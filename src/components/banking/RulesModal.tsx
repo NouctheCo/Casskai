@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-
+import { logger } from '@/lib/logger';
 interface CategorizationRule {
   id: string;
   pattern: string;
@@ -13,7 +13,6 @@ interface CategorizationRule {
   is_regex: boolean;
   priority: number;
 }
-
 interface Account {
   id: string;
   account_number: string;
@@ -21,14 +20,12 @@ interface Account {
   account_type: string;
   account_class: number;
 }
-
 interface RulesModalProps {
   rules: CategorizationRule[];
   accounts: Account[];
   onClose: () => void;
   onSave: () => void;
 }
-
 export const RulesModal: React.FC<RulesModalProps> = ({
   rules,
   accounts,
@@ -40,7 +37,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
   const [editingRules, setEditingRules] = useState<CategorizationRule[]>(rules);
   const [showNewRuleForm, setShowNewRuleForm] = useState(false);
   const [_saving, _setSaving] = useState(false);
-
   // Formulaire nouvelle règle
   const [newRule, setNewRule] = useState({
     pattern: '',
@@ -49,34 +45,28 @@ export const RulesModal: React.FC<RulesModalProps> = ({
     is_regex: false,
     priority: 0,
   });
-
   const handleDeleteRule = async (ruleId: string) => {
     // eslint-disable-next-line no-alert
     if (!confirm(t('confirm.deleteRule', 'Supprimer cette règle ?'))) return;
-
     try {
       const { error } = await supabase
         .from('categorization_rules')
         .delete()
         .eq('id', ruleId);
-
       if (error) throw error;
-
       setEditingRules(editingRules.filter((r) => r.id !== ruleId));
       toast.success(t('success.ruleDeleted', 'Règle supprimée'));
     } catch (error) {
-      console.error('Erreur suppression règle:', error);
+      logger.error('RulesModal', 'Erreur suppression règle:', error);
       toast.error(t('errors.deleteRule', 'Erreur lors de la suppression'));
     }
   };
-
   const handleAddRule = async () => {
     if (!currentCompany?.id) return;
     if (!newRule.pattern.trim() || !newRule.account_id) {
       toast.error(t('errors.fillFields', 'Veuillez remplir tous les champs obligatoires'));
       return;
     }
-
     try {
       const { data, error } = await supabase
         .from('categorization_rules')
@@ -90,9 +80,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
         })
         .select()
         .single();
-
       if (error) throw error;
-
       setEditingRules([...editingRules, data]);
       setShowNewRuleForm(false);
       setNewRule({
@@ -104,40 +92,34 @@ export const RulesModal: React.FC<RulesModalProps> = ({
       });
       toast.success(t('success.ruleAdded', 'Règle ajoutée'));
     } catch (error) {
-      console.error('Erreur ajout règle:', error);
+      logger.error('RulesModal', 'Erreur ajout règle:', error);
       toast.error(t('errors.addRule', 'Erreur lors de l\'ajout de la règle'));
     }
   };
-
   const handleUpdateRule = async (ruleId: string, updates: Partial<CategorizationRule>) => {
     try {
       const { error } = await supabase
         .from('categorization_rules')
         .update(updates)
         .eq('id', ruleId);
-
       if (error) throw error;
-
       setEditingRules(
         editingRules.map((r) => (r.id === ruleId ? { ...r, ...updates } : r))
       );
       toast.success(t('success.ruleUpdated', 'Règle mise à jour'));
     } catch (error) {
-      console.error('Erreur mise à jour règle:', error);
+      logger.error('RulesModal', 'Erreur mise à jour règle:', error);
       toast.error(t('errors.updateRule', 'Erreur lors de la mise à jour'));
     }
   };
-
   const handleClose = () => {
     onSave();
     onClose();
   };
-
   const _getAccountLabel = (accountId: string) => {
     const account = accounts.find((a) => a.id === accountId);
     return account ? `${account.account_number} - ${account.account_name}` : 'Compte inconnu';
   };
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[85vh] overflow-hidden">
@@ -156,7 +138,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
             <X className="h-5 w-5" />
           </button>
         </div>
-
         {/* Info */}
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-b">
           <div className="flex items-start gap-2">
@@ -171,7 +152,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
             </div>
           </div>
         </div>
-
         {/* Contenu */}
         <div className="p-4 overflow-y-auto max-h-[55vh]">
           {editingRules.length === 0 && !showNewRuleForm ? (
@@ -215,7 +195,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                             min="0"
                           />
                         </div>
-
                         {/* Pattern */}
                         <div className="flex-1">
                           <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">
@@ -244,7 +223,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                             </label>
                           </div>
                         </div>
-
                         {/* Compte */}
                         <div className="flex-1">
                           <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">
@@ -265,7 +243,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                             ))}
                           </select>
                         </div>
-
                         {/* Actions */}
                         <button
                           onClick={() => handleDeleteRule(rule.id)}
@@ -275,7 +252,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-
                       {/* Template de description (optionnel) */}
                       {rule.description_template && (
                         <div className="mt-3 pt-3 border-t">
@@ -298,7 +274,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                     </div>
                   ))}
               </div>
-
               {/* Bouton ajouter */}
               {!showNewRuleForm && (
                 <button
@@ -309,7 +284,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                   Ajouter une nouvelle règle
                 </button>
               )}
-
               {/* Formulaire nouvelle règle */}
               {showNewRuleForm && (
                 <div className="border-2 border-purple-300 rounded-lg p-4 bg-purple-50 dark:bg-purple-900/20">
@@ -324,7 +298,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                       <X className="h-4 w-4" />
                     </button>
                   </div>
-
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-sm font-medium block mb-1">Motif *</label>
@@ -336,7 +309,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         placeholder="Ex: AMAZON"
                       />
                     </div>
-
                     <div>
                       <label className="text-sm font-medium block mb-1">Compte comptable *</label>
                       <select
@@ -354,7 +326,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         ))}
                       </select>
                     </div>
-
                     <div>
                       <label className="text-sm font-medium block mb-1">
                         Libellé (optionnel)
@@ -369,7 +340,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         placeholder="Ex: Abonnement Amazon"
                       />
                     </div>
-
                     <div>
                       <label className="text-sm font-medium block mb-1">Priorité</label>
                       <input
@@ -382,7 +352,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         min="0"
                       />
                     </div>
-
                     <div className="col-span-2">
                       <label className="flex items-center gap-2">
                         <input
@@ -397,7 +366,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                       </label>
                     </div>
                   </div>
-
                   <div className="flex justify-end gap-2 mt-4">
                     <button
                       onClick={() => setShowNewRuleForm(false)}
@@ -417,7 +385,6 @@ export const RulesModal: React.FC<RulesModalProps> = ({
             </>
           )}
         </div>
-
         {/* Footer */}
         <div className="p-4 border-t flex justify-between items-center bg-gray-50 dark:bg-gray-700">
           <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">

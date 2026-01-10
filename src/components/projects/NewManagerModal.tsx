@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -14,13 +13,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { hrService } from '@/services/hrService';
-
+import { logger } from '@/lib/logger';
 export interface NewManagerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (employeeId: string) => void;
 }
-
 interface EmployeeFormData {
   employee_number: string;
   first_name: string;
@@ -32,13 +30,11 @@ interface EmployeeFormData {
   hire_date: string;
   contract_type: 'permanent' | 'temporary' | 'intern' | 'freelance';
 }
-
 const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [formData, setFormData] = useState<EmployeeFormData>({
     employee_number: '',
     first_name: '',
@@ -50,9 +46,7 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
     hire_date: new Date().toISOString().split('T')[0],
     contract_type: 'permanent'
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const handleInputChange = (field: keyof EmployeeFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -63,10 +57,8 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
       });
     }
   };
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.employee_number.trim()) {
       newErrors.employee_number = t('projects.managerModal.errorEmployeeNumber', 'Le numéro d\'employé est requis');
     }
@@ -87,21 +79,16 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
     if (!formData.department.trim()) {
       newErrors.department = t('projects.managerModal.errorDepartment', 'Le département est requis');
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
     if (!validateForm() || !currentCompany) {
       return;
     }
-
     setLoading(true);
-
     try {
       const response = await hrService.createEmployee(currentCompany.id, {
         employee_number: formData.employee_number,
@@ -115,7 +102,6 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
         contract_type: formData.contract_type,
         status: 'active'
       });
-
       if (response.success && response.data) {
         onSuccess(response.data.id);
         setFormData({
@@ -134,13 +120,12 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
         setError(response.error || t('projects.managerModal.errorCreating', 'Erreur lors de la création du responsable'));
       }
     } catch (err) {
-      console.error('Error creating employee:', err);
+      logger.error('NewManagerModal', 'Error creating employee:', err);
       setError(t('projects.managerModal.errorCreating', 'Erreur lors de la création du responsable'));
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -150,7 +135,6 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
             {t('projects.managerModal.description', 'Créer un nouveau responsable pour le projet')}
           </DialogDescription>
         </DialogHeader>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Numéro d'employé */}
           <div className="space-y-2">
@@ -168,7 +152,6 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
               <p className="text-sm text-red-600">{errors.employee_number}</p>
             )}
           </div>
-
           {/* Prénom et Nom */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -202,7 +185,6 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
               )}
             </div>
           </div>
-
           {/* Email et Téléphone */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -234,7 +216,6 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
               />
             </div>
           </div>
-
           {/* Poste et Département */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -268,7 +249,6 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
               )}
             </div>
           </div>
-
           {/* Date d'embauche et Type de contrat */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -299,13 +279,11 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
               </Select>
             </div>
           </div>
-
           {error && (
             <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
               <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
             </div>
           )}
-
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
               {t('common.cancel', 'Annuler')}
@@ -320,5 +298,4 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
     </Dialog>
   );
 };
-
 export default NewManagerModal;

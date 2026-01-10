@@ -9,15 +9,13 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Adapter pour migrer BanksPage de localStorage vers Supabase
  * Garde la même interface mais utilise Supabase en arrière-plan
  */
-
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 import { bankImportService, ImportResult } from './bankImportService';
-
+import { logger } from '@/lib/logger';
 export interface ImportedFile {
   id: string;
   name: string;
@@ -28,7 +26,6 @@ export interface ImportedFile {
   status: 'completed' | 'error';
   parseMethod: string;
 }
-
 export interface BankStorageTransaction {
   id: string;
   date: string;
@@ -41,7 +38,6 @@ export interface BankStorageTransaction {
   reference?: string;
   accountName?: string;
 }
-
 class BankStorageAdapter {
   /**
    * Charge les comptes bancaires depuis Supabase
@@ -53,21 +49,17 @@ class BankStorageAdapter {
       .eq('company_id', companyId)
       .eq('is_active', true)
       .order('created_at', { ascending: false });
-
     if (error) {
-      console.error('Error loading bank accounts:', error);
+      logger.error('BankStorageAdapter', 'Error loading bank accounts:', error);
       return [];
     }
-
     return data || [];
   }
-
   /**
    * Crée un compte bancaire par défaut si aucun n'existe
    */
   async ensureDefaultAccount(companyId: string, _userId: string) {
     const accounts = await this.loadBankAccounts(companyId);
-
     if (accounts.length === 0) {
       // Créer un compte par défaut
       const { data, error } = await supabase
@@ -85,18 +77,14 @@ class BankStorageAdapter {
         })
         .select()
         .single();
-
       if (error) {
-        console.error('Error creating default account:', error);
+        logger.error('BankStorageAdapter', 'Error creating default account:', error);
         return null;
       }
-
       return data;
     }
-
     return accounts[0];
   }
-
   /**
    * Import un fichier en utilisant bankImportService
    */
@@ -107,12 +95,9 @@ class BankStorageAdapter {
   ): Promise<ImportResult> {
     const extension = file.name.split('.').pop()?.toLowerCase();
     const text = await file.text();
-    
     let result: ImportResult;
-
     // Détection intelligente du format
     let detectedFormat = extension;
-    
     // Si aucune extension, essayer de détecter par contenu
     if (!detectedFormat || !['csv', 'ofx', 'qif'].includes(detectedFormat)) {
       if (text.includes('OFXHEADER') || text.includes('<OFX>')) {
@@ -133,16 +118,13 @@ class BankStorageAdapter {
         };
       }
     }
-
     // Créer un blob avec le bon type MIME
     const mimeTypes: Record<string, string> = {
       csv: 'text/csv',
       ofx: 'application/x-ofx',
       qif: 'text/plain'
     };
-    
     const newFile = new File([text], file.name, { type: mimeTypes[detectedFormat] || 'text/plain' });
-
     switch (detectedFormat) {
       case 'csv':
         result = await bankImportService.importCSV(newFile, accountId, companyId);
@@ -163,10 +145,8 @@ class BankStorageAdapter {
           transactions: []
         };
     }
-
     return result;
   }
-
   /**
    * Charge les transactions depuis Supabase
    */
@@ -181,18 +161,14 @@ class BankStorageAdapter {
       .eq('company_id', companyId)
       .order('transaction_date', { ascending: false })
       .limit(limit);
-
     if (accountId) {
       query = query.eq('bank_account_id', accountId);
     }
-
     const { data, error } = await query;
-
     if (error) {
-      console.error('Error loading transactions:', error);
+      logger.error('BankStorageAdapter', 'Error loading transactions:', error);
       return [];
     }
-
     // Transform to BankStorageTransaction format
     return (data || []).map(t => ({
       id: t.id,
@@ -207,7 +183,6 @@ class BankStorageAdapter {
       accountName: '' // Will be populated from join if needed
     }));
   }
-
   /**
    * Réconcilie une transaction
    */
@@ -217,11 +192,8 @@ class BankStorageAdapter {
       .from('bank_transactions')
       .update({ is_reconciled: true, status: 'reconciled' })
       .eq('id', transactionId);
-
     if (!error) return true;
-
-    console.warn('Fallback reconcile (missing apikey?) -> trying direct fetch', error);
-
+    logger.warn('BankStorageAdapter', 'Fallback reconcile (missing apikey?) -> trying direct fetch', error);
     try {
       const resp = await fetch(`${SUPABASE_URL}/rest/v1/bank_transactions?id=eq.${transactionId}`, {
         method: 'PATCH',
@@ -232,20 +204,17 @@ class BankStorageAdapter {
         },
         body: JSON.stringify({ is_reconciled: true, status: 'reconciled' })
       });
-
       if (!resp.ok) {
         const text = await resp.text();
-        console.error('Fallback reconcile failed', resp.status, text);
+        logger.error('BankStorageAdapter', 'Fallback reconcile failed', resp.status, text);
         return false;
       }
-
       return true;
     } catch (fetchError) {
-      console.error('Fallback reconcile error:', fetchError);
+      logger.error('BankStorageAdapter', 'Fallback reconcile error:', fetchError);
       return false;
     }
   }
-
   /**
    * Annule la réconciliation d'une transaction (renvoi en catégorisation)
    */
@@ -255,11 +224,8 @@ class BankStorageAdapter {
       .from('bank_transactions')
       .update({ is_reconciled: false, status: 'pending', matched_entry_id: null })
       .eq('id', transactionId);
-
     if (!error) return true;
-
-    console.warn('Fallback unreconcile (missing apikey?) -> trying direct fetch', error);
-
+    logger.warn('BankStorageAdapter', 'Fallback unreconcile (missing apikey?) -> trying direct fetch', error);
     try {
       const resp = await fetch(`${SUPABASE_URL}/rest/v1/bank_transactions?id=eq.${transactionId}`, {
         method: 'PATCH',
@@ -270,30 +236,25 @@ class BankStorageAdapter {
         },
         body: JSON.stringify({ is_reconciled: false, status: 'pending', matched_entry_id: null })
       });
-
       if (!resp.ok) {
         const text = await resp.text();
-        console.error('Fallback unreconcile failed', resp.status, text);
+        logger.error('BankStorageAdapter', 'Fallback unreconcile failed', resp.status, text);
         return false;
       }
-
       return true;
     } catch (fetchError) {
-      console.error('Fallback unreconcile error:', fetchError);
+      logger.error('BankStorageAdapter', 'Fallback unreconcile error:', fetchError);
       return false;
     }
   }
-
   /**
    * Calcule les métriques de réconciliation
    */
   async getReconciliationMetrics(companyId: string) {
     const transactions = await this.loadTransactions(companyId);
-
     const reconciledCount = transactions.filter(t => t.status === 'reconciled').length;
     const pendingCount = transactions.filter(t => t.status === 'pending').length;
     const autoMatchRate = transactions.length > 0 ? reconciledCount / transactions.length : 0;
-
     return {
       totalTransactions: transactions.length,
       reconciledTransactions: reconciledCount,
@@ -302,7 +263,6 @@ class BankStorageAdapter {
       autoMatchRate
     };
   }
-
   /**
    * Migre les données localStorage vers Supabase (à faire une seule fois)
    */
@@ -311,9 +271,7 @@ class BankStorageAdapter {
       // Charger les données localStorage
       const savedTransactions = localStorage.getItem(`casskai_imported_transactions_${userId}`);
       if (!savedTransactions) return { success: true, migrated: 0 };
-
       const transactions = JSON.parse(savedTransactions);
-
       // Convertir au format Supabase
       const supabaseTransactions = transactions.map((t: any) => ({
         bank_account_id: accountId,
@@ -328,29 +286,24 @@ class BankStorageAdapter {
         imported_from: 'csv' as const,
         raw_data: t
       }));
-
       // Insérer dans Supabase
       const { data, error } = await supabase
         .from('bank_transactions')
         .insert(supabaseTransactions)
         .select();
-
       if (error) {
-        console.error('Error migrating data:', error);
+        logger.error('BankStorageAdapter', 'Error migrating data:', error);
         return { success: false, migrated: 0, error };
       }
-
       // Nettoyer localStorage après migration réussie
       localStorage.removeItem(`casskai_imported_transactions_${userId}`);
       localStorage.removeItem(`casskai_imported_files_${userId}`);
-
       return { success: true, migrated: data.length };
     } catch (error) {
-      console.error('Migration error:', error);
+      logger.error('BankStorageAdapter', 'Migration error:', error);
       return { success: false, migrated: 0, error };
     }
   }
 }
-
 export const bankStorageAdapter = new BankStorageAdapter();
 export default bankStorageAdapter;

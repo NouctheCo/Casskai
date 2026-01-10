@@ -9,18 +9,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { openAIService } from '@/services/ai/OpenAIService';
-
+import { logger } from '@/lib/logger';
 interface AIMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: string;
   type?: 'text' | 'voice';
 }
-
 export const AIAssistant: React.FC = () => {
   const _navigate = useNavigate();
   const { user: _user, currentCompany } = useAuth();
-
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<AIMessage[]>([]);
@@ -28,28 +26,22 @@ export const AIAssistant: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [_isListening, _setIsListening] = useState(false);
   const [_isSpeaking, _setIsSpeaking] = useState(false);
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
   // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
   // Focus sur l'input quand on ouvre
   useEffect(() => {
     if (isOpen && !isMinimized) {
       inputRef.current?.focus();
     }
   }, [isOpen, isMinimized]);
-
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
-
     const userMessage = inputValue.trim();
     setInputValue('');
-
     // Ajouter le message utilisateur
     const tempUserMsg: AIMessage = {
       role: 'user',
@@ -58,9 +50,7 @@ export const AIAssistant: React.FC = () => {
       type: 'text'
     };
     setMessages(prev => [...prev, tempUserMsg]);
-
     setIsLoading(true);
-
     try {
       // Appel réel à OpenAI via Edge Function
       const response = await openAIService.chat({
@@ -68,7 +58,6 @@ export const AIAssistant: React.FC = () => {
         context_type: 'general',
         company_id: currentCompany?.id
       });
-
       if (response.success && response.data) {
         const assistantMsg: AIMessage = {
           role: 'assistant',
@@ -88,29 +77,25 @@ export const AIAssistant: React.FC = () => {
         type: 'text'
       };
       setMessages(prev => [...prev, errorMsg]);
-      console.error('Erreur AI Assistant:', error);
+      logger.error('AIAssistant', 'Erreur AI Assistant:', error);
     } finally {
       setIsLoading(false);
     }
   };
-
   const handleNewConversation = () => {
     setMessages([]);
   };
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   };
-
   const quickSuggestions = [
     { label: 'Comment créer une facture ?', icon: FileText },
     { label: 'Expliquer le plan comptable', icon: Calculator },
     { label: 'Configurer un workflow', icon: Sparkles },
   ];
-
   if (!isOpen) {
     return (
       <button
@@ -122,7 +107,6 @@ export const AIAssistant: React.FC = () => {
       </button>
     );
   }
-
   return (
     <div
       className={`fixed bottom-6 right-6 w-96 bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 flex flex-col overflow-hidden transition-all duration-300 ${
@@ -165,7 +149,6 @@ export const AIAssistant: React.FC = () => {
           </button>
         </div>
       </div>
-
       {!isMinimized && (
         <>
           {/* Messages */}
@@ -181,7 +164,6 @@ export const AIAssistant: React.FC = () => {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                   Je peux vous guider dans CassKai, créer des documents, ou répondre à vos questions.
                 </p>
-
                 {/* Suggestions rapides */}
                 <div className="space-y-2">
                   {quickSuggestions.map((suggestion, idx) => {
@@ -201,7 +183,6 @@ export const AIAssistant: React.FC = () => {
                 </div>
               </div>
             )}
-
             {messages.map((msg, idx) => (
               <div
                 key={idx}
@@ -226,7 +207,6 @@ export const AIAssistant: React.FC = () => {
                 </div>
               </div>
             ))}
-
             {isLoading && (
               <div className="flex justify-start">
                 <div className="bg-gray-100 dark:bg-gray-800 px-4 py-3 rounded-2xl">
@@ -234,10 +214,8 @@ export const AIAssistant: React.FC = () => {
                 </div>
               </div>
             )}
-
             <div ref={messagesEndRef} />
           </div>
-
           {/* Input */}
           <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
             <div className="flex items-center gap-2">
@@ -272,5 +250,4 @@ export const AIAssistant: React.FC = () => {
     </div>
   );
 };
-
 export default AIAssistant;

@@ -17,7 +17,7 @@ export const bankingModule: Module = {
     status: 'available',
     config: { settings: {}, defaultValues: {} },
     permissions: [],
-    dependencies: [],
+    dependencies: ['accounting'],
     conflicts: [],
   },
   getRoutes: () => [

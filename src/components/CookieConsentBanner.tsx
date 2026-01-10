@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CookieConsent from 'react-cookie-consent';
 import { useTranslation } from 'react-i18next';
 import { Shield, Cookie } from 'lucide-react';
-
+import { logger } from '@/lib/logger';
 /**
  * 🍪 COOKIE CONSENT BANNER - CONFORMITÉ RGPD
  * 
@@ -14,17 +14,14 @@ import { Shield, Cookie } from 'lucide-react';
  * - ✅ Design cohérent avec l'app
  * - ✅ Conforme RGPD Article 7
  */
-
 interface CookiePreferences {
   analytics: boolean;
   marketing: boolean;
   functional: boolean;
   timestamp: string;
 }
-
 const COOKIE_NAME = 'casskai_cookie_consent';
 const PREFERENCES_KEY = 'casskai_cookie_preferences';
-
 export const CookieConsentBanner: React.FC = () => {
   const { t } = useTranslation();
   const [showSettings, setShowSettings] = useState(false);
@@ -34,7 +31,6 @@ export const CookieConsentBanner: React.FC = () => {
     functional: true, // Toujours autorisé (cookies essentiels)
     timestamp: new Date().toISOString()
   });
-
   useEffect(() => {
     // Charger préférences existantes
     const saved = localStorage.getItem(PREFERENCES_KEY);
@@ -42,38 +38,33 @@ export const CookieConsentBanner: React.FC = () => {
       try {
         setPreferences(JSON.parse(saved));
       } catch (e) {
-        console.error('Failed to parse cookie preferences', e);
+        logger.error('CookieConsentBanner', 'Failed to parse cookie preferences', e);
       }
     }
   }, []);
-
   const savePreferences = (prefs: CookiePreferences) => {
     localStorage.setItem(PREFERENCES_KEY, JSON.stringify(prefs));
     setPreferences(prefs);
-    
     // Log consentement pour audit RGPD
     if (import.meta.env.DEV) {
-      console.warn('[RGPD] Cookie consent:', {
+      logger.warn('CookieConsentBanner - RGPD consent', {
         analytics: prefs.analytics,
         marketing: prefs.marketing,
         timestamp: prefs.timestamp
       });
     }
-
     // Activer/désactiver services selon consentement
     if (prefs.analytics) {
       initAnalytics();
     } else {
       disableAnalytics();
     }
-
     if (prefs.marketing) {
       initMarketing();
     } else {
       disableMarketing();
     }
   };
-
   const handleAcceptAll = () => {
     const prefs: CookiePreferences = {
       analytics: true,
@@ -83,7 +74,6 @@ export const CookieConsentBanner: React.FC = () => {
     };
     savePreferences(prefs);
   };
-
   const handleDeclineAll = () => {
     const prefs: CookiePreferences = {
       analytics: false,
@@ -93,7 +83,6 @@ export const CookieConsentBanner: React.FC = () => {
     };
     savePreferences(prefs);
   };
-
   const handleSaveSettings = () => {
     savePreferences({
       ...preferences,
@@ -101,7 +90,6 @@ export const CookieConsentBanner: React.FC = () => {
     });
     setShowSettings(false);
   };
-
   return (
     <>
       <CookieConsent
@@ -170,7 +158,6 @@ export const CookieConsentBanner: React.FC = () => {
           </div>
         </div>
       </CookieConsent>
-
       {/* Modal Paramètres Avancés */}
       {showSettings && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]">
@@ -182,13 +169,11 @@ export const CookieConsentBanner: React.FC = () => {
                   {t('cookies.settings.title', 'Paramètres des cookies')}
                 </h2>
               </div>
-
               <p className="text-sm text-muted-foreground mb-6">
                 {t('cookies.settings.description', 
                   'Personnalisez vos préférences de cookies. Les cookies essentiels sont toujours activés car nécessaires au fonctionnement de l\'application.'
                 )}
               </p>
-
               {/* Cookies Essentiels */}
               <div className="mb-6 pb-6 border-b border-border">
                 <div className="flex items-center justify-between mb-2">
@@ -205,7 +190,6 @@ export const CookieConsentBanner: React.FC = () => {
                   )}
                 </p>
               </div>
-
               {/* Cookies Analytics */}
               <div className="mb-6 pb-6 border-b border-border">
                 <div className="flex items-center justify-between mb-2">
@@ -232,7 +216,6 @@ export const CookieConsentBanner: React.FC = () => {
                   )}
                 </p>
               </div>
-
               {/* Cookies Marketing */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
@@ -259,7 +242,6 @@ export const CookieConsentBanner: React.FC = () => {
                   )}
                 </p>
               </div>
-
               {/* Actions */}
               <div className="flex gap-3 pt-6 border-t border-border">
                 <button
@@ -282,11 +264,9 @@ export const CookieConsentBanner: React.FC = () => {
     </>
   );
 };
-
 // ========================================
 // GESTION SERVICES ANALYTIQUES
 // ========================================
-
 function initAnalytics() {
   // Google Analytics 4
   if (typeof window !== 'undefined' && window.gtag) {
@@ -294,13 +274,11 @@ function initAnalytics() {
       analytics_storage: 'granted'
     });
   }
-
   // Sentry monitoring
   if (typeof window !== 'undefined' && window.Sentry) {
     window.Sentry.setUser({ consent: 'analytics_granted' });
   }
 }
-
 function disableAnalytics() {
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('consent', 'update', {
@@ -308,7 +286,6 @@ function disableAnalytics() {
     });
   }
 }
-
 function initMarketing() {
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('consent', 'update', {
@@ -318,7 +295,6 @@ function initMarketing() {
     });
   }
 }
-
 function disableMarketing() {
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('consent', 'update', {
@@ -328,26 +304,21 @@ function disableMarketing() {
     });
   }
 }
-
 // ========================================
 // HOOK POUR ACCÉDER AUX PRÉFÉRENCES
 // ========================================
-
 export const useCookiePreferences = (): CookiePreferences | null => {
   const [prefs, setPrefs] = useState<CookiePreferences | null>(null);
-
   useEffect(() => {
     const saved = localStorage.getItem(PREFERENCES_KEY);
     if (saved) {
       try {
         setPrefs(JSON.parse(saved));
       } catch (e) {
-        console.error('Failed to parse cookie preferences', e);
+        logger.error('CookieConsentBanner', 'Failed to parse cookie preferences', e);
       }
     }
   }, []);
-
   return prefs;
 };
-
 export default CookieConsentBanner;

@@ -9,40 +9,33 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // src/services/accountingService.ts
 import type { AccountPlan, Account, AccountType } from '../types/accounting';
 import { PCG_ACCOUNTS, PCG_CLASSES as _PCG_CLASSES } from '../data/pcg';
 import { SYSCOHADA_PLAN } from '../data/syscohada';
 import { supabase } from '../lib/supabase';
-
+import { logger } from '@/lib/logger';
 export class AccountingService {
   private static instance: AccountingService;
   private currentPlan: AccountPlan | null = null;
-
   private constructor() {
     // Charger le plan par défaut (PCG français)
     this.currentPlan = this.getDefaultPCGPlan();
   }
-
   static getInstance(): AccountingService {
     if (!AccountingService.instance) {
       AccountingService.instance = new AccountingService();
     }
     return AccountingService.instance;
   }
-
   setAccountPlan(plan: AccountPlan): void {
     this.currentPlan = plan;
   }
-
   getCurrentPlan(): AccountPlan | null {
     return this.currentPlan;
   }
-
   getAccountByNumber(accountNumber: string): Account | null {
     if (!this.currentPlan) return null;
-
     for (const accountClass of this.currentPlan.classes) {
       for (const account of accountClass.accounts) {
         if (account.number === accountNumber) {
@@ -56,10 +49,8 @@ export class AccountingService {
     }
     return null;
   }
-
   getAccountsByType(type: AccountType): Account[] {
     if (!this.currentPlan) return [];
-
     const accounts: Account[] = [];
     for (const accountClass of this.currentPlan.classes) {
       for (const account of accountClass.accounts) {
@@ -73,10 +64,8 @@ export class AccountingService {
     }
     return accounts;
   }
-
   getAllAccounts(): Account[] {
     if (!this.currentPlan) return [];
-
     const allAccounts: Account[] = [];
     for (const accountClass of this.currentPlan.classes) {
       for (const account of accountClass.accounts) {
@@ -88,34 +77,26 @@ export class AccountingService {
     }
     return allAccounts;
   }
-
   validateAccountNumber(accountNumber: string): boolean {
     return this.getAccountByNumber(accountNumber) !== null;
   }
-
   getAccountHierarchy(accountNumber: string): string[] {
     const hierarchy: string[] = [];
-    
     // Classe (1er chiffre)
     const classNumber = accountNumber.charAt(0);
     hierarchy.push(classNumber);
-    
     // Compte principal (2 premiers chiffres)
     if (accountNumber.length >= 2) {
       hierarchy.push(accountNumber.substring(0, 2));
     }
-    
     // Sous-compte (3+ chiffres)
     if (accountNumber.length >= 3) {
       hierarchy.push(accountNumber);
     }
-    
     return hierarchy;
   }
-
   generateAccountTree(): any[] {
     if (!this.currentPlan) return [];
-
     return this.currentPlan.classes.map(accountClass => ({
       id: accountClass.number,
       label: `${accountClass.number} - ${accountClass.name}`,
@@ -134,45 +115,36 @@ export class AccountingService {
       }))
     }));
   }
-
   // Fonctions spécifiques aux types de comptes
   isTVAAccount(accountNumber: string): boolean {
     // PCG français: 44xxx
     // SYSCOHADA: 443, 444, 445
     return accountNumber.startsWith('44');
   }
-
   isBankAccount(accountNumber: string): boolean {
     // PCG français: 512
     // SYSCOHADA: 52
     return accountNumber.startsWith('512') || accountNumber.startsWith('52');
   }
-
   isCashAccount(accountNumber: string): boolean {
     // PCG français: 53
     // SYSCOHADA: 57
     return accountNumber.startsWith('53') || accountNumber.startsWith('57');
   }
-
   isClientAccount(accountNumber: string): boolean {
     return accountNumber.startsWith('41');
   }
-
   isSupplierAccount(accountNumber: string): boolean {
     return accountNumber.startsWith('40');
   }
-
   isRevenueAccount(accountNumber: string): boolean {
     return accountNumber.startsWith('7');
   }
-
   isExpenseAccount(accountNumber: string): boolean {
     return accountNumber.startsWith('6');
   }
-
   getDefaultAccounts(): { [key: string]: string } {
     const standard = this.currentPlan?.standard || 'PCG';
-    
     if (standard === 'SYSCOHADA') {
       return {
         capital: '101',
@@ -208,7 +180,6 @@ export class AccountingService {
       };
     }
   }
-
   /**
    * Détermine le standard comptable basé sur le pays
    */
@@ -216,7 +187,6 @@ export class AccountingService {
     const SYSCOHADA_COUNTRIES = ['CI', 'SN', 'ML', 'BF', 'BJ', 'TG', 'NE', 'GW', 'CM', 'CF', 'TD', 'CG', 'GA', 'GQ', 'GN'];
     return SYSCOHADA_COUNTRIES.includes(country) ? 'SYSCOHADA' : 'PCG';
   }
-
   /**
    * Crée un plan comptable complet pour une entreprise
    */
@@ -227,20 +197,17 @@ export class AccountingService {
   ): Promise<{ success: boolean; accountsCreated: number; error?: string }> {
     try {
       const accountingStandard = standard || this.getStandardByCountry(country);
-      
       if (accountingStandard === 'PCG') {
         return await this.createPCGAccounts(companyId);
       } else if (accountingStandard === 'SYSCOHADA') {
         return await this.createSYSCOHADAAccounts(companyId);
       }
-      
       return { success: false, accountsCreated: 0, error: 'Standard comptable non supporté' };
     } catch (error: unknown) {
-      console.error('Erreur création plan comptable:', error);
+      logger.error('Accounting', 'Erreur création plan comptable:', error);
       return { success: false, accountsCreated: 0, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
-
   /**
    * Crée les comptes du Plan Comptable Général français
    */
@@ -258,28 +225,23 @@ export class AccountingService {
         is_active: account.isActive ?? true,
         is_detail_account: true
       }));
-
       const { data, error } = await supabase
         .from('chart_of_accounts')
         .insert(accountsToCreate)
         .select();
-
       if (error) throw error;
-
       return { success: true, accountsCreated: data?.length || 0 };
     } catch (error: unknown) {
-      console.error('Erreur création comptes PCG:', error);
+      logger.error('Accounting', 'Erreur création comptes PCG:', error);
       return { success: false, accountsCreated: 0, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
-
   /**
    * Crée les comptes du système SYSCOHADA
    */
   private async createSYSCOHADAAccounts(companyId: string): Promise<{ success: boolean; accountsCreated: number; error?: string }> {
     try {
       const accountsToCreate: any[] = [];
-      
       // Parcourir le plan SYSCOHADA et créer les comptes
       for (const accountClass of SYSCOHADA_PLAN.classes) {
         for (const account of accountClass.accounts) {
@@ -294,7 +256,6 @@ export class AccountingService {
             is_active: true,
             is_detail_account: true
           });
-
           // Ajouter les sous-comptes
           if (account.subAccounts) {
             for (const subAccount of account.subAccounts) {
@@ -313,21 +274,17 @@ export class AccountingService {
           }
         }
       }
-
       const { data, error } = await supabase
         .from('chart_of_accounts')
         .insert(accountsToCreate)
         .select();
-
       if (error) throw error;
-
       return { success: true, accountsCreated: data?.length || 0 };
     } catch (error: unknown) {
-      console.error('Erreur création comptes SYSCOHADA:', error);
+      logger.error('Accounting', 'Erreur création comptes SYSCOHADA:', error);
       return { success: false, accountsCreated: 0, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
-
   /**
    * Convertit les types PCG vers les types de base de données
    */
@@ -349,7 +306,6 @@ export class AccountingService {
     };
     return typeMapping[pcgType] || 'asset';
   }
-
   /**
    * Détermine le sens normal du solde d'un compte
    */
@@ -357,7 +313,6 @@ export class AccountingService {
     const debitAccounts = ['asset', 'expense', 'immobilisations', 'stocks', 'creances', 'tresorerie', 'charges'];
     return debitAccounts.includes(accountType) ? 'debit' : 'credit';
   }
-
   /**
    * Convertit les types SYSCOHADA vers les types de base de données
    */
@@ -374,7 +329,6 @@ export class AccountingService {
     };
     return typeMapping[syscohadaType] || 'asset';
   }
-
   // Plan comptable français simplifié (sera remplacé par des données externes)
   private getDefaultPCGPlan(): AccountPlan {
     return {

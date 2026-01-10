@@ -10,7 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import { supabase } from '@/lib/supabase';
+import { supabase, SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase';
 import { logger } from '@/utils/logger';
 
 /**
@@ -185,13 +185,47 @@ class AuditService {
         const { data: { session } } = await supabase.auth.getSession();
         const headers: Record<string, string> = {};
         if (session?.access_token) {
-          headers['Authorization'] = `Bearer ${session.access_token}`;
+          const authValue = `Bearer ${session.access_token}`;
+          headers['Authorization'] = authValue;
+          headers['authorization'] = authValue;
         }
+
+        // Ensure apikey is always present for function gateway
+        headers['apikey'] = SUPABASE_ANON_KEY;
 
         const response = await supabase.functions.invoke('audit-log', {
           body: enrichedEntry,
           headers
         });
+
+        // Some environments may drop/override Authorization in invoke(); if so, retry with direct fetch
+        if (
+          response.error &&
+          (response.error as any)?.status === 401 &&
+          typeof (response.error as any)?.message === 'string' &&
+          (response.error as any).message.toLowerCase().includes('missing authorization header') &&
+          session?.access_token
+        ) {
+          const authValue = `Bearer ${session.access_token}`;
+          const fetchResponse = await fetch(`${SUPABASE_URL}/functions/v1/audit-log`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: authValue,
+              authorization: authValue,
+              'x-application-name': 'CassKai',
+            },
+            body: JSON.stringify(enrichedEntry),
+          });
+
+          if (!fetchResponse.ok) {
+            logger.warn('AuditService: direct fetch to audit-log failed after missing-authorization invoke()', {
+              status: fetchResponse.status,
+            });
+          }
+        }
+
         if (response.error) {
           // Fallback: tentative directe (si politique autorise) sinon log local
           const { error } = await supabase

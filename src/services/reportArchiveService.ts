@@ -9,19 +9,16 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Report Archive Service
  * Service complet de gestion et d'archivage des rapports financiers
  * Similaire à hrDocumentTemplatesService mais adapté aux rapports
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 // ============================================================================
 // TYPES
 // ============================================================================
-
 export interface GeneratedReport {
   id: string;
   company_id: string;
@@ -58,7 +55,6 @@ export interface GeneratedReport {
   created_at: string;
   updated_at: string;
 }
-
 export interface ReportArchive {
   id: string;
   company_id: string;
@@ -97,7 +93,6 @@ export interface ReportArchive {
   created_at: string;
   updated_at: string;
 }
-
 export interface ReportComparison {
   id: string;
   company_id: string;
@@ -112,7 +107,6 @@ export interface ReportComparison {
   created_at: string;
   notes?: string;
 }
-
 export interface ArchiveStats {
   total_archives: number;
   total_size_bytes: number;
@@ -126,7 +120,6 @@ export interface ArchiveStats {
   oldest_archive?: string;
   newest_archive?: string;
 }
-
 export interface ReportFilters {
   report_type?: string;
   status?: string;
@@ -136,31 +129,25 @@ export interface ReportFilters {
   tags?: string[];
   search?: string;
 }
-
 export interface ServiceResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
 }
-
 // ============================================================================
 // SERVICE CLASS
 // ============================================================================
-
 class ReportArchiveService {
   private static instance: ReportArchiveService;
-
   static getInstance(): ReportArchiveService {
     if (!this.instance) {
       this.instance = new ReportArchiveService();
     }
     return this.instance;
   }
-
   // ========================================================================
   // GENERATED REPORTS - CRUD
   // ========================================================================
-
   /**
    * Créer un nouveau rapport généré
    */
@@ -173,19 +160,16 @@ class ReportArchiveService {
         .insert(report)
         .select()
         .single();
-
       if (error) throw error;
-
       return { success: true, data };
     } catch (error) {
-      console.error('Error creating generated report:', error);
+      logger.error('ReportArchive', 'Error creating generated report:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to create report'
       };
     }
   }
-
   /**
    * Récupérer les rapports générés d'une société
    */
@@ -199,7 +183,6 @@ class ReportArchiveService {
         .select('*')
         .eq('company_id', companyId)
         .order('generated_at', { ascending: false });
-
       if (filters) {
         if (filters.report_type) {
           query = query.eq('report_type', filters.report_type);
@@ -223,21 +206,17 @@ class ReportArchiveService {
           query = query.or(`report_name.ilike.%${filters.search}%,notes.ilike.%${filters.search}%`);
         }
       }
-
       const { data, error } = await query;
-
       if (error) throw error;
-
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Error fetching generated reports:', error);
+      logger.error('ReportArchive', 'Error fetching generated reports:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch reports'
       };
     }
   }
-
   /**
    * Récupérer un rapport spécifique
    */
@@ -248,19 +227,16 @@ class ReportArchiveService {
         .select('*')
         .eq('id', reportId)
         .single();
-
       if (error) throw error;
-
       return { success: true, data };
     } catch (error) {
-      console.error('Error fetching report:', error);
+      logger.error('ReportArchive', 'Error fetching report:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch report'
       };
     }
   }
-
   /**
    * Mettre à jour un rapport
    */
@@ -275,19 +251,16 @@ class ReportArchiveService {
         .eq('id', reportId)
         .select()
         .single();
-
       if (error) throw error;
-
       return { success: true, data };
     } catch (error) {
-      console.error('Error updating report:', error);
+      logger.error('ReportArchive', 'Error updating report:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to update report'
       };
     }
   }
-
   /**
    * Changer le statut d'un rapport
    */
@@ -298,7 +271,6 @@ class ReportArchiveService {
   ): Promise<ServiceResponse<GeneratedReport>> {
     try {
       const updates: Partial<GeneratedReport> = { status };
-
       // Ajouter les métadonnées selon le statut
       if (status === 'reviewed' && userId) {
         updates.reviewed_by = userId;
@@ -309,17 +281,15 @@ class ReportArchiveService {
       } else if (status === 'archived') {
         updates.archived_at = new Date().toISOString();
       }
-
       return await this.updateGeneratedReport(reportId, updates);
     } catch (error) {
-      console.error('Error updating report status:', error);
+      logger.error('ReportArchive', 'Error updating report status:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to update status'
       };
     }
   }
-
   /**
    * Supprimer un rapport (seulement si non archivé)
    */
@@ -333,36 +303,30 @@ class ReportArchiveService {
           error: 'Cannot delete archived report'
         };
       }
-
       // Supprimer le fichier du storage si existe
       if (report?.file_path) {
         await supabase.storage
           .from('financial-reports')
           .remove([report.file_path]);
       }
-
       // Supprimer le rapport
       const { error } = await supabase
         .from('generated_reports')
         .delete()
         .eq('id', reportId);
-
       if (error) throw error;
-
       return { success: true };
     } catch (error) {
-      console.error('Error deleting report:', error);
+      logger.error('ReportArchive', 'Error deleting report:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to delete report'
       };
     }
   }
-
   // ========================================================================
   // STORAGE - UPLOAD/DOWNLOAD
   // ========================================================================
-
   /**
    * Upload d'un fichier rapport dans le storage
    */
@@ -383,11 +347,8 @@ class ReportArchiveService {
           p_file_format: file.name.split('.').pop() || 'pdf',
           p_is_archived: isArchived
         });
-
       if (pathError) throw pathError;
-
       const filePath = pathData as string;
-
       // Upload du fichier
       const { data: _data, error } = await supabase.storage
         .from('financial-reports')
@@ -395,14 +356,11 @@ class ReportArchiveService {
           cacheControl: '3600',
           upsert: false
         });
-
       if (error) throw error;
-
       // Obtenir l'URL publique
       const { data: { publicUrl } } = supabase.storage
         .from('financial-reports')
         .getPublicUrl(filePath);
-
       return {
         success: true,
         data: {
@@ -411,14 +369,13 @@ class ReportArchiveService {
         }
       };
     } catch (error) {
-      console.error('Error uploading report file:', error);
+      logger.error('ReportArchive', 'Error uploading report file:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to upload file'
       };
     }
   }
-
   /**
    * Télécharger un fichier rapport
    */
@@ -427,19 +384,16 @@ class ReportArchiveService {
       const { data, error } = await supabase.storage
         .from('financial-reports')
         .download(filePath);
-
       if (error) throw error;
-
       return { success: true, data };
     } catch (error) {
-      console.error('Error downloading report file:', error);
+      logger.error('ReportArchive', 'Error downloading report file:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to download file'
       };
     }
   }
-
   /**
    * Obtenir une URL signée temporaire pour un rapport
    */
@@ -448,23 +402,19 @@ class ReportArchiveService {
       const { data, error } = await supabase.storage
         .from('financial-reports')
         .createSignedUrl(filePath, expiresIn);
-
       if (error) throw error;
-
       return { success: true, data: data.signedUrl };
     } catch (error) {
-      console.error('Error creating signed URL:', error);
+      logger.error('ReportArchive', 'Error creating signed URL:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to create signed URL'
       };
     }
   }
-
   // ========================================================================
   // ARCHIVES - GESTION LÉGALE
   // ========================================================================
-
   /**
    * Récupérer les archives d'une société
    */
@@ -483,7 +433,6 @@ class ReportArchiveService {
         .select('*')
         .eq('company_id', companyId)
         .order('archived_at', { ascending: false });
-
       if (filters) {
         if (filters.fiscal_year) {
           query = query.eq('fiscal_year', filters.fiscal_year);
@@ -495,21 +444,17 @@ class ReportArchiveService {
           query = query.eq('archive_category', filters.archive_category);
         }
       }
-
       const { data, error } = await query;
-
       if (error) throw error;
-
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Error fetching archives:', error);
+      logger.error('ReportArchive', 'Error fetching archives:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch archives'
       };
     }
   }
-
   /**
    * Récupérer les statistiques d'archivage
    */
@@ -520,40 +465,33 @@ class ReportArchiveService {
         .select('*')
         .eq('company_id', companyId)
         .single();
-
       if (error) throw error;
-
       // Récupérer répartition par type et année fiscale
       const { data: archives } = await supabase
         .from('reports_archive')
         .select('report_type, fiscal_year')
         .eq('company_id', companyId);
-
       const by_type: Record<string, number> = {};
       const by_fiscal_year: Record<number, number> = {};
-
       archives?.forEach(archive => {
         by_type[archive.report_type] = (by_type[archive.report_type] || 0) + 1;
         by_fiscal_year[archive.fiscal_year] = (by_fiscal_year[archive.fiscal_year] || 0) + 1;
       });
-
       const stats: ArchiveStats = {
         ...data,
         total_size_mb: data.total_size_bytes / (1024 * 1024),
         by_type,
         by_fiscal_year
       };
-
       return { success: true, data: stats };
     } catch (error) {
-      console.error('Error fetching archive stats:', error);
+      logger.error('ReportArchive', 'Error fetching archive stats:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch stats'
       };
     }
   }
-
   /**
    * Logger un accès à une archive (traçabilité)
    */
@@ -569,16 +507,13 @@ class ReportArchiveService {
         .select('access_log')
         .eq('id', archiveId)
         .single();
-
       if (fetchError) throw fetchError;
-
       const accessLog = archive.access_log || [];
       accessLog.push({
         user_id: userId,
         accessed_at: new Date().toISOString(),
         action
       });
-
       // Mettre à jour
       const { error } = await supabase
         .from('reports_archive')
@@ -588,23 +523,19 @@ class ReportArchiveService {
           last_accessed_by: userId
         })
         .eq('id', archiveId);
-
       if (error) throw error;
-
       return { success: true };
     } catch (error) {
-      console.error('Error logging archive access:', error);
+      logger.error('ReportArchive', 'Error logging archive access:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to log access'
       };
     }
   }
-
   // ========================================================================
   // COMPARAISONS
   // ========================================================================
-
   /**
    * Créer une comparaison entre deux rapports
    */
@@ -617,19 +548,16 @@ class ReportArchiveService {
         .insert(comparison)
         .select()
         .single();
-
       if (error) throw error;
-
       return { success: true, data };
     } catch (error) {
-      console.error('Error creating comparison:', error);
+      logger.error('ReportArchive', 'Error creating comparison:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to create comparison'
       };
     }
   }
-
   /**
    * Récupérer les comparaisons d'une société
    */
@@ -640,23 +568,19 @@ class ReportArchiveService {
         .select('*')
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
-
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Error fetching comparisons:', error);
+      logger.error('ReportArchive', 'Error fetching comparisons:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch comparisons'
       };
     }
   }
-
   // ========================================================================
   // UTILITAIRES
   // ========================================================================
-
   /**
    * Calculer la taille d'un fichier en format lisible
    */
@@ -667,7 +591,6 @@ class ReportArchiveService {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
   }
-
   /**
    * Obtenir le label d'un type de rapport
    */
@@ -686,7 +609,6 @@ class ReportArchiveService {
     };
     return labels[type] || type;
   }
-
   /**
    * Obtenir la couleur d'un statut
    */
@@ -700,11 +622,9 @@ class ReportArchiveService {
     };
     return colors[status] || 'gray';
   }
-
   // ========================================================================
   // FONCTIONNALITÉS AVANCÉES
   // ========================================================================
-
   /**
    * Comparer automatiquement deux rapports (mois N vs mois N-1)
    */
@@ -721,66 +641,54 @@ class ReportArchiveService {
         period_start: currentPeriodStart,
         period_end: currentPeriodEnd
       });
-
       if (!currentReports.success || !currentReports.data || currentReports.data.length === 0) {
         return {
           success: false,
           error: 'Aucun rapport trouvé pour la période actuelle'
         };
       }
-
       const currentReport = currentReports.data[0];
-
       // Calculer la période précédente
       const currentStart = new Date(currentPeriodStart);
       const currentEnd = new Date(currentPeriodEnd);
       const periodLength = Math.ceil((currentEnd.getTime() - currentStart.getTime()) / (1000 * 60 * 60 * 24));
-
       const previousEnd = new Date(currentStart);
       previousEnd.setDate(previousEnd.getDate() - 1);
       const previousStart = new Date(previousEnd);
       previousStart.setDate(previousStart.getDate() - periodLength + 1);
-
       // Trouver le rapport de la période précédente
       const previousReports = await this.getGeneratedReports(companyId, {
         report_type: reportType,
         period_start: previousStart.toISOString().split('T')[0],
         period_end: previousEnd.toISOString().split('T')[0]
       });
-
       if (!previousReports.success || !previousReports.data || previousReports.data.length === 0) {
         return {
           success: false,
           error: 'Aucun rapport trouvé pour la période précédente'
         };
       }
-
       const previousReport = previousReports.data[0];
-
       // Calculer les variances
       const comparisonData: Record<string, any> = {};
       const keyChanges: string[] = [];
-
       if (currentReport.report_data && previousReport.report_data) {
         // Exemple de calculs (à adapter selon les données du rapport)
         const currentRevenue = currentReport.report_data.revenue || 0;
         const previousRevenue = previousReport.report_data.revenue || 0;
         const revenueVariance = ((currentRevenue - previousRevenue) / previousRevenue) * 100;
-
         comparisonData.revenue = {
           current: currentRevenue,
           previous: previousRevenue,
           variance: revenueVariance,
           variance_amount: currentRevenue - previousRevenue
         };
-
         if (Math.abs(revenueVariance) > 10) {
           keyChanges.push(
             `Chiffre d'affaires: ${revenueVariance > 0 ? '+' : ''}${revenueVariance.toFixed(2)}%`
           );
         }
       }
-
       // Créer la comparaison
       return await this.createComparison({
         company_id: companyId,
@@ -794,14 +702,13 @@ class ReportArchiveService {
         created_by: companyId // TODO: use actual user ID
       });
     } catch (error) {
-      console.error('Error comparing reports:', error);
+      logger.error('ReportArchive', 'Error comparing reports:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to compare reports'
       };
     }
   }
-
   /**
    * Exporter plusieurs rapports dans un ZIP
    */
@@ -814,55 +721,46 @@ class ReportArchiveService {
       // Import dynamique de JSZip
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
-
       // Télécharger tous les rapports
       const downloadPromises = reportIds.map(async (reportId) => {
         const reportResult = await this.getGeneratedReport(reportId);
         if (!reportResult.success || !reportResult.data) {
           return null;
         }
-
         const report = reportResult.data;
         if (!report.file_path) {
           return null;
         }
-
         const fileResult = await this.downloadReportFile(report.file_path);
         if (!fileResult.success || !fileResult.data) {
           return null;
         }
-
         return {
           name: `${report.report_name}.${report.file_format}`,
           data: fileResult.data
         };
       });
-
       const files = await Promise.all(downloadPromises);
-
       // Ajouter les fichiers au ZIP
       files.forEach((file) => {
         if (file) {
           zip.file(file.name, file.data);
         }
       });
-
       // Générer le ZIP
       const zipBlob = await zip.generateAsync({ type: 'blob' });
-
       return {
         success: true,
         data: zipBlob
       };
     } catch (error) {
-      console.error('Error exporting reports to ZIP:', error);
+      logger.error('ReportArchive', 'Error exporting reports to ZIP:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to create ZIP'
       };
     }
   }
-
   /**
    * Exporter tous les rapports d'une période
    */
@@ -879,27 +777,23 @@ class ReportArchiveService {
         report_type: reportType,
         status: 'archived' // Seulement les rapports archivés
       });
-
       if (!result.success || !result.data || result.data.length === 0) {
         return {
           success: false,
           error: 'Aucun rapport trouvé pour cette période'
         };
       }
-
       const reportIds = result.data.map(r => r.id);
       const zipName = `rapports_${periodStart}_${periodEnd}.zip`;
-
       return await this.exportReportsToZip(companyId, reportIds, zipName);
     } catch (error) {
-      console.error('Error exporting period reports:', error);
+      logger.error('ReportArchive', 'Error exporting period reports:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to export period'
       };
     }
   }
-
   /**
    * Envoyer un rapport par email (à implémenter avec service email)
    */
@@ -917,28 +811,24 @@ class ReportArchiveService {
           error: 'Rapport non trouvé'
         };
       }
-
       const report = reportResult.data;
-
       // TODO: Implémenter l'envoi via service email (SendGrid, Mailgun, etc.)
       // Pour l'instant, on retourne un succès simulé
-      console.log('Email would be sent to:', recipients);
-      console.log('Report:', report.report_name);
-      console.log('Subject:', subject || `Rapport: ${report.report_name}`);
-      console.log('Message:', message || 'Veuillez trouver ci-joint le rapport demandé.');
-
+      logger.debug('ReportArchive', 'Email would be sent to:', recipients);
+      logger.debug('ReportArchive', 'Report:', report.report_name);
+      logger.debug('ReportArchive', 'Subject:', subject || `Rapport: ${report.report_name}`);
+      logger.debug('ReportArchive', 'Message:', message || 'Veuillez trouver ci-joint le rapport demandé.');
       return {
         success: true
       };
     } catch (error) {
-      console.error('Error sending report by email:', error);
+      logger.error('ReportArchive', 'Error sending report by email:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to send email'
       };
     }
   }
-
   /**
    * Planifier l'envoi automatique d'un rapport
    */
@@ -961,22 +851,19 @@ class ReportArchiveService {
         next_run: this.calculateNextRun(frequency),
         is_active: true
       };
-
-      console.log('Schedule would be created:', schedule);
-
+      logger.debug('ReportArchive', 'Schedule would be created:', schedule);
       return {
         success: true,
         data: schedule
       };
     } catch (error) {
-      console.error('Error scheduling report:', error);
+      logger.error('ReportArchive', 'Error scheduling report:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to schedule'
       };
     }
   }
-
   /**
    * Calculer la prochaine exécution
    */
@@ -1002,6 +889,5 @@ class ReportArchiveService {
     return now;
   }
 }
-
 // Export singleton
 export const reportArchiveService = ReportArchiveService.getInstance();

@@ -9,12 +9,10 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Formatting Service
  * Converts EN 16931 invoices to specific formats (Factur-X, UBL, CII)
  */
-
 import {
   EN16931Invoice,
   EInvoiceFormat,
@@ -22,7 +20,7 @@ import {
   EInvoicingError
 } from '../../../types/einvoicing.types';
 import { createHash } from 'crypto';
-
+import { logger } from '@/lib/logger';
 export class FormattingService {
   /**
    * Format an EN16931 invoice to the specified format
@@ -32,11 +30,9 @@ export class FormattingService {
     format: EInvoiceFormat
   ): Promise<FormattingResult> {
     try {
-      console.warn(`🔄 Formatting invoice ${invoice.invoice_number} as ${format}`);
-
+      logger.warn('Formatting', `🔄 Formatting invoice ${invoice.invoice_number} as ${format}`);
       let xmlContent: string;
       let pdfContent: Buffer | undefined;
-
       switch (format) {
         case 'FACTURX': {
           const facturXResult = await this.generateFacturX(invoice);
@@ -44,25 +40,20 @@ export class FormattingService {
           pdfContent = facturXResult.pdf;
           break;
         }
-
         case 'UBL':
           xmlContent = await this.generateUBL(invoice);
           break;
-
         case 'CII':
           xmlContent = await this.generateCII(invoice);
           break;
-
         default:
           throw new EInvoicingError(`Unsupported format: ${format}`, 'INVALID_FORMAT');
       }
-
       // Generate hashes
       const sha256_xml = createHash('sha256').update(xmlContent, 'utf8').digest('hex');
       const sha256_pdf = pdfContent 
         ? createHash('sha256').update(pdfContent).digest('hex')
         : undefined;
-
       return {
         format,
         xml_content: xmlContent,
@@ -75,9 +66,8 @@ export class FormattingService {
           format_version: this.getFormatVersion(format)
         }
       };
-
     } catch (error) {
-      console.error('Error formatting document:', error instanceof Error ? error.message : String(error));
+      logger.error('Formatting', 'Error formatting document:', error instanceof Error ? error.message : String(error));
       throw new EInvoicingError(
         `Failed to format document as ${format}: ${(error as Error).message}`,
         'FORMATTING_ERROR',
@@ -85,7 +75,6 @@ export class FormattingService {
       );
     }
   }
-
   /**
    * Generate Factur-X document (PDF/A-3 with embedded XML)
    */
@@ -95,16 +84,13 @@ export class FormattingService {
   }> {
     // Generate CII XML (Factur-X uses UN/CEFACT CII format)
     const xmlContent = await this.generateCII(invoice);
-
     // Generate PDF with embedded XML
     const pdfContent = await this.generatePDFWithEmbeddedXML(invoice, xmlContent);
-
     return {
       xml: xmlContent,
       pdf: pdfContent
     };
   }
-
   /**
    * Generate UBL 2.1 XML
    */
@@ -113,7 +99,6 @@ export class FormattingService {
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
          xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
          xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-  
   <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
   <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
   <cbc:ID>${this.escapeXml(invoice.invoice_number)}</cbc:ID>
@@ -123,7 +108,6 @@ export class FormattingService {
   ${invoice.notes?.map(note => `<cbc:Note>${this.escapeXml(note)}</cbc:Note>`).join('\n  ') || ''}
   <cbc:DocumentCurrencyCode>${invoice.currency_code}</cbc:DocumentCurrencyCode>
   ${invoice.references?.buyer_reference ? `<cbc:BuyerReference>${this.escapeXml(invoice.references.buyer_reference)}</cbc:BuyerReference>` : ''}
-
   ${this.generateUBLOrderReference(invoice)}
   ${this.generateUBLSupplierParty(invoice.seller)}
   ${this.generateUBLCustomerParty(invoice.buyer)}
@@ -131,12 +115,9 @@ export class FormattingService {
   ${this.generateUBLTaxTotal(invoice)}
   ${this.generateUBLMonetaryTotal(invoice.totals)}
   ${invoice.lines.map((line, index) => this.generateUBLInvoiceLine(line, index + 1)).join('\n  ')}
-
 </Invoice>`;
-
     return this.formatXml(xml);
   }
-
   /**
    * Generate UN/CEFACT CII XML
    */
@@ -148,13 +129,11 @@ export class FormattingService {
     xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
-  
   <rsm:ExchangedDocumentContext>
     <ram:GuidelineSpecifiedDocumentContextParameter>
       <ram:ID>urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1.0.07:basic</ram:ID>
     </ram:GuidelineSpecifiedDocumentContextParameter>
   </rsm:ExchangedDocumentContext>
-  
   <rsm:ExchangedDocument>
     <ram:ID>${this.escapeXml(invoice.invoice_number)}</ram:ID>
     <ram:TypeCode>${invoice.type_code}</ram:TypeCode>
@@ -163,18 +142,14 @@ export class FormattingService {
     </ram:IssueDateTime>
     ${invoice.notes?.map(note => `<ram:IncludedNote><ram:Content>${this.escapeXml(note)}</ram:Content></ram:IncludedNote>`).join('\n    ') || ''}
   </rsm:ExchangedDocument>
-  
   <rsm:SupplyChainTradeTransaction>
     ${this.generateCIITradeAgreement(invoice)}
     ${this.generateCIITradeDelivery(invoice)}
     ${this.generateCIITradeSettlement(invoice)}
   </rsm:SupplyChainTradeTransaction>
-  
 </rsm:CrossIndustryInvoice>`;
-
     return this.formatXml(xml);
   }
-
   /**
    * Generate PDF with embedded XML (Factur-X)
    */
@@ -185,7 +160,6 @@ export class FormattingService {
     // This is a simplified implementation
     // In production, you would use a proper PDF/A-3 library like pdf-lib
     // with ZUGFeRD/Factur-X embedding capabilities
-    
     const pdfHeader = `%PDF-1.7
 %âãÏÓ
 1 0 obj
@@ -194,7 +168,6 @@ export class FormattingService {
 /Pages 2 0 R
 >>
 endobj
-
 2 0 obj
 <<
 /Type /Pages
@@ -202,7 +175,6 @@ endobj
 /Count 1
 >>
 endobj
-
 3 0 obj
 <<
 /Type /Page
@@ -214,7 +186,6 @@ endobj
 >>
 >>
 endobj
-
 4 0 obj
 <<
 /Length 200
@@ -235,7 +206,6 @@ BT
 ET
 endstream
 endobj
-
 5 0 obj
 <<
 /Type /Font
@@ -243,7 +213,6 @@ endobj
 /BaseFont /Helvetica
 >>
 endobj
-
 xref
 0 6
 0000000000 65535 f 
@@ -260,22 +229,17 @@ trailer
 startxref
 621
 %%EOF`;
-
     // In a real implementation, you would embed the XML as an attachment
     // following the PDF/A-3 and ZUGFeRD specifications
-    
     return Buffer.from(pdfHeader, 'utf8');
   }
-
   // Helper methods for UBL generation
   private generateUBLOrderReference(invoice: EN16931Invoice): string {
     if (!invoice.references?.purchase_order_reference) return '';
-    
     return `<cac:OrderReference>
     <cbc:ID>${this.escapeXml(invoice.references.purchase_order_reference)}</cbc:ID>
   </cac:OrderReference>`;
   }
-
   private generateUBLSupplierParty(seller: EN16931Invoice['seller']): string {
     return `<cac:AccountingSupplierParty>
     <cac:Party>
@@ -298,7 +262,6 @@ startxref
     </cac:Party>
   </cac:AccountingSupplierParty>`;
   }
-
   private generateUBLCustomerParty(buyer: EN16931Invoice['buyer']): string {
     return `<cac:AccountingCustomerParty>
     <cac:Party>
@@ -316,10 +279,8 @@ startxref
     </cac:Party>
   </cac:AccountingCustomerParty>`;
   }
-
   private generateUBLAddress(address: EN16931Invoice['seller']['address']): string {
     if (!address) return '';
-    
     return `<cac:PostalAddress>
       ${address.street_name ? `<cbc:StreetName>${this.escapeXml(address.street_name)}</cbc:StreetName>` : ''}
       ${address.additional_street_name ? `<cbc:AdditionalStreetName>${this.escapeXml(address.additional_street_name)}</cbc:AdditionalStreetName>` : ''}
@@ -331,7 +292,6 @@ startxref
       </cac:Country>
     </cac:PostalAddress>`;
   }
-
   private generateUBLContact(contact: NonNullable<EN16931Invoice['seller']['contact']>): string {
     return `<cac:Contact>
       ${contact.name ? `<cbc:Name>${this.escapeXml(contact.name)}</cbc:Name>` : ''}
@@ -339,10 +299,8 @@ startxref
       ${contact.email ? `<cbc:ElectronicMail>${this.escapeXml(contact.email)}</cbc:ElectronicMail>` : ''}
     </cac:Contact>`;
   }
-
   private generateUBLPaymentMeans(paymentTerms?: EN16931Invoice['payment_terms']): string {
     if (!paymentTerms?.means) return '';
-    
     const means = paymentTerms.means;
     return `<cac:PaymentMeans>
     <cbc:PaymentMeansCode>${means.code}</cbc:PaymentMeansCode>
@@ -358,20 +316,16 @@ startxref
     </cac:PayeeFinancialAccount>` : ''}
   </cac:PaymentMeans>`;
   }
-
   private generateUBLTaxTotal(invoice: EN16931Invoice): string {
     const vatAmount = invoice.totals.invoice_total_vat_amount || 0;
-    
     return `<cac:TaxTotal>
     <cbc:TaxAmount currencyID="${invoice.currency_code}">${vatAmount.toFixed(2)}</cbc:TaxAmount>
     ${this.generateUBLTaxSubtotals(invoice)}
   </cac:TaxTotal>`;
   }
-
   private generateUBLTaxSubtotals(invoice: EN16931Invoice): string {
     // Group tax rates
     const taxGroups = new Map<string, { amount: number; baseAmount: number; rate: number; categoryCode: string }>();
-    
     invoice.lines.forEach(line => {
       if (line.tax) {
         const key = `${line.tax.category_code}_${line.tax.rate}`;
@@ -381,7 +335,6 @@ startxref
         taxGroups.set(key, existing);
       }
     });
-
     return Array.from(taxGroups.values()).map(tax => `<cac:TaxSubtotal>
       <cbc:TaxableAmount currencyID="${invoice.currency_code}">${tax.baseAmount.toFixed(2)}</cbc:TaxableAmount>
       <cbc:TaxAmount currencyID="${invoice.currency_code}">${tax.amount.toFixed(2)}</cbc:TaxAmount>
@@ -394,7 +347,6 @@ startxref
       </cac:TaxCategory>
     </cac:TaxSubtotal>`).join('\n    ');
   }
-
   private generateUBLMonetaryTotal(totals: EN16931Invoice['totals']): string {
     return `<cac:LegalMonetaryTotal>
     <cbc:LineExtensionAmount currencyID="EUR">${totals.sum_invoice_line_net_amount.toFixed(2)}</cbc:LineExtensionAmount>
@@ -405,7 +357,6 @@ startxref
     <cbc:PayableAmount currencyID="EUR">${totals.amount_due_for_payment.toFixed(2)}</cbc:PayableAmount>
   </cac:LegalMonetaryTotal>`;
   }
-
   private generateUBLInvoiceLine(line: EN16931Invoice['lines'][0], lineNumber: number): string {
     return `<cac:InvoiceLine>
     <cbc:ID>${lineNumber}</cbc:ID>
@@ -430,7 +381,6 @@ startxref
     </cac:Price>
   </cac:InvoiceLine>`;
   }
-
   // Helper methods for CII generation
   private generateCIITradeAgreement(invoice: EN16931Invoice): string {
     return `<ram:ApplicableHeaderTradeAgreement>
@@ -454,10 +404,8 @@ startxref
       </ram:BuyerOrderReferencedDocument>` : ''}
     </ram:ApplicableHeaderTradeAgreement>`;
   }
-
   private generateCIITradePartyAddress(address: EN16931Invoice['seller']['address']): string {
     if (!address) return '';
-    
     return `<ram:PostalTradeAddress>
       ${address.postal_zone ? `<ram:PostcodeCode>${this.escapeXml(address.postal_zone)}</ram:PostcodeCode>` : ''}
       ${address.street_name ? `<ram:LineOne>${this.escapeXml(address.street_name)}</ram:LineOne>` : ''}
@@ -465,7 +413,6 @@ startxref
       <ram:CountryID>${address.country_code}</ram:CountryID>
     </ram:PostalTradeAddress>`;
   }
-
   private generateCIITradeDelivery(invoice: EN16931Invoice): string {
     return `<ram:ApplicableHeaderTradeDelivery>
       ${invoice.tax_point_date ? `<ram:ActualDeliverySupplyChainEvent>
@@ -475,7 +422,6 @@ startxref
       </ram:ActualDeliverySupplyChainEvent>` : ''}
     </ram:ApplicableHeaderTradeDelivery>`;
   }
-
   private generateCIITradeSettlement(invoice: EN16931Invoice): string {
     return `<ram:ApplicableHeaderTradeSettlement>
       <ram:InvoiceCurrencyCode>${invoice.currency_code}</ram:InvoiceCurrencyCode>
@@ -485,10 +431,8 @@ startxref
       ${invoice.lines.map(line => this.generateCIITradeLineItem(line)).join('\n      ')}
     </ram:ApplicableHeaderTradeSettlement>`;
   }
-
   private generateCIIPaymentTerms(paymentTerms?: EN16931Invoice['payment_terms']): string {
     if (!paymentTerms) return '';
-    
     return `${paymentTerms.due_date ? `<ram:SpecifiedTradePaymentTerms>
       <ram:DueDateDateTime>
         <udt:DateTimeString format="102">${paymentTerms.due_date.replace(/-/g, '')}</udt:DateTimeString>
@@ -504,11 +448,9 @@ startxref
       </ram:PayeePartyCreditorFinancialAccount>` : ''}
     </ram:SpecifiedTradeSettlementPaymentMeans>` : ''}`;
   }
-
   private generateCIITaxes(invoice: EN16931Invoice): string {
     // Group tax rates (similar to UBL)
     const taxGroups = new Map<string, { amount: number; baseAmount: number; rate: number; categoryCode: string }>();
-    
     invoice.lines.forEach(line => {
       if (line.tax) {
         const key = `${line.tax.category_code}_${line.tax.rate}`;
@@ -518,7 +460,6 @@ startxref
         taxGroups.set(key, existing);
       }
     });
-
     return Array.from(taxGroups.values()).map(tax => `<ram:ApplicableTradeTax>
       <ram:CalculatedAmount>${tax.amount.toFixed(2)}</ram:CalculatedAmount>
       <ram:TypeCode>VAT</ram:TypeCode>
@@ -527,7 +468,6 @@ startxref
       <ram:RateApplicablePercent>${tax.rate.toFixed(2)}</ram:RateApplicablePercent>
     </ram:ApplicableTradeTax>`).join('\n      ');
   }
-
   private generateCIIMonetarySummation(totals: EN16931Invoice['totals']): string {
     return `<ram:SpecifiedTradeSettlementHeaderMonetarySummation>
       <ram:LineTotalAmount>${totals.sum_invoice_line_net_amount.toFixed(2)}</ram:LineTotalAmount>
@@ -537,7 +477,6 @@ startxref
       <ram:DuePayableAmount>${totals.amount_due_for_payment.toFixed(2)}</ram:DuePayableAmount>
     </ram:SpecifiedTradeSettlementHeaderMonetarySummation>`;
   }
-
   private generateCIITradeLineItem(line: EN16931Invoice['lines'][0]): string {
     return `<ram:IncludedSupplyChainTradeLineItem>
       <ram:AssociatedDocumentLineDocument>
@@ -567,7 +506,6 @@ startxref
       </ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>`;
   }
-
   // Utility methods
   private escapeXml(text: string): string {
     return text
@@ -577,12 +515,10 @@ startxref
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&apos;');
   }
-
   private formatXml(xml: string): string {
     // Basic XML formatting (in production, use a proper XML formatter)
     return xml.replace(/>\s+</g, '><').trim();
   }
-
   private getFormatVersion(format: EInvoiceFormat): string {
     switch (format) {
       case 'FACTURX': return '1.0.7';

@@ -14,12 +14,15 @@ import React from 'react';
 // import { EnhancedSettings } from '@/components/settings/EnhancedSettings';
 import { UserProfileSettings, CompanySettings, NotificationSettings, ModuleManagementSettings, SubscriptionSettings } from '@/components/settings';
 import { EmailConfigurationSettings } from '@/components/settings/EmailConfigurationSettings';
+import { SecurityLogsDashboard } from '@/components/security/SecurityLogsDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
+  const { currentCompany } = useAuth();
 
   const handleRestartTour = () => {
     // Méthode 1 : Utiliser l'URL pour forcer le tour (recommandé)
@@ -46,6 +49,7 @@ export default function SettingsPage() {
           <TabsTrigger value="modules">Modules</TabsTrigger>
           <TabsTrigger value="subscription">Abonnement</TabsTrigger>
           <TabsTrigger value="emails">📧 Emails</TabsTrigger>
+          <TabsTrigger value="security">🔒 Sécurité</TabsTrigger>
           <TabsTrigger value="team">Équipe</TabsTrigger>
         </TabsList>
         <TabsContent value="profile"><UserProfileSettings /></TabsContent>
@@ -54,6 +58,9 @@ export default function SettingsPage() {
         <TabsContent value="modules"><ModuleManagementSettings /></TabsContent>
         <TabsContent value="subscription"><SubscriptionSettings /></TabsContent>
         <TabsContent value="emails"><EmailConfigurationSettings /></TabsContent>
+        <TabsContent value="security">
+          {currentCompany?.id && <SecurityLogsDashboard companyId={currentCompany.id} />}
+        </TabsContent>
         <TabsContent value="team">
           <Button onClick={() => navigate('/team')} className="mt-4">
             Accéder à la gestion d'équipe

@@ -1,7 +1,6 @@
 /**
  * Bouton pour générer automatiquement une déclaration TVA depuis les écritures comptables
  */
-
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '../ui/dialog';
@@ -12,12 +11,11 @@ import { useToast } from '../ui/use-toast';
 import { createVATDeclaration, previewVATAmount } from '../../services/vatDeclarationService';
 import { Sparkles, Loader2, CheckCircle, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
 import { Card } from '../ui/card';
-
+import { logger } from '@/lib/logger';
 interface AutoVATDeclarationButtonProps {
   companyId: string;
   onSuccess?: () => void;
 }
-
 export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> = ({
   companyId,
   onSuccess
@@ -30,32 +28,27 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
     deductible: number;
     toPay: number;
   } | null>(null);
-
   // Calcul automatique du trimestre en cours (défaut : trimestre précédent)
   const getDefaultPeriod = () => {
     const now = new Date();
     const quarter = Math.floor((now.getMonth()) / 3); // Trimestre précédent
     const year = quarter === 0 ? now.getFullYear() - 1 : now.getFullYear();
     const actualQuarter = quarter === 0 ? 4 : quarter;
-
     const startMonth = (actualQuarter - 1) * 3 + 1;
     const endMonth = actualQuarter * 3;
-
     return {
       start: `${year}-${String(startMonth).padStart(2, '0')}-01`,
       end: `${year}-${String(endMonth).padStart(2, '0')}-${new Date(year, endMonth, 0).getDate()}`
     };
   };
-
   const [period, setPeriod] = useState(getDefaultPeriod());
-
   const handlePreview = async () => {
     setLoading(true);
     try {
       const result = await previewVATAmount(companyId, period.start, period.end);
       setPreview(result);
     } catch (error) {
-      console.error('Erreur aperçu TVA:', error);
+      logger.error('AutoVATDeclarationButton', 'Erreur aperçu TVA:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de calculer l\'aperçu TVA',
@@ -65,7 +58,6 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
       setLoading(false);
     }
   };
-
   const handleGenerate = async () => {
     setLoading(true);
     try {
@@ -75,16 +67,14 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
         period.end,
         'CA3'
       );
-
       toast({
         title: '✓ Déclaration TVA créée',
         description: `Montant à payer: ${result.data.vat_to_pay.toFixed(2)} €`,
       });
-
       setOpen(false);
       onSuccess?.();
     } catch (error) {
-      console.error('Erreur génération déclaration TVA:', error);
+      logger.error('AutoVATDeclarationButton', 'Erreur génération déclaration TVA:', error);
       toast({
         title: 'Erreur',
         description: error instanceof Error ? error.message : 'Impossible de générer la déclaration TVA',
@@ -94,13 +84,11 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
       setLoading(false);
     }
   };
-
   // Ouvrir le dialog et charger l'aperçu automatiquement
   const handleOpen = () => {
     setOpen(true);
     handlePreview();
   };
-
   return (
     <>
       <Button
@@ -111,7 +99,6 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
         <Sparkles className="w-4 h-4" />
         Générer TVA auto
       </Button>
-
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -123,7 +110,6 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
               Calcule automatiquement votre TVA depuis vos écritures comptables (comptes 44571 et 44566)
             </DialogDescription>
           </DialogHeader>
-
           <div className="space-y-6">
             {/* Sélection période */}
             <div className="grid grid-cols-2 gap-4">
@@ -148,14 +134,12 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
                 />
               </div>
             </div>
-
             {/* Aperçu calculs */}
             {loading && !preview && (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
               </div>
             )}
-
             {preview && (
               <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800">
                 <div className="space-y-4">
@@ -163,7 +147,6 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
                     <CheckCircle className="w-5 h-5 text-green-600" />
                     Aperçu de la déclaration
                   </h3>
-
                   <div className="grid grid-cols-3 gap-4">
                     {/* TVA collectée */}
                     <div className="space-y-1">
@@ -173,7 +156,6 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
                         {preview.collected.toFixed(2)} €
                       </p>
                     </div>
-
                     {/* TVA déductible */}
                     <div className="space-y-1">
                       <p className="text-sm text-gray-600 dark:text-gray-400">TVA déductible</p>
@@ -182,7 +164,6 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
                         {preview.deductible.toFixed(2)} €
                       </p>
                     </div>
-
                     {/* À payer */}
                     <div className="space-y-1">
                       <p className="text-sm text-gray-600 dark:text-gray-400">À payer</p>
@@ -197,7 +178,6 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
                       </p>
                     </div>
                   </div>
-
                   {/* Statut */}
                   <div className="pt-3 border-t border-blue-200 dark:border-blue-800">
                     <Badge variant={preview.toPay > 0 ? 'destructive' : preview.toPay < 0 ? 'default' : 'secondary'}>
@@ -206,7 +186,6 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
                       {preview.toPay === 0 && '✓ Équilibré'}
                     </Badge>
                   </div>
-
                   {preview.toPay === 0 && preview.collected === 0 && (
                     <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
                       <AlertTriangle className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
@@ -222,7 +201,6 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
               </Card>
             )}
           </div>
-
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
               Annuler

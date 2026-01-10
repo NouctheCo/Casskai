@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Mail, Smartphone, Clock, Bell, Loader2, Save } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 interface NotificationSettingsData {
   email: {
     newTransactions: boolean;
@@ -32,11 +32,9 @@ interface NotificationSettingsData {
     end: string;
   };
 }
-
 export function NotificationSettings() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
   const [settings, setSettings] = useState<NotificationSettingsData>({
     email: {
       newTransactions: true,
@@ -60,18 +58,16 @@ export function NotificationSettings() {
       end: '08:00'
     }
   });
-
   // Fonction pour charger les paramètres de notifications
   const loadNotificationSettings = async () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.rpc('get_user_notifications');
-
       if (error) {
-        console.error('Erreur RPC get_user_notifications:', error);
+        logger.error('NotificationSettings', 'Erreur RPC get_user_notifications:', error);
         // Si pas de données, utiliser les valeurs par défaut (déjà définies dans le state)
         if (error.message?.includes('No rows found') || error.code === 'PGRST116') {
-          console.warn('Aucun paramètre de notification trouvé, utilisation des valeurs par défaut');
+          logger.warn('NotificationSettings', 'Aucun paramètre de notification trouvé, utilisation des valeurs par défaut');
         } else {
           throw error;
         }
@@ -103,7 +99,7 @@ export function NotificationSettings() {
         });
       }
     } catch (error) {
-      console.error('Erreur chargement paramètres notifications:', error instanceof Error ? error.message : String(error));
+      logger.error('NotificationSettings', 'Erreur chargement paramètres notifications:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les paramètres de notifications',
@@ -113,12 +109,10 @@ export function NotificationSettings() {
       setIsLoading(false);
     }
   };
-
   // Charger les paramètres de notifications
   useEffect(() => {
     loadNotificationSettings();
   }, []);
-
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -139,21 +133,18 @@ export function NotificationSettings() {
         p_quiet_hours_start: settings.quietHours.start,
         p_quiet_hours_end: settings.quietHours.end
       });
-
       if (error) {
-        console.error('Erreur RPC save_user_notifications:', error);
+        logger.error('NotificationSettings', 'Erreur RPC save_user_notifications:', error);
         throw error;
       }
-
       toast({
         title: 'Paramètres sauvegardés',
         description: 'Vos préférences de notifications ont été mises à jour'
       });
-
       // Recharger les données après sauvegarde pour s'assurer que l'interface est à jour
       await loadNotificationSettings();
     } catch (error) {
-      console.error('Erreur sauvegarde paramètres notifications:', error instanceof Error ? error.message : String(error));
+      logger.error('NotificationSettings', 'Erreur sauvegarde paramètres notifications:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder les paramètres',
@@ -163,7 +154,6 @@ export function NotificationSettings() {
       setIsSaving(false);
     }
   };
-
   const updateEmailSetting = (key: keyof NotificationSettingsData['email'], value: boolean) => {
     setSettings(prev => ({
       ...prev,
@@ -173,7 +163,6 @@ export function NotificationSettings() {
       }
     }));
   };
-
   const updatePushSetting = (key: keyof NotificationSettingsData['push'], value: boolean) => {
     setSettings(prev => ({
       ...prev,
@@ -183,7 +172,6 @@ export function NotificationSettings() {
       }
     }));
   };
-
   if (isLoading) {
     return (
       <Card>
@@ -193,7 +181,6 @@ export function NotificationSettings() {
       </Card>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Notifications par email */}
@@ -221,7 +208,6 @@ export function NotificationSettings() {
                 onCheckedChange={(checked) => updateEmailSetting('newTransactions', checked)}
               />
             </div>
-
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Rapports hebdomadaires</Label>
@@ -234,7 +220,6 @@ export function NotificationSettings() {
                 onCheckedChange={(checked) => updateEmailSetting('weeklyReports', checked)}
               />
             </div>
-
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Factures</Label>
@@ -247,7 +232,6 @@ export function NotificationSettings() {
                 onCheckedChange={(checked) => updateEmailSetting('invoices', checked)}
               />
             </div>
-
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Paiements</Label>
@@ -260,7 +244,6 @@ export function NotificationSettings() {
                 onCheckedChange={(checked) => updateEmailSetting('payments', checked)}
               />
             </div>
-
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Rappels</Label>
@@ -273,7 +256,6 @@ export function NotificationSettings() {
                 onCheckedChange={(checked) => updateEmailSetting('reminders', checked)}
               />
             </div>
-
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Mises à jour système</Label>
@@ -286,7 +268,6 @@ export function NotificationSettings() {
                 onCheckedChange={(checked) => updateEmailSetting('systemUpdates', checked)}
               />
             </div>
-
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Communications marketing</Label>
@@ -302,7 +283,6 @@ export function NotificationSettings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Notifications push */}
       <Card>
         <CardHeader>
@@ -328,7 +308,6 @@ export function NotificationSettings() {
                 onCheckedChange={(checked) => updatePushSetting('newTransactions', checked)}
               />
             </div>
-
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Alertes importantes</Label>
@@ -341,7 +320,6 @@ export function NotificationSettings() {
                 onCheckedChange={(checked) => updatePushSetting('alerts', checked)}
               />
             </div>
-
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Rappels</Label>
@@ -354,7 +332,6 @@ export function NotificationSettings() {
                 onCheckedChange={(checked) => updatePushSetting('reminders', checked)}
               />
             </div>
-
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Mises à jour système</Label>
@@ -370,7 +347,6 @@ export function NotificationSettings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Fréquence et heures calmes */}
       <Card>
         <CardHeader>
@@ -401,7 +377,6 @@ export function NotificationSettings() {
               </SelectContent>
             </Select>
           </div>
-
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
@@ -420,7 +395,6 @@ export function NotificationSettings() {
                 }
               />
             </div>
-
             {settings.quietHours.enabled && (
               <div className="grid grid-cols-2 gap-4 ml-4">
                 <div className="space-y-2">
@@ -456,7 +430,6 @@ export function NotificationSettings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Résumé des notifications actives */}
       <Card>
         <CardHeader>
@@ -492,7 +465,6 @@ export function NotificationSettings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Bouton de sauvegarde */}
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={isSaving}>

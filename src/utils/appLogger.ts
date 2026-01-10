@@ -3,24 +3,19 @@
  *
  * Utilise Sentry en production et console en développement.
  */
-
 import * as Sentry from '@sentry/react';
-
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export interface LogContext {
   [key: string]: unknown;
 }
-
 const config = {
   isDevelopment: import.meta.env.DEV || import.meta.env.MODE === 'development',
   isProduction: import.meta.env.PROD || import.meta.env.MODE === 'production',
   minLevel: (import.meta.env.VITE_LOG_LEVEL || 'debug') as LogLevel,
 };
-
 const LOG_LEVELS: Record<LogLevel, number> = { debug: 0, info: 1, warn: 2, error: 3 };
 const shouldLog = (level: LogLevel) => !(config.isProduction && level === 'debug') && LOG_LEVELS[level] >= LOG_LEVELS[config.minLevel];
 const formatMessage = (message: string, context?: LogContext) => (!context || Object.keys(context).length === 0 ? message : `${message} ${JSON.stringify(context)}`);
-
 export const logger = {
   debug(message: string, context?: LogContext) {
     if (!shouldLog('debug')) return;
@@ -63,7 +58,7 @@ export const logger = {
     logger.debug(`DB ${operation} on ${table}`, context);
   },
   group(title: string) {
-    if (config.isDevelopment) console.group(title);
+    if (config.isDevelopment) console.group('=== ' + title + ' ===');
   },
   groupEnd() {
     if (config.isDevelopment) console.groupEnd();
@@ -73,7 +68,6 @@ export const logger = {
     Sentry.addBreadcrumb({ category: 'performance', message: label, level: 'info', data: { duration: `${duration.toFixed(2)}ms` } });
   },
 };
-
 export async function measurePerformance<T>(label: string, fn: () => Promise<T> | T): Promise<T> {
   const start = performance.now();
   try {
@@ -86,7 +80,6 @@ export async function measurePerformance<T>(label: string, fn: () => Promise<T> 
     throw error;
   }
 }
-
 export function createLogger(baseContext: LogContext) {
   return {
     debug: (message: string, context?: LogContext) => logger.debug(message, { ...baseContext, ...context }),
@@ -101,5 +94,4 @@ export function createLogger(baseContext: LogContext) {
     },
   };
 }
-
 export default logger;

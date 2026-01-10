@@ -338,19 +338,25 @@ export const businessPlanService = {
     const totalPages = (pdf as any).internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       pdf.setPage(i);
+
+      // Titre et numéro de page en gris standard
       pdf.setFontSize(8);
       pdf.setTextColor(150, 150, 150);
       pdf.text(
         `${data.company.name} - Business Plan ${data.year} - Page ${i}/${totalPages}`,
         pageWidth / 2,
-        pageHeight - 10,
+        pageHeight - 15,
         { align: 'center' }
       );
+
+      // Footer discret "Généré par CassKai" centré en gris clair
+      pdf.setFontSize(8);
+      pdf.setTextColor(180, 180, 180); // Gris clair
       pdf.text(
-        `Généré par CassKai le ${new Date().toLocaleDateString('fr-FR')}`,
-        pageWidth - 20,
+        'Généré par CassKai - casskai.app',
+        pageWidth / 2,
         pageHeight - 10,
-        { align: 'right' }
+        { align: 'center' }
       );
     }
 

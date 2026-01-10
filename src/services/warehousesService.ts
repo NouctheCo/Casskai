@@ -3,9 +3,8 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface Warehouse {
   id: string;
   company_id: string;
@@ -26,7 +25,6 @@ export interface Warehouse {
   created_at: string;
   updated_at: string;
 }
-
 class WarehousesService {
   /**
    * Get all warehouses for a company
@@ -39,15 +37,12 @@ class WarehousesService {
       .eq('is_active', true)
       .order('is_default', { ascending: false })
       .order('name', { ascending: true });
-
     if (error) {
-      console.error('Error fetching warehouses:', error);
+      logger.error('Warehouses', 'Error fetching warehouses:', error);
       throw error;
     }
-
     return data || [];
   }
-
   /**
    * Get default warehouse for a company
    */
@@ -59,15 +54,12 @@ class WarehousesService {
       .eq('is_active', true)
       .eq('is_default', true)
       .single();
-
     if (error) {
-      console.error('Error fetching default warehouse:', error);
+      logger.error('Warehouses', 'Error fetching default warehouse:', error);
       return null;
     }
-
     return data;
   }
-
   /**
    * Get warehouse by ID
    */
@@ -77,15 +69,12 @@ class WarehousesService {
       .select('*')
       .eq('id', warehouseId)
       .single();
-
     if (error) {
-      console.error('Error fetching warehouse:', error);
+      logger.error('Warehouses', 'Error fetching warehouse:', error);
       return null;
     }
-
     return data;
   }
-
   /**
    * Create a new warehouse
    */
@@ -98,15 +87,12 @@ class WarehousesService {
       })
       .select()
       .single();
-
     if (error) {
-      console.error('Error creating warehouse:', error);
+      logger.error('Warehouses', 'Error creating warehouse:', error);
       throw error;
     }
-
     return data;
   }
-
   /**
    * Update warehouse
    */
@@ -117,15 +103,12 @@ class WarehousesService {
       .eq('id', warehouseId)
       .select()
       .single();
-
     if (error) {
-      console.error('Error updating warehouse:', error);
+      logger.error('Warehouses', 'Error updating warehouse:', error);
       throw error;
     }
-
     return data;
   }
-
   /**
    * Delete warehouse (soft delete by setting is_active to false)
    */
@@ -134,13 +117,11 @@ class WarehousesService {
       .from('warehouses')
       .update({ is_active: false })
       .eq('id', warehouseId);
-
     if (error) {
-      console.error('Error deleting warehouse:', error);
+      logger.error('Warehouses', 'Error deleting warehouse:', error);
       throw error;
     }
   }
 }
-
 export const warehousesService = new WarehousesService();
 export default warehousesService;

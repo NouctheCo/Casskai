@@ -9,16 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Employee } from '@/services/hrService';
 import { employeeFormSchema } from '@/lib/validation-schemas';
 import { z } from 'zod';
-
+import { logger } from '@/lib/logger';
 type EmployeeFormData = z.infer<typeof employeeFormSchema>;
-
 interface EmployeeFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: Omit<Employee, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'full_name'>) => Promise<boolean>;
   employee?: Employee | null;
 }
-
 export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
   isOpen,
   onClose,
@@ -26,7 +24,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
   employee
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const form = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeFormSchema),
     mode: 'onChange',
@@ -50,7 +47,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
       emergency_phone: employee?.emergency_phone || '',
     },
   });
-
   // Reset form when employee changes
   useEffect(() => {
     if (employee) {
@@ -75,7 +71,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
       });
     }
   }, [employee, form]);
-
   const handleFormSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
     try {
@@ -98,20 +93,17 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
         emergency_contact: data.emergency_contact,
         emergency_phone: data.emergency_phone,
       });
-
       if (success) {
         form.reset();
         onClose();
       }
     } catch (error) {
-      console.error('Error submitting employee form:', error);
+      logger.error('EmployeeFormModal', 'Error submitting employee form:', error);
     } finally {
       setIsSubmitting(false);
     }
   });
-
   if (!isOpen) return null;
-
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
@@ -134,7 +126,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
             <X className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
-
         {/* Form */}
         <form onSubmit={handleFormSubmit} className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -144,7 +135,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 Informations Personnelles
               </h3>
             </div>
-
             <div>
               <Label htmlFor="employee_number">Matricule *</Label>
               <Input
@@ -156,7 +146,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{form.formState.errors.employee_number.message}</p>
               )}
             </div>
-
             <div>
               <Label htmlFor="first_name">Prénom *</Label>
               <Input
@@ -168,7 +157,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{form.formState.errors.first_name.message}</p>
               )}
             </div>
-
             <div>
               <Label htmlFor="last_name">Nom *</Label>
               <Input
@@ -180,7 +168,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{form.formState.errors.last_name.message}</p>
               )}
             </div>
-
             <div>
               <Label htmlFor="email">Email *</Label>
               <Input
@@ -193,7 +180,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{form.formState.errors.email.message}</p>
               )}
             </div>
-
             <div>
               <Label htmlFor="phone">Téléphone</Label>
               <Input
@@ -202,14 +188,12 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 {...form.register('phone')}
               />
             </div>
-
             {/* Section Professionnelle */}
             <div className="col-span-2 mt-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Informations Professionnelles
               </h3>
             </div>
-
             <div>
               <Label htmlFor="position">Poste *</Label>
               <Input
@@ -221,7 +205,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{form.formState.errors.position.message}</p>
               )}
             </div>
-
             <div>
               <Label htmlFor="department">Département *</Label>
               <Select
@@ -247,7 +230,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{form.formState.errors.department.message}</p>
               )}
             </div>
-
             <div>
               <Label htmlFor="hire_date">Date d'embauche *</Label>
               <Input
@@ -260,7 +242,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{form.formState.errors.hire_date.message}</p>
               )}
             </div>
-
             <div>
               <Label htmlFor="salary">Salaire annuel brut</Label>
               <Input
@@ -270,7 +251,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 {...form.register('salary')}
               />
             </div>
-
             <div>
               <Label htmlFor="salary_currency">Devise du salaire</Label>
               <Select
@@ -299,7 +279,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
-
             <div>
               <Label htmlFor="contract_type">Type de contrat</Label>
               <Select
@@ -317,7 +296,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
-
             <div>
               <Label htmlFor="status">Statut</Label>
               <Select
@@ -334,14 +312,12 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
-
             {/* Section Adresse */}
             <div className="col-span-2 mt-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Adresse
               </h3>
             </div>
-
             <div className="col-span-2">
               <Label htmlFor="address">Adresse</Label>
               <Input
@@ -349,7 +325,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 {...form.register('address')}
               />
             </div>
-
             <div>
               <Label htmlFor="city">Ville</Label>
               <Input
@@ -357,7 +332,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 {...form.register('city')}
               />
             </div>
-
             <div>
               <Label htmlFor="postal_code">Code postal</Label>
               <Input
@@ -365,14 +339,12 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 {...form.register('postal_code')}
               />
             </div>
-
             {/* Section Contact d'urgence */}
             <div className="col-span-2 mt-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Contact d'urgence
               </h3>
             </div>
-
             <div>
               <Label htmlFor="emergency_contact">Nom du contact</Label>
               <Input
@@ -380,7 +352,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 {...form.register('emergency_contact')}
               />
             </div>
-
             <div>
               <Label htmlFor="emergency_phone">Téléphone d'urgence</Label>
               <Input
@@ -390,7 +361,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               />
             </div>
           </div>
-
           {/* Footer */}
           <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
             <Button

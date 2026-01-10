@@ -2,7 +2,6 @@
  * CassKai - Plateforme de gestion financière
  * Journal Entry Attachments Component
  */
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useLocale } from '@/contexts/LocaleContext';
 import { useToast } from '@/components/ui/use-toast';
@@ -31,13 +30,12 @@ import {
   X
 } from 'lucide-react';
 import { journalEntryAttachmentService, JournalEntryAttachment } from '@/services/journalEntryAttachmentService';
-
+import { logger } from '@/lib/logger';
 interface JournalEntryAttachmentsProps {
   journalEntryId: string;
   companyId: string;
   readOnly?: boolean;
 }
-
 export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = ({
   journalEntryId,
   companyId,
@@ -53,7 +51,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
   const [description, setDescription] = useState('');
   const [previewAttachment, setPreviewAttachment] = useState<JournalEntryAttachment | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-
   // Load attachments
   const loadAttachments = useCallback(async () => {
     setLoading(true);
@@ -61,7 +58,7 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
       const data = await journalEntryAttachmentService.getAttachments(journalEntryId);
       setAttachments(data);
     } catch (error) {
-      console.error('Error loading attachments:', error);
+      logger.error('JournalEntryAttachments', 'Error loading attachments:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les pièces jointes',
@@ -71,15 +68,12 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
       setLoading(false);
     }
   }, [journalEntryId, toast]);
-
   useEffect(() => {
     loadAttachments();
   }, [loadAttachments]);
-
   // Handle file upload
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!selectedFile) {
       toast({
         title: 'Erreur',
@@ -88,7 +82,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
       });
       return;
     }
-
     setUploading(true);
     try {
       const attachment = await journalEntryAttachmentService.uploadAttachment(
@@ -97,7 +90,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
         selectedFile,
         description || undefined
       );
-
       if (attachment) {
         setAttachments([attachment, ...attachments]);
         toast({
@@ -109,7 +101,7 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
         setDescription('');
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('JournalEntryAttachments', 'Upload error:', error);
       toast({
         title: 'Erreur',
         description: error instanceof Error ? error.message : 'Erreur lors du téléchargement',
@@ -119,7 +111,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
       setUploading(false);
     }
   };
-
   // Handle file selection - optimized to avoid blocking UI
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -130,13 +121,11 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
       });
     }
   }, []);
-
   // Handle delete
   const handleDelete = async (attachment: JournalEntryAttachment) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette pièce jointe ?')) {
       return;
     }
-
     try {
       const success = await journalEntryAttachmentService.deleteAttachment(attachment);
       if (success) {
@@ -147,7 +136,7 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
         });
       }
     } catch (error) {
-      console.error('Delete error:', error);
+      logger.error('JournalEntryAttachments', 'Delete error:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de supprimer la pièce jointe',
@@ -155,7 +144,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
       });
     }
   };
-
   // Handle download
   const handleDownload = async (attachment: JournalEntryAttachment) => {
     try {
@@ -171,7 +159,7 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
         document.body.removeChild(a);
       }
     } catch (error) {
-      console.error('Download error:', error);
+      logger.error('JournalEntryAttachments', 'Download error:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de télécharger la pièce jointe',
@@ -179,13 +167,11 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
       });
     }
   };
-
   // Handle preview
   const handlePreview = (attachment: JournalEntryAttachment) => {
     setPreviewAttachment(attachment);
     setShowPreview(true);
   };
-
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith('image/')) {
       return <FileImage className="w-5 h-5 text-blue-500" />;
@@ -195,7 +181,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
     }
     return <File className="w-5 h-5 text-gray-500" />;
   };
-
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -203,7 +188,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
-
   return (
     <>
       <Card className="mt-6">
@@ -222,7 +206,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
             )}
           </div>
         </CardHeader>
-
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center p-8">
@@ -256,7 +239,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
                       )}
                     </div>
                   </div>
-
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {attachment.file_type.startsWith('image/') && (
                       <Button
@@ -290,7 +272,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
           )}
         </CardContent>
       </Card>
-
       {/* Upload Dialog */}
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
         <DialogContent>
@@ -300,7 +281,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
               Téléchargez un document pour cette écriture comptable
             </DialogDescription>
           </DialogHeader>
-
           <form onSubmit={handleUpload} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">
@@ -316,7 +296,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
                 Formats acceptés: PDF, DOC, XLS, JPG, PNG, WebP. Max 50MB.
               </p>
             </div>
-
             <div>
               <label className="block text-sm font-medium mb-2">
                 Description (optionnel)
@@ -329,7 +308,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
                 disabled={uploading}
               />
             </div>
-
             <div className="flex gap-2 justify-end">
               <Button
                 type="button"
@@ -356,7 +334,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
           </form>
         </DialogContent>
       </Dialog>
-
       {/* Preview Dialog */}
       {previewAttachment && (
         <Dialog open={showPreview} onOpenChange={setShowPreview}>
@@ -373,7 +350,6 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
                 <X className="w-4 h-4" />
               </button>
             </DialogHeader>
-
             <div className="w-full h-[60vh] overflow-auto">
               {previewAttachment.file_type.startsWith('image/') ? (
                 <img
@@ -404,5 +380,4 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
     </>
   );
 };
-
-export default JournalEntryAttachments;
+export default JournalEntryAttachments;

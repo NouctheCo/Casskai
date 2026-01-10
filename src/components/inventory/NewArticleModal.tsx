@@ -10,7 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -24,15 +24,22 @@ import { Loader2, Plus } from 'lucide-react';
 import articlesService, { type CreateArticleInput } from '@/services/articlesService';
 import { ThirdPartyFormDialog } from '@/components/third-parties/ThirdPartyFormDialog';
 import { thirdPartiesService } from '@/services/thirdPartiesService';
+import warehousesService, { type Warehouse } from '@/services/warehousesService';
+import { ChartOfAccountsService } from '@/services/chartOfAccountsService';
 import { useToast } from '@/hooks/useToast';
+import { logger } from '@/lib/logger';
 
 export interface NewArticleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (articleId: string) => void;
-  suppliers?: Array<{ id: string; name: string }>;
-  warehouses?: Array<{ id: string; name: string }>;
-  chartOfAccounts?: Array<{ id: string; account_number: string; account_name: string }>;
+}
+
+interface Account {
+  id: string;
+  account_number: string;
+  account_name: string;
+  account_type: string;
 }
 
 interface ArticleFormData {
@@ -97,15 +104,34 @@ const UNITS = [
   'palette'
 ];
 
+// ✅ Mapping statique pour éviter les re-renders en boucle
+const UNIT_LABELS: Record<string, string> = {
+  'unité': 'Unité',
+  'pièce': 'Pièce',
+  'kg': 'Kilogramme',
+  'g': 'Gramme',
+  'l': 'Litre',
+  'litre': 'Litre',
+  'ml': 'Millilitre',
+  'm': 'Mètre',
+  'mètre': 'Mètre',
+  'cm': 'Centimètre',
+  'boîte': 'Boîte',
+  'boite': 'Boîte',
+  'carton': 'Carton',
+  'palette': 'Palette',
+  'heure': 'Heure',
+  'jour': 'Jour',
+  'lot': 'Lot',
+  'forfait': 'Forfait'
+};
+
 const TVA_RATES = ['0', '5.5', '10', '20'];
 
 const NewArticleModal: React.FC<NewArticleModalProps> = ({
   isOpen,
   onClose,
-  onSuccess,
-  suppliers = [],
-  warehouses = [],
-  chartOfAccounts = []
+  onSuccess
 }) => {
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
@@ -114,12 +140,92 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showNewSupplierForm, setShowNewSupplierForm] = useState(false);
-  const [localSuppliers, setLocalSuppliers] = useState(suppliers);
 
-  // Update local suppliers when prop changes
-  React.useEffect(() => {
-    setLocalSuppliers(suppliers);
-  }, [suppliers]);
+  // State pour les données chargées
+  const [localSuppliers, setLocalSuppliers] = useState<Array<{ id: string; name: string }>>([]);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [purchaseAccounts, setPurchaseAccounts] = useState<Account[]>([]);
+  const [salesAccounts, setSalesAccounts] = useState<Account[]>([]);
+  const [dataLoading, setDataLoading] = useState(false);
+
+  // ✅ Fonction helper pour récupérer le label d'une unité (évite les re-renders)
+  const getUnitLabel = (unit: string): string => UNIT_LABELS[unit] || unit;
+
+  // ✅ Mémoriser les options d'unités pour éviter les re-calculs
+  const unitOptions = useMemo(() =>
+    UNITS.map(u => ({ value: u, label: getUnitLabel(u) }))
+  , []);
+
+  // Charger les données quand le modal s'ouvre
+  useEffect(() => {
+    // ✅ Ne rien faire si le modal est fermé ou pas de company
+    if (!isOpen || !currentCompany) return;
+
+    let cancelled = false;
+
+    async function loadFormData() {
+      setDataLoading(true);
+      logger.debug('NewArticleModal', '📦 Chargement des données du formulaire...');
+
+      try {
+        const chartService = ChartOfAccountsService.getInstance();
+
+        // Charger toutes les données en parallèle
+        const [suppliersData, warehousesData, allAccounts] = await Promise.all([
+          thirdPartiesService.getThirdParties(currentCompany.id, 'supplier'),
+          warehousesService.getWarehouses(currentCompany.id),
+          chartService.getAccounts(currentCompany.id, { isActive: true })
+        ]);
+
+        // ✅ Ne pas mettre à jour le state si le composant est démonté
+        if (cancelled) return;
+
+        // Formater les fournisseurs
+        const formattedSuppliers = suppliersData.map(s => ({
+          id: s.id,
+          name: s.name || s.display_name || s.legal_name || 'Sans nom'
+        }));
+
+        // Filtrer les comptes par type
+        const purchase = allAccounts.filter(acc =>
+          acc.account_number.startsWith('6') || // Classe 6 = Charges (achats)
+          acc.account_type === 'expense'
+        );
+        const sales = allAccounts.filter(acc =>
+          acc.account_number.startsWith('7') || // Classe 7 = Produits (ventes)
+          acc.account_type === 'revenue'
+        );
+
+        setLocalSuppliers(formattedSuppliers);
+        setWarehouses(warehousesData);
+        setPurchaseAccounts(purchase);
+        setSalesAccounts(sales);
+
+        logger.info('NewArticleModal', '✅ Données chargées:', {
+          suppliers: formattedSuppliers.length,
+          warehouses: warehousesData.length,
+          purchaseAccounts: purchase.length,
+          salesAccounts: sales.length
+        });
+      } catch (err) {
+        if (cancelled) return;
+        logger.error('NewArticleModal', '❌ Erreur chargement données:', err);
+        // ✅ Ne pas appeler showToast pour éviter les re-renders
+        // Le message d'erreur sera visible dans les logs
+      } finally {
+        if (!cancelled) {
+          setDataLoading(false);
+        }
+      }
+    }
+
+    loadFormData();
+
+    // ✅ Cleanup: annuler les mises à jour si le composant se démonte
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, currentCompany?.id]); // ✅ Dépendances STABLES uniquement
 
   const handleInputChange = (field: keyof ArticleFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -137,42 +243,62 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
   const handleSupplierCreated = async () => {
     if (!currentCompany) return;
 
-    // Recharger la liste des fournisseurs
-    const updatedSuppliers = await thirdPartiesService.getThirdParties(currentCompany.id, 'supplier');
-    setLocalSuppliers(updatedSuppliers.map(s => ({ id: s.id, name: s.name || s.display_name || s.legal_name || 'Sans nom' })));
+    try {
+      // Recharger la liste des fournisseurs
+      const updatedSuppliers = await thirdPartiesService.getThirdParties(currentCompany.id, 'supplier');
+      const formattedSuppliers = updatedSuppliers.map(s => ({
+        id: s.id,
+        name: s.name || s.display_name || s.legal_name || 'Sans nom'
+      }));
+      setLocalSuppliers(formattedSuppliers);
 
-    // Fermer le dialog
-    setShowNewSupplierForm(false);
+      logger.info('NewArticleModal', '✅ Fournisseurs rechargés:', formattedSuppliers.length);
 
-    // Le fournisseur sera automatiquement disponible dans la liste
-    showToast(
-      "Le fournisseur a été ajouté avec succès et est maintenant disponible dans la liste",
-      'success'
-    );
+      // Fermer le dialog
+      setShowNewSupplierForm(false);
+
+      // Notification
+      showToast(
+        t('inventory.articleModal.supplierCreatedSuccess', "Le fournisseur a été ajouté avec succès"),
+        'success'
+      );
+    } catch (err) {
+      logger.error('NewArticleModal', '❌ Erreur rechargement fournisseurs:', err);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log('=== 📝 SUBMIT ARTICLE FORM ===');
+    console.log('Form data (raw):', formData);
+    console.log('Current company:', currentCompany);
+
     if (!currentCompany) {
+      console.error('❌ No company selected');
       setError(t('inventory.articleModal.errorNoCompany', 'Aucune entreprise sélectionnée'));
       return;
     }
 
     if (!formData.name.trim()) {
+      console.error('❌ Article name is required');
       setError(t('inventory.articleModal.errorNameRequired', 'Le nom de l\'article est requis'));
       return;
     }
 
     if (!formData.reference.trim()) {
+      console.error('❌ Article reference is required');
       setError(t('inventory.articleModal.errorReferenceRequired', 'La référence est requise'));
       return;
     }
 
     if (!formData.warehouse_id) {
+      console.error('❌ Warehouse is required');
       setError(t('inventory.articleModal.errorWarehouseRequired', 'L\'entrepôt est requis'));
       return;
     }
+
+    console.log('✅ Validation passed');
 
     setLoading(true);
     setError(null);
@@ -198,16 +324,24 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
         barcode: formData.barcode || undefined
       };
 
+      console.log('📦 Article data to create:', articleInput);
+      console.log('🏢 Company ID:', currentCompany.id);
+
       const article = await articlesService.createArticle(currentCompany.id, articleInput);
+
+      console.log('✅ Article created successfully:', article);
 
       setFormData(INITIAL_FORM_DATA);
       onSuccess(article.id);
       onClose();
     } catch (err) {
+      console.error('❌ Error creating article:', err);
+      console.error('❌ Error details:', err instanceof Error ? err.message : String(err));
       const errorMessage = err instanceof Error ? err.message : t('inventory.articleModal.errorCreating', 'Erreur lors de la création de l\'article');
       setError(errorMessage);
     } finally {
       setLoading(false);
+      console.log('=== END SUBMIT ===');
     }
   };
 
@@ -309,9 +443,9 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {UNITS.map(unit => (
-                      <SelectItem key={unit} value={unit}>
-                        {t(`inventory.units.${unit}`, unit)}
+                    {unitOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -548,8 +682,8 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
                     <SelectValue placeholder={t('inventory.articleModal.purchaseAccountPlaceholder', 'Sélectionner un compte')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {chartOfAccounts.length > 0 ? (
-                      chartOfAccounts.filter(acc => acc.account_number.startsWith('6')).map(account => (
+                    {purchaseAccounts.length > 0 ? (
+                      purchaseAccounts.map(account => (
                         <SelectItem key={account.id} value={account.id}>
                           {account.account_number} - {account.account_name}
                         </SelectItem>
@@ -572,8 +706,8 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
                     <SelectValue placeholder={t('inventory.articleModal.salesAccountPlaceholder', 'Sélectionner un compte')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {chartOfAccounts.length > 0 ? (
-                      chartOfAccounts.filter(acc => acc.account_number.startsWith('7')).map(account => (
+                    {salesAccounts.length > 0 ? (
+                      salesAccounts.map(account => (
                         <SelectItem key={account.id} value={account.id}>
                           {account.account_number} - {account.account_name}
                         </SelectItem>
@@ -596,12 +730,12 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={loading || dataLoading}>
               {t('common.cancel', 'Annuler')}
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('inventory.articleModal.create', 'Créer l\'article')}
+            <Button type="submit" disabled={loading || dataLoading}>
+              {(loading || dataLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {dataLoading ? t('common.loading', 'Chargement...') : t('inventory.articleModal.create', 'Créer l\'article')}
             </Button>
           </DialogFooter>
         </form>

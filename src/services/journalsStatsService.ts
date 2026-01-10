@@ -9,13 +9,11 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Service pour calculer les statistiques des journaux comptables
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface JournalStats {
   id: string;
   code: string;
@@ -27,17 +25,14 @@ export interface JournalStats {
   lastEntryDate: string | null;
   isActive: boolean;
 }
-
 class JournalsStatsService {
   private static instance: JournalsStatsService;
-
   static getInstance(): JournalsStatsService {
     if (!this.instance) {
       this.instance = new JournalsStatsService();
     }
     return this.instance;
   }
-
   /**
    * Récupère tous les journaux avec leurs statistiques
    */
@@ -49,20 +44,16 @@ class JournalsStatsService {
         .select('id, code, name, type, is_active')
         .eq('company_id', companyId)
         .order('code');
-
       if (journalsError) {
-        console.error('Error fetching journals:', journalsError);
+        logger.error('JournalsStats', 'Error fetching journals:', journalsError);
         return [];
       }
-
       if (!journals || journals.length === 0) {
         return [];
       }
-
       // Pour chaque journal, calculer les stats
       const journalStatsPromises = journals.map(async (journal) => {
         const stats = await this.calculateJournalStats(companyId, journal.id);
-
         return {
           id: journal.id,
           code: journal.code,
@@ -75,14 +66,12 @@ class JournalsStatsService {
           isActive: journal.is_active
         };
       });
-
       return await Promise.all(journalStatsPromises);
     } catch (error) {
-      console.error('Error getting journals with stats:', error);
+      logger.error('JournalsStats', 'Error getting journals with stats:', error);
       return [];
     }
   }
-
   /**
    * Calcule les statistiques d'un journal spécifique
    */
@@ -103,9 +92,8 @@ class JournalsStatsService {
         .eq('company_id', companyId)
         .eq('journal_id', journalId)
         .order('entry_date', { ascending: false });
-
       if (entriesError) {
-        console.error('Error fetching journal entries:', entriesError);
+        logger.error('JournalsStats', 'Error fetching journal entries:', entriesError);
         return {
           entriesCount: 0,
           totalDebit: 0,
@@ -113,9 +101,7 @@ class JournalsStatsService {
           lastEntryDate: null
         };
       }
-
       const entryIds = (entries || []).map(e => e.id);
-
       if (entryIds.length === 0) {
         return {
           entriesCount: 0,
@@ -124,17 +110,14 @@ class JournalsStatsService {
           lastEntryDate: null
         };
       }
-
       // Récupérer les lignes d'écriture pour calculer débits et crédits
       const { data: items, error: itemsError } = await supabase
         .from('journal_entry_lines')
         .select('debit_amount, credit_amount')
         .in('journal_entry_id', entryIds);
-
       if (itemsError) {
-        console.error('Error fetching journal entry items:', itemsError);
+        logger.error('JournalsStats', 'Error fetching journal entry items:', itemsError);
       }
-
       const totals = (items || []).reduce(
         (acc, item) => {
           acc.totalDebit += Number(item.debit_amount) || 0;
@@ -143,7 +126,6 @@ class JournalsStatsService {
         },
         { totalDebit: 0, totalCredit: 0 }
       );
-
       return {
         entriesCount: entries.length,
         totalDebit: totals.totalDebit,
@@ -151,7 +133,7 @@ class JournalsStatsService {
         lastEntryDate: entries[0]?.entry_date || null
       };
     } catch (error) {
-      console.error('Error calculating journal stats:', error);
+      logger.error('JournalsStats', 'Error calculating journal stats:', error);
       return {
         entriesCount: 0,
         totalDebit: 0,
@@ -161,5 +143,4 @@ class JournalsStatsService {
     }
   }
 }
-
 export const journalsStatsService = JournalsStatsService.getInstance();

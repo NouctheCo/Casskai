@@ -10,17 +10,15 @@ import { Enterprise } from '@/types/enterprise.types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building, MapPin, Landmark, Settings } from 'lucide-react';
-
+import { logger } from '@/lib/logger';
 interface EnterpriseFormProps {
   enterprise?: Enterprise;
   onSuccess: () => void;
   onCancel: () => void;
 }
-
 export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: EnterpriseFormProps) {
   const { addEnterprise, updateEnterprise } = useEnterprise();
   const { t } = useLocale();
-  
   const [formData, setFormData] = useState({
     name: enterprise?.name || '',
     registrationNumber: enterprise?.registrationNumber || '',
@@ -50,13 +48,10 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
       timezone: enterprise?.settings?.timezone || 'Europe/Paris'
     }
   });
-
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.name.trim()) {
       newErrors.name = t('enterprise.errors.nameRequired', { defaultValue: 'Le nom est requis' });
     }
@@ -72,18 +67,14 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
     if (!formData.address.city.trim()) {
       newErrors.city = t('enterprise.errors.cityRequired', { defaultValue: 'La ville est requise' });
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) {
       return;
     }
-
     setLoading(true);
     try {
       const enterpriseData = {
@@ -107,28 +98,25 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
         isActive: true,
         settings: formData.settings
       };
-
       if (enterprise) {
         await updateEnterprise(enterprise.id, enterpriseData);
       } else {
         await addEnterprise(enterpriseData);
       }
-      
       onSuccess();
     } catch (error) {
-      console.error('Error saving enterprise:', error instanceof Error ? error.message : String(error));
+      logger.error('EnterpriseForm', 'Error saving enterprise:', error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }
   };
-
   const handleInputChange = (field: string, value: any) => {
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent],
+          ...(prev[parent as keyof typeof prev] as any),
           [child]: value
         }
       }));
@@ -143,7 +131,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
-
   const getTaxRegimeName = (type: string) => {
     const names = {
       realNormal: 'Réel Normal',
@@ -151,9 +138,8 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
       microEnterprise: 'Micro-entreprise',
       other: 'Autre'
     };
-    return names[type] || type;
+    return names[type as keyof typeof names] || type;
   };
-
   const getCorporateTaxRate = (countryCode: string, regimeType: string) => {
     const rates = {
       FR: { realNormal: 25, realSimplified: 15, microEnterprise: 0 },
@@ -161,9 +147,9 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
       CH: { realNormal: 14.6, realSimplified: 14.6, microEnterprise: 0 },
       LU: { realNormal: 17, realSimplified: 15, microEnterprise: 0 }
     };
-    return rates[countryCode]?.[regimeType] || 25;
+    const country = rates[countryCode as keyof typeof rates];
+    return country?.[regimeType as keyof typeof country] || 25;
   };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Tabs defaultValue="general" className="w-full">
@@ -185,7 +171,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
             {t('enterprise.tabs.settings', { defaultValue: 'Paramètres' })}
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="general" className="space-y-4">
           <Card>
             <CardHeader>
@@ -205,7 +190,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
                 />
                 {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="registrationNumber">{t('enterprise.registrationNumber', { defaultValue: 'N° d\'immatriculation' })} *</Label>
@@ -228,7 +212,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="country">{t('enterprise.country', { defaultValue: 'Pays' })} *</Label>
@@ -262,7 +245,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="address" className="space-y-4">
           <Card>
             <CardHeader>
@@ -282,7 +264,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
                 />
                 {errors.street && <p className="text-sm text-destructive mt-1">{errors.street}</p>}
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="postalCode">{t('enterprise.postalCode', { defaultValue: 'Code postal' })} *</Label>
@@ -305,7 +286,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
                   {errors.city && <p className="text-sm text-destructive mt-1">{errors.city}</p>}
                 </div>
               </div>
-
               <div>
                 <Label htmlFor="addressCountry">{t('enterprise.country', { defaultValue: 'Pays' })}</Label>
                 <Input
@@ -317,7 +297,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="fiscal" className="space-y-4">
           <Card>
             <CardHeader>
@@ -344,7 +323,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
                   </SelectContent>
                 </Select>
               </div>
-
               <div>
                 <Label htmlFor="vatPeriod">{t('enterprise.vatPeriod', { defaultValue: 'Périodicité TVA' })}</Label>
                 <Select 
@@ -362,7 +340,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="fiscalYearStart">{t('enterprise.fiscalYearStart', { defaultValue: 'Début exercice fiscal' })}</Label>
@@ -404,7 +381,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="settings" className="space-y-4">
           <Card>
             <CardHeader>
@@ -435,7 +411,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
                   />
                 </div>
               </div>
-
               <div>
                 <Label htmlFor="taxReminderDays">{t('enterprise.taxReminderDays', { defaultValue: 'Rappel échéances fiscales (jours avant)' })}</Label>
                 <Input
@@ -445,7 +420,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
                   onChange={(e) => handleInputChange('settings.taxReminderDays', parseInt(e.target.value))}
                 />
               </div>
-
               <div>
                 <Label htmlFor="roundingRule">{t('enterprise.roundingRule', { defaultValue: 'Règle d\'arrondi' })}</Label>
                 <Select 
@@ -462,7 +436,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
@@ -476,7 +449,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
                     onCheckedChange={(checked) => handleInputChange('settings.autoCalculateTax', checked)}
                   />
                 </div>
-
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>{t('enterprise.emailNotifications', { defaultValue: 'Notifications par email' })}</Label>
@@ -494,7 +466,6 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
           </Card>
         </TabsContent>
       </Tabs>
-
       <div className="flex justify-end gap-4 pt-4 border-t">
         <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
           {t('common.cancel', { defaultValue: 'Annuler' })}

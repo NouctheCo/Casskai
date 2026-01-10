@@ -2,13 +2,13 @@
  * Template Form Modal
  * Modal pour créer/éditer un template de document
  */
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { X, Plus, Trash2, Save } from 'lucide-react';
 import { hrDocumentTemplatesService } from '@/services/hrDocumentTemplatesService';
+import { logger } from '@/lib/logger';
 import {
   STANDARD_VARIABLES,
   type DocumentTemplate,
@@ -17,7 +17,6 @@ import {
   type TemplateVariable,
   type DocumentTemplateType
 } from '@/types/hr-document-templates.types';
-
 interface TemplateFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -26,7 +25,6 @@ interface TemplateFormModalProps {
   companyId: string;
   isEditing: boolean;
 }
-
 export function TemplateFormModal({
   isOpen,
   onClose,
@@ -48,7 +46,6 @@ export function TemplateFormModal({
     auto_archive: true
   });
   const [saving, setSaving] = useState(false);
-
   useEffect(() => {
     if (template) {
       setFormData({
@@ -65,11 +62,9 @@ export function TemplateFormModal({
       });
     }
   }, [template]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-
     try {
       if (isEditing && template) {
         await hrDocumentTemplatesService.updateTemplate(template.id, formData);
@@ -78,12 +73,11 @@ export function TemplateFormModal({
       }
       onSubmit();
     } catch (error) {
-      console.error('Error saving template:', error);
+      logger.error('TemplateFormModal', 'Error saving template:', error);
     } finally {
       setSaving(false);
     }
   };
-
   const _handleAddVariable = (variable: TemplateVariable) => {
     if (!formData.variables.find(v => v.name === variable.name)) {
       setFormData({
@@ -92,14 +86,12 @@ export function TemplateFormModal({
       });
     }
   };
-
   const handleRemoveVariable = (variableName: string) => {
     setFormData({
       ...formData,
       variables: formData.variables.filter(v => v.name !== variableName)
     });
   };
-
   const handleAddStandardVariables = () => {
     const newVariables = STANDARD_VARIABLES.filter(
       sv => !formData.variables.find(v => v.name === sv.name)
@@ -109,9 +101,7 @@ export function TemplateFormModal({
       variables: [...formData.variables, ...newVariables]
     });
   };
-
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -129,7 +119,6 @@ export function TemplateFormModal({
               <X className="w-6 h-6" />
             </button>
           </div>
-
           {/* Body */}
           <div className="p-6 space-y-6">
             {/* Basic Info */}
@@ -145,7 +134,6 @@ export function TemplateFormModal({
                   placeholder="Ex: Contrat CDI Standard"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Catégorie *
@@ -166,7 +154,6 @@ export function TemplateFormModal({
                 </select>
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Type de document *
@@ -181,7 +168,6 @@ export function TemplateFormModal({
                 Types courants: cdi, cdd, stage, apprentissage, avenant_salaire, certificat_travail, promesse_embauche
               </p>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Description
@@ -194,7 +180,6 @@ export function TemplateFormModal({
                 placeholder="Description du template..."
               />
             </div>
-
             {/* Content */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -212,7 +197,6 @@ export function TemplateFormModal({
                 Utilisez la syntaxe {`{{variable_name}}`} pour insérer des variables
               </p>
             </div>
-
             {/* Variables */}
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -230,7 +214,6 @@ export function TemplateFormModal({
                   Ajouter variables standard
                 </Button>
               </div>
-
               <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900/30">
                 {formData.variables.length === 0 ? (
                   <p className="text-sm text-gray-500 dark:text-gray-300 text-center py-4">
@@ -270,7 +253,6 @@ export function TemplateFormModal({
                 )}
               </div>
             </div>
-
             {/* Settings */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -282,7 +264,6 @@ export function TemplateFormModal({
                 />
                 <span className="text-sm font-medium">Template actif</span>
               </label>
-
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -292,7 +273,6 @@ export function TemplateFormModal({
                 />
                 <span className="text-sm font-medium">Template par défaut</span>
               </label>
-
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -302,7 +282,6 @@ export function TemplateFormModal({
                 />
                 <span className="text-sm font-medium">Nécessite une signature</span>
               </label>
-
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -314,7 +293,6 @@ export function TemplateFormModal({
               </label>
             </div>
           </div>
-
           {/* Footer */}
           <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 dark:bg-gray-900/30">
             <Button type="button" variant="outline" onClick={onClose}>

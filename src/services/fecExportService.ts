@@ -3,10 +3,9 @@
  * Format normalisé pour l'administration fiscale française (DGFiP)
  * Utilise les fonctions RPC generate_fec_export, export_fec_to_csv, validate_fec_export
  */
-
 import { supabase } from '../lib/supabase';
 import { auditService } from './auditService';
-
+import { logger } from '@/lib/logger';
 interface FECValidation {
   is_valid: boolean;
   total_lines: number;
@@ -21,7 +20,6 @@ interface FECValidation {
     [key: string]: any;
   }>;
 }
-
 interface FECLine {
   journalcode: string;
   journallib: string;
@@ -42,7 +40,6 @@ interface FECLine {
   montantdevise: string;
   idevise: string;
 }
-
 /**
  * Valider un export FEC avant génération
  */
@@ -57,23 +54,19 @@ export async function validateFECExport(
       p_start_date: startDate,
       p_end_date: endDate,
     });
-
     if (error) {
-      console.error('Erreur RPC validate_fec_export:', error);
+      logger.error('FecExport', 'Erreur RPC validate_fec_export:', error);
       throw error;
     }
-
     if (!data) {
       throw new Error('Aucune donnée retournée par la validation FEC');
     }
-
     return data as FECValidation;
   } catch (error) {
-    console.error('Erreur validation export FEC:', error);
+    logger.error('FecExport', 'Erreur validation export FEC:', error);
     throw error;
   }
 }
-
 /**
  * Générer l'export FEC au format tableau (pour affichage dans l'UI)
  */
@@ -88,17 +81,14 @@ export async function generateFECExport(
       p_start_date: startDate,
       p_end_date: endDate,
     });
-
     if (error) {
-      console.error('Erreur RPC generate_fec_export:', error);
+      logger.error('FecExport', 'Erreur RPC generate_fec_export:', error);
       throw error;
     }
-
     if (!data || data.length === 0) {
-      console.warn('Aucune écriture comptable trouvée pour la période');
+      logger.warn('FecExport', 'Aucune écriture comptable trouvée pour la période');
       return [];
     }
-
     await auditService.logAsync({
       action: 'generate_fec_export',
       entityType: 'fec_export',
@@ -109,14 +99,12 @@ export async function generateFECExport(
         total_lines: data.length,
       },
     });
-
     return data as FECLine[];
   } catch (error) {
-    console.error('Erreur génération export FEC:', error);
+    logger.error('FecExport', 'Erreur génération export FEC:', error);
     throw error;
   }
 }
-
 /**
  * Générer et télécharger le fichier FEC au format CSV (pipe-separated)
  */
@@ -129,7 +117,6 @@ export async function downloadFECFile(
   try {
     // 1. Valider l'export avant génération
     const validation = await validateFECExport(companyId, startDate, endDate);
-
     if (!validation.is_valid) {
       const errorMessages = validation.errors
         .map((e) => e.message)
@@ -138,23 +125,19 @@ export async function downloadFECFile(
         `Export FEC invalide:\n${errorMessages}\n\nDifférence débit/crédit: ${validation.balance_difference.toFixed(2)} €`
       );
     }
-
     // 2. Générer le contenu CSV
     const { data, error } = await supabase.rpc('export_fec_to_csv', {
       p_company_id: companyId,
       p_start_date: startDate,
       p_end_date: endDate,
     });
-
     if (error) {
-      console.error('Erreur RPC export_fec_to_csv:', error);
+      logger.error('FecExport', 'Erreur RPC export_fec_to_csv:', error);
       throw error;
     }
-
     if (!data) {
       throw new Error('Aucun contenu CSV généré');
     }
-
     // 3. Créer le nom de fichier conforme FEC
     // Format: SIRENFECAAMMJJhhmmss.txt
     const now = new Date();
@@ -165,10 +148,8 @@ export async function downloadFECFile(
       now.getHours().toString().padStart(2, '0') +
       now.getMinutes().toString().padStart(2, '0') +
       now.getSeconds().toString().padStart(2, '0');
-
     const sanitizedName = companyName.replace(/[^a-zA-Z0-9]/g, '');
     const fileName = `${sanitizedName}_FEC_${timestamp}.txt`;
-
     // 4. Déclencher le téléchargement
     const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
     const url = window.URL.createObjectURL(blob);
@@ -179,7 +160,6 @@ export async function downloadFECFile(
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-
     // 5. Log audit
     await auditService.logAsync({
       action: 'download_fec_file',
@@ -194,14 +174,12 @@ export async function downloadFECFile(
         total_credit: validation.total_credit,
       },
     });
-
-    console.log(`✅ Fichier FEC téléchargé: ${fileName}`);
+    logger.debug('FecExport', `✅ Fichier FEC téléchargé: ${fileName}`);
   } catch (error) {
-    console.error('Erreur téléchargement fichier FEC:', error);
+    logger.error('FecExport', 'Erreur téléchargement fichier FEC:', error);
     throw error;
   }
 }
-
 /**
  * Générer un aperçu rapide de l'export FEC (premières lignes)
  */
@@ -217,21 +195,18 @@ export async function previewFECExport(
   try {
     // Validation complète
     const validation = await validateFECExport(companyId, startDate, endDate);
-
     // Aperçu des premières lignes
     const allLines = await generateFECExport(companyId, startDate, endDate);
     const preview = allLines.slice(0, limit);
-
     return {
       validation,
       preview,
     };
   } catch (error) {
-    console.error('Erreur aperçu export FEC:', error);
+    logger.error('FecExport', 'Erreur aperçu export FEC:', error);
     throw error;
   }
 }
-
 export const fecExportService = {
   validateFECExport,
   generateFECExport,

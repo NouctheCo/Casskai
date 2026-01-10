@@ -9,12 +9,10 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // fiscalCalendarService.ts - Service for managing fiscal calendar events and deadlines
-
 import { getTaxConfiguration } from '../data/taxConfigurations';
 import { TaxCalendarEvent } from '../types/tax.types';
-
+import { logger } from '@/lib/logger';
 export interface FiscalEvent {
   id: string;
   title: string;
@@ -28,7 +26,6 @@ export interface FiscalEvent {
   amount?: number;
   category: 'vat' | 'corporate_tax' | 'social' | 'local_tax' | 'other';
 }
-
 export interface FiscalCalendarStats {
   totalEvents: number;
   overdueEvents: number;
@@ -36,7 +33,6 @@ export interface FiscalCalendarStats {
   upcomingEvents: number;
   completedEvents: number;
 }
-
 /**
  * Parse deadline string like "15 mai N+1", "31 mars", "20 du mois suivant"
  * and convert it to a Date object for a given year
@@ -45,7 +41,6 @@ function parseDeadline(deadlineStr: string, referenceYear: number): Date {
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth();
-
   // Handle relative deadlines
   if (deadlineStr.includes('mois suivant')) {
     // "20 du mois suivant" - extract day number
@@ -56,11 +51,9 @@ function parseDeadline(deadlineStr: string, referenceYear: number): Date {
       return nextMonth;
     }
   }
-
   // Handle "N+1" notation (year after reference)
   const isNextYear = deadlineStr.includes('N+1');
   const targetYear = isNextYear ? referenceYear + 1 : referenceYear;
-
   // Extract day and month
   const monthNames: Record<string, number> = {
     janvier: 0, février: 1, mars: 2, avril: 3,
@@ -70,19 +63,16 @@ function parseDeadline(deadlineStr: string, referenceYear: number): Date {
     may: 4, june: 5, july: 6, august: 7,
     september: 8, october: 9, november: 10, december: 11
   };
-
   // Try to match "DD month" or "DD monthName"
   const dateMatch = deadlineStr.match(/(\d+)(?:st|nd|rd|th)?\s+(?:of\s+)?(\w+)/i);
   if (dateMatch) {
     const day = parseInt(dateMatch[1]);
     const monthName = dateMatch[2].toLowerCase();
     const month = monthNames[monthName];
-
     if (month !== undefined) {
       return new Date(targetYear, month, day);
     }
   }
-
   // Handle "DD/MM" format
   const slashMatch = deadlineStr.match(/(\d+)\/(\d+)/);
   if (slashMatch) {
@@ -90,7 +80,6 @@ function parseDeadline(deadlineStr: string, referenceYear: number): Date {
     const month = parseInt(slashMatch[2]) - 1; // 0-indexed
     return new Date(targetYear, month, day);
   }
-
   // Handle "end of month" or "fin du mois"
   if (deadlineStr.toLowerCase().includes('fin') || deadlineStr.toLowerCase().includes('end')) {
     const monthMatch = deadlineStr.match(/(\w+)/i);
@@ -103,11 +92,9 @@ function parseDeadline(deadlineStr: string, referenceYear: number): Date {
       }
     }
   }
-
   // Default: return end of the reference year
   return new Date(targetYear, 11, 31);
 }
-
 /**
  * Calculate event status based on due date
  */
@@ -116,15 +103,12 @@ function calculateEventStatus(
   completed: boolean = false
 ): 'overdue' | 'due_soon' | 'upcoming' | 'completed' {
   if (completed) return 'completed';
-
   const now = new Date();
   const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
   if (diffDays < 0) return 'overdue';
   if (diffDays <= 7) return 'due_soon';
   return 'upcoming';
 }
-
 /**
  * Determine priority based on tax type and status
  */
@@ -134,22 +118,18 @@ function determinePriority(
 ): 'low' | 'medium' | 'high' | 'critical' {
   if (status === 'overdue') return 'critical';
   if (status === 'due_soon') return 'high';
-
   // Major tax types have higher priority
   if (taxType.includes('TVA') || taxType.includes('VAT') ||
       taxType.includes('IS') || taxType.includes('Corporate')) {
     return 'high';
   }
-
   return 'medium';
 }
-
 /**
  * Determine category based on tax type
  */
 function determineCategory(taxType: string): 'vat' | 'corporate_tax' | 'social' | 'local_tax' | 'other' {
   const typeUpper = taxType.toUpperCase();
-
   if (typeUpper.includes('TVA') || typeUpper.includes('VAT')) return 'vat';
   if (typeUpper.includes('IS') || typeUpper.includes('CORPORATE') ||
       typeUpper.includes('BIC') || typeUpper.includes('IBS')) return 'corporate_tax';
@@ -158,10 +138,8 @@ function determineCategory(taxType: string): 'vat' | 'corporate_tax' | 'social' 
       typeUpper.includes('PAYE') || typeUpper.includes('DSN')) return 'social';
   if (typeUpper.includes('CFE') || typeUpper.includes('CVAE') ||
       typeUpper.includes('PATENTE') || typeUpper.includes('TAP')) return 'local_tax';
-
   return 'other';
 }
-
 /**
  * Generate fiscal events for a specific year and country
  */
@@ -172,23 +150,19 @@ export function generateFiscalEvents(
 ): FiscalEvent[] {
   const config = getTaxConfiguration(countryCode);
   if (!config) {
-    console.warn(`No tax configuration found for country: ${countryCode}`);
+    logger.warn('FiscalCalendar', `No tax configuration found for country: ${countryCode}`);
     return [];
   }
-
   const events: FiscalEvent[] = [];
   const _eventIdCounter = 0;
-
   config.taxTypes.forEach(taxType => {
     const frequency = taxType.frequency;
     let occurrences: Date[] = [];
-
     switch (frequency) {
       case 'annual':
         // One occurrence per year
         occurrences = [parseDeadline(taxType.deadline, year)];
         break;
-
       case 'quarterly': {
         // Four occurrences per year (typical quarters: Mar, Jun, Sep, Dec)
         const quarterMonths = [2, 5, 8, 11]; // 0-indexed: March, June, September, December
@@ -198,7 +172,6 @@ export function generateFiscalEvents(
         });
         break;
       }
-
       case 'monthly':
         // Twelve occurrences per year
         occurrences = Array.from({ length: 12 }, (_, i) => {
@@ -206,13 +179,11 @@ export function generateFiscalEvents(
           return new Date(year, i, deadline.getDate());
         });
         break;
-
       case 'one_time':
         // Single occurrence
         occurrences = [parseDeadline(taxType.deadline, year)];
         break;
     }
-
     // Create events for each occurrence
     occurrences.forEach((dueDate, index) => {
       const eventId = `${countryCode}_${taxType.id}_${year}_${index}`;
@@ -220,7 +191,6 @@ export function generateFiscalEvents(
       const status = calculateEventStatus(dueDate, completed);
       const priority = determinePriority(taxType.name, status);
       const category = determineCategory(taxType.name);
-
       events.push({
         id: eventId,
         title: taxType.name,
@@ -235,13 +205,10 @@ export function generateFiscalEvents(
       });
     });
   });
-
   // Sort by due date
   events.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
-
   return events;
 }
-
 /**
  * Generate fiscal events for multiple years
  */
@@ -252,15 +219,12 @@ export function generateFiscalEventsRange(
   completedEventIds: string[] = []
 ): FiscalEvent[] {
   const allEvents: FiscalEvent[] = [];
-
   for (let year = startYear; year <= endYear; year++) {
     const yearEvents = generateFiscalEvents(countryCode, year, completedEventIds);
     allEvents.push(...yearEvents);
   }
-
   return allEvents;
 }
-
 /**
  * Get fiscal events for current year
  */
@@ -271,7 +235,6 @@ export function getCurrentYearFiscalEvents(
   const currentYear = new Date().getFullYear();
   return generateFiscalEvents(countryCode, currentYear, completedEventIds);
 }
-
 /**
  * Get upcoming fiscal events (next N days)
  */
@@ -283,15 +246,12 @@ export function getUpcomingFiscalEvents(
   const currentYear = new Date().getFullYear();
   const nextYear = currentYear + 1;
   const allEvents = generateFiscalEventsRange(countryCode, currentYear, nextYear, completedEventIds);
-
   const now = new Date();
   const futureDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
-
   return allEvents.filter(event => {
     return event.dueDate >= now && event.dueDate <= futureDate && event.status !== 'completed';
   });
 }
-
 /**
  * Get overdue fiscal events
  */
@@ -301,10 +261,8 @@ export function getOverdueFiscalEvents(
 ): FiscalEvent[] {
   const currentYear = new Date().getFullYear();
   const events = generateFiscalEvents(countryCode, currentYear, completedEventIds);
-
   return events.filter(event => event.status === 'overdue');
 }
-
 /**
  * Calculate fiscal calendar statistics
  */
@@ -317,7 +275,6 @@ export function calculateFiscalCalendarStats(events: FiscalEvent[]): FiscalCalen
     completedEvents: events.filter(e => e.status === 'completed').length
   };
 }
-
 /**
  * Filter fiscal events by category
  */
@@ -327,7 +284,6 @@ export function filterEventsByCategory(
 ): FiscalEvent[] {
   return events.filter(event => event.category === category);
 }
-
 /**
  * Filter fiscal events by priority
  */
@@ -337,7 +293,6 @@ export function filterEventsByPriority(
 ): FiscalEvent[] {
   return events.filter(event => event.priority === priority);
 }
-
 /**
  * Filter fiscal events by status
  */
@@ -347,7 +302,6 @@ export function filterEventsByStatus(
 ): FiscalEvent[] {
   return events.filter(event => event.status === status);
 }
-
 /**
  * Get events for a specific month
  */
@@ -360,7 +314,6 @@ export function getEventsByMonth(
     return event.dueDate.getFullYear() === year && event.dueDate.getMonth() === month;
   });
 }
-
 /**
  * Convert fiscal event to TaxCalendarEvent (for compatibility with existing types)
  */
@@ -399,7 +352,6 @@ export function convertToTaxCalendarEvent(
     updated_at: new Date().toISOString()
   };
 }
-
 /**
  * Get fiscal year range based on country configuration
  */
@@ -415,14 +367,11 @@ export function getFiscalYearRange(countryCode: string, currentDate: Date = new 
       endDate: new Date(currentDate.getFullYear(), 11, 31)
     };
   }
-
   // Parse fiscal year end (format: DD/MM)
   const [day, month] = config.fiscalYearEnd.split('/').map(Number);
   const fiscalYearEndMonth = month - 1; // 0-indexed
-
   const currentYear = currentDate.getFullYear();
   const fiscalYearEnd = new Date(currentYear, fiscalYearEndMonth, day);
-
   if (currentDate > fiscalYearEnd) {
     // We're in the next fiscal year
     return {
@@ -437,7 +386,6 @@ export function getFiscalYearRange(countryCode: string, currentDate: Date = new 
     };
   }
 }
-
 /**
  * Export fiscal calendar to CSV
  */
@@ -451,15 +399,12 @@ export function exportFiscalCalendarToCSV(events: FiscalEvent[]): string {
     event.status,
     event.category
   ]);
-
   const csvContent = [
     headers.join(','),
     ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
   ].join('\n');
-
   return csvContent;
 }
-
 /**
  * Fiscal Calendar Service - Main API
  */
@@ -478,5 +423,4 @@ export const fiscalCalendarService = {
   getFiscalYearRange,
   exportFiscalCalendarToCSV
 };
-
 export default fiscalCalendarService;

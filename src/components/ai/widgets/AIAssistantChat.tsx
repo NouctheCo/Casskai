@@ -24,14 +24,13 @@ import { Badge } from '../../ui/badge';
 import { cn } from '../../../lib/utils';
 import { aiAssistantService } from '../../../services/aiAssistantService';
 import { Transaction, AIAssistantQuery } from '../../../types/ai.types';
-
+import { logger } from '@/lib/logger';
 interface AIAssistantChatProps {
   transactions: Transaction[];
   currentBalance: number;
   onQueryProcessed?: (query: AIAssistantQuery, response: string) => void;
   className?: string;
 }
-
 interface ChatMessage {
   id: string;
   type: 'user' | 'assistant';
@@ -43,7 +42,6 @@ interface ChatMessage {
   suggestions?: string[];
   isLoading?: boolean;
 }
-
 export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
   transactions,
   currentBalance,
@@ -64,37 +62,30 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
       ]
     }
   ]);
-  
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
   const quickQuestions = [
     { icon: TrendingUp, text: "Analyser ma trésorerie", category: "analysis" },
     { icon: Calculator, text: "Calculer la TVA", category: "tax" },
     { icon: FileText, text: "Écritures comptables", category: "accounting" },
     { icon: Lightbulb, text: "Conseils d'optimisation", category: "general" }
   ];
-
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-
   const handleSendMessage = async (content: string) => {
     if (!content.trim() || isProcessing) return;
-
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       type: 'user',
       content: content.trim(),
       timestamp: new Date()
     };
-
     // Ajouter le message utilisateur et un message de chargement
     const loadingMessage: ChatMessage = {
       id: crypto.randomUUID(),
@@ -103,11 +94,9 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
       timestamp: new Date(),
       isLoading: true
     };
-
     setMessages(prev => [...prev, userMessage, loadingMessage]);
     setInputValue('');
     setIsProcessing(true);
-
     try {
       // Appel au service IA
       const result = await aiAssistantService.askQuestion(content, {
@@ -118,7 +107,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
           end: new Date()
         }
       });
-
       if (result.success && result.data) {
         const assistantMessage: ChatMessage = {
           id: result.data.id,
@@ -130,12 +118,10 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
           sources: result.data.sources,
           suggestions: result.data.suggestions
         };
-
         // Remplacer le message de chargement
         setMessages(prev => 
           prev.map(msg => msg.isLoading ? assistantMessage : msg)
         );
-
         // Callback optionnel
         if (onQueryProcessed) {
           onQueryProcessed(result.data, result.data.response);
@@ -149,15 +135,13 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
           timestamp: new Date(),
           confidence: 0
         };
-
         setMessages(prev => 
           prev.map(msg => msg.isLoading ? errorMessage : msg)
         );
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error('Error processing message:', errorMsg);
-
+      logger.error('AIAssistantChat', 'Error processing message:', errorMsg);
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         type: 'assistant',
@@ -165,7 +149,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
         timestamp: new Date(),
         confidence: 0
       };
-
       setMessages(prev => 
         prev.map(msg => msg.isLoading ? errorMessage : msg)
       );
@@ -173,25 +156,20 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
       setIsProcessing(false);
     }
   };
-
   const handleQuickQuestion = (question: string) => {
     handleSendMessage(question);
   };
-
   const handleSuggestionClick = (suggestion: string) => {
     setInputValue(suggestion);
     inputRef.current?.focus();
   };
-
   const handleCopyMessage = (content: string) => {
     navigator.clipboard.writeText(content);
   };
-
   const handleFeedback = (messageId: string, positive: boolean) => {
-    console.warn('Feedback:', messageId, positive);
+    logger.warn('AIAssistantChat', 'Feedback:', messageId, positive);
     // Ici on pourrait envoyer le feedback au service
   };
-
   const getTypeIcon = (type?: string) => {
     switch (type) {
       case 'accounting':
@@ -204,7 +182,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
         return <Bot className="w-3 h-3" />;
     }
   };
-
   const getTypeColor = (type?: string) => {
     switch (type) {
       case 'accounting':
@@ -217,14 +194,12 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-
   const getConfidenceColor = (confidence?: number) => {
     if (!confidence) return 'bg-gray-500';
     if (confidence >= 0.8) return 'bg-green-500';
     if (confidence >= 0.6) return 'bg-yellow-500';
     return 'bg-red-500';
   };
-
   return (
     <Card className={cn("flex flex-col h-[600px]", className)}>
       <CardHeader className="pb-3">
@@ -234,7 +209,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
             <span>Assistant IA Financier</span>
             <Sparkles className="w-4 h-4 text-yellow-500" />
           </CardTitle>
-          
           <div className="flex items-center space-x-2">
             <Badge variant="secondary" className="text-xs">
               {aiAssistantService.isEnabled ? 'OpenAI' : 'Mode démo'}
@@ -248,7 +222,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
             </Button>
           </div>
         </div>
-
         {/* Questions rapides */}
         <div className="flex flex-wrap gap-2 mt-3">
           {quickQuestions.map((question, index) => (
@@ -267,7 +240,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
           ))}
         </div>
       </CardHeader>
-
       <CardContent className="flex-1 flex flex-col space-y-4">
         {/* Zone de messages */}
         <div className="flex-1 overflow-y-auto pr-4">
@@ -296,7 +268,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                       </div>
                     </div>
                   )}
-
                   <div className={cn(
                     "max-w-[80%] space-y-2",
                     message.type === 'user' ? 'items-end' : 'items-start'
@@ -316,20 +287,17 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                       )}
                     </div>
-
                     {/* Métadonnées du message assistant */}
                     {message.type === 'assistant' && !message.isLoading && (
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
                           <span>{message.timestamp.toLocaleTimeString('fr-FR')}</span>
-                          
                           {message.queryType && (
                             <Badge className={cn("border text-xs", getTypeColor(message.queryType))}>
                               {getTypeIcon(message.queryType)}
                               <span className="ml-1 capitalize">{message.queryType}</span>
                             </Badge>
                           )}
-                          
                           {message.confidence && (
                             <div className="flex items-center space-x-1">
                               <div className={cn(
@@ -340,7 +308,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                             </div>
                           )}
                         </div>
-
                         {/* Actions du message */}
                         <div className="flex items-center space-x-1">
                           <Button
@@ -365,7 +332,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                             <ThumbsDown className="w-3 h-3" />
                           </Button>
                         </div>
-
                         {/* Suggestions */}
                         {message.suggestions && message.suggestions.length > 0 && (
                           <div className="space-y-1">
@@ -383,7 +349,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                             </div>
                           </div>
                         )}
-
                         {/* Sources */}
                         {message.sources && message.sources.length > 0 && (
                           <div className="space-y-1">
@@ -401,7 +366,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                       </div>
                     )}
                   </div>
-
                   {message.type === 'user' && (
                     <div className="flex-shrink-0">
                       <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
@@ -415,7 +379,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
             <div ref={messagesEndRef} />
           </div>
         </div>
-
         {/* Zone de saisie */}
         <div className="flex items-center space-x-2 p-2 border rounded-lg bg-gray-50 dark:bg-gray-800">
           <Input
@@ -432,7 +395,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
             }}
             disabled={isProcessing}
           />
-          
           <Button
             size="sm"
             onClick={() => handleSendMessage(inputValue)}
@@ -445,7 +407,6 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
             )}
           </Button>
         </div>
-
         {/* Indicateur de contexte */}
         <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
           Contexte: {transactions.length} transactions • Solde: {currentBalance.toLocaleString('fr-FR')}€

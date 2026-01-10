@@ -9,13 +9,12 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { companyDeletionService } from '@/services/companyDeletionService';
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 interface CompanyDeletionDialogProps {
   companyId: string;
   companyName: string;
   onCancel: () => void;
 }
-
 export function CompanyDeletionDialog({
   companyId,
   companyName,
@@ -28,12 +27,10 @@ export function CompanyDeletionDialog({
   const [deletionReason, setDeletionReason] = useState('');
   const [otherOwners, setOtherOwners] = useState<any[]>([]);
   const [requiresApproval, setRequiresApproval] = useState(false);
-
   // Charger les autres propriétaires
   useEffect(() => {
     loadOtherOwners();
   }, [companyId]);
-
   const loadOtherOwners = async () => {
     try {
       const { data, error } = await supabase
@@ -47,28 +44,23 @@ export function CompanyDeletionDialog({
         .eq('role', 'owner')
         .eq('is_active', true)
         .neq('user_id', user?.id);
-
       if (error) throw error;
-
       const owners = data || [];
       setOtherOwners(owners);
       setRequiresApproval(owners.length > 0);
     } catch (error) {
-      console.error('Erreur chargement propriétaires:', error);
+      logger.error('CompanyDeletionDialog', 'Erreur chargement propriétaires:', error);
     }
   };
-
   const handleRequestDeletion = async () => {
     setIsLoading(true);
     setStep('processing');
-
     try {
       const result = await companyDeletionService.requestCompanyDeletion(
         companyId,
         deletionReason || undefined,
         true // export FEC par défaut
       );
-
       if (result.success) {
         if (requiresApproval) {
           toast({
@@ -101,7 +93,6 @@ export function CompanyDeletionDialog({
       setIsLoading(false);
     }
   };
-
   if (step === 'processing') {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -121,7 +112,6 @@ export function CompanyDeletionDialog({
       </div>
     );
   }
-
   if (step === 'reason') {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -150,7 +140,6 @@ export function CompanyDeletionDialog({
                 </AlertDescription>
               </Alert>
             )}
-
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
@@ -163,7 +152,6 @@ export function CompanyDeletionDialog({
                 </ul>
               </AlertDescription>
             </Alert>
-
             <div>
               <Label htmlFor="reason">Raison de la suppression (optionnel)</Label>
               <Textarea
@@ -175,7 +163,6 @@ export function CompanyDeletionDialog({
                 className="mt-2"
               />
             </div>
-
             <div className="flex space-x-3">
               <Button
                 onClick={handleRequestDeletion}
@@ -209,7 +196,6 @@ export function CompanyDeletionDialog({
       </div>
     );
   }
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <Card className="max-w-md w-full">
@@ -251,7 +237,6 @@ export function CompanyDeletionDialog({
               </div>
             )}
           </div>
-
           <div className="flex space-x-3">
             <Button
               onClick={() => setStep('reason')}

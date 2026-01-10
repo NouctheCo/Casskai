@@ -26,6 +26,8 @@ import { auditService } from '../services/auditService';
 
 import type { Company } from '../types/database/company.types';
 
+import { logger } from '@/lib/logger';
+
 
 
 // Interface pour le profil utilisateur depuis public.users
@@ -159,6 +161,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
 
+      // Vérifier d'abord si un abonnement existe déjà (évite l'erreur duplicate key)
+      logger.debug('Auth', '🔍 Vérification de l\'abonnement existant pour user:', userId);
+
+      const { data: existingSubscription, error: checkError } = await supabase
+        .from('subscriptions')
+        .select('id, status, current_period_end, plan_id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        logger.error('Auth', 'Erreur lors de la vérification de l\'abonnement existant:', checkError);
+      }
+
+      if (existingSubscription) {
+        logger.info('Auth', '✅ Abonnement existant trouvé:', existingSubscription.id, 'Status:', existingSubscription.status);
+        // Ne pas recréer, utiliser l'existant
+        return;
+      }
+
+      logger.debug('Auth', 'Aucun abonnement existant, vérification de l\'éligibilité au trial...');
+
       // Vérifier si l'utilisateur peut créer un essai
 
       const canCreate = await trialService.canCreateTrial(userId);
@@ -167,7 +190,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (canCreate) {
 
-        console.warn('🔄 Création automatique d\'un essai pour le nouvel utilisateur...');
+        logger.info('Auth', 'Création automatique d\'un essai pour le nouvel utilisateur');
 
 
 
@@ -179,23 +202,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (result.success) {
 
-          console.warn('✅ Essai créé automatiquement pour l\'utilisateur');
+          logger.info('Auth', '✅ Essai créé automatiquement pour l\'utilisateur');
 
         } else {
 
-          console.error('❌ Échec de la création de l\'essai:', result.error);
+          logger.warn('Auth', '⚠️ Échec de la création de l\'essai (non bloquant):', result.error);
 
         }
 
       } else {
 
-        console.warn('ℹ️ Utilisateur déjà éligible ou a déjà un abonnement');
+        logger.info('Auth', 'Utilisateur déjà éligible ou a déjà un abonnement');
 
       }
 
     } catch (error) {
 
-      console.error('Erreur lors de la vérification/création de l\'abonnement:', error);
+      // IMPORTANT: Ne pas throw l'erreur, juste la logger (PROBLÈME 3)
+      logger.warn('Auth', '⚠️ Erreur lors de la vérification/création de l\'abonnement (non bloquant):', error);
 
     }
 
@@ -322,6 +346,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
 
+    // Guard 2: Prevent redundant fetches if already processing
+    if (isCheckingOnboarding && user?.id === currentUser.id) {
+      logger.debug('Auth', '⏭️ Skipping fetchUserSession - already checking onboarding for this user');
+      return;
+    }
+
+
+
     setUser(currentUser);
 
     setIsAuthenticated(true);
@@ -346,7 +378,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (profileError) {
 
-        console.error('⚠️  Erreur chargement profil public.users:', profileError);
+        logger.warn('Auth', 'Erreur chargement profil public.users', profileError);
 
         // Ne pas bloquer l'authentification si le profil n'existe pas encore
 
@@ -356,13 +388,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         setUserProfile(profile);
 
-        
+
 
       }
 
     } catch (error) {
 
-      console.error('⚠️  Exception chargement profil:', error);
+      logger.error('Auth', 'Exception chargement profil', error);
 
       setUserProfile(null);
 
@@ -388,7 +420,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // ============================================
         // ✅ LOGIQUE ULTRA SIMPLE : Si entreprise existe → onboarding complété
         // ============================================
-        console.log('✅ Entreprise trouvée, onboarding marqué comme complété automatiquement');
+        logger.info('Auth', 'Entreprise trouvée, onboarding marqué comme complété automatiquement');
         setOnboardingCompleted(true);
         localStorage.setItem(`onboarding_completed_${currentUser.id}`, 'true');
         localStorage.removeItem('onboarding_just_completed');
@@ -452,7 +484,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
               } catch (fallbackError) {
 
-                console.error("AuthContext | Échec du fallback vers la première entreprise:", fallbackError);
+                logger.error('Auth', 'Échec du fallback vers la première entreprise', fallbackError);
 
                 setCurrentCompany(null);
 
@@ -676,6 +708,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
   }, [fetchUserSession]);
+
+  // 🔧 MIGRATION SILENCIEUSE : Générer les écritures manquantes au login
+  useEffect(() => {
+    const migrateOnce = async () => {
+      if (!currentCompany?.id) return;
+
+      // Vérifier si déjà fait cette session
+      const migrationKey = `ecritures_migrated_${currentCompany.id}`;
+      if (sessionStorage.getItem(migrationKey)) return;
+
+      try {
+        // Import dynamique pour éviter les dépendances circulaires
+        const { generateMissingJournalEntries } = await import('@/services/accountingMigrationService');
+
+        logger.info('AuthContext', `[Migration Silencieuse] Début pour entreprise ${currentCompany.id}`);
+        const result = await generateMissingJournalEntries(currentCompany.id);
+
+        logger.info('AuthContext', `[Migration Silencieuse] Terminée: ${result.success} réussies, ${result.failed} échouées`);
+        sessionStorage.setItem(migrationKey, 'true');
+
+        if (result.errors.length > 0) {
+          logger.warn('AuthContext', '[Migration Silencieuse] Erreurs:', result.errors.slice(0, 5)); // Limiter les logs
+        }
+      } catch (error) {
+        // Silencieux - ne pas bloquer l'utilisateur
+        logger.error('AuthContext', '[Migration Silencieuse] Erreur:', error);
+      }
+    };
+
+    migrateOnce();
+  }, [currentCompany?.id]);
 
 
 

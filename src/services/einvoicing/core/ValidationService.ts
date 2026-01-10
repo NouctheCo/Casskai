@@ -9,12 +9,11 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Validation Service
  * Validates EN 16931 invoices and formatted documents
  */
-
+import { logger } from '@/lib/logger';
 import {
   EN16931Invoice,
   ValidationResult,
@@ -24,7 +23,6 @@ import {
   UnitCode,
   DocumentTypeCode
 } from '../../../types/einvoicing.types';
-
 export class ValidationService {
   private readonly VALID_COUNTRY_CODES: CountryCode[] = ['FR', 'BE', 'BJ', 'CI', 'BF', 'ML', 'SN', 'TG', 'CM', 'GA'];
   private readonly VALID_CURRENCY_CODES: CurrencyCode[] = ['EUR', 'USD', 'GBP', 'XOF', 'XAF', 'CAD'];
@@ -32,53 +30,42 @@ export class ValidationService {
   private readonly VALID_DOCUMENT_TYPES: DocumentTypeCode[] = ['380', '381', '384', '389'];
   private readonly VALID_TAX_CATEGORIES = ['S', 'Z', 'E', 'AE', 'K', 'G', 'O'];
   private readonly VALID_PAYMENT_MEANS = ['30', '31', '42', '48', '49', '57', '58', '59', '97'];
-
   /**
    * Validate an EN16931 invoice
    */
   async validateEN16931(invoice: EN16931Invoice): Promise<ValidationResult> {
     const errors: ValidationResult['errors'] = [];
     const warnings: ValidationResult['warnings'] = [];
-
     try {
       // start validation
-
       // Core document validation
       this.validateCoreDocument(invoice, errors, warnings);
-      
       // Party validation
       this.validateParty(invoice.seller, 'seller', errors, warnings);
       this.validateParty(invoice.buyer, 'buyer', errors, warnings);
-      
       // Lines validation
       this.validateLines(invoice.lines, errors, warnings);
-      
       // Totals validation (skip if key party fields are missing to avoid cascading errors)
       const hasBuyerAddress = Boolean(invoice.buyer?.address);
       if (hasBuyerAddress) {
         this.validateTotals(invoice.totals, invoice.lines, errors, warnings);
       }
-      
       // Payment terms validation
       if (invoice.payment_terms) {
         this.validatePaymentTerms(invoice.payment_terms, errors, warnings);
       }
-
       // Business rules validation
       this.validateBusinessRules(invoice, errors, warnings);
-
       if (errors.length) {
-        console.error('EN16931 validation errors', { invoice: invoice.invoice_number, errors });
+        logger.error('Validation', 'EN16931 validation errors', { invoice: invoice.invoice_number, errors });
       }
-
       return {
         valid: errors.length === 0,
         errors,
         warnings
       };
-
     } catch (error) {
-      console.error('Error during validation:', error instanceof Error ? error.message : String(error));
+      logger.error('Validation', 'Error during validation:', error instanceof Error ? error.message : String(error));
       throw new EInvoicingError(
         `Validation failed: ${(error as Error).message}`,
         'VALIDATION_FAILED',
@@ -86,7 +73,6 @@ export class ValidationService {
       );
     }
   }
-
   /**
    * Validate core document fields
    */
@@ -111,7 +97,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-2: Issue date (mandatory)
     if (!invoice.issue_date) {
       errors.push({
@@ -128,7 +113,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-3: Invoice type code (mandatory)
     if (!this.VALID_DOCUMENT_TYPES.includes(invoice.type_code)) {
       errors.push({
@@ -138,7 +122,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-5: Currency code (mandatory)
     if (!this.VALID_CURRENCY_CODES.includes(invoice.currency_code)) {
       errors.push({
@@ -148,7 +131,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-7: Tax point date (optional but validate if present)
     if (invoice.tax_point_date && !this.isValidISODate(invoice.tax_point_date)) {
       errors.push({
@@ -158,7 +140,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-8: VAT accounting date (optional but validate if present)
     if (invoice.vat_accounting_date && !this.isValidISODate(invoice.vat_accounting_date)) {
       errors.push({
@@ -168,7 +149,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // Future date warning
     const today = new Date();
     const issueDate = new Date(invoice.issue_date);
@@ -180,7 +160,6 @@ export class ValidationService {
       });
     }
   }
-
   /**
    * Validate party information (seller/buyer)
    */
@@ -192,7 +171,6 @@ export class ValidationService {
   ): void {
     const btPrefix = partyType === 'seller' ? 'BT-27' : 'BT-44';
     const fieldPrefix = partyType;
-
     // Party name (mandatory)
     if (!party.name?.trim()) {
       errors.push({
@@ -209,12 +187,10 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // Address validation
     if (party.address) {
       this.validateAddress(party.address, partyType, errors, warnings);
     }
-
     // VAT identifier validation
     if (party.vat_identifier) {
       if (partyType === 'seller' && !party.vat_identifier.trim()) {
@@ -225,7 +201,6 @@ export class ValidationService {
           severity: 'error'
         });
       }
-      
       // Basic VAT format validation (simplified)
       if (!this.isValidVATIdentifier(party.vat_identifier)) {
         warnings.push({
@@ -235,7 +210,6 @@ export class ValidationService {
         });
       }
     }
-
     // Legal registration validation
     if (party.legal_registration) {
       if (!party.legal_registration.id?.trim()) {
@@ -246,7 +220,6 @@ export class ValidationService {
           severity: 'error'
         });
       }
-
       // SIRET validation for French companies
       if (party.legal_registration.scheme_id === '0002' && party.address?.country_code === 'FR') {
         if (!this.isValidSIRET(party.legal_registration.id)) {
@@ -259,7 +232,6 @@ export class ValidationService {
         }
       }
     }
-
     // Contact validation
     if (party.contact) {
       if (party.contact.email && !this.isValidEmail(party.contact.email)) {
@@ -272,7 +244,6 @@ export class ValidationService {
       }
     }
   }
-
   /**
    * Validate address information
    */
@@ -283,7 +254,6 @@ export class ValidationService {
     warnings: ValidationResult['warnings']
   ): void {
     const fieldPrefix = partyType;
-
     // City name (mandatory)
     if (!address.city_name?.trim()) {
       errors.push({
@@ -293,7 +263,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // Country code (mandatory)
     if (!this.VALID_COUNTRY_CODES.includes(address.country_code)) {
       errors.push({
@@ -303,7 +272,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // Postal code validation (France-specific)
     if (address.country_code === 'FR' && address.postal_zone) {
       if (!/^\d{5}$/.test(address.postal_zone)) {
@@ -315,7 +283,6 @@ export class ValidationService {
       }
     }
   }
-
   /**
    * Validate invoice lines
    */
@@ -333,12 +300,10 @@ export class ValidationService {
       });
       return;
     }
-
     lines.forEach((line, index) => {
       this.validateLine(line, index, errors, warnings);
     });
   }
-
   /**
    * Validate individual invoice line
    */
@@ -349,7 +314,6 @@ export class ValidationService {
     warnings: ValidationResult['warnings']
   ): void {
     const linePrefix = `lines[${index}]`;
-
     // BT-126: Line identifier
     if (!line.id?.trim()) {
       errors.push({
@@ -359,7 +323,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-153: Item name
     if (!line.name?.trim()) {
       errors.push({
@@ -369,7 +332,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-129: Quantity
     if (line.quantity <= 0) {
       errors.push({
@@ -379,7 +341,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-130: Unit code
     if (!this.VALID_UNIT_CODES.includes(line.unit_code)) {
       errors.push({
@@ -389,7 +350,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-146: Net price
     if (line.net_price < 0) {
       warnings.push({
@@ -398,7 +358,6 @@ export class ValidationService {
         field: `${linePrefix}.net_price`
       });
     }
-
     // BT-131: Line net amount calculation
     const calculatedAmount = line.quantity * line.net_price;
     const tolerance = 0.01; // 1 cent tolerance for rounding
@@ -410,7 +369,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // Tax validation
     if (line.tax) {
       if (!this.VALID_TAX_CATEGORIES.includes(line.tax.category_code)) {
@@ -421,7 +379,6 @@ export class ValidationService {
           severity: 'error'
         });
       }
-
       if (line.tax.rate < 0 || line.tax.rate > 100) {
         errors.push({
           code: 'BT-152-01',
@@ -430,7 +387,6 @@ export class ValidationService {
           severity: 'error'
         });
       }
-
       // Tax amount validation
       if (line.tax.amount !== undefined) {
         const calculatedTaxAmount = line.net_amount * line.tax.rate / 100;
@@ -445,7 +401,6 @@ export class ValidationService {
       }
     }
   }
-
   /**
    * Validate totals and cross-check with lines
    */
@@ -456,7 +411,6 @@ export class ValidationService {
     warnings: ValidationResult['warnings']
   ): void {
     const tolerance = 0.01; // 1 cent tolerance for rounding
-
     // BT-106: Sum of line net amounts
     const calculatedLineTotal = lines.reduce((sum, line) => sum + line.net_amount, 0);
     if (Math.abs(totals.sum_invoice_line_net_amount - calculatedLineTotal) > tolerance) {
@@ -467,7 +421,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-109: Invoice total without VAT calculation
     let expectedTotalWithoutVAT = totals.sum_invoice_line_net_amount;
     if (totals.sum_allowances_on_document_level) {
@@ -476,7 +429,6 @@ export class ValidationService {
     if (totals.sum_charges_on_document_level) {
       expectedTotalWithoutVAT += totals.sum_charges_on_document_level;
     }
-
     if (Math.abs(totals.invoice_total_without_vat - expectedTotalWithoutVAT) > tolerance) {
       errors.push({
         code: 'BT-109-01',
@@ -485,7 +437,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-112: Invoice total with VAT calculation
     const expectedTotalWithVAT = totals.invoice_total_without_vat + (totals.invoice_total_vat_amount || 0);
     if (Math.abs(totals.invoice_total_with_vat - expectedTotalWithVAT) > tolerance) {
@@ -496,7 +447,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // BT-115: Amount due for payment
     let expectedAmountDue = totals.invoice_total_with_vat;
     if (totals.paid_amount) {
@@ -505,7 +455,6 @@ export class ValidationService {
     if (totals.rounding_amount) {
       expectedAmountDue += totals.rounding_amount;
     }
-
     if (Math.abs(totals.amount_due_for_payment - expectedAmountDue) > tolerance) {
       errors.push({
         code: 'BT-115-01',
@@ -514,7 +463,6 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // VAT amount cross-check with lines
     if (totals.invoice_total_vat_amount !== undefined) {
       const calculatedVATAmount = lines.reduce((sum, line) => {
@@ -525,7 +473,6 @@ export class ValidationService {
         }
         return sum;
       }, 0);
-
       if (Math.abs(totals.invoice_total_vat_amount - calculatedVATAmount) > tolerance) {
         warnings.push({
           code: 'BT-110-W01',
@@ -535,7 +482,6 @@ export class ValidationService {
       }
     }
   }
-
   /**
    * Validate payment terms
    */
@@ -553,11 +499,9 @@ export class ValidationService {
         severity: 'error'
       });
     }
-
     // Payment means validation
     if (paymentTerms.means) {
       const means = paymentTerms.means;
-      
       // BT-81: Payment means code
       if (!this.VALID_PAYMENT_MEANS.includes(means.code)) {
         errors.push({
@@ -567,7 +511,6 @@ export class ValidationService {
           severity: 'error'
         });
       }
-
       // IBAN validation
       if (means.creditor_account?.iban) {
         if (!this.isValidIBAN(means.creditor_account.iban)) {
@@ -579,7 +522,6 @@ export class ValidationService {
           });
         }
       }
-
       // BIC validation
       if (means.creditor_agent?.bic) {
         if (!this.isValidBIC(means.creditor_agent.bic)) {
@@ -593,7 +535,6 @@ export class ValidationService {
       }
     }
   }
-
   /**
    * Validate business rules
    */
@@ -604,23 +545,18 @@ export class ValidationService {
   ): void {
     // BR-1: An Invoice shall have a Specification identifier
     // (implied by our EN16931 structure)
-
     // BR-2: An Invoice shall have an Invoice number
     // (already validated in core document)
-
     // BR-8: For each different value of VAT category rate (BT-118) where the VAT category code (BT-151) 
     // is "Standard rated", the VAT category rate (BT-118) shall be the same as the Invoice VAT category rate (BT-152)
     this.validateVATCategoryConsistency(invoice.lines, errors);
-
     // BR-16: An Invoice shall at least have one Invoice line
     // (already validated in lines validation)
-
     // French-specific rules
     if (invoice.seller.address?.country_code === 'FR') {
       this.validateFrenchSpecificRules(invoice, errors, warnings);
     }
   }
-
   /**
    * Validate VAT category consistency
    */
@@ -631,9 +567,7 @@ export class ValidationService {
     const standardRatedCategories = lines
       .filter(line => line.tax?.category_code === 'S')
       .map(line => line.tax!.rate);
-
     const uniqueRates = [...new Set(standardRatedCategories)];
-    
     if (uniqueRates.length > 1) {
       errors.push({
         code: 'BR-8-01',
@@ -643,7 +577,6 @@ export class ValidationService {
       });
     }
   }
-
   /**
    * Validate French-specific business rules
    */
@@ -660,7 +593,6 @@ export class ValidationService {
         field: 'seller.vat_identifier'
       });
     }
-
     // French invoices above €150 should have buyer details
     if (invoice.totals.invoice_total_with_vat >= 150) {
       if (!invoice.buyer.address) {
@@ -672,27 +604,21 @@ export class ValidationService {
       }
     }
   }
-
   // Validation helper methods
   private isValidISODate(dateString: string): boolean {
     const regex = /^\d{4}-\d{2}-\d{2}$/;
     if (!regex.test(dateString)) return false;
-    
     const date = new Date(dateString);
     return date instanceof Date && !isNaN(date.getTime());
   }
-
   private isValidVATIdentifier(vat: string): boolean {
     // Simplified VAT validation (should be enhanced for production)
     const frenchVAT = /^FR[0-9A-Z]{2}[0-9]{9}$/;
     const genericVAT = /^[A-Z]{2}[0-9A-Z]{2,12}$/;
-    
     return frenchVAT.test(vat) || genericVAT.test(vat);
   }
-
   private isValidSIRET(siret: string): boolean {
     if (!/^\d{14}$/.test(siret)) return false;
-    
     // Luhn algorithm for SIRET validation
     let sum = 0;
     for (let i = 0; i < 14; i++) {
@@ -703,21 +629,17 @@ export class ValidationService {
       }
       sum += digit;
     }
-    
     return sum % 10 === 0;
   }
-
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
-
   private isValidIBAN(iban: string): boolean {
     // Simplified IBAN validation
     const ibanRegex = /^[A-Z]{2}[0-9]{2}[A-Z0-9]{4,30}$/;
     return ibanRegex.test(iban.replace(/\s/g, ''));
   }
-
   private isValidBIC(bic: string): boolean {
     const bicRegex = /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
     return bicRegex.test(bic);

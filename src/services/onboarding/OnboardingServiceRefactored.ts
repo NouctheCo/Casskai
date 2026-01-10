@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { MARKET_CONFIGS } from '../../data/markets';
 import {
   OnboardingData,
@@ -20,27 +19,23 @@ import {
 import { OnboardingValidationService } from './OnboardingValidationService';
 import { OnboardingStorageService } from './OnboardingStorageService';
 import { OnboardingProgressService, OnboardingResponse, OnboardingProgress, OnboardingMetrics } from './OnboardingProgressService';
-
+import { logger } from '@/lib/logger';
 class OnboardingService {
   private static instance: OnboardingService;
-  
   private validationService: OnboardingValidationService;
   private storageService: OnboardingStorageService;
   private progressService: OnboardingProgressService;
-
   private constructor() {
     this.validationService = new OnboardingValidationService();
     this.storageService = new OnboardingStorageService();
     this.progressService = new OnboardingProgressService();
   }
-
   static getInstance(): OnboardingService {
     if (!OnboardingService.instance) {
       OnboardingService.instance = new OnboardingService();
     }
     return OnboardingService.instance;
   }
-
   /**
    * Initialise une nouvelle session d'onboarding
    */
@@ -54,7 +49,6 @@ class OnboardingService {
           data: existingResponse.data
         };
       }
-
       // Créer de nouvelles données d'onboarding
       const initialData: OnboardingData = {
         userId,
@@ -75,26 +69,23 @@ class OnboardingService {
         startedAt: new Date().toISOString(),
         lastSavedAt: new Date().toISOString()
       };
-
       // Sauvegarder les données initiales
       const saveResponse = await this.storageService.saveOnboardingData(userId, initialData);
       if (!saveResponse.success) {
         return saveResponse;
       }
-
       return {
         success: true,
         data: initialData
       };
     } catch (error) {
-      console.error('Error initializing onboarding:', error instanceof Error ? error.message : String(error));
+      logger.error('OnboardingServiceRefactored', 'Error initializing onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Initialisation de l\'onboarding')
       };
     }
   }
-
   /**
    * Récupère les données d'onboarding
    */
@@ -108,7 +99,6 @@ class OnboardingService {
     }
     return response;
   }
-
   /**
    * Met à jour le profil de l'entreprise avec validation
    */
@@ -122,7 +112,6 @@ class OnboardingService {
           error: validation.errors.map(e => e.message).join(', ')
         };
       }
-
       // Récupérer les données actuelles
       const currentDataResponse = await this.getOnboardingData(userId);
       if (!currentDataResponse.success || !currentDataResponse.data) {
@@ -131,9 +120,7 @@ class OnboardingService {
           error: 'Session d\'onboarding introuvable'
         };
       }
-
       const currentData = currentDataResponse.data;
-      
       // Mise à jour des préférences basées sur le marché sélectionné
       let updatedPreferences = { ...currentData.preferences };
       if (companyProfile.country) {
@@ -147,7 +134,6 @@ class OnboardingService {
           };
         }
       }
-
       // Mettre à jour les données
       const updatedData: OnboardingData = {
         ...currentData,
@@ -155,26 +141,23 @@ class OnboardingService {
         preferences: updatedPreferences,
         lastSavedAt: new Date().toISOString()
       };
-
       // Sauvegarder
       const saveResponse = await this.storageService.saveOnboardingData(userId, updatedData);
       if (!saveResponse.success) {
         return saveResponse;
       }
-
       return {
         success: true,
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating company profile:', error instanceof Error ? error.message : String(error));
+      logger.error('OnboardingServiceRefactored', 'Error updating company profile:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour du profil entreprise')
       };
     }
   }
-
   /**
    * Met à jour les préférences avec validation
    */
@@ -188,7 +171,6 @@ class OnboardingService {
           error: validation.errors.map(e => e.message).join(', ')
         };
       }
-
       // Récupérer les données actuelles
       const currentDataResponse = await this.getOnboardingData(userId);
       if (!currentDataResponse.success || !currentDataResponse.data) {
@@ -197,35 +179,30 @@ class OnboardingService {
           error: 'Session d\'onboarding introuvable'
         };
       }
-
       const currentData = currentDataResponse.data;
-
       // Mettre à jour les données
       const updatedData: OnboardingData = {
         ...currentData,
         preferences: { ...currentData.preferences, ...preferences },
         lastSavedAt: new Date().toISOString()
       };
-
       // Sauvegarder
       const saveResponse = await this.storageService.saveOnboardingData(userId, updatedData);
       if (!saveResponse.success) {
         return saveResponse;
       }
-
       return {
         success: true,
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating preferences:', error instanceof Error ? error.message : String(error));
+      logger.error('OnboardingServiceRefactored', 'Error updating preferences:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour des préférences')
       };
     }
   }
-
   /**
    * Marque une étape comme complétée
    */
@@ -239,9 +216,7 @@ class OnboardingService {
           error: 'Session d\'onboarding introuvable'
         };
       }
-
       const currentData = currentDataResponse.data;
-
       // Valider l'étape
       const validation = await this.validationService.validateStep(userId, stepId, currentData);
       if (!validation.isValid) {
@@ -250,42 +225,36 @@ class OnboardingService {
           error: validation.errors.map(e => e.message).join(', ')
         };
       }
-
       // Mettre à jour les étapes complétées
       const completedSteps = currentData.completedSteps || [];
       if (!completedSteps.includes(stepId)) {
         completedSteps.push(stepId);
       }
-
       // Déterminer l'étape suivante
       const nextStep = this.progressService.getNextStep(stepId);
-
       const updatedData: OnboardingData = {
         ...currentData,
         currentStepId: nextStep,
         completedSteps,
         lastSavedAt: new Date().toISOString()
       };
-
       // Sauvegarder
       const saveResponse = await this.storageService.saveOnboardingData(userId, updatedData);
       if (!saveResponse.success) {
         return saveResponse;
       }
-
       return {
         success: true,
         data: updatedData
       };
     } catch (error) {
-      console.error('Error completing step:', error instanceof Error ? error.message : String(error));
+      logger.error('OnboardingServiceRefactored', 'Error completing step:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Finalisation de l\'étape')
       };
     }
   }
-
   /**
    * Finalise l'onboarding et crée l'entreprise
    */
@@ -298,9 +267,7 @@ class OnboardingService {
           error: 'Session d\'onboarding introuvable'
         };
       }
-
       const currentData = currentDataResponse.data;
-
       // Validation finale
       const validation = await this.validationService.validateStep(userId, 'complete', currentData);
       if (!validation.isValid) {
@@ -309,19 +276,15 @@ class OnboardingService {
           error: validation.errors.map(e => e.message).join(', ')
         };
       }
-
       // Créer l'entreprise
       const companyId = await this.createCompanyFromOnboarding(currentData);
-
       // Marquer comme complété
       const completedData: OnboardingData = {
         ...currentData,
         completedAt: new Date().toISOString(),
         lastSavedAt: new Date().toISOString()
       };
-
       await this.storageService.saveOnboardingData(userId, completedData);
-
       return {
         success: true,
         data: {
@@ -330,21 +293,19 @@ class OnboardingService {
         }
       };
     } catch (error) {
-      console.error('Error completing onboarding:', error instanceof Error ? error.message : String(error));
+      logger.error('OnboardingServiceRefactored', 'Error completing onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Finalisation de l\'onboarding')
       };
     }
   }
-
   /**
    * Obtient les métriques d'onboarding
    */
   async getOnboardingMetrics(): Promise<OnboardingResponse<OnboardingMetrics>> {
     return this.progressService.getOnboardingMetrics();
   }
-
   /**
    * Obtient la progression d'onboarding
    */
@@ -356,10 +317,8 @@ class OnboardingService {
         error: 'Session d\'onboarding introuvable'
       };
     }
-
     return this.progressService.getOnboardingProgress(userId, dataResponse.data);
   }
-
   /**
    * Remet à zéro l'onboarding
    */
@@ -367,24 +326,21 @@ class OnboardingService {
     try {
       // Supprimer les données existantes
       await this.storageService.clearOnboardingData(userId);
-      
       // Réinitialiser l'onboarding
       return this.initializeOnboarding(userId);
     } catch (error) {
-      console.error('Error resetting onboarding:', error instanceof Error ? error.message : String(error));
+      logger.error('OnboardingServiceRefactored', 'Error resetting onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Remise à zéro de l\'onboarding')
       };
     }
   }
-
   private async createCompanyFromOnboarding(data: OnboardingData): Promise<string> {
     // Simuler la création d'une entreprise
     await new Promise(resolve => setTimeout(resolve, 200));
     return `company_${data.userId}_${Date.now()}`;
   }
-
   private formatError(error: unknown, context: string): string {
     if (error instanceof Error) {
       return `${context}: ${error.message}`;
@@ -392,6 +348,5 @@ class OnboardingService {
     return `${context}: Erreur inconnue`;
   }
 }
-
 // Export du singleton
 export default OnboardingService.getInstance();

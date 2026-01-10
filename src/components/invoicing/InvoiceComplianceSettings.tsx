@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -15,7 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { 
+import { logger } from '@/lib/logger';
+import {
   FileText, 
   AlertCircle, 
   CheckCircle2, 
@@ -24,7 +24,6 @@ import {
   Shield,
   Info
 } from 'lucide-react';
-
 interface CompanyInvoiceSettings {
   name: string;
   siret: string;
@@ -41,7 +40,6 @@ interface CompanyInvoiceSettings {
   main_bank_bic: string;
   payment_instructions: string;
 }
-
 export function InvoiceComplianceSettings() {
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
@@ -63,15 +61,12 @@ export function InvoiceComplianceSettings() {
     main_bank_bic: '',
     payment_instructions: ''
   });
-
   // Charger les paramètres existants
   useEffect(() => {
     loadSettings();
   }, [currentCompany?.id]);
-
   const loadSettings = async () => {
     if (!currentCompany?.id) return;
-
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -94,9 +89,7 @@ export function InvoiceComplianceSettings() {
         `)
         .eq('id', currentCompany.id)
         .single();
-
       if (error) throw error;
-
       if (data) {
         setSettings({
           name: data.name || '',
@@ -116,16 +109,14 @@ export function InvoiceComplianceSettings() {
         });
       }
     } catch (error) {
-      console.error('Error loading settings:', error);
+      logger.error('InvoiceComplianceSettings', 'Error loading settings:', error);
       toast.error(t('invoicing.compliance.loadError', 'Erreur lors du chargement des paramètres'));
     } finally {
       setLoading(false);
     }
   };
-
   const handleSave = async () => {
     if (!currentCompany?.id) return;
-
     setSaving(true);
     try {
       const { error } = await supabase
@@ -146,18 +137,15 @@ export function InvoiceComplianceSettings() {
           payment_instructions: settings.payment_instructions
         })
         .eq('id', currentCompany.id);
-
       if (error) throw error;
-
       toast.success(t('invoicing.compliance.saveSuccess', 'Paramètres de facturation enregistrés'));
     } catch (error) {
-      console.error('Error saving settings:', error);
+      logger.error('InvoiceComplianceSettings', 'Error saving settings:', error);
       toast.error(t('invoicing.compliance.saveError', 'Erreur lors de l\'enregistrement'));
     } finally {
       setSaving(false);
     }
   };
-
   // Vérifier la conformité
   const checkCompliance = () => {
     const required = [
@@ -167,10 +155,8 @@ export function InvoiceComplianceSettings() {
       settings.rcs_city,
       settings.main_bank_iban
     ];
-    
     const filled = required.filter(field => field && field.trim().length > 0).length;
     const total = required.length;
-    
     return {
       percentage: Math.round((filled / total) * 100),
       filled,
@@ -178,9 +164,7 @@ export function InvoiceComplianceSettings() {
       isComplete: filled === total
     };
   };
-
   const compliance = checkCompliance();
-
   if (loading) {
     return (
       <Card>
@@ -191,7 +175,6 @@ export function InvoiceComplianceSettings() {
       </Card>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Statut de conformité */}
@@ -244,7 +227,6 @@ export function InvoiceComplianceSettings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Informations légales */}
       <Card>
         <CardHeader>
@@ -274,7 +256,6 @@ export function InvoiceComplianceSettings() {
                 {t('invoicing.compliance.siretHelp', '14 chiffres (obligatoire sur les factures)')}
               </p>
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="vat_number" className="flex items-center gap-2">
                 {t('invoicing.compliance.vat', 'N° TVA Intracommunautaire')} <span className="text-red-500">*</span>
@@ -291,7 +272,6 @@ export function InvoiceComplianceSettings() {
                 {t('invoicing.compliance.vatHelp', 'Format FR + 11 chiffres')}
               </p>
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="legal_form" className="flex items-center gap-2">
                 {t('invoicing.compliance.legalForm', 'Forme juridique')} <span className="text-red-500">*</span>
@@ -305,7 +285,6 @@ export function InvoiceComplianceSettings() {
                 className={!settings.legal_form ? 'border-orange-300' : ''}
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="share_capital">
                 {t('invoicing.compliance.shareCapital', 'Capital social')}
@@ -317,7 +296,6 @@ export function InvoiceComplianceSettings() {
                 placeholder="10 000 €"
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="rcs_city" className="flex items-center gap-2">
                 {t('invoicing.compliance.rcsCity', 'Ville du RCS')} <span className="text-red-500">*</span>
@@ -331,7 +309,6 @@ export function InvoiceComplianceSettings() {
                 className={!settings.rcs_city ? 'border-orange-300' : ''}
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="rcs_number">
                 {t('invoicing.compliance.rcsNumber', 'Numéro RCS')}
@@ -344,7 +321,6 @@ export function InvoiceComplianceSettings() {
               />
             </div>
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="legal_mentions">
               {t('invoicing.compliance.additionalMentions', 'Mentions légales supplémentaires')}
@@ -362,7 +338,6 @@ export function InvoiceComplianceSettings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Coordonnées bancaires */}
       <Card>
         <CardHeader>
@@ -386,7 +361,6 @@ export function InvoiceComplianceSettings() {
               placeholder="BNP Paribas, Crédit Agricole..."
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="main_bank_iban" className="flex items-center gap-2">
               {t('invoicing.compliance.iban', 'IBAN')} <span className="text-red-500">*</span>
@@ -400,7 +374,6 @@ export function InvoiceComplianceSettings() {
               className={!settings.main_bank_iban ? 'border-orange-300' : ''}
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="main_bank_bic">
               {t('invoicing.compliance.bic', 'BIC/SWIFT')}
@@ -412,7 +385,6 @@ export function InvoiceComplianceSettings() {
               placeholder="BNPAFRPP"
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="payment_instructions">
               {t('invoicing.compliance.paymentInstructions', 'Instructions de paiement')}
@@ -427,7 +399,6 @@ export function InvoiceComplianceSettings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Conditions générales */}
       <Card>
         <CardHeader>
@@ -455,7 +426,6 @@ export function InvoiceComplianceSettings() {
               {t('invoicing.compliance.defaultTermsHelp', 'Ces conditions apparaîtront au bas de chaque facture')}
             </p>
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="vat_note">
               {t('invoicing.compliance.vatNote', 'Note TVA')}
@@ -473,7 +443,6 @@ export function InvoiceComplianceSettings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Informations importantes */}
       <Card className="bg-blue-50 dark:bg-blue-900/10 border-blue-200">
         <CardContent className="p-6">
@@ -497,7 +466,6 @@ export function InvoiceComplianceSettings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Bouton d'enregistrement */}
       <div className="flex justify-end">
         <Button 

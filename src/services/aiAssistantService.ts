@@ -9,8 +9,8 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import OpenAI from 'openai';
+import { logger } from '@/lib/logger';
 import type {
   AIAssistantQuery,
   TaxOptimization,
@@ -20,7 +20,6 @@ import type {
   AIServiceResponse,
   AIConfiguration
 } from '../types/ai.types';
-
 interface QueryContext {
   period?: {
     start: Date;
@@ -31,7 +30,6 @@ interface QueryContext {
   metrics?: Record<string, number>;
   [key: string]: unknown;
 }
-
 // Service d'assistant IA pour les questions comptables et fiscales
 class AIAssistantService {
   private openai: OpenAI | null = null;
@@ -42,35 +40,29 @@ class AIAssistantService {
     temperature: 0.7,
     contextWindow: 10
   };
-  
   private conversationHistory: AIAssistantQuery[] = [];
   private isInitialized = false;
-
   // Initialisation du service
   async initialize(apiKey?: string, config?: AIConfiguration['assistant']): Promise<void> {
     try {
       if (config) {
         this.config = { ...this.config, ...config };
       }
-
       if (apiKey && this.config.enabled) {
         this.openai = new OpenAI({
           apiKey,
           dangerouslyAllowBrowser: true // Pour usage côté client uniquement en démo
         });
-        
-        console.warn('AI Assistant Service initialized with OpenAI API');
+        logger.warn('AiAssistant', 'AI Assistant Service initialized with OpenAI API');
       } else {
-        console.warn('AI Assistant Service initialized in mock mode');
+        logger.warn('AiAssistant', 'AI Assistant Service initialized in mock mode');
       }
-
       this.isInitialized = true;
     } catch (error: unknown) {
-      console.error('Failed to initialize AI Assistant Service:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
+      logger.error('AiAssistant', 'Failed to initialize AI Assistant Service:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       this.isInitialized = true; // Continue en mode mock
     }
   }
-
   // CHAT ASSISTANT POUR QUESTIONS COMPTABLES
   async askQuestion(
     query: string, 
@@ -82,15 +74,12 @@ class AIAssistantService {
   ): Promise<AIServiceResponse<AIAssistantQuery>> {
     try {
       const startTime = Date.now();
-      
       // Détermine le type de question
       const queryType = this.classifyQuery(query);
-      
       let response: string;
       let confidence: number;
       let sources: string[] = [];
       let suggestions: string[] = [];
-
       if (this.openai && this.config.enabled) {
         // Utilise OpenAI API
         const result = await this.queryOpenAI(query, queryType, context);
@@ -106,7 +95,6 @@ class AIAssistantService {
         sources = mockResult.sources;
         suggestions = mockResult.suggestions;
       }
-
       const assistantQuery: AIAssistantQuery = {
         id: crypto.randomUUID(),
         query,
@@ -117,56 +105,46 @@ class AIAssistantService {
         sources,
         suggestions
       };
-
       // Ajoute à l'historique
       this.conversationHistory.push(assistantQuery);
-      
       // Limite la taille de l'historique
       if (this.conversationHistory.length > this.config.contextWindow) {
         this.conversationHistory = this.conversationHistory.slice(-this.config.contextWindow);
       }
-
       return {
         success: true,
         data: assistantQuery,
         processingTime: Date.now() - startTime,
         modelUsed: this.openai ? this.config.model : 'mock_assistant'
       };
-
     } catch (error: unknown) {
-      console.error('Error processing AI assistant query:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
+      logger.error('AiAssistant', 'Error processing AI assistant query:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       return {
         success: false,
         error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
-
   // Classification du type de question
   private classifyQuery(query: string): 'accounting' | 'tax' | 'analysis' | 'general' {
     const lowerQuery = query.toLowerCase();
-    
     // Mots-clés comptables
     const accountingKeywords = ['bilan', 'compte', 'écriture', 'journal', 'grand livre', 'amortissement', 'provision'];
     if (accountingKeywords.some(keyword => lowerQuery.includes(keyword))) {
       return 'accounting';
     }
-    
     // Mots-clés fiscaux
     const taxKeywords = ['tva', 'impôt', 'fiscal', 'déduction', 'crédit', 'déclaration'];
     if (taxKeywords.some(keyword => lowerQuery.includes(keyword))) {
       return 'tax';
     }
-    
     // Mots-clés d'analyse
     const analysisKeywords = ['analyse', 'tendance', 'performance', 'ratio', 'évolution', 'prévision'];
     if (analysisKeywords.some(keyword => lowerQuery.includes(keyword))) {
       return 'analysis';
     }
-    
     return 'general';
   }
-
   // Requête vers OpenAI API
   private async queryOpenAI(
     query: string,
@@ -178,11 +156,9 @@ class AIAssistantService {
       if (!this.openai) {
         throw new Error('OpenAI client not initialized');
       }
-
       // Construction du prompt avec contexte
       const systemPrompt = this.buildSystemPrompt(type, context);
       const userPrompt = this.buildUserPrompt(query, context);
-
       const completion = await this.openai.chat.completions.create({
         model: this.config.model,
         messages: [
@@ -193,33 +169,27 @@ class AIAssistantService {
         max_tokens: this.config.maxTokens,
         temperature: this.config.temperature
       });
-
       const response = completion.choices[0]?.message?.content || 'Désolé, je n\'ai pas pu traiter votre demande.';
-      
       return {
         response,
         confidence: 0.8, // Estimation basée sur la qualité de la réponse
         sources: ['Assistant IA OpenAI', 'Base de connaissances comptable'],
         suggestions: this.generateSuggestions(query, type)
       };
-
     } catch (error: unknown) {
-      console.error('OpenAI API error:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
+      logger.error('AiAssistant', 'OpenAI API error:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       throw error;
     }
   }
-
   // Construction du prompt système
   private buildSystemPrompt(type: string, context?: QueryContext): string {
     const basePrompt = `Vous êtes un assistant comptable expert français. Répondez de manière claire, précise et professionnelle.`;
-    
     const typeSpecificPrompts = {
       accounting: `Vous spécialisez dans la comptabilité française, le plan comptable général, et les écritures comptables.`,
       tax: `Vous spécialisez dans la fiscalité française, la TVA, l'impôt sur les sociétés et l'optimisation fiscale.`,
       analysis: `Vous spécialisez dans l'analyse financière, les ratios, et l'interprétation des données comptables.`,
       general: `Vous pouvez répondre à toutes questions relatives à la comptabilité et la gestion d'entreprise.`
     };
-
     let contextPrompt = '';
     if (context?.currentBalance) {
       contextPrompt += `\nSolde actuel: ${context.currentBalance}€`;
@@ -227,22 +197,18 @@ class AIAssistantService {
     if (context?.transactions?.length) {
       contextPrompt += `\nNombre de transactions récentes: ${context.transactions.length}`;
     }
-
-    return `${basePrompt}\n${typeSpecificPrompts[type] || typeSpecificPrompts.general}${contextPrompt}`;
+    const promptType = type as keyof typeof typeSpecificPrompts;
+    return `${basePrompt}\n${typeSpecificPrompts[promptType] || typeSpecificPrompts.general}${contextPrompt}`;
   }
-
   // Construction du prompt utilisateur
   private buildUserPrompt(query: string, context?: QueryContext): string {
     let prompt = query;
-    
     // Ajoute du contexte si pertinent
     if (context?.period) {
       prompt += `\n\nPériode d'analyse: du ${context.period.start.toLocaleDateString('fr-FR')} au ${context.period.end.toLocaleDateString('fr-FR')}`;
     }
-    
     return prompt;
   }
-
   // Récupère l'historique récent de conversation
   private getRecentHistory(): Array<{role: 'user' | 'assistant'; content: string}> {
     return this.conversationHistory.slice(-4).flatMap(item => [
@@ -250,14 +216,12 @@ class AIAssistantService {
       { role: 'assistant' as const, content: item.response }
     ]);
   }
-
   // Génération de réponses mock (fallback)
   private generateMockResponse(
     query: string,
     type: string,
     context?: QueryContext
   ): {response: string; confidence: number; sources: string[]; suggestions: string[]} {
-    
     const responses = {
       accounting: [
         "En comptabilité française, il est important de respecter le plan comptable général (PCG). Pour votre question, je recommande de consulter les comptes de classe 6 pour les charges et classe 7 pour les produits.",
@@ -280,10 +244,9 @@ class AIAssistantService {
         "Pour une réponse plus personnalisée, précisez votre secteur d'activité et la taille de votre entreprise."
       ]
     };
-
-    const typeResponses = responses[type] || responses.general;
+    const responseType = type as keyof typeof responses;
+    const typeResponses = responses[responseType] || responses.general;
     const response = typeResponses[Math.floor(Math.random() * typeResponses.length)];
-    
     return {
       response,
       confidence: 0.6,
@@ -291,7 +254,6 @@ class AIAssistantService {
       suggestions: this.generateSuggestions(query, type)
     };
   }
-
   // Génération de suggestions
   private generateSuggestions(query: string, type: string): string[] {
     const suggestions = {
@@ -316,47 +278,38 @@ class AIAssistantService {
         "Contacter un professionnel"
       ]
     };
-
-    return suggestions[type] || suggestions.general;
+    const suggestionType = type as keyof typeof suggestions;
+    return suggestions[suggestionType] || suggestions.general;
   }
-
   // SUGGESTIONS D'OPTIMISATION FISCALE
   async generateTaxOptimizations(transactions: Transaction[]): Promise<AIServiceResponse<TaxOptimization[]>> {
     try {
       const startTime = Date.now();
-      
       const optimizations: TaxOptimization[] = [];
-      
       // Analyse des transactions pour identifier les opportunités
       const deductibleExpenses = this.identifyDeductibleExpenses(transactions);
       const timingOpportunities = this.identifyTimingOpportunities(transactions);
       const structureOptimizations = this.identifyStructureOptimizations(transactions);
-      
       optimizations.push(...deductibleExpenses, ...timingOpportunities, ...structureOptimizations);
-      
       // Tri par potentiel d'économie
       optimizations.sort((a, b) => b.potentialSavings - a.potentialSavings);
-      
       return {
         success: true,
         data: optimizations.slice(0, 10), // Top 10 optimisations
         processingTime: Date.now() - startTime,
         modelUsed: 'tax_optimization_analyzer'
       };
-
     } catch (error: unknown) {
-      console.error('Error generating tax optimizations:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
+      logger.error('AiAssistant', 'Error generating tax optimizations:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       return {
         success: false,
         error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
-
   // Identification des dépenses déductibles
   private identifyDeductibleExpenses(transactions: Transaction[]): TaxOptimization[] {
     const optimizations: TaxOptimization[] = [];
-    
     // Recherche de dépenses potentiellement déductibles
     const potentialDeductions = transactions.filter(t => {
       const description = t.description.toLowerCase();
@@ -368,10 +321,8 @@ class AIAssistantService {
         description.includes('restaurant') && t.amount < 200 // repas d'affaires
       );
     });
-
     if (potentialDeductions.length > 0) {
       const totalAmount = potentialDeductions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
-      
       optimizations.push({
         id: crypto.randomUUID(),
         type: 'deduction',
@@ -387,25 +338,20 @@ class AIAssistantService {
         status: 'suggested'
       } as TaxOptimization);
     }
-
     return optimizations;
   }
-
   // Identification des opportunités de timing
   private identifyTimingOpportunities(transactions: Transaction[]): TaxOptimization[] {
     const optimizations: TaxOptimization[] = [];
-    
     // Analyse des dépenses de fin d'année
     const now = new Date();
     const endOfYear = new Date(now.getFullYear(), 11, 31);
     const daysUntilEndOfYear = Math.ceil((endOfYear.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    
     if (daysUntilEndOfYear < 60) {
       const recentExpenses = transactions.filter(t => 
         t.type === 'expense' && 
         new Date(t.date).getMonth() >= 10 // Nov-Dec
       );
-      
       if (recentExpenses.length > 0) {
         optimizations.push({
           id: crypto.randomUUID(),
@@ -424,18 +370,14 @@ class AIAssistantService {
         } as any);
       }
     }
-
     return optimizations;
   }
-
   // Identification des optimisations de structure
   private identifyStructureOptimizations(transactions: Transaction[]): TaxOptimization[] {
     const optimizations: TaxOptimization[] = [];
-    
     const totalRevenue = transactions
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
-    
     // Si le CA dépasse certains seuils
     if (totalRevenue > 170000) {
       optimizations.push({
@@ -453,10 +395,8 @@ class AIAssistantService {
         status: 'suggested'
       } as TaxOptimization);
     }
-
     return optimizations;
   }
-
   // GÉNÉRATION DE RAPPORTS NARRATIFS
   async generateNarrativeReport(
     type: 'monthly' | 'quarterly' | 'annual',
@@ -466,25 +406,21 @@ class AIAssistantService {
   ): Promise<AIServiceResponse<ReportNarrative>> {
     try {
       const startTime = Date.now();
-      
       const report = await this.generateReportContent(type, period, transactions, metrics);
-      
       return {
         success: true,
         data: report,
         processingTime: Date.now() - startTime,
         modelUsed: this.openai ? this.config.model : 'narrative_generator'
       };
-
     } catch (error: unknown) {
-      console.error('Error generating narrative report:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
+      logger.error('AiAssistant', 'Error generating narrative report:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       return {
         success: false,
         error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
-
   // Génération du contenu du rapport
   private async generateReportContent(
     type: 'custom' | 'monthly' | 'quarterly' | 'annual',
@@ -492,27 +428,21 @@ class AIAssistantService {
     transactions: Transaction[],
     metrics: Record<string, number>
   ): Promise<ReportNarrative> {
-    
     const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const expenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
     const balance = income - expenses;
-    
     let summary: string;
     let keyInsights: string[];
     let recommendations: string[];
-
     if (this.openai && this.config.enabled) {
       // Utilise OpenAI pour générer le rapport
       const prompt = `Générez un rapport financier ${type} pour la période du ${period.start.toLocaleDateString('fr-FR')} au ${period.end.toLocaleDateString('fr-FR')}.
-      
       Données:
       - Revenus: ${income.toLocaleString('fr-FR')}€
       - Dépenses: ${expenses.toLocaleString('fr-FR')}€
       - Solde: ${balance.toLocaleString('fr-FR')}€
       - Nombre de transactions: ${transactions.length}
-      
       Format attendu: JSON avec summary, keyInsights (array), recommendations (array)`;
-
       try {
         const completion = await this.openai.chat.completions.create({
           model: this.config.model,
@@ -520,7 +450,6 @@ class AIAssistantService {
           max_tokens: 800,
           temperature: 0.5
         });
-
         const response = JSON.parse(completion.choices[0]?.message?.content || '{}');
         summary = response.summary || this.generateDefaultSummary(balance, income, expenses);
         keyInsights = response.keyInsights || this.generateDefaultInsights(transactions, metrics);
@@ -537,7 +466,6 @@ class AIAssistantService {
       keyInsights = this.generateDefaultInsights(transactions, metrics);
       recommendations = this.generateDefaultRecommendations(balance, metrics);
     }
-
     return {
       id: crypto.randomUUID(),
       type,
@@ -550,47 +478,35 @@ class AIAssistantService {
       period
     };
   }
-
   // Génération du résumé par défaut
   private generateDefaultSummary(balance: number, income: number, expenses: number): string {
     const profitability = income > 0 ? ((balance / income) * 100).toFixed(1) : '0';
-    
     return `Au cours de cette période, l'activité a généré ${income.toLocaleString('fr-FR')}€ de revenus pour ${expenses.toLocaleString('fr-FR')}€ de dépenses, ` +
            `soit un résultat ${balance >= 0 ? 'positif' : 'négatif'} de ${Math.abs(balance).toLocaleString('fr-FR')}€. ` +
            `La marge bénéficiaire s'établit à ${profitability}%, ${balance >= 0 ? 'témoignant d\'une bonne performance' : 'nécessitant une attention particulière'}.`;
   }
-
   // Génération des insights par défaut
   private generateDefaultInsights(transactions: Transaction[], _metrics: Record<string, number>): string[] {
     const insights: string[] = [];
-    
     // Analyse des transactions
     const avgTransaction = transactions.length > 0 ? 
       transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0) / transactions.length : 0;
-    
     insights.push(`Montant moyen par transaction: ${avgTransaction.toLocaleString('fr-FR')}€`);
-    
     // Analyse par type
     const incomeCount = transactions.filter(t => t.type === 'income').length;
     const expenseCount = transactions.filter(t => t.type === 'expense').length;
-    
     insights.push(`Répartition: ${incomeCount} transactions de revenus, ${expenseCount} de dépenses`);
-    
     // Analyse temporelle
     const weekdays = transactions.filter(t => {
       const day = new Date(t.date).getDay();
       return day >= 1 && day <= 5;
     }).length;
-    
     insights.push(`${((weekdays / transactions.length) * 100).toFixed(0)}% des transactions en semaine`);
-    
     return insights;
   }
-
   // Génération des recommandations par défaut
   private generateDefaultRecommendations(balance: number, _metrics: Record<string, number>): string[] {
     const recommendations: string[] = [];
-    
     if (balance < 0) {
       recommendations.push('Analyser les postes de dépenses pour identifier les optimisations possibles');
       recommendations.push('Diversifier les sources de revenus pour améliorer la stabilité financière');
@@ -598,13 +514,10 @@ class AIAssistantService {
       recommendations.push('Maintenir cette performance positive tout en surveillant les coûts');
       recommendations.push('Envisager des investissements pour soutenir la croissance');
     }
-    
     recommendations.push('Mettre en place un suivi budgétaire régulier');
     recommendations.push('Constituer une réserve de trésorerie pour faire face aux imprévus');
-    
     return recommendations;
   }
-
   // Génération des métriques narratives
   private generateNarrativeMetrics(income: number, expenses: number, balance: number): { name: string; value: number; previousValue: number; change: number; trend: 'up' | 'down' | 'stable'; interpretation: string }[] {
     return [
@@ -634,7 +547,6 @@ class AIAssistantService {
       }
     ];
   }
-
   // ALERTES INTELLIGENTES
   generateSmartAlert(
     type: SmartAlert['type'],
@@ -656,11 +568,9 @@ class AIAssistantService {
       autoResolve: type === 'threshold' || type === 'anomaly'
     };
   }
-
   // Génération des actions d'alerte
   private generateAlertActions(type: string, data: Record<string, unknown>): { label: string; action: string; params?: Record<string, unknown>; style?: 'primary' | 'secondary' | 'danger' }[] {
-    const actions = [];
-    
+    const actions: { label: string; action: string; params?: Record<string, unknown>; style?: 'primary' | 'secondary' | 'danger' }[] = [];
     switch (type) {
       case 'anomaly':
         actions.push(
@@ -668,14 +578,12 @@ class AIAssistantService {
           { label: 'Ignorer', action: 'dismiss_alert', style: 'secondary' }
         );
         break;
-        
       case 'threshold':
         actions.push(
           { label: 'Ajuster seuil', action: 'adjust_threshold', style: 'primary' },
           { label: 'Voir détails', action: 'view_details', style: 'secondary' }
         );
         break;
-        
       case 'opportunity':
         actions.push(
           { label: 'En savoir plus', action: 'learn_more', style: 'primary' },
@@ -683,37 +591,29 @@ class AIAssistantService {
         );
         break;
     }
-    
     return actions;
   }
-
   // Getters et utilitaires
   getConversationHistory(): AIAssistantQuery[] {
     return [...this.conversationHistory];
   }
-
   clearHistory(): void {
     this.conversationHistory = [];
   }
-
   updateConfig(config: Partial<AIConfiguration['assistant']>): void {
     this.config = { ...this.config, ...config };
   }
-
   get isEnabled(): boolean {
     return this.config.enabled;
   }
-
   get initialized(): boolean {
     return this.isInitialized;
   }
-
   dispose(): void {
     this.conversationHistory = [];
     this.openai = null;
     this.isInitialized = false;
   }
 }
-
 // Instance singleton
 export const aiAssistantService = new AIAssistantService();

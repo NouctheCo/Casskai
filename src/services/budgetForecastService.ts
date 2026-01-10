@@ -9,16 +9,13 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // Service de Forecast Budgétaire pour CassKai
 // Implémente le système de forecast avec réel YTD + prorata + budget restant
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 // ============================================================================
 // Types
 // ============================================================================
-
 export interface BudgetForecastLine {
   year: number;
   month: number;
@@ -32,7 +29,6 @@ export interface BudgetForecastLine {
   variance_amount: number;
   variance_percentage: number;
 }
-
 export interface BudgetForecastKPI {
   total_actual_ytd: number;
   total_budget_annual: number;
@@ -41,13 +37,11 @@ export interface BudgetForecastKPI {
   variance_percentage: number;
   absorption_rate: number;
 }
-
 export interface UnmappedEntry {
   account_code: string;
   total_amount: number;
   entry_count: number;
 }
-
 export interface BudgetForecastData {
   kpi: BudgetForecastKPI;
   lines: BudgetForecastLine[];
@@ -61,7 +55,6 @@ export interface BudgetForecastData {
   by_month: MonthlyForecast[];
   unmapped_entries: UnmappedEntry[];
 }
-
 export interface BudgetForecastSummary {
   actual_ytd: number;
   budget_annual: number;
@@ -69,7 +62,6 @@ export interface BudgetForecastSummary {
   variance: number;
   variance_percentage: number;
 }
-
 export interface CategoryForecast {
   category_id: string;
   category_code: string;
@@ -81,7 +73,6 @@ export interface CategoryForecast {
   variance: number;
   variance_percentage: number;
 }
-
 export interface MonthlyForecast {
   month: number;
   month_name: string;
@@ -92,11 +83,9 @@ export interface MonthlyForecast {
   is_past: boolean;
   is_current: boolean;
 }
-
 // ============================================================================
 // Service
 // ============================================================================
-
 class BudgetForecastService {
   /**
    * Récupère le forecast complet pour un budget et une date donnée
@@ -118,12 +107,10 @@ class BudgetForecastService {
           p_mode: mode
         }
       );
-
       if (linesError) {
-        console.error('Error fetching forecast lines:', linesError);
+        logger.error('BudgetForecast', 'Error fetching forecast lines:', linesError);
         return { data: null, error: linesError };
       }
-
       // 2. Appel à la fonction RPC pour les KPI
       const { data: kpiData, error: kpiError } = await supabase.rpc(
         'get_budget_forecast_kpi',
@@ -133,12 +120,10 @@ class BudgetForecastService {
           p_as_of_date: asOfDate.toISOString().split('T')[0]
         }
       );
-
       if (kpiError) {
-        console.error('Error fetching forecast KPI:', kpiError);
+        logger.error('BudgetForecast', 'Error fetching forecast KPI:', kpiError);
         return { data: null, error: kpiError };
       }
-
       const kpi: BudgetForecastKPI = kpiData[0] || {
         total_actual_ytd: 0,
         total_budget_annual: 0,
@@ -147,7 +132,6 @@ class BudgetForecastService {
         variance_percentage: 0,
         absorption_rate: 0
       };
-
       // 3. Récupérer les écritures non mappées
       const currentYear = asOfDate.getFullYear();
       const { data: unmappedData, error: unmappedError } = await supabase.rpc(
@@ -157,18 +141,13 @@ class BudgetForecastService {
           p_year: currentYear
         }
       );
-
       const unmapped_entries: UnmappedEntry[] = unmappedError ? [] : (unmappedData || []);
-
       // 4. Calculer les totaux par type
       const totals_by_type = this.calculateTotalsByType(lines || []);
-
       // 5. Agréger par catégorie
       const by_category = this.aggregateByCategory(lines || []);
-
       // 6. Agréger par mois
       const by_month = this.aggregateByMonth(lines || [], asOfDate);
-
       const forecastData: BudgetForecastData = {
         kpi,
         lines: lines || [],
@@ -177,14 +156,12 @@ class BudgetForecastService {
         by_month,
         unmapped_entries
       };
-
       return { data: forecastData, error: null };
     } catch (error) {
-      console.error('Error in getForecast:', error instanceof Error ? error.message : String(error));
+      logger.error('BudgetForecast', 'Error in getForecast:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   /**
    * Calcule les totaux par type (revenue, expense, capex, net)
    */
@@ -197,7 +174,6 @@ class BudgetForecastService {
     const revenue = this.aggregateByType(lines, 'revenue');
     const expense = this.aggregateByType(lines, 'expense');
     const capex = this.aggregateByType(lines, 'capex');
-
     const net: BudgetForecastSummary = {
       actual_ytd: revenue.actual_ytd - expense.actual_ytd - capex.actual_ytd,
       budget_annual: revenue.budget_annual - expense.budget_annual - capex.budget_annual,
@@ -205,14 +181,11 @@ class BudgetForecastService {
       variance: revenue.variance - expense.variance - capex.variance,
       variance_percentage: 0
     };
-
     if (net.budget_annual !== 0) {
       net.variance_percentage = (net.variance / Math.abs(net.budget_annual)) * 100;
     }
-
     return { revenue, expense, capex, net };
   }
-
   /**
    * Agrège les lignes par type
    */
@@ -221,13 +194,11 @@ class BudgetForecastService {
     type: 'revenue' | 'expense' | 'capex'
   ): BudgetForecastSummary {
     const filtered = lines.filter(l => l.category_type === type);
-
     const actual_ytd = filtered.reduce((sum, l) => sum + (l.amount_actual || 0), 0);
     const budget_annual = filtered.reduce((sum, l) => sum + (l.amount_budget || 0), 0);
     const forecast_eoy = filtered.reduce((sum, l) => sum + (l.amount_forecast || 0), 0);
     const variance = forecast_eoy - budget_annual;
     const variance_percentage = budget_annual !== 0 ? (variance / budget_annual) * 100 : 0;
-
     return {
       actual_ytd,
       budget_annual,
@@ -236,13 +207,11 @@ class BudgetForecastService {
       variance_percentage
     };
   }
-
   /**
    * Agrège par catégorie
    */
   private aggregateByCategory(lines: BudgetForecastLine[]): CategoryForecast[] {
     const categoryMap = new Map<string, CategoryForecast>();
-
     lines.forEach(line => {
       const key = line.category_id;
       if (!categoryMap.has(key)) {
@@ -258,13 +227,11 @@ class BudgetForecastService {
           variance_percentage: 0
         });
       }
-
       const cat = categoryMap.get(key)!;
       cat.actual_ytd += line.amount_actual || 0;
       cat.budget_annual += line.amount_budget || 0;
       cat.forecast_eoy += line.amount_forecast || 0;
     });
-
     // Calculer les variances
     categoryMap.forEach(cat => {
       cat.variance = cat.forecast_eoy - cat.budget_annual;
@@ -272,7 +239,6 @@ class BudgetForecastService {
         ? (cat.variance / Math.abs(cat.budget_annual)) * 100
         : 0;
     });
-
     return Array.from(categoryMap.values()).sort((a, b) => {
       if (a.category_type !== b.category_type) {
         const order = { revenue: 0, expense: 1, capex: 2 };
@@ -281,7 +247,6 @@ class BudgetForecastService {
       return a.category_code.localeCompare(b.category_code);
     });
   }
-
   /**
    * Agrège par mois
    */
@@ -290,17 +255,13 @@ class BudgetForecastService {
       'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
       'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
     ];
-
     const currentMonth = asOfDate.getMonth() + 1;
     const monthlyData: MonthlyForecast[] = [];
-
     for (let month = 1; month <= 12; month++) {
       const monthLines = lines.filter(l => l.month === month);
-
       const actual = monthLines.reduce((sum, l) => sum + (l.amount_actual || 0), 0);
       const budget = monthLines.reduce((sum, l) => sum + (l.amount_budget || 0), 0);
       const forecast = monthLines.reduce((sum, l) => sum + (l.amount_forecast || 0), 0);
-
       monthlyData.push({
         month,
         month_name: monthNames[month - 1],
@@ -312,10 +273,8 @@ class BudgetForecastService {
         is_current: month === currentMonth
       });
     }
-
     return monthlyData;
   }
-
   /**
    * Export du forecast en CSV
    */
@@ -329,7 +288,6 @@ class BudgetForecastService {
       'Écart',
       'Écart %'
     ];
-
     const rows = data.by_category.map(cat => [
       cat.category_name,
       cat.category_type === 'revenue' ? 'Revenus' : cat.category_type === 'expense' ? 'Charges' : 'Investissements',
@@ -339,12 +297,10 @@ class BudgetForecastService {
       cat.variance.toFixed(2),
       `${cat.variance_percentage.toFixed(2)  }%`
     ]);
-
     const csvContent = [
       headers.join(','),
       ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
     ].join('\n');
-
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -356,5 +312,4 @@ class BudgetForecastService {
     document.body.removeChild(link);
   }
 }
-
 export const budgetForecastService = new BudgetForecastService();

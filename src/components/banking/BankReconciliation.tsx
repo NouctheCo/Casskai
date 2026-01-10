@@ -8,7 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { 
+import { logger } from '@/lib/logger';
+import {
   Shuffle, 
   CheckCircle, 
   XCircle, 
@@ -27,7 +28,6 @@ import {
   Database,
   Zap
 } from 'lucide-react';
-
 type BankTransaction = {
   id: string;
   date: string;
@@ -38,10 +38,13 @@ type BankTransaction = {
   suggested_matches?: string[];
   matched_entry_id?: string;
 };
-
-const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccounts, onReconciliationComplete }) => {
+interface BankReconciliationProps {
+  currentEnterprise: unknown;
+  bankAccounts: unknown[];
+  onReconciliationComplete?: (summary?: unknown) => void;
+}
+const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccounts, onReconciliationComplete }: BankReconciliationProps) => {
   const { toast } = useToast();
-
   // États
   const [selectedAccount, setSelectedAccount] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('month');
@@ -55,7 +58,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   const [reconciliationSummary, setReconciliationSummary] = useState<any>(null);
   const [reconciliationInProgress, setReconciliationInProgress] = useState<{[key: string]: boolean}>({});
   const [reconciledTransactions, setReconciledTransactions] = useState<Set<string>>(new Set());
-
   // Données simulées pour les transactions bancaires et écritures comptables
   const [bankTransactions, setBankTransactions] = useState<BankTransaction[]>([
     {
@@ -95,7 +97,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       suggested_matches: ['ae_15']
     }
   ]);
-
   const [accountingEntries] = useState([
     {
       id: 'ae_3',
@@ -144,20 +145,17 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       reconciled: false
     }
   ]);
-
   // Calculs des statistiques
   const reconciliationStats = useMemo(() => {
     const totalBankTransactions = bankTransactions.length;
     const reconciledTransactions = bankTransactions.filter(t => t.is_reconciled).length;
     const pendingTransactions = totalBankTransactions - reconciledTransactions;
     const reconciliationRate = totalBankTransactions > 0 ? (reconciledTransactions / totalBankTransactions) * 100 : 0;
-
     const totalAmount = bankTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
     const reconciledAmount = bankTransactions
       .filter(t => t.is_reconciled)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
     const pendingAmount = totalAmount - reconciledAmount;
-
     return {
       totalBankTransactions,
       reconciledTransactions,
@@ -168,7 +166,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       pendingAmount
     };
   }, [bankTransactions]);
-
   const markTransactionAsReconciled = (transactionId: string, matchedEntryId?: string) => {
     setReconciledTransactions(prev => new Set([...prev, transactionId]));
     setBankTransactions(prev => prev.map(tx =>
@@ -177,7 +174,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
         : tx
     ));
   };
-
   const sendToCategorization = (transactionId: string) => {
     // Remet la transaction dans l'état "En attente" pour la recatégoriser
     setReconciledTransactions(prev => {
@@ -185,30 +181,25 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       clone.delete(transactionId);
       return clone;
     });
-
     setBankTransactions(prev => prev.map(tx =>
       tx.id === transactionId
         ? { ...tx, is_reconciled: false, matched_entry_id: undefined }
         : tx
     ));
-
     toast({
       title: "Transaction renvoyée en catégorisation",
       description: "Vous pouvez la recatégoriser dans l'onglet Catégorisation",
     });
   };
-
   // Filtrage des transactions
   const filteredTransactions = useMemo(() => {
     let filtered = bankTransactions;
-
     if (searchTerm) {
       filtered = filtered.filter(t => 
         t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.reference.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     if (filterStatus !== 'all') {
       filtered = filtered.filter(t => {
         switch (filterStatus) {
@@ -219,10 +210,8 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
         }
       });
     }
-
     return filtered;
   }, [bankTransactions, searchTerm, filterStatus]);
-
   // Lancement de la réconciliation automatique
   const runAutoReconciliation = async () => {
     if (!selectedAccount) {
@@ -233,13 +222,10 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       });
       return;
     }
-
     setIsReconciling(true);
-
     try {
       // Simulation d'un appel au service de réconciliation
       await new Promise(resolve => setTimeout(resolve, 2000));
-
       const mockMatches = [
         {
           bank_transaction_id: 'bt_2',
@@ -263,17 +249,14 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
           amount_difference: -0.01
         }
       ];
-
       setAutoMatches(mockMatches);
-
       toast({
         title: "Réconciliation automatique terminée",
         description: `${mockMatches.length} correspondances trouvées`,
         variant: "default"
       });
-
     } catch (error) {
-      console.error('Erreur lors de la réconciliation automatique:', error instanceof Error ? error.message : String(error));
+      logger.error('BankReconciliation', 'Erreur lors de la réconciliation automatique:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Échec de la réconciliation automatique",
@@ -283,31 +266,25 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       setIsReconciling(false);
     }
   };
-
   // Validation d'une correspondance
   const validateMatch = async (bankTransactionId: string, accountingEntryId: string) => {
     try {
       setReconciliationInProgress(prev => ({ ...prev, [`${bankTransactionId}-${accountingEntryId}`]: true }));
-      
       // Simulation d'un appel au service de réconciliation
       await new Promise(resolve => setTimeout(resolve, 1000));
-
       // Marquer la transaction comme réconciliée (mise à jour des compteurs et des listes)
       markTransactionAsReconciled(bankTransactionId, accountingEntryId);
-
       toast({
         title: "✅ Correspondance validée",
         description: `Transaction ${bankTransactionId} réconciliée avec l'écriture ${accountingEntryId}`,
         variant: "default"
       });
-
       // Retirer de la liste des matches automatiques
       setAutoMatches(prev => prev.filter(m =>
         m.bank_transaction_id !== bankTransactionId || m.accounting_entry_id !== accountingEntryId
       ));
-
     } catch (error) {
-      console.error('Erreur lors de la validation:', error instanceof Error ? error.message : String(error));
+      logger.error('BankReconciliation', 'Erreur lors de la validation:', error instanceof Error ? error.message : String(error));
       toast({
         title: "❌ Erreur",
         description: "Échec de la réconciliation",
@@ -321,26 +298,21 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       });
     }
   };
-
   // Réconcilier une transaction spécifique de l'onglet Historique
   const reconcileTransaction = async (transactionId: string) => {
     try {
       setReconciliationInProgress(prev => ({ ...prev, [transactionId]: true }));
-      
       // Simulation d'un appel au service de réconciliation
       await new Promise(resolve => setTimeout(resolve, 1000));
-
       // Marquer la transaction comme réconciliée (mise à jour des compteurs et des listes)
       markTransactionAsReconciled(transactionId);
-
       toast({
         title: "✅ Réconciliation réussie",
         description: `La transaction a été réconciliée avec succès`,
         variant: "default"
       });
-
     } catch (error) {
-      console.error('Erreur lors de la réconciliation:', error instanceof Error ? error.message : String(error));
+      logger.error('BankReconciliation', 'Erreur lors de la réconciliation:', error instanceof Error ? error.message : String(error));
       toast({
         title: "❌ Erreur",
         description: "Échec de la réconciliation",
@@ -354,7 +326,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       });
     }
   };
-
   // Récupération du résumé de réconciliation
   const fetchReconciliationSummary = async () => {
     try {
@@ -369,45 +340,37 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
         last_reconciliation: new Date().toISOString(),
         period: selectedPeriod
       };
-
       setReconciliationSummary(summary);
-
       if (onReconciliationComplete) {
         onReconciliationComplete(summary);
       }
-
     } catch (error) {
-      console.error('Erreur lors de la récupération du résumé:', error instanceof Error ? error.message : String(error));
+      logger.error('BankReconciliation', 'Erreur lors de la récupération du résumé:', error instanceof Error ? error.message : String(error));
     }
   };
-
   useEffect(() => {
     if (selectedAccount) {
       fetchReconciliationSummary();
     }
   }, [selectedAccount, selectedPeriod]);
-
   // Formatage des montants
   const formatAmount = (amount: number) => {
     const abs = Math.abs(amount);
     const sign = amount >= 0 ? '+' : '-';
     return `${sign}${abs.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
   };
-
   // Couleur selon le statut
   const getStatusColor = (reconciled: boolean, hasMatches = false) => {
     if (reconciled) return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
     if (hasMatches) return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400';
     return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
   };
-
   // Icône de confiance
   const getConfidenceIcon = (confidence: number) => {
     if (confidence >= 0.9) return <CheckCircle className="h-4 w-4 text-green-600" />;
     if (confidence >= 0.7) return <AlertCircle className="h-4 w-4 text-orange-600" />;
     return <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />;
   };
-
   return (
     <div className="space-y-6">
       {/* Header avec statistiques */}
@@ -428,7 +391,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
           </CardHeader>
         </Card>
       </motion.div>
-
       {/* KPI de réconciliation */}
       <motion.div
         className="grid gap-6 md:grid-cols-4"
@@ -460,7 +422,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
             </div>
           </CardContent>
         </Card>
-
         <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
@@ -479,7 +440,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
             </div>
           </CardContent>
         </Card>
-
         <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
@@ -498,7 +458,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
             </div>
           </CardContent>
         </Card>
-
         <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
@@ -518,7 +477,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
           </CardContent>
         </Card>
       </motion.div>
-
       {/* Contrôles */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -545,7 +503,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="flex-1">
                 <label htmlFor="period-select" className="text-sm font-medium mb-2 block">
                   Période
@@ -562,7 +519,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="flex items-end space-x-2">
                 <Button
                   onClick={runAutoReconciliation}
@@ -602,7 +558,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
           </CardContent>
         </Card>
       </motion.div>
-
       {/* Panneau de détails conditionnel */}
       {showDetails && (
         <motion.div
@@ -658,7 +613,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
           </Card>
         </motion.div>
       )}
-
       {/* Onglets principaux */}
       <Tabs defaultValue="matches" className="space-y-4">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-2">
@@ -686,7 +640,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
             </TabsTrigger>
           </TabsList>
         </div>
-
         {/* Correspondances automatiques */}
         <TabsContent value="matches">
           <motion.div
@@ -710,7 +663,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                     {autoMatches.map((match, index) => {
                       const bankTx = bankTransactions.find(t => t.id === match.bank_transaction_id);
                       const accountingEntry = accountingEntries.find(e => e.id === match.accounting_entry_id);
-
                       return (
                         <motion.div
                           key={`${match.bank_transaction_id}-${match.accounting_entry_id}`}
@@ -745,7 +697,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                               </Button>
                             </div>
                           </div>
-
                           <div className="grid md:grid-cols-2 gap-4">
                             {/* Transaction bancaire */}
                             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600 dark:border-gray-600">
@@ -774,7 +725,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                                 </div>
                               </div>
                             </div>
-
                             {/* Écriture comptable */}
                             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600 dark:border-gray-600">
                               <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2 flex items-center gap-2">
@@ -803,7 +753,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                               </div>
                             </div>
                           </div>
-
                           {/* Détails de la correspondance */}
                           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
                             <p className="text-sm text-blue-800 dark:text-blue-300">
@@ -836,7 +785,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
             </Card>
           </motion.div>
         </TabsContent>
-
         {/* Liste des transactions */}
         <TabsContent value="transactions">
           <motion.div
@@ -856,7 +804,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                       Liste complète des transactions avec statut de réconciliation
                     </CardDescription>
                   </div>
-                  
                   <div className="flex space-x-3">
                     <div className="relative">
                       <Search className="h-4 w-4 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
@@ -893,7 +840,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                     >
                       <div className="flex items-center space-x-4 flex-1">
                         <div className={`w-3 h-3 rounded-full ${transaction.is_reconciled ? 'bg-green-500' : 'bg-orange-500'}`} />
-                        
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
                             <p className="font-medium text-gray-900 dark:text-gray-100 dark:text-white truncate">
@@ -903,7 +849,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                               {formatAmount(transaction.amount)}
                             </span>
                           </div>
-                          
                           <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
@@ -913,19 +858,16 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                           </div>
                         </div>
                       </div>
-
                       <div className="flex items-center space-x-3 ml-4">
                         <Badge className={getStatusColor(transaction.is_reconciled, (transaction.suggested_matches?.length ?? 0) > 0)}>
                           {transaction.is_reconciled ? 'Réconciliée' :
                            (transaction.suggested_matches?.length ?? 0) > 0 ? 'Suggestions' : 'En attente'}
                         </Badge>
-
                         {!transaction.is_reconciled && (transaction.suggested_matches?.length ?? 0) > 0 && (
                           <Badge variant="secondary" className="text-xs">
                             {transaction.suggested_matches?.length} suggestion{(transaction.suggested_matches?.length ?? 0) > 1 ? 's' : ''}
                           </Badge>
                         )}
-                        
                         {!reconciledTransactions.has(transaction.id) && !transaction.is_reconciled && (
                           <Button 
                             variant="outline"
@@ -948,7 +890,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                             )}
                           </Button>
                         )}
-
                         {(reconciledTransactions.has(transaction.id) || transaction.is_reconciled) && (
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
@@ -971,7 +912,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                     </motion.div>
                   ))}
                 </div>
-
                 {filteredTransactions.length === 0 && (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -989,7 +929,6 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
             </Card>
           </motion.div>
         </TabsContent>
-
         {/* Réconciliation manuelle */}
         <TabsContent value="manual">
           <motion.div
@@ -1031,5 +970,4 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
     </div>
   );
 };
-
 export default BankReconciliation;

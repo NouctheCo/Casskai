@@ -280,7 +280,10 @@ export function ModuleManagementSettings() {
 
               const module = systemModules.find(m => m.key === result.value.moduleKey);
 
-              const errorReason = result.value.error?.message || result.value.error || 'Erreur inconnue';
+              const error = result.value.error;
+              const errorReason = (error && typeof error === 'object' && 'message' in error)
+                ? (error as { message: string }).message
+                : (typeof error === 'string' ? error : 'Erreur inconnue');
 
               return `${module?.name || result.value.moduleKey}: ${errorReason}`;
 

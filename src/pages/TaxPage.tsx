@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -42,7 +41,8 @@ import {
   TaxFilters,
   TaxObligationFormData
 } from '../types/tax.types';
-import { 
+import { logger } from '@/lib/logger';
+import {
   FileText, 
   Calendar as CalendarIcon, 
   AlertTriangle, 
@@ -63,12 +63,10 @@ import {
   Shield,
   Sparkles
 } from 'lucide-react';
-
 // Calendar setup
 const locales = {
   fr,
 };
-
 const _localizer = dateFnsLocalizer({
   format,
   parse,
@@ -76,11 +74,9 @@ const _localizer = dateFnsLocalizer({
   getDay,
   locales,
 });
-
 const TaxPage: React.FC = () => {
   const { t } = useTranslation();
   const { currentEnterprise } = useEnterprise();
-  
   // State management
   const [dashboardData, setDashboardData] = useState<TaxDashboardData | null>(null);
   const [declarations, setDeclarations] = useState<TaxDeclaration[]>([]);
@@ -92,7 +88,10 @@ const TaxPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isObligationDialogOpen, setIsObligationDialogOpen] = useState(false);
   const [selectedObligation, setSelectedObligation] = useState<TaxObligation | null>(null);
-
+  // States for declaration view/edit modals
+  const [selectedDeclaration, setSelectedDeclaration] = useState<TaxDeclaration | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -103,7 +102,6 @@ const TaxPage: React.FC = () => {
       }
     }
   };
-
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
@@ -116,7 +114,6 @@ const TaxPage: React.FC = () => {
       }
     }
   };
-  
   // Filter states
   const [filters, setFilters] = useState<TaxFilters>({
     search: '',
@@ -125,7 +122,6 @@ const TaxPage: React.FC = () => {
     due_date_from: '',
     due_date_to: ''
   });
-
   // Form state for new declaration
   const [newDeclaration, setNewDeclaration] = useState({
     type: 'TVA' as 'TVA' | 'IS' | 'Liasse' | 'IR' | 'CFE' | 'CVAE',
@@ -136,9 +132,7 @@ const TaxPage: React.FC = () => {
     amount: '',
     description: ''
   });
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   // Load data on component mount
   useEffect(() => {
     if (currentEnterprise?.id) {
@@ -149,12 +143,10 @@ const TaxPage: React.FC = () => {
       loadObligations();
     }
   }, [currentEnterprise]);
-
   // Apply filters when they change
   useEffect(() => {
     applyFilters();
   }, [declarations, filters]);
-
   const loadDashboardData = async () => {
     try {
       const response = await taxService.getDashboardData(currentEnterprise!.id);
@@ -165,11 +157,10 @@ const TaxPage: React.FC = () => {
         toastError(t('tax.errors.loadDashboardData'));
       }
     } catch (error) {
-      console.error('Error loading dashboard data:', error instanceof Error ? error.message : String(error));
+      logger.error('Tax', 'Error loading dashboard data:', error instanceof Error ? error.message : String(error));
       toastError(t('tax.errors.loadDashboardData'));
     }
   };
-
   const loadDeclarations = async () => {
     try {
       const response = await taxService.getDeclarations(currentEnterprise!.id);
@@ -181,22 +172,19 @@ const TaxPage: React.FC = () => {
           decl.type.trim() !== '' &&
           ['TVA', 'IS', 'Liasse', 'IR', 'CFE', 'CVAE', 'DSN'].includes(decl.type)
         );
-
         if (validDeclarations.length < response.data.length) {
-          console.warn(`${response.data.length - validDeclarations.length} déclaration(s) invalide(s) filtrée(s)`);
+          logger.warn('Tax', `${response.data.length - validDeclarations.length} déclaration(s) invalide(s) filtrée(s)`);
         }
-
         setDeclarations(validDeclarations);
       }
       if (response.error) {
         toastError(t('tax.errors.loadDeclarations'));
       }
     } catch (error) {
-      console.error('Error loading declarations:', error instanceof Error ? error.message : String(error));
+      logger.error('Tax', 'Error loading declarations:', error instanceof Error ? error.message : String(error));
       toastError(t('tax.errors.loadDeclarations'));
     }
   };
-
   const loadCalendarEvents = async () => {
     try {
       const response = await taxService.getCalendarEvents(currentEnterprise!.id);
@@ -211,10 +199,9 @@ const TaxPage: React.FC = () => {
         setCalendarEvents(response.data);
       }
     } catch (error) {
-      console.error('Error loading calendar events:', error instanceof Error ? error.message : String(error));
+      logger.error('Tax', 'Error loading calendar events:', error instanceof Error ? error.message : String(error));
     }
   };
-
   const loadAlerts = async () => {
     try {
       const response = await taxService.getAlerts(currentEnterprise!.id);
@@ -222,10 +209,9 @@ const TaxPage: React.FC = () => {
         setAlerts(response.data);
       }
     } catch (error) {
-      console.error('Error loading alerts:', error instanceof Error ? error.message : String(error));
+      logger.error('Tax', 'Error loading alerts:', error instanceof Error ? error.message : String(error));
     }
   };
-
   const loadObligations = async () => {
     try {
       const response = await taxService.getObligations(currentEnterprise!.id);
@@ -234,14 +220,12 @@ const TaxPage: React.FC = () => {
       }
       setLoading(false);
     } catch (error) {
-      console.error('Error loading obligations:', error instanceof Error ? error.message : String(error));
+      logger.error('Tax', 'Error loading obligations:', error instanceof Error ? error.message : String(error));
       setLoading(false);
     }
   };
-
   const applyFilters = () => {
     let filtered = [...declarations];
-    
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       filtered = filtered.filter(d =>
@@ -249,15 +233,12 @@ const TaxPage: React.FC = () => {
         d.description?.toLowerCase().includes(searchLower)
       );
     }
-    
     if (filters.type) {
       filtered = filtered.filter(d => d.type === filters.type);
     }
-    
     if (filters.status) {
       filtered = filtered.filter(d => d.status === filters.status);
     }
-    
     if (filters.due_date_from) {
       const fromDate = new Date(filters.due_date_from);
       if (!isNaN(fromDate.getTime())) {
@@ -266,7 +247,6 @@ const TaxPage: React.FC = () => {
         );
       }
     }
-    
     if (filters.due_date_to) {
       const toDate = new Date(filters.due_date_to);
       if (!isNaN(toDate.getTime())) {
@@ -275,20 +255,15 @@ const TaxPage: React.FC = () => {
         );
       }
     }
-    
     setFilteredDeclarations(filtered);
   };
-
   const handleExportDeclarations = () => {
     taxService.exportDeclarationsToCSV(filteredDeclarations, 'declarations_fiscales');
     toastSuccess(t('tax.success.exportDeclarations'));
   };
-
   const handleCreateDeclaration = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!currentEnterprise?.id) return;
-
     // Validation du type de déclaration
     const VALID_TYPES = ['TVA', 'IS', 'Liasse', 'IR', 'CFE', 'CVAE', 'DSN'];
     if (!VALID_TYPES.includes(newDeclaration.type)) {
@@ -296,9 +271,7 @@ const TaxPage: React.FC = () => {
       setIsSubmitting(false);
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       const declarationData: Omit<TaxDeclaration, 'id'> = {
         type: newDeclaration.type,
@@ -314,12 +287,9 @@ const TaxPage: React.FC = () => {
           end: new Date(newDeclaration.period_end)
         }
       };
-
       const response = await taxService.createTaxDeclaration(currentEnterprise.id, declarationData);
-
       if (response.data) {
         toastSuccess(t('tax.success.declarationCreated'));
-
         // Reset form
         setNewDeclaration({
           type: 'TVA',
@@ -330,24 +300,21 @@ const TaxPage: React.FC = () => {
           amount: '',
           description: ''
         });
-
         // Reload data
         await loadDeclarations();
         await loadDashboardData();
-
         // Switch to declarations tab
         setActiveTab('declarations');
       } else if (response.error) {
         toastError(response.error.message || t('tax.errors.createDeclaration'));
       }
     } catch (error) {
-      console.error('Error creating declaration:', error);
+      logger.error('Tax', 'Error creating declaration:', error);
       toastError(t('tax.errors.createDeclarationGeneric'));
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const handleAcknowledgeAlert = async (alertId: string) => {
     try {
       const response = await (taxService as any).acknowledgeAlert(alertId);
@@ -361,22 +328,38 @@ const TaxPage: React.FC = () => {
       toastError(t('tax.errors.acknowledgeAlert'));
     }
   };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR'
     }).format(amount);
   };
-
   const handleViewDeclaration = (declaration: TaxDeclaration) => {
-    toastSuccess(t('tax.success.viewDeclaration', { name: declaration.name }));
-    // TODO: Open modal or navigate to detail view
+    setSelectedDeclaration(declaration);
+    setShowDetailModal(true);
   };
 
   const handleEditDeclaration = (declaration: TaxDeclaration) => {
-    toastUpdated(t('tax.success.editDeclaration', { name: declaration.name }));
-    // TODO: Open edit modal or navigate to edit form
+    setSelectedDeclaration(declaration);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEditedDeclaration = async (updates: Partial<TaxDeclaration>) => {
+    if (!selectedDeclaration) return;
+
+    try {
+      const result = await taxService.updateDeclaration(selectedDeclaration.id, updates);
+      if (result.error) {
+        throw result.error;
+      }
+      await loadDeclarations();
+      setShowEditModal(false);
+      setSelectedDeclaration(null);
+      toastUpdated('La déclaration');
+    } catch (error) {
+      logger.error('Tax', 'Error updating declaration:', error instanceof Error ? error.message : String(error));
+      toastError(t('tax.errors.updateDeclaration'));
+    }
   };
 
   const handleDeleteDeclaration = async (declarationId: string, declarationName: string) => {
@@ -384,31 +367,29 @@ const TaxPage: React.FC = () => {
     if (!window.confirm(t('tax.confirm.deleteDeclaration', { name: declarationName }))) {
       return;
     }
-    
     try {
-      // TODO: Implement delete API call
-      // await taxService.deleteDeclaration(declarationId);
+      const result = await taxService.deleteDeclaration(declarationId);
+      if (result.error) {
+        throw result.error;
+      }
       await loadDeclarations();
+      await loadDashboardData();
       toastDeleted('La déclaration');
     } catch (error) {
-      console.error('Error deleting declaration:', error instanceof Error ? error.message : String(error));
+      logger.error('Tax', 'Error deleting declaration:', error instanceof Error ? error.message : String(error));
       toastError(t('tax.errors.deleteDeclaration'));
     }
   };
-
   const handleEditObligation = (obligation: TaxObligation) => {
     setSelectedObligation(obligation);
     setIsObligationDialogOpen(true);
   };
-
   const handleCreateObligation = () => {
     setSelectedObligation(null);
     setIsObligationDialogOpen(true);
   };
-
   const handleSaveObligation = async (data: TaxObligationFormData) => {
     if (!currentEnterprise?.id) return;
-
     if (selectedObligation) {
       // Update existing obligation
       const result = await taxService.updateObligation(selectedObligation.id, data);
@@ -422,17 +403,14 @@ const TaxPage: React.FC = () => {
         throw result.error;
       }
     }
-
     // Reload obligations
     await loadObligations();
   };
-
   const handleDeleteObligation = async (obligationId: string, obligationName: string) => {
     // eslint-disable-next-line no-alert
     if (!window.confirm(t('tax.confirm.deleteObligation', { name: obligationName }))) {
       return;
     }
-    
     try {
       const result = await taxService.deleteObligation(obligationId);
       if (result.error) {
@@ -441,11 +419,10 @@ const TaxPage: React.FC = () => {
       await loadObligations();
       toastDeleted('L\'obligation');
     } catch (error) {
-      console.error('Error deleting obligation:', error instanceof Error ? error.message : String(error));
+      logger.error('Tax', 'Error deleting obligation:', error instanceof Error ? error.message : String(error));
       toastError(t('tax.errors.deleteObligation'));
     }
   };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
@@ -456,7 +433,6 @@ const TaxPage: React.FC = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'TVA': return 'bg-blue-100 text-blue-800';
@@ -468,7 +444,6 @@ const TaxPage: React.FC = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-
   const getAlertIcon = (severity: string) => {
     switch (severity) {
       case 'critical': return <XCircle className="h-5 w-5 text-red-500" />;
@@ -478,7 +453,6 @@ const TaxPage: React.FC = () => {
       default: return <Bell className="h-5 w-5 text-gray-500 dark:text-gray-300" />;
     }
   };
-
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical': return 'bg-red-100 text-red-800';
@@ -488,7 +462,6 @@ const TaxPage: React.FC = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -499,7 +472,6 @@ const TaxPage: React.FC = () => {
       </div>
     );
   }
-
   return (
     <motion.div 
       className="space-y-8 p-6"
@@ -529,7 +501,6 @@ const TaxPage: React.FC = () => {
             </Badge>
           </div>
         </div>
-        
         <div className="flex items-center space-x-3">
           <Button 
             variant="outline" 
@@ -548,7 +519,6 @@ const TaxPage: React.FC = () => {
           </Button>
         </div>
       </motion.div>
-
       {/* Tabs Navigation */}
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -562,7 +532,6 @@ const TaxPage: React.FC = () => {
             <TabsTrigger value="vat-validator">{t('tax.tabs.vat_validator', 'Vérif. TVA')}</TabsTrigger>
             <TabsTrigger value="new-declaration">{t('tax.tabs.new')}</TabsTrigger>
           </TabsList>
-
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
             {dashboardData && (
@@ -584,7 +553,6 @@ const TaxPage: React.FC = () => {
                       </div>
                     </CardContent>
                   </Card>
-
                   <Card>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -600,7 +568,6 @@ const TaxPage: React.FC = () => {
                       </div>
                     </CardContent>
                   </Card>
-
                   <Card>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -616,7 +583,6 @@ const TaxPage: React.FC = () => {
                       </div>
                     </CardContent>
                   </Card>
-
                   <Card>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -633,7 +599,6 @@ const TaxPage: React.FC = () => {
                     </CardContent>
                   </Card>
                 </div>
-
                 {/* Financial Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card>
@@ -663,7 +628,6 @@ const TaxPage: React.FC = () => {
                       </div>
                     </CardContent>
                   </Card>
-
 {dashboardData.compliance_score && (
                   <Card>
                     <CardHeader>
@@ -704,7 +668,6 @@ const TaxPage: React.FC = () => {
                   </Card>
                 )}
                 </div>
-
                 {/* Breakdown by Type */}
                 <Card>
                   <CardHeader>
@@ -741,7 +704,6 @@ const TaxPage: React.FC = () => {
                     </div>
                   </CardContent>
                 </Card>
-
                 {/* Recent Declarations and Upcoming Obligations */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Card>
@@ -778,7 +740,6 @@ const TaxPage: React.FC = () => {
                       </div>
                     </CardContent>
                   </Card>
-
                   <Card>
                     <CardHeader>
                       <CardTitle>{t('tax.upcomingObligations.title')}</CardTitle>
@@ -814,7 +775,6 @@ const TaxPage: React.FC = () => {
               </>
             )}
           </TabsContent>
-
           {/* Conformité Fiscale Multi-pays Tab */}
           <TabsContent value="compliance" className="space-y-6">
             {currentEnterprise?.id && (
@@ -824,7 +784,6 @@ const TaxPage: React.FC = () => {
               />
             )}
           </TabsContent>
-
           {/* Declarations Tab */}
           <TabsContent value="declarations" className="space-y-6">
             {/* Actions rapides : Génération TVA auto + Export FEC */}
@@ -841,7 +800,6 @@ const TaxPage: React.FC = () => {
                 }}
               />
             </div>
-
             {/* Search and Filters */}
             <Card>
               <CardContent className="p-6">
@@ -895,7 +853,6 @@ const TaxPage: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-
             {/* Declarations List */}
             <div className="grid gap-6">
               {filteredDeclarations.map((declaration) => (
@@ -954,7 +911,6 @@ const TaxPage: React.FC = () => {
                         </Button>
                       </div>
                     </div>
-
                     {declaration.amount && (
                       <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg dark:bg-gray-900/30">
                         <div>
@@ -966,7 +922,6 @@ const TaxPage: React.FC = () => {
                         <DollarSign className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                       </div>
                     )}
-
                     {declaration.notes && (
                       <div className="mt-4 p-3 bg-blue-50 rounded-lg dark:bg-blue-900/20">
                         <p className="text-sm text-blue-800">
@@ -974,7 +929,6 @@ const TaxPage: React.FC = () => {
                         </p>
                       </div>
                     )}
-
                     {declaration.attachments && declaration.attachments.length > 0 && (
                       <div className="mt-4">
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('tax.declarations.attachments')}:</p>
@@ -991,7 +945,6 @@ const TaxPage: React.FC = () => {
                 </Card>
               ))}
             </div>
-
             {filteredDeclarations.length === 0 && (
               <Card>
                 <CardContent className="p-8 text-center">
@@ -1007,7 +960,6 @@ const TaxPage: React.FC = () => {
               </Card>
             )}
           </TabsContent>
-
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-6">
             {currentEnterprise?.id && (
@@ -1021,7 +973,6 @@ const TaxPage: React.FC = () => {
               />
             )}
           </TabsContent>
-
           {/* Alerts Tab */}
           <TabsContent value="alerts" className="space-y-6">
             <div className="grid gap-4">
@@ -1079,7 +1030,6 @@ const TaxPage: React.FC = () => {
                 </Card>
               ))}
             </div>
-
             {alerts.length === 0 && (
               <Card>
                 <CardContent className="p-8 text-center">
@@ -1092,7 +1042,6 @@ const TaxPage: React.FC = () => {
               </Card>
             )}
           </TabsContent>
-
           {/* Obligations Tab */}
           <TabsContent value="obligations" className="space-y-6">
             {obligations.length === 0 ? (
@@ -1164,7 +1113,6 @@ const TaxPage: React.FC = () => {
                         </Button>
                       </div>
                     </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="flex items-center gap-2">
                         <input
@@ -1197,7 +1145,6 @@ const TaxPage: React.FC = () => {
                         <span className="text-sm">{t('tax.obligations.emailNotifications')}</span>
                       </div>
                     </div>
-
                     {obligation.notification_emails && obligation.notification_emails.length > 0 && (
                       <div className="mt-4">
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('tax.obligations.notificationEmails')}:</p>
@@ -1216,12 +1163,10 @@ const TaxPage: React.FC = () => {
             </div>
             )}
           </TabsContent>
-
           {/* VAT Validator Tab */}
           <TabsContent value="vat-validator" className="space-y-6">
             <VATNumberValidator />
           </TabsContent>
-
           {/* New Declaration Tab */}
           <TabsContent value="new-declaration" className="space-y-6">
             <Card>
@@ -1255,7 +1200,6 @@ const TaxPage: React.FC = () => {
                         </SelectContent>
                       </Select>
                     </div>
-
                     <div className="space-y-2">
                       <label htmlFor="name" className="text-sm font-medium">
                         {t('tax.newDeclaration.form.name')} *
@@ -1269,7 +1213,6 @@ const TaxPage: React.FC = () => {
                         required
                       />
                     </div>
-
                     <div className="space-y-2">
                       <label htmlFor="period_start" className="text-sm font-medium">
                         {t('tax.newDeclaration.form.periodStart')} *
@@ -1282,7 +1225,6 @@ const TaxPage: React.FC = () => {
                         required
                       />
                     </div>
-
                     <div className="space-y-2">
                       <label htmlFor="period_end" className="text-sm font-medium">
                         {t('tax.newDeclaration.form.periodEnd')} *
@@ -1295,7 +1237,6 @@ const TaxPage: React.FC = () => {
                         required
                       />
                     </div>
-
                     <div className="space-y-2">
                       <label htmlFor="due_date" className="text-sm font-medium">
                         {t('tax.newDeclaration.form.dueDate')} *
@@ -1308,7 +1249,6 @@ const TaxPage: React.FC = () => {
                         required
                       />
                     </div>
-
                     <div className="space-y-2">
                       <label htmlFor="amount" className="text-sm font-medium">
                         {t('tax.newDeclaration.form.amount')}
@@ -1323,7 +1263,6 @@ const TaxPage: React.FC = () => {
                       />
                     </div>
                   </div>
-
                   <div className="space-y-2">
                     <label htmlFor="description" className="text-sm font-medium">
                       {t('tax.newDeclaration.form.description')}
@@ -1336,7 +1275,6 @@ const TaxPage: React.FC = () => {
                       placeholder={t('tax.newDeclaration.form.descriptionPlaceholder')}
                     />
                   </div>
-
                   <div className="flex justify-end gap-2 pt-4">
                     <Button
                       type="button"
@@ -1359,7 +1297,6 @@ const TaxPage: React.FC = () => {
           </TabsContent>
         </Tabs>
       </motion.div>
-
       {/* Obligation Configuration Dialog */}
       <ObligationConfigDialog
         open={isObligationDialogOpen}
@@ -1367,8 +1304,201 @@ const TaxPage: React.FC = () => {
         obligation={selectedObligation}
         onSave={handleSaveObligation}
       />
+
+      {/* Declaration Detail Modal */}
+      {showDetailModal && selectedDeclaration && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-xl">{selectedDeclaration.name}</CardTitle>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge className={getTypeColor(selectedDeclaration.type)}>
+                      {selectedDeclaration.type}
+                    </Badge>
+                    <Badge className={getStatusColor(selectedDeclaration.status)}>
+                      {selectedDeclaration.status}
+                    </Badge>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowDetailModal(false);
+                    setSelectedDeclaration(null);
+                  }}
+                >
+                  ✕
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Date limite</p>
+                  <p className="text-base font-semibold">{selectedDeclaration.dueDate.toLocaleDateString('fr-FR')}</p>
+                </div>
+                {selectedDeclaration.amount && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Montant</p>
+                    <p className="text-base font-semibold">{formatCurrency(selectedDeclaration.amount)}</p>
+                  </div>
+                )}
+              </div>
+              {selectedDeclaration.period && (
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Période</p>
+                  <p className="text-base">
+                    {selectedDeclaration.period.start.toLocaleDateString('fr-FR')} - {selectedDeclaration.period.end.toLocaleDateString('fr-FR')}
+                  </p>
+                </div>
+              )}
+              {selectedDeclaration.description && (
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Description</p>
+                  <p className="text-base">{selectedDeclaration.description}</p>
+                </div>
+              )}
+              {selectedDeclaration.notes && (
+                <div className="p-3 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Notes</p>
+                  <p className="text-sm text-blue-800 dark:text-blue-300">{selectedDeclaration.notes}</p>
+                </div>
+              )}
+              {selectedDeclaration.attachments && selectedDeclaration.attachments.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Pièces jointes</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedDeclaration.attachments.map((attachment, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        📎 {attachment}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Declaration Edit Modal */}
+      {showEditModal && selectedDeclaration && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-xl">Modifier la déclaration</CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedDeclaration(null);
+                  }}
+                >
+                  ✕
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const updates: Partial<TaxDeclaration> = {
+                    name: formData.get('name') as string,
+                    description: formData.get('description') as string,
+                    amount: formData.get('amount') ? parseFloat(formData.get('amount') as string) : undefined,
+                    status: formData.get('status') as any,
+                    dueDate: new Date(formData.get('due_date') as string),
+                  };
+                  handleSaveEditedDeclaration(updates);
+                }}
+                className="space-y-4"
+              >
+                <div className="space-y-2">
+                  <label htmlFor="edit-name" className="text-sm font-medium">Nom *</label>
+                  <Input
+                    id="edit-name"
+                    name="name"
+                    type="text"
+                    defaultValue={selectedDeclaration.name}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="edit-status" className="text-sm font-medium">Statut *</label>
+                  <Select name="status" defaultValue={selectedDeclaration.status}>
+                    <SelectTrigger id="edit-status">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Brouillon</SelectItem>
+                      <SelectItem value="pending">En attente</SelectItem>
+                      <SelectItem value="submitted">Soumise</SelectItem>
+                      <SelectItem value="completed">Terminée</SelectItem>
+                      <SelectItem value="overdue">En retard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="edit-due_date" className="text-sm font-medium">Date limite *</label>
+                  <Input
+                    id="edit-due_date"
+                    name="due_date"
+                    type="date"
+                    defaultValue={selectedDeclaration.dueDate.toISOString().split('T')[0]}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="edit-amount" className="text-sm font-medium">Montant</label>
+                  <Input
+                    id="edit-amount"
+                    name="amount"
+                    type="number"
+                    step="0.01"
+                    defaultValue={selectedDeclaration.amount}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="edit-description" className="text-sm font-medium">Description</label>
+                  <Input
+                    id="edit-description"
+                    name="description"
+                    type="text"
+                    defaultValue={selectedDeclaration.description || ''}
+                    placeholder="Description optionnelle"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowEditModal(false);
+                      setSelectedDeclaration(null);
+                    }}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                  >
+                    Enregistrer
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </motion.div>
   );
 };
-
 export default TaxPage;

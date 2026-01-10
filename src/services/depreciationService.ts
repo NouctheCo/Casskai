@@ -1,10 +1,9 @@
 /**
  * Service de gestion des immobilisations et amortissements automatiques
  */
-
 import { supabase } from '../lib/supabase';
 import { auditService } from './auditService';
-
+import { logger } from '@/lib/logger';
 interface FixedAsset {
   id?: string;
   company_id: string;
@@ -23,7 +22,6 @@ interface FixedAsset {
   depreciation_account_id: string;
   expense_account_id: string;
 }
-
 /**
  * Générer les écritures d'amortissement pour toutes les immobilisations d'une période
  */
@@ -43,13 +41,10 @@ export async function generateDepreciationEntries(
       p_period_date: periodDate,
       p_auto_post: autoPost,
     });
-
     if (error) throw error;
-
     if (!data.success) {
       throw new Error(data.error || 'Erreur génération amortissements');
     }
-
     await auditService.logAsync({
       action: 'generate_depreciation_entries',
       entityType: 'depreciation',
@@ -61,14 +56,12 @@ export async function generateDepreciationEntries(
         auto_posted: autoPost,
       },
     });
-
     return data;
   } catch (error) {
-    console.error('Erreur génération amortissements:', error);
+    logger.error('Depreciation', 'Erreur génération amortissements:', error);
     throw error;
   }
 }
-
 /**
  * Créer une immobilisation
  */
@@ -79,23 +72,19 @@ export async function createFixedAsset(asset: FixedAsset): Promise<string> {
       .insert(asset)
       .select()
       .single();
-
     if (error) throw error;
-
     await auditService.logAsync({
       action: 'create_fixed_asset',
       entityType: 'fixed_asset',
       entityId: data.id,
       metadata: { name: asset.name, cost: asset.acquisition_cost },
     });
-
     return data.id;
   } catch (error) {
-    console.error('Erreur création immobilisation:', error);
+    logger.error('Depreciation', 'Erreur création immobilisation:', error);
     throw error;
   }
 }
-
 /**
  * Récupérer toutes les immobilisations
  */
@@ -109,21 +98,17 @@ export async function getFixedAssets(
       .select('*')
       .eq('company_id', companyId)
       .order('acquisition_date', { ascending: false });
-
     if (status) {
       query = query.eq('status', status);
     }
-
     const { data, error } = await query;
     if (error) throw error;
-
     return data || [];
   } catch (error) {
-    console.error('Erreur récupération immobilisations:', error);
+    logger.error('Depreciation', 'Erreur récupération immobilisations:', error);
     return [];
   }
 }
-
 /**
  * Récupérer le plan d'amortissement d'une immobilisation
  */
@@ -134,16 +119,13 @@ export async function getDepreciationSchedule(assetId: string): Promise<any[]> {
       .select('*')
       .eq('fixed_asset_id', assetId)
       .order('period_start', { ascending: true });
-
     if (error) throw error;
-
     return data || [];
   } catch (error) {
-    console.error('Erreur récupération plan amortissement:', error);
+    logger.error('Depreciation', 'Erreur récupération plan amortissement:', error);
     return [];
   }
 }
-
 export const depreciationService = {
   generateDepreciationEntries,
   createFixedAsset,

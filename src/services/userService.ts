@@ -9,10 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from '@/lib/supabase';
 import type { UserProfile } from '@/contexts/AuthContext';
-
+import { logger } from '@/lib/logger';
 /**
  * Service centralisé pour les opérations sur les utilisateurs
  *
@@ -35,19 +34,16 @@ class UserService {
         .select('id, email, full_name, avatar_url, phone, created_at, updated_at')
         .eq('id', userId)
         .single();
-
       if (error) {
-        console.error('Erreur récupération profil:', error);
+        logger.error('User', 'Erreur récupération profil:', error);
         return null;
       }
-
       return data;
     } catch (error) {
-      console.error('Exception récupération profil:', error);
+      logger.error('User', 'Exception récupération profil:', error);
       return null;
     }
   }
-
   /**
    * Mettre à jour le profil utilisateur
    *
@@ -69,19 +65,16 @@ class UserService {
         .eq('id', userId)
         .select('id, email, full_name, avatar_url, phone, created_at, updated_at')
         .single();
-
       if (error) {
-        console.error('Erreur mise à jour profil:', error);
+        logger.error('User', 'Erreur mise à jour profil:', error);
         throw error;
       }
-
       return data;
     } catch (error) {
-      console.error('Exception mise à jour profil:', error);
+      logger.error('User', 'Exception mise à jour profil:', error);
       throw error;
     }
   }
-
   /**
    * Récupérer plusieurs utilisateurs par leurs IDs
    * Utile pour afficher les noms dans les listes (créateurs, assignés, etc.)
@@ -91,25 +84,21 @@ class UserService {
    */
   async getUsers(userIds: string[]): Promise<UserProfile[]> {
     if (userIds.length === 0) return [];
-
     try {
       const { data, error } = await supabase
         .from('users')
         .select('id, email, full_name, avatar_url, phone, created_at, updated_at')
         .in('id', userIds);
-
       if (error) {
-        console.error('Erreur récupération utilisateurs:', error);
+        logger.error('User', 'Erreur récupération utilisateurs:', error);
         return [];
       }
-
       return data || [];
     } catch (error) {
-      console.error('Exception récupération utilisateurs:', error);
+      logger.error('User', 'Exception récupération utilisateurs:', error);
       return [];
     }
   }
-
   /**
    * Récupérer un utilisateur par son email
    *
@@ -123,19 +112,16 @@ class UserService {
         .select('id, email, full_name, avatar_url, phone, created_at, updated_at')
         .eq('email', email)
         .single();
-
       if (error) {
-        console.error('Erreur recherche utilisateur par email:', error);
+        logger.error('User', 'Erreur recherche utilisateur par email:', error);
         return null;
       }
-
       return data;
     } catch (error) {
-      console.error('Exception recherche utilisateur par email:', error);
+      logger.error('User', 'Exception recherche utilisateur par email:', error);
       return null;
     }
   }
-
   /**
    * Vérifier si un utilisateur existe
    *
@@ -148,19 +134,16 @@ class UserService {
         .from('users')
         .select('id', { count: 'exact', head: true })
         .eq('id', userId);
-
       if (error) {
-        console.error('Erreur vérification existence utilisateur:', error);
+        logger.error('User', 'Erreur vérification existence utilisateur:', error);
         return false;
       }
-
       return (count || 0) > 0;
     } catch (error) {
-      console.error('Exception vérification existence utilisateur:', error);
+      logger.error('User', 'Exception vérification existence utilisateur:', error);
       return false;
     }
   }
-
   /**
    * Récupérer les informations minimales pour l'affichage (nom + avatar)
    * Optimisé pour les listes et les badges utilisateur
@@ -175,28 +158,23 @@ class UserService {
     email: string;
   }>> {
     if (userIds.length === 0) return [];
-
     try {
       const { data, error } = await supabase
         .from('users')
         .select('id, email, full_name, avatar_url')
         .in('id', userIds);
-
       if (error) {
-        console.error('Erreur récupération utilisateurs minimaux:', error);
+        logger.error('User', 'Erreur récupération utilisateurs minimaux:', error);
         return [];
       }
-
       return data || [];
     } catch (error) {
-      console.error('Exception récupération utilisateurs minimaux:', error);
+      logger.error('User', 'Exception récupération utilisateurs minimaux:', error);
       return [];
     }
   }
 }
-
 // Export d'une instance singleton
 export const userService = new UserService();
-
 // Export de la classe pour les tests
 export default UserService;

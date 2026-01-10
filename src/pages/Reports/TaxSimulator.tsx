@@ -2,7 +2,6 @@
  * CassKai - Simulateur IS/IR
  * Page de simulation fiscale pour comparer IS et IR
  */
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -35,11 +34,10 @@ import { cn } from '@/lib/utils';
 import { taxSimulationService, TaxSimulationInput, TaxSimulationResult } from '@/services/fiscal/TaxSimulationService';
 import { getAvailableCountries } from '@/data/taxConfigurations';
 import { useAuth } from '@/contexts/AuthContext';
-
+import { logger } from '@/lib/logger';
 const TaxSimulator: React.FC = () => {
   const { currentCompany: company } = useAuth();
   const availableCountries = getAvailableCountries();
-
   // État du formulaire
   const [formData, setFormData] = useState<TaxSimulationInput>({
     countryCode: company?.country || 'FR',
@@ -50,11 +48,9 @@ const TaxSimulator: React.FC = () => {
     numberOfEmployees: 0,
     totalSalaries: 0
   });
-
   // Résultats de simulation
   const [result, setResult] = useState<TaxSimulationResult | null>(null);
   const [showComparison, setShowComparison] = useState(false);
-
   // Gestion du formulaire
   const handleInputChange = (field: keyof TaxSimulationInput, value: any) => {
     setFormData(prev => ({
@@ -62,21 +58,17 @@ const TaxSimulator: React.FC = () => {
       [field]: value
     }));
   };
-
   // Lancer la simulation
   const runSimulation = () => {
     if (formData.revenue <= 0) {
-      console.warn('Veuillez saisir un chiffre d\'affaires');
+      logger.warn('TaxSimulator', 'Veuillez saisir un chiffre d\'affaires');
       return;
     }
-
     const simulationResult = showComparison
       ? taxSimulationService.compareISvsIR(formData)
       : taxSimulationService.simulateCorporateTax(formData);
-
     setResult(simulationResult);
   };
-
   // Formater devise
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -86,17 +78,14 @@ const TaxSimulator: React.FC = () => {
       maximumFractionDigits: 0
     }).format(amount);
   };
-
   // Formater pourcentage
   const formatPercent = (value: number) => {
     return `${value.toFixed(2)}%`;
   };
-
   // Export PDF (placeholder)
   const exportToPDF = () => {
-    console.log('Export PDF - Fonctionnalité à venir');
+    logger.debug('TaxSimulator', 'Export PDF - Fonctionnalité à venir');
   };
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* En-tête */}
@@ -110,13 +99,11 @@ const TaxSimulator: React.FC = () => {
             Comparez l'impôt sur les sociétés (IS) et l'impôt sur le revenu (IR) pour optimiser votre fiscalité
           </p>
         </div>
-
         <Button variant="outline" onClick={exportToPDF} className="flex items-center space-x-2">
           <Download className="w-4 h-4" />
           <span>Exporter PDF</span>
         </Button>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* FORMULAIRE */}
         <Card className="lg:col-span-1">
@@ -129,7 +116,6 @@ const TaxSimulator: React.FC = () => {
               Saisissez les données de votre entreprise
             </CardDescription>
           </CardHeader>
-
           <CardContent className="space-y-4">
             {/* Pays */}
             <div className="space-y-2">
@@ -150,7 +136,6 @@ const TaxSimulator: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-
             {/* Type de société */}
             <div className="space-y-2">
               <Label htmlFor="companyType">Forme juridique</Label>
@@ -173,7 +158,6 @@ const TaxSimulator: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-
             {/* Chiffre d'affaires */}
             <div className="space-y-2">
               <Label htmlFor="revenue">Chiffre d'affaires annuel (€)</Label>
@@ -187,7 +171,6 @@ const TaxSimulator: React.FC = () => {
                 placeholder="Ex: 250000"
               />
             </div>
-
             {/* Charges */}
             <div className="space-y-2">
               <Label htmlFor="expenses">Charges déductibles (€)</Label>
@@ -204,7 +187,6 @@ const TaxSimulator: React.FC = () => {
                 Bénéfice estimé : {formatCurrency(formData.revenue - formData.expenses)}
               </p>
             </div>
-
             {/* Salariés */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -218,7 +200,6 @@ const TaxSimulator: React.FC = () => {
                   aria-label="L'entreprise a des salariés"
                 />
               </div>
-
               {formData.hasEmployees && (
                 <AnimatePresence>
                   <motion.div
@@ -246,7 +227,6 @@ const TaxSimulator: React.FC = () => {
                 </AnimatePresence>
               )}
             </div>
-
             {/* Mode de simulation */}
             <div className="space-y-2 pt-4 border-t">
               <Label>Mode de simulation</Label>
@@ -264,7 +244,6 @@ const TaxSimulator: React.FC = () => {
                 </Label>
               </div>
             </div>
-
             {/* Bouton simulation */}
             <Button
               className="w-full"
@@ -277,7 +256,6 @@ const TaxSimulator: React.FC = () => {
             </Button>
           </CardContent>
         </Card>
-
         {/* RÉSULTATS */}
         <div className="lg:col-span-2 space-y-6">
           {!result ? (
@@ -311,7 +289,6 @@ const TaxSimulator: React.FC = () => {
                       <span>Résumé Fiscal</span>
                     </CardTitle>
                   </CardHeader>
-
                   <CardContent className="space-y-4">
                     {/* Métriques clés */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -321,7 +298,6 @@ const TaxSimulator: React.FC = () => {
                           {formatCurrency(result.fiscalProfit)}
                         </p>
                       </div>
-
                       <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                         <p className="text-xs text-red-600 dark:text-red-400 font-medium">Impôt sur les sociétés</p>
                         <p className="text-2xl font-bold text-red-700 dark:text-red-300">
@@ -331,7 +307,6 @@ const TaxSimulator: React.FC = () => {
                           Taux effectif : {formatPercent(result.corporateTaxRate)}
                         </p>
                       </div>
-
                       <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                         <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">Charges sociales</p>
                         <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">
@@ -341,7 +316,6 @@ const TaxSimulator: React.FC = () => {
                           {formatPercent(result.socialContributionsRate)}
                         </p>
                       </div>
-
                       <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <p className="text-xs text-green-600 dark:text-green-400 font-medium">Net après impôts</p>
                         <p className="text-2xl font-bold text-green-700 dark:text-green-300">
@@ -352,7 +326,6 @@ const TaxSimulator: React.FC = () => {
                         </p>
                       </div>
                     </div>
-
                     {/* Détail de l'IS */}
                     {result.corporateTaxBreakdown && result.corporateTaxBreakdown.length > 0 && (
                       <div className="border-t pt-4">
@@ -380,7 +353,6 @@ const TaxSimulator: React.FC = () => {
                     )}
                   </CardContent>
                 </Card>
-
                 {/* Comparaison IS vs IR */}
                 {result.comparison && (
                   <Card>
@@ -390,7 +362,6 @@ const TaxSimulator: React.FC = () => {
                         <span>Comparaison IS vs IR</span>
                       </CardTitle>
                     </CardHeader>
-
                     <CardContent className="space-y-4">
                       {/* Recommandation */}
                       <div className={cn(
@@ -423,7 +394,6 @@ const TaxSimulator: React.FC = () => {
                           </div>
                         </div>
                       </div>
-
                       {/* Détails comparaison */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* IS */}
@@ -439,7 +409,6 @@ const TaxSimulator: React.FC = () => {
                               </Badge>
                             )}
                           </div>
-
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-gray-600 dark:text-gray-400">IS</span>
@@ -456,7 +425,6 @@ const TaxSimulator: React.FC = () => {
                               </span>
                             </div>
                           </div>
-
                           {/* Avantages IS */}
                           <div className="space-y-1 pt-2 border-t">
                             <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Avantages :</p>
@@ -470,7 +438,6 @@ const TaxSimulator: React.FC = () => {
                             </ul>
                           </div>
                         </div>
-
                         {/* IR */}
                         <div className="border rounded-lg p-4 space-y-3">
                           <div className="flex items-center justify-between">
@@ -484,7 +451,6 @@ const TaxSimulator: React.FC = () => {
                               </Badge>
                             )}
                           </div>
-
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-gray-600 dark:text-gray-400">IR</span>
@@ -501,7 +467,6 @@ const TaxSimulator: React.FC = () => {
                               </span>
                             </div>
                           </div>
-
                           {/* Avantages IR */}
                           <div className="space-y-1 pt-2 border-t">
                             <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Avantages :</p>
@@ -519,7 +484,6 @@ const TaxSimulator: React.FC = () => {
                     </CardContent>
                   </Card>
                 )}
-
                 {/* Optimisations suggérées */}
                 {result.optimizations && result.optimizations.length > 0 && (
                   <Card>
@@ -533,7 +497,6 @@ const TaxSimulator: React.FC = () => {
                         Opportunités d'économies fiscales identifiées par l'IA
                       </CardDescription>
                     </CardHeader>
-
                     <CardContent className="space-y-3">
                       {result.optimizations.map((optimization, index) => (
                         <div
@@ -559,7 +522,6 @@ const TaxSimulator: React.FC = () => {
                                 {optimization.description}
                               </p>
                             </div>
-
                             <div className="text-right ml-4">
                               <p className="text-lg font-bold text-green-600 dark:text-green-400">
                                 {formatCurrency(optimization.potentialSaving)}
@@ -569,7 +531,6 @@ const TaxSimulator: React.FC = () => {
                           </div>
                         </div>
                       ))}
-
                       <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-md p-3 flex items-start space-x-2">
                         <Info className="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
                         <p className="text-xs text-yellow-700 dark:text-yellow-300">
@@ -587,5 +548,4 @@ const TaxSimulator: React.FC = () => {
     </div>
   );
 };
-
 export default TaxSimulator;

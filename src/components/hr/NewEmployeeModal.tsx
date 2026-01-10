@@ -6,6 +6,7 @@ import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { logger } from '@/lib/logger';
 import {
   Select,
   SelectContent,
@@ -13,13 +14,11 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-
 interface NewEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (employee: Employee) => void;
 }
-
 export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
   isOpen,
   onClose,
@@ -29,7 +28,6 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
-
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -47,46 +45,37 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
     leave_balance: 25,
     status: 'active'
   });
-
   useEffect(() => {
     if (isOpen && currentCompany?.id) {
       loadData();
     }
   }, [isOpen, currentCompany?.id]);
-
   const loadData = async () => {
     if (!currentCompany?.id) return;
-
     try {
       // Charger les employés existants pour le manager
       const response = await hrService.getEmployees(currentCompany.id);
       if (response.success && response.data) {
         setEmployees(response.data);
-
         // Extraire les départements existants
         const depts = [...new Set(response.data.map(e => e.department).filter(Boolean))] as string[];
         setDepartments(depts);
       }
     } catch (error) {
-      console.error('Erreur chargement données:', error);
+      logger.error('NewEmployeeModal', 'Erreur chargement données:', error);
     }
   };
-
   if (!isOpen) return null;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!formData.first_name || !formData.last_name) {
       toastError('Le prénom et le nom sont obligatoires');
       return;
     }
-
     if (!currentCompany?.id) {
       toastError('Entreprise non définie');
       return;
     }
-
     setLoading(true);
     try {
       const response = await hrService.createEmployee(currentCompany.id, {
@@ -95,7 +84,6 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
         contract_type: formData.contract_type as 'permanent' | 'temporary' | 'intern' | 'freelance',
         status: formData.status as 'active' | 'inactive' | 'on_leave'
       });
-
       if (response.success && response.data) {
         toastSuccess('Employé créé avec succès');
         onSuccess(response.data);
@@ -129,7 +117,6 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
       setLoading(false);
     }
   };
-
   const CONTRACT_TYPES = [
     { value: 'cdi', label: 'CDI' },
     { value: 'cdd', label: 'CDD' },
@@ -137,7 +124,6 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
     { value: 'apprentice', label: 'Apprentissage' },
     { value: 'freelance', label: 'Freelance' }
   ];
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -156,7 +142,6 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
             <X className="h-5 w-5" />
           </button>
         </div>
-
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4">
           <div className="space-y-6">
@@ -225,7 +210,6 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
                 </div>
               </div>
             </div>
-
             {/* Emploi */}
             <div>
               <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
@@ -304,7 +288,6 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
                 </div>
               </div>
             </div>
-
             {/* Rémunération */}
             <div>
               <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
@@ -350,7 +333,6 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
             </div>
           </div>
         </form>
-
         {/* Footer */}
         <div className="flex justify-end gap-3 p-4 border-t shrink-0">
           <Button variant="outline" onClick={onClose} type="button">

@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Service de calcul RFA (Remise de Fin d'Année)
  * Gère tous les calculs liés aux RFA des contrats :
@@ -17,15 +16,13 @@
  * - Calcul RFA selon barème progressif
  * - Intégration devis pondérés par taux de conversion
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface RFABracket {
   min: number;
   max: number | null;
   rate: number;
 }
-
 export interface ContractRFAData {
   contract: {
     id: string;
@@ -37,12 +34,10 @@ export interface ContractRFAData {
     rfa_brackets: RFABracket[];
     rfa_calculation_base: 'ht' | 'ttc';
   };
-
   // Données actuelles
   currentRevenue: number;
   invoicedAmount: number;
   paidAmount: number;
-
   // Devis en attente
   pendingQuotes: {
     total: number;
@@ -50,20 +45,17 @@ export interface ContractRFAData {
     conversionRate: number;
     weightedAmount: number;
   };
-
   // Projections temporelles
   periodProgress: {
     daysElapsed: number;
     totalDays: number;
     percentage: number;
   };
-
   yearProgress: {
     daysElapsed: number;
     totalDays: number;
     percentage: number;
   };
-
   // CA Projetés
   projectedRevenue: {
     prorata: number;        // Prorata temporis simple
@@ -71,14 +63,12 @@ export interface ContractRFAData {
     endOfYear: number;      // Fin d'année
     endOfContract: number;  // Fin de contrat
   };
-
   // RFA Calculées
   rfa: {
     current: number;              // Sur CA actuel
     projectedEndOfYear: number;   // Projection fin d'année
     projectedEndOfContract: number; // Projection fin contrat
   };
-
   // Détails pour affichage
   bracketDetails: {
     bracket: string;
@@ -87,7 +77,6 @@ export interface ContractRFAData {
     rfa: number;
   }[];
 }
-
 export const rfaCalculationService = {
   // Barème RFA par défaut
   DEFAULT_BRACKETS: [
@@ -97,7 +86,6 @@ export const rfaCalculationService = {
     { min: 500000, max: 1000000, rate: 0.04 },
     { min: 1000000, max: null, rate: 0.05 }
   ] as RFABracket[],
-
   /**
    * Calculer la RFA selon un barème progressif
    * Chaque tranche de revenu est taxée à son propre taux
@@ -105,21 +93,16 @@ export const rfaCalculationService = {
   calculateRFA(revenue: number, brackets: RFABracket[]): { total: number; details: Array<{ bracket: string; revenue: number; rate: number; rfa: number }> } {
     let totalRFA = 0;
     const details: Array<{ bracket: string; revenue: number; rate: number; rfa: number }> = [];
-
     for (let i = 0; i < brackets.length; i++) {
       const bracket = brackets[i];
       const bracketMin = bracket.min;
       const bracketMax = bracket.max || Infinity;
-
       // Si le revenu n'atteint pas cette tranche, on s'arrête
       if (revenue <= bracketMin) break;
-
       // Calculer le revenu dans cette tranche
       const revenueInBracket = Math.min(revenue, bracketMax) - bracketMin;
-
       // Calculer la RFA pour cette tranche
       const rfaForBracket = revenueInBracket * bracket.rate;
-
       if (revenueInBracket > 0) {
         details.push({
           bracket: bracket.max
@@ -129,14 +112,11 @@ export const rfaCalculationService = {
           rate: bracket.rate * 100,
           rfa: rfaForBracket
         });
-
         totalRFA += rfaForBracket;
       }
     }
-
     return { total: totalRFA, details };
   },
-
   /**
    * Calculer toutes les métriques RFA pour un contrat
    */
@@ -144,7 +124,6 @@ export const rfaCalculationService = {
     contractId: string,
     companyId: string
   ): Promise<ContractRFAData | null> {
-
     // 1. Récupérer le contrat avec les informations du client
     const { data: contract, error: contractError } = await supabase
       .from('contracts')
@@ -155,18 +134,15 @@ export const rfaCalculationService = {
       .eq('id', contractId)
       .eq('company_id', companyId)
       .single();
-
     if (contractError || !contract) {
-      console.error('Contrat non trouvé:', contractError);
+      logger.error('RfaCalculation', 'Contrat non trouvé:', contractError);
       return null;
     }
-
     const startDate = new Date(contract.start_date);
     const endDate = new Date(contract.end_date);
     const today = new Date();
     const yearStart = new Date(today.getFullYear(), 0, 1);
     const _yearEnd = new Date(today.getFullYear(), 11, 31);
-
     // 2. Récupérer les factures du client sur la période du contrat
     const { data: invoices } = await supabase
       .from('invoices')
@@ -176,7 +152,6 @@ export const rfaCalculationService = {
       .gte('invoice_date', contract.start_date)
       .lte('invoice_date', today.toISOString().split('T')[0])
       .in('status', ['sent', 'paid', 'partial']);
-
     // 3. Récupérer les devis en attente
     const { data: quotes } = await supabase
       .from('quotes')
@@ -184,7 +159,6 @@ export const rfaCalculationService = {
       .eq('company_id', companyId)
       .eq('customer_id', contract.third_party_id)
       .eq('status', 'sent'); // Devis envoyés mais pas encore acceptés
-
     // 4. Calculer le taux de conversion historique des devis
     const { data: historicalQuotes } = await supabase
       .from('quotes')
@@ -192,52 +166,39 @@ export const rfaCalculationService = {
       .eq('company_id', companyId)
       .eq('customer_id', contract.third_party_id)
       .in('status', ['accepted', 'rejected', 'expired']);
-
     const acceptedCount = historicalQuotes?.filter(q => q.status === 'accepted').length || 0;
     const totalHistorical = historicalQuotes?.length || 0;
     const conversionRate = totalHistorical > 0 ? acceptedCount / totalHistorical : 0.5;
-
     // 5. Calculs des montants
     const base = (contract.rfa_calculation_base as 'ht' | 'ttc') || 'ht';
-
     const invoicedAmount = invoices?.reduce((sum, inv) =>
       sum + (base === 'ht' ? (inv.total_ht || 0) : (inv.total_ttc || 0)), 0) || 0;
-
     const paidAmount = invoices?.reduce((sum, inv) => sum + (inv.paid_amount || 0), 0) || 0;
-
     const pendingQuotesTotal = quotes?.reduce((sum, q) =>
       sum + (base === 'ht' ? (q.total_ht || 0) : (q.total_ttc || 0)), 0) || 0;
-
     // 6. Calcul du prorata temporis
     const daysElapsedInPeriod = Math.max(0, Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
     const totalDaysInPeriod = Math.max(1, Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
     const periodProgress = Math.min(daysElapsedInPeriod / totalDaysInPeriod, 1);
-
     const daysElapsedInYear = Math.max(0, Math.floor((today.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24)));
     const totalDaysInYear = 365;
     const yearProgress = Math.min(daysElapsedInYear / totalDaysInYear, 1);
-
     // 7. Projections
     const projectedProrata = periodProgress > 0.01 ? invoicedAmount / periodProgress : invoicedAmount;
     const weightedQuotes = pendingQuotesTotal * conversionRate;
     const projectedWithQuotes = projectedProrata + weightedQuotes;
-
     // Projection fin d'année basée sur le rythme quotidien
     const remainingDaysInYear = Math.max(0, totalDaysInYear - daysElapsedInYear);
     const dailyRate = daysElapsedInYear > 0 ? invoicedAmount / daysElapsedInYear : 0;
     const projectedEndOfYear = invoicedAmount + (dailyRate * remainingDaysInYear) + weightedQuotes;
-
     // Projection fin de contrat
     const remainingDaysInContract = Math.max(0, Math.floor((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
     const projectedEndOfContract = invoicedAmount + (dailyRate * remainingDaysInContract) + weightedQuotes;
-
     // 8. Calcul RFA selon barème
     const brackets = (contract.rfa_brackets as RFABracket[]) || this.DEFAULT_BRACKETS;
-
     const rfaCurrent = this.calculateRFA(invoicedAmount, brackets);
     const rfaEndOfYear = this.calculateRFA(projectedEndOfYear, brackets);
     const rfaEndOfContract = this.calculateRFA(projectedEndOfContract, brackets);
-
     // 9. Construire le résultat
     return {
       contract: {
@@ -283,7 +244,6 @@ export const rfaCalculationService = {
       bracketDetails: rfaCurrent.details
     };
   },
-
   /**
    * Calculer les RFA pour tous les contrats actifs d'une entreprise
    */
@@ -294,16 +254,12 @@ export const rfaCalculationService = {
       .eq('company_id', companyId)
       .eq('status', 'active')
       .eq('rfa_enabled', true);
-
     if (!contracts || contracts.length === 0) return [];
-
     const results: ContractRFAData[] = [];
-
     for (const contract of contracts) {
       const data = await this.calculateContractRFA(contract.id, companyId);
       if (data) results.push(data);
     }
-
     return results;
   }
 };

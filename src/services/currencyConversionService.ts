@@ -9,9 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // Service de conversion des devises pour les marchés africains
 // Taux de change approximatifs (à mettre à jour régulièrement)
+import { logger } from '@/lib/logger';
 
 export interface CurrencyRate {
   code: string;
@@ -19,7 +19,6 @@ export interface CurrencyRate {
   symbol: string;
   rateFromEUR: number; // Taux par rapport à l'EUR (base)
 }
-
 // Taux de change actuels approximatifs (base EUR = 1)
 export const CURRENCY_RATES: Record<string, CurrencyRate> = {
   'EUR': {
@@ -71,17 +70,14 @@ export const CURRENCY_RATES: Record<string, CurrencyRate> = {
     rateFromEUR: 1.45 // Approximatif
   }
 };
-
 // Fonction pour convertir un prix d'EUR vers une autre devise
 export function convertPrice(priceEUR: number, targetCurrency: string): number {
   const rate = CURRENCY_RATES[targetCurrency];
   if (!rate) {
-    console.warn(`Devise non supportée: ${targetCurrency}`);
+    logger.warn('CurrencyConversion', `Devise non supportée: ${targetCurrency}`);
     return priceEUR;
   }
-  
   const convertedPrice = priceEUR * rate.rateFromEUR;
-  
   // Arrondi intelligent selon la devise
   if (targetCurrency === 'XOF' || targetCurrency === 'XAF') {
     // Pour les francs CFA, arrondir à la dizaine proche
@@ -97,14 +93,12 @@ export function convertPrice(priceEUR: number, targetCurrency: string): number {
     return Math.round(convertedPrice * 100) / 100;
   }
 }
-
 // Fonction pour formater un prix selon la devise
 export function formatPriceWithCurrency(price: number, currency: string): string {
   const rate = CURRENCY_RATES[currency];
   if (!rate) {
     return `${price} €`;
   }
-  
   // Formatage selon la devise
   switch (currency) {
     case 'XOF':
@@ -126,12 +120,10 @@ export function formatPriceWithCurrency(price: number, currency: string): string
       return `${price} ${rate.symbol}`;
   }
 }
-
 // Fonction pour obtenir les informations d'une devise
 export function getCurrencyInfo(currency: string): CurrencyRate | null {
   return CURRENCY_RATES[currency] || null;
 }
-
 // Liste des pays africains supportés
 export const AFRICAN_COUNTRIES = [
   { code: 'fr-BJ', name: 'Bénin', flag: '🇧🇯', currency: 'XOF', region: 'west-africa' },
@@ -142,17 +134,14 @@ export const AFRICAN_COUNTRIES = [
   { code: 'en-NG', name: 'Nigeria', flag: '🇳🇬', currency: 'NGN', region: 'west-africa' },
   { code: 'fr-GA', name: 'Gabon', flag: '🇬🇦', currency: 'XAF', region: 'central-africa' }
 ];
-
 // Fonction pour obtenir le pays par défaut basé sur la géolocalisation (optionnel)
 export function getDefaultCountryFromLocale(browserLocale: string): string {
   // Détecter le pays basé sur la locale du navigateur
   const locale = browserLocale.toLowerCase();
-  
   if (locale.includes('fr')) {
     return 'fr-CI'; // Côte d'Ivoire par défaut pour le français
   } else if (locale.includes('en')) {
     return 'en-NG'; // Nigeria par défaut pour l'anglais
   }
-  
   return 'fr-CI'; // Par défaut
 }

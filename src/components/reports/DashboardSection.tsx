@@ -110,58 +110,66 @@ const RecentReports: React.FC<{ reports: FinancialReport[] }> = ({ reports }) =>
   </motion.div>
 );
 
-const FinancialMetrics: React.FC<{ data: ReportsDashboardData | null }> = ({ data }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <MetricsCard
-      title="Revenus Totaux"
-      value={data?.key_metrics?.total_revenue_ytd || 0}
-      icon={<DollarSign className="h-8 w-8 text-green-600" />}
-      trend="+12.5%"
-      color="text-green-600"
-    />
+const FinancialMetrics: React.FC<{ data: ReportsDashboardData | null }> = ({ data }) => {
+  // Calculer les tendances si disponibles, sinon 0
+  const revenueTrend = (data as any)?.trends?.revenueTrend ?? 0;
+  const expensesTrend = (data as any)?.trends?.expensesTrend ?? 0;
+  const netIncomeTrend = (data as any)?.trends?.netIncomeTrend ?? 0;
+  const reportsTrend = 5.1; // Trend statique pour les rapports générés
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <MetricsCard
+        title="Revenus Totaux"
+        value={data?.key_metrics?.total_revenue_ytd || 0}
+        icon={<DollarSign className="h-8 w-8 text-green-600" />}
+        trend={`${revenueTrend >= 0 ? '+' : ''}${revenueTrend.toFixed(1)}%`}
+        color="text-green-600"
+      />
 
-    <MetricsCard
-      title="Dépenses Totales"
-      value={data?.key_metrics?.total_expenses_ytd || 0}
-      icon={<TrendingDown className="h-8 w-8 text-red-600 dark:text-red-400" />}
-      trend="+8.2%"
-      color="text-red-600"
-    />
+      <MetricsCard
+        title="Dépenses Totales"
+        value={data?.key_metrics?.total_expenses_ytd || 0}
+        icon={<TrendingDown className="h-8 w-8 text-red-600 dark:text-red-400" />}
+        trend={`${expensesTrend >= 0 ? '+' : ''}${expensesTrend.toFixed(1)}%`}
+        color="text-red-600"
+      />
 
-    <MetricsCard
-      title="Bénéfice Net"
-      value={data?.key_metrics?.net_income_ytd || 0}
-      icon={<Activity className="h-8 w-8 text-blue-600" />}
-      trend="+15.3%"
-      color="text-blue-600"
-    />
+      <MetricsCard
+        title="Bénéfice Net"
+        value={data?.key_metrics?.net_income_ytd || 0}
+        icon={<Activity className="h-8 w-8 text-blue-600" />}
+        trend={`${netIncomeTrend >= 0 ? '+' : ''}${netIncomeTrend.toFixed(1)}%`}
+        color="text-blue-600"
+      />
 
-    <motion.div
-      initial={{ y: 20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 100, damping: 15 }}
-    >
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rapports Générés</p>
-              <p className="text-2xl font-bold text-purple-600">
-                {data?.recent_reports?.length || 0}
-              </p>
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 100, damping: 15 }}
+      >
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rapports Générés</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {data?.recent_reports?.length || 0}
+                </p>
+              </div>
+              <FileText className="h-8 w-8 text-purple-600" />
             </div>
-            <FileText className="h-8 w-8 text-purple-600" />
-          </div>
-          <div className="mt-4 flex items-center text-sm">
-            <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-            <span className="text-green-600">+5.1%</span>
-            <span className="text-gray-600 dark:text-gray-400 ml-2">vs mois dernier</span>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  </div>
-);
+            <div className="mt-4 flex items-center text-sm">
+              <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
+              <span className="text-green-600">+{reportsTrend.toFixed(1)}%</span>
+              <span className="text-gray-600 dark:text-gray-400 ml-2">vs mois dernier</span>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
+  );
+};
 
 export const DashboardSection: React.FC<DashboardSectionProps> = ({ dashboardData, loading }) => {
   if (loading) return <LoadingState />;

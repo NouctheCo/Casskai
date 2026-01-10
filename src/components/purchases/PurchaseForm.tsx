@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { Loader2, Upload, X, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SupplierSelectWithCreate } from './SupplierSelectWithCreate';
-
+import { logger } from '@/lib/logger';
 interface PurchaseFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -20,7 +20,6 @@ interface PurchaseFormProps {
   suppliers: Supplier[];
   loading: boolean;
 }
-
 const PurchaseForm: React.FC<PurchaseFormProps> = ({
   isOpen,
   onClose,
@@ -40,13 +39,11 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
     due_date: '',
     attachments: []
   });
-  
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [calculatedAmounts, setCalculatedAmounts] = useState({
     tva_amount: 0,
     amount_ttc: 0
   });
-
   // Initialize form when purchase changes
   useEffect(() => {
     if (purchase) {
@@ -74,72 +71,57 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
     }
     setErrors({});
   }, [purchase]);
-
   // Calculate amounts when amount_ht or tva_rate changes
   useEffect(() => {
     const tvaAmount = formData.amount_ht * (formData.tva_rate / 100);
     const amountTTC = formData.amount_ht + tvaAmount;
-    
     setCalculatedAmounts({
       tva_amount: tvaAmount,
       amount_ttc: amountTTC
     });
   }, [formData.amount_ht, formData.tva_rate]);
-
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.invoice_number.trim()) {
       newErrors.invoice_number = t('purchases.form.validation.invoiceNumberRequired');
     }
-
     if (!formData.purchase_date) {
       newErrors.purchase_date = t('purchases.form.validation.purchaseDateRequired');
     }
-
     if (!formData.supplier_id) {
       newErrors.supplier_id = t('purchases.form.validation.supplierRequired');
     }
-
     if (!formData.description.trim()) {
       newErrors.description = t('purchases.form.validation.descriptionRequired');
     }
-
     if (formData.amount_ht <= 0) {
       newErrors.amount_ht = t('purchases.form.validation.amountRequired');
     }
-
     if (!formData.due_date) {
       newErrors.due_date = t('purchases.form.validation.dueDateRequired');
     } else if (new Date(formData.due_date) < new Date(formData.purchase_date)) {
       newErrors.due_date = t('purchases.form.validation.dueDateInvalid');
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) {
       return;
     }
-
     try {
       await onSubmit(formData);
       onClose();
     } catch (error) {
-      console.error('Error submitting form:', error instanceof Error ? error.message : String(error));
+      logger.error('PurchaseForm', 'Error submitting form:', error instanceof Error ? error.message : String(error));
     }
   };
-
   const handleInputChange = (field: keyof PurchaseFormData, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
-    
     // Clear error for this field
     if (errors[field]) {
       setErrors(prev => {
@@ -149,7 +131,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
       });
     }
   };
-
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     setFormData(prev => ({
@@ -157,21 +138,18 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
       attachments: [...(prev.attachments || []), ...files]
     }));
   };
-
   const removeAttachment = (index: number) => {
     setFormData(prev => ({
       ...prev,
       attachments: prev.attachments?.filter((_, i) => i !== index) || []
     }));
   };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR'
     }).format(amount);
   };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -180,7 +158,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
             {purchase ? t('purchases.form.editTitle') : t('purchases.form.createTitle')}
           </DialogTitle>
         </DialogHeader>
-
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Invoice Number */}
@@ -199,7 +176,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                 <p className="text-sm text-red-600 dark:text-red-400">{errors.invoice_number}</p>
               )}
             </div>
-
             {/* Purchase Date */}
             <div className="space-y-2">
               <Label htmlFor="purchase_date">
@@ -216,7 +192,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                 <p className="text-sm text-red-600 dark:text-red-400">{errors.purchase_date}</p>
               )}
             </div>
-
             {/* Supplier */}
             <SupplierSelectWithCreate
               value={formData.supplier_id}
@@ -224,7 +199,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
               error={errors.supplier_id}
               required={true}
             />
-
             {/* Due Date */}
             <div className="space-y-2">
               <Label htmlFor="due_date">
@@ -242,7 +216,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
               )}
             </div>
           </div>
-
           {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description">
@@ -260,12 +233,10 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
               <p className="text-sm text-red-600 dark:text-red-400">{errors.description}</p>
             )}
           </div>
-
           {/* Amounts */}
           <Card>
             <CardContent className="p-4 space-y-4">
               <h4 className="font-medium text-gray-900 dark:text-gray-100">{t('purchases.form.amounts')}</h4>
-              
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Amount HT */}
                 <div className="space-y-2">
@@ -286,7 +257,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                     <p className="text-sm text-red-600 dark:text-red-400">{errors.amount_ht}</p>
                   )}
                 </div>
-
                 {/* TVA Rate */}
                 <div className="space-y-2">
                   <Label htmlFor="tva_rate">
@@ -307,7 +277,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                     </SelectContent>
                   </Select>
                 </div>
-
                 {/* Calculated amounts display */}
                 <div className="space-y-2">
                   <Label>{t('purchases.form.calculatedAmounts')}</Label>
@@ -325,7 +294,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
               </div>
             </CardContent>
           </Card>
-
           {/* Attachments */}
           <div className="space-y-2">
             <Label>{t('purchases.form.attachments')}</Label>
@@ -351,7 +319,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                   </p>
                 </div>
               </div>
-              
               {/* Display uploaded files */}
               {formData.attachments && formData.attachments.length > 0 && (
                 <div className="mt-4 space-y-2">
@@ -379,7 +346,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
               )}
             </div>
           </div>
-
           {/* Form validation summary */}
           {Object.keys(errors).length > 0 && (
             <Alert variant="destructive">
@@ -388,7 +354,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
               </AlertDescription>
             </Alert>
           )}
-
           <div className="flex justify-end space-x-2 pt-4">
             <Button
               type="button"
@@ -414,5 +379,4 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
     </Dialog>
   );
 };
-
 export default PurchaseForm;

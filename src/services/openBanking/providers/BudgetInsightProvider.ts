@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import {
   BankConnection,
   BankAccount,
@@ -22,21 +21,19 @@ import {
   BankingProvider as OBProviderConfig,
 } from '../../../types/openBanking.types';
 import { BankingProvider, BankingProviderError, AuthenticationError, NetworkError } from '../base/BankingProvider';
-
+import { logger } from '@/lib/logger';
 // Provider spécialisé pour Budget Insight API
 export class BudgetInsightProvider extends BankingProvider {
   private accessToken: string | null = null;
   private tokenExpiresAt: Date | null = null;
   private baseUrl: string;
   private manageUrl: string;
-
   constructor(config: OBProviderConfig) {
     super(config);
   const budgetInsightConfig = (config.config as unknown as BudgetInsightConfig);
     this.baseUrl = budgetInsightConfig.baseUrl || 'https://api.budget-insight.com';
     this.manageUrl = budgetInsightConfig.manageUrl || 'https://manage.budget-insight.com';
   }
-
   async initialize(): Promise<void> {
     try {
       await this.authenticateClient();
@@ -49,7 +46,6 @@ export class BudgetInsightProvider extends BankingProvider {
       );
     }
   }
-
   async isHealthy(): Promise<boolean> {
     try {
   const response = await this.makeRequest<{ status: string }>('GET', '/2.0/status');
@@ -58,40 +54,33 @@ export class BudgetInsightProvider extends BankingProvider {
       return false;
     }
   }
-
   // Authentification client Budget Insight
   private async authenticateClient(): Promise<void> {
     try {
       const credentials = Buffer.from(
         `${this.config.config.clientId}:${this.config.config.clientSecret}`
       ).toString('base64');
-
   const response = await this.makeRequest<{ access_token: string; expires_in: number }>('POST', '/2.0/auth/init', {}, {
         'Authorization': `Basic ${credentials}`
       });
-
       this.accessToken = response.access_token;
       this.tokenExpiresAt = new Date(Date.now() + response.expires_in * 1000);
   } catch (_error) {
       throw new AuthenticationError('Failed to authenticate with Budget Insight API');
     }
   }
-
   async createConnection(userId: string, bankId: string): Promise<OpenBankingResponse<BankConnection>> {
     this.validateConnectionId(userId);
-
     try {
       const bank = this.config.supportedBanks.find(b => b.id === bankId);
       if (!bank) {
         return this.createErrorResponse('BANK_NOT_SUPPORTED', `Bank ${bankId} is not supported`);
       }
-
       // Budget Insight utilise des "connections" pour les connexions bancaires
   const response = await this.makeRequest<{ id: number; state: string }>('POST', `/2.0/users/${userId}/connections`, {
         id_connector: bankId,
         expand: 'connector'
       });
-
       const connection: BankConnection = {
         id: crypto.randomUUID(),
         userId,
@@ -110,21 +99,17 @@ export class BudgetInsightProvider extends BankingProvider {
           state: response.state
         }
       };
-
       return this.createResponse(connection);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   async getConnection(connectionId: string): Promise<OpenBankingResponse<BankConnection>> {
     this.validateConnectionId(connectionId);
-
     try {
       // En production, récupérer userId et connectionId depuis la base de données
   const _userId = ''; // À récupérer depuis la DB
       const biConnectionId = ''; // À récupérer depuis la DB
-      
   const response = await this.makeRequest<{
         id: number;
         id_connector: string;
@@ -135,7 +120,6 @@ export class BudgetInsightProvider extends BankingProvider {
   }>('GET', `/2.0/users/${_userId}/connections/${biConnectionId}`, {
         expand: 'connector'
       });
-
       const connection: BankConnection = {
         id: connectionId,
   userId: _userId,
@@ -154,68 +138,52 @@ export class BudgetInsightProvider extends BankingProvider {
           state: response.state
         }
       };
-
       return this.createResponse(connection);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   async updateConnection(connectionId: string, _updates: Partial<BankConnection>): Promise<OpenBankingResponse<BankConnection>> {
     this.validateConnectionId(connectionId);
-    
     try {
   const _initUserId = ''; // À récupérer depuis la DB
   const biConnectionId = ''; // À récupérer depuis la DB
-
   await this.makeRequest<unknown>('PUT', `/2.0/users/${_initUserId}/connections/${biConnectionId}`, {
         // Budget Insight specific updates
       });
-
       return await this.getConnection(connectionId);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   async deleteConnection(connectionId: string): Promise<OpenBankingResponse<void>> {
     this.validateConnectionId(connectionId);
-
     try {
   const _userId2 = ''; // À récupérer depuis la DB
   const biConnectionId = ''; // À récupérer depuis la DB
-      
   await this.makeRequest<unknown>('DELETE', `/2.0/users/${_userId2}/connections/${biConnectionId}`);
-      
       return this.createResponse(undefined);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   async refreshConnection(connectionId: string): Promise<OpenBankingResponse<BankConnection>> {
     this.validateConnectionId(connectionId);
-
     try {
     const _userId3 = ''; // À récupérer depuis la DB
     const biConnectionId = ''; // À récupérer depuis la DB
-
   await this.makeRequest<unknown>('POST', `/2.0/users/${_userId3}/connections/${biConnectionId}/sources`);
-
       return await this.getConnection(connectionId);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   // Authentification PSD2
   async initiateAuth(connectionId: string, _redirectUri: string): Promise<OpenBankingResponse<PSD2AuthFlow>> {
     try {
       const biConnectionId = ''; // À récupérer depuis la DB
-
       // Budget Insight gère l'authentification via une URL de redirection
   const authUrl = `${this.manageUrl}/auth?connection_id=${biConnectionId}`;
-
       const authFlow: PSD2AuthFlow = {
         id: crypto.randomUUID(),
         connectionId,
@@ -226,13 +194,11 @@ export class BudgetInsightProvider extends BankingProvider {
         createdAt: new Date(),
         updatedAt: new Date()
       };
-
       return this.createResponse(authFlow);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   async completeAuth(_authFlowId: string, authCode: string): Promise<OpenBankingResponse<BankConnection>> {
     try {
       // Budget Insight gère l'authentification côté serveur
@@ -244,16 +210,13 @@ export class BudgetInsightProvider extends BankingProvider {
       return this.handleError(error);
     }
   }
-
   async handleSCA(authFlowId: string, challengeResponse: string): Promise<OpenBankingResponse<PSD2AuthFlow>> {
     try {
   const _userId = ''; // À récupérer depuis authFlowId
   const _biConnectionId = ''; // À récupérer depuis authFlowId
-
   const response = await this.makeRequest<{ state: string; consent_id: string; expires_at: number }>('POST', `/2.0/users/${_userId}/connections/${_biConnectionId}/sca`, {
         value: challengeResponse
       });
-
       const authFlow: PSD2AuthFlow = {
         id: authFlowId,
         connectionId: '',
@@ -263,17 +226,14 @@ export class BudgetInsightProvider extends BankingProvider {
         createdAt: new Date(),
         updatedAt: new Date()
       };
-
       return this.createResponse(authFlow);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   // Gestion des comptes
   async getAccounts(connectionId: string): Promise<OpenBankingResponse<BankAccount[]>> {
     this.validateConnectionId(connectionId);
-
     try {
   const _userId = ''; // À récupérer depuis la DB
   const response = await this.makeRequest<{ accounts: Array<{
@@ -292,7 +252,6 @@ export class BudgetInsightProvider extends BankingProvider {
   }>; }>('GET', `/2.0/users/${_userId}/accounts`, {
         expand: 'connection'
       });
-
       const accounts: BankAccount[] = response.accounts
         .filter((account) => account.connection.id.toString() === connectionId)
         .map((account) => ({
@@ -316,17 +275,14 @@ export class BudgetInsightProvider extends BankingProvider {
             accountType: account.type
           }
         }));
-
       return this.createResponse(accounts);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   async getAccount(connectionId: string, accountId: string): Promise<OpenBankingResponse<BankAccount>> {
     this.validateConnectionId(connectionId);
     this.validateAccountId(accountId);
-
     try {
   const _userId3 = ''; // À récupérer depuis la DB
   const response = await this.makeRequest<{
@@ -342,7 +298,6 @@ export class BudgetInsightProvider extends BankingProvider {
         disabled?: boolean;
         last_update: number;
   }>('GET', `/2.0/users/${_userId3}/accounts/${accountId}`);
-
       const account: BankAccount = {
         id: crypto.randomUUID(),
         connectionId,
@@ -360,13 +315,11 @@ export class BudgetInsightProvider extends BankingProvider {
         createdAt: new Date(),
         updatedAt: new Date(response.last_update * 1000)
       };
-
       return this.createResponse(account);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   async refreshAccountBalance(connectionId: string, accountId: string): Promise<OpenBankingResponse<BankAccount>> {
     try {
       // Budget Insight synchronise automatiquement lors de la requête
@@ -375,7 +328,6 @@ export class BudgetInsightProvider extends BankingProvider {
       return this.handleError(error);
     }
   }
-
   // Gestion des transactions
   async getTransactions(
     connectionId: string,
@@ -390,14 +342,12 @@ export class BudgetInsightProvider extends BankingProvider {
     this.validateConnectionId(connectionId);
     this.validateAccountId(accountId);
     this.validateDateRange(options.startDate, options.endDate);
-
     try {
   const _userId4 = ''; // À récupérer depuis la DB
       const params: Record<string, string> = {
         limit: (options.limit || 100).toString(),
         expand: 'category'
       };
-
       if (options.startDate) {
         params.min_date = options.startDate.toISOString().split('T')[0];
       }
@@ -407,7 +357,6 @@ export class BudgetInsightProvider extends BankingProvider {
       if (options.cursor) {
         params.offset = options.cursor;
       }
-
       const queryString = new URLSearchParams(params).toString();
       const response = await this.makeRequest<{
         transactions: Array<{
@@ -429,7 +378,6 @@ export class BudgetInsightProvider extends BankingProvider {
       }>('GET', 
         `/2.0/users/${_userId4}/accounts/${accountId}/transactions?${queryString}`
       );
-
   const transactions: BankTransaction[] = response.transactions.map((tx) => ({
         id: crypto.randomUUID(),
         accountId,
@@ -454,11 +402,9 @@ export class BudgetInsightProvider extends BankingProvider {
           state: tx.state
         }
       }));
-
       const nextCursor = response.pagination && response.pagination.next_uri 
         ? response.pagination.offset?.toString() 
         : undefined;
-
       return this.createResponse({
         transactions,
         nextCursor
@@ -467,27 +413,21 @@ export class BudgetInsightProvider extends BankingProvider {
       return this.handleError(error);
     }
   }
-
   async syncTransactions(connectionId: string, accountId: string): Promise<OpenBankingResponse<SyncResult>> {
     try {
   const _userId5 = ''; // À récupérer depuis la DB
   const biConnectionId = ''; // À récupérer depuis la DB
-
       // Force synchronization avec Budget Insight
   await this.makeRequest<unknown>('POST', `/2.0/users/${_userId5}/connections/${biConnectionId}/sources`);
-      
       // Attendre un peu pour la synchronisation
       await new Promise(resolve => setTimeout(resolve, 2000));
-
       // Récupérer les nouvelles transactions
       const result = await this.getTransactions(connectionId, accountId, {
         startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // 30 jours
       });
-
       if (!result.success || !result.data) {
         throw new Error('Failed to fetch transactions');
       }
-
       const syncResult: SyncResult = {
         accountId,
         transactionsAdded: result.data.transactions.length,
@@ -496,20 +436,17 @@ export class BudgetInsightProvider extends BankingProvider {
         lastSyncDate: new Date(),
         nextSyncDate: new Date(Date.now() + 6 * 60 * 60 * 1000) // 6 heures
       };
-
       return this.createResponse(syncResult);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   async syncAllAccounts(connectionId: string): Promise<OpenBankingResponse<SyncResult[]>> {
     try {
       const accountsResult = await this.getAccounts(connectionId);
       if (!accountsResult.success || !accountsResult.data) {
         throw new Error('Failed to fetch accounts');
       }
-
       const syncResultsFiltered = await Promise.all(
         accountsResult.data.map(async (account) => {
           const result = await this.syncTransactions(connectionId, account.accountId);
@@ -519,13 +456,11 @@ export class BudgetInsightProvider extends BankingProvider {
       const syncResults: SyncResult[] = syncResultsFiltered.filter(
         (r): r is SyncResult => r !== null
       );
-
       return this.createResponse(syncResults);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   // Webhooks
   async setupWebhook(_connectionId: string, _events: string[]): Promise<OpenBankingResponse<void>> {
     try {
@@ -536,7 +471,6 @@ export class BudgetInsightProvider extends BankingProvider {
       return this.handleError(error);
     }
   }
-
   async removeWebhook(_connectionId: string): Promise<OpenBankingResponse<void>> {
     try {
       // Budget Insight webhook removal
@@ -545,7 +479,6 @@ export class BudgetInsightProvider extends BankingProvider {
       return this.handleError(error);
     }
   }
-
   async processWebhookEvent(event: WebhookEvent): Promise<OpenBankingResponse<void>> {
     try {
       // Traitement spécifique à Budget Insight
@@ -557,15 +490,13 @@ export class BudgetInsightProvider extends BankingProvider {
           // Traiter la mise à jour du compte
           break;
         default:
-          console.warn(`Unhandled webhook event: ${event.type}`);
+          logger.warn('BudgetInsight', `Unhandled webhook event: ${event.type}`);
       }
-
       return this.createResponse(undefined);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   validateWebhookSignature(payload: string, signature: string): boolean {
     // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     const crypto = require('crypto');
@@ -573,13 +504,11 @@ export class BudgetInsightProvider extends BankingProvider {
       .createHmac('sha1', this.config.config.webhookSecret)
       .update(payload)
       .digest('hex');
-    
     return crypto.timingSafeEqual(
       Buffer.from(signature.replace('sha1=', ''), 'hex'),
       Buffer.from(expectedSignature, 'hex')
     );
   }
-
   // Enrichissement
   async categorizeTransaction(transaction: BankTransaction): Promise<OpenBankingResponse<BankTransaction>> {
     try {
@@ -588,33 +517,27 @@ export class BudgetInsightProvider extends BankingProvider {
         wording: transaction.description,
         value: transaction.amount
       });
-
       const enrichedTransaction = {
         ...transaction,
         category: this.mapBudgetInsightCategory(response.category)
       };
-
       return this.createResponse(enrichedTransaction);
     } catch (error) {
       return this.handleError(error);
     }
   }
-
   async enrichTransaction(transaction: BankTransaction): Promise<OpenBankingResponse<BankTransaction>> {
     // Budget Insight fait l'enrichissement automatiquement
     return this.createResponse(transaction);
   }
-
   // Gestion des tokens
   async refreshTokens(_connectionId: string): Promise<OpenBankingResponse<void>> {
     // Budget Insight gère les tokens automatiquement
     return this.createResponse(undefined);
   }
-
   async revokeTokens(connectionId: string): Promise<OpenBankingResponse<void>> {
     return this.deleteConnection(connectionId);
   }
-
   // Méthodes utilitaires
   protected async makeRequest<T>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
@@ -623,31 +546,25 @@ export class BudgetInsightProvider extends BankingProvider {
     headers: Record<string, string> = {}
   ): Promise<T> {
     await this.checkRateLimit();
-
     const url = `${this.baseUrl}${endpoint}`;
     const requestHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
       'User-Agent': 'CassKai/1.0',
       ...headers
     };
-
     if (this.accessToken) {
       requestHeaders['Authorization'] = `Bearer ${this.accessToken}`;
     }
-
     try {
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
         body: data ? JSON.stringify(data) : undefined
       });
-
       if (!response.ok) {
         throw new NetworkError(`HTTP ${response.status}: ${response.statusText}`);
       }
-
       const result = await response.json();
-      
       if (result.error) {
         throw new BankingProviderError(
           result.error.code || 'API_ERROR',
@@ -655,7 +572,6 @@ export class BudgetInsightProvider extends BankingProvider {
           result.error
         );
       }
-
       return result;
     } catch (error) {
       if (error instanceof BankingProviderError) {
@@ -665,16 +581,13 @@ export class BudgetInsightProvider extends BankingProvider {
       throw new NetworkError(`Request failed: ${message}`, error);
     }
   }
-
   protected handleError(error: unknown): OpenBankingResponse<never> {
     if (error instanceof BankingProviderError) {
       return this.createErrorResponse(error.code, error.message, error.details as Record<string, unknown>);
     }
-
     const message = (error as { message?: string })?.message || 'An unknown error occurred';
     return this.createErrorResponse('UNKNOWN_ERROR', message, error as Record<string, unknown>);
   }
-
   // Mappers spécifiques à Budget Insight
   private mapBudgetInsightStatus(state: string): BankConnection['status'] {
     switch (state) {
@@ -692,7 +605,6 @@ export class BudgetInsightProvider extends BankingProvider {
         return 'error';
     }
   }
-
   private mapBudgetInsightAccountType(type: string): BankAccount['type'] {
     switch (type) {
       case 'checking':
@@ -711,10 +623,8 @@ export class BudgetInsightProvider extends BankingProvider {
         return 'checking';
     }
   }
-
   private mapBudgetInsightCategory(category: { name?: string } | null | undefined): string {
     if (!category) return 'Autre';
-
     // Mapping des catégories Budget Insight vers nos catégories
     const categoryMap: Record<string, string> = {
       'food': 'Alimentaire',
@@ -727,7 +637,6 @@ export class BudgetInsightProvider extends BankingProvider {
       'taxes': 'Impôts',
       'income': 'Revenus'
     };
-
   return categoryMap[category.name ?? ''] || category.name || 'Autre';
   }
 }

@@ -98,10 +98,10 @@ jobs:
           BUNDLE_SIZE=$(du -sm dist | cut -f1)
           echo "Bundle size: ${BUNDLE_SIZE}MB"
           if [ $BUNDLE_SIZE -gt 15 ]; then
-            echo "❌ Bundle size too large (${BUNDLE_SIZE}MB > 15MB)"
+            echo "Bundle size too large (${BUNDLE_SIZE}MB > 15MB)"
             exit 1
           else
-            echo "✅ Bundle size OK (${BUNDLE_SIZE}MB)"
+            echo "Bundle size OK (${BUNDLE_SIZE}MB)"
           fi
 
       - name: Upload build artifacts
@@ -172,7 +172,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             sudo systemctl reload nginx
-            echo "✅ Staging deployment complete"
+            echo "Staging deployment complete"
 
   # Job 6: Deploy to Production (only on tags)
   deploy-production:
@@ -225,16 +225,16 @@ jobs:
           script: |
             sudo systemctl reload nginx
             sudo pm2 restart casskai-api
-            echo "✅ Production deployment complete"
+            echo "Production deployment complete"
 
       - name: Health check
         run: |
           sleep 10
           response=$(curl -s -o /dev/null -w "%{http_code}" https://casskai.app)
           if [ $response -eq 200 ]; then
-            echo "✅ Health check passed (HTTP $response)"
+            echo "Health check passed (HTTP $response)"
           else
-            echo "❌ Health check failed (HTTP $response)"
+            echo "Health check failed (HTTP $response)"
             exit 1
           fi
 

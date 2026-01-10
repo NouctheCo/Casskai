@@ -12,7 +12,7 @@ import { reportExportService } from '@/services/ReportExportService';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
+import { logger } from '@/lib/logger';
 interface ReportFilters {
   companyId: string;
   dateFrom: string;
@@ -22,7 +22,6 @@ interface ReportFilters {
   onlyActiveAccounts?: boolean;
   currency?: string;
 }
-
 interface ExportOptions {
   format: 'pdf' | 'excel' | 'csv';
   orientation?: 'portrait' | 'landscape';
@@ -38,27 +37,23 @@ interface ExportOptions {
     logo?: string;
   };
 }
-
 const REPORT_TYPES = [
   { value: 'balance-sheet', label: 'Bilan comptable', icon: BarChart3, description: 'Actif, passif et situation financière' },
   { value: 'income-statement', label: 'Compte de résultat', icon: FileText, description: 'Produits, charges et résultat' },
   { value: 'trial-balance', label: 'Balance générale', icon: Table, description: 'Soldes des comptes' },
   { value: 'general-ledger', label: 'Grand livre', icon: FileText, description: 'Détail des écritures comptables' }
 ];
-
 const EXPORT_FORMATS = [
   { value: 'pdf', label: 'PDF', icon: FileText },
   { value: 'excel', label: 'Excel', icon: Table },
   { value: 'csv', label: 'CSV', icon: Download }
 ];
-
 export function ReportViewer() {
   const { currentCompany } = useAuth();
   const [reportType, setReportType] = useState<string>('');
   const [exportFormat, setExportFormat] = useState<'pdf' | 'excel' | 'csv'>('pdf');
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
   const [isGenerating, setIsGenerating] = useState(false);
-
   const [filters, setFilters] = useState<ReportFilters>({
     companyId: currentCompany?.id || '',
     dateFrom: format(new Date(new Date().getFullYear(), 0, 1), 'yyyy-MM-dd'),
@@ -68,11 +63,9 @@ export function ReportViewer() {
     onlyActiveAccounts: false,
     currency: 'EUR'
   });
-
   const handleFilterChange = (key: keyof ReportFilters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
-
   const getExportOptions = (): ExportOptions => ({
     format: exportFormat,
     orientation,
@@ -87,59 +80,47 @@ export function ReportViewer() {
       email: currentCompany.email || undefined
     } : undefined
   });
-
   const generateReport = async () => {
     if (!reportType || !currentCompany?.id) {
       toast.error('Veuillez sélectionner un type de rapport');
       return;
     }
-
     setIsGenerating(true);
-
     try {
       const exportOptions = getExportOptions();
       const reportFilters = { ...filters, companyId: currentCompany.id };
-
       let downloadUrl: string;
       let filename: string;
-
       switch (reportType) {
         case 'balance-sheet':
           downloadUrl = await reportGenerationService.generateBalanceSheet(reportFilters, exportOptions);
           filename = `bilan-comptable-${format(new Date(), 'yyyy-MM-dd')}.${exportFormat}`;
           break;
-
         case 'income-statement':
           downloadUrl = await reportGenerationService.generateIncomeStatement(reportFilters, exportOptions);
           filename = `compte-resultat-${format(new Date(), 'yyyy-MM-dd')}.${exportFormat}`;
           break;
-
         case 'trial-balance':
           downloadUrl = await reportGenerationService.generateTrialBalance(reportFilters, exportOptions);
           filename = `balance-generale-${format(new Date(), 'yyyy-MM-dd')}.${exportFormat}`;
           break;
-
         case 'general-ledger':
           downloadUrl = await reportGenerationService.generateGeneralLedger(reportFilters, exportOptions);
           filename = `grand-livre-${format(new Date(), 'yyyy-MM-dd')}.${exportFormat}`;
           break;
-
         default:
           throw new Error('Type de rapport non supporté');
       }
-
       // Télécharger automatiquement le fichier
       reportExportService.downloadFile(downloadUrl, filename);
-
       toast.success(`Rapport ${REPORT_TYPES.find(t => t.value === reportType)?.label} généré avec succès!`);
     } catch (error) {
-      console.error('Erreur lors de la génération du rapport:', error);
+      logger.error('ReportViewer', 'Erreur lors de la génération du rapport:', error);
       toast.error(`Erreur lors de la génération du rapport: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
       setIsGenerating(false);
     }
   };
-
   if (!currentCompany) {
     return (
       <Card className="max-w-2xl mx-auto">
@@ -151,7 +132,6 @@ export function ReportViewer() {
       </Card>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <Card>
@@ -196,7 +176,6 @@ export function ReportViewer() {
               })}
             </div>
           </div>
-
           {/* Filtres de période */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -226,7 +205,6 @@ export function ReportViewer() {
               </div>
             </div>
           </div>
-
           {/* Options avancées */}
           <div className="space-y-4">
             <Label>Options</Label>
@@ -244,7 +222,6 @@ export function ReportViewer() {
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-2">
                 <Label>Devise</Label>
                 <Select value={filters.currency} onValueChange={(value) => handleFilterChange('currency', value)}>
@@ -262,7 +239,6 @@ export function ReportViewer() {
                 </Select>
               </div>
             </div>
-
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -272,7 +248,6 @@ export function ReportViewer() {
                 />
                 <Label htmlFor="includeSubAccounts">Inclure les sous-comptes</Label>
               </div>
-
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="onlyActiveAccounts"
@@ -283,7 +258,6 @@ export function ReportViewer() {
               </div>
             </div>
           </div>
-
           {/* Format d'export */}
           <div className="space-y-2">
             <Label>Format d'export</Label>
@@ -305,7 +279,6 @@ export function ReportViewer() {
               })}
             </div>
           </div>
-
           {/* Orientation (PDF seulement) */}
           {exportFormat === 'pdf' && (
             <div className="space-y-2">
@@ -328,7 +301,6 @@ export function ReportViewer() {
               </div>
             </div>
           )}
-
           {/* Bouton de génération */}
           <div className="pt-4 border-t">
             <Button
@@ -347,7 +319,6 @@ export function ReportViewer() {
           </div>
         </CardContent>
       </Card>
-
       {/* Informations sur l'entreprise */}
       <Card>
         <CardHeader>

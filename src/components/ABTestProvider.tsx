@@ -1,28 +1,24 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import ABTestingFramework, { UserContext as ABTestUserContext } from '@/utils/abTestingFramework';
 import { useAnalytics } from '@/components/analytics/AnalyticsProvider';
-
+import { logger } from '@/lib/logger';
 // Types pour A/B Testing - on utilise le type du framework
 type UserContext = Partial<ABTestUserContext> & {
   companyId?: string;
   subscription?: string;
   locale?: string;
 };
-
 interface TestVariantConfig {
   [key: string]: string | number | boolean | undefined;
 }
-
 interface TestVariantResult {
   variant: string;
   isInTest: boolean;
   config?: TestVariantConfig;
 }
-
 interface ConversionProperties {
   [key: string]: string | number | boolean;
 }
-
 // Context pour A/B Testing
 interface ABTestContextType {
   framework: ABTestingFramework;
@@ -30,9 +26,7 @@ interface ABTestContextType {
   getVariant: (testId: string, userContext?: UserContext) => TestVariantResult;
   trackConversion: (testId: string, eventName?: string, value?: number, properties?: ConversionProperties) => void;
 }
-
 const ABTestContext = createContext<ABTestContextType | null>(null);
-
 // Configuration des tests A/B pour CassKai
 const AB_TESTS_CONFIG = [
   {
@@ -267,7 +261,6 @@ const AB_TESTS_CONFIG = [
     metrics: ['navigation_usage', 'page_depth', 'session_duration'],
   },
 ];
-
 // Provider pour A/B Testing
 export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [framework] = useState(() => ABTestingFramework.getInstance({
@@ -277,9 +270,7 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     maxQueueSize: 50,
     hashSalt: 'casskai-ab-2024',
   }));
-  
   const [isInitialized, setIsInitialized] = useState(false);
-  
   // Utiliser le hook analytics de manière conditionnelle
   let trackEvent: ((eventName: string, props?: ConversionProperties) => void) | null = null;
   try {
@@ -287,33 +278,28 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     trackEvent = analytics.trackEvent;
   } catch (error) {
     // AnalyticsProvider n'est pas disponible, créer un fallback
-    console.warn('[ABTest] Analytics non disponible:', error instanceof Error ? error.message : String(error));
+    logger.warn('ABTest', '[ABTest] Analytics non disponible:', error instanceof Error ? error.message : String(error));
     trackEvent = () => {
-      console.warn('[ABTest] Analytics non disponible, événement ignoré');
+      logger.warn('ABTest', '[ABTest] Analytics non disponible, événement ignoré');
     };
   }
-
   useEffect(() => {
     const initializeFramework = async () => {
       try {
         await framework.initialize(AB_TESTS_CONFIG);
         setIsInitialized(true);
-        console.warn('[ABTest] Framework A/B Testing initialisé');
+        logger.warn('ABTest', '[ABTest] Framework A/B Testing initialisé');
       } catch (error) {
-        console.error('[ABTest] Erreur d\'initialisation:', error instanceof Error ? error.message : String(error));
+        logger.error('ABTest', '[ABTest] Erreur d\'initialisation:', error instanceof Error ? error.message : String(error));
       }
     };
-
     initializeFramework();
   }, [framework]);
-
   const getVariant = (testId: string, userContext?: UserContext) => {
     if (!isInitialized) {
       return { variant: 'control', isInTest: false };
     }
-
     const result = framework.getVariant(testId, userContext);
-    
     // Analytics: tracker l'exposition si c'est la première fois
     if (result.isInTest && trackEvent) {
       trackEvent('AB Test Assigned', {
@@ -322,19 +308,15 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         is_control: result.variantId === 'control',
       });
     }
-
     return {
       variant: result.variantId,
       isInTest: result.isInTest,
       config: result.config as TestVariantConfig,
     };
   };
-
   const trackConversion = (testId: string, eventName?: string, value?: number, properties?: ConversionProperties) => {
     if (!isInitialized) return;
-
     framework.trackConversion(testId, eventName, value, properties);
-    
     // Analytics: tracker la conversion
     if (trackEvent) {
       trackEvent('AB Test Conversion', {
@@ -345,21 +327,18 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       });
     }
   };
-
   const contextValue: ABTestContextType = {
     framework,
     isInitialized,
     getVariant,
     trackConversion,
   };
-
   return (
     <ABTestContext.Provider value={contextValue}>
       {children}
     </ABTestContext.Provider>
   );
 };
-
 // Hook pour utiliser le contexte A/B Testing
 export const useABTestContext = () => {
   const context = useContext(ABTestContext);
@@ -368,23 +347,19 @@ export const useABTestContext = () => {
   }
   return context;
 };
-
 // Composant pour afficher les informations de debug des tests A/B
 export const ABTestDebugPanel: React.FC<{ isVisible?: boolean }> = ({ isVisible = false }) => {
   const { framework, isInitialized } = useABTestContext();
   const [debugInfo, setDebugInfo] = useState<Record<string, unknown> | null>(null);
-
   useEffect(() => {
     if (isInitialized && isVisible) {
       const info = framework.getDebugInfo();
       setDebugInfo(info);
     }
   }, [framework, isInitialized, isVisible]);
-
   if (!isVisible || process.env.NODE_ENV === 'production') {
     return null;
   }
-
   return (
     <div className="fixed bottom-4 right-4 bg-gray-900 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm">
       <h3 className="font-bold text-sm mb-2">A/B Tests Debug</h3>
@@ -396,7 +371,6 @@ export const ABTestDebugPanel: React.FC<{ isVisible?: boolean }> = ({ isVisible 
           <div>Queue: {String(debugInfo.queuedEventsCount)}</div>
         </div>
       )}
-      
       {isInitialized && (
         <div className="mt-2 text-xs">
           <div className="font-semibold">Tests Actifs:</div>
@@ -410,7 +384,6 @@ export const ABTestDebugPanel: React.FC<{ isVisible?: boolean }> = ({ isVisible 
     </div>
   );
 };
-
 // HOC pour wrapper des composants avec A/B Testing
 export function withABTest<P extends object>(
   Component: React.ComponentType<P>,
@@ -420,15 +393,12 @@ export function withABTest<P extends object>(
   return React.forwardRef<React.ComponentRef<typeof Component>, P>((props, ref) => {
     const { getVariant } = useABTestContext();
     const { variant, config } = getVariant(testId);
-
     const enhancedProps = {
       ...props,
       [variantProp]: variant,
       [`${variantProp}Config`]: config,
     } as P & Record<string, unknown>;
-
     return <Component {...enhancedProps} ref={ref} />;
   });
 }
-
 export default ABTestProvider;

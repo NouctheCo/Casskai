@@ -2,10 +2,9 @@
  * Service de génération automatique des déclarations TVA
  * Utilise la fonction RPC generate_vat_declaration
  */
-
 import { supabase } from '../lib/supabase';
 import { auditService } from './auditService';
-
+import { logger } from '@/lib/logger';
 interface VATDeclaration {
   company_id: string;
   period_start: string;
@@ -33,7 +32,6 @@ interface VATDeclaration {
   status: string;
   is_valid: boolean;
 }
-
 /**
  * Générer une déclaration TVA automatiquement depuis les écritures comptables
  */
@@ -51,28 +49,23 @@ export async function generateVATDeclaration(
       p_end_date: periodEnd,
       p_declaration_type: declarationType,
     });
-
     if (error) {
-      console.error('Erreur RPC generate_vat_declaration:', error);
+      logger.error('VatDeclaration', 'Erreur RPC generate_vat_declaration:', error);
       throw error;
     }
-
     if (!data) {
       throw new Error('Aucune donnée retournée par la fonction RPC');
     }
-
     // Vérifier si la déclaration contient une erreur
     if (data.error) {
       throw new Error(`Erreur génération TVA: ${data.error}`);
     }
-
     return data as VATDeclaration;
   } catch (error) {
-    console.error('Erreur génération déclaration TVA:', error);
+    logger.error('VatDeclaration', 'Erreur génération déclaration TVA:', error);
     throw error;
   }
 }
-
 /**
  * Créer et enregistrer une déclaration TVA dans la base de données
  */
@@ -90,7 +83,6 @@ export async function createVATDeclaration(
       periodEnd,
       declarationType
     );
-
     // 2. Enregistrer dans company_tax_declarations
     const { data: declaration, error: insertError } = await supabase
       .from('company_tax_declarations')
@@ -105,12 +97,10 @@ export async function createVATDeclaration(
       })
       .select()
       .single();
-
     if (insertError) {
-      console.error('Erreur insertion déclaration TVA:', insertError);
+      logger.error('VatDeclaration', 'Erreur insertion déclaration TVA:', insertError);
       throw insertError;
     }
-
     // 3. Audit log
     await auditService.logAsync({
       action: 'create_vat_declaration',
@@ -124,17 +114,15 @@ export async function createVATDeclaration(
         status: vatData.status,
       },
     });
-
     return {
       id: declaration.id,
       data: vatData,
     };
   } catch (error) {
-    console.error('Erreur création déclaration TVA:', error);
+    logger.error('VatDeclaration', 'Erreur création déclaration TVA:', error);
     throw error;
   }
 }
-
 /**
  * Récupérer toutes les déclarations TVA d'une entreprise
  */
@@ -149,22 +137,17 @@ export async function getVATDeclarations(
       .eq('company_id', companyId)
       .eq('type', 'vat')
       .order('period_start', { ascending: false });
-
     if (status) {
       query = query.eq('status', status);
     }
-
     const { data, error } = await query;
-
     if (error) throw error;
-
     return data || [];
   } catch (error) {
-    console.error('Erreur récupération déclarations TVA:', error);
+    logger.error('VatDeclaration', 'Erreur récupération déclarations TVA:', error);
     return [];
   }
 }
-
 /**
  * Soumettre une déclaration TVA (changer le statut en "submitted")
  */
@@ -179,9 +162,7 @@ export async function submitVATDeclaration(
         submitted_date: new Date().toISOString(),
       })
       .eq('id', declarationId);
-
     if (error) throw error;
-
     await auditService.logAsync({
       action: 'submit_vat_declaration',
       entityType: 'tax_declaration',
@@ -189,11 +170,10 @@ export async function submitVATDeclaration(
       metadata: { submitted_at: new Date().toISOString() },
     });
   } catch (error) {
-    console.error('Erreur soumission déclaration TVA:', error);
+    logger.error('VatDeclaration', 'Erreur soumission déclaration TVA:', error);
     throw error;
   }
 }
-
 /**
  * Enregistrer un paiement de TVA
  */
@@ -216,19 +196,15 @@ export async function recordVATPayment(
       })
       .select()
       .single();
-
     if (paymentError) throw paymentError;
-
     // 2. Mettre à jour le statut de la déclaration
     const { error: updateError } = await supabase
       .from('company_tax_declarations')
       .update({ status: 'paid' })
       .eq('id', declarationId);
-
     if (updateError) {
-      console.error('Erreur mise à jour statut déclaration:', updateError);
+      logger.error('VatDeclaration', 'Erreur mise à jour statut déclaration:', updateError);
     }
-
     // 3. Audit log
     await auditService.logAsync({
       action: 'record_vat_payment',
@@ -240,14 +216,12 @@ export async function recordVATPayment(
         payment_date: paymentDate,
       },
     });
-
     return payment.id;
   } catch (error) {
-    console.error('Erreur enregistrement paiement TVA:', error);
+    logger.error('VatDeclaration', 'Erreur enregistrement paiement TVA:', error);
     throw error;
   }
 }
-
 /**
  * Exporter une déclaration TVA au format PDF/Excel (à implémenter côté frontend)
  */
@@ -262,23 +236,19 @@ export async function exportVATDeclaration(
       .select('*')
       .eq('id', declarationId)
       .single();
-
     if (error || !declaration) {
       throw new Error('Déclaration non trouvée');
     }
-
     // TODO: Générer le PDF/Excel côté frontend ou via un service externe
     // Pour l'instant, retourner les données brutes
-
     return {
       url: '', // URL du fichier généré
     };
   } catch (error) {
-    console.error('Erreur export déclaration TVA:', error);
+    logger.error('VatDeclaration', 'Erreur export déclaration TVA:', error);
     throw error;
   }
 }
-
 /**
  * Calculer le montant de TVA à payer pour une période donnée (aperçu rapide)
  */
@@ -297,18 +267,16 @@ export async function previewVATAmount(
       periodStart,
       periodEnd
     );
-
     return {
       collected: vatData.vat_collected,
       deductible: vatData.vat_deductible,
       toPay: vatData.vat_to_pay,
     };
   } catch (error) {
-    console.error('Erreur aperçu montant TVA:', error);
+    logger.error('VatDeclaration', 'Erreur aperçu montant TVA:', error);
     return { collected: 0, deductible: 0, toPay: 0 };
   }
 }
-
 export const vatDeclarationService = {
   generateVATDeclaration,
   createVATDeclaration,

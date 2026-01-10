@@ -9,9 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // Service pour la gestion budgétaire complète de CassKai
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 import type {
   Budget,
   BudgetCategory,
@@ -23,21 +23,17 @@ import type {
   BudgetStatus,
   BudgetVarianceAnalysis
 } from '@/types/budget.types';
-
 export class BudgetService {
   private static instance: BudgetService;
-
   static getInstance(): BudgetService {
     if (!BudgetService.instance) {
       BudgetService.instance = new BudgetService();
     }
     return BudgetService.instance;
   }
-
   // =============================================
   // CRUD Operations - Budgets
   // =============================================
-
   /**
    * Récupère tous les budgets d'une entreprise
    */
@@ -55,7 +51,6 @@ export class BudgetService {
         `)
         .eq('company_id', companyId)
         .order('budget_year', { ascending: false });
-
       // Appliquer les filtres
       if (filter?.years?.length) {
         query = query.in('budget_year', filter.years);
@@ -63,18 +58,14 @@ export class BudgetService {
       if (filter?.status?.length) {
         query = query.in('status', filter.status);
       }
-
       const { data, error } = await query;
-
       if (error) throw error;
-
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching budgets:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error fetching budgets:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   /**
    * Récupère un budget spécifique avec toutes ses données
    */
@@ -89,16 +80,13 @@ export class BudgetService {
         `)
         .eq('id', budgetId)
         .single();
-
       if (error && error.code !== 'PGRST116') throw error;
-
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching budget:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error fetching budget:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   /**
    * Récupère le budget actif pour une année donnée
    */
@@ -118,18 +106,15 @@ export class BudgetService {
         .eq('budget_year', year)
         .eq('status', 'active')
         .single();
-
       if (error && error.code !== 'PGRST116') {
         throw error;
       }
-
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching active budget:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error fetching active budget:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   /**
    * Crée un nouveau budget
    */
@@ -146,10 +131,8 @@ export class BudgetService {
           error: { message: 'Données invalides', details: validation.errors }
         };
       }
-
       // Calculer les totaux
       const totals = this.calculateBudgetTotals(budgetData.categories as unknown as BudgetCategory[]);
-
       // Créer le budget principal
       const { data: budget, error: budgetError } = await supabase
         .from('budgets')
@@ -165,9 +148,7 @@ export class BudgetService {
         })
         .select()
         .single();
-
       if (budgetError) throw budgetError;
-
       // Créer les catégories
       if (budgetData.categories.length > 0) {
         const categoriesData = budgetData.categories.map(cat => ({
@@ -188,14 +169,11 @@ export class BudgetService {
           responsible_person: cat.responsible_person,
           approval_status: 'pending'
         }));
-
         const { error: categoriesError } = await supabase
           .from('budget_categories')
           .insert(categoriesData);
-
         if (categoriesError) throw categoriesError;
       }
-
       // Créer les hypothèses
       if (budgetData.assumptions.length > 0) {
         const assumptionsData = budgetData.assumptions.map(ass => ({
@@ -209,23 +187,18 @@ export class BudgetService {
           confidence_level: ass.confidence_level,
           source: ass.source
         }));
-
         const { error: assumptionsError } = await supabase
           .from('budget_assumptions')
           .insert(assumptionsData);
-
         if (assumptionsError) throw assumptionsError;
       }
-
       // Récupérer le budget complet créé
       return this.getBudgetById(budget.id);
-
     } catch (error) {
-      console.error('Error creating budget:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error creating budget:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   /**
    * Met à jour un budget existant
    */
@@ -235,7 +208,6 @@ export class BudgetService {
   ): Promise<{ data: Budget | null; error: unknown | null }> {
     try {
       let updateData: Record<string, unknown> = {};
-
       // Recalculer les totaux si les catégories ont changé
       if (budgetData.categories) {
         const totals = this.calculateBudgetTotals(budgetData.categories as unknown as BudgetCategory[]);
@@ -247,19 +219,15 @@ export class BudgetService {
           updated_at: new Date().toISOString()
         };
       }
-
       if (budgetData.year) {
         updateData.budget_year = budgetData.year;
       }
-
       // Mettre à jour le budget principal
       const { error: budgetError } = await supabase
         .from('budgets')
         .update(updateData)
         .eq('id', budgetId);
-
       if (budgetError) throw budgetError;
-
       // Mettre à jour les catégories si fournies
       if (budgetData.categories) {
         // Supprimer les anciennes catégories
@@ -267,7 +235,6 @@ export class BudgetService {
           .from('budget_categories')
           .delete()
           .eq('budget_id', budgetId);
-
         // Créer les nouvelles catégories
         if (budgetData.categories.length > 0) {
           const categoriesData = budgetData.categories.map(cat => ({
@@ -288,15 +255,12 @@ export class BudgetService {
             responsible_person: cat.responsible_person,
             approval_status: 'pending'
           }));
-
           const { error: categoriesError } = await supabase
             .from('budget_categories')
             .insert(categoriesData);
-
           if (categoriesError) throw categoriesError;
         }
       }
-
       // Mettre à jour les hypothèses si fournies
       if (budgetData.assumptions) {
         // Supprimer les anciennes hypothèses
@@ -304,7 +268,6 @@ export class BudgetService {
           .from('budget_assumptions')
           .delete()
           .eq('budget_id', budgetId);
-
         // Créer les nouvelles hypothèses
         if (budgetData.assumptions.length > 0) {
           const assumptionsData = budgetData.assumptions.map(ass => ({
@@ -318,23 +281,18 @@ export class BudgetService {
             confidence_level: ass.confidence_level,
             source: ass.source
           }));
-
           const { error: assumptionsError } = await supabase
             .from('budget_assumptions')
             .insert(assumptionsData);
-
           if (assumptionsError) throw assumptionsError;
         }
       }
-
       return this.getBudgetById(budgetId);
-
     } catch (error) {
-      console.error('Error updating budget:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error updating budget:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   /**
    * Change le statut d'un budget
    */
@@ -348,27 +306,21 @@ export class BudgetService {
         status,
         updated_at: new Date().toISOString()
       };
-
       if (status === 'approved' && approvedBy) {
         updateData.approved_at = new Date().toISOString();
         updateData.approved_by = approvedBy;
       }
-
       const { error } = await supabase
         .from('budgets')
         .update(updateData)
         .eq('id', budgetId);
-
       if (error) throw error;
-
       return this.getBudgetById(budgetId);
-
     } catch (error) {
-      console.error('Error updating budget status:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error updating budget status:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   /**
    * Supprime un budget
    */
@@ -378,20 +330,16 @@ export class BudgetService {
         .from('budgets')
         .delete()
         .eq('id', budgetId);
-
       if (error) throw error;
-
       return { error: null };
     } catch (error) {
-      console.error('Error deleting budget:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error deleting budget:', error instanceof Error ? error.message : String(error));
       return { error };
     }
   }
-
   // =============================================
   // Analyse et comparaisons
   // =============================================
-
   /**
    * Analyse les écarts budgétaires
    */
@@ -408,16 +356,13 @@ export class BudgetService {
         p_period_start: periodStart,
         p_period_end: periodEnd
       });
-
       if (error) throw error;
-
       return { data: data || [], error: null };
     } catch (error) {
-      console.error('Error analyzing budget variances:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error analyzing budget variances:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   /**
    * Compare les budgets (N vs N-1)
    */
@@ -430,20 +375,16 @@ export class BudgetService {
         p_current_budget_id: currentBudgetId,
         p_previous_budget_id: previousBudgetId
       });
-
       if (error) throw error;
-
       return { data, error: null };
     } catch (error) {
-      console.error('Error comparing budgets:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error comparing budgets:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   // =============================================
   // Templates et import/export
   // =============================================
-
   /**
    * Récupère les templates de budget disponibles
    */
@@ -454,16 +395,13 @@ export class BudgetService {
         .select('*')
         .eq('is_active', true)
         .order('name');
-
       if (error) throw error;
-
       return { data: data || [], error: null };
     } catch (error) {
-      console.error('Error fetching budget templates:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error fetching budget templates:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   /**
    * Crée un budget à partir d'un template
    */
@@ -479,9 +417,7 @@ export class BudgetService {
         .select('*')
         .eq('id', templateId)
         .single();
-
       if (templateError) throw templateError;
-
       // Créer les données de budget basées sur le template
       const budgetData: BudgetFormData = {
         year,
@@ -505,15 +441,12 @@ export class BudgetService {
           confidence_level: 80
         })) || []
       };
-
       return this.createBudget(companyId, budgetData);
-
     } catch (error) {
-      console.error('Error creating budget from template:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error creating budget from template:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   /**
    * Duplique un budget existant pour une nouvelle année
    */
@@ -525,11 +458,9 @@ export class BudgetService {
     try {
       // Récupérer le budget source
       const { data: sourceBudget, error: sourceError } = await this.getBudgetById(budgetId);
-
       if (sourceError || !sourceBudget) {
         throw sourceError || new Error('Budget source introuvable');
       }
-
       // Créer les nouvelles données avec ajustement de croissance
       const budgetData: BudgetFormData = {
         year: newYear,
@@ -559,19 +490,15 @@ export class BudgetService {
           source: ass.source
         })) || []
       };
-
       return this.createBudget(sourceBudget.company_id, budgetData);
-
     } catch (error) {
-      console.error('Error duplicating budget:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error duplicating budget:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
-
   // =============================================
   // Méthodes utilitaires privées
   // =============================================
-
   private calculateBudgetTotals(categories: BudgetCategory[]): {
     revenue: number;
     expense: number;
@@ -595,11 +522,9 @@ export class BudgetService {
       { revenue: 0, expense: 0, capex: 0 }
     );
   }
-
   private validateBudgetData(budgetData: BudgetFormData): BudgetValidationResult {
     const errors: Array<{ field: string; category?: string; message: string; severity: 'error' | 'warning' }> = [];
     const warnings: Array<{ field: string; category?: string; message: string; suggestion?: string }> = [];
-
     // Validation de l'année
     const currentYear = new Date().getFullYear();
     if (budgetData.year < currentYear - 1 || budgetData.year > currentYear + 5) {
@@ -609,7 +534,6 @@ export class BudgetService {
         severity: 'error'
       });
     }
-
     // Validation des catégories
     if (budgetData.categories.length === 0) {
       errors.push({
@@ -618,7 +542,6 @@ export class BudgetService {
         severity: 'error'
       });
     }
-
     // Validation des montants mensuels
     budgetData.categories.forEach((cat, index) => {
       if (cat.monthly_amounts.length !== 12) {
@@ -629,10 +552,8 @@ export class BudgetService {
           severity: 'error'
         });
       }
-
       const monthlyTotal = cat.monthly_amounts.reduce((sum, amount) => sum + amount, 0);
       const annualAmount = cat.annual_amount;
-
       if (Math.abs(monthlyTotal - annualAmount) > 0.01) {
         warnings.push({
           field: `categories[${index}].amounts`,
@@ -642,14 +563,12 @@ export class BudgetService {
         });
       }
     });
-
     return {
       isValid: errors.length === 0,
       errors,
       warnings
     };
   }
-
   /**
    * Crée un budget à partir de données importées (Excel/CSV)
    */
@@ -684,16 +603,13 @@ export class BudgetService {
           confidence_level: 80,
         })) || []
       };
-
       // Créer le budget
       return this.createBudget(companyId, budgetData);
-
     } catch (error) {
-      console.error('Error creating budget from import:', error instanceof Error ? error.message : String(error));
+      logger.error('Budget', 'Error creating budget from import:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
 }
-
 // Export de l'instance singleton
 export const budgetService = BudgetService.getInstance();

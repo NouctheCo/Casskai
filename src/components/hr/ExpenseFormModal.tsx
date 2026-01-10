@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Expense, Employee } from '@/services/hrService';
-
+import { logger } from '@/lib/logger';
 interface ExpenseFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,7 +14,6 @@ interface ExpenseFormModalProps {
   employees: Employee[];
   expense?: Expense | null;
 }
-
 export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
   isOpen,
   onClose,
@@ -31,29 +30,22 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
     expense_date: expense?.expense_date || new Date().toISOString().split('T')[0],
     notes: expense?.notes || '',
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const validate = () => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.employee_id) newErrors.employee_id = 'Employé requis';
     if (!formData.description.trim()) newErrors.description = 'Description requise';
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       newErrors.amount = 'Montant invalide';
     }
     if (!formData.expense_date) newErrors.expense_date = 'Date requise';
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validate()) return;
-
     setIsSubmitting(true);
     try {
       const success = await onSubmit({
@@ -62,19 +54,16 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
         status: 'pending',
         category: formData.category as any,
       });
-
       if (success) {
         onClose();
       }
     } catch (error) {
-      console.error('Error submitting expense form:', error);
+      logger.error('ExpenseFormModal', 'Error submitting expense form:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
-
   if (!isOpen) return null;
-
   const expenseCategories = {
     travel: 'Déplacement',
     meals: 'Repas',
@@ -83,7 +72,6 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
     training: 'Formation',
     other: 'Autre'
   };
-
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
@@ -108,7 +96,6 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
             <X className="h-6 w-6" />
           </button>
         </div>
-
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-6">
@@ -134,7 +121,6 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{errors.employee_id}</p>
               )}
             </div>
-
             {/* Catégorie et Date */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -155,7 +141,6 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-
               <div>
                 <Label htmlFor="expense_date">Date *</Label>
                 <Input
@@ -170,7 +155,6 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
                 )}
               </div>
             </div>
-
             {/* Description */}
             <div>
               <Label htmlFor="description">Description *</Label>
@@ -186,7 +170,6 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{errors.description}</p>
               )}
             </div>
-
             {/* Montant et Devise */}
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
@@ -204,7 +187,6 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
                   <p className="text-sm text-red-500 mt-1">{errors.amount}</p>
                 )}
               </div>
-
               <div>
                 <Label htmlFor="currency">Devise</Label>
                 <Select
@@ -234,7 +216,6 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
                 </Select>
               </div>
             </div>
-
             {/* Justificatif */}
             <div>
               <Label htmlFor="receipt">Justificatif</Label>
@@ -262,7 +243,6 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
                 📎 Le justificatif sera disponible dans une prochaine version
               </p>
             </div>
-
             {/* Notes */}
             <div>
               <Label htmlFor="notes">Notes additionnelles</Label>
@@ -274,7 +254,6 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
                 rows={2}
               />
             </div>
-
             {/* Info */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-900/20">
               <p className="text-sm text-blue-900 dark:text-blue-100">
@@ -282,7 +261,6 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
               </p>
             </div>
           </div>
-
           {/* Footer */}
           <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
             <Button

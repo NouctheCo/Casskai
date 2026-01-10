@@ -9,12 +9,11 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import ABTestingFramework from '@/utils/abTestingFramework';
 import { useAnalytics } from '@/components/analytics/AnalyticsProvider';
-
+import { logger } from '@/lib/logger';
 // Types pour les hooks A/B Testing
 interface ABTestHookResult {
   variant: string;
@@ -22,13 +21,11 @@ interface ABTestHookResult {
   config?: Record<string, any>;
   isLoading: boolean;
 }
-
 interface ABTestConfig {
   testId: string;
   defaultVariant?: string;
   userContext?: Record<string, any>;
 }
-
 interface ABTestDefinition {
   id: string;
   name: string;
@@ -48,7 +45,6 @@ interface ABTestDefinition {
     customFunction?: (context: any) => boolean;
   }>;
 }
-
 // Tests A/B configurés pour CassKai
 const CASSKAI_AB_TESTS: ABTestDefinition[] = [
   {
@@ -223,7 +219,6 @@ const CASSKAI_AB_TESTS: ABTestDefinition[] = [
     ],
   },
 ];
-
 // Hook principal pour A/B Testing
 export const useABTest = (config: ABTestConfig): ABTestHookResult => {
   const [result, setResult] = useState<ABTestHookResult>({
@@ -231,10 +226,8 @@ export const useABTest = (config: ABTestConfig): ABTestHookResult => {
     isInTest: false,
     isLoading: true,
   });
-
   const framework = useRef<ABTestingFramework>(ABTestingFramework.getInstance());
   const { trackEvent } = useAnalytics();
-
   useEffect(() => {
     const initializeTest = async () => {
       try {
@@ -242,17 +235,14 @@ export const useABTest = (config: ABTestConfig): ABTestHookResult => {
         if (!framework.current.getTest(config.testId)) {
           await framework.current.initialize(CASSKAI_AB_TESTS);
         }
-
         // Obtenir la variante
         const testResult = framework.current.getVariant(config.testId, config.userContext);
-        
         setResult({
           variant: testResult.variantId,
           isInTest: testResult.isInTest,
           config: testResult.config,
           isLoading: false,
         });
-
         // Analytics : tracker l'exposition au test
         if (testResult.isInTest) {
           trackEvent('AB Test Exposure', {
@@ -260,9 +250,8 @@ export const useABTest = (config: ABTestConfig): ABTestHookResult => {
             variant_id: testResult.variantId,
           });
         }
-
       } catch (error) {
-        console.error('[ABTest] Erreur d\'initialisation:', error);
+        logger.error('UseABTesting', '[ABTest] Erreur d\'initialisation:', error);
         setResult({
           variant: config.defaultVariant || 'control',
           isInTest: false,
@@ -270,18 +259,14 @@ export const useABTest = (config: ABTestConfig): ABTestHookResult => {
         });
       }
     };
-
     initializeTest();
   }, [config.testId, config.defaultVariant, trackEvent]);
-
   return result;
 };
-
 // Hook pour tracker les conversions
 export const useABTestConversion = () => {
   const framework = useRef<ABTestingFramework>(ABTestingFramework.getInstance());
   const { trackEvent } = useAnalytics();
-
   const trackConversion = useCallback((
     testId: string, 
     eventName?: string, 
@@ -289,7 +274,6 @@ export const useABTestConversion = () => {
     properties?: Record<string, any>
   ) => {
     framework.current.trackConversion(testId, eventName, value, properties);
-    
     // Analytics : tracker la conversion
     trackEvent('AB Test Conversion', {
       test_id: testId,
@@ -298,34 +282,27 @@ export const useABTestConversion = () => {
       ...properties,
     });
   }, [trackEvent]);
-
   return { trackConversion };
 };
-
 // Hook pour les tests de page d'atterrissage
 export const useLandingPageTest = () => {
   const location = useLocation();
   const isLandingPage = location.pathname === '/' || location.pathname === '/landing';
-  
   const { variant, isInTest, config, isLoading } = useABTest({
     testId: 'landing-page-hero',
     defaultVariant: 'control',
   });
-
   const { trackConversion } = useABTestConversion();
-
   const trackSignupClick = useCallback(() => {
     if (isInTest) {
       trackConversion('landing-page-hero', 'signup_click');
     }
   }, [isInTest, trackConversion]);
-
   const trackTrialStart = useCallback(() => {
     if (isInTest) {
       trackConversion('landing-page-hero', 'trial_start', 1);
     }
   }, [isInTest, trackConversion]);
-
   return {
     variant,
     isInTest: isInTest && isLandingPage,
@@ -335,39 +312,32 @@ export const useLandingPageTest = () => {
     trackTrialStart,
   };
 };
-
 // Hook pour les tests d'onboarding
 export const useOnboardingTest = () => {
   const location = useLocation();
   const isOnboardingPage = ['/auth', '/signup', '/onboarding'].some(path => 
     location.pathname.includes(path)
   );
-
   const { variant, isInTest, config, isLoading } = useABTest({
     testId: 'onboarding-flow',
     defaultVariant: 'control',
   });
-
   const { trackConversion } = useABTestConversion();
-
   const trackStepCompleted = useCallback((stepNumber: number) => {
     if (isInTest) {
       trackConversion('onboarding-flow', 'step_completed', stepNumber);
     }
   }, [isInTest, trackConversion]);
-
   const trackOnboardingCompleted = useCallback(() => {
     if (isInTest) {
       trackConversion('onboarding-flow', 'onboarding_completed', 1);
     }
   }, [isInTest, trackConversion]);
-
   const trackOnboardingAbandoned = useCallback((stepNumber: number) => {
     if (isInTest) {
       trackConversion('onboarding-flow', 'onboarding_abandoned', stepNumber);
     }
   }, [isInTest, trackConversion]);
-
   return {
     variant,
     isInTest: isInTest && isOnboardingPage,
@@ -378,31 +348,25 @@ export const useOnboardingTest = () => {
     trackOnboardingAbandoned,
   };
 };
-
 // Hook pour les tests de dashboard
 export const useDashboardTest = () => {
   const location = useLocation();
   const isDashboardPage = location.pathname.startsWith('/dashboard');
-
   const { variant, isInTest, config, isLoading } = useABTest({
     testId: 'dashboard-layout',
     defaultVariant: 'control',
   });
-
   const { trackConversion } = useABTestConversion();
-
   const trackFeatureUsage = useCallback((feature: string) => {
     if (isInTest) {
       trackConversion('dashboard-layout', 'feature_used', 1, { feature });
     }
   }, [isInTest, trackConversion]);
-
   const trackEngagementTime = useCallback((seconds: number) => {
     if (isInTest && seconds > 30) { // Seulement si > 30 secondes
       trackConversion('dashboard-layout', 'engagement_time', seconds);
     }
   }, [isInTest, trackConversion]);
-
   return {
     variant,
     isInTest: isInTest && isDashboardPage,
@@ -412,33 +376,27 @@ export const useDashboardTest = () => {
     trackEngagementTime,
   };
 };
-
 // Hook pour les tests de pricing
 export const usePricingTest = () => {
   const location = useLocation();
   const isPricingPage = ['/pricing', '/plans', '/billing'].some(path => 
     location.pathname.includes(path)
   );
-
   const { variant, isInTest, config, isLoading } = useABTest({
     testId: 'pricing-display',
     defaultVariant: 'control',
   });
-
   const { trackConversion } = useABTestConversion();
-
   const trackPlanClick = useCallback((planId: string, price: number) => {
     if (isInTest) {
       trackConversion('pricing-display', 'plan_selected', price, { plan_id: planId });
     }
   }, [isInTest, trackConversion]);
-
   const trackCheckoutStarted = useCallback((planId: string, price: number) => {
     if (isInTest) {
       trackConversion('pricing-display', 'checkout_started', price, { plan_id: planId });
     }
   }, [isInTest, trackConversion]);
-
   return {
     variant,
     isInTest: isInTest && isPricingPage,
@@ -448,28 +406,23 @@ export const usePricingTest = () => {
     trackCheckoutStarted,
   };
 };
-
 // Hook générique pour créer des tests personnalisés
 export const useCustomABTest = (testId: string, variants: string[], defaultVariant?: string) => {
   const { variant, isInTest, config, isLoading } = useABTest({
     testId,
     defaultVariant: defaultVariant || variants[0],
   });
-
   const { trackConversion } = useABTestConversion();
-
   // Helper pour vérifier si on est dans une variante spécifique
   const isVariant = useCallback((variantId: string) => {
     return isInTest && variant === variantId;
   }, [isInTest, variant]);
-
   // Helper pour tracker les conversions personnalisées
   const trackCustomConversion = useCallback((eventName: string, value?: number, properties?: Record<string, any>) => {
     if (isInTest) {
       trackConversion(testId, eventName, value, properties);
     }
   }, [isInTest, testId, trackConversion]);
-
   return {
     variant,
     isInTest,
@@ -479,27 +432,22 @@ export const useCustomABTest = (testId: string, variants: string[], defaultVaria
     trackCustomConversion,
   };
 };
-
 // Hook pour obtenir des informations debug sur les tests A/B
 export const useABTestDebug = () => {
   const framework = useRef<ABTestingFramework>(ABTestingFramework.getInstance());
   const [debugInfo, setDebugInfo] = useState<any>(null);
-
   const getDebugInfo = useCallback(() => {
     const info = framework.current.getDebugInfo();
     setDebugInfo(info);
     return info;
   }, []);
-
   const getAllActiveTests = useCallback(() => {
     return framework.current.getActiveTests();
   }, []);
-
   return {
     debugInfo,
     getDebugInfo,
     getAllActiveTests,
   };
 };
-
 export default useABTest;

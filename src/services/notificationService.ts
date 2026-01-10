@@ -9,9 +9,8 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface Notification {
   id: string;
   user_id: string;
@@ -35,7 +34,6 @@ export interface Notification {
   created_at: string;
   updated_at?: string;
 }
-
 export interface CreateNotificationData {
   user_id: string;
   company_id?: string;
@@ -51,23 +49,19 @@ export interface CreateNotificationData {
   expires_at?: string;
   scheduled_for?: string;
 }
-
 export interface NotificationServiceResponse<T = any> {
   success: boolean;
   data?: T;
   error?: string;
 }
-
 export class NotificationService {
   private static instance: NotificationService;
-
   static getInstance(): NotificationService {
     if (!this.instance) {
       this.instance = new NotificationService();
     }
     return this.instance;
   }
-
   /**
    * Crée une nouvelle notification
    */
@@ -94,11 +88,8 @@ export class NotificationService {
         })
         .select()
         .single();
-
       if (error) throw error;
-
       this.emitNotificationEvent('new', data);
-
       return {
         success: true,
         data
@@ -110,7 +101,6 @@ export class NotificationService {
       };
     }
   }
-
   /**
    * Archive une notification
    */
@@ -125,11 +115,8 @@ export class NotificationService {
         .eq('id', notificationId)
         .select()
         .single();
-
       if (error) throw error;
-
       this.emitNotificationEvent('archive', data);
-
       return {
         success: true,
         data
@@ -141,7 +128,6 @@ export class NotificationService {
       };
     }
   }
-
   /**
    * Envoie une notification à tous les utilisateurs d'une entreprise
    */
@@ -163,16 +149,13 @@ export class NotificationService {
         .from('user_companies')
         .select('user_id')
         .eq('company_id', companyId);
-
       if (fetchError) throw fetchError;
-
       if (!userCompanies || userCompanies.length === 0) {
         return {
           success: true,
           data: 0
         };
       }
-
       // Créer les notifications
       const notifications = userCompanies.map(uc => ({
         user_id: uc.user_id,
@@ -188,14 +171,11 @@ export class NotificationService {
         archived: false,
         metadata: {}
       }));
-
       const { error: insertError, count } = await supabase
         .from('notifications')
         .insert(notifications)
         .select();
-
       if (insertError) throw insertError;
-
       return {
         success: true,
         data: count || 0
@@ -207,7 +187,6 @@ export class NotificationService {
       };
     }
   }
-
   /**
    * Récupère les notifications d'un utilisateur
    */
@@ -226,39 +205,29 @@ export class NotificationService {
         .from('notifications')
         .select('*')
         .eq('user_id', userId);
-
       // Filtres optionnels
       if (options?.unreadOnly) {
         query = query.eq('read', false);
       }
-
       if (options?.category) {
         query = query.eq('category', options.category);
       }
-
       if (options?.type) {
         query = query.eq('type', options.type);
       }
-
       // Exclure les notifications expirées (filtre manuel après récupération)
       // Note: Supabase OR syntax nécessite une syntaxe spécifique pour les filtres NULL
-
       // Pagination
       if (options?.limit) {
         query = query.limit(options.limit);
       }
-
       if (options?.offset) {
         query = query.range(options.offset, (options.offset) + (options?.limit || 50) - 1);
       }
-
       // Tri par date de création (plus récent en premier)
       query = query.order('created_at', { ascending: false });
-
       const { data, error } = await query;
-
       if (error) throw error;
-
       return {
         success: true,
         data: data || []
@@ -270,7 +239,6 @@ export class NotificationService {
       };
     }
   }
-
   /**
    * Marque une notification comme lue
    */
@@ -285,11 +253,8 @@ export class NotificationService {
         .eq('id', notificationId)
         .select()
         .single();
-
       if (error) throw error;
-
       this.emitNotificationEvent('read', data);
-
       return {
         success: true,
         data
@@ -301,7 +266,6 @@ export class NotificationService {
       };
     }
   }
-
   /**
    * Marque toutes les notifications comme lues pour un utilisateur
    */
@@ -316,11 +280,8 @@ export class NotificationService {
         .eq('user_id', userId)
         .eq('read', false)
         .select();
-
       if (error) throw error;
-
       this.emitNotificationEvent('mark_all_read', { userId, count });
-
       return {
         success: true,
         data: count || 0
@@ -332,7 +293,6 @@ export class NotificationService {
       };
     }
   }
-
   /**
    * Supprime une notification
    */
@@ -342,11 +302,8 @@ export class NotificationService {
         .from('notifications')
         .delete()
         .eq('id', notificationId);
-
       if (error) throw error;
-
       this.emitNotificationEvent('delete', { id: notificationId });
-
       return {
         success: true,
         data: true
@@ -358,7 +315,6 @@ export class NotificationService {
       };
     }
   }
-
   /**
    * Compte les notifications non lues
    */
@@ -369,9 +325,7 @@ export class NotificationService {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
         .eq('read', false);
-
       if (error) throw error;
-
       return {
         success: true,
         data: count || 0
@@ -383,7 +337,6 @@ export class NotificationService {
       };
     }
   }
-
   /**
    * Nettoie les anciennes notifications expirées
    */
@@ -394,9 +347,7 @@ export class NotificationService {
         .delete()
         .lt('expires_at', new Date().toISOString())
         .select();
-
       if (error) throw error;
-
       return {
         success: true,
         data: count || 0
@@ -408,14 +359,12 @@ export class NotificationService {
       };
     }
   }
-
   /**
    * Émet un événement temps réel pour les notifications
    */
   private emitNotificationEvent(event: string, data: any): void {
-    console.warn(`📱 Notification event: ${event}`, data);
+    logger.warn('Notification', `📱 Notification event: ${event}`, data);
   }
-
   /**
    * S'abonne aux notifications en temps réel
    */
@@ -439,13 +388,10 @@ export class NotificationService {
         }
       )
       .subscribe();
-
     // Retourner une fonction de cleanup
     return () => {
       supabase.removeChannel(channel);
     };
   }
 }
-
 export const notificationService = NotificationService.getInstance();
-

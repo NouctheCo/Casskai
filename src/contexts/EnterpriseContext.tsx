@@ -10,7 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { devLogger } from '@/utils/devLogger';
 import { Enterprise, EnterpriseTaxConfiguration } from '../types/enterprise.types';
 import { useToast } from '../components/ui/use-toast';
@@ -46,12 +46,22 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
   const [currentEnterpriseId, setCurrentEnterpriseId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const hasLoadedOnce = useRef(false);
+  const isLoadingRef = useRef(false);
   const { toast } = useToast();
 
   const loadEnterprises = async () => {
+    // Guard: Only load once to prevent multiple calls
+    if (hasLoadedOnce.current || isLoadingRef.current) {
+      devLogger.debug('EnterpriseContext', '⏭️ Skipping loadEnterprises - already loaded or loading');
+      return;
+    }
+
+    isLoadingRef.current = true;
+
     // First try to load from Supabase
     devLogger.info('🏢 Loading enterprises from Supabase...');
-    
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -146,6 +156,8 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           }
           
           setLoading(false);
+          hasLoadedOnce.current = true;
+          isLoadingRef.current = false;
           devLogger.info('✅ Enterprises loaded from Supabase');
           return;
         }
@@ -191,24 +203,29 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
     
     setLoading(false);
+    hasLoadedOnce.current = true;
+    isLoadingRef.current = false;
     devLogger.info('✅ Enterprises loaded from localStorage');
   };
 
   useEffect(() => {
     loadEnterprises();
-    
+
     // Listen for custom refresh event
     const handleRefresh = () => {
       devLogger.info('🔄 Actualisation forcée des entreprises...');
+      hasLoadedOnce.current = false; // Reset flag to allow reload
+      isLoadingRef.current = false;
       loadEnterprises();
     };
-    
+
     window.addEventListener('enterpriseContextRefresh', handleRefresh);
-    
+
     return () => {
       window.removeEventListener('enterpriseContextRefresh', handleRefresh);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only run once on mount
 
   const currentEnterprise = enterprises.find(e => e.id === currentEnterpriseId) || null;
 

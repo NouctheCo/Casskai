@@ -9,9 +9,8 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 interface CountryTaxConfig {
   country: string;
   countryName: string;
@@ -51,7 +50,6 @@ interface CountryTaxConfig {
     software: number;
   };
 }
-
 export class InternationalTaxService {
   private static readonly TAX_CONFIGURATIONS: Record<string, CountryTaxConfig> = {
     // France - Plan Comptable Général (PCG)
@@ -94,7 +92,6 @@ export class InternationalTaxService {
         software: 33.33
       }
     },
-
     // Sénégal - SYSCOHADA
     SN: {
       country: 'SN',
@@ -133,7 +130,6 @@ export class InternationalTaxService {
         software: 33.33
       }
     },
-
     // Côte d'Ivoire - SYSCOHADA
     CI: {
       country: 'CI',
@@ -172,7 +168,6 @@ export class InternationalTaxService {
         software: 33.33
       }
     },
-
     // Mali - SYSCOHADA
     ML: {
       country: 'ML',
@@ -211,7 +206,6 @@ export class InternationalTaxService {
         software: 33.33
       }
     },
-
     // Maroc
     MA: {
       country: 'MA',
@@ -251,7 +245,6 @@ export class InternationalTaxService {
         software: 33.33
       }
     },
-
     // Tunisie
     TN: {
       country: 'TN',
@@ -292,15 +285,12 @@ export class InternationalTaxService {
       }
     }
   };
-
   static getTaxConfiguration(country: string): CountryTaxConfig | null {
     return this.TAX_CONFIGURATIONS[country] || null;
   }
-
   static getAllSupportedCountries(): CountryTaxConfig[] {
     return Object.values(this.TAX_CONFIGURATIONS);
   }
-
   static async configureCompanyTaxSettings(
     companyId: string,
     country: string
@@ -310,7 +300,6 @@ export class InternationalTaxService {
       if (!config) {
         return { success: false, error: `Configuration fiscale non supportée pour le pays: ${country}` };
       }
-
       // 1. Mettre à jour la configuration de l'entreprise
       const { error: companyError } = await supabase
         .from('companies')
@@ -328,9 +317,7 @@ export class InternationalTaxService {
           }
         })
         .eq('id', companyId);
-
       if (companyError) throw companyError;
-
       // 2. Créer ou mettre à jour les paramètres fiscaux spécifiques
       const { error: fiscalError } = await supabase
         .from('company_fiscal_settings')
@@ -340,60 +327,50 @@ export class InternationalTaxService {
           accounting_standard: config.accountingStandard,
           fiscal_year_end: config.fiscalYearEnd,
           default_currency: config.currency,
-
           // TVA
           vat_standard_rate: config.vatRates.standard,
           vat_reduced_rate: config.vatRates.reduced || 0,
           vat_zero_rate: config.vatRates.zero || 0,
           vat_exempt_available: config.vatRates.exempt || false,
-
           // Comptes TVA
           vat_collected_account: config.taxAccounts.vatCollected,
           vat_deductible_account: config.taxAccounts.vatDeductible,
           corporate_tax_account: config.taxAccounts.corporateTax,
           payroll_tax_account: config.taxAccounts.payrollTax,
-
           // Obligations déclaratives
           monthly_vat_return: config.complianceRequirements.monthlyVatReturn,
           quarterly_tax_return: config.complianceRequirements.quarterlyTaxReturn,
           annual_financial_statements: config.complianceRequirements.annualFinancialStatements,
           audit_required: config.complianceRequirements.auditRequired,
           minimum_capital: config.complianceRequirements.minimumCapital,
-
           // Charges sociales et paie
           income_tax_rate: config.payrollTaxes.incomeTaxRate,
           social_security_rate: config.payrollTaxes.socialSecurityRate,
           employer_contribution_rate: config.payrollTaxes.employerContribution,
           pension_rate: config.payrollTaxes.pensionRate,
-
           // Amortissements
           building_depreciation_rate: config.depreciation.buildings,
           equipment_depreciation_rate: config.depreciation.equipment,
           vehicle_depreciation_rate: config.depreciation.vehicles,
           software_depreciation_rate: config.depreciation.software,
-
           // Métadonnées
           configuration_date: new Date().toISOString(),
           is_active: true
         }, {
           onConflict: 'company_id'
         });
-
       if (fiscalError) throw fiscalError;
-
       // 3. Créer les comptes comptables spécifiques au pays s'ils n'existent pas
       await this.createCountrySpecificAccounts(companyId, config);
-
       return { success: true };
     } catch (error: unknown) {
-      console.error('Erreur configuration fiscale:', error);
+      logger.error('InternationalTax', 'Erreur configuration fiscale:', error);
       return {
         success: false,
         error: (error instanceof Error ? error.message : 'Une erreur est survenue') || 'Erreur lors de la configuration fiscale'
       };
     }
   }
-
   private static async createCountrySpecificAccounts(
     companyId: string,
     config: CountryTaxConfig
@@ -418,7 +395,6 @@ export class InternationalTaxService {
         is_tax_account: true
       }
     ];
-
     if (config.taxAccounts.payrollTax) {
       taxAccounts.push({
         account_code: config.taxAccounts.payrollTax,
@@ -427,7 +403,6 @@ export class InternationalTaxService {
         is_tax_account: true
       });
     }
-
     if (config.taxAccounts.socialContributions) {
       taxAccounts.push({
         account_code: config.taxAccounts.socialContributions,
@@ -436,7 +411,6 @@ export class InternationalTaxService {
         is_tax_account: true
       });
     }
-
     const accountsToInsert = taxAccounts.map(account => ({
       company_id: companyId,
       account_number: account.account_code,
@@ -447,7 +421,6 @@ export class InternationalTaxService {
       is_detail_account: true,
       level: account.account_code.length <= 2 ? 1 : 2
     }));
-
     // Insérer les comptes en ignorant les doublons
     await supabase
       .from('chart_of_accounts')
@@ -456,7 +429,6 @@ export class InternationalTaxService {
         ignoreDuplicates: true
       });
   }
-
   static calculateVAT(
     amount: number,
     country: string,
@@ -466,7 +438,6 @@ export class InternationalTaxService {
     if (!config) {
       return { vatAmount: 0, totalAmount: amount, vatRate: 0 };
     }
-
     let vatRate = 0;
     switch (vatType) {
       case 'standard':
@@ -479,18 +450,14 @@ export class InternationalTaxService {
         vatRate = config.vatRates.zero || 0;
         break;
     }
-
     const vatAmount = (amount * vatRate) / 100;
     const totalAmount = amount + vatAmount;
-
     return { vatAmount, totalAmount, vatRate };
   }
-
   static getDepreciationRate(country: string, assetType: 'buildings' | 'equipment' | 'vehicles' | 'software'): number {
     const config = this.getTaxConfiguration(country);
     return config?.depreciation[assetType] || 10; // Par défaut 10%
   }
-
   static getComplianceRequirements(country: string): CountryTaxConfig['complianceRequirements'] | null {
     const config = this.getTaxConfiguration(country);
     return config?.complianceRequirements || null;

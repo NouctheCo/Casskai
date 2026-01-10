@@ -11,7 +11,7 @@ import {
 import { toast } from 'sonner';
 import { TransactionRow } from './TransactionRow';
 import { RulesModal } from './RulesModal';
-
+import { logger } from '@/lib/logger';
 interface BankTransaction {
   id: string;
   transaction_date: string;
@@ -23,7 +23,6 @@ interface BankTransaction {
   suggested_account_id?: string | null;
   matched_entry_id?: string | null;
 }
-
 interface Account {
   id: string;
   account_number: string;
@@ -31,7 +30,6 @@ interface Account {
   account_type: string;
   account_class: number;
 }
-
 interface CategorizationRule {
   id: string;
   pattern: string;
@@ -40,13 +38,11 @@ interface CategorizationRule {
   is_regex: boolean;
   priority: number;
 }
-
 interface TransactionCategorizationProps {
   bankAccountId: string;
   bankAccountNumber: string;
   onRefresh?: () => void;
 }
-
 export const TransactionCategorization: React.FC<TransactionCategorizationProps> = ({
   bankAccountId,
   bankAccountNumber,
@@ -54,14 +50,12 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
 }) => {
   const { currentCompany } = useAuth();
   const { t } = useTranslation();
-
   const [transactions, setTransactions] = useState<BankTransaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [rules, setRules] = useState<CategorizationRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'categorized'>('pending');
   const [searchTerm, setSearchTerm] = useState('');
-
   // État pour la catégorisation en masse
   const [selectedTransactions, setSelectedTransactions] = useState<Set<string>>(new Set());
   const [bulkAccount, setBulkAccount] = useState<string>('');
@@ -69,16 +63,12 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
   const [bankingAccount, setBankingAccount] = useState<Account | null>(null);
   const [bankingAccountOptions, setBankingAccountOptions] = useState<Account[]>([]);
   const [selectedBankingAccount, setSelectedBankingAccount] = useState<string>('');
-
   useEffect(() => {
     loadData();
   }, [bankAccountId, filter, currentCompany?.id]);
-
   const loadData = async () => {
     if (!currentCompany?.id) return;
-
     setLoading(true);
-
     try {
       // Charger les transactions
       let query = supabase
@@ -86,17 +76,14 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         .select('*')
         .eq('bank_account_id', bankAccountId)
         .order('transaction_date', { ascending: false });
-
       if (filter === 'pending') {
         query = query.eq('status', 'pending');
       } else if (filter === 'categorized') {
         query = query.in('status', ['categorized', 'reconciled']);
       }
-
       const { data: txData, error: txError } = await query;
       if (txError) throw txError;
       setTransactions(txData || []);
-
       // Charger les comptes comptables
       const { data: accData, error: accError } = await supabase
         .from('chart_of_accounts')
@@ -106,14 +93,12 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         .order('account_number');
       if (accError) throw accError;
       setAccounts(accData || []);
-
       // 🏦 Charger les comptes 512 (Banque) et chercher ceux auxiliarisés du client
       if (accData) {
         const bankingAccounts = accData.filter(
           (a) => a.account_number?.startsWith('512')
         );
         setBankingAccountOptions(bankingAccounts);
-
         // Si un seul compte 512, le sélectionner automatiquement
         if (bankingAccounts.length === 1) {
           setBankingAccount(bankingAccounts[0]);
@@ -121,10 +106,9 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         } else if (bankingAccounts.length > 1) {
           // Chercher un compte auxiliarisé du client si possible
           // Pour l'instant, laisser l'user choisir
-          console.log('📋 Plusieurs comptes 512 trouvés, l\'utilisateur doit choisir');
+          logger.debug('TransactionCategorization', '📋 Plusieurs comptes 512 trouvés, l\'utilisateur doit choisir');
         }
       }
-
       // Charger les règles de catégorisation
       const { data: rulesData, error: rulesError } = await supabase
         .from('categorization_rules')
@@ -133,49 +117,42 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         .order('priority', { ascending: false });
       if (rulesError) throw rulesError;
       setRules(rulesData || []);
-
       // Appliquer les suggestions automatiques côté client
       if (txData && rulesData) {
         applySuggestions(txData, rulesData);
       }
     } catch (error) {
-      console.error('Erreur chargement données:', error);
+      logger.error('TransactionCategorization', 'Erreur chargement données:', error);
       toast.error(t('errors.loadData', 'Erreur lors du chargement des données'));
     } finally {
       setLoading(false);
     }
   };
-
   // Appliquer les règles pour suggérer des comptes
   const applySuggestions = (txs: BankTransaction[], rls: CategorizationRule[]) => {
     const updated = txs.map((tx) => {
       if (tx.status !== 'pending' || tx.suggested_account_id) return tx;
-
       for (const rule of rls) {
         let matches = false;
-
         if (rule.is_regex) {
           try {
             const pattern = new RegExp(rule.pattern, 'i');
             matches = pattern.test(tx.description);
           } catch (_e) {
-            console.error('Invalid regex:', rule.pattern);
+            logger.error('TransactionCategorization', 'Invalid regex:', rule.pattern);
             continue;
           }
         } else {
           matches = tx.description.toLowerCase().includes(rule.pattern.toLowerCase());
         }
-
         if (matches) {
           return { ...tx, suggested_account_id: rule.account_id };
         }
       }
       return tx;
     });
-
     setTransactions(updated);
   };
-
   // Catégoriser une transaction
   const categorizeTransaction = async (
     transactionId: string,
@@ -183,19 +160,15 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
     customDescription?: string
   ) => {
     if (!currentCompany?.id) return;
-
     // Vérifier qu'un compte 512 est sélectionné
     if (!selectedBankingAccount) {
       toast.error('Veuillez sélectionner un compte bancaire (512)');
       return;
     }
-
     const transaction = transactions.find((t) => t.id === transactionId);
     if (!transaction) return;
-
     const account = accounts.find((a) => a.id === accountId);
     if (!account) return;
-
     try {
       // 1. Récupérer ou créer le journal de banque
       let { data: bankJournals } = await supabase
@@ -204,9 +177,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         .eq('company_id', currentCompany.id)
         .eq('type', 'bank')
         .limit(1);
-
       let bankJournal;
-
       if (!bankJournals || bankJournals.length === 0) {
         // Créer automatiquement un journal de banque
         const { data: newJournal, error: createError } = await supabase
@@ -220,7 +191,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
           })
           .select('id')
           .single();
-
         if (createError || !newJournal) {
           throw new Error('Impossible de créer le journal de banque');
         }
@@ -228,7 +198,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       } else {
         bankJournal = bankJournals[0];
       }
-
       // 2. Créer l'écriture comptable
       const journalEntry = {
         company_id: currentCompany.id,
@@ -238,31 +207,23 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         reference_number: transaction.reference,
         status: 'draft',  // 📋 Statut brouillon pour permettre les modifications en comptabilité
       };
-
       const { data: entry, error: entryError } = await supabase
         .from('journal_entries')
         .insert(journalEntry)
         .select()
         .single();
-
       if (entryError) throw entryError;
-
-      console.log('✅ Écriture créée:', entry.id);
-
+      logger.debug('TransactionCategorization', '✅ Écriture créée:', entry.id);
       // 3. Récupérer les comptes comptables
       const selectedAccount = accounts.find(a => a.id === accountId);
       const bankAccountData = accounts.find(a => a.id === selectedBankingAccount);
-
       if (!selectedAccount || !bankAccountData) {
         throw new Error('Compte introuvable dans le plan comptable');
       }
-
       const lines = [];
-
       // Déterminer si c'est une dépense (montant négatif) ou une recette (montant positif)
       const absAmount = Math.abs(transaction.amount);
       const isExpense = transaction.amount < 0;
-
       if (isExpense) {
         // Dépense : Débit compte charge, Crédit compte banque
         lines.push({
@@ -312,20 +273,16 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
           account_name: selectedAccount.account_name,
         });
       }
-
-      console.log('📝 Insertion des lignes d\'écriture:', lines);
+      logger.debug('TransactionCategorization', '📝 Insertion des lignes d\'écriture:', lines);
       const { data: insertedLines, error: linesError } = await supabase
         .from('journal_entry_lines')
         .insert(lines)
         .select();
-
       if (linesError) {
-        console.error('❌ Erreur insertion lignes:', linesError);
+        logger.error('TransactionCategorization', '❌ Erreur insertion lignes:', linesError);
         throw new Error(`Erreur insertion lignes: ${linesError.message}`);
       }
-
-      console.log('✅ Lignes insérées:', insertedLines);
-
+      logger.debug('TransactionCategorization', '✅ Lignes insérées:', insertedLines);
       // 4. Mettre à jour le statut de la transaction (reconciled = catégorisée et validée)
       const { error: updateError } = await supabase
         .from('bank_transactions')
@@ -336,28 +293,23 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
           reconciliation_date: new Date().toISOString(),
         })
         .eq('id', transactionId);
-
       if (updateError) {
-        console.error('❌ Erreur mise à jour transaction:', updateError);
+        logger.error('TransactionCategorization', '❌ Erreur mise à jour transaction:', updateError);
         throw updateError;
       }
-
-      console.log('✅ Transaction mise à jour avec succès');
+      logger.debug('TransactionCategorization', '✅ Transaction mise à jour avec succès');
       toast.success(t('success.categorized', 'Transaction catégorisée et rapprochée avec succès'));
-
       // Rafraîchir la liste
       await loadData();
       onRefresh?.();
     } catch (error: any) {
-      console.error('❌ Erreur catégorisation:', error);
+      logger.error('TransactionCategorization', '❌ Erreur catégorisation:', error);
       toast.error(error?.message || t('errors.categorization', 'Erreur lors de la catégorisation'));
     }
   };
-
   const getAccountIdByNumber = async (accountNumber: string): Promise<string | null> => {
     const account = accounts.find((a) => a.account_number === accountNumber);
     if (account) return account.id;
-
     // Chercher en base si pas trouvé localement
     const { data } = await supabase
       .from('chart_of_accounts')
@@ -365,34 +317,27 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       .eq('company_id', currentCompany?.id)
       .eq('account_number', accountNumber)
       .limit(1);
-
     return (data && data.length > 0) ? data[0].id : null;
   };
-
   // Catégorisation en masse
   const bulkCategorize = async () => {
     if (!bulkAccount || selectedTransactions.size === 0) return;
-
     const txIds = Array.from(selectedTransactions);
     let successCount = 0;
-
     for (const txId of txIds) {
       try {
         await categorizeTransaction(txId, bulkAccount);
         successCount++;
       } catch (error) {
-        console.error('Erreur catégorisation transaction:', txId, error);
+        logger.error('TransactionCategorization', 'Erreur catégorisation transaction:', txId, error);
       }
     }
-
     toast.success(
       t('success.bulkCategorized', `${successCount} transaction(s) catégorisée(s)`)
     );
-
     setSelectedTransactions(new Set());
     setBulkAccount('');
   };
-
   // Ignorer une transaction
   const ignoreTransaction = async (transactionId: string) => {
     try {
@@ -400,17 +345,14 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         .from('bank_transactions')
         .update({ status: 'ignored' })
         .eq('id', transactionId);
-
       if (error) throw error;
-
       toast.success(t('success.ignored', 'Transaction ignorée'));
       loadData();
     } catch (error) {
-      console.error('Erreur:', error);
+      logger.error('TransactionCategorization', 'Erreur:', error);
       toast.error(t('errors.ignore', 'Erreur lors de l\'ignorement'));
     }
   };
-
   // Créer une règle à partir d'une transaction
   const createRuleFromTransaction = async (
     transaction: BankTransaction,
@@ -418,7 +360,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
     pattern: string
   ) => {
     if (!currentCompany?.id) return;
-
     try {
       const { error } = await supabase.from('categorization_rules').insert({
         company_id: currentCompany.id,
@@ -428,23 +369,19 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         priority: 0,
         created_from_transaction_id: transaction.id,
       });
-
       if (error) throw error;
-
       toast.success(t('success.ruleCreated', 'Règle créée avec succès'));
       loadData();
     } catch (error) {
-      console.error('Erreur création règle:', error);
+      logger.error('TransactionCategorization', 'Erreur création règle:', error);
       toast.error(t('errors.ruleCreation', 'Erreur lors de la création de la règle'));
     }
   };
-
   // Filtrer les transactions
   const filteredTransactions = transactions.filter((tx) => {
     if (!searchTerm) return true;
     return tx.description.toLowerCase().includes(searchTerm.toLowerCase());
   });
-
   // Fonction pour obtenir le label d'une classe comptable
   const getClassLabel = (classNum: number): string => {
     const labels: Record<number, string> = {
@@ -460,7 +397,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
     };
     return labels[classNum] || `Classe ${classNum}`;
   };
-
   // Grouper les comptes par classe pour le select
   const groupedAccounts = accounts.reduce((groups, account) => {
     const classLabel = getClassLabel(account.account_class);
@@ -468,7 +404,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
     groups[classLabel].push(account);
     return groups;
   }, {} as Record<string, Account[]>);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -476,13 +411,11 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       </div>
     );
   }
-
   const pendingCount = transactions.filter((t) => t.status === 'pending').length;
   const suggestedCount = transactions.filter((t) => t.suggested_account_id).length;
   const categorizedCount = transactions.filter(
     (t) => t.status === 'categorized' || t.status === 'reconciled'
   ).length;
-
   return (
     <div className="space-y-4">
       {/* Header avec statistiques */}
@@ -504,7 +437,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
           <div className="text-sm text-purple-700">{t('common.rules', 'Règles actives')}</div>
         </div>
       </div>
-
       {/* Barre d'outils */}
       <div className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
         {/* Sélection du compte bancaire 512 */}
@@ -529,13 +461,11 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
             </select>
           </div>
         )}
-
         {bankingAccountOptions.length === 0 && (
           <div className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
             ⚠️ Aucun compte bancaire (512) trouvé. Créez-en un en comptabilité.
           </div>
         )}
-        
         {/* Filtres */}
         <div className="flex gap-2">
           <button
@@ -567,7 +497,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
             Toutes
           </button>
         </div>
-
         {/* Recherche */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
@@ -579,7 +508,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
             className="w-full pl-10 pr-4 py-2 border rounded-lg"
           />
         </div>
-
         {/* Actions en masse */}
         {selectedTransactions.size > 0 && (
           <div className="flex items-center gap-2">
@@ -611,7 +539,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
             </button>
           </div>
         )}
-
         {/* Bouton règles */}
         <button
           onClick={() => setShowRuleModal(true)}
@@ -621,7 +548,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
           Règles auto
         </button>
       </div>
-
       {/* Liste des transactions */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         <table className="min-w-full">
@@ -692,7 +618,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
             ))}
           </tbody>
         </table>
-
         {filteredTransactions.length === 0 && (
           <div className="text-center py-12 text-gray-500 dark:text-gray-300">
             <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-green-500" />
@@ -704,7 +629,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
           </div>
         )}
       </div>
-
       {/* Modal des règles */}
       {showRuleModal && (
         <RulesModal

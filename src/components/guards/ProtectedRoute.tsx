@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { logger } from '@/lib/logger';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -33,7 +34,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Si l'utilisateur n'est pas connecté et que l'auth est requise, rediriger vers la page de connexion
   if (requireAuth && !user) {
-    console.warn('🔒 ProtectedRoute: Redirecting to auth - user not authenticated');
+    logger.warn('Router', 'Redirecting to auth - user not authenticated');
     // Sauvegarder l'URL demandée pour rediriger après la connexion
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
@@ -50,7 +51,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     const hasLocalCompany = localStorage.getItem('casskai_current_enterprise');
 
     if (!currentCompany && !hasLocalCompany) {
-      console.warn('🎯 ProtectedRoute: No company - redirecting to onboarding');
+      logger.warn('Router', 'No company - redirecting to onboarding');
       return <Navigate to="/onboarding" replace />;
     }
 
@@ -66,18 +67,18 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     if (!currentCompany && !hasLocalCompany) {
       // Si on est déjà sur l'onboarding, permettre le rendu
       if (location.pathname === '/onboarding' || location.pathname.startsWith('/onboarding/')) {
-        console.warn('ℹ️ ProtectedRoute: No company found but on onboarding page - allowing render');
+        logger.info('Router', 'No company found but on onboarding page - allowing render');
         return <>{children}</>;
       }
 
-      console.warn('🏢 ProtectedRoute: No company found - redirecting to onboarding');
+      logger.warn('Router', 'No company found - redirecting to onboarding');
       return <Navigate to="/onboarding" replace />;
     }
 
     // Si l'onboarding est complété mais que currentCompany n'est pas encore chargé,
     // afficher un état de chargement seulement si on n'est pas sur l'onboarding
     if (!currentCompany && hasLocalCompany && location.pathname !== '/onboarding') {
-      console.warn('⏳ ProtectedRoute: Company data loading...');
+      logger.info('Router', 'Company data loading...');
       return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
@@ -100,14 +101,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const isOnBillingPage = billingPaths.some(path => location.pathname.startsWith(path));
 
   if (user && isExpired && !isOnBillingPage) {
-    console.warn('💳 ProtectedRoute: Subscription expired - redirecting to billing');
+    logger.warn('Router', 'Subscription expired - redirecting to billing');
     return <Navigate to="/settings/billing" state={{ from: location }} replace />;
   }
 
   // Si l'utilisateur est connecté et que les requirements sont satisfaits,
   // afficher le contenu protégé
   if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
-    console.warn('🎉 ProtectedRoute: Access granted, rendering protected content');
+    logger.debug('Router', 'Access granted, rendering protected content');
   }
   return <>{children}</>;
 };

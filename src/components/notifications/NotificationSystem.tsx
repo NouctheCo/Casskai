@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, AlertTriangle, Info, AlertCircle, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
+import { logger } from '@/lib/logger';
 export interface SmartNotification {
   id: string;
   type: 'success' | 'warning' | 'info' | 'error';
@@ -20,7 +20,6 @@ export interface SmartNotification {
   }>;
   createdAt: Date;
 }
-
 interface NotificationContextType {
   notifications: SmartNotification[];
   addNotification: (notification: Omit<SmartNotification, 'id' | 'createdAt'>) => string;
@@ -28,16 +27,13 @@ interface NotificationContextType {
   clearAll: () => void;
   markAsRead: (id: string) => void;
 }
-
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
-
 const NOTIFICATION_ICONS = {
   success: CheckCircle2,
   warning: AlertTriangle,
   info: Info,
   error: AlertCircle,
 };
-
 const NOTIFICATION_STYLES = {
   success: {
     bg: 'bg-green-50 dark:bg-green-900/20',
@@ -68,10 +64,8 @@ const NOTIFICATION_STYLES = {
     message: 'text-red-700 dark:text-red-400',
   },
 };
-
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<SmartNotification[]>([]);
-
   const addNotification = useCallback((notificationData: Omit<SmartNotification, 'id' | 'createdAt'>) => {
     const id = `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const notification: SmartNotification = {
@@ -80,36 +74,29 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       createdAt: new Date(),
       duration: notificationData.duration || (notificationData.autoHide !== false ? 5000 : undefined),
     };
-
     setNotifications(prev => {
       // Limite à 5 notifications maximum, supprime les plus anciennes
       const newNotifications = [notification, ...prev].slice(0, 5);
       return newNotifications.sort((a, b) => b.priority - a.priority);
     });
-
     // Auto-hide si défini
     if (notification.autoHide !== false && notification.duration) {
       setTimeout(() => {
         removeNotification(id);
       }, notification.duration);
     }
-
     return id;
   }, []);
-
   const removeNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   }, []);
-
   const clearAll = useCallback(() => {
     setNotifications([]);
   }, []);
-
   const markAsRead = useCallback((id: string) => {
     // For future implementation with read status
-    console.log('Mark as read:', id);
+    logger.debug('NotificationSystem', 'Mark as read:', id);
   }, []);
-
   const value = {
     notifications,
     addNotification,
@@ -117,7 +104,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     clearAll,
     markAsRead,
   };
-
   return (
     <NotificationContext.Provider value={value}>
       {children}
@@ -125,7 +111,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     </NotificationContext.Provider>
   );
 }
-
 export function useNotifications() {
   const context = useContext(NotificationContext);
   if (!context) {
@@ -133,10 +118,8 @@ export function useNotifications() {
   }
   return context;
 }
-
 function NotificationStack() {
   const { notifications, removeNotification } = useNotifications();
-
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm w-full">
       <AnimatePresence mode="popLayout">
@@ -152,33 +135,26 @@ function NotificationStack() {
     </div>
   );
 }
-
 interface NotificationToastProps {
   notification: SmartNotification;
   index: number;
   onClose: () => void;
 }
-
 function NotificationToast({ notification, index, onClose }: NotificationToastProps) {
   const IconComponent = NOTIFICATION_ICONS[notification.type];
   const styles = NOTIFICATION_STYLES[notification.type];
-
   const [progress, setProgress] = useState(100);
-
   // Progress bar pour l'auto-hide
   useEffect(() => {
     if (!notification.duration || notification.autoHide === false) return;
-
     const interval = setInterval(() => {
       setProgress(prev => {
         const newProgress = prev - (100 / (notification.duration! / 100));
         return Math.max(0, newProgress);
       });
     }, 100);
-
     return () => clearInterval(interval);
   }, [notification.duration, notification.autoHide]);
-
   return (
     <motion.div
       layout
@@ -229,7 +205,6 @@ function NotificationToast({ notification, index, onClose }: NotificationToastPr
           <Star className={cn("h-3 w-3", styles.icon)} />
         </div>
       )}
-
       {/* Progress bar */}
       {notification.duration && notification.autoHide !== false && (
         <motion.div
@@ -239,18 +214,15 @@ function NotificationToast({ notification, index, onClose }: NotificationToastPr
           transition={{ ease: "linear" }}
         />
       )}
-
       <div className="flex items-start gap-3">
         <div className={cn("flex-shrink-0 mt-0.5", styles.icon)}>
           <IconComponent className="h-5 w-5" />
         </div>
-        
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <h4 className={cn("text-sm font-semibold", styles.title)}>
               {notification.title}
             </h4>
-            
             <Button
               variant="ghost"
               size="icon"
@@ -260,18 +232,15 @@ function NotificationToast({ notification, index, onClose }: NotificationToastPr
               <X className="h-3 w-3" />
             </Button>
           </div>
-          
           <p className={cn("text-sm mt-1", styles.message)}>
             {notification.message}
           </p>
-          
           {/* Context badge */}
           {notification.context && (
             <span className="inline-block mt-2 px-2 py-1 text-xs bg-current bg-opacity-10 rounded-full capitalize">
               {notification.context}
             </span>
           )}
-          
           {/* Actions */}
           {notification.actions && notification.actions.length > 0 && (
             <div className="flex items-center gap-2 mt-3">
@@ -296,11 +265,9 @@ function NotificationToast({ notification, index, onClose }: NotificationToastPr
     </motion.div>
   );
 }
-
 // Hook helper pour des notifications courantes
 export function useCommonNotifications() {
   const { addNotification } = useNotifications();
-
   const success = useCallback((title: string, message: string, actions?: SmartNotification['actions']) => {
     return addNotification({
       type: 'success',
@@ -310,7 +277,6 @@ export function useCommonNotifications() {
       actions,
     });
   }, [addNotification]);
-
   const error = useCallback((title: string, message: string, actions?: SmartNotification['actions']) => {
     return addNotification({
       type: 'error',
@@ -321,7 +287,6 @@ export function useCommonNotifications() {
       actions,
     });
   }, [addNotification]);
-
   const warning = useCallback((title: string, message: string, actions?: SmartNotification['actions']) => {
     return addNotification({
       type: 'warning',
@@ -332,7 +297,6 @@ export function useCommonNotifications() {
       actions,
     });
   }, [addNotification]);
-
   const info = useCallback((title: string, message: string, actions?: SmartNotification['actions']) => {
     return addNotification({
       type: 'info',
@@ -342,7 +306,6 @@ export function useCommonNotifications() {
       actions,
     });
   }, [addNotification]);
-
   const contextual = useCallback((context: SmartNotification['context'], type: SmartNotification['type'], title: string, message: string) => {
     return addNotification({
       type,
@@ -352,7 +315,6 @@ export function useCommonNotifications() {
       priority: type === 'error' ? 5 : 3,
     });
   }, [addNotification]);
-
   return {
     success,
     error,

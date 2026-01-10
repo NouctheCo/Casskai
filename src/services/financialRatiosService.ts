@@ -9,20 +9,17 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from '../lib/supabase';
-
+import { logger } from '@/lib/logger';
 /**
  * Service de calcul des ratios financiers pour l'analyse de gestion
  * Conforme aux normes d'analyse financière PCG/IFRS
  */
-
 export interface FinancialRatios {
   // Ratios de liquidité
   currentRatio: number;              // Ratio de liquidité générale (Actif circulant / Dettes CT)
   quickRatio: number;                // Ratio de liquidité réduite (AC - Stocks) / Dettes CT
   cashRatio: number;                 // Ratio de liquidité immédiate (Trésorerie / Dettes CT)
-
   // Ratios de rentabilité
   roe: number;                       // Return on Equity (Résultat net / Capitaux propres)
   roa: number;                       // Return on Assets (Résultat net / Total actif)
@@ -30,18 +27,15 @@ export interface FinancialRatios {
   grossProfitMargin: number;         // Marge brute (Marge commerciale / CA)
   operatingMargin: number;           // Marge d'exploitation (Résultat exploitation / CA)
   ebitdaMargin: number;              // Marge EBE (EBE / CA)
-
   // Ratios de structure financière
   debtRatio: number;                 // Ratio d'endettement (Dettes totales / Total actif)
   equityRatio: number;               // Ratio d'autonomie financière (Capitaux propres / Total actif)
   debtToEquityRatio: number;         // Dettes / Capitaux propres
   interestCoverageRatio: number;     // Couverture des intérêts (EBE / Charges financières)
-
   // Ratios d'activité
   assetTurnover: number;             // Rotation de l'actif (CA / Total actif)
   workingCapital: number;            // Fonds de roulement (Actif circulant - Dettes CT)
   workingCapitalRatio: number;       // BFR / CA
-
   // Données brutes pour référence
   totalRevenue: number;
   totalExpenses: number;
@@ -52,26 +46,21 @@ export interface FinancialRatios {
   currentAssets: number;
   currentLiabilities: number;
 }
-
 export interface RatioStatus {
   value: number;
   status: 'excellent' | 'good' | 'warning' | 'critical';
   benchmark: string;
   interpretation: string;
 }
-
 class FinancialRatiosService {
   private static instance: FinancialRatiosService;
-
   private constructor() {}
-
   static getInstance(): FinancialRatiosService {
     if (!FinancialRatiosService.instance) {
       FinancialRatiosService.instance = new FinancialRatiosService();
     }
     return FinancialRatiosService.instance;
   }
-
   /**
    * Calcule tous les ratios financiers pour une période donnée
    */
@@ -95,9 +84,7 @@ class FinancialRatiosService {
         .in('status', ['posted', 'validated', 'imported'])
         .gte('entry_date', startDate)
         .lte('entry_date', endDate);
-
       if (error) throw error;
-
       // Agréger les montants par classe de comptes
       let totalRevenue = 0;          // Classe 7
       let totalExpenses = 0;         // Classe 6
@@ -112,17 +99,14 @@ class FinancialRatiosService {
       let commercialMargin = 0;      // 707 - 607
       let operatingIncome = 0;       // Résultat d'exploitation
       let ebe = 0;                   // EBE calculé
-
       let ventes707 = 0;
       let achats607 = 0;
-
       entries?.forEach((entry: any) => {
         entry.journal_entry_lines?.forEach((line: any) => {
           const account = line.account_number;
           const debit = line.debit_amount || 0;
           const credit = line.credit_amount || 0;
           const balance = credit - debit;
-
           // Produits (classe 7)
           if (account.startsWith('7')) {
             totalRevenue += balance;
@@ -172,22 +156,18 @@ class FinancialRatiosService {
           }
         });
       });
-
       commercialMargin = ventes707 - achats607;
       operatingIncome = totalRevenue - totalExpenses;
       ebe = operatingIncome; // Simplification (devrait inclure dotations amortissements)
-
       const totalAssets = fixedAssets + currentAssets;
       const totalLiabilities = longTermLiabilities + currentLiabilities;
       const netIncome = totalRevenue - totalExpenses;
-
       // Calcul des ratios
       const ratios: FinancialRatios = {
         // Liquidité
         currentRatio: currentLiabilities > 0 ? currentAssets / currentLiabilities : 0,
         quickRatio: currentLiabilities > 0 ? (currentAssets - inventory) / currentLiabilities : 0,
         cashRatio: currentLiabilities > 0 ? cash / currentLiabilities : 0,
-
         // Rentabilité
         roe: equity > 0 ? (netIncome / equity) * 100 : 0,
         roa: totalAssets > 0 ? (netIncome / totalAssets) * 100 : 0,
@@ -195,18 +175,15 @@ class FinancialRatiosService {
         grossProfitMargin: totalRevenue > 0 ? (commercialMargin / totalRevenue) * 100 : 0,
         operatingMargin: totalRevenue > 0 ? (operatingIncome / totalRevenue) * 100 : 0,
         ebitdaMargin: totalRevenue > 0 ? (ebe / totalRevenue) * 100 : 0,
-
         // Structure financière
         debtRatio: totalAssets > 0 ? (totalLiabilities / totalAssets) * 100 : 0,
         equityRatio: totalAssets > 0 ? (equity / totalAssets) * 100 : 0,
         debtToEquityRatio: equity > 0 ? totalLiabilities / equity : 0,
         interestCoverageRatio: financialExpenses > 0 ? ebe / financialExpenses : 0,
-
         // Activité
         assetTurnover: totalAssets > 0 ? totalRevenue / totalAssets : 0,
         workingCapital: currentAssets - currentLiabilities,
         workingCapitalRatio: totalRevenue > 0 ? ((currentAssets - currentLiabilities) / totalRevenue) * 100 : 0,
-
         // Données brutes
         totalRevenue,
         totalExpenses,
@@ -217,14 +194,12 @@ class FinancialRatiosService {
         currentAssets,
         currentLiabilities
       };
-
       return ratios;
     } catch (error) {
-      console.error('Error calculating financial ratios:', error);
+      logger.error('FinancialRatios', 'Error calculating financial ratios:', error);
       throw error;
     }
   }
-
   /**
    * Évalue un ratio et retourne son statut avec interprétation
    */
@@ -242,7 +217,6 @@ class FinancialRatiosService {
           ? 'Liquidité juste suffisante'
           : 'Risque de difficultés de trésorerie'
       }),
-
       roe: (val) => ({
         value: val,
         status: val >= 15 ? 'excellent' : val >= 10 ? 'good' : val >= 5 ? 'warning' : 'critical',
@@ -255,7 +229,6 @@ class FinancialRatiosService {
           ? 'Rentabilité moyenne'
           : 'Rentabilité insuffisante'
       }),
-
       netProfitMargin: (val) => ({
         value: val,
         status: val >= 10 ? 'excellent' : val >= 5 ? 'good' : val >= 2 ? 'warning' : 'critical',
@@ -268,7 +241,6 @@ class FinancialRatiosService {
           ? 'Marge correcte'
           : 'Marge insuffisante'
       }),
-
       debtRatio: (val) => ({
         value: val,
         status: val <= 50 ? 'excellent' : val <= 70 ? 'good' : val <= 85 ? 'warning' : 'critical',
@@ -281,7 +253,6 @@ class FinancialRatiosService {
           ? 'Endettement élevé'
           : 'Endettement excessif, risque financier'
       }),
-
       assetTurnover: (val) => ({
         value: val,
         status: val >= 2 ? 'excellent' : val >= 1.5 ? 'good' : val >= 1 ? 'warning' : 'critical',
@@ -295,12 +266,10 @@ class FinancialRatiosService {
           : 'Actifs sous-utilisés'
       })
     };
-
     const evaluator = evaluations[ratioName];
     if (evaluator) {
       return evaluator(value);
     }
-
     // Retour par défaut
     return {
       value,
@@ -309,13 +278,11 @@ class FinancialRatiosService {
       interpretation: 'Ratio non évalué'
     };
   }
-
   /**
    * Formate un ratio pour l'affichage
    */
   formatRatio(value: number, type: 'percentage' | 'ratio' | 'currency' = 'ratio'): string {
     if (!Number.isFinite(value)) return 'N/A';
-
     switch (type) {
       case 'percentage':
         return `${value.toFixed(2)}%`;
@@ -331,5 +298,4 @@ class FinancialRatiosService {
     }
   }
 }
-
 export const financialRatiosService = FinancialRatiosService.getInstance();

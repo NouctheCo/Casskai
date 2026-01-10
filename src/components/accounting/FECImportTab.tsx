@@ -492,9 +492,9 @@ export default function FECImportTab() {
 
                 <div className="space-y-2">
 
-                  <Button 
+                  <Button
 
-                    onClick={() => document.getElementById('file-input').click()}
+                    onClick={() => document.getElementById('file-input')?.click()}
 
                     className="bg-primary hover:bg-primary/90"
 

@@ -9,21 +9,19 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * E-invoicing API Routes
  * Express.js routes for e-invoicing endpoints
  */
-
 import { Router, Request, Response, NextFunction } from 'express';
 import { EInvoicingAPI, APIResponse } from './EInvoicingAPI';
-import { 
+import { logger } from '@/lib/logger';
+import {
   EInvoiceLifecycleStatus, 
   EInvoiceFormat, 
   EInvoiceChannel,
   EInvoicingError 
 } from '../../../types/einvoicing.types';
-
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
@@ -31,7 +29,6 @@ export interface AuthenticatedRequest extends Request {
   };
   companyId?: string;
 }
-
 // Initialize API service
 const einvoicingAPI = new EInvoicingAPI({
   rateLimiting: {
@@ -39,10 +36,8 @@ const einvoicingAPI = new EInvoicingAPI({
     maxRequestsPerHour: 1000
   }
 });
-
 // Create router
 const router = Router();
-
 // Middleware for authentication and company extraction
 const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -56,13 +51,11 @@ const authenticate = async (req: AuthenticatedRequest, res: Response, next: Next
         request_id: `req_${Date.now()}`
       });
     }
-
     // Extract user info from token (mock implementation)
     req.user = {
       id: 'user_123', // Would come from JWT
       email: 'user@example.com'
     };
-
     next();
   } catch (_error) {
     res.status(401).json({
@@ -73,11 +66,9 @@ const authenticate = async (req: AuthenticatedRequest, res: Response, next: Next
     });
   }
 };
-
 // Middleware to extract and validate company ID
 const extractCompanyId = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const companyId = req.params.companyId || req.query.company_id || req.body.company_id;
-  
   if (!companyId) {
     return res.status(400).json({
       success: false,
@@ -86,15 +77,12 @@ const extractCompanyId = (req: AuthenticatedRequest, res: Response, next: NextFu
       request_id: `req_${Date.now()}`
     });
   }
-
   req.companyId = companyId as string;
   next();
 };
-
 // Middleware for request validation
 const validateSubmissionRequest = (req: Request, res: Response, next: NextFunction) => {
   const { invoice_id } = req.body;
-  
   if (!invoice_id) {
     return res.status(400).json({
       success: false,
@@ -103,10 +91,8 @@ const validateSubmissionRequest = (req: Request, res: Response, next: NextFuncti
       request_id: `req_${Date.now()}`
     });
   }
-
   next();
 };
-
 // Error handler middleware
 const handleAPIResponse = (apiCall: (req: any, res: Response) => Promise<APIResponse<any>>) => {
   return async (req: Request, res: Response) => {
@@ -115,7 +101,7 @@ const handleAPIResponse = (apiCall: (req: any, res: Response) => Promise<APIResp
       const statusCode = result.success ? 200 : 400;
       res.status(statusCode).json(result);
     } catch (error) {
-      console.error('API route error:', error instanceof Error ? error.message : String(error));
+      logger.error('Routes', 'API route error:', error instanceof Error ? error.message : String(error));
       res.status(500).json({
         success: false,
         error: 'Internal server error',
@@ -125,9 +111,7 @@ const handleAPIResponse = (apiCall: (req: any, res: Response) => Promise<APIResp
     }
   };
 };
-
 // Routes
-
 /**
  * Submit invoice for e-invoicing
  * POST /api/v1/companies/:companyId/einvoicing/submit
@@ -140,7 +124,6 @@ router.post(
   handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const { invoice_id, format, channel, async, validate, archive } = req.body;
     const requestId = req.headers['x-request-id'] as string;
-
     return einvoicingAPI.submitInvoice(
       invoice_id,
       req.companyId!,
@@ -149,7 +132,6 @@ router.post(
     );
   })
 );
-
 /**
  * Get document status
  * GET /api/v1/companies/:companyId/einvoicing/documents/:documentId
@@ -161,7 +143,6 @@ router.get(
   handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const { documentId } = req.params;
     const requestId = req.headers['x-request-id'] as string;
-
     return einvoicingAPI.getDocumentStatus(
       documentId,
       req.companyId!,
@@ -169,7 +150,6 @@ router.get(
     );
   })
 );
-
 /**
  * List company documents
  * GET /api/v1/companies/:companyId/einvoicing/documents
@@ -185,7 +165,6 @@ router.get(
       sort: req.query.sort as string,
       order: req.query.order as 'asc' | 'desc'
     };
-
     const filters = {
       status: req.query.status as EInvoiceLifecycleStatus,
       format: req.query.format as EInvoiceFormat,
@@ -193,9 +172,7 @@ router.get(
       date_from: req.query.date_from as string,
       date_to: req.query.date_to as string
     };
-
     const requestId = req.headers['x-request-id'] as string;
-
     return einvoicingAPI.listDocuments(
       req.companyId!,
       pagination,
@@ -204,7 +181,6 @@ router.get(
     );
   })
 );
-
 /**
  * Get e-invoicing capabilities
  * GET /api/v1/companies/:companyId/einvoicing/capabilities
@@ -215,14 +191,12 @@ router.get(
   extractCompanyId,
   handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const requestId = req.headers['x-request-id'] as string;
-
     return einvoicingAPI.getCapabilities(
       req.companyId!,
       requestId
     );
   })
 );
-
 /**
  * Get e-invoicing statistics
  * GET /api/v1/companies/:companyId/einvoicing/statistics
@@ -234,7 +208,6 @@ router.get(
   handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const { date_from, date_to } = req.query;
     const requestId = req.headers['x-request-id'] as string;
-
     return einvoicingAPI.getStatistics(
       req.companyId!,
       date_from as string,
@@ -243,7 +216,6 @@ router.get(
     );
   })
 );
-
 /**
  * Enable e-invoicing for company
  * POST /api/v1/companies/:companyId/einvoicing/enable
@@ -254,14 +226,12 @@ router.post(
   extractCompanyId,
   handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const requestId = req.headers['x-request-id'] as string;
-
     return einvoicingAPI.enableEInvoicing(
       req.companyId!,
       requestId
     );
   })
 );
-
 /**
  * Disable e-invoicing for company
  * POST /api/v1/companies/:companyId/einvoicing/disable
@@ -272,14 +242,12 @@ router.post(
   extractCompanyId,
   handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const requestId = req.headers['x-request-id'] as string;
-
     return einvoicingAPI.disableEInvoicing(
       req.companyId!,
       requestId
     );
   })
 );
-
 /**
  * Webhook endpoint for status updates
  * POST /api/v1/einvoicing/webhooks/status
@@ -290,11 +258,9 @@ router.post(
   handleAPIResponse(async (req: Request, _res: Response) => {
     const { message_id, status, reason } = req.body;
     const requestId = req.headers['x-request-id'] as string;
-
     if (!message_id || !status) {
       throw new EInvoicingError('message_id and status are required', 'BAD_REQUEST');
     }
-
     return einvoicingAPI.updateDocumentStatus(
       message_id,
       status as EInvoiceLifecycleStatus,
@@ -303,7 +269,6 @@ router.post(
     );
   })
 );
-
 /**
  * Health check endpoint
  * GET /api/v1/einvoicing/health
@@ -321,19 +286,15 @@ router.get('/einvoicing/health', (req: Request, res: Response) => {
     request_id: `req_${Date.now()}`
   });
 });
-
 // Error handling middleware
 router.use((error: Error, req: Request, res: Response, _next: NextFunction) => {
-  console.error('E-invoicing API error:', error);
-
+  logger.error('Routes', 'E-invoicing API error:', error);
   let statusCode = 500;
   let errorMessage = 'Internal server error';
   let errorCode = 'INTERNAL_ERROR';
-
   if (error instanceof EInvoicingError) {
     errorMessage = error.message;
     errorCode = error.code;
-    
     // Map error codes to HTTP status codes
     switch (error.code) {
       case 'AUTH_REQUIRED':
@@ -360,7 +321,6 @@ router.use((error: Error, req: Request, res: Response, _next: NextFunction) => {
         statusCode = 500;
     }
   }
-
   res.status(statusCode).json({
     success: false,
     error: errorMessage,
@@ -369,9 +329,7 @@ router.use((error: Error, req: Request, res: Response, _next: NextFunction) => {
     request_id: req.headers['x-request-id'] || `req_${Date.now()}`
   });
 });
-
 export { router as einvoicingRoutes };
-
 // Export route documentation for API docs generation
 export const routeDocumentation = {
   basePath: '/api/v1',

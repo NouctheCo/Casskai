@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -18,42 +17,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar, Download, CreditCard, AlertCircle, CheckCircle2, FileText, Users, Euro } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-
+import { logger } from '@/lib/logger';
 interface SepaPaymentGeneratorProps {
   onClose?: () => void;
   onNavigateToAccounts?: () => void;
 }
-
 export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onClose: _onClose, onNavigateToAccounts }) => {
   const { currentCompany } = useAuth();
   const { t } = useTranslation();
-
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-
   // Données
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [supplierInvoices, setSupplierInvoices] = useState<SepaPayment[]>([]);
   const [expenseReports, setExpenseReports] = useState<SepaPayment[]>([]);
-
   // Sélections
   const [selectedBankAccount, setSelectedBankAccount] = useState<string>('');
   const [executionDate, setExecutionDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
   const [selectedPayments, setSelectedPayments] = useState<Set<string>>(new Set());
-
   // Filtres
   const [showSuppliers, setShowSuppliers] = useState(true);
   const [showExpenses, setShowExpenses] = useState(true);
-
   useEffect(() => {
     loadData();
   }, [currentCompany?.id]);
-
   const loadData = async () => {
     if (!currentCompany?.id) return;
-
     setLoading(true);
     try {
       const [accounts, invoices, reports] = await Promise.all([
@@ -61,31 +52,26 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
         SepaService.getUnpaidSupplierInvoices(currentCompany.id),
         SepaService.getApprovedExpenseReports(currentCompany.id),
       ]);
-
       setBankAccounts(accounts);
       setSupplierInvoices(invoices);
       setExpenseReports(reports);
-
       // Sélectionner le premier compte par défaut
       if (accounts.length > 0 && !selectedBankAccount) {
         setSelectedBankAccount(accounts[0].id);
       }
     } catch (error) {
-      console.error('Error loading bank accounts:', error);
+      logger.error('SepaPaymentGenerator', 'Error loading bank accounts:', error);
       toast.error(t('errors.loadData', 'Erreur lors du chargement des données'));
     } finally {
       setLoading(false);
     }
   };
-
   const allPayments = [
     ...(showSuppliers ? supplierInvoices : []),
     ...(showExpenses ? expenseReports : []),
   ];
-
   const selectedPaymentsList = allPayments.filter(p => selectedPayments.has(p.id));
   const totalAmount = selectedPaymentsList.reduce((sum, p) => sum + p.amount, 0);
-
   const togglePayment = (id: string) => {
     const newSelected = new Set(selectedPayments);
     if (newSelected.has(id)) {
@@ -95,39 +81,31 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
     }
     setSelectedPayments(newSelected);
   };
-
   const selectAll = () => {
     setSelectedPayments(new Set(allPayments.map(p => p.id)));
   };
-
   const deselectAll = () => {
     setSelectedPayments(new Set());
   };
-
   const handleGenerate = async () => {
     if (!currentCompany) {
       toast.error('Entreprise non identifiée');
       return;
     }
-
     if (selectedPaymentsList.length === 0) {
       toast.error('Veuillez sélectionner au moins un paiement');
       return;
     }
-
     if (!selectedBankAccount) {
       toast.error('Veuillez sélectionner un compte bancaire émetteur');
       return;
     }
-
     const emitterAccount = bankAccounts.find(acc => acc.id === selectedBankAccount);
     if (!emitterAccount) {
       toast.error('Compte bancaire émetteur introuvable');
       return;
     }
-
     setGenerating(true);
-
     try {
       // Générer le XML SEPA
       const xml = SepaService.generateSepaXml({
@@ -137,29 +115,24 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
         payments: selectedPaymentsList,
         executionDate,
       });
-
       // Télécharger le fichier
       const filename = `virement_sepa_${new Date().toISOString().split('T')[0]}.xml`;
       SepaService.downloadSepaXml(xml, filename);
-
       // Mettre à jour le statut des paiements
       await SepaService.markPaymentsAsPending(selectedPaymentsList, currentCompany.id);
-
       toast.success(
         `Fichier SEPA généré avec succès (${selectedPaymentsList.length} paiement${selectedPaymentsList.length > 1 ? 's' : ''})`
       );
-
       // Recharger les données
       await loadData();
       deselectAll();
     } catch (error: any) {
-      console.error('Erreur génération SEPA:', error);
+      logger.error('SepaPaymentGenerator', 'Erreur génération SEPA:', error);
       toast.error(error.message || 'Erreur lors de la génération du fichier SEPA');
     } finally {
       setGenerating(false);
     }
   };
-
   if (loading) {
     return (
       <Card>
@@ -172,7 +145,6 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
       </Card>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -187,7 +159,6 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
           </CardDescription>
         </CardHeader>
       </Card>
-
       {/* Configuration */}
       <Card>
         <CardHeader>
@@ -237,7 +208,6 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
                 </div>
               )}
             </div>
-
             {/* Date d'exécution */}
             <div className="space-y-2">
               <Label htmlFor="execution-date" className="text-gray-700 dark:text-gray-300">Date d'exécution souhaitée *</Label>
@@ -253,7 +223,6 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
           </div>
         </CardContent>
       </Card>
-
       {/* Filtres */}
       <Card>
         <CardContent className="p-4">
@@ -266,7 +235,6 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
               <Users className="h-4 w-4" />
               Factures fournisseurs ({supplierInvoices.length})
             </Label>
-
             <Label className="flex items-center gap-2 cursor-pointer">
               <Checkbox
                 checked={showExpenses}
@@ -278,7 +246,6 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
           </div>
         </CardContent>
       </Card>
-
       {/* Liste des paiements */}
       <Card>
         <CardHeader>
@@ -310,7 +277,6 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
               {allPayments.map((payment) => {
                 const isSelected = selectedPayments.has(payment.id);
                 const isMissingBic = !payment.beneficiaryBic;
-
                 return (
                   <motion.div
                     key={payment.id}
@@ -327,7 +293,6 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
                         disabled={isMissingBic}
                         className="mt-1"
                       />
-
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
                           <div>
@@ -346,13 +311,11 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
                             </Badge>
                           </div>
                         </div>
-
                         <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
                           <p>IBAN: {payment.beneficiaryIban}</p>
                           <p>BIC: {payment.beneficiaryBic || 'NON RENSEIGNÉ'}</p>
                           <p>Référence: {payment.reference}</p>
                         </div>
-
                         {isMissingBic && (
                           <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1">
                             <AlertCircle className="h-3 w-3" />
@@ -368,7 +331,6 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
           )}
         </CardContent>
       </Card>
-
       {/* Résumé et génération */}
       {selectedPaymentsList.length > 0 && (
         <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-300">
@@ -386,7 +348,6 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
                   })}
                 </p>
               </div>
-
               <Button
                 onClick={handleGenerate}
                 disabled={generating || !selectedBankAccount}
@@ -409,7 +370,6 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
           </CardContent>
         </Card>
       )}
-
       {/* Informations */}
       <Card className="bg-blue-50 border-blue-200 dark:bg-blue-900/20">
         <CardContent className="p-4">
@@ -430,6 +390,3 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
     </div>
   );
 };
-
-
-

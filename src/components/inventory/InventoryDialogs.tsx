@@ -553,6 +553,16 @@ export const MovementDialog: FC<MovementDialogProps> = ({
   </Dialog>
 );
 
+/**
+ * ⚠️ DÉPRÉCIÉ : SupplierDialog
+ *
+ * Ce dialog est obsolète et remplacé par ThirdPartyFormDialog.
+ * Le bouton "Nouveau fournisseur" dans l'onglet Fournisseurs utilise désormais ThirdPartyFormDialog
+ * pour créer un fournisseur complet dans la table third_parties.
+ *
+ * Ce composant est conservé pour compatibilité mais ne devrait plus être utilisé.
+ * @deprecated Utiliser ThirdPartyFormDialog à la place
+ */
 export const SupplierDialog: FC<SupplierDialogProps> = ({
   open,
   onOpenChange,
@@ -569,8 +579,8 @@ export const SupplierDialog: FC<SupplierDialogProps> = ({
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-lg">
       <DialogHeader>
-        <DialogTitle>Nouveau fournisseur</DialogTitle>
-        <DialogDescription>Ajouter un nouveau fournisseur au carnet d'adresses</DialogDescription>
+        <DialogTitle>Nouveau fournisseur (Ancien formulaire)</DialogTitle>
+        <DialogDescription>⚠️ Ce formulaire est obsolète. Utilisez le nouveau formulaire via le bouton "Nouveau fournisseur".</DialogDescription>
       </DialogHeader>
       <div className="space-y-4">
         <div className="space-y-2">

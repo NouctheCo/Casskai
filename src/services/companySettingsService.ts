@@ -9,23 +9,21 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import React from 'react';
 import { supabase, handleSupabaseError } from '@/lib/supabase';
-import { 
+import { logger } from '@/lib/logger';
+import {
   CompanySettings, 
   CompanyRow, 
   mapRowToSettings, 
   mapSettingsToUpdate,
   DEFAULT_COMPANY_SETTINGS 
 } from '@/types/company-settings.types';
-
 /**
  * Service dédié à la gestion des paramètres d'entreprise
  * Fournit une interface simple pour CRUD sur les settings
  */
 export class CompanySettingsService {
-  
   /**
    * Récupère les paramètres d'une entreprise
    */
@@ -36,22 +34,18 @@ export class CompanySettingsService {
         .select('*')
         .eq('id', companyId)
         .single();
-
       if (error) {
         throw handleSupabaseError(error);
       }
-
       if (!data) {
         throw new Error('Entreprise non trouvée');
       }
-
       return mapRowToSettings(data as CompanyRow);
     } catch (error) {
-      console.error('Erreur lors de la récupération des paramètres:', error instanceof Error ? error.message : String(error));
+      logger.error('CompanySettings', 'Erreur lors de la récupération des paramètres:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   /**
    * Met à jour les paramètres d'une entreprise (mise à jour partielle)
    */
@@ -62,37 +56,30 @@ export class CompanySettingsService {
     try {
       // Conversion des settings en format DB
       const updateData = mapSettingsToUpdate(settings);
-      
       // Ajout de la date de mise à jour
       updateData.updated_at = new Date().toISOString();
-      
       // Si on marque les settings comme complétés
       if (settings.metadata?.settingsCompletedAt) {
         (updateData as Record<string, unknown>).onboarding_completed_at = settings.metadata.settingsCompletedAt.toISOString();
       }
-
       const { data, error } = await supabase
         .from('companies')
         .update(updateData)
         .eq('id', companyId)
         .select()
         .single();
-
       if (error) {
         throw handleSupabaseError(error);
       }
-
       if (!data) {
         throw new Error('Échec de la mise à jour des paramètres');
       }
-
       return mapRowToSettings(data as CompanyRow);
     } catch (error) {
-      console.error('Erreur lors de la mise à jour des paramètres:', error instanceof Error ? error.message : String(error));
+      logger.error('CompanySettings', 'Erreur lors de la mise à jour des paramètres:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   /**
    * Met à jour une section spécifique des paramètres
    */
@@ -104,10 +91,8 @@ export class CompanySettingsService {
     const partialSettings: Partial<CompanySettings> = {
       [section]: sectionData
     };
-
     return this.updateCompanySettings(companyId, partialSettings);
   }
-
   /**
    * Met à jour les informations générales
    */
@@ -117,7 +102,6 @@ export class CompanySettingsService {
   ): Promise<CompanySettings> {
     return this.updateSettingsSection(companyId, 'generalInfo', generalInfo);
   }
-
   /**
    * Met à jour les informations de contact
    */
@@ -127,7 +111,6 @@ export class CompanySettingsService {
   ): Promise<CompanySettings> {
     return this.updateSettingsSection(companyId, 'contact', contact);
   }
-
   /**
    * Met à jour les paramètres comptables
    */
@@ -137,7 +120,6 @@ export class CompanySettingsService {
   ): Promise<CompanySettings> {
     return this.updateSettingsSection(companyId, 'accounting', accounting);
   }
-
   /**
    * Met à jour les paramètres métier
    */
@@ -147,7 +129,6 @@ export class CompanySettingsService {
   ): Promise<CompanySettings> {
     return this.updateSettingsSection(companyId, 'business', business);
   }
-
   /**
    * Met à jour la personnalisation/branding
    */
@@ -157,7 +138,6 @@ export class CompanySettingsService {
   ): Promise<CompanySettings> {
     return this.updateSettingsSection(companyId, 'branding', branding);
   }
-
   /**
    * Met à jour les paramètres de documents
    */
@@ -167,7 +147,6 @@ export class CompanySettingsService {
   ): Promise<CompanySettings> {
     return this.updateSettingsSection(companyId, 'documents', documents);
   }
-
   /**
    * Met à jour les informations du dirigeant
    */
@@ -177,7 +156,6 @@ export class CompanySettingsService {
   ): Promise<CompanySettings> {
     return this.updateSettingsSection(companyId, 'ceo', ceo);
   }
-
   /**
    * Marque les paramètres comme complétés
    */
@@ -188,7 +166,6 @@ export class CompanySettingsService {
       }
     });
   }
-
   /**
    * Vérifie si les paramètres essentiels sont complétés
    */
@@ -197,30 +174,24 @@ export class CompanySettingsService {
     missingFields: string[];
   } {
     const missingFields: string[] = [];
-    
     // Vérifications essentielles
     if (!settings.generalInfo.name?.trim()) {
       missingFields.push('Nom de l\'entreprise');
     }
-    
     if (!settings.contact.email?.trim()) {
       missingFields.push('Email principal');
     }
-    
     if (!settings.business.currency) {
       missingFields.push('Devise par défaut');
     }
-    
     if (!settings.business.language) {
       missingFields.push('Langue de l\'interface');
     }
-
     return {
       isValid: missingFields.length === 0,
       missingFields
     };
   }
-
   /**
    * Initialise les paramètres par défaut pour une nouvelle entreprise
    */
@@ -232,10 +203,8 @@ export class CompanySettingsService {
       ...DEFAULT_COMPANY_SETTINGS,
       ...initialData
     };
-
     return this.updateCompanySettings(companyId, defaultSettings);
   }
-
   /**
    * Obtient les statistiques des paramètres (pourcentage de completion)
    */
@@ -251,12 +220,10 @@ export class CompanySettingsService {
       completionPercentage: 0,
       sections: {} as Record<string, { completed: number; total: number; }>
     };
-
     // Fonction helper pour compter les champs complétés dans un objet
     const countFields = (obj: any, prefix: string = ''): { total: number; completed: number } => {
       let total = 0;
       let completed = 0;
-
       Object.entries(obj).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== '') {
           if (typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
@@ -273,10 +240,8 @@ export class CompanySettingsService {
           total++;
         }
       });
-
       return { total, completed };
     };
-
     // Analyser chaque section
     const sections = [
       { name: 'generalInfo', data: settings.generalInfo },
@@ -287,19 +252,15 @@ export class CompanySettingsService {
       { name: 'documents', data: settings.documents },
       { name: 'ceo', data: settings.ceo || {} }
     ];
-
     sections.forEach(section => {
       const sectionStats = countFields(section.data);
       stats.sections[section.name] = sectionStats;
       stats.totalFields += sectionStats.total;
       stats.completedFields += sectionStats.completed;
     });
-
     stats.completionPercentage = Math.round((stats.completedFields / stats.totalFields) * 100);
-
     return stats;
   }
-
   /**
    * Exporte les paramètres d'entreprise au format JSON
    */
@@ -307,7 +268,6 @@ export class CompanySettingsService {
     const settings = await this.getCompanySettings(companyId);
     return JSON.stringify(settings, null, 2);
   }
-
   /**
    * Importe les paramètres d'entreprise depuis JSON
    */
@@ -319,22 +279,19 @@ export class CompanySettingsService {
       const settings = JSON.parse(jsonData) as Partial<CompanySettings>;
       return await this.updateCompanySettings(companyId, settings);
     } catch (error) {
-      console.error('Erreur lors de l\'import des paramètres:', error instanceof Error ? error.message : String(error));
+      logger.error('CompanySettings', 'Erreur lors de l\'import des paramètres:', error instanceof Error ? error.message : String(error));
       throw new Error('Format JSON invalide');
     }
   }
 }
-
 // Hook React pour utiliser le service
 export const useCompanySettings = (companyId: string) => {
   const [settings, setSettings] = React.useState<CompanySettings | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-
   // Charger les paramètres
   const loadSettings = React.useCallback(async () => {
     if (!companyId) return;
-    
     try {
       setLoading(true);
       setError(null);
@@ -346,11 +303,9 @@ export const useCompanySettings = (companyId: string) => {
       setLoading(false);
     }
   }, [companyId]);
-
   // Sauvegarder les paramètres
   const updateSettings = React.useCallback(async (updates: Partial<CompanySettings>) => {
     if (!companyId) return;
-    
     try {
       setError(null);
       const updated = await CompanySettingsService.updateCompanySettings(companyId, updates);
@@ -361,11 +316,9 @@ export const useCompanySettings = (companyId: string) => {
       throw err;
     }
   }, [companyId]);
-
   React.useEffect(() => {
     loadSettings();
   }, [loadSettings]);
-
   return {
     settings,
     loading,
@@ -374,6 +327,5 @@ export const useCompanySettings = (companyId: string) => {
     reload: loadSettings
   };
 };
-
 // Réexport pour faciliter l'utilisation
 export default CompanySettingsService;

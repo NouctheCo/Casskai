@@ -2,7 +2,6 @@
  * CassKai - Validateur d'identifiants d'entreprise
  * SIREN, SIRET, BCE, RCS, NIF, etc.
  */
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -31,6 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 import {
   validateBusinessId,
   formatSIREN,
@@ -38,14 +38,12 @@ import {
   enrichFromINSEE,
   BUSINESS_ID_FORMATS
 } from '@/utils/validation/sirenValidator';
-
 interface ValidationHistory {
   id: string;
   type: string;
   isValid: boolean;
   timestamp: Date;
 }
-
 export const BusinessIdValidator: React.FC<{ className?: string }> = ({ className }) => {
   const [businessId, setBusinessId] = useState<string>('');
   const [countryCode, setCountryCode] = useState<string>('FR');
@@ -53,22 +51,18 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
   const [result, setResult] = useState<any>(null);
   const [enrichedData, setEnrichedData] = useState<any>(null);
   const [history, setHistory] = useState<ValidationHistory[]>([]);
-
   // Valide l'identifiant
   const validate = async () => {
     if (!businessId.trim()) {
-      console.warn('Veuillez saisir un identifiant');
+      logger.warn('BusinessIdValidator', 'Veuillez saisir un identifiant');
       return;
     }
-
     setIsValidating(true);
     setResult(null);
     setEnrichedData(null);
-
     try {
       const validationResult = validateBusinessId(businessId, countryCode);
       setResult(validationResult);
-
       // Ajouter à l'historique
       addToHistory({
         id: businessId,
@@ -76,7 +70,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
         isValid: validationResult.isValid,
         timestamp: new Date()
       });
-
       // Si valide et France, enrichir via INSEE
       if (validationResult.isValid && countryCode === 'FR' && validationResult.type === 'SIRET') {
         const enrichment = await enrichFromINSEE(businessId.replace(/\s/g, ''));
@@ -93,17 +86,14 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
       setIsValidating(false);
     }
   };
-
   // Ajoute à l'historique
   const addToHistory = (entry: ValidationHistory) => {
     setHistory(prev => [entry, ...prev.slice(0, 9)]);
   };
-
   // Export preuve
   const exportProof = () => {
-    console.warn('Export PDF - Fonctionnalité à venir');
+    logger.warn('BusinessIdValidator', 'Export PDF - Fonctionnalité à venir');
   };
-
   return (
     <Card className={cn(className)}>
       <CardHeader>
@@ -115,7 +105,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
           Validez SIREN, SIRET, BCE, RCS et autres identifiants professionnels
         </CardDescription>
       </CardHeader>
-
       <CardContent className="space-y-6">
         {/* Formulaire */}
         <div className="space-y-4">
@@ -138,7 +127,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
               </SelectContent>
             </Select>
           </div>
-
           {/* Identifiant */}
           <div className="space-y-2">
             <Label htmlFor="businessId">Identifiant d'entreprise</Label>
@@ -170,7 +158,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
                 <span>Vérifier</span>
               </Button>
             </div>
-
             {/* Formatage */}
             {businessId && result && result.type && (
               <p className="text-xs text-gray-500">
@@ -182,7 +169,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
               </p>
             )}
           </div>
-
           {/* Information formats */}
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 flex items-start space-x-2">
             <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
@@ -206,7 +192,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
             </div>
           </div>
         </div>
-
         {/* Résultats */}
         <AnimatePresence mode="wait">
           {result && (
@@ -229,7 +214,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
                 ) : (
                   <XCircle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0" />
                 )}
-
                 <div className="flex-1">
                   <h4 className={cn(
                     "font-bold text-lg",
@@ -253,12 +237,10 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
                   </p>
                 </div>
               </div>
-
               {/* Détails */}
               {result.isValid && (
                 <div className="space-y-3">
                   <h4 className="font-semibold text-gray-900 dark:text-white">Détails</h4>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Type */}
                     <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border">
@@ -267,13 +249,11 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
                         {result.type}
                       </Badge>
                     </div>
-
                     {/* Format */}
                     <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border">
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Format</p>
                       <p className="text-sm text-gray-700 dark:text-gray-300">{result.format}</p>
                     </div>
-
                     {/* SIREN (si SIRET) */}
                     {result.details?.siren && (
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border">
@@ -283,7 +263,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
                         </p>
                       </div>
                     )}
-
                     {/* NIC (si SIRET) */}
                     {result.details?.nic && (
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border">
@@ -296,7 +275,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
                   </div>
                 </div>
               )}
-
               {/* Données enrichies INSEE */}
               {enrichedData && (
                 <div className="border rounded-lg p-4 space-y-3 bg-white dark:bg-gray-800">
@@ -312,13 +290,11 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
                       {enrichedData.status === 'active' ? 'Active' : 'Fermée'}
                     </Badge>
                   </h5>
-
                   <div className="space-y-2">
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Dénomination</p>
                       <p className="font-medium text-gray-900 dark:text-white">{enrichedData.denomination}</p>
                     </div>
-
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-1">
                         <MapPin className="w-3 h-3" />
@@ -326,7 +302,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
                       </p>
                       <p className="text-sm text-gray-700 dark:text-gray-300">{enrichedData.address}</p>
                     </div>
-
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-1">
                         <Briefcase className="w-3 h-3" />
@@ -334,13 +309,11 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
                       </p>
                       <p className="text-sm text-gray-700 dark:text-gray-300">{enrichedData.activity}</p>
                     </div>
-
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <p className="text-xs text-gray-500 dark:text-gray-400">Forme juridique</p>
                         <Badge variant="secondary">{enrichedData.legalForm}</Badge>
                       </div>
-
                       <div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-1">
                           <Calendar className="w-3 h-3" />
@@ -354,7 +327,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
                   </div>
                 </div>
               )}
-
               {/* Actions */}
               {result.isValid && (
                 <div className="flex items-center space-x-2">
@@ -371,12 +343,10 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Historique */}
         {history.length > 0 && (
           <div className="border-t pt-6 space-y-3">
             <h4 className="font-semibold text-gray-900 dark:text-white">Historique</h4>
-
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {history.map((item, index) => (
                 <div
@@ -398,7 +368,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
                       </p>
                     </div>
                   </div>
-
                   <Badge className={cn(
                     item.isValid
                       ? "bg-green-100 text-green-800 border-green-200"
@@ -411,7 +380,6 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
             </div>
           </div>
         )}
-
         {/* Avertissement */}
         <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 flex items-start space-x-2">
           <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />

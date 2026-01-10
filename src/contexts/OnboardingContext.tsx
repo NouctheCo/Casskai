@@ -13,6 +13,7 @@
 import React, { createContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 import {
   OnboardingContextType,
   OnboardingState,
@@ -89,7 +90,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         progress: data.progress
       });
     } catch (error) {
-      console.error('Failed to initialize onboarding:', error);
+      logger.error('Onboarding', 'Failed to initialize onboarding', error);
       setState(prev => ({
         ...prev,
         isLoading: false,
@@ -363,7 +364,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       return { success: true };
     } catch (error) {
-      console.error('Failed to finalize onboarding:', error);
+      logger.error('Onboarding', 'Failed to finalize onboarding', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }, [state.data, user?.id, storageService]);

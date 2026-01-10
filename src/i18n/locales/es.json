@@ -106,9 +106,9 @@
       "totalBalance": "Saldo total",
       "totalBalanceDesc": "Balance general",
       "totalDebit": "Total débito",
-      "totalDebitDesc": "Débitos este mes",
+      "totalDebitDesc": "Débitos",
       "totalCredit": "Total crédito",
-      "totalCreditDesc": "Créditos este mes",
+      "totalCreditDesc": "Créditos",
       "entries": "Asientos",
       "entriesDesc": "Asientos registrados",
       "pendingEntries": "Pendientes",
@@ -122,7 +122,15 @@
       "overdue": "Atrasadas",
       "overdueDesc": "{{amount}} en retraso",
       "validationRate": "Tasa validación",
-      "validationRateDesc": "Asientos validados"
+      "validationRateDesc": "Asientos validados",
+      "periodDesc": {
+        "currentMonth": "Este mes",
+        "currentQuarter": "Este trimestre",
+        "currentYear": "Este año",
+        "lastMonth": "Mes pasado",
+        "lastYear": "Año pasado",
+        "custom": "Período seleccionado"
+      }
     },
     "refresh": "Actualizar",
     "newEntry": "Nuevo asiento",
@@ -156,11 +164,147 @@
       "accounts": "Plan contable",
       "fecImport": "📥 Importar FEC",
       "journals": "Diarios",
-      "reports": "Informes"
+      "reports": "Informes",
+      "anomalies": "Anomalías"
+    },
+    "nav": {
+      "overview": "Visión general",
+      "operations": "Operaciones",
+      "entries": "Asientos",
+      "journals": "Diarios",
+      "structure": "Estructura",
+      "chartOfAccounts": "Plan contable",
+      "importFEC": "Importar FEC",
+      "reports": "Informes",
+      "anomalies": "Anomalías"
     },
     "recentActivity": {
       "title": "Actividad reciente",
       "noActivity": "Sin actividad reciente"
+    },
+    "import": {
+      "title": "Importar Datos",
+      "subtitle": "Importe sus datos contables desde varios formatos",
+      "csv_button": "Importar CSV",
+      "type": "Tipo de importación",
+      "journal_entries": "Asientos contables",
+      "chart_of_accounts": "Plan contable",
+      "drop_file": "Suelte su archivo CSV aquí o haga clic para explorar",
+      "supported_formats": "Formatos compatibles: CSV, TXT, TSV",
+      "detected_columns": "Columnas detectadas",
+      "group_by_entry": "Agrupar líneas por asiento",
+      "replace_existing": "Reemplazar el plan contable existente",
+      "validate": "Validar",
+      "validating": "Validando...",
+      "import": "Importar",
+      "importing": "Importando...",
+      "file_parsed": "Archivo analizado correctamente",
+      "validation_success": "Validación exitosa",
+      "validation_errors": "Errores de validación detectados",
+      "success": "Importación exitosa",
+      "partial_success": "Importación completada con errores",
+      "error": {
+        "invalid_file_type": "Tipo de archivo inválido. Por favor suba un archivo CSV.",
+        "parse_failed": "Error al analizar el archivo CSV",
+        "validation_failed": "Validación fallida",
+        "import_failed": "Importación fallida"
+      }
+    },
+    "anomalies": {
+      "title": "Detección de anomalías",
+      "analysis_complete": "Análisis completado",
+      "anomalies_detected": "{{count}} anomalía(s) detectada(s)",
+      "error_detecting": "No se pueden detectar anomalías",
+      "error_resolving": "No se puede resolver la anomalía",
+      "resolved_success": "Anomalía resuelta con éxito",
+      "loading": "Cargando anomalías...",
+      "refresh": "Actualizar",
+      "filters": {
+        "severity": "Severidad",
+        "type": "Tipo",
+        "status": "Estado"
+      },
+      "severity": {
+        "all": "Todas",
+        "critical": "Crítica",
+        "high": "Alta",
+        "medium": "Media",
+        "low": "Baja"
+      },
+      "status": {
+        "all": "Todos",
+        "open": "Abiertos",
+        "resolved": "Resueltos"
+      }
+    },
+    "workflow": {
+      "status": {
+        "draft": "Borrador",
+        "review": "En revisión",
+        "validated": "Validado",
+        "posted": "Contabilizado"
+      },
+      "actions": {
+        "submit": "Enviar",
+        "approve": "Aprobar",
+        "reject": "Rechazar",
+        "post": "Contabilizar"
+      },
+      "confirm_action": "Confirmar acción",
+      "comment": "Comentario",
+      "comment_required": "El comentario es obligatorio para el rechazo",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "success": "Acción completada con éxito",
+      "error": "Error al realizar la acción"
+    },
+    "security": {
+      "title": "Registros de seguridad",
+      "loading_error": "Error al cargar los registros",
+      "stats_error": "Error al cargar las estadísticas",
+      "export_success": "Exportación exitosa",
+      "export_error": "Error al exportar",
+      "refresh": "Actualizar",
+      "export": "Exportar",
+      "search_placeholder": "Buscar en los registros...",
+      "filters": {
+        "severity": "Severidad",
+        "category": "Categoría",
+        "period": "Período"
+      },
+      "severity": {
+        "all": "Todos",
+        "info": "Info",
+        "warning": "Advertencia",
+        "error": "Error",
+        "critical": "Crítico"
+      },
+      "category": {
+        "all": "Todas",
+        "authentication": "Autenticación",
+        "export": "Exportación",
+        "modification": "Modificación",
+        "access": "Acceso",
+        "admin": "Administración"
+      },
+      "stats": {
+        "total": "Total de eventos",
+        "critical": "Críticos",
+        "errors": "Errores",
+        "users": "Usuarios activos"
+      },
+      "details": {
+        "title": "Detalles del registro",
+        "close": "Cerrar",
+        "event_type": "Tipo de evento",
+        "user": "Usuario",
+        "ip_address": "Dirección IP",
+        "description": "Descripción",
+        "metadata": "Metadatos"
+      },
+      "empty": "No se encontraron registros",
+      "loading": "Cargando registros...",
+      "no_results": "Sin resultados"
     },
     "journalDistribution": {
       "title": "Distribución por diario",
@@ -168,6 +312,15 @@
       "entries": "Asientos",
       "totalJournals": "Total diarios",
       "totalEntries": "Total asientos"
+    },
+    "budgetVsActual": {
+      "title": "Presupuesto vs Real",
+      "noData": "No hay categorías presupuestarias disponibles",
+      "budget": "Presupuesto",
+      "actual": "Real",
+      "totalBudget": "Presupuesto total",
+      "totalActual": "Real total",
+      "totalVariance": "Desviación total"
     }
   },
   "accountingEntries": "Écritures comptables",
@@ -297,6 +450,7 @@
     "errors": {
       "noCompany": "Sin empresa"
     },
+    "export": "Exportar",
     "exporting": "Exportando...",
     "forecasts": "Prévisions",
     "getStarted": "Commencer",
@@ -1680,7 +1834,92 @@
   "interval_month": "mois",
   "interval_week": "semaine",
   "interval_year": "année",
-  "inventory": "Inventario",
+  "inventory": {
+    "title": "Inventario",
+    "articleModal": {
+      "title": "Nuevo Artículo",
+      "description": "Descripción",
+      "sectionGeneral": "Información General",
+      "sectionPricing": "Precios",
+      "sectionStock": "Stock",
+      "sectionSupplier": "Proveedor",
+      "sectionAccounting": "Contabilidad",
+      "reference": "Referencia",
+      "referencePlaceholder": "Ej: ART-001",
+      "barcode": "Código de Barras",
+      "barcodePlaceholder": "Ej: 3245678901234",
+      "name": "Nombre del Artículo",
+      "namePlaceholder": "Ej: Ordenador portátil Dell",
+      "descriptionPlaceholder": "Descripción detallada del artículo",
+      "category": "Categoría",
+      "categoryPlaceholder": "Seleccione una categoría",
+      "unit": "Unidad de Medida",
+      "purchasePrice": "Precio de Compra sin IVA (€)",
+      "sellingPrice": "Precio de Venta sin IVA (€)",
+      "margin": "Margen (%)",
+      "tvaRate": "Tasa de IVA (%)",
+      "stockQuantity": "Cantidad Inicial",
+      "stockMin": "Stock Mínimo",
+      "stockMax": "Stock Máximo",
+      "warehouse": "Almacén",
+      "warehousePlaceholder": "Seleccione un almacén",
+      "supplier": "Proveedor",
+      "supplierPlaceholder": "Seleccione un proveedor (opcional)",
+      "supplierReference": "Referencia del Proveedor",
+      "supplierReferencePlaceholder": "Ej: SUPP-REF-001",
+      "purchaseAccount": "Cuenta de Compra",
+      "purchaseAccountPlaceholder": "Seleccione una cuenta de compra",
+      "salesAccount": "Cuenta de Venta",
+      "salesAccountPlaceholder": "Seleccione una cuenta de venta",
+      "create": "Crear Artículo",
+      "cancel": "Cancelar",
+      "createSupplier": "Crear un nuevo proveedor",
+      "noSupplier": "Ningún proveedor disponible",
+      "noAccount": "Ninguna cuenta disponible",
+      "noWarehouse": "Ningún almacén disponible",
+      "errorNoCompany": "Ninguna empresa seleccionada",
+      "errorNameRequired": "El nombre del artículo es obligatorio",
+      "errorReferenceRequired": "La referencia es obligatoria",
+      "errorWarehouseRequired": "Se debe seleccionar un almacén",
+      "errorCreating": "Error al crear el artículo"
+    },
+    "categories": {
+      "matiere_premiere": "Materia Prima",
+      "produit_fini": "Producto Terminado",
+      "service": "Servicio",
+      "consommable": "Consumible",
+      "equipement": "Equipo",
+      "autre": "Otro"
+    },
+    "units": {
+      "unité": "Unidad",
+      "pièce": "Pieza",
+      "piece": "Pieza",
+      "kg": "Kilogramo",
+      "g": "Gramo",
+      "l": "Litro",
+      "litre": "Litro",
+      "ml": "Mililitro",
+      "m": "Metro",
+      "mètre": "Metro",
+      "metre": "Metro",
+      "cm": "Centímetro",
+      "boîte": "Caja",
+      "boite": "Caja",
+      "carton": "Cartón",
+      "palette": "Paleta",
+      "heure": "Hora",
+      "jour": "Día",
+      "lot": "Lote",
+      "forfait": "Paquete"
+    },
+    "tvaRates": {
+      "0": "0% - Exento",
+      "5.5": "5,5% - Tipo Reducido",
+      "10": "10% - Tipo Intermedio",
+      "20": "20% - Tipo Normal"
+    }
+  },
   "inventorypage": {
     "80000": "80000",
     "120000": "120000",
@@ -1728,7 +1967,80 @@
     "stock_initial": "Stock initial",
     "stock_minimum": "Stock minimum",
     "unit": "Unité",
-    "unit_": "Unité"
+    "unit_": "Unité",
+    "articleModal": {
+      "title": "Nuevo Artículo",
+      "description": "Descripción",
+      "sectionGeneral": "Información General",
+      "sectionPricing": "Precios",
+      "sectionStock": "Stock",
+      "sectionSupplier": "Proveedor",
+      "sectionAccounting": "Contabilidad",
+      "reference": "Referencia",
+      "referencePlaceholder": "Ej: ART-001",
+      "barcode": "Código de Barras",
+      "barcodePlaceholder": "Ej: 3245678901234",
+      "name": "Nombre del Artículo",
+      "namePlaceholder": "Ej: Ordenador portátil Dell",
+      "descriptionPlaceholder": "Descripción detallada del artículo",
+      "category": "Categoría",
+      "categoryPlaceholder": "Seleccione una categoría",
+      "unit": "Unidad de Medida",
+      "purchasePrice": "Precio de Compra sin IVA (€)",
+      "sellingPrice": "Precio de Venta sin IVA (€)",
+      "margin": "Margen (%)",
+      "tvaRate": "Tasa de IVA (%)",
+      "stockQuantity": "Cantidad Inicial",
+      "stockMin": "Stock Mínimo",
+      "stockMax": "Stock Máximo",
+      "warehouse": "Almacén",
+      "warehousePlaceholder": "Seleccione un almacén",
+      "supplier": "Proveedor",
+      "supplierPlaceholder": "Seleccione un proveedor (opcional)",
+      "supplierReference": "Referencia del Proveedor",
+      "supplierReferencePlaceholder": "Ej: SUPP-REF-001",
+      "purchaseAccount": "Cuenta de Compra",
+      "purchaseAccountPlaceholder": "Seleccione una cuenta de compra",
+      "salesAccount": "Cuenta de Venta",
+      "salesAccountPlaceholder": "Seleccione una cuenta de venta",
+      "create": "Crear Artículo",
+      "cancel": "Cancelar",
+      "createSupplier": "Crear un nuevo proveedor",
+      "noSupplier": "Ningún proveedor disponible",
+      "noAccount": "Ninguna cuenta disponible",
+      "noWarehouse": "Ningún almacén disponible",
+      "errorNoCompany": "Ninguna empresa seleccionada",
+      "errorNameRequired": "El nombre del artículo es obligatorio",
+      "errorReferenceRequired": "La referencia es obligatoria",
+      "errorWarehouseRequired": "Se debe seleccionar un almacén",
+      "errorCreating": "Error al crear el artículo"
+    },
+    "categories": {
+      "matiere_premiere": "Materia Prima",
+      "produit_fini": "Producto Terminado",
+      "service": "Servicio",
+      "consommable": "Consumible",
+      "equipement": "Equipo",
+      "autre": "Otro"
+    },
+    "units": {
+      "piece": "Unidad",
+      "kg": "Kilogramo (kg)",
+      "litre": "Litro (L)",
+      "metre": "Metro (m)",
+      "heure": "Hora (h)",
+      "jour": "Día",
+      "lot": "Lote",
+      "boite": "Caja",
+      "carton": "Cartón",
+      "palette": "Paleta"
+    },
+    "tvaRates": {
+      "0": "0% - Exento",
+      "5.5": "5,5% - Tipo Reducido",
+      "10": "10% - Tipo Intermedio",
+      "20": "20% - Tipo Normal"
+    }
   },
   "invoicing": {
     "title": "Facturación",
@@ -1986,7 +2298,11 @@
         "title": "Sécurité maximale"
       },
       "subtitle": "dans une seule application",
-      "title": "Tout ce dont vous avez besoin"
+      "title": "Tout ce dont vous avez besoin",
+      "regulatory": {
+        "title": "Cumplimiento Legal",
+        "description": "Generación automática de 35+ documentos legales conformes con estándares PCG, SYSCOHADA, IFRS, SCF y PCM. Exportación PDF y XML para presentación electrónica."
+      }
     },
     "footer": {
       "company": {
@@ -2040,20 +2356,57 @@
     },
     "hero": {
       "badge": "🚀 Solución Profesional - Gestión empresarial moderna",
+      "badgeRegulatory": "🌍 Informes Legales Multi-País (10+ países)",
       "cta": {
         "beta": "Comenzar prueba gratuita",
         "demo": "Ver la demostración",
         "start": "Prueba gratis 30 días"
       },
-      "description": "CassKai simplifie la gestion d'entreprise avec une suite complète : comptabilité, facturation, CRM, projets, RH et bien plus. Tout en un, simple et puissant.",
+      "description": "CassKai simplifica la gestión empresarial con una suite completa: contabilidad, facturación, CRM, proyectos, RRHH y más. Todo en uno, simple y potente.",
       "stats": {
-        "companies": "Entreprises",
-        "rating": "Satisfaction",
+        "companies": "Empresas",
+        "rating": "Satisfacción",
         "support": "Soporte",
-        "uptime": "Disponibilité"
+        "uptime": "Disponibilidad"
       },
-      "subtitle": "en toute simplicité",
-      "title": "Gérez su entreprise"
+      "subtitle": "con simplicidad",
+      "title": "Gestione su empresa"
+    },
+    "regulatory": {
+      "badge": "Cumplimiento Legal",
+      "title": "Informes Legales Automatizados",
+      "subtitle": "Generación automática de sus documentos regulatorios en un clic",
+      "documentsTitle": "Estados Financieros",
+      "feature1Title": "Autocompletar Inteligente",
+      "feature1Desc": "Generación automática de 35+ documentos legales desde su libro mayor. Balance, cuenta de resultados, declaraciones fiscales...",
+      "feature2Title": "5 Estándares Contables",
+      "feature2Desc": "PCG (Francia), SYSCOHADA (OHADA), IFRS for SMEs, SCF (Argelia/Túnez), PCM (Marruecos). Cumplimiento garantizado.",
+      "feature3Title": "Validación Automática",
+      "feature3Desc": "Verificaciones contables automáticas (equilibrio balance, coherencia cuentas). Exportación PDF y XML para presentación electrónica."
+    },
+    "anomaly": {
+      "badge": "IA y Seguridad",
+      "title": "Detección Automática de Anomalías",
+      "subtitle": "Inteligencia artificial para detectar errores contables",
+      "description": "Detección Crítica y Alta",
+      "feature1": "Desequilibrios Débito/Crédito",
+      "feature1Desc": "Detección instantánea de asientos no equilibrados",
+      "feature2": "Cuentas Inconsistentes",
+      "feature2Desc": "Verificación automática de números de cuenta",
+      "feature3": "Montos Sospechosos",
+      "feature3Desc": "Alerta sobre montos inusuales o extremos"
+    },
+    "workflow": {
+      "badge": "Flujo Profesional",
+      "title": "Flujo de Validación Avanzado",
+      "subtitle": "Proceso de validación multinivel para sus asientos",
+      "description": "Borrador → Revisión → Validación → Contabilización Final",
+      "step1": "Borrador → Revisión",
+      "step1Desc": "Creación y envío para revisión",
+      "step2": "Revisión → Validación",
+      "step2Desc": "Aprobación o rechazo con comentarios",
+      "step3": "Validación → Contabilización",
+      "step3Desc": "Bloqueo definitivo en los libros contables"
     },
     "nav": {
       "contact": "Contact",
@@ -2080,7 +2433,9 @@
           "onboarding": "Formation incluse",
           "storage": "Stockage illimité",
           "support": "Soporte dédié 24/7",
-          "users": "Utilisateurs illimités"
+          "users": "Utilisateurs illimités",
+          "regulatory_auto": "Presentación electrónica automática",
+          "security_logs": "Registros de seguridad avanzados"
         },
         "name": "Entreprise"
       },
@@ -2115,7 +2470,12 @@
           "projects": "Gestion de projets",
           "reports": "Informes illimités",
           "storage": "50 GB de stockage",
-          "support": "Soporte prioritaire"
+          "support": "Soporte prioritaire",
+          "ai_full": "🧠 Análisis IA ilimitados (7 informes)",
+          "regulatory_all": "35+ documentos legales + Exportación PDF",
+          "anomaly": "Detección de anomalías",
+          "workflow": "Flujo de validación",
+          "csv_import": "Importación CSV inteligente"
         },
         "name": "Professionnel"
       },
@@ -2128,7 +2488,9 @@
           "invoicing": "Facturación illimitée",
           "reports": "10 rapports standards",
           "storage": "5 GB de stockage",
-          "support": "Soporte email"
+          "support": "Soporte email",
+          "ai": "2 informes IA incluidos",
+          "regulatory": "5 documentos legales/mes"
         },
         "name": "Starter"
       },
@@ -2851,7 +3213,10 @@
       "revenueEvolution": "Evolución de la cifra de negocios",
       "expensesByCategory": "Gastos por categoría",
       "monthlyComparison": "Comparación mensual Ingresos / Gastos",
-      "amount": "Importe"
+      "amount": "Importe",
+      "noData": "No hay datos disponibles para este período",
+      "periodLabel": "Período",
+      "last6Months": "Últimos 6 meses móviles"
     },
     "dataLoadError": "Error lors du chargement des datos comptables",
     "debit": "Débit",
@@ -2896,7 +3261,91 @@
     "totalRevenues": "TOTAL PRODUITS",
     "trialBalance": "Balance générale",
     "trialBalanceDesc": "Soldes de tous les cuentas",
-    "unbalanced": "Bilan déséquilibré"
+    "unbalanced": "Bilan déséquilibré",
+    "regulatory": {
+      "title": "Documentos Reglamentarios",
+      "subtitle": "Declaraciones fiscales, estados financieros y documentos de cumplimiento",
+      "newDocument": "Nuevo documento",
+      "selectTemplate": "Seleccione una plantilla de documento",
+      "create": "Crear documento",
+      "creating": "Creando...",
+      "emptyState": {
+        "title": "Sin documentos reglamentarios",
+        "description": "Cree su primer documento para comenzar"
+      },
+      "stats": {
+        "total": "Total de documentos",
+        "draft": "Borradores",
+        "completed": "Completados",
+        "submitted": "Enviados"
+      },
+      "filters": {
+        "allYears": "Todos los ejercicios",
+        "allStatuses": "Todos los estados",
+        "allStandards": "Todos los estándares"
+      },
+      "status": {
+        "draft": "Borrador",
+        "completed": "Completado",
+        "submitted": "Enviado",
+        "validated": "Validado",
+        "rejected": "Rechazado"
+      },
+      "table": {
+        "document": "Documento",
+        "period": "Período",
+        "country": "País",
+        "status": "Estado",
+        "lastUpdate": "Última actualización",
+        "actions": "Acciones"
+      },
+      "fields": {
+        "template": "Tipo de documento",
+        "fiscalYear": "Ejercicio fiscal",
+        "period": "Período"
+      },
+      "periods": {
+        "annual": "Anual",
+        "quarterly": "Trimestral",
+        "monthly": "Mensual",
+        "q1": "Trimestre 1",
+        "q2": "Trimestre 2",
+        "q3": "Trimestre 3",
+        "q4": "Trimestre 4"
+      },
+      "months": {
+        "M01": "Enero",
+        "M02": "Febrero",
+        "M03": "Marzo",
+        "M04": "Abril",
+        "M05": "Mayo",
+        "M06": "Junio",
+        "M07": "Julio",
+        "M08": "Agosto",
+        "M09": "Septiembre",
+        "M10": "Octubre",
+        "M11": "Noviembre",
+        "M12": "Diciembre"
+      },
+      "actions": {
+        "save": "Guardar",
+        "exportPdf": "Exportar a PDF",
+        "recalculate": "Recalcular"
+      },
+      "validation": {
+        "errors": "Errores de validación",
+        "warnings": "Advertencias"
+      },
+      "messages": {
+        "saveSuccess": "Documento guardado correctamente",
+        "saveError": "Error al guardar el documento",
+        "createError": "Error al crear el documento",
+        "exportSuccess": "PDF generado correctamente",
+        "exportError": "Error al generar el PDF",
+        "recalculateSuccess": "Documento recalculado correctamente",
+        "recalculateError": "Error al recalcular el documento"
+      }
+    }
   },
   "rules": {
     "title": "Reglas de categorización"
@@ -4709,5 +5158,67 @@
       "success": "Éxito",
       "failed": "Fallido"
     }
+  },
+  "regulatory": {
+    "title": "Documentos Reglamentarios",
+    "selectPeriod": "Seleccionar período",
+    "fiscalYear": "Año fiscal",
+    "period": "Período",
+    "periods": {
+      "annual": "Anual",
+      "quarterly": "Trimestral",
+      "monthly": "Mensual",
+      "q1": "Trimestre 1",
+      "q2": "Trimestre 2",
+      "q3": "Trimestre 3",
+      "q4": "Trimestre 4"
+    },
+    "myDocuments": "Mis Documentos",
+    "documentsDescription": "Gestione sus declaraciones fiscales, estados financieros y documentos reglamentarios",
+    "newDocument": "Nuevo Documento",
+    "documentName": "Nombre del documento",
+    "category": {
+      "financialStatements": "Estados Financieros",
+      "taxReturns": "Declaraciones Fiscales",
+      "socialDeclarations": "Declaraciones Sociales"
+    },
+    "status": {
+      "draft": "Borrador",
+      "pending": "Pendiente",
+      "submitted": "Enviado",
+      "validated": "Validado",
+      "rejected": "Rechazado"
+    },
+    "lastModified": "Última modificación",
+    "noDocuments": "Aún no hay documentos",
+    "filterByCategory": "Filtrar por categoría",
+    "filterByStatus": "Filtrar por estado",
+    "allCategories": "Todas las categorías",
+    "allStatuses": "Todos los estados",
+    "fieldRequired": "Este campo es obligatorio",
+    "minValue": "Valor mínimo: {{min}}",
+    "maxValue": "Valor máximo: {{max}}",
+    "calculatedField": "Campo calculado automáticamente",
+    "selectOption": "Seleccionar una opción",
+    "autoFilling": "Auto-llenado en curso...",
+    "unsavedChanges": "Cambios no guardados",
+    "editDocument": "Editar Documento",
+    "documentCreated": "Documento creado con éxito",
+    "documentSaved": "Documento guardado con éxito",
+    "documentDeleted": "Documento eliminado con éxito",
+    "generatingPdf": "Generando PDF...",
+    "pdfGenerated": "PDF generado con éxito",
+    "confirmDelete": "¿Está seguro de que desea eliminar este documento?",
+    "invalidTemplate": "Plantilla inválida",
+    "templateNotFound": "Plantilla no encontrada",
+    "errorLoadingTemplates": "Error al cargar las plantillas",
+    "errorLoadingDocuments": "Error al cargar los documentos",
+    "errorLoadingDocument": "Error al cargar el documento",
+    "errorGeneratingDocument": "Error al generar el documento",
+    "errorCreatingDocument": "Error al crear el documento",
+    "errorSavingDocument": "Error al guardar el documento",
+    "errorDeletingDocument": "Error al eliminar el documento",
+    "errorExportingDocument": "Error al exportar el documento",
+    "submissionError": "Error al enviar el formulario"
   }
 }

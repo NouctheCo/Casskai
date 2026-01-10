@@ -36,14 +36,15 @@ describe('BudgetService', () => {
   const mockUserId = 'user-789';
 
   // Mock data
+  const currentYear = new Date().getFullYear();
   const mockBudget: Budget = {
     id: mockBudgetId,
     company_id: mockCompanyId,
-    year: 2024,
+    year: currentYear,
     version: 1,
     status: 'draft',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
+    created_at: `${currentYear}-01-01T00:00:00Z`,
+    updated_at: `${currentYear}-01-01T00:00:00Z`,
     total_revenue_budget: 100000,
     total_expense_budget: 60000,
     total_capex_budget: 10000,
@@ -53,7 +54,7 @@ describe('BudgetService', () => {
   };
 
   const mockBudgetFormData: BudgetFormData = {
-    year: 2024,
+    year: currentYear,
     categories: [
       {
         category: 'Sales',
@@ -373,7 +374,7 @@ describe('BudgetService', () => {
 
     it('should reject budget with no categories', async () => {
       const noCategoriesData: BudgetFormData = {
-        year: 2024,
+        year: currentYear,
         categories: [],
         assumptions: []
       };
@@ -469,12 +470,12 @@ describe('BudgetService', () => {
       (supabase.from as any).mockReturnValue(mockUpdateQuery);
 
       vi.spyOn(budgetService, 'getBudgetById').mockResolvedValue({
-        data: { ...mockBudget, year: 2025 },
+        data: { ...mockBudget, year: currentYear },
         error: null
       });
 
       const updateData: Partial<BudgetFormData> = {
-        year: 2025
+        year: currentYear
       };
 
       const result = await budgetService.updateBudget(mockBudgetId, updateData);
@@ -482,7 +483,7 @@ describe('BudgetService', () => {
       expect(supabase.from).toHaveBeenCalledWith('budgets');
       expect(mockUpdateQuery.update).toHaveBeenCalled();
       expect(mockUpdateQuery.eq).toHaveBeenCalledWith('id', mockBudgetId);
-      expect(result.data?.year).toBe(2025);
+      expect(result.data?.year).toBe(currentYear);
     });
 
     it('should recalculate totals when categories are updated', async () => {
@@ -603,7 +604,7 @@ describe('BudgetService', () => {
 
       (supabase.from as any).mockReturnValue(mockUpdateQuery);
 
-      const result = await budgetService.updateBudget(mockBudgetId, { year: 2025 });
+      const result = await budgetService.updateBudget(mockBudgetId, { year: currentYear });
 
       expect(result.data).toBeNull();
       expect(result.error).toBe(mockError);
@@ -961,16 +962,17 @@ describe('BudgetService', () => {
         error: null
       });
 
+      const targetYear = currentYear + 1;
       vi.spyOn(budgetService, 'createBudget').mockResolvedValue({
-        data: { ...mockBudget, year: 2025 },
+        data: { ...mockBudget, year: targetYear },
         error: null
       });
 
-      const result = await budgetService.duplicateBudget(mockBudgetId, 2025, 10);
+      const result = await budgetService.duplicateBudget(mockBudgetId, targetYear, 10);
 
       expect(budgetService.getBudgetById).toHaveBeenCalledWith(mockBudgetId);
       expect(budgetService.createBudget).toHaveBeenCalled();
-      expect(result.data?.year).toBe(2025);
+      expect(result.data?.year).toBe(targetYear);
     });
 
     it('should handle source budget not found', async () => {
@@ -1011,7 +1013,7 @@ describe('BudgetService', () => {
   describe('Data Validation', () => {
     it('should validate monthly amounts length', async () => {
       const invalidData: BudgetFormData = {
-        year: 2024,
+        year: currentYear,
         categories: [
           {
             category: 'Test',
@@ -1040,7 +1042,7 @@ describe('BudgetService', () => {
 
     it('should warn when monthly total does not match annual amount', async () => {
       const inconsistentData: BudgetFormData = {
-        year: 2024,
+        year: currentYear,
         categories: [
           {
             category: 'Test',
@@ -1085,7 +1087,7 @@ describe('BudgetService', () => {
   describe('Budget Totals Calculation', () => {
     it('should calculate revenue total correctly', async () => {
       const dataWithMultipleRevenue: BudgetFormData = {
-        year: 2024,
+        year: currentYear,
         categories: [
           {
             category: 'Product Sales',
@@ -1129,7 +1131,7 @@ describe('BudgetService', () => {
 
     it('should calculate expense total correctly', async () => {
       const dataWithMultipleExpenses: BudgetFormData = {
-        year: 2024,
+        year: currentYear,
         categories: [
           {
             category: 'Salaries',
@@ -1173,7 +1175,7 @@ describe('BudgetService', () => {
 
     it('should calculate capex total correctly', async () => {
       const dataWithCapex: BudgetFormData = {
-        year: 2024,
+        year: currentYear,
         categories: [
           {
             category: 'Equipment',

@@ -9,17 +9,16 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // ExcelJS import conditionnel pour éviter les problèmes de build
 let ExcelJS: typeof import('exceljs') | null = null;
 try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   ExcelJS = require('exceljs');
 } catch (_error) {
-  console.warn('ExcelJS not available in browser environment');
+  logger.warn('CsvImport', 'ExcelJS not available in browser environment');
 }
 import { CSVMapping, ImportResult, ImportError, ImportWarning, FileParserOptions, FECEntry } from '../types/accounting-import.types';
-
+import { logger } from '@/lib/logger';
 /**
  * Service d'import CSV/Excel avec mapping intelligent des colonnes
  */
@@ -56,7 +55,6 @@ export class CSVImportService {
       /tiers/i, /client/i, /fournisseur/i, /supplier/i, /customer/i, /third.?party/i
     ]
   };
-
   /**
    * Analyse un fichier pour détecter le format et proposer un mapping
    */
@@ -69,14 +67,12 @@ export class CSVImportService {
     suggestedMapping: CSVMapping[];
   }> {
     const format = this.detectFileFormat(file);
-    
     if (format === 'Excel') {
       return this.analyzeExcelFile(file);
     } else {
       return this.analyzeCSVFile(file);
     }
   }
-
   /**
    * Détecte le format du fichier
    */
@@ -85,7 +81,6 @@ export class CSVImportService {
     const excelExtensions = ['xlsx', 'xls', 'xlsm'];
     return excelExtensions.includes(extension || '') ? 'Excel' : 'CSV';
   }
-
   /**
    * Analyse un fichier Excel
    */
@@ -100,17 +95,14 @@ export class CSVImportService {
     if (!ExcelJS) {
       throw new Error('ExcelJS n\'est pas disponible dans cet environnement. Veuillez utiliser des fichiers CSV.');
     }
-    
     try {
       const workbook = new ExcelJS!.Workbook();
       const buffer = await file.arrayBuffer();
       await workbook.xlsx.load(buffer);
-      
       const worksheet = workbook.getWorksheet(1);
       if (!worksheet) {
         throw new Error('Aucune feuille trouvée dans le fichier Excel');
       }
-
       const jsonData: string[][] = [];
       worksheet.eachRow((row, _rowNumber) => {
         const rowData: string[] = [];
@@ -119,11 +111,9 @@ export class CSVImportService {
         });
         jsonData.push(rowData);
       });
-
       if (jsonData.length === 0) {
         throw new Error('Le fichier Excel est vide');
       }
-
       const headers = jsonData[0] as string[];
       const preview = jsonData.slice(0, 6).map((row: string[]) =>
         headers.reduce((obj, header, colIndex) => {
@@ -131,10 +121,8 @@ export class CSVImportService {
           return obj;
         }, {} as Record<string, string>)
       );
-
       const suggestedMapping = this.generateSmartMapping(headers);
       const sheetNames = workbook.worksheets.map(ws => ws.name);
-
       return {
         format: 'Excel',
         encoding: 'UTF-8',
@@ -146,7 +134,6 @@ export class CSVImportService {
       throw new Error(`Erreur lors de l'analyse Excel: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
-
   /**
    * Analyse un fichier CSV
    */
@@ -160,18 +147,15 @@ export class CSVImportService {
   }> {
     const encoding = await this.detectCSVEncoding(file);
     const delimiter = await this.detectCSVDelimiter(file, encoding);
-
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
           const content = event.target?.result as string;
           const lines = content.split(/\r?\n/).filter(line => line.trim());
-          
           if (lines.length === 0) {
             throw new Error('Fichier CSV vide');
           }
-
           const headers = this.parseCSVLine(lines[0], delimiter);
           const preview = lines.slice(1, 6).map(line => {
             const values = this.parseCSVLine(line, delimiter);
@@ -180,9 +164,7 @@ export class CSVImportService {
               return obj;
             }, {} as Record<string, string>);
           });
-
           const suggestedMapping = this.generateSmartMapping(headers);
-
           resolve({
             format: 'CSV',
             encoding,
@@ -198,19 +180,16 @@ export class CSVImportService {
       reader.readAsText(file, encoding);
     });
   }
-
   /**
    * Génère un mapping intelligent basé sur les noms de colonnes
    */
   private static generateSmartMapping(headers: string[]): CSVMapping[] {
     const mapping: CSVMapping[] = [];
     const usedColumns = new Set<number>();
-
     // Mapping automatique basé sur les patterns
     Object.entries(this.FIELD_PATTERNS).forEach(([fieldName, patterns]) => {
       for (let i = 0; i < headers.length; i++) {
         if (usedColumns.has(i)) continue;
-
         const header = headers[i];
         if (patterns.some(pattern => pattern.test(header))) {
           mapping.push({
@@ -225,25 +204,20 @@ export class CSVImportService {
         }
       }
     });
-
     // Détection spéciale pour les montants
     this.detectAmountColumns(headers, mapping, usedColumns);
-
     // Tri par ordre d'importance
     const fieldOrder = [
       'date', 'accountNumber', 'accountName', 'journalCode', 
       'reference', 'label', 'debit', 'credit', 'amount'
     ];
-
     mapping.sort((a, b) => {
       const aIndex = fieldOrder.indexOf(a.fieldName);
       const bIndex = fieldOrder.indexOf(b.fieldName);
       return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
     });
-
     return mapping;
   }
-
   /**
    * Détection spécialisée des colonnes de montants
    */
@@ -255,11 +229,9 @@ export class CSVImportService {
     // Si pas de débit/crédit trouvés, chercher des colonnes montants
     const hasDebit = mapping.some(m => m.fieldName === 'debit');
     const hasCredit = mapping.some(m => m.fieldName === 'credit');
-
     if (!hasDebit && !hasCredit) {
       for (let i = 0; i < headers.length; i++) {
         if (usedColumns.has(i)) continue;
-
         const header = headers[i].toLowerCase();
         if (header.includes('montant') || header.includes('amount')) {
           // Analyser le contexte pour déterminer débit/crédit
@@ -299,7 +271,6 @@ export class CSVImportService {
       }
     }
   }
-
   /**
    * Import avec mapping personnalisé
    */
@@ -309,14 +280,12 @@ export class CSVImportService {
     options: FileParserOptions = {}
   ): Promise<ImportResult> {
     const format = this.detectFileFormat(file);
-    
     if (format === 'Excel') {
       return this.importExcelWithMapping(file, mapping, options);
     } else {
       return this.importCSVWithMapping(file, mapping, options);
     }
   }
-
   /**
    * Import Excel avec mapping
    */
@@ -329,12 +298,10 @@ export class CSVImportService {
       const workbook = new ExcelJS!.Workbook();
       const buffer = await file.arrayBuffer();
       await workbook.xlsx.load(buffer);
-      
       const worksheet = workbook.getWorksheet(1);
       if (!worksheet) {
         return this.createErrorResult('Aucune feuille trouvée dans le fichier Excel');
       }
-
       const jsonData: string[][] = [];
       worksheet.eachRow((row) => {
         const rowData: string[] = [];
@@ -343,14 +310,12 @@ export class CSVImportService {
         });
         jsonData.push(rowData);
       });
-      
       const result = this.processDataWithMapping(jsonData, mapping, options);
       return result;
     } catch (error: unknown) {
       return this.createErrorResult((error instanceof Error ? error.message : 'Une erreur est survenue'));
     }
   }
-
   /**
    * Import CSV avec mapping
    */
@@ -360,7 +325,6 @@ export class CSVImportService {
     options: FileParserOptions
   ): Promise<ImportResult> {
     const encoding = options.encoding || await this.detectCSVEncoding(file);
-    
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -368,7 +332,6 @@ export class CSVImportService {
           const content = event.target?.result as string;
           const lines = content.split(/\r?\n/).filter(line => line.trim());
           const delimiter = options.delimiter || ',';
-
           const data = lines.map(line => this.parseCSVLine(line, delimiter));
           const result = this.processDataWithMapping(data, mapping, options);
           resolve(result);
@@ -380,7 +343,6 @@ export class CSVImportService {
       reader.readAsText(file, encoding);
     });
   }
-
   /**
    * Traite les données avec le mapping fourni
    */
@@ -392,20 +354,15 @@ export class CSVImportService {
     const errors: ImportError[] = [];
     const warnings: ImportWarning[] = [];
     const entries: FECEntry[] = [];
-    
     const startRow = options.skipFirstRow !== false ? 1 : 0;
     const dataRows = data.slice(startRow);
-
     dataRows.forEach((row, index) => {
       const rowNumber = index + startRow + 1;
-      
       if (options.skipEmptyLines && this.isEmptyRow(row)) {
         return;
       }
-
       try {
         const entry = this.mapRowToEntry(row, mapping, rowNumber);
-        
         // Validation de base - accepter les entrées partielles
         if (entry.journalCode || (entry as any).pieceRef || (entry as any).CompteNum) {
           entries.push(entry as any);
@@ -417,7 +374,6 @@ export class CSVImportService {
             severity: 'error'
           });
         }
-
       } catch (error: unknown) {
         errors.push({
           row: rowNumber,
@@ -427,7 +383,6 @@ export class CSVImportService {
         });
       }
     });
-
     return {
       success: errors.length === 0,
       totalRows: dataRows.length,
@@ -438,32 +393,25 @@ export class CSVImportService {
       warnings
     };
   }
-
   /**
    * Mappe une ligne vers un objet entry
    */
   private static mapRowToEntry(row: string[], mapping: CSVMapping[], _rowNumber: number): Partial<FECEntry> {
     const entry: Record<string, unknown> = {};
-
     mapping.forEach(map => {
       const rawValue = row[map.columnIndex] || map.defaultValue || '';
-      
       try {
         let processedValue: any = this.processFieldValue(rawValue, map.dataType);
-        
         if (map.transform) {
           processedValue = map.transform(String(processedValue));
         }
-        
         entry[map.fieldName] = processedValue;
       } catch (error: unknown) {
         throw new Error(`Colonne ${map.columnName}: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       }
     });
-
     return entry as Partial<FECEntry>;
   }
-
   /**
    * Traite une valeur selon son type
    */
@@ -471,9 +419,7 @@ export class CSVImportService {
     if (value === null || value === undefined || value === '') {
       return dataType === 'number' || dataType === 'amount' ? 0 : '';
     }
-
     const stringValue = String(value).trim();
-
     switch (dataType) {
       case 'number':
       case 'amount':
@@ -485,20 +431,16 @@ export class CSVImportService {
         return stringValue;
     }
   }
-
   /**
    * Parse un nombre avec gestion des formats internationaux
    */
   private static parseNumber(value: string): number {
     if (!value) return 0;
-    
     // Nettoyage et normalisation
     let cleanValue = value.replace(/[^\d,.-]/g, ''); // Garde seulement chiffres, virgules, points, tirets
-    
     // Détection du format (1,234.56 vs 1.234,56)
     const lastComma = cleanValue.lastIndexOf(',');
     const lastDot = cleanValue.lastIndexOf('.');
-    
     if (lastComma > lastDot) {
       // Format européen: 1.234,56
       cleanValue = cleanValue.replace(/\./g, '').replace(',', '.');
@@ -506,29 +448,24 @@ export class CSVImportService {
       // Format anglo-saxon: 1,234.56
       cleanValue = cleanValue.replace(/,/g, '');
     }
-    
     const result = parseFloat(cleanValue);
     return isNaN(result) ? 0 : result;
   }
-
   /**
    * Parse une date avec détection automatique du format
    */
   private static parseDate(value: string): string {
     if (!value) return '';
-    
     // Formats communs à détecter
     const formats = [
       /^(\d{1,2})[/\-.](?:\d{1,2})[/\-.](\d{4})$/, // DD/MM/YYYY
       /^(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})$/, // YYYY/MM/DD
       /^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2})$/,  // DD/MM/YY
     ];
-
     for (const format of formats) {
       const match = value.match(format);
       if (match) {
         const [, part1, part2, part3] = match;
-        
         // Déterminer l'ordre des composants
         if (part3.length === 4) {
           // Format avec année à 4 chiffres
@@ -548,20 +485,16 @@ export class CSVImportService {
         }
       }
     }
-    
     return value; // Retourne tel quel si pas de format reconnu
   }
-
   // Méthodes utilitaires
   private static parseCSVLine(line: string, delimiter: string): string[] {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
     let i = 0;
-
     while (i < line.length) {
       const char = line[i];
-      
       if (char === '"' && (i === 0 || line[i - 1] === delimiter || line[i - 1] === ' ')) {
         inQuotes = true;
       } else if (char === '"' && inQuotes && (i === line.length - 1 || line[i + 1] === delimiter)) {
@@ -574,26 +507,21 @@ export class CSVImportService {
       }
       i++;
     }
-    
     result.push(current.trim());
     return result;
   }
-
   private static async detectCSVEncoding(_file: File): Promise<string> {
     // Réutilise la logique de FECParser
     return 'UTF-8'; // Simplifié pour cet exemple
   }
-
   private static async detectCSVDelimiter(_file: File, _encoding: string): Promise<string> {
     // Réutilise la logique de FECParser
     return ';'; // Délimiteur par défaut français
   }
-
   private static isRequiredField(fieldName: string): boolean {
     const requiredFields = ['date', 'accountNumber', 'label'];
     return requiredFields.includes(fieldName);
   }
-
   private static getFieldDataType(fieldName: string): 'string' | 'number' | 'date' | 'amount' {
     const typeMap: Record<string, 'string' | 'number' | 'date' | 'amount'> = {
       date: 'date',
@@ -603,14 +531,11 @@ export class CSVImportService {
     };
     return typeMap[fieldName] || 'string';
   }
-
   private static isEmptyRow(row: string[]): boolean {
     return row.every(cell => !cell || String(cell).trim() === '');
   }
-
   private static validateMappedEntry(entry: Partial<FECEntry>, rowNumber: number): ImportError[] {
     const errors: ImportError[] = [];
-    
     // Validations de base
     if (!entry.date) {
       errors.push({
@@ -621,7 +546,6 @@ export class CSVImportService {
         severity: 'error'
       });
     }
-
     if (!entry.accountNumber) {
       errors.push({
         row: rowNumber,
@@ -631,7 +555,6 @@ export class CSVImportService {
         severity: 'error'
       });
     }
-
     if (!entry.label) {
       errors.push({
         row: rowNumber,
@@ -641,10 +564,8 @@ export class CSVImportService {
         severity: 'error'
       });
     }
-
     return errors;
   }
-
   private static createErrorResult(message: string): ImportResult {
     return {
       success: false,

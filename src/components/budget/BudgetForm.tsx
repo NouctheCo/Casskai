@@ -4,20 +4,19 @@ import React, { useState, useEffect } from 'react';
 import { Save, X, Plus, Trash2, Calculator, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
 import { budgetService } from '@/services/budgetService';
 import { AccountSelectDropdown, type AccountOption } from '@/components/budget/AccountSelectDropdown';
+import { logger } from '@/lib/logger';
 import type {
   BudgetFormData,
   BudgetCategoryFormData,
   BudgetAssumptionFormData,
   BudgetValidationResult
 } from '@/types/budget.types';
-
 interface BudgetFormProps {
   companyId: string;
   budgetId?: string; // Pour l'édition
   onSave: (budget: any) => void;
   onCancel: () => void;
 }
-
 export const BudgetForm: React.FC<BudgetFormProps> = ({
   companyId,
   budgetId,
@@ -29,17 +28,14 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
     categories: [],
     assumptions: []
   });
-
   const [activeTab, setActiveTab] = useState<'categories' | 'assumptions' | 'summary'>('categories');
   const [validation, setValidation] = useState<BudgetValidationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-
   const monthNames = [
     'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
     'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'
   ];
-
   useEffect(() => {
     if (budgetId) {
       loadExistingBudget();
@@ -47,17 +43,14 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       initializeNewBudget();
     }
   }, [budgetId]);
-
   const loadExistingBudget = async () => {
     try {
       setLoading(true);
       const { data, error } = await budgetService.getBudgetById(budgetId!);
-
       if (error || !data) {
-        console.error('Error loading budget:', error);
+        logger.error('BudgetForm', 'Error loading budget:', error);
         return;
       }
-
       setFormData({
         year: data.year,
         categories: data.budget_categories?.map(cat => ({
@@ -87,14 +80,12 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           source: ass.source
         })) || []
       });
-
     } catch (error) {
-      console.error('Error loading budget:', error instanceof Error ? error.message : String(error));
+      logger.error('BudgetForm', 'Error loading budget:', error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }
   };
-
   const initializeNewBudget = () => {
     // Budget vide - l'utilisateur devra sélectionner des comptes via le dropdown
     const defaultAssumptions: BudgetAssumptionFormData[] = [
@@ -117,14 +108,12 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
         source: 'BCE/INSEE'
       }
     ];
-
     setFormData({
       year: new Date().getFullYear() + 1,
       categories: [], // Vide - utilisateur doit ajouter via "Ajouter une catégorie"
       assumptions: defaultAssumptions
     });
   };
-
   const addCategory = () => {
     const newCategory: BudgetCategoryFormData = {
       account_id: '', // Required - will be set via dropdown
@@ -139,28 +128,22 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       notes: '',
       responsible_person: ''
     };
-
     setFormData({
       ...formData,
       categories: [...formData.categories, newCategory]
     });
   };
-
   // Callback pour AccountSelectDropdown - auto-remplit category/subcategory depuis le compte
   const handleAccountSelect = (categoryIndex: number, accountId: string, accountData: AccountOption) => {
     const updatedCategories = [...formData.categories];
-
     // Mettre à jour account_id
     updatedCategories[categoryIndex].account_id = accountId;
-
     // Auto-remplir category depuis budget_category du compte
     if (accountData.budget_category) {
       updatedCategories[categoryIndex].category = accountData.budget_category;
     }
-
     // Auto-remplir subcategory depuis account_name du compte
     updatedCategories[categoryIndex].subcategory = accountData.account_name;
-
     // Auto-remplir category_type depuis account_class
     if (accountData.account_class === 7) {
       updatedCategories[categoryIndex].category_type = 'revenue';
@@ -169,23 +152,18 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
     } else if (accountData.account_class === 2) {
       updatedCategories[categoryIndex].category_type = 'capex';
     }
-
     // Auto-remplir account_codes
     updatedCategories[categoryIndex].account_codes = [accountData.account_number];
-
     setFormData({ ...formData, categories: updatedCategories });
   };
-
   const removeCategory = (index: number) => {
     setFormData({
       ...formData,
       categories: formData.categories.filter((_, i) => i !== index)
     });
   };
-
   const updateCategory = (index: number, field: keyof BudgetCategoryFormData, value: any) => {
     const updatedCategories = [...formData.categories];
-
     if (field === 'monthly_amounts') {
       updatedCategories[index] = { ...updatedCategories[index], [field]: value };
       // Recalculer le montant annuel
@@ -199,27 +177,21 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
     } else {
       updatedCategories[index] = { ...updatedCategories[index], [field]: value };
     }
-
     setFormData({ ...formData, categories: updatedCategories });
   };
-
   const updateMonthlyAmount = (categoryIndex: number, monthIndex: number, value: number) => {
     const updatedCategories = [...formData.categories];
     updatedCategories[categoryIndex].monthly_amounts[monthIndex] = value;
-
     // Recalculer le montant annuel
     const annualAmount = updatedCategories[categoryIndex].monthly_amounts.reduce((sum, amount) => sum + amount, 0);
     updatedCategories[categoryIndex].annual_amount = annualAmount;
-
     setFormData({ ...formData, categories: updatedCategories });
   };
-
   const distributeEqually = (categoryIndex: number) => {
     const category = formData.categories[categoryIndex];
     const monthlyAmount = category.annual_amount / 12;
     updateCategory(categoryIndex, 'monthly_amounts', Array(12).fill(monthlyAmount));
   };
-
   const addAssumption = () => {
     const newAssumption: BudgetAssumptionFormData = {
       key: '',
@@ -230,30 +202,25 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       confidence_level: 80,
       source: ''
     };
-
     setFormData({
       ...formData,
       assumptions: [...formData.assumptions, newAssumption]
     });
   };
-
   const removeAssumption = (index: number) => {
     setFormData({
       ...formData,
       assumptions: formData.assumptions.filter((_, i) => i !== index)
     });
   };
-
   const updateAssumption = (index: number, field: keyof BudgetAssumptionFormData, value: any) => {
     const updatedAssumptions = [...formData.assumptions];
     updatedAssumptions[index] = { ...updatedAssumptions[index], [field]: value };
     setFormData({ ...formData, assumptions: updatedAssumptions });
   };
-
   const validateForm = (): BudgetValidationResult => {
     const errors: any[] = [];
     const warnings: any[] = [];
-
     // Validation de l'année
     const currentYear = new Date().getFullYear();
     if (formData.year < currentYear - 1 || formData.year > currentYear + 5) {
@@ -263,7 +230,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
         severity: 'error'
       });
     }
-
     // Validation des catégories
     if (formData.categories.length === 0) {
       errors.push({
@@ -272,7 +238,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
         severity: 'error'
       });
     }
-
     formData.categories.forEach((cat, index) => {
       // VALIDATION CRITIQUE : account_id est obligatoire
       if (!cat.account_id || cat.account_id.trim() === '') {
@@ -282,7 +247,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           severity: 'error'
         });
       }
-
       if (!cat.category.trim()) {
         errors.push({
           field: `categories[${index}].category`,
@@ -290,7 +254,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           severity: 'error'
         });
       }
-
       if (cat.monthly_amounts.length !== 12) {
         errors.push({
           field: `categories[${index}].monthly_amounts`,
@@ -298,7 +261,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           severity: 'error'
         });
       }
-
       // Vérifier la cohérence mensuel/annuel
       const monthlyTotal = cat.monthly_amounts.reduce((sum, amount) => sum + amount, 0);
       if (Math.abs(monthlyTotal - cat.annual_amount) > 0.01) {
@@ -309,63 +271,50 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
         });
       }
     });
-
     return {
       isValid: errors.length === 0,
       errors,
       warnings
     };
   };
-
   const handleSave = async () => {
     const validationResult = validateForm();
     setValidation(validationResult);
-
     if (!validationResult.isValid) {
       return;
     }
-
     try {
       setSaving(true);
-
       let result;
       if (budgetId) {
         result = await budgetService.updateBudget(budgetId, formData);
       } else {
         result = await budgetService.createBudget(companyId, formData);
       }
-
       if (result.error) {
-        console.error('Error saving budget:', result.error);
+        logger.error('BudgetForm', 'Error saving budget:', result.error);
       } else {
         onSave(result.data);
       }
-
     } catch (error) {
-      console.error('Error saving budget:', error instanceof Error ? error.message : String(error));
+      logger.error('BudgetForm', 'Error saving budget:', error instanceof Error ? error.message : String(error));
     } finally {
       setSaving(false);
     }
   };
-
   const calculateTotals = () => {
     const revenue = formData.categories
       .filter(cat => cat.category_type === 'revenue')
       .reduce((sum, cat) => sum + cat.annual_amount, 0);
-
     const expenses = formData.categories
       .filter(cat => cat.category_type === 'expense')
       .reduce((sum, cat) => sum + cat.annual_amount, 0);
-
     const capex = formData.categories
       .filter(cat => cat.category_type === 'capex')
       .reduce((sum, cat) => sum + cat.annual_amount, 0);
-
     return { revenue, expenses, capex, profit: revenue - expenses };
   };
-
   const totals = calculateTotals();
-
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
@@ -374,7 +323,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       maximumFractionDigits: 0
     }).format(amount);
   };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -382,7 +330,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       </div>
     );
   }
-
   return (
     <div className="bg-white dark:bg-gray-800">
       {/* Header */}
@@ -396,7 +343,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
               Définissez vos objectifs financiers par catégorie et mois
             </p>
           </div>
-
           <div className="flex items-center space-x-3">
             <button
               onClick={onCancel}
@@ -419,7 +365,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
             </button>
           </div>
         </div>
-
         {/* Validation Messages */}
         {validation && (
           <div className="mt-4 space-y-2">
@@ -438,7 +383,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           </div>
         )}
       </div>
-
       {/* Year Selection */}
       <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
         <div className="flex items-center space-x-4">
@@ -456,7 +400,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           </select>
         </div>
       </div>
-
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
         <nav className="flex space-x-8 px-6">
@@ -480,7 +423,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           ))}
         </nav>
       </div>
-
       {/* Content */}
       <div className="px-6 py-6">
         {activeTab === 'categories' && (
@@ -497,7 +439,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                 <span>Ajouter une catégorie</span>
               </button>
             </div>
-
             {formData.categories.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <Calculator className="h-16 w-16 text-gray-400 dark:text-gray-300 mx-auto mb-4" />
@@ -533,7 +474,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                             placeholder="Sélectionner un compte..."
                           />
                         </div>
-
                         {/* Catégorie et sous-catégorie en LECTURE SEULE (auto-remplies) */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
@@ -549,7 +489,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                               placeholder="Auto-rempli depuis le compte"
                             />
                           </div>
-
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                               Sous-catégorie (auto)
@@ -563,7 +502,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                               placeholder="Auto-rempli depuis le compte"
                             />
                           </div>
-
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                               Type (auto)
@@ -582,7 +520,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                           </div>
                         </div>
                       </div>
-
                       <button
                         onClick={() => removeCategory(index)}
                         className="ml-4 p-2 text-gray-400 dark:text-gray-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors dark:bg-red-900/20 dark:text-red-400"
@@ -590,7 +527,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
-
                     {/* Montant annuel */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
@@ -614,7 +550,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                           </button>
                         </div>
                       </div>
-
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Taux de croissance (%)
@@ -628,7 +563,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                         />
                       </div>
                     </div>
-
                     {/* Répartition mensuelle */}
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -648,7 +582,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                         ))}
                       </div>
                     </div>
-
                     {/* Notes */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -668,7 +601,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
             )}
           </div>
         )}
-
         {activeTab === 'assumptions' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -688,7 +620,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                 <span>Ajouter une hypothèse</span>
               </button>
             </div>
-
             <div className="space-y-4">
               {formData.assumptions.map((assumption, index) => (
                 <div key={index} className="border border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 dark:bg-gray-700/30">
@@ -705,7 +636,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                         placeholder="Ex: taux_croissance_marche"
                       />
                     </div>
-
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Valeur *
@@ -728,7 +658,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                       </div>
                     </div>
                   </div>
-
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Description *
@@ -741,7 +670,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                       placeholder="Ex: Taux de croissance du marché prévu"
                     />
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -759,7 +687,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                         <option value="financial">Financier</option>
                       </select>
                     </div>
-
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Confiance (%)
@@ -773,7 +700,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                       />
                     </div>
-
                     <div className="flex items-end">
                       <button
                         onClick={() => removeAssumption(index)}
@@ -783,7 +709,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                       </button>
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Source
@@ -798,7 +723,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                   </div>
                 </div>
               ))}
-
               {formData.assumptions.length === 0 && (
                 <div className="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <TrendingUp className="h-16 w-16 text-gray-400 dark:text-gray-300 mx-auto mb-4" />
@@ -819,14 +743,12 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
             </div>
           </div>
         )}
-
         {activeTab === 'summary' && (
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-4">
                 Résumé du Budget {formData.year}
               </h3>
-
               {/* Indicateurs principaux */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 p-6 rounded-lg">
@@ -837,7 +759,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                     {formatCurrency(totals.revenue)}
                   </div>
                 </div>
-
                 <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-6 rounded-lg">
                   <div className="text-sm text-red-700 dark:text-red-300 font-medium mb-2">
                     Total Charges
@@ -846,7 +767,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                     {formatCurrency(totals.expenses)}
                   </div>
                 </div>
-
                 <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 p-6 rounded-lg">
                   <div className="text-sm text-blue-700 dark:text-blue-300 font-medium mb-2">
                     Résultat Prévu
@@ -855,7 +775,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                     {formatCurrency(totals.profit)}
                   </div>
                 </div>
-
                 <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 p-6 rounded-lg">
                   <div className="text-sm text-purple-700 dark:text-purple-300 font-medium mb-2">
                     Marge Nette
@@ -865,7 +784,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                   </div>
                 </div>
               </div>
-
               {/* Détail par catégorie */}
               <div className="bg-white dark:bg-gray-800 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-lg overflow-hidden">
                 <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
@@ -896,7 +814,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                         const totalBase = category.category_type === 'revenue' ? totals.revenue :
                                          category.category_type === 'expense' ? totals.expenses : totals.capex;
                         const percentage = totalBase > 0 ? (category.annual_amount / totalBase * 100).toFixed(1) : '0';
-
                         return (
                           <tr key={index}>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -934,7 +851,6 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                   </table>
                 </div>
               </div>
-
               {/* Hypothèses résumées */}
               {formData.assumptions.length > 0 && (
                 <div className="bg-white dark:bg-gray-800 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-lg overflow-hidden">

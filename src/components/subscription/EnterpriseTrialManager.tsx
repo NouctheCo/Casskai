@@ -11,7 +11,6 @@
  * @author CassKai Team
  * @version 2.0.0
  */
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTrial } from '@/hooks/trial.hooks';
@@ -34,7 +33,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
+import { logger } from '@/lib/logger';
 interface TrialEngagement {
   days_remaining: number;
   trial_phase: 'discovery' | 'consideration' | 'decision' | 'urgency' | 'expired';
@@ -44,7 +43,6 @@ interface TrialEngagement {
   has_clicked_upgrade: boolean;
   has_viewed_pricing: boolean;
 }
-
 export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'modal' }> = ({
   variant = 'card'
 }) => {
@@ -54,38 +52,31 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
   const [engagement, setEngagement] = useState<TrialEngagement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDismissed, setIsDismissed] = useState(false);
-
   // Charger l'état d'engagement
   useEffect(() => {
     if (user?.id && isActive) {
       loadEngagement();
     }
   }, [user?.id, isActive]);
-
   const loadEngagement = async () => {
     if (!user?.id) return;
-
     try {
       const { data, error } = await supabase.rpc('get_user_trial_engagement', {
         p_user_id: user.id
       });
-
       if (error) throw error;
-
       if (data && data.length > 0) {
         setEngagement(data[0]);
       }
     } catch (err) {
-      console.error('Error loading trial engagement:', err);
+      logger.error('EnterpriseTrialManager', 'Error loading trial engagement:', err);
     } finally {
       setIsLoading(false);
     }
   };
-
   // Tracker un événement d'engagement
   const trackEngagement = async (eventType: string, metadata: any = {}) => {
     if (!user?.id) return;
-
     try {
       await supabase.rpc('track_trial_engagement_event', {
         p_user_id: user.id,
@@ -93,42 +84,34 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
         p_metadata: metadata
       });
     } catch (err) {
-      console.error('Error tracking engagement:', err);
+      logger.error('EnterpriseTrialManager', 'Error tracking engagement:', err);
     }
   };
-
   // Gérer le clic sur "Choisir un plan"
   const handleUpgradeClick = async () => {
     await trackEngagement('clicked_upgrade');
     navigate('/billing');
   };
-
   // Gérer la fermeture de la notification
   const handleDismiss = async () => {
     setIsDismissed(true);
-
     // Marquer la notification comme vue pour cette phase
     const notifyEvent = (engagement?.days_remaining ?? 0) <= 3 ? 'notified_3_days' :
                        (engagement?.days_remaining ?? 0) <= 7 ? 'notified_7_days' :
                        'notified_15_days';
-
     await trackEngagement(notifyEvent);
   };
-
   // Ne rien afficher si pas d'essai actif ou si chargement
   if (!isActive || isLoading || isDismissed) {
     return null;
   }
-
   // Ne rien afficher si pas besoin de notifier
   if (engagement && !engagement.should_show_notification) {
     return null;
   }
-
   const phase = engagement?.trial_phase || 'discovery';
   const urgency = engagement?.notification_urgency || 'low';
   const progressValue = ((30 - daysRemaining) / 30) * 100;
-
   // Configuration des couleurs et icônes selon l'urgence
   const urgencyConfig = {
     low: {
@@ -164,10 +147,8 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
       borderColor: 'border-red-400'
     }
   };
-
   const config = urgencyConfig[urgency];
   const IconComponent = config.icon;
-
   // Bénéfices à afficher selon la phase
   const benefits = phase === 'expired' ? [
     { icon: Shield, text: 'Récupérez l\'accès à toutes vos données' },
@@ -179,7 +160,6 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
     { icon: TrendingUp, text: 'Support technique dédié' },
     { icon: Star, text: 'Mises à jour et améliorations continues' },
   ];
-
   // Messages selon la phase
   const phaseMessages = {
     discovery: {
@@ -208,9 +188,7 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
       cta: 'Réactiver maintenant'
     }
   };
-
   const message = phaseMessages[phase];
-
   // VARIANT: Banner (top of page)
   if (variant === 'banner') {
     return (
@@ -244,7 +222,6 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
       </Alert>
     );
   }
-
   // VARIANT: Card (default - in settings or dashboard)
   return (
     <Card className={cn('border-l-4', config.borderColor)}>
@@ -264,7 +241,6 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
           </Badge>
         </div>
       </CardHeader>
-
       <CardContent className="space-y-6">
         {/* Progress bar */}
         {phase !== 'expired' && (
@@ -283,7 +259,6 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
             </p>
           </div>
         )}
-
         {/* Benefits */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {benefits.map((benefit, idx) => (
@@ -293,7 +268,6 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
             </div>
           ))}
         </div>
-
         {/* CTA Button */}
         <Button
           onClick={handleUpgradeClick}
@@ -304,7 +278,6 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
           {message.cta}
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
-
         {/* Pricing link */}
         <p className="text-center text-sm text-muted-foreground">
           À partir de 29€/mois • Sans engagement •{' '}
@@ -322,5 +295,4 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
     </Card>
   );
 };
-
 export default EnterpriseTrialManager;

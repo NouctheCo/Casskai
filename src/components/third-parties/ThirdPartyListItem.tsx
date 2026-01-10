@@ -14,9 +14,32 @@ import { Edit, Trash2, Eye, FileText } from 'lucide-react';
 
 import { useNavigate } from 'react-router-dom';
 
+interface ThirdPartyItem {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  balance?: number;
+  default_currency?: string;
+  is_active: boolean;
+  type: string;
+}
 
-
-export const ThirdPartyListItem = ({ thirdParty, onEdit, onDelete: _onDelete, onView, formatCurrency }) => {
+export const ThirdPartyListItem = ({
+  thirdParty,
+  onEdit,
+  onDelete: _onDelete,
+  onView,
+  formatCurrency
+}: {
+  thirdParty: ThirdPartyItem;
+  onEdit: (thirdParty: ThirdPartyItem) => void;
+  onDelete: (thirdParty: ThirdPartyItem) => void;
+  onView: (thirdParty: ThirdPartyItem) => void;
+  formatCurrency: (amount: number, currency: string) => string;
+}) => {
 
   const { t } = useLocale();
 

@@ -2,7 +2,6 @@
  * CassKai - Composant de Gestion des Soldes Bancaires
  * Permet de recalculer et synchroniser les soldes des comptes bancaires
  */
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -11,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle2, AlertTriangle, RefreshCw, History } from 'lucide-react';
 import { bankAccountBalanceService } from '@/services/bankAccountBalanceService';
 import { toast } from 'sonner';
-
+import { logger } from '@/lib/logger';
 interface BankAccountBalanceManagerProps {
   companyId: string;
   bankAccounts: Array<{
@@ -22,7 +21,6 @@ interface BankAccountBalanceManagerProps {
   }>;
   onBalanceUpdated?: () => void;
 }
-
 export function BankAccountBalanceManager({
   companyId,
   bankAccounts,
@@ -40,7 +38,6 @@ export function BankAccountBalanceManager({
     message: string;
     success: boolean;
   }> | null>(null);
-
   /**
    * Recalcule le solde d'un compte spécifique
    */
@@ -51,7 +48,6 @@ export function BankAccountBalanceManager({
         companyId,
         accountId
       );
-
       if (result.success) {
         toast.success(result.message);
         onBalanceUpdated?.();
@@ -59,13 +55,12 @@ export function BankAccountBalanceManager({
         toast.error(result.message);
       }
     } catch (error) {
-      console.error('Erreur:', error);
+      logger.error('BankAccountBalanceManager', 'Erreur:', error);
       toast.error('Erreur lors du recalcul');
     } finally {
       setRecalculatingAccount(null);
     }
   };
-
   /**
    * Recalcule tous les comptes
    */
@@ -74,7 +69,6 @@ export function BankAccountBalanceManager({
     setResults(null);
     try {
       const result = await bankAccountBalanceService.recalculateAllBankAccountBalances(companyId);
-
       if (result.success) {
         toast.success('✅ Tous les soldes ont été recalculés');
         setResults(
@@ -89,13 +83,12 @@ export function BankAccountBalanceManager({
         toast.error('Erreur lors du recalcul');
       }
     } catch (error) {
-      console.error('Erreur:', error);
+      logger.error('BankAccountBalanceManager', 'Erreur:', error);
       toast.error('Erreur lors du recalcul');
     } finally {
       setIsRecalculatingAll(false);
     }
   };
-
   /**
    * Affiche l'historique des mouvements d'un compte
    */
@@ -106,18 +99,16 @@ export function BankAccountBalanceManager({
         accountId,
         50
       );
-
       setMovementHistory({
         accountId,
         movements,
         visible: true
       });
     } catch (error) {
-      console.error('Erreur:', error);
+      logger.error('BankAccountBalanceManager', 'Erreur:', error);
       toast.error('Erreur lors de la récupération de l\'historique');
     }
   };
-
   return (
     <div className="space-y-6">
       {/* Carte de gestion globale */}
@@ -138,14 +129,12 @@ export function BankAccountBalanceManager({
               <strong>Approche 1 - Automatique :</strong> Les soldes se mettent à jour automatiquement en temps réel lors de la création/modification d'écritures comptables.
             </AlertDescription>
           </Alert>
-
           <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800">
             <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             <AlertDescription className="text-amber-900 dark:text-amber-200">
               <strong>Approche 2 - Manuelle :</strong> Utilisez les boutons ci-dessous pour recalculer les soldes en cas de désynchronisation.
             </AlertDescription>
           </Alert>
-
           <Button
             onClick={handleRecalculateAll}
             disabled={isRecalculatingAll || bankAccounts.length === 0}
@@ -165,7 +154,6 @@ export function BankAccountBalanceManager({
           </Button>
         </CardContent>
       </Card>
-
       {/* Résultats du recalcul */}
       {results && results.length > 0 && (
         <Card className="border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/10">
@@ -189,11 +177,9 @@ export function BankAccountBalanceManager({
           </CardContent>
         </Card>
       )}
-
       {/* Liste des comptes */}
       <div className="space-y-3">
         <h3 className="font-semibold text-gray-900 dark:text-gray-100">Comptes bancaires</h3>
-        
         {bankAccounts.length === 0 ? (
           <Card>
             <CardContent className="pt-6 text-center">
@@ -247,7 +233,6 @@ export function BankAccountBalanceManager({
           ))
         )}
       </div>
-
       {/* Historique des mouvements */}
       {movementHistory?.visible && (
         <Card>
@@ -336,7 +321,6 @@ export function BankAccountBalanceManager({
           </CardContent>
         </Card>
       )}
-
       {/* Info supplémentaire */}
       <Alert className="bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700">
         <AlertTriangle className="h-4 w-4" />
@@ -346,4 +330,4 @@ export function BankAccountBalanceManager({
       </Alert>
     </div>
   );
-}
+}

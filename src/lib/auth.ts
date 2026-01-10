@@ -9,9 +9,8 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from './supabase';
-
+import { logger } from '@/lib/logger';
 /**
  * Gère l'inscription d'un nouvel utilisateur.
  * Crée l'utilisateur dans Supabase Auth et insère un profil public.
@@ -33,25 +32,19 @@ export const signUp = async (email: string, password: string, userData: { firstN
       },
     },
   });
-
   if (authError) {
-    console.error("Erreur lors de l'inscription (Auth):", authError.message);
+    logger.error('Auth', "Erreur lors de l'inscription (Auth):", authError.message);
     throw new Error(`L'inscription a échoué: ${authError.message}`);
   }
-
   if (!authData.user) {
     throw new Error("L'inscription n'a pas retourné d'utilisateur.");
   }
-
   // Étape 2: Création du profil public de l'utilisateur
   // Cette opération est maintenant gérée par un trigger SQL dans Supabase
   // pour plus de fiabilité et de sécurité. Voir la fonction `handle_new_user`.
-
-  console.log(`Inscription réussie pour ${email}. Un profil public a été créé automatiquement.`);
-
+  logger.debug('Auth', `Inscription réussie pour ${email}. Un profil public a été créé automatiquement.`);
   return authData;
 };
-
 /**
  * Gère la connexion d'un utilisateur.
  *
@@ -64,27 +57,22 @@ export const signIn = async (email: string, password: string) => {
     email,
     password,
   });
-
   if (error) {
-    console.error('Erreur de connexion:', error.message);
+    logger.error('Auth', 'Erreur de connexion:', error.message);
     throw new Error(`La connexion a échoué: ${error.message}`);
   }
-
   return data;
 };
-
 /**
  * Gère la déconnexion de l'utilisateur.
  */
 export const signOut = async () => {
   const { error } = await supabase.auth.signOut();
-
   if (error) {
-    console.error('Erreur de déconnexion:', error.message);
+    logger.error('Auth', 'Erreur de déconnexion:', error.message);
     throw new Error(`La déconnexion a échoué: ${error.message}`);
   }
 };
-
 /**
  * Récupère la session en cours de l'utilisateur.
  * @returns La session active ou null.
@@ -93,7 +81,6 @@ export const getSession = async () => {
   const { data: { session } } = await supabase.auth.getSession();
   return session;
 };
-
 /**
  * Écoute les changements d'état d'authentification.
  * @param callback La fonction à appeler lors d'un changement.
@@ -103,6 +90,5 @@ export const onAuthStateChange = (callback: (session: any) => void) => {
   const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
     callback(session);
   });
-
   return authListener.subscription;
 };

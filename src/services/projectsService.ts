@@ -9,10 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // Service Projets moderne intégré avec Supabase
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface Project {
   id: string;
   name: string;
@@ -38,7 +37,6 @@ export interface Project {
   created_at: string;
   updated_at: string;
 }
-
 export interface ProjectTask {
   id: string;
   project_id: string;
@@ -58,7 +56,6 @@ export interface ProjectTask {
   created_at: string;
   updated_at: string;
 }
-
 export interface ProjectTimeEntry {
   id: string;
   project_id: string;
@@ -76,7 +73,6 @@ export interface ProjectTimeEntry {
   created_at: string;
   updated_at: string;
 }
-
 export interface ProjectMetrics {
   totalProjects: number;
   activeProjects: number;
@@ -110,27 +106,21 @@ export interface ProjectMetrics {
     profit: number;
   }>;
 }
-
 export interface ProjectsServiceResponse<T> {
   success: boolean;
   data: T | null;
   error?: string;
 }
-
 export class ProjectsService {
   private static instance: ProjectsService;
-
   private constructor() {}
-
   static getInstance(): ProjectsService {
     if (!this.instance) {
       this.instance = new ProjectsService();
     }
     return this.instance;
   }
-
   // PROJECTS
-
   async getProjects(companyId: string, filters?: {
     status?: string;
     category?: string;
@@ -143,7 +133,6 @@ export class ProjectsService {
         .from('projects')
         .select('*')
         .eq('company_id', companyId);
-
       // Apply filters
       if (filters?.status) {
         query = query.eq('status', filters.status);
@@ -160,36 +149,31 @@ export class ProjectsService {
       if (filters?.search) {
         query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,client.ilike.%${filters.search}%`);
       }
-
       const { data, error } = await query.order('created_at', { ascending: false });
-
       if (error) {
-        console.error('Error fetching projects:', error);
+        logger.error('Projects', 'Error fetching projects:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       // Calculate computed fields
       const enrichedProjects = (data || []).map(project => {
         const profit = (project.revenue || 0) - (project.spent || 0);
         const progressPercentage = Math.min(100, Math.max(0, project.progress || 0));
-
         return {
           ...project,
           profit,
           progress: progressPercentage
         };
       });
-
       return {
         success: true,
         data: enrichedProjects as Project[]
       };
     } catch (error) {
-      console.error('Error in getProjects:', error);
+      logger.error('Projects', 'Error in getProjects:', error);
       return {
         success: false,
         data: null,
@@ -197,7 +181,6 @@ export class ProjectsService {
       };
     }
   }
-
   async createProject(companyId: string, projectData: Omit<Project, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'profit'>): Promise<ProjectsServiceResponse<Project>> {
     try {
       const { data, error } = await supabase
@@ -210,22 +193,20 @@ export class ProjectsService {
         })
         .select()
         .single();
-
       if (error) {
-        console.error('Error creating project:', error);
+        logger.error('Projects', 'Error creating project:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       return {
         success: true,
         data: data as Project
       };
     } catch (error) {
-      console.error('Error in createProject:', error);
+      logger.error('Projects', 'Error in createProject:', error);
       return {
         success: false,
         data: null,
@@ -233,7 +214,6 @@ export class ProjectsService {
       };
     }
   }
-
   async updateProject(projectId: string, updates: Partial<Project>): Promise<ProjectsServiceResponse<Project>> {
     try {
       const { data, error } = await supabase
@@ -245,22 +225,20 @@ export class ProjectsService {
         .eq('id', projectId)
         .select()
         .single();
-
       if (error) {
-        console.error('Error updating project:', error);
+        logger.error('Projects', 'Error updating project:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       return {
         success: true,
         data: data as Project
       };
     } catch (error) {
-      console.error('Error in updateProject:', error);
+      logger.error('Projects', 'Error in updateProject:', error);
       return {
         success: false,
         data: null,
@@ -268,29 +246,26 @@ export class ProjectsService {
       };
     }
   }
-
   async deleteProject(projectId: string): Promise<ProjectsServiceResponse<boolean>> {
     try {
       const { error } = await supabase
         .from('projects')
         .delete()
         .eq('id', projectId);
-
       if (error) {
-        console.error('Error deleting project:', error);
+        logger.error('Projects', 'Error deleting project:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       return {
         success: true,
         data: true
       };
     } catch (error) {
-      console.error('Error in deleteProject:', error);
+      logger.error('Projects', 'Error in deleteProject:', error);
       return {
         success: false,
         data: null,
@@ -298,9 +273,7 @@ export class ProjectsService {
       };
     }
   }
-
   // PROJECT TASKS
-
   async getProjectTasks(projectId: string, filters?: {
     status?: string;
     assignee?: string;
@@ -311,7 +284,6 @@ export class ProjectsService {
         .from('project_tasks')
         .select('*')
         .eq('project_id', projectId);
-
       // Apply filters
       if (filters?.status) {
         query = query.eq('status', filters.status);
@@ -322,24 +294,21 @@ export class ProjectsService {
       if (filters?.priority) {
         query = query.eq('priority', filters.priority);
       }
-
       const { data, error } = await query.order('created_at', { ascending: false });
-
       if (error) {
-        console.error('Error fetching project tasks:', error);
+        logger.error('Projects', 'Error fetching project tasks:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       return {
         success: true,
         data: data as ProjectTask[]
       };
     } catch (error) {
-      console.error('Error in getProjectTasks:', error);
+      logger.error('Projects', 'Error in getProjectTasks:', error);
       return {
         success: false,
         data: null,
@@ -347,7 +316,6 @@ export class ProjectsService {
       };
     }
   }
-
   async createTask(companyId: string, taskData: Omit<ProjectTask, 'id' | 'company_id' | 'created_at' | 'updated_at'>): Promise<ProjectsServiceResponse<ProjectTask>> {
     try {
       const { data, error } = await supabase
@@ -360,22 +328,20 @@ export class ProjectsService {
         })
         .select()
         .single();
-
       if (error) {
-        console.error('Error creating task:', error);
+        logger.error('Projects', 'Error creating task:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       return {
         success: true,
         data: data as ProjectTask
       };
     } catch (error) {
-      console.error('Error in createTask:', error);
+      logger.error('Projects', 'Error in createTask:', error);
       return {
         success: false,
         data: null,
@@ -383,9 +349,7 @@ export class ProjectsService {
       };
     }
   }
-
   // TIME TRACKING
-
   async getTimeEntries(companyId: string, filters?: {
     projectId?: string;
     userId?: string;
@@ -398,7 +362,6 @@ export class ProjectsService {
         .from('project_time_entries')
         .select('*')
         .eq('company_id', companyId);
-
       // Apply filters
       if (filters?.projectId) {
         query = query.eq('project_id', filters.projectId);
@@ -415,30 +378,26 @@ export class ProjectsService {
       if (filters?.billable !== undefined) {
         query = query.eq('billable', filters.billable);
       }
-
       const { data, error } = await query.order('entry_date', { ascending: false });
-
       if (error) {
-        console.error('Error fetching time entries:', error);
+        logger.error('Projects', 'Error fetching time entries:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       // Enrich with calculated total amount
       const enrichedEntries = (data || []).map(entry => ({
         ...entry,
         totalAmount: (entry.hours || 0) * (entry.hourlyRate || 0)
       }));
-
       return {
         success: true,
         data: enrichedEntries as ProjectTimeEntry[]
       };
     } catch (error) {
-      console.error('Error in getTimeEntries:', error);
+      logger.error('Projects', 'Error in getTimeEntries:', error);
       return {
         success: false,
         data: null,
@@ -446,11 +405,9 @@ export class ProjectsService {
       };
     }
   }
-
   async createTimeEntry(companyId: string, entryData: Omit<ProjectTimeEntry, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'totalAmount'>): Promise<ProjectsServiceResponse<ProjectTimeEntry>> {
     try {
       const totalAmount = (entryData.hours || 0) * (entryData.hourlyRate || 0);
-
       const { data, error } = await supabase
         .from('project_time_entries')
         .insert({
@@ -462,22 +419,20 @@ export class ProjectsService {
         })
         .select()
         .single();
-
       if (error) {
-        console.error('Error creating time entry:', error);
+        logger.error('Projects', 'Error creating time entry:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       return {
         success: true,
         data: data as ProjectTimeEntry
       };
     } catch (error) {
-      console.error('Error in createTimeEntry:', error);
+      logger.error('Projects', 'Error in createTimeEntry:', error);
       return {
         success: false,
         data: null,
@@ -485,9 +440,7 @@ export class ProjectsService {
       };
     }
   }
-
   // METRICS & ANALYTICS
-
   async getProjectMetrics(companyId: string): Promise<ProjectsServiceResponse<ProjectMetrics>> {
     try {
       // Execute parallel queries
@@ -495,14 +448,11 @@ export class ProjectsService {
         supabase.from('projects').select('status, category, manager, budget, spent, revenue, progress').eq('company_id', companyId),
         supabase.from('project_time_entries').select('hours, totalAmount, billable').eq('company_id', companyId).gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
       ]);
-
       if (projectsResult.error || timeEntriesResult.error) {
         throw new Error('Error fetching project metrics data');
       }
-
       const projects = projectsResult.data || [];
       const _timeEntries = timeEntriesResult.data || [];
-
       // Calculate basic metrics
       const totalProjects = projects.length;
       const activeProjects = projects.filter(p => p.status === 'in_progress').length;
@@ -512,19 +462,16 @@ export class ProjectsService {
       const totalRevenue = projects.reduce((sum, p) => sum + (p.revenue || 0), 0);
       const totalProfit = totalRevenue - totalSpent;
       const averageProgress = projects.length > 0 ? projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length : 0;
-
       // Projects by status
       const statusCount = projects.reduce((acc, p) => {
         acc[p.status] = (acc[p.status] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
-
       const projectsByStatus = Object.entries(statusCount).map(([status, count]) => ({
         status,
         count,
         percentage: (count / totalProjects) * 100
       }));
-
       // Projects by category
       const categoryStats = projects.reduce((acc, p) => {
         const category = p.category || 'Non assigné';
@@ -536,12 +483,10 @@ export class ProjectsService {
         acc[category].revenue += p.revenue || 0;
         return acc;
       }, {} as Record<string, { count: number; budget: number; revenue: number }>);
-
       const projectsByCategory = Object.entries(categoryStats).map(([category, stats]) => ({
         category,
         ...stats
       }));
-
       // Top performers
       const managerStats = projects.reduce((acc, p) => {
         const manager = p.manager || 'Non assigné';
@@ -553,7 +498,6 @@ export class ProjectsService {
         acc[manager].totalProfit += (p.revenue || 0) - (p.spent || 0);
         return acc;
       }, {} as Record<string, { projectCount: number; totalRevenue: number; totalProfit: number }>);
-
       const topPerformers = Object.entries(managerStats)
         .map(([manager, stats]) => ({
           manager,
@@ -563,14 +507,12 @@ export class ProjectsService {
         }))
         .sort((a, b) => b.totalRevenue - a.totalRevenue)
         .slice(0, 5);
-
       // Monthly stats (simplified for now)
       const monthlyStats = [
         { month: 'Mars', projects: activeProjects, revenue: totalRevenue * 0.3, profit: totalProfit * 0.25 },
         { month: 'Février', projects: Math.floor(activeProjects * 0.8), revenue: totalRevenue * 0.25, profit: totalProfit * 0.3 },
         { month: 'Janvier', projects: Math.floor(activeProjects * 0.6), revenue: totalRevenue * 0.2, profit: totalProfit * 0.2 }
       ];
-
       const metrics: ProjectMetrics = {
         totalProjects,
         activeProjects,
@@ -585,13 +527,12 @@ export class ProjectsService {
         topPerformers,
         monthlyStats
       };
-
       return {
         success: true,
         data: metrics
       };
     } catch (error) {
-      console.error('Error in getProjectMetrics:', error);
+      logger.error('Projects', 'Error in getProjectMetrics:', error);
       return {
         success: false,
         data: null,
@@ -599,9 +540,7 @@ export class ProjectsService {
       };
     }
   }
-
   // CATEGORIES & MANAGERS
-
   async getCategories(companyId: string): Promise<ProjectsServiceResponse<string[]>> {
     try {
       const { data, error } = await supabase
@@ -609,24 +548,21 @@ export class ProjectsService {
         .select('category')
         .eq('company_id', companyId)
         .not('category', 'is', null);
-
       if (error) {
-        console.error('Error fetching categories:', error);
+        logger.error('Projects', 'Error fetching categories:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       const categories = [...new Set((data || []).map(item => item.category))].filter(Boolean);
-
       return {
         success: true,
         data: categories
       };
     } catch (error) {
-      console.error('Error in getCategories:', error);
+      logger.error('Projects', 'Error in getCategories:', error);
       return {
         success: false,
         data: null,
@@ -634,7 +570,6 @@ export class ProjectsService {
       };
     }
   }
-
   async getManagers(companyId: string): Promise<ProjectsServiceResponse<string[]>> {
     try {
       const { data, error } = await supabase
@@ -642,24 +577,21 @@ export class ProjectsService {
         .select('manager')
         .eq('company_id', companyId)
         .not('manager', 'is', null);
-
       if (error) {
-        console.error('Error fetching managers:', error);
+        logger.error('Projects', 'Error fetching managers:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       const managers = [...new Set((data || []).map(item => item.manager))].filter(Boolean);
-
       return {
         success: true,
         data: managers
       };
     } catch (error) {
-      console.error('Error in getManagers:', error);
+      logger.error('Projects', 'Error in getManagers:', error);
       return {
         success: false,
         data: null,
@@ -668,6 +600,5 @@ export class ProjectsService {
     }
   }
 }
-
 // Export singleton instance
 export const projectsService = ProjectsService.getInstance();

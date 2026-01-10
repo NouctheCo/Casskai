@@ -16,7 +16,7 @@ export const forecastsModule: Module = {
     status: 'available',
     config: { settings: {}, defaultValues: {} },
     permissions: [],
-    dependencies: [],
+    dependencies: ['accounting'],
     conflicts: [],
   },
   getRoutes: () => [],

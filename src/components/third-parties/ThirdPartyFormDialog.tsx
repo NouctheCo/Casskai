@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/components/ui/use-toast';
 import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
 import { Users, Building2 } from 'lucide-react';
-
+import { logger } from '@/lib/logger';
 interface ThirdPartyFormDialogProps {
   open: boolean;
   onClose: () => void;
@@ -15,7 +15,6 @@ interface ThirdPartyFormDialogProps {
   companyId: string;
   defaultType?: 'customer' | 'supplier';
 }
-
 export function ThirdPartyFormDialog({
   open,
   onClose,
@@ -40,10 +39,8 @@ export function ThirdPartyFormDialog({
     currency: 'EUR',
     notes: ''
   });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!formData.name.trim()) {
       toast({
         title: 'Erreur',
@@ -52,9 +49,7 @@ export function ThirdPartyFormDialog({
       });
       return;
     }
-
     setLoading(true);
-
     try {
       const data = {
         company_id: companyId,
@@ -71,21 +66,17 @@ export function ThirdPartyFormDialog({
         currency: formData.currency,
         notes: formData.notes.trim() || undefined
       };
-
       let result;
       if (formData.type === 'customer') {
         result = await unifiedThirdPartiesService.createCustomer(data);
       } else {
         result = await unifiedThirdPartiesService.createSupplier(data);
       }
-
       if (result.error) throw result.error;
-
       toast({
         title: 'Succès',
         description: `${formData.type === 'customer' ? 'Client' : 'Fournisseur'} créé avec succès`
       });
-
       // Reset form
       setFormData({
         type: defaultType,
@@ -102,11 +93,10 @@ export function ThirdPartyFormDialog({
         currency: 'EUR',
         notes: ''
       });
-
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error creating third party:', error instanceof Error ? error.message : String(error));
+      logger.error('ThirdPartyFormDialog', 'Error creating third party:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de créer le tiers',
@@ -116,7 +106,6 @@ export function ThirdPartyFormDialog({
       setLoading(false);
     }
   };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -130,7 +119,6 @@ export function ThirdPartyFormDialog({
             <span>Nouveau {formData.type === 'customer' ? 'Client' : 'Fournisseur'}</span>
           </DialogTitle>
         </DialogHeader>
-
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Type Selection */}
           <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
@@ -160,13 +148,11 @@ export function ThirdPartyFormDialog({
               </SelectContent>
             </Select>
           </div>
-
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-300">
               Informations générales
             </h3>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 sm:col-span-1">
                 <Label htmlFor="name">Nom / Raison sociale *</Label>
@@ -179,7 +165,6 @@ export function ThirdPartyFormDialog({
                   className="mt-1"
                 />
               </div>
-
               <div className="col-span-2 sm:col-span-1">
                 <Label htmlFor="company_name">Nom commercial</Label>
                 <Input
@@ -191,7 +176,6 @@ export function ThirdPartyFormDialog({
                 />
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="email">Email</Label>
@@ -204,7 +188,6 @@ export function ThirdPartyFormDialog({
                   className="mt-1"
                 />
               </div>
-
               <div>
                 <Label htmlFor="phone">Téléphone</Label>
                 <Input
@@ -217,7 +200,6 @@ export function ThirdPartyFormDialog({
                 />
               </div>
             </div>
-
             <div>
               <Label htmlFor="tax_number">Numéro de TVA</Label>
               <Input
@@ -229,13 +211,11 @@ export function ThirdPartyFormDialog({
               />
             </div>
           </div>
-
           {/* Address */}
           <div className="space-y-4">
             <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-300">
               Adresse de facturation
             </h3>
-
             <div>
               <Label htmlFor="address">Adresse</Label>
               <Input
@@ -246,7 +226,6 @@ export function ThirdPartyFormDialog({
                 className="mt-1"
               />
             </div>
-
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="city">Ville</Label>
@@ -258,7 +237,6 @@ export function ThirdPartyFormDialog({
                   className="mt-1"
                 />
               </div>
-
               <div>
                 <Label htmlFor="postal_code">Code postal</Label>
                 <Input
@@ -269,7 +247,6 @@ export function ThirdPartyFormDialog({
                   className="mt-1"
                 />
               </div>
-
               <div>
                 <Label htmlFor="country">Pays</Label>
                 <Select
@@ -291,13 +268,11 @@ export function ThirdPartyFormDialog({
               </div>
             </div>
           </div>
-
           {/* Commercial Terms */}
           <div className="space-y-4">
             <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-300">
               Conditions commerciales
             </h3>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="payment_terms">Délai de paiement (jours)</Label>
@@ -310,7 +285,6 @@ export function ThirdPartyFormDialog({
                   className="mt-1"
                 />
               </div>
-
               <div>
                 <Label htmlFor="currency">Devise</Label>
                 <Select
@@ -331,7 +305,6 @@ export function ThirdPartyFormDialog({
               </div>
             </div>
           </div>
-
           {/* Notes */}
           <div>
             <Label htmlFor="notes">Notes</Label>
@@ -344,7 +317,6 @@ export function ThirdPartyFormDialog({
               className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-sm"
             />
           </div>
-
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>

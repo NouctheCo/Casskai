@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -23,7 +22,7 @@ import { Badge } from '../ui/badge';
 import { TaxObligation, TaxObligationFormData } from '../../types/tax.types';
 import { Calendar, Bell, RefreshCw, AlertCircle, Plus, Trash2 } from 'lucide-react';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
-
+import { logger } from '@/lib/logger';
 interface ObligationConfigDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -31,7 +30,6 @@ interface ObligationConfigDialogProps {
   onSave: (data: TaxObligationFormData) => Promise<void>;
   taxTypes?: Array<{ id: string; name: string }>;
 }
-
 const DEFAULT_TAX_TYPES = [
   { id: 'tva', name: 'TVA' },
   { id: 'is', name: 'IS (Impôt sur les Sociétés)' },
@@ -45,7 +43,6 @@ const DEFAULT_TAX_TYPES = [
   { id: 'taxe_apprentissage', name: 'Taxe d\'Apprentissage' },
   { id: 'formation_pro', name: 'Formation Professionnelle' },
 ];
-
 export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
   open,
   onOpenChange,
@@ -57,7 +54,6 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notificationEmails, setNotificationEmails] = useState<string[]>([]);
   const [emailInput, setEmailInput] = useState('');
-
   const [formData, setFormData] = useState<TaxObligationFormData>({
     tax_type_id: '',
     frequency: 'monthly',
@@ -68,7 +64,6 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
     email_notifications: false,
     notification_emails: [],
   });
-
   // Reset form when dialog opens/closes or obligation changes
   useEffect(() => {
     if (open && obligation) {
@@ -97,20 +92,16 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
       setNotificationEmails([]);
     }
   }, [open, obligation]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.tax_type_id) {
       toastError(t('tax.obligations.errors.selectTaxType', 'Veuillez sélectionner un type d\'obligation'));
       return;
     }
-
     if (formData.due_day < 1 || formData.due_day > 31) {
       toastError(t('tax.obligations.errors.invalidDueDay', 'Le jour d\'échéance doit être entre 1 et 31'));
       return;
     }
-
     setIsSubmitting(true);
     try {
       await onSave({
@@ -124,13 +115,12 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
       );
       onOpenChange(false);
     } catch (error) {
-      console.error('Error saving obligation:', error);
+      logger.error('ObligationConfigDialog', 'Error saving obligation:', error);
       toastError(t('tax.obligations.errors.saveFailed', 'Erreur lors de la sauvegarde de l\'obligation'));
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const handleAddEmail = () => {
     const trimmedEmail = emailInput.trim();
     if (trimmedEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
@@ -144,11 +134,9 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
       toastError(t('tax.obligations.errors.invalidEmail', 'Email invalide'));
     }
   };
-
   const handleRemoveEmail = (email: string) => {
     setNotificationEmails(notificationEmails.filter(e => e !== email));
   };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -164,7 +152,6 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
             {t('tax.obligations.configDesc', 'Configurez les obligations fiscales pour suivre automatiquement vos échéances TVA, IS, CFE, CVAE, etc.')}
           </DialogDescription>
         </DialogHeader>
-
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Tax Type Selection */}
           <div className="space-y-2">
@@ -188,7 +175,6 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
               </SelectContent>
             </Select>
           </div>
-
           {/* Frequency */}
           <div className="space-y-2">
             <Label htmlFor="frequency" className="flex items-center gap-2">
@@ -210,7 +196,6 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
               </SelectContent>
             </Select>
           </div>
-
           {/* Due Day */}
           <div className="space-y-2">
             <Label htmlFor="due_day" className="flex items-center gap-2">
@@ -230,7 +215,6 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
               {t('tax.obligations.dueDayHelp', 'Jour du mois où l\'obligation est due (1-31)')}
             </p>
           </div>
-
           {/* Advance Notice */}
           <div className="space-y-2">
             <Label htmlFor="advance_notice_days" className="flex items-center gap-2">
@@ -250,7 +234,6 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
               {t('tax.obligations.advanceNoticeHelp', 'Nombre de jours avant l\'échéance pour recevoir une alerte')}
             </p>
           </div>
-
           {/* Options Switches */}
           <div className="space-y-4 border-t pt-4">
             <div className="flex items-center justify-between">
@@ -268,7 +251,6 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
                 onCheckedChange={(checked) => setFormData({ ...formData, auto_generate: checked })}
               />
             </div>
-
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="requires_approval">
@@ -284,7 +266,6 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
                 onCheckedChange={(checked) => setFormData({ ...formData, requires_approval: checked })}
               />
             </div>
-
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="email_notifications">
@@ -301,12 +282,10 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
               />
             </div>
           </div>
-
           {/* Email Notifications Section */}
           {formData.email_notifications && (
             <div className="space-y-3 border-t pt-4">
               <Label>{t('tax.obligations.notificationEmails', 'Emails de notification')}</Label>
-              
               <div className="flex gap-2">
                 <Input
                   type="email"
@@ -319,7 +298,6 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-
               {notificationEmails.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {notificationEmails.map((email) => (
@@ -340,7 +318,6 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
               )}
             </div>
           )}
-
           <DialogFooter>
             <Button
               type="button"
@@ -362,4 +339,4 @@ export const ObligationConfigDialog: React.FC<ObligationConfigDialogProps> = ({
       </DialogContent>
     </Dialog>
   );
-};
+};

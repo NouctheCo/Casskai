@@ -9,17 +9,15 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // src/services/accountingStandardAdapter.ts
 /**
  * Adaptateur pour gérer les différents standards comptables multi-pays
  * Supporte: PCG (France), SYSCOHADA (OHADA), IFRS (International), SCF (Maghreb)
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
+import { IFRS_ACCOUNTS } from '@/data/ifrs';
 export type AccountingStandard = 'PCG' | 'SYSCOHADA' | 'IFRS' | 'SCF';
-
 export interface StandardMapping {
   revenueClasses: string[];
   expenseClasses: string[];
@@ -28,7 +26,6 @@ export interface StandardMapping {
   equityClasses: string[];
   haoClasses?: string[];  // Spécifique SYSCOHADA (Hors Activités Ordinaires)
 }
-
 /**
  * Mappings des classes de comptes par standard comptable
  */
@@ -49,11 +46,15 @@ export const STANDARD_MAPPINGS: Record<AccountingStandard, StandardMapping> = {
     haoClasses: ['8']  // ✅ CLASSE 8 HAO - Hors Activités Ordinaires
   },
   IFRS: {
-    // Structure IFRS simplifiée (à adapter selon besoins)
-    revenueClasses: ['4'],
-    expenseClasses: ['5', '6'],
+    // Structure IFRS for SMEs
+    // Class 1 = Non-current Assets, Class 2 = Current Assets
+    // Class 3 = Equity
+    // Class 4 = Non-current Liabilities, Class 5 = Current Liabilities
+    // Class 6 = Revenue, Class 7 = Expenses
+    revenueClasses: ['6'],
+    expenseClasses: ['7'],
     assetClasses: ['1', '2'],
-    liabilityClasses: ['2', '3'],
+    liabilityClasses: ['4', '5'],
     equityClasses: ['3']
   },
   SCF: {
@@ -65,7 +66,6 @@ export const STANDARD_MAPPINGS: Record<AccountingStandard, StandardMapping> = {
     equityClasses: ['1']
   }
 };
-
 /**
  * Pays membres OHADA utilisant SYSCOHADA
  */
@@ -88,7 +88,6 @@ export const SYSCOHADA_COUNTRIES = [
   'CD', // RD Congo
   'KM'  // Comores
 ];
-
 /**
  * Pays du Maghreb utilisant SCF (Algérie) ou systèmes similaires
  */
@@ -97,7 +96,6 @@ export const SCF_COUNTRIES = [
   'MA', // Maroc (Plan Comptable Marocain similaire)
   'TN'  // Tunisie (Plan Comptable Tunisien similaire)
 ];
-
 /**
  * Pays anglophones africains utilisant IFRS
  */
@@ -113,19 +111,16 @@ export const IFRS_COUNTRIES = [
   'ZM', // Zambie
   'ZW'  // Zimbabwe
 ];
-
 /**
  * Classe singleton pour adapter les opérations comptables selon le standard
  */
 export class AccountingStandardAdapter {
-
   /**
    * Récupère le mapping pour un standard donné
    */
   static getMapping(standard: AccountingStandard): StandardMapping {
     return STANDARD_MAPPINGS[standard] || STANDARD_MAPPINGS.PCG;
   }
-
   /**
    * Vérifie si un compte est un compte de produits/revenus
    */
@@ -133,7 +128,6 @@ export class AccountingStandardAdapter {
     const mapping = this.getMapping(standard);
     return mapping.revenueClasses.some(cls => accountNumber.startsWith(cls));
   }
-
   /**
    * Vérifie si un compte est un compte de charges/expenses
    */
@@ -141,7 +135,6 @@ export class AccountingStandardAdapter {
     const mapping = this.getMapping(standard);
     return mapping.expenseClasses.some(cls => accountNumber.startsWith(cls));
   }
-
   /**
    * Vérifie si un compte est un compte d'actifs
    */
@@ -149,7 +142,6 @@ export class AccountingStandardAdapter {
     const mapping = this.getMapping(standard);
     return mapping.assetClasses.some(cls => accountNumber.startsWith(cls));
   }
-
   /**
    * Vérifie si un compte est un compte de passifs/dettes
    */
@@ -157,7 +149,6 @@ export class AccountingStandardAdapter {
     const mapping = this.getMapping(standard);
     return mapping.liabilityClasses.some(cls => accountNumber.startsWith(cls));
   }
-
   /**
    * Vérifie si un compte est un compte de capitaux propres
    */
@@ -165,7 +156,6 @@ export class AccountingStandardAdapter {
     const mapping = this.getMapping(standard);
     return mapping.equityClasses.some(cls => accountNumber.startsWith(cls));
   }
-
   /**
    * Vérifie si un compte appartient aux Hors Activités Ordinaires (HAO - classe 8 SYSCOHADA)
    */
@@ -174,7 +164,6 @@ export class AccountingStandardAdapter {
     const mapping = this.getMapping(standard);
     return mapping.haoClasses?.some(cls => accountNumber.startsWith(cls)) || false;
   }
-
   /**
    * Infère le standard comptable à partir du code pays
    */
@@ -190,7 +179,6 @@ export class AccountingStandardAdapter {
     }
     return 'PCG';  // Par défaut (France et autres pays francophones)
   }
-
   /**
    * Récupère le standard comptable d'une entreprise depuis la base de données
    */
@@ -202,29 +190,24 @@ export class AccountingStandardAdapter {
         .select('country, accounting_standard')
         .eq('id', companyId)
         .single();
-
       if (error || !company) {
-        console.warn(`Cannot fetch company ${companyId}, using default PCG`, error);
+        logger.warn('AccountingStandardAdapter', `Cannot fetch company ${companyId}, using default PCG`, error);
         return 'PCG';
       }
-
       // Si accounting_standard est défini, l'utiliser
       if (company.accounting_standard) {
         return company.accounting_standard as AccountingStandard;
       }
-
       // Sinon, inférer depuis le pays
       if (company.country) {
         return this.inferStandardFromCountry(company.country);
       }
-
       return 'PCG'; // Fallback par défaut
     } catch (error) {
-      console.error('Error fetching company standard:', error);
+      logger.error('AccountingStandardAdapter', 'Error fetching company standard:', error);
       return 'PCG';
     }
   }
-
   /**
    * Filtre les écritures comptables pour n'inclure que les revenus
    */
@@ -234,7 +217,6 @@ export class AccountingStandardAdapter {
   ): T[] {
     return entries.filter(entry => this.isRevenue(entry.account_number, standard));
   }
-
   /**
    * Filtre les écritures comptables pour n'inclure que les charges
    */
@@ -244,7 +226,6 @@ export class AccountingStandardAdapter {
   ): T[] {
     return entries.filter(entry => this.isExpense(entry.account_number, standard));
   }
-
   /**
    * Filtre les écritures HAO (SYSCOHADA uniquement)
    */
@@ -255,7 +236,6 @@ export class AccountingStandardAdapter {
     if (standard !== 'SYSCOHADA') return [];
     return entries.filter(entry => this.isHAO(entry.account_number, standard));
   }
-
   /**
    * Sépare les charges HAO des charges d'exploitation (SYSCOHADA)
    */
@@ -266,15 +246,12 @@ export class AccountingStandardAdapter {
     if (standard !== 'SYSCOHADA') {
       return { exploitation: this.filterExpenseEntries(entries, standard), hao: [] };
     }
-
     const exploitation = entries.filter(
       e => this.isExpense(e.account_number, standard) && !this.isHAO(e.account_number, standard)
     );
     const hao = entries.filter(e => this.isHAO(e.account_number, standard) && e.account_number.startsWith('8') && ['81', '83', '85', '87', '89'].some(c => e.account_number.startsWith(c)));
-
     return { exploitation, hao };
   }
-
   /**
    * Sépare les produits HAO des produits d'exploitation (SYSCOHADA)
    */
@@ -285,15 +262,12 @@ export class AccountingStandardAdapter {
     if (standard !== 'SYSCOHADA') {
       return { exploitation: this.filterRevenueEntries(entries, standard), hao: [] };
     }
-
     const exploitation = entries.filter(
       e => this.isRevenue(e.account_number, standard) && !this.isHAO(e.account_number, standard)
     );
     const hao = entries.filter(e => this.isHAO(e.account_number, standard) && e.account_number.startsWith('8') && ['82', '84', '86', '88'].some(c => e.account_number.startsWith(c)));
-
     return { exploitation, hao };
   }
-
   /**
    * Obtient le nom du standard en texte complet
    */
@@ -306,7 +280,6 @@ export class AccountingStandardAdapter {
     };
     return names[standard] || standard;
   }
-
   /**
    * Obtient les pays couverts par un standard
    */
@@ -324,6 +297,5 @@ export class AccountingStandardAdapter {
     }
   }
 }
-
 // Export par défaut
 export default AccountingStandardAdapter;

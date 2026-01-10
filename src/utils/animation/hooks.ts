@@ -49,12 +49,12 @@ export const usePerformanceMode = () => {
     // - Moins de 4 cœurs CPU
     // - Connexion lente
     // - Memory limitée
-    const isLowPerformance = 
-      hardwareConcurrency < 4 || 
+    const isLowPerformance =
+      hardwareConcurrency < 4 ||
       (connection && (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g')) ||
-      ((performance as PerformanceWithMemory).memory && (performance as PerformanceWithMemory).memory.usedJSHeapSize > 50_000_000); // > 50MB
+      (((performance as PerformanceWithMemory).memory?.usedJSHeapSize ?? 0) > 50_000_000); // > 50MB
 
-    setIsLowPerf(isLowPerformance);
+    setIsLowPerf(!!isLowPerformance);
   }, []);
 
   return isLowPerf;

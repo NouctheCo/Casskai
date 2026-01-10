@@ -9,7 +9,7 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
+import { logger } from '@/lib/logger';
 import {
   ExportFormat,
   ExportJob,
@@ -20,46 +20,38 @@ import {
   ReconciliationMatch,
   OpenBankingResponse
 } from '../../../types/openBanking.types';
-
 // Types utilitaires module-scope
 type ExportData = {
   transactions: BankTransaction[];
   entries: AccountingEntry[];
   matches: ReconciliationMatch[];
 };
-
 type TransformedRecord = Record<string, string | number | boolean | null>;
-
 // Service d'export vers logiciels comptables
 export class AccountingExportService {
   private static instance: AccountingExportService;
   private exportFormats = new Map<string, ExportFormat>();
   private activeJobs = new Map<string, ExportJob>();
   private isInitialized = false;
-
   private constructor() {}
-
   static getInstance(): AccountingExportService {
     if (!this.instance) {
       this.instance = new AccountingExportService();
     }
     return this.instance;
   }
-
   async initialize(formats: ExportFormat[]): Promise<void> {
     try {
       // Charger les formats d'export
       for (const format of formats) {
         this.exportFormats.set(format.id, format);
       }
-
       this.isInitialized = true;
-  console.warn(`Accounting export service initialized with ${formats.length} formats`);
+  logger.warn('AccountingExport', `Accounting export service initialized with ${formats.length} formats`);
     } catch (error: unknown) {
       throw new Error(`Failed to initialize accounting export service: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
-
   // Créer un job d'export
   async createExportJob(
     userId: string,
@@ -75,7 +67,6 @@ export class AccountingExportService {
         }
       };
     }
-
     try {
       const format = this.exportFormats.get(formatId);
       if (!format || !format.isActive) {
@@ -87,7 +78,6 @@ export class AccountingExportService {
           }
         };
       }
-
       const job: ExportJob = {
         id: crypto.randomUUID(),
         userId,
@@ -98,12 +88,9 @@ export class AccountingExportService {
         createdAt: new Date(),
         updatedAt: new Date()
       };
-
       this.activeJobs.set(job.id, job);
-
       // Démarrer l'export de manière asynchrone
       this.processExportJob(job);
-
       return {
         success: true,
         data: job
@@ -119,40 +106,32 @@ export class AccountingExportService {
       };
     }
   }
-
   // Traiter un job d'export
   private async processExportJob(job: ExportJob): Promise<void> {
     try {
       this.updateJob(job.id, { status: 'processing' });
-
       const format = this.exportFormats.get(job.formatId);
       if (!format) {
         throw new Error('Export format not found');
       }
-
       // Récupérer les données à exporter
       this.updateJob(job.id, { progress: 10 });
       const data = await this.fetchExportData(job.parameters);
-
       // Valider les données
       this.updateJob(job.id, { progress: 30 });
       const validationResult = await this.validateExportData(data, format);
       if (!validationResult.valid) {
         throw new Error(`Validation failed: ${validationResult.errors.join(', ')}`);
       }
-
       // Transformer les données selon le format
       this.updateJob(job.id, { progress: 50 });
       const transformedData = await this.transformData(data, format);
-
       // Générer le fichier d'export
       this.updateJob(job.id, { progress: 80 });
       const exportedFile = await this.generateExportFile(transformedData, format);
-
       // Sauvegarder le fichier et générer l'URL
       this.updateJob(job.id, { progress: 90 });
       const fileUrl = await this.saveExportFile(exportedFile, job.id, format);
-
       // Finaliser le job
       this.updateJob(job.id, {
         status: 'completed',
@@ -160,15 +139,12 @@ export class AccountingExportService {
         resultUrl: fileUrl,
         completedAt: new Date(),
       });
-
-  console.warn(`Export job ${job.id} completed successfully`);
+  logger.warn('AccountingExport', `Export job ${job.id} completed successfully`);
     } catch (error: unknown) {
       this.updateJob(job.id, { status: 'failed', errorMessage: (error instanceof Error ? error.message : 'Une erreur est survenue') });
-
-      console.error(`Export job ${job.id} failed:`, error);
+      logger.error('AccountingExport', `Export job ${job.id} failed:`, error);
     }
   }
-
   // Récupérer les données à exporter
   private async fetchExportData(_parameters: ExportJob['parameters']): Promise<{
     transactions: BankTransaction[];
@@ -181,10 +157,8 @@ export class AccountingExportService {
       entries: [] as AccountingEntry[],
       matches: [] as ReconciliationMatch[]
     };
-
     return mockData;
   }
-
   // Valider les données avant export
   private async validateExportData(
     data: unknown,
@@ -194,13 +168,11 @@ export class AccountingExportService {
       format.validation.map(rule => this.applyValidationRule(data, rule))
     );
     const errors = results.filter(r => !r.valid).map(r => r.error);
-
     return {
       valid: errors.length === 0,
       errors
     };
   }
-
   // Appliquer une règle de validation
   private async applyValidationRule(
     data: unknown,
@@ -216,7 +188,6 @@ export class AccountingExportService {
             };
           }
           break;
-
         case 'format': {
           const value = this.getFieldValue(data, rule.field);
           if (value && rule.parameters.pattern) {
@@ -230,7 +201,6 @@ export class AccountingExportService {
           }
           break;
         }
-
         case 'range': {
           const raw = this.getFieldValue(data, rule.field);
           const numValue = typeof raw === 'number' ? raw : parseFloat(String(raw));
@@ -246,7 +216,6 @@ export class AccountingExportService {
           }
           break;
         }
-
         case 'custom': {
           // Validation personnalisée
           const customResult = await this.applyCustomValidation(data, rule);
@@ -256,7 +225,6 @@ export class AccountingExportService {
           break;
         }
       }
-
       return { valid: true, error: '' };
     } catch (error: unknown) {
       return {
@@ -265,7 +233,6 @@ export class AccountingExportService {
       };
     }
   }
-
   // Met à jour un job de manière atomique dans la Map (évite require-atomic-updates sur l'objet capturé)
   private updateJob(jobId: string, patch: Partial<ExportJob>): void {
     const current = this.activeJobs.get(jobId);
@@ -273,7 +240,6 @@ export class AccountingExportService {
     const updated: ExportJob = { ...current, ...patch, updatedAt: new Date() } as ExportJob;
     this.activeJobs.set(jobId, updated);
   }
-
   // Validation personnalisée
   private async applyCustomValidation(
     _data: unknown,
@@ -282,7 +248,6 @@ export class AccountingExportService {
     // Implémentation des validations personnalisées selon les besoins
     return { valid: true, error: '' };
   }
-
   // Transformer les données selon le format
   private async transformData(
     data: ExportData,
@@ -290,22 +255,18 @@ export class AccountingExportService {
   ): Promise<TransformedRecord[]> {
     // Pour chaque transaction/entrée, appliquer les mappings
   const items = (data.transactions?.length ? data.transactions : data.entries) as unknown as Array<Record<string, unknown>>;
-
     const transformedData = await Promise.all(
       items.map(async (item) => {
         const entries = await Promise.all(
           format.mapping.map(async (mapping) => {
             try {
               let value: unknown = this.getFieldValue(item, mapping.sourceField);
-
               if (mapping.transformation) {
                 value = await this.applyTransformation(value, mapping.transformation);
               }
-
               if (value === undefined || value === null) {
                 value = mapping.defaultValue ?? '';
               }
-
               const normalized = typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
                 ? value
                 : String(value);
@@ -318,21 +279,17 @@ export class AccountingExportService {
             }
           })
         );
-
         return Object.fromEntries(entries) as TransformedRecord;
       })
     );
-
     return transformedData;
   }
-
   // Appliquer une transformation de champ
   private async applyTransformation(
     value: unknown,
     transformation: FieldMapping['transformation']
   ): Promise<string | number | boolean | null | undefined> {
     if (!transformation) return value as string | number | boolean | null | undefined;
-
     try {
       switch (transformation.type) {
         case 'format_date':
@@ -342,7 +299,6 @@ export class AccountingExportService {
             return this.formatDate(date, fmt);
           }
           break;
-
         case 'format_currency':
           if (typeof value === 'number') {
             const decimals = transformation.parameters.decimals || 2;
@@ -350,49 +306,41 @@ export class AccountingExportService {
             return value.toFixed(decimals).replace('.', separator);
           }
           break;
-
         case 'truncate':
           if (typeof value === 'string') {
             const maxLength = transformation.parameters.maxLength || 50;
             return value.substring(0, maxLength);
           }
           break;
-
         case 'uppercase':
           if (typeof value === 'string') {
             return value.toUpperCase();
           }
           break;
-
         case 'lowercase':
           if (typeof value === 'string') {
             return value.toLowerCase();
           }
           break;
-
         case 'regex_replace':
           if (typeof value === 'string') {
             const pattern = new RegExp(transformation.parameters.pattern, transformation.parameters.flags || 'g');
             return value.replace(pattern, transformation.parameters.replacement || '');
           }
           break;
-
         case 'lookup': {
           const lookupTable = transformation.parameters.table || {};
           return (lookupTable as Record<string, any>)[String(value)] ?? transformation.parameters.defaultValue ?? value;
         }
-
         default:
           return value as string | number | boolean | null | undefined;
       }
-
       return value as string | number | boolean | null | undefined;
     } catch (error: unknown) {
-      console.error('Transformation error:', error);
+      logger.error('AccountingExport', 'Transformation error:', error);
       return value as string | number | boolean | null | undefined;
     }
   }
-
   // Générer le fichier d'export
   private async generateExportFile(
     data: TransformedRecord[],
@@ -400,50 +348,40 @@ export class AccountingExportService {
   ): Promise<{ content: string; filename: string; mimeType: string }> {
     const timestamp = new Date().toISOString().split('T')[0];
     const filename = `export_${format.software}_${timestamp}.${format.fileFormat}`;
-
     let content: string;
     let mimeType: string;
-
     switch (format.fileFormat) {
       case 'csv':
         content = this.generateCSV(data);
         mimeType = 'text/csv';
         break;
-
       case 'xml':
         content = this.generateXML(data, format);
         mimeType = 'application/xml';
         break;
-
       case 'json':
         content = JSON.stringify(data, null, 2);
         mimeType = 'application/json';
         break;
-
       case 'txt':
         content = this.generateFixedWidth(data, format);
         mimeType = 'text/plain';
         break;
-
       default:
         throw new Error(`Unsupported file format: ${format.fileFormat}`);
     }
-
     return {
       content,
       filename,
       mimeType
     };
   }
-
   // Génération CSV
   private generateCSV(data: Array<Record<string, unknown>>): string {
     if (data.length === 0) return '';
-
     // En-têtes
     const headers = Object.keys(data[0]);
     let csv = `${headers.join(',')  }\n`;
-
     // Données
     for (const item of data) {
       const row = headers.map(header => {
@@ -457,15 +395,12 @@ export class AccountingExportService {
       });
       csv += `${row.join(',')  }\n`;
     }
-
     return csv;
   }
-
   // Génération XML
   private generateXML(data: Array<Record<string, unknown>>, format: ExportFormat): string {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += `<export software="${format.software}" version="${format.version || '1.0'}">\n`;
-
     for (const item of data) {
       xml += '  <record>\n';
       for (const [key, value] of Object.entries(item)) {
@@ -473,21 +408,17 @@ export class AccountingExportService {
       }
       xml += '  </record>\n';
     }
-
     xml += '</export>';
     return xml;
   }
-
   // Génération format fixe
   private generateFixedWidth(data: Array<Record<string, unknown>>, format: ExportFormat): string {
     let content = '';
-
     // Configuration des largeurs de champs (à définir dans les paramètres du format)
     const fieldWidths = format.mapping.reduce((widths, mapping) => {
       widths[mapping.targetField] = mapping.transformation?.parameters?.width || 20;
       return widths;
     }, {} as Record<string, number>);
-
     for (const item of data) {
       let line = '';
       for (const mapping of format.mapping) {
@@ -498,10 +429,8 @@ export class AccountingExportService {
       }
       content += `${line  }\n`;
     }
-
     return content;
   }
-
   // Sauvegarder le fichier d'export
   private async saveExportFile(
     exportedFile: { content: string; filename: string; mimeType: string },
@@ -512,16 +441,13 @@ export class AccountingExportService {
       // En production, sauvegarder sur un service de stockage (S3, Google Cloud Storage, etc.)
       const blob = new Blob([exportedFile.content], { type: exportedFile.mimeType });
       const url = URL.createObjectURL(blob);
-
       // Simuler la sauvegarde
-  console.warn(`Export file saved: ${exportedFile.filename}`);
-
+  logger.warn('AccountingExport', `Export file saved: ${exportedFile.filename}`);
       return url;
     } catch (error: unknown) {
       throw new Error(`Failed to save export file: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
-
   // Méthodes utilitaires
   private getFieldValue(object: unknown, fieldPath: string): unknown {
     const keys = fieldPath.split('.');
@@ -535,18 +461,15 @@ export class AccountingExportService {
     }
     return current;
   }
-
   private formatDate(date: Date, format: string): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-
     return format
       .replace('yyyy', year.toString())
       .replace('MM', month)
       .replace('dd', day);
   }
-
   private escapeXML(text: string): string {
     return text
       .replace(/&/g, '&amp;')
@@ -555,11 +478,9 @@ export class AccountingExportService {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&apos;');
   }
-
   // API publique
   async getExportJob(jobId: string): Promise<OpenBankingResponse<ExportJob>> {
     const job = this.activeJobs.get(jobId);
-    
     if (!job) {
       return {
         success: false,
@@ -569,26 +490,21 @@ export class AccountingExportService {
         }
       };
     }
-
     return {
       success: true,
       data: job
     };
   }
-
   async getAllExportJobs(userId: string): Promise<OpenBankingResponse<ExportJob[]>> {
     const userJobs = Array.from(this.activeJobs.values())
       .filter(job => job.userId === userId);
-
     return {
       success: true,
       data: userJobs
     };
   }
-
   async cancelExportJob(jobId: string): Promise<OpenBankingResponse<void>> {
     const job = this.activeJobs.get(jobId);
-
     if (!job) {
       return {
         success: false,
@@ -598,7 +514,6 @@ export class AccountingExportService {
         }
       };
     }
-
     if (job.status === 'completed') {
       return {
         success: false,
@@ -608,45 +523,36 @@ export class AccountingExportService {
         }
       };
     }
-
     job.status = 'failed';
     job.errorMessage = 'Cancelled by user';
     job.updatedAt = new Date();
-
     return {
       success: true,
       data: undefined
     };
   }
-
   // Gestion des formats d'export
   async addExportFormat(format: ExportFormat): Promise<void> {
     this.exportFormats.set(format.id, format);
   }
-
   async updateExportFormat(formatId: string, updates: Partial<ExportFormat>): Promise<void> {
     const existingFormat = this.exportFormats.get(formatId);
     if (existingFormat) {
       this.exportFormats.set(formatId, { ...existingFormat, ...updates });
     }
   }
-
   async getExportFormats(): Promise<ExportFormat[]> {
     return Array.from(this.exportFormats.values()).filter(f => f.isActive);
   }
-
   async getExportFormat(formatId: string): Promise<ExportFormat | undefined> {
     return this.exportFormats.get(formatId);
   }
-
   // Nettoyer les anciens jobs
   async cleanupOldJobs(maxAgeMs: number = 7 * 24 * 60 * 60 * 1000): Promise<void> {
     const cutoffTime = new Date(Date.now() - maxAgeMs);
-    
     for (const [jobId, job] of this.activeJobs) {
       if (job.createdAt < cutoffTime && job.status === 'completed') {
         this.activeJobs.delete(jobId);
-        
         // Nettoyer les fichiers si nécessaire
         if (job.resultUrl) {
           URL.revokeObjectURL(job.resultUrl);
@@ -654,11 +560,9 @@ export class AccountingExportService {
       }
     }
   }
-
   get initialized(): boolean {
     return this.isInitialized;
   }
-
   dispose(): void {
     // Nettoyer les jobs actifs
     for (const [_jobId, job] of this.activeJobs) {
@@ -666,13 +570,11 @@ export class AccountingExportService {
         URL.revokeObjectURL(job.resultUrl);
       }
     }
-
     this.activeJobs.clear();
     this.exportFormats.clear();
     this.isInitialized = false;
   }
 }
-
 // Factory pour créer des formats d'export prédéfinis
 export class ExportFormatFactory {
   // Format Sage
@@ -699,7 +601,6 @@ export class ExportFormatFactory {
       isActive: true
     };
   }
-
   // Format QuickBooks
   static createQuickBooksFormat(): ExportFormat {
     return {
@@ -724,7 +625,6 @@ export class ExportFormatFactory {
       isActive: true
     };
   }
-
   // Format Cegid
   static createCegidFormat(): ExportFormat {
     return {

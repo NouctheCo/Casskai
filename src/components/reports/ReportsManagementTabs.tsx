@@ -5,9 +5,11 @@
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
-import { FileText, History, Archive, BarChart3 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { FileText, History, Archive, BarChart3, Scale } from 'lucide-react';
 import OptimizedReportsTab from '../accounting/OptimizedReportsTab';
 import { ReportHistoryTab } from './ReportHistoryTab';
 import { ReportArchiveTab } from './ReportArchiveTab';
@@ -17,6 +19,7 @@ interface ReportsManagementTabsProps {
 }
 
 export function ReportsManagementTabs({ companyId }: ReportsManagementTabsProps) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('generation');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -36,6 +39,15 @@ export function ReportsManagementTabs({ companyId }: ReportsManagementTabsProps)
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Génération, historique et archivage légal des rapports comptables
           </p>
+        </div>
+        <div>
+          <Button
+            onClick={() => navigate('/reports/regulatory')}
+            className="flex items-center gap-2"
+          >
+            <Scale className="w-4 h-4" />
+            Documents Réglementaires
+          </Button>
         </div>
       </div>
 

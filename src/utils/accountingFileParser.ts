@@ -2,49 +2,41 @@
  * Parser universel pour fichiers comptables multi-pays
  * Supporte: FEC (France), SYSCOHADA (OHADA), IFRS, SCF (Maghreb), QuickBooks, Sage, Xero
  */
-
 // ============ TYPES ============
+import { logger } from '@/lib/logger';
 
 export type AccountingStandard = 'PCG' | 'SYSCOHADA' | 'IFRS' | 'SCF' | 'US_GAAP';
 export type FileFormat = 'FEC' | 'SYSCOHADA' | 'IFRS_CSV' | 'SCF' | 'QUICKBOOKS' | 'SAGE' | 'XERO' | 'GENERIC';
-
 export interface AccountingLine {
   // Identifiants
   journalCode: string;
   journalName: string;
   entryNumber: string;
   lineNumber: number;
-
   // Dates
   entryDate: string;      // Format ISO: YYYY-MM-DD
   documentDate: string | null;
   validationDate: string | null;
-
   // Compte
   accountNumber: string;
   accountName: string;
   auxiliaryAccount: string | null;
   auxiliaryName: string | null;
-
   // Pièce
   documentRef: string | null;
   description: string;
-
   // Montants
   debit: number;
   credit: number;
   currency: string;
   foreignAmount: number | null;
   foreignCurrency: string | null;
-
   // Lettrage
   letteringCode: string | null;
   letteringDate: string | null;
-
   // Métadonnées
   rawData: string;
 }
-
 export interface ParseResult {
   success: boolean;
   format: FileFormat;
@@ -54,14 +46,12 @@ export interface ParseResult {
   warnings: string[];
   stats: ParseStats;
 }
-
 export interface ParseError {
   line: number;
   field?: string;
   message: string;
   data?: string;
 }
-
 export interface ParseStats {
   totalLines: number;
   validLines: number;
@@ -73,9 +63,7 @@ export interface ParseStats {
   journals: string[];
   dateRange: { start: string; end: string } | null;
 }
-
 // ============ DÉTECTION AUTOMATIQUE ============
-
 // Patterns de colonnes par format
 const FORMAT_SIGNATURES: Record<FileFormat, string[][]> = {
   FEC: [
@@ -110,7 +98,6 @@ const FORMAT_SIGNATURES: Record<FileFormat, string[][]> = {
   ],
   GENERIC: [],
 };
-
 // Détecter le séparateur
 export const detectSeparator = (content: string): string => {
   const firstLines = content.split('\n').slice(0, 3).join('\n');
@@ -120,7 +107,6 @@ export const detectSeparator = (content: string): string => {
     { char: '\t', regex: /\t/g },
     { char: ',', regex: /,/g },
   ];
-
   let best = { char: ',', count: 0 };
   for (const sep of separators) {
     const count = (firstLines.match(sep.regex) || []).length;
@@ -128,14 +114,11 @@ export const detectSeparator = (content: string): string => {
       best = { char: sep.char, count };
     }
   }
-
   return best.char;
 };
-
 // Détecter le format du fichier
 export const detectFormat = (headers: string[]): FileFormat => {
   const normalizedHeaders = headers.map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
-
   for (const [format, signatures] of Object.entries(FORMAT_SIGNATURES)) {
     for (const signature of signatures) {
       const normalizedSignature = signature.map(s => s.toLowerCase().replace(/[^a-z0-9]/g, ''));
@@ -147,68 +130,50 @@ export const detectFormat = (headers: string[]): FileFormat => {
       }
     }
   }
-
   return 'GENERIC';
 };
-
 // Détecter le standard comptable depuis les numéros de compte
 export const detectStandard = (accountNumbers: string[]): AccountingStandard | null => {
   if (accountNumbers.length === 0) return null;
-
   const samples = accountNumbers.slice(0, 50);
-
   // France PCG: 6 chiffres, commence par 1-7
   const pcgPattern = /^[1-7]\d{5}$/;
   const pcgMatches = samples.filter(a => pcgPattern.test(a)).length;
-
   // OHADA/SYSCOHADA: 4-8 chiffres, structure spécifique
   const ohadaPattern = /^[1-9]\d{3,7}$/;
   const ohadaMatches = samples.filter(a => ohadaPattern.test(a)).length;
-
   // IFRS/International: Variable, souvent alphanumérique
   const ifrsPattern = /^[A-Z0-9]{2,10}$/i;
   const ifrsMatches = samples.filter(a => ifrsPattern.test(a)).length;
-
   // Déterminer le plus probable
   if (pcgMatches > samples.length * 0.6) return 'PCG';
   if (ohadaMatches > samples.length * 0.6) return 'SYSCOHADA';
   if (ifrsMatches > samples.length * 0.6) return 'IFRS';
-
   return null;
 };
-
 // ============ PARSERS DE MONTANTS ============
-
 // Parser montant universel
 export const parseAmount = (value: string | undefined | null, _locale?: string): number => {
   // DEBUG: Log les valeurs reçues
   if (value && value.trim() !== '' && value !== '0' && value !== '0,00' && value !== '0.00') {
-    console.log('[parseAmount] Input:', value);
+    logger.debug('AccountingFileParser', '[parseAmount] Input:', value);
   }
-
   if (!value || value.trim() === '') return 0;
-
   let normalized = value.trim();
-
   // Supprimer symboles monétaires
   normalized = normalized.replace(/[€$£¥₣FCFA₦₵KSh]/gi, '').trim();
-
   // Supprimer espaces (séparateurs de milliers)
   normalized = normalized.replace(/\s/g, '');
-
   // Gérer les nombres négatifs entre parenthèses: (1234.56) -> -1234.56
   if (normalized.startsWith('(') && normalized.endsWith(')')) {
     normalized = `-${  normalized.slice(1, -1)}`;
   }
-
   // Détecter le format
   const hasComma = normalized.includes(',');
   const hasDot = normalized.includes('.');
-
   if (hasComma && hasDot) {
     const lastComma = normalized.lastIndexOf(',');
     const lastDot = normalized.lastIndexOf('.');
-
     if (lastComma > lastDot) {
       // Format européen: 1.234,56
       normalized = normalized.replace(/\./g, '').replace(',', '.');
@@ -227,42 +192,32 @@ export const parseAmount = (value: string | undefined | null, _locale?: string):
       normalized = normalized.replace(/,/g, '');
     }
   }
-
   const parsed = parseFloat(normalized);
   const result = isNaN(parsed) ? 0 : Math.round(parsed * 100) / 100;
-
   // DEBUG: Log le résultat
   if (value && value.trim() !== '' && value !== '0' && value !== '0,00' && value !== '0.00') {
-    console.log('[parseAmount] Normalized:', normalized, '-> Result:', result);
+    logger.debug('AccountingFileParser', '[parseAmount] Normalized:', normalized, '-> Result:', result);
   }
-
   return result;
 };
-
 // ============ PARSERS DE DATES ============
-
 // Parser date universel
 export const parseDate = (value: string | undefined | null): string | null => {
   if (!value || value.trim() === '') return null;
-
   const cleaned = value.trim().split(/[\sT]/)[0]; // Ignorer heure
-
   // YYYYMMDD (FEC)
   if (/^\d{8}$/.test(cleaned)) {
     return `${cleaned.slice(0, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6, 8)}`;
   }
-
   // YYYY-MM-DD (ISO)
   if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) {
     return cleaned;
   }
-
   // DD/MM/YYYY (Europe, Afrique francophone)
   if (/^\d{2}\/\d{2}\/\d{4}$/.test(cleaned)) {
     const [d, m, y] = cleaned.split('/');
     return `${y}-${m}-${d}`;
   }
-
   // MM/DD/YYYY (US)
   if (/^\d{2}\/\d{2}\/\d{4}$/.test(cleaned)) {
     const [m, d, y] = cleaned.split('/');
@@ -272,30 +227,24 @@ export const parseDate = (value: string | undefined | null): string | null => {
     }
     return `${y}-${m}-${d}`;
   }
-
   // DD-MM-YYYY
   if (/^\d{2}-\d{2}-\d{4}$/.test(cleaned)) {
     const [d, m, y] = cleaned.split('-');
     return `${y}-${m}-${d}`;
   }
-
   // DD.MM.YYYY (Allemand, Suisse)
   if (/^\d{2}\.\d{2}\.\d{4}$/.test(cleaned)) {
     const [d, m, y] = cleaned.split('.');
     return `${y}-${m}-${d}`;
   }
-
   // Dernier recours
   const parsed = Date.parse(cleaned);
   if (!isNaN(parsed)) {
     return new Date(parsed).toISOString().split('T')[0];
   }
-
   return null;
 };
-
 // ============ MAPPING DE COLONNES PAR FORMAT ============
-
 const COLUMN_MAPPINGS: Record<string, string[]> = {
   // Codes journal
   journalCode: [
@@ -306,13 +255,11 @@ const COLUMN_MAPPINGS: Record<string, string[]> = {
     'JournalLib', 'JOURNALLIB', 'LibJournal', 'LIB_JOURNAL',
     'JournalName', 'LibelleJournal', 'JrnlName',
   ],
-
   // Numéro d'écriture
   entryNumber: [
     'EcritureNum', 'ECRITURENUM', 'NumEcriture', 'NUM_ECRITURE',
     'EntryNumber', 'TransactionID', 'TRNSID', 'DocNum', 'Numero',
   ],
-
   // Dates
   entryDate: [
     'EcritureDate', 'ECRITUREDATE', 'DateEcriture', 'DATE_ECRITURE',
@@ -326,7 +273,6 @@ const COLUMN_MAPPINGS: Record<string, string[]> = {
     'ValidDate', 'VALIDDATE', 'DateValidation', 'DATE_VALIDATION',
     'PostedDate', 'ApprovedDate',
   ],
-
   // Comptes
   accountNumber: [
     'CompteNum', 'COMPTENUM', 'NumCompte', 'NUM_COMPTE',
@@ -346,7 +292,6 @@ const COLUMN_MAPPINGS: Record<string, string[]> = {
     'CompAuxLib', 'COMPAUXLIB', 'LibCompteAux',
     'SubAccountName', 'AuxiliaryName',
   ],
-
   // Pièce / Référence
   documentRef: [
     'PieceRef', 'PIECEREF', 'RefPiece', 'REF_PIECE',
@@ -358,7 +303,6 @@ const COLUMN_MAPPINGS: Record<string, string[]> = {
     'Description', 'DESCRIPTION', 'Memo', 'MEMO',
     'Libelle', 'LIBELLE', 'Narrative',
   ],
-
   // Montants
   debit: [
     'Debit', 'DEBIT', 'Débit', 'DÉBIT', 'Dr', 'DR',
@@ -373,7 +317,6 @@ const COLUMN_MAPPINGS: Record<string, string[]> = {
     // IMPORTANT: Ne PAS inclure 'Montant' car ça match aussi 'Montantdevise' dans les FEC
     // et cause des problèmes où les montants deviennent 0
   ],
-
   // Devise
   currency: [
     'Idevise', 'IDEVISE', 'Currency', 'CURRENCY',
@@ -383,7 +326,6 @@ const COLUMN_MAPPINGS: Record<string, string[]> = {
     'Montantdevise', 'MONTANTDEVISE', 'MontantDevise',
     'ForeignAmount', 'OriginalAmount',
   ],
-
   // Lettrage
   letteringCode: [
     'EcritureLet', 'ECRITURELET', 'Lettrage', 'LETTRAGE',
@@ -394,12 +336,10 @@ const COLUMN_MAPPINGS: Record<string, string[]> = {
     'MatchingDate', 'ReconciliationDate',
   ],
 };
-
 // Trouver l'index d'une colonne
 const findColumnIndex = (headers: string[], fieldName: string): number => {
   const possibleNames = COLUMN_MAPPINGS[fieldName] || [fieldName];
   const normalizedHeaders = headers.map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
-
   for (const name of possibleNames) {
     const normalizedName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
     const index = normalizedHeaders.findIndex(h => h === normalizedName || h.includes(normalizedName));
@@ -407,9 +347,7 @@ const findColumnIndex = (headers: string[], fieldName: string): number => {
   }
   return -1;
 };
-
 // ============ PARSER PRINCIPAL ============
-
 export const parseAccountingFile = (
   content: string,
   options?: {
@@ -420,13 +358,10 @@ export const parseAccountingFile = (
   const errors: ParseError[] = [];
   const warnings: string[] = [];
   const lines: AccountingLine[] = [];
-
   const defaultCurrency = options?.defaultCurrency || 'EUR';
-
   // Normaliser les fins de ligne
   const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const rawLines = normalizedContent.split('\n').filter(line => line.trim() !== '');
-
   if (rawLines.length < 2) {
     return {
       success: false,
@@ -438,18 +373,14 @@ export const parseAccountingFile = (
       stats: { totalLines: 0, validLines: 0, errorLines: 0, totalDebit: 0, totalCredit: 0, balance: 0, currencies: [], journals: [], dateRange: null }
     };
   }
-
   // Détecter le séparateur
   const separator = detectSeparator(rawLines[0]);
   warnings.push(`Séparateur détecté: "${separator === '\t' ? 'TAB' : separator}"`);
-
   // Parser les headers
   const headers = rawLines[0].split(separator).map(h => h.trim().replace(/^["']|["']$/g, ''));
-
   // Détecter le format
   const format = detectFormat(headers);
   warnings.push(`Format détecté: ${format}`);
-
   // Créer le mapping des colonnes
   const columnMap = {
     journalCode: findColumnIndex(headers, 'journalCode'),
@@ -472,16 +403,14 @@ export const parseAccountingFile = (
     letteringCode: findColumnIndex(headers, 'letteringCode'),
     letteringDate: findColumnIndex(headers, 'letteringDate'),
   };
-
   // DEBUG: Afficher les colonnes détectées
-  console.log('[Parser] Headers:', headers);
-  console.log('[Parser] Column mapping:', {
+  logger.debug('AccountingFileParser', '[Parser] Headers:', headers);
+  logger.debug('accountingFileParser', '[Parser] Column mapping:', {
     debit: `${columnMap.debit} (${headers[columnMap.debit] || 'N/A'})`,
     credit: `${columnMap.credit} (${headers[columnMap.credit] || 'N/A'})`,
     accountNumber: `${columnMap.accountNumber} (${headers[columnMap.accountNumber] || 'N/A'})`,
     entryDate: `${columnMap.entryDate} (${headers[columnMap.entryDate] || 'N/A'})`,
   });
-
   // Vérifier les colonnes obligatoires
   if (columnMap.accountNumber === -1) {
     errors.push({ line: 1, message: 'Colonne de numéro de compte non trouvée' });
@@ -492,7 +421,6 @@ export const parseAccountingFile = (
   if (columnMap.debit === -1 && columnMap.credit === -1 && columnMap.amount === -1) {
     errors.push({ line: 1, message: 'Colonnes de montants (Débit/Crédit ou Amount) non trouvées' });
   }
-
   if (errors.length > 0) {
     return {
       success: false,
@@ -504,7 +432,6 @@ export const parseAccountingFile = (
       stats: { totalLines: rawLines.length - 1, validLines: 0, errorLines: errors.length, totalDebit: 0, totalCredit: 0, balance: 0, currencies: [], journals: [], dateRange: null }
     };
   }
-
   // Statistiques
   let totalDebit = 0;
   let totalCredit = 0;
@@ -513,22 +440,17 @@ export const parseAccountingFile = (
   const accountNumbers: string[] = [];
   let minDate: string | null = null;
   let maxDate: string | null = null;
-
   // Parser chaque ligne
   for (let i = 1; i < rawLines.length; i++) {
     const lineNumber = i + 1;
     const rawLine = rawLines[i];
-
     if (rawLine.trim() === '') continue;
-
     // Parser les valeurs (gérer les guillemets)
     const values = rawLine.split(separator).map(v => v.trim().replace(/^["']|["']$/g, ''));
-
     const getValue = (field: keyof typeof columnMap): string => {
       const idx = columnMap[field];
       return idx >= 0 && idx < values.length ? values[idx] : '';
     };
-
     try {
       // Parser la date
       const entryDate = parseDate(getValue('entryDate'));
@@ -536,7 +458,6 @@ export const parseAccountingFile = (
         errors.push({ line: lineNumber, message: `Date invalide: ${getValue('entryDate')}`, data: rawLine });
         continue;
       }
-
       // Parser le compte
       const accountNumber = getValue('accountNumber').trim();
       if (!accountNumber) {
@@ -544,52 +465,41 @@ export const parseAccountingFile = (
         continue;
       }
       accountNumbers.push(accountNumber);
-
       // Parser les montants
       let debit = 0;
       let credit = 0;
-
-      console.log(`[Parser Line ${lineNumber}] columnMap.amount = ${columnMap.amount}`);
-
+      logger.debug('AccountingFileParser', `[Parser Line ${lineNumber}] columnMap.amount = ${columnMap.amount}`);
       if (columnMap.amount !== -1) {
-        console.log(`[Parser Line ${lineNumber}] Using AMOUNT column`);
+        logger.debug('AccountingFileParser', `[Parser Line ${lineNumber}] Using AMOUNT column`);
         // Format avec montant unique (positif = débit, négatif = crédit)
         const amount = parseAmount(getValue('amount'));
-        console.log(`[Parser Line ${lineNumber}] Amount parsed: ${amount}`);
+        logger.debug('AccountingFileParser', `[Parser Line ${lineNumber}] Amount parsed: ${amount}`);
         if (amount >= 0) {
           debit = amount;
         } else {
           credit = Math.abs(amount);
         }
       } else {
-        console.log(`[Parser Line ${lineNumber}] Using DEBIT/CREDIT columns`);
+        logger.debug('AccountingFileParser', `[Parser Line ${lineNumber}] Using DEBIT/CREDIT columns`);
         // DEBUG: Log les valeurs brutes extraites
         const rawDebit = getValue('debit');
         const rawCredit = getValue('credit');
-
         // DEBUG: Log TOUTES les lignes pour voir le problème
-        console.log(`[Parser Line ${lineNumber}] Raw Debit: "${rawDebit}" | Raw Credit: "${rawCredit}"`);
-
+        logger.debug('AccountingFileParser', `[Parser Line ${lineNumber}] Raw Debit: "${rawDebit}" | Raw Credit: "${rawCredit}"`);
         debit = parseAmount(rawDebit);
         credit = parseAmount(rawCredit);
-
-        console.log(`[Parser Line ${lineNumber}] Parsed Debit: ${debit} | Parsed Credit: ${credit}`);
+        logger.debug('AccountingFileParser', `[Parser Line ${lineNumber}] Parsed Debit: ${debit} | Parsed Credit: ${credit}`);
       }
-
-      console.log(`[Parser Line ${lineNumber}] FINAL: debit=${debit}, credit=${credit}`);
-
+      logger.debug('AccountingFileParser', `[Parser Line ${lineNumber}] FINAL: debit=${debit}, credit=${credit}`);
       // Devise
       const currency = getValue('currency') || defaultCurrency;
       currencies.add(currency);
-
       // Journal
       const journalCode = getValue('journalCode') || 'OD';
       journals.add(journalCode);
-
       // Dates min/max
       if (!minDate || entryDate < minDate) minDate = entryDate;
       if (!maxDate || entryDate > maxDate) maxDate = entryDate;
-
       // Créer la ligne
       const line: AccountingLine = {
         journalCode,
@@ -614,11 +524,9 @@ export const parseAccountingFile = (
         letteringDate: parseDate(getValue('letteringDate')),
         rawData: rawLine,
       };
-
       lines.push(line);
       totalDebit += debit;
       totalCredit += credit;
-
     } catch (e) {
       errors.push({
         line: lineNumber,
@@ -627,19 +535,16 @@ export const parseAccountingFile = (
       });
     }
   }
-
   // Détecter le standard comptable
   const standard = options?.expectedStandard || detectStandard(accountNumbers);
   if (standard) {
     warnings.push(`Standard comptable détecté: ${standard}`);
   }
-
   // Vérifier l'équilibre
   const balance = Math.round((totalDebit - totalCredit) * 100) / 100;
   if (Math.abs(balance) > 0.01) {
     warnings.push(`⚠️ Déséquilibre: Débit=${totalDebit.toFixed(2)}, Crédit=${totalCredit.toFixed(2)}, Écart=${balance.toFixed(2)}`);
   }
-
   return {
     success: errors.length === 0 || lines.length > 0,
     format,
@@ -660,7 +565,5 @@ export const parseAccountingFile = (
     }
   };
 };
-
 // ============ EXPORTS ============
-
 export default parseAccountingFile;

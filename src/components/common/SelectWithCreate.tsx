@@ -2,16 +2,14 @@
  * Composant Select amélioré avec recherche et création à la volée
  * Utilisable pour Fournisseurs, Clients, Catégories, etc.
  */
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, Search, X, Check } from 'lucide-react';
-
+import { logger } from '@/lib/logger';
 interface Option {
   value: string;
   label: string;
   sublabel?: string;
 }
-
 interface SelectWithCreateProps {
   options: Option[];
   value: string;
@@ -24,7 +22,6 @@ interface SelectWithCreateProps {
   disabled?: boolean;
   className?: string;
 }
-
 export const SelectWithCreate: React.FC<SelectWithCreateProps> = ({
   options,
   value,
@@ -43,7 +40,6 @@ export const SelectWithCreate: React.FC<SelectWithCreateProps> = ({
   const [newItemName, setNewItemName] = useState('');
   const [creatingLoading, setCreatingLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
   // Fermer le dropdown quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -55,17 +51,13 @@ export const SelectWithCreate: React.FC<SelectWithCreateProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
   const filteredOptions = options.filter(option =>
     option.label.toLowerCase().includes(search.toLowerCase()) ||
     option.sublabel?.toLowerCase().includes(search.toLowerCase())
   );
-
   const selectedOption = options.find(o => o.value === value);
-
   const handleCreate = async () => {
     if (!newItemName.trim()) return;
-
     setCreatingLoading(true);
     try {
       const newOption = await onCreate(newItemName.trim());
@@ -76,12 +68,11 @@ export const SelectWithCreate: React.FC<SelectWithCreateProps> = ({
         setIsOpen(false);
       }
     } catch (error) {
-      console.error('Erreur création:', error);
+      logger.error('SelectWithCreate', 'Erreur création:', error);
     } finally {
       setCreatingLoading(false);
     }
   };
-
   return (
     <div ref={containerRef} className={`relative ${className}`}>
       {/* Champ affiché */}
@@ -106,7 +97,6 @@ export const SelectWithCreate: React.FC<SelectWithCreateProps> = ({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-
       {/* Dropdown */}
       {isOpen && (
         <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-80 overflow-hidden">
@@ -124,7 +114,6 @@ export const SelectWithCreate: React.FC<SelectWithCreateProps> = ({
               />
             </div>
           </div>
-
           {/* Liste des options */}
           <div className="max-h-48 overflow-y-auto">
             {isLoading ? (
@@ -160,7 +149,6 @@ export const SelectWithCreate: React.FC<SelectWithCreateProps> = ({
               ))
             )}
           </div>
-
           {/* Bouton créer */}
           <div className="border-t p-2">
             {isCreating ? (

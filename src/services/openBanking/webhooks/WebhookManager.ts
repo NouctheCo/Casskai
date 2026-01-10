@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import {
   WebhookEvent,
   WebhookConfig,
@@ -17,7 +16,7 @@ import {
   OpenBankingResponse
 } from '../../../types/openBanking.types';
 import { EncryptionService } from '../security/EncryptionService';
-
+import { logger } from '@/lib/logger';
 // Gestionnaire de webhooks temps réel
 export class WebhookManager {
   private static instance: WebhookManager;
@@ -26,36 +25,30 @@ export class WebhookManager {
   private processingQueue = false;
   private encryptionService: EncryptionService;
   private isInitialized = false;
-
   private constructor() {
     this.encryptionService = EncryptionService.getInstance();
   }
-
   static getInstance(): WebhookManager {
     if (!this.instance) {
       this.instance = new WebhookManager();
     }
     return this.instance;
   }
-
   async initialize(configs: WebhookConfig[]): Promise<void> {
     try {
       // Charger les configurations de webhooks
       for (const config of configs) {
         this.configs.set(config.providerId, config);
       }
-
       // Démarrer le processeur de queue
       this.startQueueProcessor();
-      
   this.isInitialized = true;
-  console.warn(`Webhook manager initialized with ${configs.length} providers`);
+  logger.warn('WebhookManager', `Webhook manager initialized with ${configs.length} providers`);
     } catch (error) {
   const message = (error as { message?: string })?.message || 'unknown';
   throw new Error(`Failed to initialize webhook manager: ${message}`);
     }
   }
-
   // Recevoir et traiter un webhook
   async receiveWebhook(
     providerId: string,
@@ -74,7 +67,6 @@ export class WebhookManager {
           }
         };
       }
-
       if (!config.isActive) {
         return {
           success: false,
@@ -84,7 +76,6 @@ export class WebhookManager {
           }
         };
       }
-
       // Vérifier la signature
       const isValidSignature = await this.validateSignature(payload, signature, config.secret);
       if (!isValidSignature) {
@@ -96,10 +87,8 @@ export class WebhookManager {
           }
         };
       }
-
       // Normaliser le payload inconnu
       const p = (payload as Record<string, unknown>) || {};
-
       // Créer l'événement webhook
       const event: WebhookEvent = {
         id: crypto.randomUUID(),
@@ -111,21 +100,18 @@ export class WebhookManager {
         processed: false,
         retryCount: 0
       };
-
       // Ajouter à la queue de traitement
       this.eventQueue.push(event);
-
       // Traitement immédiat pour les événements critiques
       if (this.isCriticalEvent(event.type)) {
         await this.processEvent(event);
       }
-
       return {
         success: true,
         data: undefined
       };
     } catch (error) {
-      console.error('Webhook processing error:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Webhook processing error:', error instanceof Error ? error.message : String(error));
       const message = (error as { message?: string })?.message || 'unknown';
       return {
         success: false,
@@ -136,207 +122,166 @@ export class WebhookManager {
       };
     }
   }
-
   // Processeur de queue d'événements
   private async startQueueProcessor(): Promise<void> {
     if (this.processingQueue) return;
-
     this.processingQueue = true;
-
     const processQueue = () => {
       if (!this.processingQueue) return;
-
       // Constituer un lot jusqu'à 50 événements
       const batch: WebhookEvent[] = [];
       while (this.eventQueue.length > 0 && batch.length < 50) {
         const e = this.eventQueue.shift();
         if (e && !e.processed) batch.push(e);
       }
-
       if (batch.length === 0) {
         // Rien à traiter maintenant, replanifier plus tard
         if (this.processingQueue) setTimeout(processQueue, 1000);
         return;
       }
-
       const tasks = batch.map((event) =>
         this.processEvent(event).catch(async (error) => {
-          console.error(`Failed to process event ${event.id}:`, error);
+          logger.error('WebhookManager', `Failed to process event ${event.id}:`, error);
           await this.handleEventError(event, error as Error);
         })
       );
-
       // Traiter le lot puis replanifier immédiatement pour drainer la queue sans await dans une boucle
       Promise.allSettled(tasks).finally(() => {
         if (this.processingQueue) setTimeout(processQueue, 0);
       });
     };
-
     // Lancer le premier cycle
     processQueue();
   }
-
   // Traiter un événement webhook
   private async processEvent(event: WebhookEvent): Promise<void> {
-    console.warn(`Processing webhook event: ${event.type} for provider: ${event.providerId}`);
-
+    logger.warn('WebhookManager', `Processing webhook event: ${event.type} for provider: ${event.providerId}`);
     switch (event.type) {
       case 'transaction.created':
         await this.handleTransactionCreated(event);
         break;
-
       case 'transaction.updated':
         await this.handleTransactionUpdated(event);
         break;
-
       case 'account.updated':
         await this.handleAccountUpdated(event);
         break;
-
       case 'connection.status_changed':
         await this.handleConnectionStatusChanged(event);
         break;
-
       case 'connection.error':
         await this.handleConnectionError(event);
         break;
-
       case 'connection.expired':
         await this.handleConnectionExpired(event);
         break;
-
       default:
-        console.warn(`Unhandled webhook event type: ${event.type}`);
+        logger.warn('WebhookManager', `Unhandled webhook event type: ${event.type}`);
     }
-
     // Marquer comme traité
     // eslint-disable-next-line require-atomic-updates
     event.processed = true;
     // eslint-disable-next-line require-atomic-updates
     event.processedAt = new Date();
   }
-
   // Gestionnaires d'événements spécifiques
   private async handleTransactionCreated(event: WebhookEvent): Promise<void> {
     try {
       const transactionData = event.data.transaction || event.data;
-      
       // Normaliser la transaction selon le provider
       const normalizedTransaction = await this.normalizeTransactionData(
         event.providerId,
         transactionData
       );
-
       // En production, sauvegarder en base de données
-  console.warn('New transaction created:', normalizedTransaction.id);
-
+  logger.warn('WebhookManager', 'New transaction created:', normalizedTransaction.id);
       // Déclencher la réconciliation automatique
       await this.triggerAutoReconciliation(normalizedTransaction);
-
       // Notifier les clients via WebSocket si connectés
       await this.notifyClients('transaction.created', {
         connectionId: event.connectionId,
         transaction: normalizedTransaction
       });
     } catch (error) {
-      console.error('Error handling transaction created:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Error handling transaction created:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   private async handleTransactionUpdated(event: WebhookEvent): Promise<void> {
     try {
       const transactionData = event.data.transaction || event.data;
-      
       const normalizedTransaction = await this.normalizeTransactionData(
         event.providerId,
         transactionData
       );
-
       // En production, mettre à jour en base de données
-  console.warn('Transaction updated:', normalizedTransaction.id);
-
+  logger.warn('WebhookManager', 'Transaction updated:', normalizedTransaction.id);
       await this.notifyClients('transaction.updated', {
         connectionId: event.connectionId,
         transaction: normalizedTransaction
       });
     } catch (error) {
-      console.error('Error handling transaction updated:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Error handling transaction updated:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   private async handleAccountUpdated(event: WebhookEvent): Promise<void> {
     try {
       const accountData = event.data.account || event.data;
-      
-  console.warn('Account updated:', accountData.id);
-
+  logger.warn('WebhookManager', 'Account updated:', accountData.id);
       await this.notifyClients('account.updated', {
         connectionId: event.connectionId,
         account: accountData
       });
     } catch (error) {
-      console.error('Error handling account updated:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Error handling account updated:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   private async handleConnectionStatusChanged(event: WebhookEvent): Promise<void> {
     try {
       const status = event.data.status || event.data.state;
-      
       // En production, mettre à jour le statut de connexion
-  console.warn(`Connection ${event.connectionId} status changed to: ${status}`);
-
+  logger.warn('WebhookManager', `Connection ${event.connectionId} status changed to: ${status}`);
       // Si la connexion est expirée, déclencher le renouvellement
       if (status === 'expired' || status === 'error') {
         await this.handleConnectionIssue(event.connectionId, status);
       }
-
       await this.notifyClients('connection.status_changed', {
         connectionId: event.connectionId,
         status
       });
     } catch (error) {
-      console.error('Error handling connection status change:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Error handling connection status change:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   private async handleConnectionError(event: WebhookEvent): Promise<void> {
     try {
       const errorInfo = event.data.error || event.data;
-      
-      console.error(`Connection ${event.connectionId} error:`, errorInfo);
-
+      logger.error('WebhookManager', `Connection ${event.connectionId} error:`, errorInfo);
       await this.handleConnectionIssue(event.connectionId, 'error', errorInfo);
-
       await this.notifyClients('connection.error', {
         connectionId: event.connectionId,
         error: errorInfo
       });
     } catch (error) {
-      console.error('Error handling connection error:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Error handling connection error:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   private async handleConnectionExpired(event: WebhookEvent): Promise<void> {
     try {
-  console.warn(`Connection ${event.connectionId} expired`);
-
+  logger.warn('WebhookManager', `Connection ${event.connectionId} expired`);
       await this.handleConnectionIssue(event.connectionId, 'expired');
-
       await this.notifyClients('connection.expired', {
         connectionId: event.connectionId
       });
     } catch (error) {
-      console.error('Error handling connection expired:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Error handling connection expired:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   // Gérer les problèmes de connexion
   private async handleConnectionIssue(
     connectionId: string,
@@ -346,13 +291,11 @@ export class WebhookManager {
     try {
       // En production, récupérer la connexion depuis la DB
       // const connection = await getConnection(connectionId);
-      
       switch (issue) {
         case 'expired':
           // Programmer un renouvellement automatique
           await this.scheduleConnectionRenewal(connectionId);
           break;
-          
         case 'error': {
           // Analyser l'erreur et prendre des mesures
           const info = errorInfo as { code?: string } | undefined;
@@ -364,10 +307,9 @@ export class WebhookManager {
         }
       }
     } catch (error) {
-      console.error('Error handling connection issue:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Error handling connection issue:', error instanceof Error ? error.message : String(error));
     }
   }
-
   // Normaliser les données de transaction selon le provider
   private async normalizeTransactionData(
     providerId: string,
@@ -394,7 +336,6 @@ export class WebhookManager {
   ): Promise<BankTransaction> {
     return Promise.resolve(this.mapToBankTransaction(providerId, transactionData));
   }
-
   private mapToBankTransaction(
     providerId: string,
     transactionData: {
@@ -428,7 +369,6 @@ export class WebhookManager {
   const currency = this.firstTruthy(transactionData.currency_code, transactionData.currency) ?? 'EUR';
   const description = this.firstTruthy(transactionData.description, transactionData.wording) ?? '';
   const originalDescription = this.firstTruthy(transactionData.raw_description, transactionData.original_wording) ?? '';
-
     return {
       id: crypto.randomUUID(),
       accountId,
@@ -453,7 +393,6 @@ export class WebhookManager {
       }
     };
   }
-
   // Helpers to reduce complexity in mapping
   private firstDefined<T>(...vals: Array<T | undefined | null>): T | undefined {
     for (const v of vals) {
@@ -461,33 +400,28 @@ export class WebhookManager {
     }
     return undefined;
   }
-
   private firstTruthy<T>(...vals: Array<T | undefined | null | ''>): T | undefined {
     for (const v of vals) {
       if (v) return v as T;
     }
     return undefined;
   }
-
   // Déclencher la réconciliation automatique
   private async triggerAutoReconciliation(transaction: BankTransaction): Promise<void> {
     try {
       // En production, appeler le service de réconciliation
-  console.warn(`Triggering auto-reconciliation for transaction: ${transaction.id}`);
-      
+  logger.warn('WebhookManager', `Triggering auto-reconciliation for transaction: ${transaction.id}`);
       // const reconciliationService = new ReconciliationService();
       // await reconciliationService.reconcileTransaction(transaction, accountingEntries);
     } catch (error) {
-      console.error('Auto-reconciliation failed:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Auto-reconciliation failed:', error instanceof Error ? error.message : String(error));
     }
   }
-
   // Notifier les clients connectés via WebSocket
   private async notifyClients(eventType: string, data: unknown): Promise<void> {
     try {
       // En production, utiliser un service de WebSocket (comme Socket.io)
-  console.warn(`Broadcasting ${eventType} to clients:`, data);
-      
+  logger.warn('WebhookManager', `Broadcasting ${eventType} to clients:`, data);
       // Exemple avec Supabase Realtime
       // supabase.channel('banking').send({
       //   type: 'broadcast',
@@ -495,38 +429,33 @@ export class WebhookManager {
       //   payload: data
       // });
     } catch (error) {
-      console.error('Failed to notify clients:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Failed to notify clients:', error instanceof Error ? error.message : String(error));
     }
   }
-
   // Programmer le renouvellement d'une connexion
   private async scheduleConnectionRenewal(connectionId: string): Promise<void> {
     try {
-  console.warn(`Scheduling renewal for connection: ${connectionId}`);
-      
+  logger.warn('WebhookManager', `Scheduling renewal for connection: ${connectionId}`);
       // En production, programmer une tâche de renouvellement
       // setTimeout(() => {
       //   this.renewConnection(connectionId);
       // }, 5 * 60 * 1000); // 5 minutes
     } catch (error) {
-      console.error('Failed to schedule connection renewal:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Failed to schedule connection renewal:', error instanceof Error ? error.message : String(error));
     }
   }
-
   // Demander une re-authentification
   private async requestReAuthentication(connectionId: string): Promise<void> {
     try {
-  console.warn(`Requesting re-authentication for connection: ${connectionId}`);
-      
+  logger.warn('WebhookManager', `Requesting re-authentication for connection: ${connectionId}`);
       await this.notifyClients('authentication.required', {
         connectionId,
         message: 'Please re-authenticate your bank connection'
       });
     } catch (error) {
-      console.error('Failed to request re-authentication:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Failed to request re-authentication:', error instanceof Error ? error.message : String(error));
     }
   }
-
   // Valider la signature du webhook
   private async validateSignature(
     payload: unknown,
@@ -542,47 +471,39 @@ export class WebhookManager {
         'SHA-256'
       );
     } catch (error) {
-      console.error('Signature validation error:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Signature validation error:', error instanceof Error ? error.message : String(error));
       return false;
     }
   }
-
   // Gérer les erreurs d'événements
   private async handleEventError(event: WebhookEvent, error: unknown): Promise<void> {
     event.retryCount++;
     event.lastError = (error as { message?: string })?.message || 'unknown';
-
     const config = this.configs.get(event.providerId);
     const maxRetries = config?.retryPolicy.maxRetries || 3;
-
     if (event.retryCount < maxRetries) {
       // Calculer le délai de retry avec backoff exponentiel
       const delay = (config?.retryPolicy.initialDelay || 1000) * 
         Math.pow(config?.retryPolicy.backoffMultiplier || 2, event.retryCount - 1);
-
-  console.warn(`Retrying event ${event.id} in ${delay}ms (attempt ${event.retryCount}/${maxRetries})`);
-
+  logger.warn('WebhookManager', `Retrying event ${event.id} in ${delay}ms (attempt ${event.retryCount}/${maxRetries})`);
       setTimeout(() => {
         this.eventQueue.push(event);
       }, delay);
     } else {
-  console.error(`Event ${event.id} failed after ${maxRetries} retries:`, error);
-      
+  logger.error('WebhookManager', `Event ${event.id} failed after ${maxRetries} retries:`, error);
       // En production, sauvegarder l'événement en échec pour analyse
       await this.saveFailedEvent(event);
     }
   }
-
   // Sauvegarder les événements en échec
   private async saveFailedEvent(event: WebhookEvent): Promise<void> {
     try {
       // En production, sauvegarder en base de données pour analyse
-  console.warn('Saving failed event for analysis:', event.id);
+  logger.warn('WebhookManager', 'Saving failed event for analysis:', event.id);
     } catch (error) {
-      console.error('Failed to save failed event:', error instanceof Error ? error.message : String(error));
+      logger.error('WebhookManager', 'Failed to save failed event:', error instanceof Error ? error.message : String(error));
     }
   }
-
   // Vérifier si un événement est critique
   private isCriticalEvent(eventType: string): boolean {
     const criticalEvents = [
@@ -592,12 +513,10 @@ export class WebhookManager {
     ];
     return criticalEvents.includes(eventType);
   }
-
   // Configuration des webhooks
   async addWebhookConfig(config: WebhookConfig): Promise<void> {
     this.configs.set(config.providerId, config);
   }
-
   async updateWebhookConfig(
     providerId: string,
     updates: Partial<WebhookConfig>
@@ -607,15 +526,12 @@ export class WebhookManager {
       this.configs.set(providerId, { ...existingConfig, ...updates });
     }
   }
-
   async removeWebhookConfig(providerId: string): Promise<void> {
     this.configs.delete(providerId);
   }
-
   getWebhookConfig(providerId: string): WebhookConfig | undefined {
     return this.configs.get(providerId);
   }
-
   // Statistiques
   getQueueStatus(): {
     queueLength: number;
@@ -628,12 +544,10 @@ export class WebhookManager {
       configuredProviders: this.configs.size
     };
   }
-
   // Arrêter le processeur de queue
   stopQueueProcessor(): void {
     this.processingQueue = false;
   }
-
   // Nettoyer les ressources
   dispose(): void {
     this.stopQueueProcessor();
@@ -641,20 +555,16 @@ export class WebhookManager {
     this.eventQueue = [];
     this.isInitialized = false;
   }
-
   get initialized(): boolean {
     return this.isInitialized;
   }
 }
-
 // Middleware Express pour les webhooks
 export class WebhookMiddleware {
   private webhookManager: WebhookManager;
-
   constructor() {
     this.webhookManager = WebhookManager.getInstance();
   }
-
   // Créer un middleware Express pour recevoir les webhooks
   createExpressMiddleware() {
     return async (
@@ -665,20 +575,17 @@ export class WebhookMiddleware {
       try {
         const providerId = req.params?.providerId || req.headers['x-provider-id'];
         const signature = req.headers['x-signature'] || req.headers['x-hub-signature-256'];
-        
         if (!providerId) {
           return res.status(400).json({
             error: 'Provider ID is required'
           });
         }
-
         const result = await this.webhookManager.receiveWebhook(
           providerId,
           req.body,
           String(signature),
           req.headers
         );
-
         if (result.success) {
           res.status(200).json({ status: 'received' });
         } else {
@@ -687,14 +594,13 @@ export class WebhookMiddleware {
           });
         }
       } catch (_error) {
-        console.error('Webhook middleware error');
+        logger.error('WebhookManager', 'Webhook middleware error');
         res.status(500).json({
           error: 'Internal server error'
         });
       }
     };
   }
-
   // Middleware de validation pour les webhooks
   createValidationMiddleware() {
     return async (
@@ -709,14 +615,12 @@ export class WebhookMiddleware {
             error: 'Content-Type must be application/json'
           });
         }
-
         // Vérifier la présence du payload
         if (!req.body) {
           return res.status(400).json({
             error: 'Request body is required'
           });
         }
-
         next();
       } catch (_error) {
         res.status(500).json({

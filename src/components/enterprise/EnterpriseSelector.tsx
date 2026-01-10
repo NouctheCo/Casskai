@@ -82,7 +82,8 @@ export default function EnterpriseSelector() {
 
     };
 
-    return flags[countryCode] || '🏢';
+    const code = countryCode as keyof typeof flags;
+    return flags[code] || '🏢';
 
   };
 
@@ -102,7 +103,8 @@ export default function EnterpriseSelector() {
 
     };
 
-    return labels[type] || type;
+    const labelType = type as keyof typeof labels;
+    return labels[labelType] || type;
 
   };
 
@@ -468,7 +470,8 @@ function getCountryFlag(countryCode: string) {
 
   };
 
-  return flags[countryCode] || '🏢';
+  const code = countryCode as keyof typeof flags;
+  return flags[code] || '🏢';
 
 }
 
@@ -488,6 +491,7 @@ function getTaxRegimeLabel(type: string) {
 
   };
 
-  return labels[type] || type;
+  const labelType = type as keyof typeof labels;
+  return labels[labelType] || type;
 
 }

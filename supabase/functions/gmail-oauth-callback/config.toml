@@ -1,0 +1,6 @@
+# Gmail OAuth Callback Configuration
+# This function handles OAuth callbacks from Google and doesn't require JWT verification
+# since the authentication is handled via the OAuth state parameter
+
+[functions.gmail-oauth-callback]
+verify_jwt = false

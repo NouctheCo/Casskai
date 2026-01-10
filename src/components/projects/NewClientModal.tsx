@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -13,13 +12,12 @@ import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { crmService } from '@/services/crmService';
-
+import { logger } from '@/lib/logger';
 export interface NewClientModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (clientId: string) => void;
 }
-
 interface ClientFormData {
   company_name: string;
   industry: string;
@@ -30,13 +28,11 @@ interface ClientFormData {
   website: string;
   notes: string;
 }
-
 const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [formData, setFormData] = useState<ClientFormData>({
     company_name: '',
     industry: '',
@@ -47,9 +43,7 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
     website: '',
     notes: ''
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const handleInputChange = (field: keyof ClientFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -60,7 +54,6 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
       });
     }
   };
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.company_name.trim()) {
@@ -69,17 +62,13 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
     if (!validateForm() || !currentCompany) {
       return;
     }
-
     setLoading(true);
-
     try {
       // Utiliser le service CRM pour créer un client (type = client)
       const response = await crmService.createClient(currentCompany.id, {
@@ -94,7 +83,6 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
         notes: formData.notes,
         status: 'active'
       });
-
       if (response.success && response.data) {
         onSuccess(response.data.id);
         setFormData({
@@ -115,13 +103,12 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
         setError(errorMessage);
       }
     } catch (err) {
-      console.error('Error creating client:', err);
+      logger.error('NewClientModal', 'Error creating client:', err);
       setError(t('projects.clientModal.errorCreating', 'Erreur lors de la création du client'));
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -131,7 +118,6 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
             {t('projects.clientModal.description', 'Créer un nouveau client pour le projet')}
           </DialogDescription>
         </DialogHeader>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Nom de l'entreprise */}
           <div className="space-y-2">
@@ -149,7 +135,6 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
               <p className="text-sm text-red-600">{errors.company_name}</p>
             )}
           </div>
-
           {/* Secteur */}
           <div className="space-y-2">
             <Label htmlFor="industry">
@@ -162,7 +147,6 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
               placeholder={t('projects.clientModal.industryPlaceholder', 'Ex: Technologie, Commerce, etc.')}
             />
           </div>
-
           {/* Adresse */}
           <div className="space-y-2">
             <Label htmlFor="address">
@@ -175,7 +159,6 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
               placeholder={t('projects.clientModal.addressPlaceholder', '123 Rue de la Paix')}
             />
           </div>
-
           {/* Ville / Code postal */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -201,7 +184,6 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
               />
             </div>
           </div>
-
           {/* Site web */}
           <div className="space-y-2">
             <Label htmlFor="website">
@@ -215,7 +197,6 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
               placeholder={t('projects.clientModal.websitePlaceholder', 'https://example.com')}
             />
           </div>
-
           {/* Notes */}
           <div className="space-y-2">
             <Label htmlFor="notes">
@@ -228,13 +209,11 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
               placeholder={t('projects.clientModal.notesPlaceholder', 'Informations complémentaires')}
             />
           </div>
-
           {error && (
             <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
               <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
             </div>
           )}
-
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
               {t('common.cancel', 'Annuler')}
@@ -249,5 +228,4 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
     </Dialog>
   );
 };
-
 export default NewClientModal;

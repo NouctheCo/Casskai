@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,13 +30,12 @@ import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import assetsService from '@/services/assetsService';
 import type { AssetCategory, AssetFormData, DepreciationMethod } from '@/types/assets.types';
-
+import { logger } from '@/lib/logger';
 interface Employee {
   id: string;
   first_name: string;
   last_name: string;
 }
-
 interface AssetFormDialogProps {
   open: boolean;
   onClose: () => void;
@@ -45,7 +43,6 @@ interface AssetFormDialogProps {
   assetId?: string; // Pour édition
   onCategoryCreated?: () => void; // Callback pour rafraîchir les catégories
 }
-
 export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
   open,
   onClose,
@@ -58,19 +55,16 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<AssetCategory | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
-
   // États pour les modals de création inline
   const [showNewCategoryModal, setShowNewCategoryModal] = useState(false);
   const [showNewEmployeeModal, setShowNewEmployeeModal] = useState(false);
   const [newCategory, setNewCategory] = useState({ name: '', code: '', default_duration_years: 5 });
   const [newEmployee, setNewEmployee] = useState({ first_name: '', last_name: '', email: '' });
-
   // Debug: Log catégories reçues en props
   useEffect(() => {
-    console.log('[AssetForm] Catégories reçues:', categories);
-    console.log('[AssetForm] Nombre de catégories:', categories.length);
+    logger.debug('AssetFormDialog', '[AssetForm] Catégories reçues:', categories);
+    logger.debug('AssetFormDialog', '[AssetForm] Nombre de catégories:', categories.length);
   }, [categories]);
-
   const [formData, setFormData] = useState<AssetFormData>({
     name: '',
     description: '',
@@ -89,45 +83,39 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
     residual_value: 0,
     notes: '',
   });
-
   // Charger les employés au montage
   useEffect(() => {
     if (currentCompany?.id && open) {
       loadEmployees();
     }
   }, [currentCompany?.id, open]);
-
   // Charger les données si édition
   useEffect(() => {
     if (assetId) {
       loadAsset();
     }
   }, [assetId]);
-
   const loadEmployees = async () => {
     if (!currentCompany?.id) {
-      console.log('[AssetForm] companyId non disponible pour charger les employés');
+      logger.debug('AssetFormDialog', '[AssetForm] companyId non disponible pour charger les employés');
       return;
     }
-
     try {
-      console.log('[AssetForm] Chargement des employés pour company:', currentCompany.id);
+      logger.debug('AssetFormDialog', '[AssetForm] Chargement des employés pour company:', currentCompany.id);
       const { data, error } = await supabase
         .from('employees')
         .select('id, first_name, last_name')
         .eq('company_id', currentCompany.id)
         .eq('status', 'active')
         .order('last_name');
-
       if (error) throw error;
-      console.log('[AssetForm] Employés chargés:', data);
+      logger.debug('AssetFormDialog', '[AssetForm] Employés chargés:', data);
       setEmployees(data || []);
     } catch (error: any) {
-      console.error('[AssetForm] Error loading employees:', error);
+      logger.error('AssetFormDialog', '[AssetForm] Error loading employees:', error);
       // Ne pas afficher d'erreur, liste vide acceptable
     }
   };
-
   // Mettre à jour les paramètres par défaut quand la catégorie change
   useEffect(() => {
     if (selectedCategory && !assetId) {
@@ -143,10 +131,8 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
       }));
     }
   }, [selectedCategory, assetId]);
-
   const loadAsset = async () => {
     if (!assetId) return;
-
     try {
       const asset = await assetsService.getAssetById(assetId);
       setFormData({
@@ -173,37 +159,30 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
         notes: asset.notes || '',
       });
     } catch (error: any) {
-      console.error('Error loading asset:', error);
+      logger.error('AssetFormDialog', 'Error loading asset:', error);
       toast.error(t('assets.errors.loadFailed'));
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!currentCompany?.id) {
       toast.error(t('common.errors.noCompany'));
       return;
     }
-
     // Validation
     if (!formData.name.trim()) {
       toast.error(t('assets.form.errors.nameRequired'));
       return;
     }
-
     if (formData.acquisition_value <= 0) {
       toast.error(t('assets.form.errors.acquisitionValueRequired'));
       return;
     }
-
     if (formData.duration_years <= 0) {
       toast.error(t('assets.form.errors.durationRequired'));
       return;
     }
-
     setLoading(true);
-
     try {
       if (assetId) {
         await assetsService.updateAsset(assetId, formData);
@@ -214,19 +193,17 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
       }
       onClose();
     } catch (error: any) {
-      console.error('Error saving asset:', error);
+      logger.error('AssetFormDialog', 'Error saving asset:', error);
       toast.error(error.message || t('assets.errors.saveFailed'));
     } finally {
       setLoading(false);
     }
   };
-
   const handleCategoryChange = (categoryId: string) => {
     setFormData((prev) => ({ ...prev, category_id: categoryId }));
     const category = categories.find((c) => c.id === categoryId);
     setSelectedCategory(category || null);
   };
-
   /**
    * Créer une nouvelle catégorie (compte plan comptable)
    */
@@ -235,12 +212,10 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
       toast.error(t('common.errors.noCompany'));
       return;
     }
-
     if (!newCategory.name.trim() || !newCategory.code.trim()) {
       toast.error('Le nom et le code sont requis');
       return;
     }
-
     try {
       const { data, error } = await supabase
         .from('chart_of_accounts')
@@ -252,22 +227,18 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
         })
         .select()
         .single();
-
       if (error) throw error;
-
       if (data && onCategoryCreated) {
         onCategoryCreated(); // Rafraîchir la liste des catégories dans le parent
       }
-
       setShowNewCategoryModal(false);
       setNewCategory({ name: '', code: '', default_duration_years: 5 });
       toast.success('Catégorie créée avec succès');
     } catch (error: any) {
-      console.error('Error creating category:', error);
+      logger.error('AssetFormDialog', 'Error creating category:', error);
       toast.error(error.message || 'Erreur lors de la création de la catégorie');
     }
   };
-
   /**
    * Créer un nouvel employé
    */
@@ -276,12 +247,10 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
       toast.error(t('common.errors.noCompany'));
       return;
     }
-
     if (!newEmployee.first_name.trim() || !newEmployee.last_name.trim()) {
       toast.error('Le prénom et le nom sont requis');
       return;
     }
-
     try {
       const { data, error } = await supabase
         .from('employees')
@@ -294,23 +263,19 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
         })
         .select()
         .single();
-
       if (error) throw error;
-
       if (data) {
         setEmployees((prev) => [...prev, data]);
         setFormData((prev) => ({ ...prev, responsible_person: data.id }));
       }
-
       setShowNewEmployeeModal(false);
       setNewEmployee({ first_name: '', last_name: '', email: '' });
       toast.success('Employé créé avec succès');
     } catch (error: any) {
-      console.error('Error creating employee:', error);
+      logger.error('AssetFormDialog', 'Error creating employee:', error);
       toast.error(error.message || 'Erreur lors de la création de l\'employé');
     }
   };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -322,12 +287,10 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             {t('assets.form.description')}
           </DialogDescription>
         </DialogHeader>
-
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section identification */}
           <div className="space-y-4">
             <h3 className="font-semibold">{t('assets.form.sections.identification')}</h3>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -357,7 +320,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="asset_number">{t('assets.form.assetNumber')}</Label>
                 <Input
@@ -367,7 +329,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   placeholder={t('assets.form.assetNumberPlaceholder')}
                 />
               </div>
-
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="name">{t('assets.form.name')} *</Label>
                 <Input
@@ -378,7 +339,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   required
                 />
               </div>
-
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="description">{t('assets.form.description')}</Label>
                 <Textarea
@@ -389,7 +349,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   rows={2}
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="serial_number">{t('assets.form.serialNumber')}</Label>
                 <Input
@@ -399,7 +358,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   placeholder={t('assets.form.serialNumberPlaceholder')}
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="location">{t('assets.form.location')}</Label>
                 <Input
@@ -411,11 +369,9 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
               </div>
             </div>
           </div>
-
           {/* Section acquisition */}
           <div className="space-y-4">
             <h3 className="font-semibold">{t('assets.form.sections.acquisition')}</h3>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="acquisition_date">{t('assets.form.acquisitionDate')} *</Label>
@@ -427,7 +383,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   required
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="acquisition_value">{t('assets.form.acquisitionValue')} * (€)</Label>
                 <Input
@@ -440,7 +395,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   required
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="invoice_reference">{t('assets.form.invoiceReference')}</Label>
                 <Input
@@ -450,7 +404,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   placeholder={t('assets.form.invoiceReferencePlaceholder')}
                 />
               </div>
-
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="responsible_person">{t('assets.form.responsiblePerson')}</Label>
@@ -482,11 +435,9 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
               </div>
             </div>
           </div>
-
           {/* Section amortissement */}
           <div className="space-y-4">
             <h3 className="font-semibold">{t('assets.form.sections.depreciation')}</h3>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="depreciation_method">{t('assets.form.depreciationMethod')} *</Label>
@@ -504,7 +455,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="depreciation_start_date">{t('assets.form.depreciationStartDate')} *</Label>
                 <Input
@@ -515,7 +465,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   required
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="duration_years">{t('assets.form.durationYears')} *</Label>
                 <Input
@@ -527,7 +476,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   required
                 />
               </div>
-
               {formData.depreciation_method === 'declining_balance' && (
                 <div className="space-y-2">
                   <Label htmlFor="declining_rate">{t('assets.form.decliningRate')}</Label>
@@ -546,7 +494,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                   </Select>
                 </div>
               )}
-
               <div className="space-y-2">
                 <Label htmlFor="residual_value">{t('assets.form.residualValue')} (€)</Label>
                 <Input
@@ -560,7 +507,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
               </div>
             </div>
           </div>
-
           {/* Section notes */}
           <div className="space-y-2">
             <Label htmlFor="notes">{t('assets.form.notes')}</Label>
@@ -572,7 +518,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
               rows={3}
             />
           </div>
-
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
@@ -584,7 +529,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
           </div>
         </form>
       </DialogContent>
-
       {/* Modal Nouvelle Catégorie */}
       <Dialog open={showNewCategoryModal} onOpenChange={setShowNewCategoryModal}>
         <DialogContent>
@@ -634,7 +578,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       {/* Modal Nouvel Employé */}
       <Dialog open={showNewEmployeeModal} onOpenChange={setShowNewEmployeeModal}>
         <DialogContent>

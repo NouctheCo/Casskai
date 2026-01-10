@@ -3,7 +3,31 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { useLocale } from '@/contexts/LocaleContext';
 
-export const ThirdPartyDetailView = ({ open, onOpenChange, thirdParty, formatCurrency }) => {
+interface ThirdPartyDetailViewProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  thirdParty: {
+    name: string;
+    type: string;
+    email?: string;
+    phone?: string;
+    website?: string;
+    address?: string;
+    city?: string;
+    country?: string;
+    balance?: number;
+    default_currency?: string;
+    contact_name?: string;
+    postal_code?: string;
+    tax_number?: string;
+    is_active?: boolean;
+    default_payment_terms?: number;
+    notes?: string;
+  } | null;
+  formatCurrency: (amount: number, currency: string) => string;
+}
+
+export const ThirdPartyDetailView = ({ open, onOpenChange, thirdParty, formatCurrency }: ThirdPartyDetailViewProps) => {
   const { t } = useLocale();
   if (!thirdParty) return null;
 

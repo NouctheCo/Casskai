@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,8 +40,35 @@ import { realDashboardKpiService, type RealKPIData } from '@/services/realDashbo
 import { aiDashboardAnalysisService, type AIAnalysisResult } from '@/services/aiDashboardAnalysisService';
 import { useKpiRefresh } from '@/hooks/useKpiRefresh';
 import { formatCurrency } from '@/lib/utils';
-
+import { logger } from '@/lib/logger';
+import { kpiCacheService } from '@/services/kpiCacheService';
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+// Helper to format units correctly
+const formatUnit = (unit: string) => {
+  switch (unit) {
+    case 'currency':
+      return '€';
+    case 'percentage':
+      return '%';
+    case 'days':
+      return 'jours';
+    case 'number':
+      return '';
+    default:
+      return unit;
+  }
+};
+
+// Helper to format month names
+const getMonthName = (monthNumber: string | number): string => {
+  const monthNames = [
+    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+  ];
+  const index = typeof monthNumber === 'string' ? parseInt(monthNumber) - 1 : monthNumber - 1;
+  return monthNames[index] || `Mois ${monthNumber}`;
+};
 
 export const RealOperationalDashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -53,10 +79,8 @@ export const RealOperationalDashboard: React.FC = () => {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  
   // Ref pour éviter les rechargements multiples de timers
   const reloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   // 🎯 OPTIMISATION: Détecter quand l'utilisateur revient sur la page
   usePageVisibility({
     onVisible: () => {
@@ -64,7 +88,6 @@ export const RealOperationalDashboard: React.FC = () => {
       if (lastUpdate) {
         const ageMs = Date.now() - lastUpdate.getTime();
         const maxAge = 10 * 60 * 1000; // 10 minutes = rechargement recommandé
-        
         if (ageMs > maxAge) {
           handleRefresh();
         }
@@ -72,7 +95,6 @@ export const RealOperationalDashboard: React.FC = () => {
     },
     reloadDelay: 300,
   });
-
   // 🎯 OPTIMISATION: Hook pour synchronisation temps réel des KPIs
   const handleCacheInvalidated = useCallback(async () => {
     // Le cache a été invalidé, recharger les KPIs en arrière-plan
@@ -88,29 +110,23 @@ export const RealOperationalDashboard: React.FC = () => {
       }
     }
   }, [currentCompany?.id]);
-
   useKpiRefresh(currentCompany?.id, {
     onCacheInvalidated: handleCacheInvalidated,
     onError: (event) => {
-      console.error('[RealOperationalDashboard] Erreur KPI:', event.message);
+      logger.error('RealOperationalDashboard', '[RealOperationalDashboard] Erreur KPI:', event.message);
     },
     subscribeToRealtime: true,
   });
-
   const loadDashboardData = useCallback(async () => {
     if (!currentCompany?.id) {
       return;
     }
-
     setLoading(true);
-    
     try {
       // Charger les KPIs réels
       const data = await realDashboardKpiService.calculateRealKPIs(currentCompany.id);
-      
       setKpiData(data);
       setLastUpdate(new Date());
-
       // Charger l'analyse IA en parallèle
       loadAIAnalysis(data);
     } catch (error) {
@@ -119,10 +135,8 @@ export const RealOperationalDashboard: React.FC = () => {
       setLoading(false);
     }
   }, [currentCompany?.id]);
-
   const loadAIAnalysis = async (data: RealKPIData) => {
     if (!currentCompany) return;
-
     setAiLoading(true);
     try {
       const analysis = await aiDashboardAnalysisService.analyzeKPIs(
@@ -132,20 +146,17 @@ export const RealOperationalDashboard: React.FC = () => {
       );
       setAiAnalysis(analysis);
     } catch (error) {
-      console.error('Error loading AI analysis:', error);
+      logger.error('RealOperationalDashboard', 'Error loading AI analysis:', error);
     } finally {
       setAiLoading(false);
     }
   };
-
   // 🎯 OPTIMISATION: Initialisation unique au changement de compagnie
   useEffect(() => {
-    
     // Cleanup des timers précédents
     if (reloadTimeoutRef.current) {
       clearTimeout(reloadTimeoutRef.current);
     }
-
     // Charger les données pour la compagnie actuelle
     // Note: Ne pas utiliser hasInitializedRef car cela empêche le rechargement
     // quand l'utilisateur arrive pour la première fois ou change de compagnie
@@ -154,7 +165,6 @@ export const RealOperationalDashboard: React.FC = () => {
     } else {
       // no company available; skip initial load
     }
-
     return () => {
       if (reloadTimeoutRef.current) {
         clearTimeout(reloadTimeoutRef.current);
@@ -162,16 +172,18 @@ export const RealOperationalDashboard: React.FC = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCompany?.id]);
-
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
+      // Invalider le cache avant de recharger
+      if (currentCompany?.id) {
+        kpiCacheService.invalidateCache(currentCompany.id);
+      }
       await loadDashboardData();
     } finally {
       setRefreshing(false);
     }
-  }, [loadDashboardData]);
-
+  }, [loadDashboardData, currentCompany?.id]);
   if (loading || !kpiData) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -179,10 +191,8 @@ export const RealOperationalDashboard: React.FC = () => {
       </div>
     );
   }
-
   const metrics = realDashboardKpiService.generateMetrics(kpiData, t);
   const charts = realDashboardKpiService.generateCharts(kpiData, t);
-
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -202,7 +212,6 @@ export const RealOperationalDashboard: React.FC = () => {
           {t('common.refresh')}
         </Button>
       </div>
-
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {metrics.map((metric) => (
@@ -224,7 +233,7 @@ export const RealOperationalDashboard: React.FC = () => {
                     maximumFractionDigits: metric.unit === 'currency' ? 2 : 0,
                   })}
                   <span className="text-sm font-normal text-muted-foreground ml-1">
-                    {metric.unit}
+                    {formatUnit(metric.unit)}
                   </span>
                 </div>
                 {metric.change !== undefined && metric.period && (
@@ -255,7 +264,6 @@ export const RealOperationalDashboard: React.FC = () => {
           </Card>
         ))}
       </div>
-
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Revenue Chart */}
@@ -290,7 +298,6 @@ export const RealOperationalDashboard: React.FC = () => {
             </CardContent>
           </Card>
         )}
-
         {/* Top Clients Chart */}
         {charts[1] && (
           <Card>
@@ -317,7 +324,6 @@ export const RealOperationalDashboard: React.FC = () => {
             </CardContent>
           </Card>
         )}
-
         {/* Expense Breakdown Chart */}
         {charts[2] && (
           <Card className="lg:col-span-2">
@@ -355,7 +361,6 @@ export const RealOperationalDashboard: React.FC = () => {
           </Card>
         )}
       </div>
-
       {/* AI Analysis Section */}
       <Card className="border-2 border-primary/20">
         <CardHeader>
@@ -388,7 +393,6 @@ export const RealOperationalDashboard: React.FC = () => {
                   {aiAnalysis.executive_summary}
                 </AlertDescription>
               </Alert>
-
               {/* Key Insights */}
               <div>
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -404,7 +408,6 @@ export const RealOperationalDashboard: React.FC = () => {
                   ))}
                 </ul>
               </div>
-
               {/* Strategic Recommendations */}
               <div>
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -422,7 +425,6 @@ export const RealOperationalDashboard: React.FC = () => {
                   ))}
                 </ul>
               </div>
-
               {/* Risk Factors */}
               {aiAnalysis.risk_factors.length > 0 && (
                 <div>
@@ -440,7 +442,6 @@ export const RealOperationalDashboard: React.FC = () => {
                   </ul>
                 </div>
               )}
-
               {/* Action Items */}
               <div>
                 <h3 className="font-semibold mb-3">{t('dashboard.aiAnalysis.actions')}</h3>

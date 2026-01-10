@@ -9,16 +9,14 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 interface ChartOfAccountsConfig {
   country: string;
   standard: 'PCG' | 'SYSCOHADA' | 'IFRS' | 'US_GAAP';
   currency: string;
   fiscalYearEnd: string;
 }
-
 interface SampleDataConfig {
   includeTransactions: boolean;
   includeCustomers: boolean;
@@ -30,14 +28,11 @@ interface SampleDataConfig {
     end: string;
   };
 }
-
 export class SampleDataService {
   private companyId: string;
-
   constructor(companyId: string) {
     this.companyId = companyId;
   }
-
   // Plans comptables par pays/standard
   private getChartOfAccounts(config: ChartOfAccountsConfig) {
     const baseAccounts = {
@@ -48,57 +43,47 @@ export class SampleDataService {
         { code: '110000', name: 'Report à nouveau', type: 'equity', level: 1 },
         { code: '120000', name: 'Résultat de l\'exercice', type: 'equity', level: 1 },
         { code: '164000', name: 'Emprunts auprès des établissements de crédit', type: 'liability', level: 1 },
-
         // Classe 2 - Comptes d'immobilisations
         { code: '213000', name: 'Constructions', type: 'asset', level: 1 },
         { code: '218000', name: 'Autres immobilisations corporelles', type: 'asset', level: 1 },
         { code: '283000', name: 'Amortissements des constructions', type: 'asset', level: 1 },
-
         // Classe 3 - Comptes de stocks
         { code: '310000', name: 'Matières premières', type: 'asset', level: 1 },
         { code: '370000', name: 'Stocks de marchandises', type: 'asset', level: 1 },
-
         // Classe 4 - Comptes de tiers
         { code: '411000', name: 'Clients', type: 'asset', level: 1 },
         { code: '401000', name: 'Fournisseurs', type: 'liability', level: 1 },
         { code: '421000', name: 'Personnel - rémunérations dues', type: 'liability', level: 1 },
         { code: '445700', name: 'TVA collectée', type: 'liability', level: 1 },
         { code: '445660', name: 'TVA déductible sur autres biens et services', type: 'asset', level: 1 },
-
         // Classe 5 - Comptes financiers
         { code: '512000', name: 'Banque', type: 'asset', level: 1 },
         { code: '530000', name: 'Caisse', type: 'asset', level: 1 },
-
         // Classe 6 - Comptes de charges
         { code: '601000', name: 'Achats de matières premières', type: 'expense', level: 1 },
         { code: '607000', name: 'Achats de marchandises', type: 'expense', level: 1 },
         { code: '613000', name: 'Locations', type: 'expense', level: 1 },
         { code: '641000', name: 'Rémunérations du personnel', type: 'expense', level: 1 },
         { code: '645000', name: 'Charges de sécurité sociale', type: 'expense', level: 1 },
-
         // Classe 7 - Comptes de produits
         { code: '701000', name: 'Ventes de produits finis', type: 'revenue', level: 1 },
         { code: '707000', name: 'Ventes de marchandises', type: 'revenue', level: 1 },
         { code: '758000', name: 'Produits divers de gestion courante', type: 'revenue', level: 1 }
       ],
-
       SYSCOHADA: [
         // Classe 1 - Ressources durables
         { code: '10', name: 'Capital et réserves', type: 'equity', level: 1 },
         { code: '101', name: 'Capital social', type: 'equity', level: 2 },
         { code: '106', name: 'Réserves', type: 'equity', level: 2 },
         { code: '16', name: 'Emprunts et dettes assimilées', type: 'liability', level: 1 },
-
         // Classe 2 - Actif immobilisé
         { code: '21', name: 'Immobilisations corporelles', type: 'asset', level: 1 },
         { code: '213', name: 'Bâtiments, installations techniques', type: 'asset', level: 2 },
         { code: '24', name: 'Matériel', type: 'asset', level: 1 },
         { code: '28', name: 'Amortissements des immobilisations', type: 'asset', level: 1 },
-
         // Classe 3 - Stocks
         { code: '31', name: 'Matières premières et fournitures', type: 'asset', level: 1 },
         { code: '37', name: 'Stocks de marchandises', type: 'asset', level: 1 },
-
         // Classe 4 - Créances et dettes
         { code: '41', name: 'Clients et comptes rattachés', type: 'asset', level: 1 },
         { code: '411', name: 'Clients', type: 'asset', level: 2 },
@@ -107,12 +92,10 @@ export class SampleDataService {
         { code: '421', name: 'Personnel', type: 'liability', level: 2 },
         { code: '4441', name: 'État - TVA facturée', type: 'liability', level: 2 },
         { code: '4454', name: 'État - TVA récupérable', type: 'asset', level: 2 },
-
         // Classe 5 - Trésorerie
         { code: '52', name: 'Banques', type: 'asset', level: 1 },
         { code: '521', name: 'Banques locales', type: 'asset', level: 2 },
         { code: '53', name: 'Caisses', type: 'asset', level: 1 },
-
         // Classe 6 - Charges
         { code: '60', name: 'Achats et variations de stocks', type: 'expense', level: 1 },
         { code: '601', name: 'Achats de matières premières', type: 'expense', level: 2 },
@@ -121,17 +104,14 @@ export class SampleDataService {
         { code: '62', name: 'Services extérieurs A', type: 'expense', level: 1 },
         { code: '66', name: 'Charges de personnel', type: 'expense', level: 1 },
         { code: '661', name: 'Rémunérations directes versées au personnel', type: 'expense', level: 2 },
-
         // Classe 7 - Produits
         { code: '70', name: 'Ventes', type: 'revenue', level: 1 },
         { code: '701', name: 'Ventes de marchandises', type: 'revenue', level: 2 },
         { code: '702', name: 'Ventes de produits finis', type: 'revenue', level: 2 }
       ]
     };
-
     return baseAccounts[config.standard] || baseAccounts.PCG;
   }
-
   // Données d'exemple pour clients
   private getSampleCustomers(config: ChartOfAccountsConfig) {
     const countryPrefixes = {
@@ -142,7 +122,6 @@ export class SampleDataService {
       'MA': '+212',
       'TN': '+216'
     };
-
     return [
       {
         name: 'SARL TECHNO SOLUTIONS',
@@ -187,7 +166,6 @@ export class SampleDataService {
       }
     ];
   }
-
   // Données d'exemple pour fournisseurs
   private getSampleSuppliers(_config: ChartOfAccountsConfig) {
     return [
@@ -219,7 +197,6 @@ export class SampleDataService {
       }
     ];
   }
-
   // Données d'exemple pour produits/services
   private getSampleProducts(config: ChartOfAccountsConfig) {
     return [
@@ -259,14 +236,12 @@ export class SampleDataService {
       }
     ];
   }
-
   // Génération des écritures comptables d'exemple
   private generateSampleTransactions(config: ChartOfAccountsConfig, sampleConfig: SampleDataConfig) {
     const transactions = [];
     const startDate = new Date(sampleConfig.dateRange.start);
     const endDate = new Date(sampleConfig.dateRange.end);
     const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-
     // Transaction types avec leurs écritures
     const transactionTypes = [
       {
@@ -306,17 +281,14 @@ export class SampleDataService {
         ]
       }
     ];
-
     for (let i = 0; i < sampleConfig.transactionCount; i++) {
       const randomDays = Math.floor(Math.random() * daysDiff);
       const transactionDate = new Date(startDate.getTime() + (randomDays * 24 * 60 * 60 * 1000));
       const transactionType = transactionTypes[Math.floor(Math.random() * transactionTypes.length)];
-
       // Ajuster les montants selon la devise
       const currencyMultiplier = config.currency === 'XOF' ? 650 :
                                  config.currency === 'MAD' ? 10 :
                                  config.currency === 'TND' ? 3 : 1;
-
       transactions.push({
         date: transactionDate.toISOString().split('T')[0],
         reference: `${transactionType.type.toUpperCase()}-${String(i + 1).padStart(4, '0')}`,
@@ -329,10 +301,8 @@ export class SampleDataService {
         }))
       });
     }
-
     return transactions;
   }
-
   async generateSampleData(chartConfig: ChartOfAccountsConfig, sampleConfig: SampleDataConfig) {
     try {
       const results = {
@@ -342,7 +312,6 @@ export class SampleDataService {
         products: 0,
         transactions: 0
       };
-
       // 1. Créer le plan comptable
       const accounts = this.getChartOfAccounts(chartConfig);
       const accountsToInsert = accounts.map((account: any) => ({
@@ -360,13 +329,10 @@ export class SampleDataService {
         current_balance: 0,
         imported_from_fec: false
       }));
-
       const { error: accountsError } = await supabase
         .from('chart_of_accounts')
         .insert(accountsToInsert);
-
       if (!accountsError) results.accounts = accountsToInsert.length;
-
       // 2. Créer les clients d'exemple
       if (sampleConfig.includeCustomers) {
         const customers = this.getSampleCustomers(chartConfig);
@@ -374,14 +340,11 @@ export class SampleDataService {
           company_id: this.companyId,
           ...customer
         }));
-
         const { error: customersError } = await supabase
           .from('customers')
           .insert(customersToInsert);
-
         if (!customersError) results.customers = customersToInsert.length;
       }
-
       // 3. Créer les fournisseurs d'exemple
       if (sampleConfig.includeSuppliers) {
         const suppliers = this.getSampleSuppliers(chartConfig);
@@ -389,14 +352,11 @@ export class SampleDataService {
           company_id: this.companyId,
           ...supplier
         }));
-
         const { error: suppliersError } = await supabase
           .from('suppliers')
           .insert(suppliersToInsert);
-
         if (!suppliersError) results.suppliers = suppliersToInsert.length;
       }
-
       // 4. Créer les produits/services d'exemple
       if (sampleConfig.includeProducts) {
         const products = this.getSampleProducts(chartConfig);
@@ -404,18 +364,14 @@ export class SampleDataService {
           company_id: this.companyId,
           ...product
         }));
-
         const { error: productsError } = await supabase
           .from('products')
           .insert(productsToInsert);
-
         if (!productsError) results.products = productsToInsert.length;
       }
-
       // 5. Créer les transactions d'exemple
       if (sampleConfig.includeTransactions) {
         const transactions = this.generateSampleTransactions(chartConfig, sampleConfig);
-
         for (const transaction of transactions) {
           // Créer l'écriture comptable
           const { data: journalEntry, error: _journalError } = await supabase
@@ -429,7 +385,6 @@ export class SampleDataService {
             })
             .select('id')
             .single();
-
           if (journalEntry) {
             // Créer les lignes d'écriture
             const entryLines = transaction.entries.map(entry => ({
@@ -440,23 +395,19 @@ export class SampleDataService {
               credit_amount: entry.credit_amount,
               description: entry.description
             }));
-
             await supabase
               .from('journal_entry_lines')
               .insert(entryLines);
-
             results.transactions++;
           }
         }
       }
-
       return { success: true, results };
     } catch (error: unknown) {
-      console.error('Erreur génération données d\'exemple:', error);
+      logger.error('SampleData', 'Erreur génération données d\'exemple:', error);
       return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
-
   // Fonction de suppression des données d'exemple (RAZ)
   async resetSampleData() {
     try {
@@ -470,17 +421,15 @@ export class SampleDataService {
         'customers',
         'chart_of_accounts'
       ];
-
       for (const table of tablesToReset) {
         await supabase
           .from(table)
           .delete()
           .eq('company_id', this.companyId);
       }
-
       return { success: true };
     } catch (error: unknown) {
-      console.error('Erreur suppression données d\'exemple:', error);
+      logger.error('SampleData', 'Erreur suppression données d\'exemple:', error);
       return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }

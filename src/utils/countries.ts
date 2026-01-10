@@ -104,6 +104,78 @@ export const CURRENCIES: Record<string, Currency> = {
     decimalSeparator: '.',
     exchangeRateToEUR: 130.0, // Variable
   },
+
+  // Nigeria
+  NGN: {
+    code: 'NGN',
+    name: 'Naira nigérian',
+    symbol: '₦',
+    symbolPosition: 'before',
+    decimals: 2,
+    thousandSeparator: ',',
+    decimalSeparator: '.',
+    exchangeRateToEUR: 1600, // Variable
+  },
+
+  // Ghana
+  GHS: {
+    code: 'GHS',
+    name: 'Cedi ghanéen',
+    symbol: 'GH₵',
+    symbolPosition: 'before',
+    decimals: 2,
+    thousandSeparator: ',',
+    decimalSeparator: '.',
+    exchangeRateToEUR: 15, // Variable
+  },
+
+  // Afrique du Sud
+  ZAR: {
+    code: 'ZAR',
+    name: 'Rand sud-africain',
+    symbol: 'R',
+    symbolPosition: 'before',
+    decimals: 2,
+    thousandSeparator: ' ',
+    decimalSeparator: ',',
+    exchangeRateToEUR: 20, // Variable
+  },
+
+  // Égypte
+  EGP: {
+    code: 'EGP',
+    name: 'Livre égyptienne',
+    symbol: 'E£',
+    symbolPosition: 'before',
+    decimals: 2,
+    thousandSeparator: ',',
+    decimalSeparator: '.',
+    exchangeRateToEUR: 53, // Variable
+  },
+
+  // Algérie
+  DZD: {
+    code: 'DZD',
+    name: 'Dinar algérien',
+    symbol: 'د.ج',
+    symbolPosition: 'after',
+    decimals: 2,
+    thousandSeparator: ' ',
+    decimalSeparator: ',',
+    exchangeRateToEUR: 145, // Variable
+  },
+
+  // Tunisie
+  TND: {
+    code: 'TND',
+    name: 'Dinar tunisien',
+    symbol: 'د.ت',
+    symbolPosition: 'after',
+    decimals: 3,
+    thousandSeparator: ' ',
+    decimalSeparator: ',',
+    exchangeRateToEUR: 3.4, // Variable
+  },
 };
 
 // PAYS SUPPORTÉS PAR CASSKAI
@@ -182,7 +254,7 @@ export const COUNTRIES: Record<string, Country> = {
     flag: '🇳🇬',
     continent: 'Africa',
     region: 'Afrique de l\'Ouest',
-    currency: 'USD', // Temporaire - utilise USD en attendant NGN
+    currency: 'NGN',
     languages: ['en'],
     timezone: 'Africa/Lagos',
     phoneCode: '+234',
@@ -191,14 +263,14 @@ export const COUNTRIES: Record<string, Country> = {
       example: 'RC123456',
     },
   },
-  
+
   GH: {
     code: 'GH',
     name: 'Ghana',
     flag: '🇬🇭',
     continent: 'Africa',
     region: 'Afrique de l\'Ouest',
-    currency: 'USD', // Temporaire - utilise USD en attendant GHS
+    currency: 'GHS',
     languages: ['en'],
     timezone: 'Africa/Accra',
     phoneCode: '+233',
@@ -248,7 +320,7 @@ export const COUNTRIES: Record<string, Country> = {
     flag: '🇪🇬',
     continent: 'Africa',
     region: 'Afrique du Nord',
-    currency: 'USD', // Temporaire - utilise USD en attendant EGP
+    currency: 'EGP',
     languages: ['ar', 'en'],
     timezone: 'Africa/Cairo',
     phoneCode: '+20',
@@ -282,7 +354,7 @@ export const COUNTRIES: Record<string, Country> = {
     flag: '🇿🇦',
     continent: 'Africa',
     region: 'Afrique Australe',
-    currency: 'USD', // Temporaire - utilise USD en attendant ZAR
+    currency: 'ZAR',
     languages: ['en', 'af'],
     timezone: 'Africa/Johannesburg',
     phoneCode: '+27',
@@ -341,7 +413,13 @@ export const SUPPORTED_CURRENCIES = [
   { value: 'XAF', label: '🌍 Franc CFA Central (XAF)', priority: 3 },
   { value: 'USD', label: '🇺🇸 Dollar US (USD)', priority: 4 },
   { value: 'MAD', label: '🇲🇦 Dirham (MAD)', priority: 5 },
-  { value: 'KES', label: '🇰🇪 Shilling (KES)', priority: 6 },
+  { value: 'KES', label: '🇰🇪 Shilling kenyan (KES)', priority: 6 },
+  { value: 'NGN', label: '🇳🇬 Naira (NGN)', priority: 7 },
+  { value: 'GHS', label: '🇬🇭 Cedi (GHS)', priority: 8 },
+  { value: 'ZAR', label: '🇿🇦 Rand (ZAR)', priority: 9 },
+  { value: 'DZD', label: '🇩🇿 Dinar algérien (DZD)', priority: 10 },
+  { value: 'TND', label: '🇹🇳 Dinar tunisien (TND)', priority: 11 },
+  { value: 'EGP', label: '🇪🇬 Livre égyptienne (EGP)', priority: 12 },
 ];
 
 // FUSEAUX HORAIRES SUPPORTÉS

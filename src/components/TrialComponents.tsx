@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { CalendarDays, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-
+import { logger } from '@/lib/logger';
 export const TrialStatusCard: React.FC = () => {
   const {
     trialInfo,
@@ -19,14 +19,12 @@ export const TrialStatusCard: React.FC = () => {
     isExpired,
     isActive
   } = useTrial();
-
   const handleCreateTrial = async () => {
     const result = await createTrial();
     if (!result.success) {
-      console.error('Erreur lors de la création de l\'essai:', result.error);
+      logger.error('TrialComponents', 'Erreur lors de la création de l\'essai:', result.error);
     }
   };
-
   if (isLoading) {
     return (
       <Card>
@@ -45,7 +43,6 @@ export const TrialStatusCard: React.FC = () => {
       </Card>
     );
   }
-
   if (error) {
     return (
       <Alert variant="destructive">
@@ -54,7 +51,6 @@ export const TrialStatusCard: React.FC = () => {
       </Alert>
     );
   }
-
   // Aucun essai actif
   if (!trialInfo) {
     return (
@@ -105,10 +101,8 @@ export const TrialStatusCard: React.FC = () => {
       </Card>
     );
   }
-
   // Essai actif
   const progressValue = Math.max(0, ((30 - daysRemaining) / 30) * 100);
-
   return (
     <Card>
       <CardHeader>
@@ -136,7 +130,6 @@ export const TrialStatusCard: React.FC = () => {
             <Progress value={progressValue} className="w-full" />
           </div>
         )}
-
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-muted-foreground">Date de début</p>
@@ -151,7 +144,6 @@ export const TrialStatusCard: React.FC = () => {
             </p>
           </div>
         </div>
-
         {isExpired && (
           <Alert>
             <XCircle className="h-4 w-4" />
@@ -161,7 +153,6 @@ export const TrialStatusCard: React.FC = () => {
             </AlertDescription>
           </Alert>
         )}
-
         {daysRemaining <= 7 && !isExpired && (
           <Alert>
             <AlertTriangle className="h-4 w-4" />
@@ -175,15 +166,13 @@ export const TrialStatusCard: React.FC = () => {
     </Card>
   );
 };
-
 export const TrialActionsCard: React.FC = () => {
   const { trialInfo, convertTrialToPaid, cancelTrial, isActive } = useTrial();
-
   const handleConvertToPaid = async () => {
     // TODO: Ouvrir un modal de sélection de plan
     const result = await convertTrialToPaid('starter_monthly');
     if (!result.success) {
-      console.error('Erreur lors de la conversion:', result.error);
+      logger.error('TrialComponents', 'Erreur lors de la conversion:', result.error);
       toast({
         title: "Erreur",
         description: result.error || 'Erreur lors de la conversion vers un abonnement payant',
@@ -197,11 +186,10 @@ export const TrialActionsCard: React.FC = () => {
       });
     }
   };
-
   const handleCancelTrial = async () => {
     const result = await cancelTrial('Annulé par l\'utilisateur');
     if (!result.success) {
-      console.error('Erreur lors de l\'annulation:', result.error);
+      logger.error('TrialComponents', 'Erreur lors de l\'annulation:', result.error);
       // Afficher un message d'erreur plus user-friendly
       if (result.error?.includes('check constraint')) {
         toast({
@@ -224,11 +212,9 @@ export const TrialActionsCard: React.FC = () => {
       });
     }
   };
-
   if (!trialInfo || !isActive) {
     return null;
   }
-
   return (
     <Card>
       <CardHeader>

@@ -2,7 +2,6 @@
  * CassKai - Simulateur de Prêt Professionnel
  * Calcul de mensualités et tableau d'amortissement
  */
-
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -29,7 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-
+import { logger } from '@/lib/logger';
 interface AmortizationLine {
   period: number;
   date: Date;
@@ -38,7 +37,6 @@ interface AmortizationLine {
   interest: number;
   remainingBalance: number;
 }
-
 interface LoanSimulationResult {
   loanAmount: number;
   annualRate: number;
@@ -48,7 +46,6 @@ interface LoanSimulationResult {
   totalInterest: number;
   amortizationSchedule: AmortizationLine[];
 }
-
 const LoanSimulator: React.FC = () => {
   // Paramètres du prêt
   const [loanAmount, setLoanAmount] = useState<number>(100000);
@@ -58,34 +55,27 @@ const LoanSimulator: React.FC = () => {
   const [startDate, setStartDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
-
   // Calcul du prêt
   const loanResult = useMemo((): LoanSimulationResult | null => {
     if (loanAmount <= 0 || annualRate < 0 || durationYears <= 0) {
       return null;
     }
-
     const durationMonths = durationYears * 12;
     const monthlyRate = annualRate / 100 / 12;
     const startDateObj = new Date(startDate);
-
     let monthlyPayment: number;
     const amortizationSchedule: AmortizationLine[] = [];
-
     if (amortizationType === 'constant') {
       // Mensualités constantes (annuités)
       monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, durationMonths)) /
                       (Math.pow(1 + monthlyRate, durationMonths) - 1);
-
       let remainingBalance = loanAmount;
       for (let i = 1; i <= durationMonths; i++) {
         const interest = remainingBalance * monthlyRate;
         const principal = monthlyPayment - interest;
         remainingBalance = Math.max(0, remainingBalance - principal);
-
         const paymentDate = new Date(startDateObj);
         paymentDate.setMonth(paymentDate.getMonth() + i);
-
         amortizationSchedule.push({
           period: i,
           date: paymentDate,
@@ -99,15 +89,12 @@ const LoanSimulator: React.FC = () => {
       // Amortissement constant (capital constant)
       const constantPrincipal = loanAmount / durationMonths;
       let remainingBalance = loanAmount;
-
       for (let i = 1; i <= durationMonths; i++) {
         const interest = remainingBalance * monthlyRate;
         const payment = constantPrincipal + interest;
         remainingBalance = Math.max(0, remainingBalance - constantPrincipal);
-
         const paymentDate = new Date(startDateObj);
         paymentDate.setMonth(paymentDate.getMonth() + i);
-
         amortizationSchedule.push({
           period: i,
           date: paymentDate,
@@ -117,14 +104,11 @@ const LoanSimulator: React.FC = () => {
           remainingBalance
         });
       }
-
       // Mensualité moyenne
       monthlyPayment = amortizationSchedule.reduce((sum, line) => sum + line.payment, 0) / durationMonths;
     }
-
     const totalPayment = amortizationSchedule.reduce((sum, line) => sum + line.payment, 0);
     const totalInterest = totalPayment - loanAmount;
-
     return {
       loanAmount,
       annualRate,
@@ -135,7 +119,6 @@ const LoanSimulator: React.FC = () => {
       amortizationSchedule
     };
   }, [loanAmount, annualRate, durationYears, amortizationType, startDate]);
-
   // Formate une devise
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -145,17 +128,14 @@ const LoanSimulator: React.FC = () => {
       maximumFractionDigits: 2
     }).format(amount);
   };
-
   // Export PDF (placeholder)
   const exportToPDF = () => {
-    console.log('Export PDF - Fonctionnalité à venir');
+    logger.debug('LoanSimulator', 'Export PDF - Fonctionnalité à venir');
   };
-
   // Export Excel (placeholder)
   const exportToExcel = () => {
-    console.log('Export Excel - Fonctionnalité à venir');
+    logger.debug('LoanSimulator', 'Export Excel - Fonctionnalité à venir');
   };
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* En-tête */}
@@ -169,7 +149,6 @@ const LoanSimulator: React.FC = () => {
             Calculez vos mensualités et visualisez votre tableau d'amortissement
           </p>
         </div>
-
         <div className="flex items-center space-x-2">
           <Button variant="outline" onClick={exportToPDF} className="flex items-center space-x-2">
             <Download className="w-4 h-4" />
@@ -181,7 +160,6 @@ const LoanSimulator: React.FC = () => {
           </Button>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* FORMULAIRE */}
         <Card className="lg:col-span-1">
@@ -191,7 +169,6 @@ const LoanSimulator: React.FC = () => {
               <span>Paramètres du prêt</span>
             </CardTitle>
           </CardHeader>
-
           <CardContent className="space-y-4">
             {/* Montant */}
             <div className="space-y-2">
@@ -209,7 +186,6 @@ const LoanSimulator: React.FC = () => {
                 placeholder="Ex: 100000"
               />
             </div>
-
             {/* Taux d'intérêt */}
             <div className="space-y-2">
               <Label htmlFor="annualRate" className="flex items-center space-x-1">
@@ -227,7 +203,6 @@ const LoanSimulator: React.FC = () => {
                 placeholder="Ex: 3.5"
               />
             </div>
-
             {/* Durée */}
             <div className="space-y-2">
               <Label htmlFor="durationYears" className="flex items-center space-x-1">
@@ -248,7 +223,6 @@ const LoanSimulator: React.FC = () => {
                 Soit {durationYears * 12} mensualités
               </p>
             </div>
-
             {/* Type d'amortissement */}
             <div className="space-y-2">
               <Label htmlFor="amortizationType">Type d'amortissement</Label>
@@ -270,7 +244,6 @@ const LoanSimulator: React.FC = () => {
                   : 'Capital constant, mensualités décroissantes'}
               </p>
             </div>
-
             {/* Date de début */}
             <div className="space-y-2">
               <Label htmlFor="startDate">Date de début</Label>
@@ -281,7 +254,6 @@ const LoanSimulator: React.FC = () => {
                 onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
-
             {/* Information */}
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 flex items-start space-x-2">
               <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
@@ -291,7 +263,6 @@ const LoanSimulator: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-
         {/* RÉSULTATS */}
         <div className="lg:col-span-2 space-y-6">
           {!loanResult ? (
@@ -323,7 +294,6 @@ const LoanSimulator: React.FC = () => {
                     <span>Résumé du prêt</span>
                   </CardTitle>
                 </CardHeader>
-
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {/* Mensualité */}
@@ -335,7 +305,6 @@ const LoanSimulator: React.FC = () => {
                         {formatCurrency(loanResult.monthlyPayment)}
                       </p>
                     </div>
-
                     {/* Coût total */}
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                       <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Coût total</p>
@@ -343,7 +312,6 @@ const LoanSimulator: React.FC = () => {
                         {formatCurrency(loanResult.totalPayment)}
                       </p>
                     </div>
-
                     {/* Intérêts totaux */}
                     <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                       <p className="text-xs text-red-600 dark:text-red-400 font-medium">Intérêts totaux</p>
@@ -354,7 +322,6 @@ const LoanSimulator: React.FC = () => {
                         {((loanResult.totalInterest / loanResult.loanAmount) * 100).toFixed(1)}% du capital
                       </p>
                     </div>
-
                     {/* Durée */}
                     <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <p className="text-xs text-green-600 dark:text-green-400 font-medium">Durée</p>
@@ -366,7 +333,6 @@ const LoanSimulator: React.FC = () => {
                       </p>
                     </div>
                   </div>
-
                   {/* Graphique simple (texte) */}
                   <div className="border-t pt-4">
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
@@ -387,7 +353,6 @@ const LoanSimulator: React.FC = () => {
                           />
                         </div>
                       </div>
-
                       <div>
                         <div className="flex items-center justify-between text-sm mb-1">
                           <span className="text-gray-600 dark:text-gray-400">Intérêts</span>
@@ -406,7 +371,6 @@ const LoanSimulator: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
-
               {/* Tableau d'amortissement */}
               <Card>
                 <CardHeader>
@@ -418,7 +382,6 @@ const LoanSimulator: React.FC = () => {
                     </CardTitle>
                   </div>
                 </CardHeader>
-
                 <CardContent>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -493,5 +456,4 @@ const LoanSimulator: React.FC = () => {
     </div>
   );
 };
-
 export default LoanSimulator;

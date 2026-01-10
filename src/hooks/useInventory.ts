@@ -13,6 +13,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 import {
   InventoryService,
@@ -153,17 +154,62 @@ export function useInventory(): UseInventoryReturn {
 
     try {
 
-      const response = await InventoryService.getInventoryItems(currentCompany.id, filters);
+      // ✅ Lire depuis la table `articles` au lieu de `inventory_items`
+      const { data: articlesData, error: articlesError } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('company_id', currentCompany.id)
+        .eq('is_active', true)
+        .order('updated_at', { ascending: false });
+
+      if (articlesError) throw articlesError;
+
+      // ✅ Mapper les articles vers le format InventoryItem
+      const mappedItems: InventoryItem[] = (articlesData || []).map(article => {
+        const currentStock = article.stock_quantity || 0;
+        const minStock = article.stock_min || 0;
+        const maxStock = article.stock_max || 0;
+
+        // Calculer le statut
+        let status: InventoryItem['status'] = 'active';
+        if (currentStock === 0) {
+          status = 'out_of_stock';
+        } else if (currentStock <= minStock) {
+          status = 'low_stock';
+        }
+
+        return {
+          id: article.id,
+          name: article.name || '',
+          reference: article.reference || '',
+          category: article.category,
+          unit: article.unit || 'pièce',
+          purchasePrice: article.purchase_price || 0,
+          salePrice: article.selling_price || 0,
+          currentStock,
+          minStock,
+          maxStock,
+          status,
+          totalValue: currentStock * (article.purchase_price || 0),
+          avgCost: article.purchase_price || 0,
+          location: article.warehouse_id || '',
+          warehouseId: article.warehouse_id,
+          supplierId: article.supplier_id,
+          supplierName: '', // Sera chargé via join si nécessaire
+          barcode: article.barcode,
+          description: article.description
+        };
+      });
 
       const filteredItems = filters?.status
-        ? response.filter((item) => item.status === filters.status)
-        : response;
+        ? mappedItems.filter((item) => item.status === filters.status)
+        : mappedItems;
 
       setItems(filteredItems);
 
       const uniqueCategories = Array.from(
         new Set(
-          response
+          mappedItems
             .map(item => item.category)
             .filter((category): category is string => Boolean(category))
         )
@@ -274,7 +320,30 @@ export function useInventory(): UseInventoryReturn {
 
     try {
 
-      await InventoryService.createInventoryItem(currentCompany.id, itemData);
+      // ✅ Créer directement dans la table `articles`
+      const { error } = await supabase
+        .from('articles')
+        .insert({
+          company_id: currentCompany.id,
+          reference: itemData.productCode,
+          name: itemData.productName,
+          description: itemData.description,
+          category: itemData.category,
+          unit: itemData.unit,
+          purchase_price: itemData.purchasePrice,
+          selling_price: itemData.salePrice,
+          tva_rate: itemData.taxRate,
+          barcode: itemData.barcode,
+          warehouse_id: itemData.warehouseId,
+          stock_quantity: itemData.initialQuantity || 0,
+          stock_min: itemData.reorderPoint || 0,
+          stock_max: itemData.reorderQuantity ? (itemData.reorderPoint || 0) + itemData.reorderQuantity : undefined,
+          supplier_id: itemData.supplierId,
+          supplier_reference: itemData.supplierReference,
+          is_active: true
+        });
+
+      if (error) throw error;
 
       await fetchItems();
 
@@ -300,7 +369,28 @@ export function useInventory(): UseInventoryReturn {
 
     try {
 
-      await InventoryService.updateInventoryItem(itemId, updates);
+      // ✅ Mettre à jour dans la table `articles`
+      const articleUpdates: Record<string, unknown> = {};
+      if (updates.name) articleUpdates.name = updates.name;
+      if (updates.reference) articleUpdates.reference = updates.reference;
+      if (updates.description !== undefined) articleUpdates.description = updates.description;
+      if (updates.category) articleUpdates.category = updates.category;
+      if (updates.unit) articleUpdates.unit = updates.unit;
+      if (updates.purchasePrice !== undefined) articleUpdates.purchase_price = updates.purchasePrice;
+      if (updates.salePrice !== undefined) articleUpdates.selling_price = updates.salePrice;
+      if (updates.currentStock !== undefined) articleUpdates.stock_quantity = updates.currentStock;
+      if (updates.minStock !== undefined) articleUpdates.stock_min = updates.minStock;
+      if (updates.maxStock !== undefined) articleUpdates.stock_max = updates.maxStock;
+      if (updates.barcode !== undefined) articleUpdates.barcode = updates.barcode;
+      if (updates.warehouseId) articleUpdates.warehouse_id = updates.warehouseId;
+      if (updates.supplierId !== undefined) articleUpdates.supplier_id = updates.supplierId;
+
+      const { error } = await supabase
+        .from('articles')
+        .update(articleUpdates)
+        .eq('id', itemId);
+
+      if (error) throw error;
 
       await fetchItems();
 
@@ -324,7 +414,13 @@ export function useInventory(): UseInventoryReturn {
 
     try {
 
-      await InventoryService.deleteInventoryItem(itemId);
+      // ✅ Soft delete dans la table `articles` (marquer comme inactif)
+      const { error } = await supabase
+        .from('articles')
+        .update({ is_active: false })
+        .eq('id', itemId);
+
+      if (error) throw error;
 
       await fetchItems();
 
@@ -406,7 +502,7 @@ export function useInventory(): UseInventoryReturn {
 
 
 
-  // Initial data load
+  // Initial data load - load items and metrics when company changes
 
   useEffect(() => {
 
@@ -416,11 +512,19 @@ export function useInventory(): UseInventoryReturn {
 
       fetchItems();
 
-      fetchCategories();
-
     }
 
-  }, [currentCompany?.id, fetchMetrics, fetchItems, fetchCategories]);
+  }, [currentCompany?.id, fetchMetrics, fetchItems]);
+
+
+
+  // Update categories when items change
+
+  useEffect(() => {
+
+    fetchCategories();
+
+  }, [fetchCategories]); // fetchCategories dépend de items, donc se met à jour quand items change
 
 
 

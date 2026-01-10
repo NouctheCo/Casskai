@@ -9,11 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase, handleSupabaseError } from '../lib/supabase';
-
 import { Enterprise, TaxRegime, EnterpriseSettings } from '../types/enterprise.types';
-
+import { logger } from '@/lib/logger';
 /**
  * Service for managing enterprise-related operations
  */
@@ -37,7 +35,6 @@ export const enterpriseService = {
           updated_at: string;
         } | null;
       };
-
       const { data: userCompanies, error: userCompaniesError } = await supabase
         .from('user_companies')
         .select(`
@@ -54,9 +51,7 @@ export const enterpriseService = {
             updated_at
           )
         `) as unknown as { data: SupabaseCompany[]; error: any };
-
       if (userCompaniesError) throw userCompaniesError;
-
       // Transform data to match Enterprise interface
       const enterprises: Enterprise[] = userCompanies
         .filter((uc: SupabaseCompany) => uc.companies) // Filter out null entries
@@ -100,17 +95,15 @@ export const enterpriseService = {
             }
           };
         });
-
       return { data: enterprises, error: null };
     } catch (error) {
-      console.error('Error fetching user enterprises:', error instanceof Error ? error.message : String(error));
+      logger.error('Enterprise', 'Error fetching user enterprises:', error instanceof Error ? error.message : String(error));
       return { 
         data: null, 
         error: new Error(handleSupabaseError(error))
       };
     }
   },
-
   /**
    * Create a new enterprise
    */
@@ -136,7 +129,6 @@ export const enterpriseService = {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
       if (!user) throw new Error('User not authenticated');
-
       // Prepare data for Supabase
       const companyData = {
         name: enterpriseData.name,
@@ -146,16 +138,13 @@ export const enterpriseService = {
         timezone: enterpriseData.settings.timezone,
         is_active: true
       };
-
       // Create company in Supabase
       const { data: newCompany, error: companyError } = await supabase
         .from('companies')
         .insert([companyData])
         .select()
         .single();
-
       if (companyError) throw companyError;
-
       // Link company to user
       const { error: linkError } = await supabase
         .from('user_companies')
@@ -164,9 +153,7 @@ export const enterpriseService = {
           company_id: newCompany.id,
           is_default: true // Make this the default company
         }]);
-
       if (linkError) throw linkError;
-
       // Convert to Enterprise model
       const newEnterprise: Enterprise = {
         id: newCompany.id,
@@ -184,17 +171,15 @@ export const enterpriseService = {
         isActive: newCompany.is_active !== false,
         settings: enterpriseData.settings
       };
-
       return { data: newEnterprise, error: null };
     } catch (error) {
-      console.error('Error creating enterprise:', error instanceof Error ? error.message : String(error));
+      logger.error('Enterprise', 'Error creating enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         data: null, 
         error: new Error(handleSupabaseError(error))
       };
     }
   },
-
   /**
    * Update an existing enterprise
    */
@@ -202,32 +187,27 @@ export const enterpriseService = {
     try {
       // Prepare data for Supabase
       const updateData: any = {};
-      
       if (data.name !== undefined) updateData.name = data.name;
       if (data.countryCode !== undefined) updateData.country = data.countryCode;
       if (data.currency !== undefined) updateData.default_currency = data.currency;
       if (data.isActive !== undefined) updateData.is_active = data.isActive;
       if (data.settings?.language !== undefined) updateData.default_locale = data.settings.language;
       if (data.settings?.timezone !== undefined) updateData.timezone = data.settings.timezone;
-
       // Update in Supabase
       const { error } = await supabase
         .from('companies')
         .update(updateData)
         .eq('id', id);
-
       if (error) throw error;
-
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error updating enterprise:', error instanceof Error ? error.message : String(error));
+      logger.error('Enterprise', 'Error updating enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         success: false, 
         error: new Error(handleSupabaseError(error))
       };
     }
   },
-
   /**
    * Delete an enterprise
    */
@@ -239,19 +219,16 @@ export const enterpriseService = {
         .from('companies')
         .delete()
         .eq('id', id);
-
       if (error) throw error;
-
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error deleting enterprise:', error instanceof Error ? error.message : String(error));
+      logger.error('Enterprise', 'Error deleting enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         success: false, 
         error: new Error(handleSupabaseError(error))
       };
     }
   },
-
   /**
    * Set an enterprise as the default for the current user
    */
@@ -261,27 +238,22 @@ export const enterpriseService = {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
       if (!user) throw new Error('User not authenticated');
-
       // First, set all user companies to not default
       const { error: resetError } = await supabase
         .from('user_companies')
         .update({ is_default: false })
         .eq('user_id', user.id);
-
       if (resetError) throw resetError;
-
       // Then set the selected company as default
       const { error: updateError } = await supabase
         .from('user_companies')
         .update({ is_default: true })
         .eq('user_id', user.id)
         .eq('company_id', id);
-
       if (updateError) throw updateError;
-
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error setting default enterprise:', error instanceof Error ? error.message : String(error));
+      logger.error('Enterprise', 'Error setting default enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         success: false, 
         error: new Error(handleSupabaseError(error))

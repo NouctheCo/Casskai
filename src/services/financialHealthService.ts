@@ -9,16 +9,14 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Service pour calculer dynamiquement le score de santé financière
  * Basé sur des métriques réelles extraites de la base de données
  */
-
 import { supabase } from '@/lib/supabase';
 import { subMonths } from 'date-fns';
 import type { FinancialHealthScore } from '@/types/enterprise-dashboard.types';
-
+import { logger } from '@/lib/logger';
 interface FinancialData {
   revenue: number;
   expenses: number;
@@ -28,17 +26,14 @@ interface FinancialData {
   currentLiabilities: number;
   cashBalance: number;
 }
-
 class FinancialHealthService {
   private static instance: FinancialHealthService;
-
   static getInstance(): FinancialHealthService {
     if (!this.instance) {
       this.instance = new FinancialHealthService();
     }
     return this.instance;
   }
-
   /**
    * Calcule le score de santé financière global
    */
@@ -46,13 +41,11 @@ class FinancialHealthService {
     try {
       // Récupérer les données financières
       const financialData = await this.getFinancialData(companyId);
-
       // Si aucune donnée n'est disponible, retourner null au lieu de valeurs mockées
       if (!financialData || this.isDataEmpty(financialData)) {
-        console.log('No financial data available for company:', companyId);
+        logger.debug('FinancialHealth', 'No financial data available for company:', companyId);
         return null;
       }
-
       // Calculer chaque score individuellement
       const liquidityScore = this.calculateLiquidityScore(financialData);
       const profitabilityScore = this.calculateProfitabilityScore(financialData);
@@ -60,7 +53,6 @@ class FinancialHealthService {
       const growthScore = await this.calculateGrowthScore(companyId, financialData);
       const riskScore = this.calculateRiskScore(financialData);
       const sustainabilityScore = this.calculateSustainabilityScore(financialData);
-
       // Score global pondéré
       const overallScore = Math.round(
         liquidityScore * 0.20 +
@@ -70,7 +62,6 @@ class FinancialHealthService {
         riskScore * 0.10 +
         sustainabilityScore * 0.10
       );
-
       // Générer des recommandations basées sur les scores
       const recommendations = this.generateRecommendations({
         liquidity: liquidityScore,
@@ -80,14 +71,12 @@ class FinancialHealthService {
         risk: riskScore,
         sustainability: sustainabilityScore
       });
-
       // Identifier les alertes critiques
       const criticalAlerts = this.identifyCriticalAlerts({
         liquidity: liquidityScore,
         profitability: profitabilityScore,
         risk: riskScore
       }, financialData);
-
       return {
         overall_score: overallScore,
         liquidity_score: liquidityScore,
@@ -100,13 +89,11 @@ class FinancialHealthService {
         critical_alerts: criticalAlerts,
         last_updated: new Date().toISOString()
       };
-
     } catch (error) {
-      console.error('Error calculating health score:', error);
+      logger.error('FinancialHealth', 'Error calculating health score:', error);
       return null;
     }
   }
-
   /**
    * Vérifie si les données financières sont vides
    */
@@ -116,7 +103,6 @@ class FinancialHealthService {
            data.assets === 0 &&
            data.liabilities === 0;
   }
-
   /**
    * Récupère les données financières depuis la base
    */
@@ -125,7 +111,6 @@ class FinancialHealthService {
       // Période : 12 derniers mois
       const endDate = new Date();
       const startDate = subMonths(endDate, 12);
-
       // D'abord, récupérer les IDs des écritures dans la période
       const { data: journalEntries } = await supabase
         .from('journal_entries')
@@ -134,13 +119,10 @@ class FinancialHealthService {
         .in('status', ['posted', 'validated', 'imported'])
         .gte('entry_date', startDate.toISOString().split('T')[0])
         .lte('entry_date', endDate.toISOString().split('T')[0]);
-
       if (!journalEntries || journalEntries.length === 0) {
         return null;
       }
-
       const entryIds = journalEntries.map(e => e.id);
-
       // Récupérer les lignes d'écritures comptables avec les comptes
       const { data: entries, error } = await supabase
         .from('journal_entry_lines')
@@ -150,16 +132,13 @@ class FinancialHealthService {
           account:chart_of_accounts!journal_entry_lines_account_id_fkey(account_number)
         `)
         .in('journal_entry_id', entryIds);
-
       if (error) {
-        console.error('Error fetching journal entries:', error);
+        logger.error('FinancialHealth', 'Error fetching journal entries:', error);
         return null;
       }
-
       if (!entries || entries.length === 0) {
         return null;
       }
-
       // Calculer les métriques par classe de compte
       let revenue = 0;        // Classe 7
       let expenses = 0;       // Classe 6
@@ -168,15 +147,12 @@ class FinancialHealthService {
       let liabilities = 0;    // Classe 1 (capitaux permanents)
       let currentLiabilities = 0; // Classe 4 (dettes)
       let cashBalance = 0;    // Classe 5 (comptes financiers)
-
       entries.forEach(entry => {
         if (!(entry as any).account?.account_number) return;
-
         const accountClass = (entry as any).account.account_number.charAt(0);
         const debit = Number((entry as any).debit_amount) || 0;
         const credit = Number((entry as any).credit_amount) || 0;
         const netAmount = debit - credit;
-
         switch (accountClass) {
           case '7': // Produits
             revenue += credit - debit;
@@ -203,7 +179,6 @@ class FinancialHealthService {
             break;
         }
       });
-
       return {
         revenue: Math.abs(revenue),
         expenses: Math.abs(expenses),
@@ -213,13 +188,11 @@ class FinancialHealthService {
         currentLiabilities: Math.abs(currentLiabilities),
         cashBalance
       };
-
     } catch (error) {
-      console.error('Error in getFinancialData:', error);
+      logger.error('FinancialHealth', 'Error in getFinancialData:', error);
       return null;
     }
   }
-
   /**
    * Score de liquidité (capacité à couvrir les dettes court terme)
    * Ratio de liquidité = Actifs courants / Passifs courants
@@ -228,9 +201,7 @@ class FinancialHealthService {
     if (data.currentLiabilities === 0) {
       return data.currentAssets > 0 ? 100 : 50;
     }
-
     const liquidityRatio = (data.currentAssets + data.cashBalance) / data.currentLiabilities;
-
     // Ratio idéal : > 2.0 (100%), Acceptable: 1.0-2.0, Critique: < 1.0
     if (liquidityRatio >= 2.0) return 100;
     if (liquidityRatio >= 1.5) return 85;
@@ -238,7 +209,6 @@ class FinancialHealthService {
     if (liquidityRatio >= 0.5) return 40;
     return 20;
   }
-
   /**
    * Score de rentabilité (capacité à générer des bénéfices)
    * Marge nette = (Revenus - Dépenses) / Revenus
@@ -247,10 +217,8 @@ class FinancialHealthService {
     if (data.revenue === 0) {
       return 0; // Pas de revenus = pas de rentabilité
     }
-
     const netIncome = data.revenue - data.expenses;
     const profitMargin = (netIncome / data.revenue) * 100;
-
     // Marge > 20% = Excellent, 10-20% = Bon, 0-10% = Acceptable, < 0% = Perte
     if (profitMargin >= 20) return 100;
     if (profitMargin >= 15) return 85;
@@ -260,21 +228,17 @@ class FinancialHealthService {
     if (profitMargin >= -10) return 25;
     return 10;
   }
-
   /**
    * Score d'efficacité (gestion des ressources)
    * ROA = Résultat net / Total actifs
    */
   private calculateEfficiencyScore(data: FinancialData): number {
     const totalAssets = data.assets + data.currentAssets + data.cashBalance;
-
     if (totalAssets === 0) {
       return 50; // Score neutre si pas d'actifs
     }
-
     const netIncome = data.revenue - data.expenses;
     const roa = (netIncome / totalAssets) * 100;
-
     // ROA > 10% = Excellent, 5-10% = Bon, 0-5% = Moyen, < 0% = Faible
     if (roa >= 10) return 100;
     if (roa >= 7) return 80;
@@ -283,7 +247,6 @@ class FinancialHealthService {
     if (roa >= 0) return 35;
     return 20;
   }
-
   /**
    * Score de croissance (évolution du CA sur 3 mois)
    */
@@ -292,7 +255,6 @@ class FinancialHealthService {
       // Comparer avec il y a 3 mois
       const endDate3MonthsAgo = subMonths(new Date(), 3);
       const startDate3MonthsAgo = subMonths(endDate3MonthsAgo, 12);
-
       // D'abord, récupérer les IDs des écritures de la période précédente
       const { data: oldJournalEntries } = await supabase
         .from('journal_entries')
@@ -301,13 +263,10 @@ class FinancialHealthService {
         .in('status', ['posted', 'validated', 'imported'])
         .gte('entry_date', startDate3MonthsAgo.toISOString().split('T')[0])
         .lte('entry_date', endDate3MonthsAgo.toISOString().split('T')[0]);
-
       if (!oldJournalEntries || oldJournalEntries.length === 0) {
         return 50; // Pas assez d'historique
       }
-
       const oldEntryIds = oldJournalEntries.map(e => e.id);
-
       const { data: oldEntries } = await supabase
         .from('journal_entry_lines')
         .select(`
@@ -316,7 +275,6 @@ class FinancialHealthService {
           account:chart_of_accounts!journal_entry_lines_account_id_fkey(account_number)
         `)
         .in('journal_entry_id', oldEntryIds);
-
       let oldRevenue = 0;
       (oldEntries || []).forEach(entry => {
         if ((entry as any).account?.account_number?.charAt(0) === '7') {
@@ -325,13 +283,10 @@ class FinancialHealthService {
           oldRevenue += credit - debit;
         }
       });
-
       if (oldRevenue === 0) {
         return currentData.revenue > 0 ? 100 : 0;
       }
-
       const growthRate = ((currentData.revenue - Math.abs(oldRevenue)) / Math.abs(oldRevenue)) * 100;
-
       // Croissance > 20% = Excellent, 10-20% = Bon, 0-10% = Stable, < 0% = Déclin
       if (growthRate >= 20) return 100;
       if (growthRate >= 15) return 85;
@@ -341,26 +296,21 @@ class FinancialHealthService {
       if (growthRate >= -5) return 40;
       if (growthRate >= -10) return 25;
       return 10;
-
     } catch (error) {
-      console.error('Error calculating growth score:', error);
+      logger.error('FinancialHealth', 'Error calculating growth score:', error);
       return 50;
     }
   }
-
   /**
    * Score de risque (endettement et solvabilité)
    * Ratio d'endettement = Dettes / Actifs
    */
   private calculateRiskScore(data: FinancialData): number {
     const totalAssets = data.assets + data.currentAssets + data.cashBalance;
-
     if (totalAssets === 0) {
       return data.liabilities > 0 ? 0 : 100;
     }
-
     const debtRatio = (data.liabilities + data.currentLiabilities) / totalAssets;
-
     // Moins d'endettement = Moins de risque = Score élevé
     // Ratio < 0.3 = Excellent, 0.3-0.5 = Bon, 0.5-0.7 = Acceptable, > 0.7 = Risqué
     if (debtRatio <= 0.3) return 100;
@@ -370,20 +320,16 @@ class FinancialHealthService {
     if (debtRatio <= 0.9) return 25;
     return 10;
   }
-
   /**
    * Score de durabilité (réserves de trésorerie)
    * Runway = Trésorerie / (Dépenses mensuelles moyennes)
    */
   private calculateSustainabilityScore(data: FinancialData): number {
     const monthlyExpenses = data.expenses / 12;
-
     if (monthlyExpenses === 0) {
       return data.cashBalance > 0 ? 100 : 50;
     }
-
     const runway = data.cashBalance / monthlyExpenses;
-
     // Runway > 12 mois = Excellent, 6-12 = Bon, 3-6 = Acceptable, < 3 = Critique
     if (runway >= 12) return 100;
     if (runway >= 9) return 85;
@@ -392,7 +338,6 @@ class FinancialHealthService {
     if (runway >= 1) return 30;
     return 15;
   }
-
   /**
    * Génère des recommandations basées sur les scores
    */
@@ -405,7 +350,6 @@ class FinancialHealthService {
     sustainability: number;
   }): Array<{ title: string; description: string; priority: 'low' | 'medium' | 'high'; impact: string }> {
     const recommendations = [];
-
     if (scores.liquidity < 50) {
       recommendations.push({
         title: 'Améliorer la liquidité',
@@ -414,7 +358,6 @@ class FinancialHealthService {
         impact: 'Critique pour la solvabilité à court terme'
       });
     }
-
     if (scores.profitability < 50) {
       recommendations.push({
         title: 'Optimiser la rentabilité',
@@ -423,7 +366,6 @@ class FinancialHealthService {
         impact: 'Impact direct sur la viabilité long terme'
       });
     }
-
     if (scores.growth < 40) {
       recommendations.push({
         title: 'Relancer la croissance',
@@ -432,7 +374,6 @@ class FinancialHealthService {
         impact: 'Nécessaire pour la compétitivité'
       });
     }
-
     if (scores.sustainability < 50) {
       recommendations.push({
         title: 'Renforcer les réserves de trésorerie',
@@ -441,10 +382,8 @@ class FinancialHealthService {
         impact: 'Essentiel pour la résilience'
       });
     }
-
     return recommendations;
   }
-
   /**
    * Identifie les alertes critiques
    */
@@ -454,25 +393,19 @@ class FinancialHealthService {
     risk: number;
   }, data: FinancialData): string[] {
     const alerts = [];
-
     if (scores.liquidity < 30) {
       alerts.push('⚠️ Risque de liquidité critique - Actifs courants insuffisants');
     }
-
     if (scores.profitability < 20) {
       alerts.push('⚠️ Pertes importantes détectées - Révision du modèle économique nécessaire');
     }
-
     if (scores.risk < 30) {
       alerts.push('⚠️ Endettement élevé - Risque de solvabilité');
     }
-
     if (data.cashBalance < 0) {
       alerts.push('⚠️ Trésorerie négative - Action immédiate requise');
     }
-
     return alerts;
   }
 }
-
 export const financialHealthService = FinancialHealthService.getInstance();

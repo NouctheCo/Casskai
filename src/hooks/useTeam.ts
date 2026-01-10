@@ -9,13 +9,12 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { useState, useEffect, useCallback } from 'react';
 import { teamService, TeamMember, Invitation, InviteData, SubscriptionSeats } from '@/services/teamService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-
+import { logger } from '@/lib/logger';
 export function useTeam() {
   const { currentCompany } = useAuth();
   const { t } = useTranslation();
@@ -30,16 +29,13 @@ export function useTeam() {
   const [seatPrice, setSeatPrice] = useState<number>(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const loadData = useCallback(async () => {
     if (!currentCompany?.id) {
       setLoading(false);
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
       const [membersData, invitationsData, modulesData, seatsData, seatPriceData] = await Promise.all([
         teamService.getTeamMembers(currentCompany.id),
@@ -48,7 +44,6 @@ export function useTeam() {
         teamService.getSubscriptionSeats(currentCompany.id),
         teamService.getSeatPrice(currentCompany.id)
       ]);
-
       setMembers(membersData);
       setInvitations(invitationsData);
       setModules(modulesData);
@@ -58,38 +53,32 @@ export function useTeam() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors du chargement de l\'équipe';
       setError(errorMessage);
-      console.error('[useTeam] Error loading data:', err);
+      logger.error('UseTeam', '[useTeam] Error loading data:', err);
     } finally {
       setLoading(false);
     }
   }, [currentCompany?.id]);
-
   useEffect(() => {
     loadData();
   }, [loadData]);
-
   const sendInvitation = async (data: InviteData) => {
     if (!currentCompany?.id) {
       toast.error(t('team.no_company'));
       return { success: false, error: 'No company selected' };
     }
-
     // Vérifier si on a des sièges disponibles
     if (seats.seats_available <= 0) {
       toast.error(t('team.no_seats_available'));
       return { success: false, error: 'No seats available' };
     }
-
     try {
       const result = await teamService.sendInvitation(currentCompany.id, data);
-
       if (result.success) {
         toast.success(t('team.invitation_sent'));
         await loadData();
       } else {
         toast.error(result.error || t('team.invitation_error'));
       }
-
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'envoi';
@@ -97,7 +86,6 @@ export function useTeam() {
       return { success: false, error: errorMessage };
     }
   };
-
   const cancelInvitation = async (invitationId: string) => {
     try {
       await teamService.cancelInvitation(invitationId);
@@ -109,13 +97,11 @@ export function useTeam() {
       throw err;
     }
   };
-
   const resendInvitation = async (invitationId: string) => {
     if (!currentCompany?.id) {
       toast.error(t('team.no_company'));
       return;
     }
-
     try {
       await teamService.resendInvitation(invitationId, currentCompany.id);
       toast.success(t('team.invitation_resent'));
@@ -126,7 +112,6 @@ export function useTeam() {
       throw err;
     }
   };
-
   const updateMember = async (memberId: string, role: string, allowedModules?: string[]) => {
     try {
       await teamService.updateMemberRole(memberId, role, allowedModules);
@@ -138,13 +123,11 @@ export function useTeam() {
       throw err;
     }
   };
-
   const removeMember = async (memberId: string) => {
     if (!currentCompany?.id) {
       toast.error(t('team.no_company'));
       return;
     }
-
     try {
       await teamService.removeMember(memberId, currentCompany.id);
       toast.success(t('team.member_removed'));
@@ -155,16 +138,13 @@ export function useTeam() {
       throw err;
     }
   };
-
   const canInvite = useCallback(() => {
     if (!currentCompany?.id) return false;
     if (seats.seats_available <= 0) return false;
-
     // Vérifier si l'utilisateur a le rôle owner ou admin
     // Cette vérification devrait être faite côté serveur également
     return true;
   }, [currentCompany?.id, seats.seats_available]);
-
   return {
     members,
     invitations,

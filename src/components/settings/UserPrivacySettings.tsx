@@ -6,12 +6,10 @@
  * - Gérer ses consentements
  * - Supprimer son compte (Article 17 RGPD)
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -32,7 +30,7 @@ import {
   useAccountDeletion
 } from '@/services/rgpdService';
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export function UserPrivacySettings() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -40,7 +38,6 @@ export function UserPrivacySettings() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [consents, setConsents] = useState<any[]>([]);
   const [loadingConsents, setLoadingConsents] = useState(true);
-
   // Hooks RGPD
   const { exportData, loading: exportLoading, error: exportError, canExport, nextAllowedAt } = useUserDataExport();
   const {
@@ -51,7 +48,6 @@ export function UserPrivacySettings() {
     error: deletionError,
     deletionStatus
   } = useAccountDeletion();
-
   // Charger les consentements et le statut de suppression au montage
   useEffect(() => {
     if (user?.id) {
@@ -59,10 +55,8 @@ export function UserPrivacySettings() {
       checkStatus(user.id);
     }
   }, [user?.id]);
-
   const loadConsents = async () => {
     if (!user?.id) return;
-
     try {
       setLoadingConsents(true);
       const { data, error } = await supabase
@@ -70,22 +64,18 @@ export function UserPrivacySettings() {
         .select('*')
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
-
       if (error) throw error;
       setConsents(data || []);
     } catch (error) {
-      console.error('Error loading consents:', error);
+      logger.error('UserPrivacySettings', 'Error loading consents:', error);
     } finally {
       setLoadingConsents(false);
     }
   };
-
   const handleExportData = async () => {
     if (!user?.id) return;
-
     try {
       const result = await exportData(user.id);
-
       if (result.success) {
         toast({
           title: '✅ Export réussi',
@@ -106,13 +96,10 @@ export function UserPrivacySettings() {
       });
     }
   };
-
   const handleRequestDeletion = async () => {
     if (!user?.id) return;
-
     try {
       const result = await requestDeletion(user.id, deletionReason);
-
       if (result.success && 'deletion_request' in result && result.deletion_request) {
         toast({
           title: '🕒 Demande enregistrée',
@@ -135,13 +122,10 @@ export function UserPrivacySettings() {
       });
     }
   };
-
   const handleCancelDeletion = async () => {
     if (!deletionStatus?.id) return;
-
     try {
       const result = await cancelRequest(deletionStatus.id);
-
       if (result.success) {
         toast({
           title: '✅ Demande annulée',
@@ -162,10 +146,8 @@ export function UserPrivacySettings() {
       });
     }
   };
-
   const handleUpdateConsent = async (consentId: string, consentType: string, newValue: boolean) => {
     if (!user?.id) return;
-
     try {
       const { error } = await supabase
         .from('rgpd_consents')
@@ -178,14 +160,11 @@ export function UserPrivacySettings() {
           )
         })
         .eq('id', consentId);
-
       if (error) throw error;
-
       toast({
         title: '✅ Consentement mis à jour',
         description: `Votre préférence pour "${getConsentLabel(consentType)}" a été enregistrée.`,
       });
-
       // Recharger les consentements
       await loadConsents();
     } catch (_error) {
@@ -196,7 +175,6 @@ export function UserPrivacySettings() {
       });
     }
   };
-
   const getConsentLabel = (type: string): string => {
     const labels: Record<string, string> = {
       COOKIES_ESSENTIAL: 'Cookies essentiels',
@@ -208,7 +186,6 @@ export function UserPrivacySettings() {
     };
     return labels[type] || type;
   };
-
   const getConsentDescription = (type: string): string => {
     const descriptions: Record<string, string> = {
       COOKIES_ESSENTIAL: 'Nécessaires au fonctionnement du site (obligatoires)',
@@ -220,7 +197,6 @@ export function UserPrivacySettings() {
     };
     return descriptions[type] || 'Consentement RGPD';
   };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       day: '2-digit',
@@ -228,7 +204,6 @@ export function UserPrivacySettings() {
       year: 'numeric'
     });
   };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -241,7 +216,6 @@ export function UserPrivacySettings() {
           </p>
         </div>
       </div>
-
       {/* Demande de suppression en cours */}
       {deletionStatus && (
         <Alert className="border-orange-500 bg-orange-50 dark:bg-orange-900/20">
@@ -267,7 +241,6 @@ export function UserPrivacySettings() {
           </AlertDescription>
         </Alert>
       )}
-
       {/* Export de données */}
       <Card>
         <CardHeader>
@@ -297,7 +270,6 @@ export function UserPrivacySettings() {
               </ul>
             </div>
           </div>
-
           {!canExport && nextAllowedAt && (
             <Alert>
               <Clock className="h-4 w-4" />
@@ -307,7 +279,6 @@ export function UserPrivacySettings() {
               </AlertDescription>
             </Alert>
           )}
-
           <Button
             onClick={handleExportData}
             disabled={exportLoading || !canExport}
@@ -325,7 +296,6 @@ export function UserPrivacySettings() {
               </>
             )}
           </Button>
-
           {exportError && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
@@ -334,7 +304,6 @@ export function UserPrivacySettings() {
           )}
         </CardContent>
       </Card>
-
       {/* Gestion des consentements */}
       <Card>
         <CardHeader>
@@ -388,7 +357,6 @@ export function UserPrivacySettings() {
           )}
         </CardContent>
       </Card>
-
       {/* Suppression de compte */}
       {!deletionStatus && (
         <Card className="border-red-200 dark:border-red-900">
@@ -414,7 +382,6 @@ export function UserPrivacySettings() {
                 </ul>
               </AlertDescription>
             </Alert>
-
             {!showDeleteConfirm ? (
               <Button
                 onClick={() => setShowDeleteConfirm(true)}
@@ -429,7 +396,6 @@ export function UserPrivacySettings() {
                 <div className="font-semibold text-red-900 dark:text-red-200">
                   Confirmez la suppression de votre compte
                 </div>
-
                 <div>
                   <Label htmlFor="reason">Raison de la suppression (optionnel)</Label>
                   <Textarea
@@ -441,7 +407,6 @@ export function UserPrivacySettings() {
                     className="mt-2"
                   />
                 </div>
-
                 <div className="flex space-x-3">
                   <Button
                     onClick={handleRequestDeletion}
@@ -472,7 +437,6 @@ export function UserPrivacySettings() {
                     Annuler
                   </Button>
                 </div>
-
                 {deletionError && (
                   <Alert variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
@@ -484,7 +448,6 @@ export function UserPrivacySettings() {
           </CardContent>
         </Card>
       )}
-
       {/* Liens utiles */}
       <Card>
         <CardHeader>
@@ -522,7 +485,6 @@ export function UserPrivacySettings() {
           </div>
         </CardContent>
       </Card>
-
       {/* Contact DPO */}
       <div className="text-center py-4 text-sm text-gray-600 dark:text-gray-400">
         <p>Des questions sur vos données personnelles ?</p>

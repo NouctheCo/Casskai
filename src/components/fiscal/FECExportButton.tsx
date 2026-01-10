@@ -2,7 +2,6 @@
  * Bouton pour générer et télécharger l'export FEC (Fichier des Écritures Comptables)
  * Conforme à la réglementation DGFiP française
  */
-
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '../ui/dialog';
@@ -13,12 +12,11 @@ import { useToast } from '../ui/use-toast';
 import { downloadFECFile, previewFECExport } from '../../services/fecExportService';
 import { FileDown, Loader2, CheckCircle, AlertTriangle, FileText, Download } from 'lucide-react';
 import { Card } from '../ui/card';
-
+import { logger } from '@/lib/logger';
 interface FECExportButtonProps {
   companyId: string;
   companyName?: string;
 }
-
 export const FECExportButton: React.FC<FECExportButtonProps> = ({
   companyId,
   companyName = 'Entreprise'
@@ -37,27 +35,23 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
     };
     preview: any[];
   } | null>(null);
-
   // Période par défaut : année fiscale en cours (1er janvier → 31 décembre)
   const getDefaultPeriod = () => {
     const now = new Date();
     const year = now.getFullYear();
-
     return {
       start: `${year}-01-01`,
       end: `${year}-12-31`
     };
   };
-
   const [period, setPeriod] = useState(getDefaultPeriod());
-
   const handlePreview = async () => {
     setLoading(true);
     try {
       const result = await previewFECExport(companyId, period.start, period.end, 10);
       setPreview(result);
     } catch (error) {
-      console.error('Erreur aperçu FEC:', error);
+      logger.error('FECExportButton', 'Erreur aperçu FEC:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de générer l\'aperçu FEC',
@@ -67,20 +61,17 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
       setLoading(false);
     }
   };
-
   const handleDownload = async () => {
     setLoading(true);
     try {
       await downloadFECFile(companyId, period.start, period.end, companyName);
-
       toast({
         title: '✓ Export FEC téléchargé',
         description: `Fichier généré avec ${preview?.validation.total_lines || 0} lignes`,
       });
-
       setOpen(false);
     } catch (error) {
-      console.error('Erreur téléchargement FEC:', error);
+      logger.error('FECExportButton', 'Erreur téléchargement FEC:', error);
       toast({
         title: 'Erreur export FEC',
         description: error instanceof Error ? error.message : 'Impossible de télécharger le fichier FEC',
@@ -90,12 +81,10 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
       setLoading(false);
     }
   };
-
   const handleOpen = () => {
     setOpen(true);
     handlePreview();
   };
-
   return (
     <>
       <Button
@@ -106,7 +95,6 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
         <FileDown className="w-4 h-4" />
         Export FEC
       </Button>
-
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -118,7 +106,6 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
               Génère un fichier FEC conforme à la réglementation DGFiP pour contrôle fiscal
             </DialogDescription>
           </DialogHeader>
-
           <div className="space-y-6">
             {/* Sélection période */}
             <div className="grid grid-cols-2 gap-4">
@@ -143,14 +130,12 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
                 />
               </div>
             </div>
-
             {/* Aperçu validation */}
             {loading && !preview && (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
               </div>
             )}
-
             {preview && (
               <Card className={`p-6 ${
                 preview.validation.is_valid
@@ -176,7 +161,6 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
                       {preview.validation.total_lines} écritures
                     </Badge>
                   </div>
-
                   {/* Statistiques */}
                   <div className="grid grid-cols-3 gap-4 pt-3 border-t">
                     <div className="space-y-1">
@@ -202,7 +186,6 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
                       </p>
                     </div>
                   </div>
-
                   {/* Erreurs de validation */}
                   {preview.validation.errors && preview.validation.errors.length > 0 && (
                     <div className="pt-3 border-t space-y-2">
@@ -218,7 +201,6 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
                       ))}
                     </div>
                   )}
-
                   {/* Info si aucune écriture */}
                   {preview.validation.total_lines === 0 && (
                     <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
@@ -231,7 +213,6 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
                       </div>
                     </div>
                   )}
-
                   {/* Aperçu premières lignes */}
                   {preview.preview && preview.preview.length > 0 && (
                     <div className="pt-3 border-t">
@@ -255,7 +236,6 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
               </Card>
             )}
           </div>
-
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
               Annuler

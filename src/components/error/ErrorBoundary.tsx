@@ -2,12 +2,11 @@ import React from 'react';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
+import { logger } from '@/lib/logger';
 interface ErrorFallbackProps {
   error: unknown;
   resetError: () => void;
 }
-
 /**
  * Error Fallback Component
  * Displayed when an error is caught by the boundary
@@ -22,18 +21,15 @@ function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
           </div>
         </div>
-
         {/* Error Title */}
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center mb-2">
           Oups ! Une erreur s'est produite
         </h1>
-
         {/* Error Message */}
         <p className="text-gray-600 dark:text-gray-400 text-center mb-4">
           Nous sommes désolés, quelque chose ne s'est pas passé comme prévu.
           Notre équipe a été notifiée de ce problème.
         </p>
-
         {/* Error Details (only in development) */}
         {import.meta.env.MODE === 'development' && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md dark:bg-red-900/20">
@@ -42,7 +38,6 @@ function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             </p>
           </div>
         )}
-
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
@@ -53,7 +48,6 @@ function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             <RefreshCw className="w-4 h-4" />
             Réessayer
           </Button>
-
           <Button
             onClick={() => (window.location.href = '/')}
             className="flex-1 flex items-center justify-center gap-2"
@@ -63,7 +57,6 @@ function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             Accueil
           </Button>
         </div>
-
         {/* Support Information */}
         <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
           <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
@@ -80,12 +73,10 @@ function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
     </div>
   );
 }
-
 interface ErrorBoundaryProps {
   children: React.ReactNode;
   fallback?: React.ComponentType<ErrorFallbackProps>;
 }
-
 /**
  * Global Error Boundary
  * Catches all React errors and displays fallback UI
@@ -101,14 +92,13 @@ export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
         );
       }}
       onError={(error, errorInfo) => {
-        console.error('ErrorBoundary caught an error:', error, errorInfo);
+        logger.error('ErrorBoundary', 'ErrorBoundary caught an error:', error, errorInfo);
       }}
     >
       {children}
     </SentryErrorBoundary>
   );
 }
-
 /**
  * Page-level Error Boundary
  * For wrapping individual routes/pages

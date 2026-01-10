@@ -8,41 +8,33 @@ import { supabase } from '@/lib/supabase';
 import type { WorkflowExecution, Workflow } from '@/types/automation.types';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
+import { logger } from '@/lib/logger';
 interface ExecutionHistoryProps {
   companyId?: string;
   workflowId?: string; // Pour filtrer par workflow spécifique
 }
-
 export default function ExecutionHistory({ companyId, workflowId }: ExecutionHistoryProps) {
   const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-
   // Filtres
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [workflowFilter, setWorkflowFilter] = useState<string>(workflowId || 'all');
   const [dateFilter, setDateFilter] = useState<string>('7days');
-
   useEffect(() => {
     loadData();
   }, [companyId, statusFilter, workflowFilter, dateFilter]);
-
   const loadData = async () => {
     if (!companyId) return;
-
     try {
       setLoading(true);
-
       // Charger les workflows pour afficher les noms
       const { data: workflowsData } = await supabase
         .from('workflows')
         .select('*')
         .eq('company_id', companyId);
-
       setWorkflows((workflowsData as Workflow[]) || []);
-
       // Construire la requête avec filtres
       let query = supabase
         .from('workflow_executions')
@@ -50,21 +42,17 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
         .eq('company_id', companyId)
         .order('started_at', { ascending: false })
         .limit(50);
-
       // Filtre par statut
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
       }
-
       // Filtre par workflow
       if (workflowFilter !== 'all') {
         query = query.eq('workflow_id', workflowFilter);
       }
-
       // Filtre par date
       const now = new Date();
       let dateThreshold: Date | null = null;
-
       switch (dateFilter) {
         case '24hours':
           dateThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -76,24 +64,18 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
           dateThreshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
           break;
       }
-
       if (dateThreshold) {
         query = query.gte('started_at', dateThreshold.toISOString());
       }
-
       const { data: executionsData, error } = await query;
-
       if (error) throw error;
-
       setExecutions(executionsData || []);
-
     } catch (error) {
-      console.error('Error loading executions:', error);
+      logger.error('ExecutionHistory', 'Error loading executions:', error);
     } finally {
       setLoading(false);
     }
   };
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'success':
@@ -108,7 +90,6 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
         return <Clock className="w-5 h-5 text-gray-600 dark:text-gray-400" />;
     }
   };
-
   const getStatusBadge = (status: string) => {
     const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       success: 'default',
@@ -116,42 +97,34 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
       cancelled: 'secondary',
       running: 'outline'
     };
-
     const labels: Record<string, string> = {
       success: 'Succès',
       failed: 'Échec',
       cancelled: 'Annulé',
       running: 'En cours'
     };
-
     return (
       <Badge variant={variants[status] || 'outline'}>
         {labels[status] || status}
       </Badge>
     );
   };
-
   const getWorkflowName = (workflowId: string) => {
     const workflow = workflows.find(w => w.id === workflowId);
     return workflow?.name || 'Workflow inconnu';
   };
-
   const formatDuration = (started: string, completed?: string) => {
     if (!completed) return 'En cours...';
-
     const start = new Date(started).getTime();
     const end = new Date(completed).getTime();
     const durationMs = end - start;
-
     if (durationMs < 1000) return `${durationMs}ms`;
     if (durationMs < 60000) return `${Math.round(durationMs / 1000)}s`;
     return `${Math.round(durationMs / 60000)}min`;
   };
-
   const toggleExpand = (executionId: string) => {
     setExpandedId(expandedId === executionId ? null : executionId);
   };
-
   if (loading) {
     return (
       <Card className="p-12 text-center">
@@ -160,7 +133,6 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
       </Card>
     );
   }
-
   return (
     <div className="space-y-4">
       {/* Filtres */}
@@ -170,7 +142,6 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
             <Filter className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm font-medium">Filtres :</span>
           </div>
-
           {/* Filtre par statut */}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-40">
@@ -184,7 +155,6 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
               <SelectItem value="running">En cours</SelectItem>
             </SelectContent>
           </Select>
-
           {/* Filtre par workflow */}
           {!workflowId && (
             <Select value={workflowFilter} onValueChange={setWorkflowFilter}>
@@ -201,7 +171,6 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
               </SelectContent>
             </Select>
           )}
-
           {/* Filtre par date */}
           <Select value={dateFilter} onValueChange={setDateFilter}>
             <SelectTrigger className="w-40">
@@ -214,7 +183,6 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
               <SelectItem value="all">Toute la période</SelectItem>
             </SelectContent>
           </Select>
-
           {/* Reset filtres */}
           {(statusFilter !== 'all' || workflowFilter !== 'all' || dateFilter !== '7days') && (
             <Button
@@ -231,7 +199,6 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
           )}
         </div>
       </Card>
-
       {/* Liste des exécutions */}
       {executions.length === 0 ? (
         <Card className="p-12 text-center">
@@ -250,7 +217,6 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3 flex-1">
                   <div className="mt-1">{getStatusIcon(execution.status)}</div>
-
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-semibold truncate">
@@ -258,7 +224,6 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
                       </h4>
                       {getStatusBadge(execution.status)}
                     </div>
-
                     <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
                       <span>
                         {formatDistanceToNow(new Date(execution.started_at), {
@@ -275,14 +240,12 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
                         Actions : {execution.actions_success || 0} / {execution.actions_total || 0}
                       </span>
                     </div>
-
                     {/* Message d'erreur si échec */}
                     {execution.status === 'failed' && execution.error_message && (
                       <div className="bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-400 px-3 py-2 rounded text-sm">
                         <strong>Erreur :</strong> {execution.error_message}
                       </div>
                     )}
-
                     {/* Détails des étapes (expandable) */}
                     {expandedId === execution.id && execution.steps_executed && execution.steps_executed.length > 0 && (
                       <div className="mt-3 space-y-2 border-t pt-3">
@@ -325,7 +288,6 @@ export default function ExecutionHistory({ companyId, workflowId }: ExecutionHis
                     )}
                   </div>
                 </div>
-
                 {/* Bouton expand/collapse */}
                 {execution.steps_executed && execution.steps_executed.length > 0 && (
                   <Button

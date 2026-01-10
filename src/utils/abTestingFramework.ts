@@ -1,5 +1,6 @@
 // Framework A/B Testing moderne et performant
 // Optimisé pour les Core Web Vitals et la performance
+import { logger } from '@/lib/logger';
 
 export interface ABTestVariant {
   id: string;
@@ -8,7 +9,6 @@ export interface ABTestVariant {
   config?: Record<string, unknown>;
   isControl?: boolean;
 }
-
 export interface ABTest {
   id: string;
   name: string;
@@ -23,14 +23,12 @@ export interface ABTest {
   includeUrls?: string[];
   trafficAllocation: number; // Pourcentage du trafic total (0-100)
 }
-
 export interface TargetingRule {
   type: 'url' | 'query' | 'cookie' | 'localStorage' | 'userAgent' | 'custom';
   operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'regex' | 'not';
   value: string | string[];
   customFunction?: (context: UserContext) => boolean;
 }
-
 export interface UserContext {
   userId?: string;
   sessionId: string;
@@ -43,14 +41,12 @@ export interface UserContext {
   customProperties?: Record<string, unknown>;
   [key: string]: string | number | boolean | undefined | Record<string, unknown> | Record<string, string>;
 }
-
 interface ABTestResult {
   testId: string;
   variantId: string;
   isInTest: boolean;
   config?: Record<string, unknown>;
 }
-
 interface ABTestEvent {
   testId: string;
   variantId: string;
@@ -60,7 +56,6 @@ interface ABTestEvent {
   properties?: Record<string, unknown>;
   timestamp: number;
 }
-
 // Service principal A/B Testing
 export class ABTestingFramework {
   private static instance: ABTestingFramework;
@@ -69,7 +64,6 @@ export class ABTestingFramework {
   private eventQueue: ABTestEvent[] = [];
   private isInitialized: boolean = false;
   private config: ABTestingConfig;
-
   private constructor(config: ABTestingConfig = {}) {
     this.config = {
       persistentStorage: true,
@@ -81,14 +75,12 @@ export class ABTestingFramework {
       ...config,
     };
   }
-
   static getInstance(config?: ABTestingConfig): ABTestingFramework {
     if (!ABTestingFramework.instance) {
       ABTestingFramework.instance = new ABTestingFramework(config);
     }
     return ABTestingFramework.instance;
   }
-
   // Initialiser le framework
   async initialize(testsConfig: ABTest[]): Promise<void> {
     try {
@@ -96,37 +88,29 @@ export class ABTestingFramework {
       testsConfig.forEach(test => {
         this.tests.set(test.id, test);
       });
-
       // Restaurer les assignments depuis le storage
       if (this.config.persistentStorage) {
         this.loadAssignmentsFromStorage();
       }
-
       // Démarrer le flush périodique des événements
       this.startEventFlush();
-
       this.isInitialized = true;
-      console.log(`[ABTesting] Framework initialisé avec ${testsConfig.length} tests`);
+      logger.debug('AbTestingFramework', `[ABTesting] Framework initialisé avec ${testsConfig.length} tests`);
     } catch (error) {
-      console.error('[ABTesting] Erreur d\'initialisation:', error instanceof Error ? error.message : String(error));
+      logger.error('AbTestingFramework', '[ABTesting] Erreur d\'initialisation:', error instanceof Error ? error.message : String(error));
     }
   }
-
   // Obtenir la variante pour un test donné
   getVariant(testId: string, userContext?: Partial<UserContext>): ABTestResult {
     const test = this.tests.get(testId);
-    
     if (!test || test.status !== 'running') {
       return { testId, variantId: 'control', isInTest: false };
     }
-
     const context = this.buildUserContext(userContext);
-    
     // Vérifier les règles de ciblage
     if (!this.matchesTargeting(test, context)) {
       return { testId, variantId: 'control', isInTest: false };
     }
-
     // Vérifier si l'utilisateur est déjà assigné
     const existingAssignment = this.getUserAssignment(context.userId || context.sessionId, testId);
     if (existingAssignment) {
@@ -138,30 +122,23 @@ export class ABTestingFramework {
         config: variant?.config,
       };
     }
-
     // Vérifier l'allocation de trafic
     const trafficHash = this.hashString(`${context.userId || context.sessionId}-${testId}-traffic`, this.config.hashSalt);
     const trafficBucket = trafficHash % 100;
-    
     if (trafficBucket >= test.trafficAllocation) {
       return { testId, variantId: 'control', isInTest: false };
     }
-
     // Assigner une variante
     const variantId = this.assignVariant(test, context);
-    
     // Sauvegarder l'assignment
     this.setUserAssignment(context.userId || context.sessionId, testId, variantId);
-    
     // Enregistrer l'impression
     this.trackEvent({
       testId,
       variantId,
       eventType: 'impression',
     });
-
     const variant = test.variants.find(v => v.id === variantId);
-    
     return {
       testId,
       variantId,
@@ -169,13 +146,11 @@ export class ABTestingFramework {
       config: variant?.config,
     };
   }
-
   // Assigner une variante basée sur les poids
   private assignVariant(test: ABTest, context: UserContext): string {
     const userId = context.userId || context.sessionId;
     const hash = this.hashString(`${userId}-${test.id}`, this.config.hashSalt);
     const bucket = hash % 100;
-
     let cumulativeWeight = 0;
     for (const variant of test.variants) {
       cumulativeWeight += variant.weight;
@@ -183,24 +158,19 @@ export class ABTestingFramework {
         return variant.id;
       }
     }
-
     // Fallback sur la variante de contrôle
     const controlVariant = test.variants.find(v => v.isControl);
     return controlVariant?.id || test.variants[0].id;
   }
-
   // Vérifier les règles de ciblage
   private matchesTargeting(test: ABTest, context: UserContext): boolean {
     if (!test.targetingRules || test.targetingRules.length === 0) {
       return true;
     }
-
     return test.targetingRules.every(rule => this.evaluateTargetingRule(rule, context));
   }
-
   private evaluateTargetingRule(rule: TargetingRule, context: UserContext): boolean {
     let value: string | undefined | unknown;
-
     switch (rule.type) {
       case 'url':
         value = context.url;
@@ -222,11 +192,8 @@ export class ABTestingFramework {
       default:
         return true;
     }
-
     if (value === undefined) return false;
-
     const targetValue = Array.isArray(rule.value) ? rule.value : [rule.value];
-
     switch (rule.operator) {
       case 'equals':
         return targetValue.includes(value as string);
@@ -244,7 +211,6 @@ export class ABTestingFramework {
         return true;
     }
   }
-
   // Construire le contexte utilisateur
   private buildUserContext(userContext?: Partial<UserContext>): UserContext {
     const defaultContext: UserContext = {
@@ -256,30 +222,24 @@ export class ABTestingFramework {
       localStorage: this.getLocalStorageData(),
       queryParams: this.getQueryParams(),
     };
-
     return { ...defaultContext, ...userContext };
   }
-
   // Enregistrer un événement
   trackEvent(event: Omit<ABTestEvent, 'timestamp'>): void {
     const fullEvent: ABTestEvent = {
       ...event,
       timestamp: Date.now(),
     };
-
     this.eventQueue.push(fullEvent);
-
     // Flush immédiat si la queue est pleine
     if (this.config.maxQueueSize && this.eventQueue.length >= this.config.maxQueueSize) {
       this.flushEvents();
     }
   }
-
   // Tracker une conversion
   trackConversion(testId: string, eventName?: string, value?: number, properties?: Record<string, unknown>): void {
     const userAssignments = this.userAssignments.get(this.getSessionId());
     const variantId = userAssignments?.get(testId);
-    
     if (variantId) {
       this.trackEvent({
         testId,
@@ -291,24 +251,19 @@ export class ABTestingFramework {
       });
     }
   }
-
   // Gérer les assignments utilisateur
   private getUserAssignment(userId: string, testId: string): string | null {
     return this.userAssignments.get(userId)?.get(testId) || null;
   }
-
   private setUserAssignment(userId: string, testId: string, variantId: string): void {
     if (!this.userAssignments.has(userId)) {
       this.userAssignments.set(userId, new Map());
     }
-     
     this.userAssignments.get(userId)!.set(testId, variantId);
-
     if (this.config.persistentStorage) {
       this.saveAssignmentsToStorage();
     }
   }
-
   // Persistence des assignments
   private loadAssignmentsFromStorage(): void {
     try {
@@ -320,10 +275,9 @@ export class ABTestingFramework {
         });
       }
     } catch (error) {
-      console.warn('[ABTesting] Erreur de chargement des assignments:', error instanceof Error ? error.message : String(error));
+      logger.warn('AbTestingFramework', '[ABTesting] Erreur de chargement des assignments:', error instanceof Error ? error.message : String(error));
     }
   }
-
   private saveAssignmentsToStorage(): void {
     try {
       const assignments: Record<string, Record<string, string>> = {};
@@ -332,10 +286,9 @@ export class ABTestingFramework {
       });
       localStorage.setItem('casskai-ab-assignments', JSON.stringify(assignments));
     } catch (error) {
-      console.warn('[ABTesting] Erreur de sauvegarde des assignments:', error instanceof Error ? error.message : String(error));
+      logger.warn('AbTestingFramework', '[ABTesting] Erreur de sauvegarde des assignments:', error instanceof Error ? error.message : String(error));
     }
   }
-
   // Gestion des événements
   private startEventFlush(): void {
     setInterval(() => {
@@ -344,26 +297,21 @@ export class ABTestingFramework {
       }
     }, this.config.flushInterval);
   }
-
   private async flushEvents(): Promise<void> {
     if (this.eventQueue.length === 0) return;
-
     const eventsToFlush = [...this.eventQueue];
     this.eventQueue = [];
-
     try {
       // Envoyer vers l'API analytics
       await this.sendEventsToAnalytics(eventsToFlush);
     } catch (error) {
-      console.error('[ABTesting] Erreur lors du flush des événements:', error instanceof Error ? error.message : String(error));
+      logger.error('AbTestingFramework', '[ABTesting] Erreur lors du flush des événements:', error instanceof Error ? error.message : String(error));
       // Remettre les événements en queue en cas d'erreur
       this.eventQueue.unshift(...eventsToFlush);
     }
   }
-
   private async sendEventsToAnalytics(events: ABTestEvent[]): Promise<void> {
     if (!this.config.analyticsIntegration) return;
-
     // Intégration avec Plausible Analytics
     events.forEach(event => {
       if (window.plausible) {
@@ -378,7 +326,6 @@ export class ABTestingFramework {
         });
       }
     });
-
     // Envoyer vers notre API si configurée
     if (this.config.apiEndpoint) {
       await fetch(this.config.apiEndpoint, {
@@ -388,7 +335,6 @@ export class ABTestingFramework {
       });
     }
   }
-
   // Utilitaires
   private hashString(str: string, salt: string = ''): number {
     const fullStr = salt + str;
@@ -400,16 +346,13 @@ export class ABTestingFramework {
     }
     return Math.abs(hash);
   }
-
   private getSessionId(): string {
     const existing = sessionStorage.getItem('casskai-session-id');
     if (existing) return existing;
-    
     const newId = `sess_${  Date.now()  }_${  Math.random().toString(36).substr(2, 9)}`;
     sessionStorage.setItem('casskai-session-id', newId);
     return newId;
   }
-
   private getCookies(): Record<string, string> {
     const cookies: Record<string, string> = {};
     document.cookie.split(';').forEach(cookie => {
@@ -420,7 +363,6 @@ export class ABTestingFramework {
     });
     return cookies;
   }
-
   private getLocalStorageData(): Record<string, unknown> {
     const data: Record<string, unknown> = {};
     try {
@@ -435,11 +377,10 @@ export class ABTestingFramework {
         }
       }
     } catch (error) {
-      console.warn('[ABTesting] Erreur d\'accès au localStorage:', error instanceof Error ? error.message : String(error));
+      logger.warn('AbTestingFramework', '[ABTesting] Erreur d\'accès au localStorage:', error instanceof Error ? error.message : String(error));
     }
     return data;
   }
-
   private getQueryParams(): Record<string, string> {
     const params: Record<string, string> = {};
     new URLSearchParams(window.location.search).forEach((value, key) => {
@@ -447,28 +388,22 @@ export class ABTestingFramework {
     });
     return params;
   }
-
   // Méthodes publiques pour la gestion des tests
   addTest(test: ABTest): void {
     this.tests.set(test.id, test);
   }
-
   removeTest(testId: string): void {
     this.tests.delete(testId);
   }
-
   getTest(testId: string): ABTest | undefined {
     return this.tests.get(testId);
   }
-
   getAllTests(): ABTest[] {
     return Array.from(this.tests.values());
   }
-
   getActiveTests(): ABTest[] {
     return this.getAllTests().filter(test => test.status === 'running');
   }
-
   // Debug et monitoring
   getDebugInfo(): Record<string, unknown> {
     return {
@@ -482,7 +417,6 @@ export class ABTestingFramework {
     };
   }
 }
-
 // Configuration du framework
 export interface ABTestingConfig {
   persistentStorage?: boolean;
@@ -493,6 +427,4 @@ export interface ABTestingConfig {
   hashSalt?: string;
   apiEndpoint?: string;
 }
-
-
 export default ABTestingFramework;

@@ -9,9 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { openBankingManager } from './openBanking/OpenBankingManager';
-import { 
+import { logger } from '@/lib/logger';
+import {
   BankConnection, 
   BankAccount,
   BankTransaction, 
@@ -19,25 +19,20 @@ import {
   PSD2AuthFlow,
   ReconciliationMatch
 } from '../types/openBanking.types';
-
 // Service unifié pour l'intégration bancaire
 export class BankingService {
   private static instance: BankingService;
   private isInitialized = false;
-
   private constructor() {}
-
   static getInstance(): BankingService {
     if (!this.instance) {
       this.instance = new BankingService();
     }
     return this.instance;
   }
-
   // Initialiser le service bancaire
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
-
     try {
       // Configuration Open Banking (en production, récupérer depuis variables d'environnement)
       const config = {
@@ -74,18 +69,15 @@ export class BankingService {
           timeoutMs: 5000
         }
       };
-
       await openBankingManager.initialize(config);
       this.isInitialized = true;
-      console.warn('Banking Service initialized successfully');
+      logger.warn('Banking', 'Banking Service initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Banking Service:', error instanceof Error ? error.message : String(error));
+      logger.error('Banking', 'Failed to initialize Banking Service:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   // GESTION DES CONNEXIONS BANCAIRES
-
   // Créer une nouvelle connexion bancaire
   async createBankConnection(
     userId: string, 
@@ -95,7 +87,6 @@ export class BankingService {
     await this.ensureInitialized();
     return await openBankingManager.createBankConnection(userId, providerId, bankId);
   }
-
   // Obtenir toutes les connexions d'un utilisateur
   async getUserBankConnections(userId: string): Promise<OpenBankingResponse<BankConnection[]>> {
     await this.ensureInitialized();
@@ -123,35 +114,28 @@ export class BankingService {
       } as OpenBankingResponse<BankConnection[]>;
     }
   }
-
   // Obtenir une connexion spécifique
   async getBankConnection(connectionId: string): Promise<OpenBankingResponse<BankConnection>> {
     await this.ensureInitialized();
     return await openBankingManager.getBankConnection(connectionId);
   }
-
   // Rafraîchir une connexion
   async refreshBankConnection(connectionId: string): Promise<OpenBankingResponse<BankConnection>> {
     await this.ensureInitialized();
     return await openBankingManager.refreshConnection(connectionId);
   }
-
   // Supprimer une connexion
   async deleteBankConnection(connectionId: string): Promise<OpenBankingResponse<void>> {
     await this.ensureInitialized();
     return await openBankingManager.deleteBankConnection(connectionId);
   }
-
   // GESTION DES COMPTES
-
   // Obtenir les comptes d'une connexion
   async getBankAccounts(connectionId: string): Promise<OpenBankingResponse<BankAccount[]>> {
     await this.ensureInitialized();
     return await openBankingManager.getAccounts(connectionId);
   }
-
   // GESTION DES TRANSACTIONS
-
   // Obtenir les transactions d'un compte
   async getBankTransactions(
     connectionId: string,
@@ -166,22 +150,17 @@ export class BankingService {
     await this.ensureInitialized();
     return await openBankingManager.getTransactions(connectionId, accountId, options);
   }
-
   // Synchroniser les transactions
   async syncBankTransactions(connectionId: string, accountId: string): Promise<OpenBankingResponse<any>> {
     await this.ensureInitialized();
     return await openBankingManager.syncTransactions(connectionId, accountId);
   }
-
   // AUTHENTIFICATION PSD2
-
   // Initier l'authentification PSD2
   async initiatePSD2Auth(connectionId: string, redirectUri?: string): Promise<OpenBankingResponse<PSD2AuthFlow>> {
     await this.ensureInitialized();
-    
     // Le redirectUri par défaut pour l'application
     const defaultRedirectUri = `${window.location.origin}/banking/auth/callback`;
-    
     // En production, utiliser la méthode appropriée du provider
     // Pour l'instant, retourner un mock de l'authentification PSD2
     return {
@@ -198,9 +177,7 @@ export class BankingService {
       }
     };
   }
-
   // RÉCONCILIATION
-
   // Réconcilier une transaction
   async reconcileTransaction(
     transactionId: string,
@@ -209,9 +186,7 @@ export class BankingService {
     await this.ensureInitialized();
     return await openBankingManager.reconcileTransaction(transactionId, accountingEntries);
   }
-
   // WEBHOOKS
-
   // Traiter un webhook
   async processWebhook(
     providerId: string,
@@ -222,9 +197,7 @@ export class BankingService {
     await this.ensureInitialized();
     return await openBankingManager.processWebhook(providerId, payload, signature, headers);
   }
-
   // EXPORT
-
   // Créer un export comptable
   async createAccountingExport(
     userId: string,
@@ -242,9 +215,7 @@ export class BankingService {
     await this.ensureInitialized();
     return await openBankingManager.createExport(userId, formatId, parameters);
   }
-
   // UTILITAIRES POUR L'UI
-
   // Obtenir les banques supportées par provider
   getSupportedBanks(providerId: 'bridge' | 'budget_insight'): Array<{
     id: string;
@@ -268,30 +239,24 @@ export class BankingService {
         { id: 'hsbc', name: 'HSBC France', country: 'FR', logo: '/banks/hsbc.png' }
       ]
     };
-
     return mockBanks[providerId] || [];
   }
-
   // Obtenir les statistiques de synchronisation
   async getSyncStatistics() {
     await this.ensureInitialized();
     return await openBankingManager.getSyncStatistics();
   }
-
   // Obtenir les statistiques de réconciliation
   async getReconciliationStatistics() {
     await this.ensureInitialized();
     return await openBankingManager.getReconciliationStatistics();
   }
-
   // Vérifier la santé du système
   async healthCheck() {
     await this.ensureInitialized();
     return await openBankingManager.healthCheck();
   }
-
   // MÉTHODES DE TRANSFORMATION POUR L'UI
-
   // Transformer une BankConnection en format UI
   transformConnectionForUI(connection: BankConnection) {
     return {
@@ -306,7 +271,6 @@ export class BankingService {
       needsAuth: connection.status === 'expired' || connection.status === 'error'
     };
   }
-
   // Transformer un BankAccount en format UI
   transformAccountForUI(account: BankAccount, connection: BankConnection) {
     return {
@@ -324,7 +288,6 @@ export class BankingService {
       lastUpdate: this.formatLastSync(account.updatedAt)
     };
   }
-
   // Transformer une BankTransaction en format UI
   transformTransactionForUI(transaction: BankTransaction) {
     return {
@@ -345,15 +308,12 @@ export class BankingService {
       reconciliationStatus: transaction.isReconciled ? 'reconciled' : 'pending'
     };
   }
-
   // MÉTHODES UTILITAIRES PRIVÉES
-
   private async ensureInitialized(): Promise<void> {
     if (!this.isInitialized) {
       await this.initialize();
     }
   }
-
   private getConnectionStatusLabel(status: BankConnection['status']): string {
     const labels = {
       connected: 'Connecté',
@@ -364,7 +324,6 @@ export class BankingService {
     };
     return labels[status] || status;
   }
-
   private getConnectionStatusColor(status: BankConnection['status']): string {
     const colors = {
       connected: 'green',
@@ -375,7 +334,6 @@ export class BankingService {
     };
     return colors[status] || 'gray';
   }
-
   private getAccountTypeLabel(type: BankAccount['type']): string {
     const labels = {
       checking: 'Compte courant',
@@ -387,7 +345,6 @@ export class BankingService {
     };
     return labels[type] || type;
   }
-
   private getTransactionStatusLabel(status: BankTransaction['status']): string {
     const labels = {
       posted: 'Validée',
@@ -396,7 +353,6 @@ export class BankingService {
     };
     return labels[status] || status;
   }
-
   private getTransactionStatusColor(status: BankTransaction['status']): string {
     const colors = {
       posted: 'green',
@@ -405,19 +361,16 @@ export class BankingService {
     };
     return colors[status] || 'gray';
   }
-
   private formatCurrency(amount: number, _currency: string = 'EUR'): string {
     const formatted = new Intl.NumberFormat('fr-FR', {}).format(amount);
     return formatted.replace(/\u00a0/g, ' ');
   }
-
   private formatLastSync(date: Date): string {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
     if (diffMinutes < 1) {
       return 'À l\'instant';
     } else if (diffMinutes < 60) {
@@ -430,12 +383,10 @@ export class BankingService {
       return `Il y a ${diffDays} jours`;
     }
   }
-
   // Getters
   get initialized(): boolean {
     return this.isInitialized;
   }
-
   // Cleanup
   dispose(): void {
     if (this.isInitialized) {
@@ -444,6 +395,5 @@ export class BankingService {
     }
   }
 }
-
 // Instance singleton
 export const bankingService = BankingService.getInstance();

@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { X } from 'lucide-react';
-
+import { logger } from '@/lib/logger';
 interface TaskFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,7 +20,6 @@ interface TaskFormModalProps {
   projects: Array<{ id: string; name: string }>;
   employees?: Array<{ id: string; name: string }>;
 }
-
 export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   isOpen,
   onClose,
@@ -41,16 +39,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     status: 'todo' as 'todo' | 'in_progress' | 'completed' | 'cancelled',
     progress: 0
   });
-
   const [submitting, setSubmitting] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!formData.title.trim() || !formData.project_id) {
       return;
     }
-
     setSubmitting(true);
     try {
       await onSubmit({
@@ -59,7 +53,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         dueDate: formData.dueDate?.toISOString().split('T')[0],
         estimatedHours: formData.estimatedHours ? parseFloat(formData.estimatedHours) : undefined
       });
-
       // Reset form
       setFormData({
         title: '',
@@ -73,15 +66,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         status: 'todo',
         progress: 0
       });
-
       onClose();
     } catch (error) {
-      console.error('Error saving task:', error);
+      logger.error('TaskFormModal', 'Error saving task:', error);
     } finally {
       setSubmitting(false);
     }
   };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -98,7 +89,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             </Button>
           </div>
         </DialogHeader>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="title" className="text-gray-700 dark:text-gray-300">Titre *</Label>
@@ -111,7 +101,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
-
           <div>
             <Label htmlFor="description" className="text-gray-700 dark:text-gray-300">Description</Label>
             <Textarea
@@ -123,7 +112,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="project" className="text-gray-700 dark:text-gray-300">Projet *</Label>
@@ -143,7 +131,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
-
             <div>
               <Label htmlFor="assignee" className="text-gray-700 dark:text-gray-300">Assigné à</Label>
               <Select
@@ -164,7 +151,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               </Select>
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-gray-700 dark:text-gray-300">Date début</Label>
@@ -175,7 +161,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 className=""
               />
             </div>
-
             <div>
               <Label className="text-gray-700 dark:text-gray-300">Date fin</Label>
               <DatePicker
@@ -186,7 +171,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               />
             </div>
           </div>
-
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="priority" className="text-gray-700 dark:text-gray-300">Priorité</Label>
@@ -205,7 +189,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
-
             <div>
               <Label htmlFor="status" className="text-gray-700 dark:text-gray-300">Statut</Label>
               <Select
@@ -223,7 +206,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
-
             <div>
               <Label htmlFor="estimatedHours" className="text-gray-700 dark:text-gray-300">Heures estimées</Label>
               <Input
@@ -237,7 +219,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               />
             </div>
           </div>
-
           <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Annuler
@@ -251,5 +232,3 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     </Dialog>
   );
 };
-
-

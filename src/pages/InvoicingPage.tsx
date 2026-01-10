@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence as _AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,6 +25,7 @@ import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { invoicingService } from '@/services/invoicingService';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { 
   FileText,
@@ -55,7 +55,6 @@ import {
   BarChart3 as _BarChart3,
   Settings as _Settings
 } from 'lucide-react';
-
 // Import optimized tab components
 import OptimizedInvoicesTab from '@/components/invoicing/OptimizedInvoicesTab';
 import OptimizedClientsTab from '@/components/invoicing/OptimizedClientsTab';
@@ -63,11 +62,18 @@ import OptimizedQuotesTab from '@/components/invoicing/OptimizedQuotesTab';
 import OptimizedPaymentsTab from '@/components/invoicing/OptimizedPaymentsTab';
 import { LateFeeCalculator } from '@/components/invoicing/LateFeeCalculator';
 import { InvoiceComplianceSettings } from '@/components/invoicing/InvoiceComplianceSettings';
-
+import { logger } from '@/lib/logger';
 // Invoicing KPI Card Component
-const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }) => {
+const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }: {
+  title: string;
+  value: string | number;
+  icon: any;
+  trend?: number;
+  color?: string;
+  description?: string;
+  onClick?: () => void;
+}) => {
   const IconComponent = icon;
-  
   return (
     <motion.div
       className={`card-modern card-hover cursor-pointer overflow-hidden relative group ${onClick ? 'hover:shadow-lg' : ''}`}
@@ -75,7 +81,6 @@ const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', descripti
       onClick={onClick}
     >
       <div className={`absolute inset-0 bg-gradient-to-br from-${color}-500/5 to-${color}-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-      
       <div className="relative z-10 p-6">
         <div className="flex items-center justify-between mb-4">
           <div className={`p-3 rounded-xl bg-gradient-to-r from-${color}-500 to-${color}-600 shadow-lg`}>
@@ -92,7 +97,6 @@ const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', descripti
             </div>
           )}
         </div>
-        
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</h3>
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -106,9 +110,14 @@ const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', descripti
     </motion.div>
   );
 };
-
 // Quick Actions Component
-const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewClients, t }) => {
+const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewClients, t }: {
+  onNewInvoice: () => void;
+  onNewQuote: () => void;
+  onNewPayment: () => void;
+  onViewClients: () => void;
+  t: any;
+}) => {
   const quickActions = [
     {
       title: t('invoicing.quickActions.newInvoice', 'Nouvelle facture'),
@@ -139,7 +148,6 @@ const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewC
       onClick: onViewClients
     }
   ];
-
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
       {quickActions.map((action, index) => (
@@ -176,16 +184,94 @@ const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewC
     </div>
   );
 };
-
 // Recent Invoicing Activities Component
-const RecentInvoicingActivities = ({ t }) => {
+const RecentInvoicingActivities = ({ t }: { t: any }) => {
+  const { currentCompany } = useAuth();
   type ActivityItem = {
     icon: React.ComponentType<{ className?: string }>;
     color: 'blue' | 'green' | 'purple' | 'orange';
     description: string;
     time: string;
   };
-  const activities: ActivityItem[] = [];
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+
+  useEffect(() => {
+    const loadRecentActivities = async () => {
+      if (!currentCompany?.id) return;
+
+      try {
+        // Charger les 5 dernières factures et devis
+        const { data: recentInvoices } = await supabase
+          .from('invoices')
+          .select('id, invoice_number, status, total_incl_tax, created_at, customer:customers(name)')
+          .eq('company_id', currentCompany.id)
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        const { data: recentQuotes } = await supabase
+          .from('quotes')
+          .select('id, quote_number, status, total_incl_tax, created_at')
+          .eq('company_id', currentCompany.id)
+          .order('created_at', { ascending: false })
+          .limit(2);
+
+        const activityItems: ActivityItem[] = [];
+
+        // Ajouter les factures récentes
+        if (recentInvoices) {
+          for (const invoice of recentInvoices) {
+            const customerName = invoice.customer?.name || 'Client inconnu';
+            const amount = invoice.total_incl_tax || 0;
+            const timeAgo = getTimeAgo(invoice.created_at);
+
+            activityItems.push({
+              icon: FileText,
+              color: invoice.status === 'paid' ? 'green' : 'blue',
+              description: `Facture ${invoice.invoice_number} - ${customerName} (${amount.toLocaleString('fr-FR')} €)`,
+              time: timeAgo
+            });
+          }
+        }
+
+        // Ajouter les devis récents
+        if (recentQuotes) {
+          for (const quote of recentQuotes) {
+            const amount = quote.total_incl_tax || 0;
+            const timeAgo = getTimeAgo(quote.created_at);
+
+            activityItems.push({
+              icon: Receipt,
+              color: 'purple',
+              description: `Devis ${quote.quote_number} (${amount.toLocaleString('fr-FR')} €)`,
+              time: timeAgo
+            });
+          }
+        }
+
+        // Trier par date et garder les 5 plus récents
+        setActivities(activityItems.slice(0, 5));
+      } catch (error) {
+        logger.error('InvoicingPage', 'Error loading recent activities:', error);
+      }
+    };
+
+    // Fonction helper pour calculer "il y a X temps"
+    const getTimeAgo = (dateString: string): string => {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 60) return `${diffMins} min`;
+      if (diffHours < 24) return `${diffHours}h`;
+      if (diffDays < 7) return `${diffDays}j`;
+      return date.toLocaleDateString('fr-FR');
+    };
+
+    loadRecentActivities();
+  }, [currentCompany]);
 
   return (
     <Card className="h-full">
@@ -239,21 +325,18 @@ const RecentInvoicingActivities = ({ t }) => {
     </Card>
   );
 };
-
 export default function InvoicingPageOptimized() {
   const { user: _user } = useAuth();
   const { canAccessFeature } = useSubscription();
   const { isExpired } = useSubscriptionStatus();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState('current-month');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [shouldCreateNew, setShouldCreateNew] = useState(null); // 'invoice', 'quote', 'payment'
-
+  const [shouldCreateNew, setShouldCreateNew] = useState<'invoice' | 'quote' | 'payment' | null>(null);
   const [invoicingData, setInvoicingData] = useState({
     totalRevenue: 0,
     paidInvoices: 0,
@@ -268,22 +351,18 @@ export default function InvoicingPageOptimized() {
     pendingInvoicesTrend: undefined as number | undefined,
     overdueInvoicesTrend: undefined as number | undefined
   });
-  const [_error, setError] = useState(null);
-
+  const [_error, setError] = useState<string | null>(null);
   useEffect(() => {
     const loadInvoicingData = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        
         const periodStart = getPeriodStart(selectedPeriod);
         const periodEnd = getPeriodEnd(selectedPeriod);
-
         const stats = await invoicingService.getInvoicingStatsWithTrends({
           periodStart,
           periodEnd
         });
-
         setInvoicingData({
           totalRevenue: stats.totalRevenue,
           paidInvoices: stats.paidInvoices,
@@ -299,17 +378,15 @@ export default function InvoicingPageOptimized() {
           overdueInvoicesTrend: stats.overdueInvoicesTrend
         });
       } catch (error: unknown) {
-        console.error('Error loading invoicing data:', error);
+        logger.error('Invoicing', 'Error loading invoicing data:', error);
         setError((error instanceof Error ? error.message : 'Une erreur est survenue'));
         toastSuccess("Action effectuée avec succès");
       } finally {
         setIsLoading(false);
       }
     };
-    
     loadInvoicingData();
   }, [selectedPeriod, customStartDate, customEndDate]);
-  
   const getPeriodStart = (period: string) => {
     const now = new Date();
     switch (period) {
@@ -331,7 +408,6 @@ export default function InvoicingPageOptimized() {
         return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
     }
   };
-
   const getPeriodEnd = (period: string) => {
     const now = new Date();
     switch (period) {
@@ -353,7 +429,6 @@ export default function InvoicingPageOptimized() {
         return new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
     }
   };
-
   const handleNewInvoice = async () => {
     // Check if subscription is expired
     if (isExpired) {
@@ -361,25 +436,21 @@ export default function InvoicingPageOptimized() {
       navigate('/settings/billing');
       return;
     }
-
     if (!canAccessFeature('unlimited_invoices')) {
       toastSuccess("Action effectuée avec succès");
       return;
     }
-
     try {
       // For now, just switch to invoices tab and set create mode
       // The actual invoice creation will be handled by the OptimizedInvoicesTab component
       setShouldCreateNew('invoice');
       setActiveTab('invoices');
-
       toastSuccess("Action effectuée avec succès");
     } catch (error: unknown) {
-      console.error('Error preparing new invoice:', error);
+      logger.error('Invoicing', 'Error preparing new invoice:', error);
       toastSuccess("Action effectuée avec succès");
     }
   };
-
   const handleNewQuote = () => {
     // Check if subscription is expired
     if (isExpired) {
@@ -387,11 +458,9 @@ export default function InvoicingPageOptimized() {
       navigate('/settings/billing');
       return;
     }
-
     setShouldCreateNew('quote');
     setActiveTab('quotes');
   };
-
   const handleNewPayment = () => {
     // Check if subscription is expired
     if (isExpired) {
@@ -399,15 +468,12 @@ export default function InvoicingPageOptimized() {
       navigate('/settings/billing');
       return;
     }
-
     setShouldCreateNew('payment');
     setActiveTab('payments');
   };
-
   const handleViewClients = () => {
     setActiveTab('clients');
   };
-
   if (isLoading) {
     return (
       <div className="space-y-8 p-6">
@@ -422,7 +488,6 @@ export default function InvoicingPageOptimized() {
       </div>
     );
   }
-
   return (
     <PageContainer variant="default" className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto p-6 max-w-7xl">
@@ -450,7 +515,6 @@ export default function InvoicingPageOptimized() {
                   </div>
                 </div>
               </div>
-              
               <div className="flex items-center space-x-3">
                 <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
                   <SelectTrigger className="w-48 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
@@ -465,7 +529,6 @@ export default function InvoicingPageOptimized() {
                     <SelectItem value="custom">{t('invoicing.periods.custom', 'Période personnalisée')}</SelectItem>
                   </SelectContent>
                 </Select>
-                
                 {selectedPeriod === 'custom' && (
                   <div className="flex items-center space-x-2">
                     <div className="flex flex-col">
@@ -512,7 +575,6 @@ export default function InvoicingPageOptimized() {
             </div>
           </div>
         </motion.div>
-
         {/* Invoicing KPIs */}
         <motion.div 
           className="grid gap-6 md:grid-cols-2 lg:grid-cols-4"
@@ -529,7 +591,6 @@ export default function InvoicingPageOptimized() {
             description={t('invoicing.kpis.revenueDesc', 'CA total ce mois')}
             onClick={() => setActiveTab('invoices')}
           />
-
           <InvoicingKPICard
             title={t('invoicing.kpis.paidInvoices', 'Factures payées')}
             value={`${invoicingData.paidInvoices.toLocaleString('fr-FR')} €`}
@@ -539,7 +600,6 @@ export default function InvoicingPageOptimized() {
             description={t('invoicing.kpis.paidInvoicesDesc', 'Paiements reçus')}
             onClick={() => setActiveTab('payments')}
           />
-
           <InvoicingKPICard
             title={t('invoicing.kpis.pendingInvoices', 'En attente')}
             value={`${invoicingData.pendingInvoices.toLocaleString('fr-FR')} €`}
@@ -549,7 +609,6 @@ export default function InvoicingPageOptimized() {
             description={t('invoicing.kpis.pendingInvoicesDesc', 'Factures en attente')}
             onClick={() => setActiveTab('invoices')}
           />
-
           <InvoicingKPICard
             title={t('invoicing.kpis.overdueInvoices', 'En retard')}
             value={`${invoicingData.overdueInvoices.toLocaleString('fr-FR')} €`}
@@ -560,7 +619,6 @@ export default function InvoicingPageOptimized() {
             onClick={() => setActiveTab('invoices')}
           />
         </motion.div>
-
         {/* Navigation par onglets */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-2">
@@ -616,7 +674,6 @@ export default function InvoicingPageOptimized() {
               </TabsTrigger>
             </TabsList>
           </div>
-
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             <motion.div
@@ -632,7 +689,6 @@ export default function InvoicingPageOptimized() {
                 onViewClients={handleViewClients}
                 t={t}
               />
-              
               <div className="grid gap-6 lg:grid-cols-3">
                 <div className="lg:col-span-2">
                   <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
@@ -666,7 +722,6 @@ export default function InvoicingPageOptimized() {
                               color: 'red' 
                             }
                           ];
-                          
                           if (totalAmount === 0) {
                             return (
                               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -674,7 +729,6 @@ export default function InvoicingPageOptimized() {
                               </div>
                             );
                           }
-                          
                           return revenueBreakdown.map((item, index) => (
                             <div key={index} className="space-y-2">
                               <div className="flex justify-between text-sm">
@@ -689,10 +743,8 @@ export default function InvoicingPageOptimized() {
                     </CardContent>
                   </Card>
                 </div>
-                
                 <RecentInvoicingActivities t={t} />
               </div>
-
               {/* Additional Stats */}
               <div className="grid gap-6 md:grid-cols-3">
                 <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
@@ -709,7 +761,6 @@ export default function InvoicingPageOptimized() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-3">
@@ -724,7 +775,6 @@ export default function InvoicingPageOptimized() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-3">
@@ -742,7 +792,6 @@ export default function InvoicingPageOptimized() {
               </div>
             </motion.div>
           </TabsContent>
-
           {/* Invoices Tab */}
           <TabsContent value="invoices">
             <motion.div
@@ -756,7 +805,6 @@ export default function InvoicingPageOptimized() {
               />
             </motion.div>
           </TabsContent>
-
           {/* Quotes Tab */}
           <TabsContent value="quotes">
             <motion.div
@@ -770,7 +818,6 @@ export default function InvoicingPageOptimized() {
               />
             </motion.div>
           </TabsContent>
-
           {/* Clients Tab */}
           <TabsContent value="clients">
             <motion.div
@@ -781,7 +828,6 @@ export default function InvoicingPageOptimized() {
               <OptimizedClientsTab />
             </motion.div>
           </TabsContent>
-
           {/* Payments Tab */}
           <TabsContent value="payments">
             <motion.div
@@ -795,7 +841,6 @@ export default function InvoicingPageOptimized() {
               />
             </motion.div>
           </TabsContent>
-
           {/* Late Fees Tab */}
           <TabsContent value="late-fees">
             <motion.div
@@ -806,7 +851,6 @@ export default function InvoicingPageOptimized() {
               <LateFeeCalculator />
             </motion.div>
           </TabsContent>
-
           {/* Invoice Settings Tab */}
           <TabsContent value="settings">
             <motion.div

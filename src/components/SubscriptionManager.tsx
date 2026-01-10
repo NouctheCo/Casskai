@@ -8,12 +8,11 @@ import { Check, Crown, Zap, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
+import { logger } from '@/lib/logger';
 interface SubscriptionManagerProps {
   enterpriseId?: string;
   className?: string;
 }
-
 interface PlanCardProps {
   plan: typeof SUBSCRIPTION_PLANS[0];
   isCurrentPlan: boolean;
@@ -22,7 +21,6 @@ interface PlanCardProps {
   onSubscribe: (planId: string) => void;
   onManage: () => void;
 }
-
 /**
  * Carte individuelle pour un plan d'abonnement
  */
@@ -43,7 +41,6 @@ function PlanCard({ plan, isCurrentPlan, isPopular, isLoading, onSubscribe, onMa
           </Badge>
         </div>
       )}
-
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           {plan.name}
@@ -63,7 +60,6 @@ function PlanCard({ plan, isCurrentPlan, isPopular, isLoading, onSubscribe, onMa
           )}
         </div>
       </CardHeader>
-
       <CardContent className="space-y-4">
         <ul className="space-y-2">
           {plan.features.map((feature, index) => (
@@ -76,7 +72,6 @@ function PlanCard({ plan, isCurrentPlan, isPopular, isLoading, onSubscribe, onMa
           ))}
         </ul>
       </CardContent>
-
       <CardFooter>
         {isCurrentPlan ? (
           <Button
@@ -99,18 +94,15 @@ function PlanCard({ plan, isCurrentPlan, isPopular, isLoading, onSubscribe, onMa
     </Card>
   );
 }
-
 interface CurrentPlanCardProps {
   plan: ReturnType<typeof useEnterprisePlan>;
   onManage: () => void;
 }
-
 /**
  * Carte affichant le plan actuel
  */
 function CurrentPlanCard({ plan, onManage }: CurrentPlanCardProps) {
   const currentPlanName = SUBSCRIPTION_PLANS.find(p => p.id === plan.planCode)?.name;
-
   return (
     <Card className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20">
       <CardHeader>
@@ -137,11 +129,9 @@ function CurrentPlanCard({ plan, onManage }: CurrentPlanCardProps) {
     </Card>
   );
 }
-
 interface UsageQuotasProps {
   quotas: Record<string, { current: number; limit: number | null; percentage: number }>;
 }
-
 /**
  * Section affichant les quotas d'utilisation
  */
@@ -184,7 +174,6 @@ function UsageQuotas({ quotas }: UsageQuotasProps) {
     </Card>
   );
 }
-
 /**
  * Logique de gestion des abonnements
  */
@@ -193,17 +182,13 @@ function useSubscriptionLogic(enterpriseId?: string) {
   const plan = useEnterprisePlan(enterpriseId || currentCompany?.id);
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [billingInterval, setBillingInterval] = useState<'month' | 'year'>('month');
-
   const targetEnterpriseId = enterpriseId || currentCompany?.id;
-
   const handleSubscribe = async (planId: string) => {
     if (!targetEnterpriseId) return;
-
     setIsLoading(planId);
     try {
       const selectedPlan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
       if (!selectedPlan) return;
-
       await stripeSubscriptionService.createCheckoutSession({
         priceId: selectedPlan.stripePriceId,
         enterpriseId: targetEnterpriseId,
@@ -211,30 +196,26 @@ function useSubscriptionLogic(enterpriseId?: string) {
         cancelUrl: `${window.location.origin}/settings/subscription?canceled=true`
       });
     } catch (error) {
-      console.error('Error creating subscription:', error instanceof Error ? error.message : String(error));
+      logger.error('SubscriptionManager', 'Error creating subscription:', error instanceof Error ? error.message : String(error));
       // TODO: Afficher une notification d'erreur
     } finally {
       setIsLoading(null);
     }
   };
-
   const handleManageSubscription = async () => {
     if (!targetEnterpriseId) return;
-
     try {
       await stripeSubscriptionService.redirectToCustomerPortal(
         targetEnterpriseId,
         `${window.location.origin}/settings/subscription`
       );
     } catch (error) {
-      console.error('Error accessing customer portal:', error instanceof Error ? error.message : String(error));
+      logger.error('SubscriptionManager', 'Error accessing customer portal:', error instanceof Error ? error.message : String(error));
       // TODO: Afficher une notification d'erreur
     }
   };
-
   // Filtrer les plans selon l'intervalle sélectionné
   const filteredPlans = SUBSCRIPTION_PLANS.filter(plan => plan.interval === billingInterval);
-
   return {
     plan,
     isLoading,
@@ -246,7 +227,6 @@ function useSubscriptionLogic(enterpriseId?: string) {
     targetEnterpriseId
   };
 }
-
 /**
  * Composant principal de gestion des abonnements
  */
@@ -260,7 +240,6 @@ export function SubscriptionManager({ enterpriseId, className }: SubscriptionMan
     handleSubscribe,
     handleManageSubscription
   } = useSubscriptionLogic(enterpriseId);
-
   if (plan.isLoading) {
     return (
       <div className={cn("space-y-6", className)}>
@@ -272,7 +251,6 @@ export function SubscriptionManager({ enterpriseId, className }: SubscriptionMan
       </div>
     );
   }
-
   return (
     <div className={cn("space-y-6", className)}>
       <div className="text-center space-y-2">
@@ -283,12 +261,10 @@ export function SubscriptionManager({ enterpriseId, className }: SubscriptionMan
           Choisissez le plan qui correspond à vos besoins
         </p>
       </div>
-
       {/* Plan actuel */}
       {plan.planCode && (
         <CurrentPlanCard plan={plan} onManage={handleManageSubscription} />
       )}
-
       {/* Plans disponibles */}
       <Tabs value={billingInterval} onValueChange={(value) => setBillingInterval(value as 'month' | 'year')} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -304,7 +280,6 @@ export function SubscriptionManager({ enterpriseId, className }: SubscriptionMan
             </Badge>
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="month" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-3">
             {filteredPlans.map((subscriptionPlan) => (
@@ -320,7 +295,6 @@ export function SubscriptionManager({ enterpriseId, className }: SubscriptionMan
             ))}
           </div>
         </TabsContent>
-
         <TabsContent value="year" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-3">
             {filteredPlans.map((subscriptionPlan) => (
@@ -337,7 +311,6 @@ export function SubscriptionManager({ enterpriseId, className }: SubscriptionMan
           </div>
         </TabsContent>
       </Tabs>
-
       {/* Quotas d'utilisation */}
       {plan.quotas && Object.keys(plan.quotas).length > 0 && (
         <UsageQuotas quotas={plan.quotas} />

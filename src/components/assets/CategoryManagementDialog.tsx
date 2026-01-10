@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,12 +38,11 @@ import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import assetsService from '@/services/assetsService';
 import type { AssetCategory, AssetCategoryFormData, DepreciationMethod } from '@/types/assets.types';
-
+import { logger } from '@/lib/logger';
 interface CategoryManagementDialogProps {
   open: boolean;
   onClose: () => void;
 }
-
 export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> = ({
   open,
   onClose,
@@ -56,7 +54,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
   const [categories, setCategories] = useState<AssetCategory[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-
   const [formData, setFormData] = useState<AssetCategoryFormData>({
     name: '',
     code: '',
@@ -69,28 +66,24 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
     default_declining_rate: undefined,
     default_residual_value: 0,
   });
-
   useEffect(() => {
     if (open && currentCompany?.id) {
       loadCategories();
     }
   }, [open, currentCompany?.id]);
-
   const loadCategories = async () => {
     if (!currentCompany?.id) return;
-
     setLoading(true);
     try {
       const data = await assetsService.getAssetCategories(currentCompany.id);
       setCategories(data);
     } catch (error: any) {
-      console.error('Error loading categories:', error);
+      logger.error('CategoryManagementDialog', 'Error loading categories:', error);
       toast.error(t('assets.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
   };
-
   const resetForm = () => {
     setFormData({
       name: '',
@@ -107,7 +100,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
     setEditingId(null);
     setShowAddForm(false);
   };
-
   const handleEdit = (category: AssetCategory) => {
     setFormData({
       name: category.name,
@@ -124,22 +116,17 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
     setEditingId(category.id);
     setShowAddForm(true);
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!currentCompany?.id) {
       toast.error(t('common.errors.noCompany'));
       return;
     }
-
     if (!formData.name.trim()) {
       toast.error(t('assets.categories.errors.nameRequired'));
       return;
     }
-
     setLoading(true);
-
     try {
       if (editingId) {
         await assetsService.updateAssetCategory(editingId, formData);
@@ -148,17 +135,15 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
         await assetsService.createAssetCategory(currentCompany.id, formData);
         toast.success(t('assets.categories.success.created'));
       }
-
       await loadCategories();
       resetForm();
     } catch (error: any) {
-      console.error('Error saving category:', error);
+      logger.error('CategoryManagementDialog', 'Error saving category:', error);
       toast.error(error.message || t('assets.errors.saveFailed'));
     } finally {
       setLoading(false);
     }
   };
-
   const handleDelete = async (categoryId: string) => {
     const confirmed = await confirm({
       title: t('common.confirmation', 'Confirmation'),
@@ -167,29 +152,25 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
       cancelText: t('common.cancel', 'Annuler'),
       variant: 'destructive',
     });
-
     if (!confirmed) return;
-
     setLoading(true);
     try {
       await assetsService.deleteAssetCategory(categoryId);
       toast.success(t('assets.categories.success.deleted'));
       await loadCategories();
     } catch (error: any) {
-      console.error('Error deleting category:', error);
+      logger.error('CategoryManagementDialog', 'Error deleting category:', error);
       toast.error(error.message || t('assets.errors.deleteFailed'));
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('assets.categories.manage')}</DialogTitle>
         </DialogHeader>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Liste des catégories */}
           <Card>
@@ -269,7 +250,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
               )}
             </CardContent>
           </Card>
-
           {/* Formulaire d'ajout/édition */}
           {showAddForm && (
             <Card>
@@ -292,7 +272,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
                         required
                       />
                     </div>
-
                     <div className="space-y-2">
                       <Label htmlFor="code">{t('assets.categories.code')}</Label>
                       <Input
@@ -302,7 +281,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
                         placeholder="Ex: 2183"
                       />
                     </div>
-
                     <div className="space-y-2">
                       <Label htmlFor="description">{t('assets.form.description')}</Label>
                       <Textarea
@@ -313,11 +291,9 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
                       />
                     </div>
                   </div>
-
                   {/* Comptes comptables */}
                   <div className="space-y-4 border-t pt-4">
                     <h4 className="font-medium">{t('assets.categories.accounts')}</h4>
-
                     <div className="grid grid-cols-1 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="account_asset">{t('assets.categories.accountAsset')}</Label>
@@ -328,7 +304,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
                           placeholder="Ex: 2183"
                         />
                       </div>
-
                       <div className="space-y-2">
                         <Label htmlFor="account_depreciation">{t('assets.categories.accountDepreciation')}</Label>
                         <Input
@@ -338,7 +313,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
                           placeholder="Ex: 28183"
                         />
                       </div>
-
                       <div className="space-y-2">
                         <Label htmlFor="account_expense">{t('assets.categories.accountExpense')}</Label>
                         <Input
@@ -350,11 +324,9 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
                       </div>
                     </div>
                   </div>
-
                   {/* Paramètres d'amortissement */}
                   <div className="space-y-4 border-t pt-4">
                     <h4 className="font-medium">{t('assets.categories.defaultSettings')}</h4>
-
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="method">{t('assets.form.depreciationMethod')}</Label>
@@ -372,7 +344,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
                           </SelectContent>
                         </Select>
                       </div>
-
                       <div className="space-y-2">
                         <Label htmlFor="duration">{t('assets.form.durationYears')}</Label>
                         <Input
@@ -383,7 +354,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
                           onChange={(e) => setFormData({ ...formData, default_duration_years: parseInt(e.target.value) || 1 })}
                         />
                       </div>
-
                       {formData.default_depreciation_method === 'declining_balance' && (
                         <div className="space-y-2">
                           <Label htmlFor="rate">{t('assets.form.decliningRate')}</Label>
@@ -402,7 +372,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
                           </Select>
                         </div>
                       )}
-
                       <div className="space-y-2">
                         <Label htmlFor="residual">{t('assets.form.residualValue')} (€)</Label>
                         <Input
@@ -416,7 +385,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
                       </div>
                     </div>
                   </div>
-
                   {/* Actions */}
                   <div className="flex justify-end gap-2 pt-4">
                     <Button type="button" variant="outline" onClick={resetForm}>
@@ -433,7 +401,6 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
             </Card>
           )}
         </div>
-
         <ConfirmDialogComponent />
       </DialogContent>
     </Dialog>

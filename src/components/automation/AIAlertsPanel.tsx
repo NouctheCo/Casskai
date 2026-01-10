@@ -6,16 +6,14 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/useToast';
 import { supabase } from '@/lib/supabase';
 import type { AIInsight } from '@/types/automation.types';
-
+import { logger } from '@/lib/logger';
 interface AIAlertsPanelProps {
   insights: AIInsight[];
   onRefresh: () => void;
 }
-
 export default function AIAlertsPanel({ insights, onRefresh }: AIAlertsPanelProps) {
   const { showToast } = useToast();
   const { t } = useTranslation();
-
   const getIcon = (type: string) => {
     switch (type) {
       case 'anomaly':
@@ -30,7 +28,6 @@ export default function AIAlertsPanel({ insights, onRefresh }: AIAlertsPanelProp
         return <AlertTriangle className="w-5 h-5" />;
     }
   };
-
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical':
@@ -45,35 +42,30 @@ export default function AIAlertsPanel({ insights, onRefresh }: AIAlertsPanelProp
         return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800';
     }
   };
-
   const handleMarkAsSeen = async (insight: AIInsight) => {
     try {
       await supabase
         .from('ai_insights')
         .update({ status: 'seen' })
         .eq('id', insight.id);
-
       showToast(t('automation.success.alertMarkedAsRead'), 'success');
       onRefresh();
     } catch (error) {
-      console.error('Error marking as seen:', error);
+      logger.error('AIAlertsPanel', 'Error marking as seen:', error);
     }
   };
-
   const handleDismiss = async (insight: AIInsight) => {
     try {
       await supabase
         .from('ai_insights')
         .update({ status: 'dismissed' })
         .eq('id', insight.id);
-
       showToast(t('automation.success.alertIgnored'), 'success');
       onRefresh();
     } catch (error) {
-      console.error('Error dismissing:', error);
+      logger.error('AIAlertsPanel', 'Error dismissing:', error);
     }
   };
-
   if (insights.length === 0) {
     return (
       <Card className="p-12 text-center">
@@ -87,7 +79,6 @@ export default function AIAlertsPanel({ insights, onRefresh }: AIAlertsPanelProp
       </Card>
     );
   }
-
   return (
     <div className="space-y-4">
       {insights.map((insight) => (
@@ -109,7 +100,6 @@ export default function AIAlertsPanel({ insights, onRefresh }: AIAlertsPanelProp
                   </Badge>
                 </div>
                 <p className="text-sm mb-3">{insight.description}</p>
-
                 {/* Actions suggérées */}
                 {insight.suggested_actions.length > 0 && (
                   <div className="flex flex-wrap gap-2">
@@ -131,7 +121,6 @@ export default function AIAlertsPanel({ insights, onRefresh }: AIAlertsPanelProp
                 )}
               </div>
             </div>
-
             <div className="flex gap-1 ml-4">
               {insight.status === 'new' && (
                 <Button
@@ -153,7 +142,6 @@ export default function AIAlertsPanel({ insights, onRefresh }: AIAlertsPanelProp
               </Button>
             </div>
           </div>
-
           {/* Métadonnées */}
           <div className="text-xs text-muted-foreground flex items-center gap-3 pt-3 border-t">
             <span>Catégorie: {insight.category}</span>

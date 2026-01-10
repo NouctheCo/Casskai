@@ -3,16 +3,14 @@ import Joyride, { STATUS, EVENTS, type CallBackProps, type Step } from 'react-jo
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useAuth } from '@/contexts/AuthContext';
-
+import { logger } from '@/lib/logger';
 interface OnboardingTourProps {
   isNewAccount: boolean;
   companyName: string;
 }
-
 type TourWindow = Window & typeof globalThis & {
   restartOnboardingTour?: () => void;
 };
-
 const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
   {
     target: 'body',
@@ -29,7 +27,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
             La plateforme tout-en-un pour piloter <strong className="text-purple-600 dark:text-purple-400">{companyName}</strong>
           </p>
         </div>
-
         <div className="grid grid-cols-1 gap-2">
           {[
             { icon: '💼', text: 'Comptabilité complète et conforme' },
@@ -44,7 +41,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
             </div>
           ))}
         </div>
-
         <div className="flex items-center justify-center gap-2 pt-2">
           <span className="text-2xl">⏱️</span>
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Ce guide prend 3 minutes</p>
@@ -64,9 +60,7 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Navigation principale</h3>
         </div>
-
         <p className="text-gray-700 dark:text-gray-200">Accédez à tous vos modules depuis le menu latéral</p>
-
         <div className="grid grid-cols-2 gap-3">
           {[
             { icon: '📊', name: 'Tableau de bord', desc: 'Vue d\'ensemble' },
@@ -83,7 +77,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
             </div>
           ))}
         </div>
-
         <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
           <span className="text-xl">💡</span>
           <span className="text-sm font-medium text-blue-900 dark:text-blue-100">Utilisez <kbd className="px-2 py-1 text-xs bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600">Ctrl+K</kbd> pour la recherche rapide</span>
@@ -103,9 +96,7 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Tableau de bord</h3>
         </div>
-
         <p className="text-gray-700 dark:text-gray-200">Visualisez en temps réel les indicateurs clés de votre entreprise</p>
-
         <div className="space-y-2">
           {[
             { icon: '💰', label: 'Chiffre d\'affaires', color: 'from-green-500 to-emerald-500' },
@@ -122,7 +113,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
             </div>
           ))}
         </div>
-
         <div className="p-3 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800">
           <p className="text-xs text-blue-900 dark:text-blue-100">✨ Données synchronisées automatiquement depuis votre comptabilité</p>
         </div>
@@ -143,7 +133,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
             Intelligence Artificielle
           </h3>
         </div>
-
         <div className="relative overflow-hidden p-4 rounded-xl bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-rose-900/40 border-2 border-purple-300 dark:border-purple-600">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-2xl"></div>
           <div className="relative">
@@ -156,7 +145,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
             </p>
           </div>
         </div>
-
         <div className="space-y-2">
           <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <span className="text-xl">✨</span>
@@ -178,7 +166,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
             </div>
           ))}
         </div>
-
         <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
           <div className="flex items-start gap-3">
             <span className="text-2xl flex-shrink-0">📍</span>
@@ -201,7 +188,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Modules essentiels</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">Explorez les fonctionnalités principales de CassKai</p>
         </div>
-
         <div className="grid grid-cols-1 gap-3">
           {[
             {
@@ -254,7 +240,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
             </div>
           ))}
         </div>
-
         <div className="p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border border-gray-200 dark:border-gray-600">
           <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
             <span className="text-base mr-1">➕</span>
@@ -279,7 +264,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
           </h2>
           <p className="text-gray-700 dark:text-gray-200">Commencez à utiliser CassKai dès maintenant</p>
         </div>
-
         <div className="space-y-3">
           <p className="font-bold text-gray-900 dark:text-white">🚀 Prochaines étapes</p>
           {[
@@ -298,7 +282,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
             </div>
           ))}
         </div>
-
         <div className="relative overflow-hidden p-4 rounded-xl bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-rose-900/40 border-2 border-purple-300 dark:border-purple-600">
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-2xl"></div>
           <div className="relative flex items-start gap-3">
@@ -309,7 +292,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
             </div>
           </div>
         </div>
-
         <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
           <div className="flex items-start gap-3">
             <span className="text-2xl flex-shrink-0">💡</span>
@@ -329,7 +311,6 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
     disableBeacon: true
   }
 ];
-
 export function OnboardingTour({ isNewAccount, companyName }: OnboardingTourProps) {
   const { user } = useAuth();
   const { t } = useTranslation();
@@ -337,15 +318,12 @@ export function OnboardingTour({ isNewAccount, companyName }: OnboardingTourProp
   const [stepIndex, setStepIndex] = useState(0);
   const storageKey = useMemo(() => `onboarding_tour_completed_${user?.id ?? 'anonymous'}`, [user?.id]);
   const steps = useMemo(() => buildTourSteps(t, companyName), [t, companyName]);
-
   useEffect(() => {
     // Vérifier si le tour est déjà complété
     const hasCompletedTour = localStorage.getItem(storageKey);
-
     // Vérifier si l'URL demande explicitement le tour (pour relancer)
     const urlParams = new URLSearchParams(window.location.search);
     const forceTour = urlParams.get('tour') === 'start' || urlParams.get('tour') === 'true';
-
     if (forceTour) {
       // Forcer le redémarrage du tour
       localStorage.removeItem(storageKey);
@@ -355,52 +333,42 @@ export function OnboardingTour({ isNewAccount, companyName }: OnboardingTourProp
       window.history.replaceState({}, '', window.location.pathname);
       return () => window.clearTimeout(timeoutId);
     }
-
     if (isNewAccount && !hasCompletedTour) {
       // Nouveau compte et tour pas encore fait
       const timeoutId = window.setTimeout(() => setRun(true), 1000);
       return () => window.clearTimeout(timeoutId);
     }
-
     return undefined;
   }, [isNewAccount, storageKey]);
-
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status, type, index } = data;
-
-    console.log('[OnboardingTour] Callback:', { status, type, index });
-
+    logger.debug('OnboardingTour', '[OnboardingTour] Callback:', { status, type, index });
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       localStorage.setItem(storageKey, 'true');
       setRun(false);
       return;
     }
-
     // Gérer target non trouvé - passer à l'étape suivante
     if (type === EVENTS.TARGET_NOT_FOUND) {
-      console.warn('[OnboardingTour] Target not found, skipping to next step');
+      logger.warn('OnboardingTour', '[OnboardingTour] Target not found, skipping to next step');
       setStepIndex(index + 1);
       return;
     }
-
     // Gérer STEP_AFTER (bouton Next ou Last cliqué)
     if (type === EVENTS.STEP_AFTER) {
       setStepIndex(index + 1);
     }
-
     // Gérer STEP_BEFORE (bouton Back cliqué)
     // L'index fourni par Joyride est déjà celui de l'étape précédente
     if (type === EVENTS.STEP_BEFORE) {
       setStepIndex(index);
     }
   };
-
   const restartTour = useCallback(() => {
     localStorage.removeItem(storageKey);
     setStepIndex(0);
     setRun(true);
   }, [storageKey]);
-
   useEffect(() => {
     const tourWindow = window as TourWindow;
     tourWindow.restartOnboardingTour = restartTour;
@@ -408,7 +376,6 @@ export function OnboardingTour({ isNewAccount, companyName }: OnboardingTourProp
       delete tourWindow.restartOnboardingTour;
     };
   }, [restartTour]);
-
   return (
     <Joyride
       steps={steps}
@@ -421,10 +388,16 @@ export function OnboardingTour({ isNewAccount, companyName }: OnboardingTourProp
       styles={{
         options: {
           primaryColor: '#8b5cf6',
+          backgroundColor: 'hsl(var(--popover))',
+          textColor: 'hsl(var(--popover-foreground))',
+          arrowColor: 'hsl(var(--popover))',
           zIndex: 10000,
           overlayColor: 'rgba(0, 0, 0, 0.5)'
         },
         tooltip: {
+          backgroundColor: 'hsl(var(--popover))',
+          color: 'hsl(var(--popover-foreground))',
+          border: '1px solid hsl(var(--border))',
           borderRadius: 16,
           fontSize: 14,
           padding: 24,
@@ -443,18 +416,18 @@ export function OnboardingTour({ isNewAccount, companyName }: OnboardingTourProp
           boxShadow: '0 4px 6px -1px rgba(139, 92, 246, 0.3)'
         },
         buttonBack: {
-          color: '#6b7280',
+          color: 'hsl(var(--muted-foreground))',
           marginRight: 8,
           fontSize: 14,
           fontWeight: 500
         },
         buttonSkip: {
-          color: '#9ca3af',
+          color: 'hsl(var(--muted-foreground))',
           fontSize: 13,
           fontWeight: 500
         },
         buttonClose: {
-          color: '#6b7280'
+          color: 'hsl(var(--muted-foreground))'
         }
       }}
       locale={{

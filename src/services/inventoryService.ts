@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from '@/lib/supabase';
 import type { CreateInventoryItemInput, StockMovementCreationInput } from '@/types/inventory';
 import type { InventoryItemRow, StockMovementRow } from './inventory/types/inventory-db.types';
@@ -30,6 +29,7 @@ import {
   filterMovementsByType,
   resolveMovementDirection
 } from './inventory/inventory-calculations';
+import { logger } from '@/lib/logger';
 import {
   buildInventoryInsertPayload,
   buildInventoryUpdates,
@@ -40,9 +40,7 @@ import {
   queryStockMovements,
   resolveWarehouse
 } from './inventory/inventory-queries';
-
 export type InventoryStatus = 'active' | 'inactive' | 'low_stock' | 'out_of_stock';
-
 export interface InventoryItem {
   id: string;
   productId: string;
@@ -83,14 +81,12 @@ export interface InventoryItem {
   created_at: string;
   updated_at: string;
 }
-
 export type InventoryItemFilters = {
   warehouseId?: string;
   category?: string;
   search?: string;
   lowStock?: boolean;
 };
-
 export interface StockMovement {
   id: string;
   item_id?: string;
@@ -117,14 +113,12 @@ export interface StockMovement {
   created_at: string;
   movement_date: string;
 }
-
 export type StockMovementFilters = {
   itemId?: string;
   type?: 'entry' | 'exit' | 'adjustment' | 'transfer';
   dateFrom?: string;
   dateTo?: string;
 };
-
 export interface InventoryMetrics {
   totalItems: number;
   totalValue: number;
@@ -138,7 +132,6 @@ export interface InventoryMetrics {
   availableStock: number;
   totalWarehouses: number;
 }
-
 export interface InventoryAlertSettings {
   emailEnabled: boolean;
   smsEnabled: boolean;
@@ -147,7 +140,6 @@ export interface InventoryAlertSettings {
   autoReorderEnabled: boolean;
   globalThreshold: number;
 }
-
 export const defaultInventoryAlertSettings: InventoryAlertSettings = {
   emailEnabled: true,
   smsEnabled: false,
@@ -156,7 +148,6 @@ export const defaultInventoryAlertSettings: InventoryAlertSettings = {
   autoReorderEnabled: true,
   globalThreshold: 5
 };
-
 type InventoryAlertSettingsRow = {
   company_id?: string;
   email_enabled?: boolean | null;
@@ -166,7 +157,6 @@ type InventoryAlertSettingsRow = {
   auto_reorder_enabled?: boolean | null;
   global_threshold?: number | null;
 };
-
 export interface Supplier {
   id: string;
   supplier_number: string;
@@ -187,7 +177,6 @@ export interface Supplier {
   created_at: string;
   updated_at: string;
 }
-
 export interface NewInventoryItemInput {
   productId?: string;
   productVariantId?: string | null;
@@ -208,7 +197,6 @@ export interface NewInventoryItemInput {
   reorderQuantity?: number;
   supplierId?: string;
 }
-
 export interface NewStockMovementInput {
   item_id?: string;
   product_id?: string;
@@ -225,12 +213,10 @@ export interface NewStockMovementInput {
   company_id?: string;
   location?: string;
 }
-
 export class InventoryService {
   static async getInventoryItems(companyId?: string, filters?: InventoryItemFilters): Promise<InventoryItem[]> {
     try {
       const company_id = companyId || await this.getCurrentCompanyId();
-
       let query = supabase
         .from('inventory_items')
         .select(`
@@ -265,19 +251,15 @@ export class InventoryService {
         `)
         .eq('company_id', company_id)
         .order('updated_at', { ascending: false });
-
       if (filters?.warehouseId) {
         query = query.eq('warehouse_id', filters.warehouseId);
       }
-
       const { data, error } = await query;
       if (error) throw error;
-
       const rows = (data || []) as unknown[];
       let items = rows
         .filter((item): item is InventoryItemRow => isInventoryItemRow(item))
         .map((item) => normalizeInventoryItem(item));
-
       if (filters?.search) {
         const term = filters.search.toLowerCase();
         items = items.filter((item) =>
@@ -285,22 +267,18 @@ export class InventoryService {
           item.reference.toLowerCase().includes(term)
         );
       }
-
       if (filters?.category) {
         items = items.filter((item) => item.category === filters.category);
       }
-
       if (filters?.lowStock) {
         items = items.filter((item) => item.status === 'low_stock' || item.status === 'out_of_stock');
       }
-
       return items;
     } catch (error) {
-      console.error('Error fetching inventory items:', error instanceof Error ? error.message : String(error));
+      logger.error('Inventory', 'Error fetching inventory items:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
-
   static async createInventoryItem(
     companyIdOrData: string | NewInventoryItemInput,
     maybeItemData?: NewInventoryItemInput
@@ -309,9 +287,7 @@ export class InventoryService {
       const { companyId, payload } = await this.resolveCreateItemContext(companyIdOrData, maybeItemData);
       const normalizedInput = this.normalizeCreateInventoryInput(payload, companyId);
       const warehouseId = await resolveWarehouse(companyId, normalizedInput.warehouseId);
-
       validateCreateInventoryItem(normalizedInput);
-
       const productPayload = buildProductUpsertPayload(normalizedInput, companyId);
       validateProductData(productPayload);
       const product = await this.upsertProduct(productPayload, {
@@ -319,14 +295,12 @@ export class InventoryService {
         productId: normalizedInput.productId,
         productCode: normalizedInput.productCode
       });
-
       const inventoryPayload = buildInventoryInsertPayload(normalizedInput, {
         companyId,
         productId: product.id,
         warehouseId,
         locationId: normalizedInput.locationId
       });
-
       const { data, error } = await supabase
         .from('inventory_items')
         .insert(inventoryPayload)
@@ -338,18 +312,16 @@ export class InventoryService {
           inventory_locations:location_id (*)
         `)
         .single();
-
       if (error) throw error;
       if (!isInventoryItemRow(data)) {
         throw new Error('Unexpected inventory item payload');
       }
       return normalizeInventoryItem(data);
     } catch (error) {
-      console.error('Error creating inventory item:', error instanceof Error ? error.message : String(error));
+      logger.error('Inventory', 'Error creating inventory item:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   static async updateInventoryItem(id: string, updates: Partial<InventoryItem>): Promise<InventoryItem> {
     try {
       const { data: existing, error: fetchError } = await supabase
@@ -360,17 +332,13 @@ export class InventoryService {
         `)
         .eq('id', id)
         .single();
-
       if (fetchError || !existing) {
         throw new Error('Inventory item not found');
       }
-
       const normalizedUpdates = this.normalizeUpdateInventoryInput(updates);
       const productUpdates = buildProductUpdates(normalizedUpdates);
       const inventoryUpdates = buildInventoryUpdates(normalizedUpdates);
-
       const mutations: Promise<unknown>[] = [];
-
       if (productUpdates) {
         mutations.push(
           Promise.resolve(supabase
@@ -380,7 +348,6 @@ export class InventoryService {
             .then())
         );
       }
-
       if (inventoryUpdates) {
         mutations.push(
           Promise.resolve(supabase
@@ -390,11 +357,9 @@ export class InventoryService {
             .then())
         );
       }
-
       if (mutations.length) {
         await Promise.all(mutations);
       }
-
       const { data, error } = await supabase
         .from('inventory_items')
         .select(`
@@ -406,33 +371,28 @@ export class InventoryService {
         `)
         .eq('id', id)
         .single();
-
       if (error) throw error;
       if (!isInventoryItemRow(data)) {
         throw new Error('Unexpected inventory item payload');
       }
-
       return normalizeInventoryItem(data);
     } catch (error) {
-      console.error('Error updating inventory item:', error instanceof Error ? error.message : String(error));
+      logger.error('Inventory', 'Error updating inventory item:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   static async deleteInventoryItem(id: string): Promise<void> {
     try {
       const { error } = await supabase
         .from('inventory_items')
         .delete()
         .eq('id', id);
-
       if (error) throw error;
     } catch (error) {
-      console.error('Error deleting inventory item:', error instanceof Error ? error.message : String(error));
+      logger.error('Inventory', 'Error deleting inventory item:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   static async getStockMovements(companyId?: string, filters?: StockMovementFilters): Promise<StockMovement[]> {
     try {
       const company_id = companyId || await this.getCurrentCompanyId();
@@ -444,23 +404,19 @@ export class InventoryService {
         }),
         buildProductToItemMap(company_id)
       ]);
-
       let movements = rawMovements
         .filter((movement): movement is StockMovementRow => isStockMovementRow(movement))
         .map((movement) => normalizeStockMovement(movement));
-
       movements = attachInventoryIds(movements, productToItemMap);
       movements = filterMovementsByType(movements, filters?.type);
       movements = filterMovementsByItemId(movements, filters?.itemId);
       movements = filterMovementsByDateRange(movements, filters?.dateFrom, filters?.dateTo);
-
       return movements;
     } catch (error) {
-      console.error('Error fetching stock movements:', error instanceof Error ? error.message : String(error));
+      logger.error('Inventory', 'Error fetching stock movements:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
-
   static async createStockMovement(
     companyIdOrData: string | NewStockMovementInput,
     maybeMovementData?: NewStockMovementInput
@@ -468,23 +424,18 @@ export class InventoryService {
     try {
       const { companyId, payload } = await this.resolveMovementContext(companyIdOrData, maybeMovementData);
       const normalizedInput = this.normalizeStockMovementInput(payload, companyId);
-
       if (!normalizedInput.itemId) {
         throw new Error('Inventory item identifier is required for stock movements');
       }
-
       const itemRecord = await this.fetchInventoryItem(normalizedInput.itemId);
-
       const rawQuantity = this.sanitizeNumber(payload.quantity);
       const quantity = Math.abs(rawQuantity);
       const direction = resolveMovementDirection(normalizedInput.type, rawQuantity);
       const movementType = this.mapMovementType(normalizedInput.type, direction);
       const unitCost = normalizedInput.unitCost ?? itemRecord.unit_cost ?? 0;
-
       const newQuantity = normalizedInput.type === 'adjustment'
         ? quantity
         : calculateStockAdjustment(Number(itemRecord.quantity_on_hand ?? 0), quantity, direction);
-
       const movementPayload = buildStockMovementPayload(
         {
           productId: itemRecord.product_id,
@@ -501,7 +452,6 @@ export class InventoryService {
         },
         companyId
       );
-
       const { data: movement, error: movementError } = await supabase
         .from('inventory_movements')
         .insert(movementPayload)
@@ -513,9 +463,7 @@ export class InventoryService {
           inventory_locations:location_id (*)
         `)
         .single();
-
       if (movementError) throw movementError;
-
       const { error: updateError } = await supabase
         .from('inventory_items')
         .update({
@@ -523,42 +471,34 @@ export class InventoryService {
           last_movement_date: new Date().toISOString()
         })
         .eq('id', itemRecord.id);
-
       if (updateError) throw updateError;
-
       if (!movement || !isStockMovementRow(movement)) {
         throw new Error('Unexpected stock movement payload');
       }
-
       return normalizeStockMovement(movement, itemRecord.id);
     } catch (error) {
-      console.error('Error creating stock movement:', error instanceof Error ? error.message : String(error));
+      logger.error('Inventory', 'Error creating stock movement:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   static async getSuppliers(companyId?: string): Promise<Supplier[]> {
     try {
       const company_id = companyId || await this.getCurrentCompanyId();
-
       const { data, error } = await supabase
         .from('suppliers')
         .select('*')
         .eq('company_id', company_id)
         .order('name');
-
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching suppliers:', error instanceof Error ? error.message : String(error));
+      logger.error('Inventory', 'Error fetching suppliers:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
-
   static async createSupplier(supplierData: Omit<Supplier, 'id' | 'created_at' | 'updated_at' | 'company_id'>): Promise<Supplier> {
     try {
       const company_id = await this.getCurrentCompanyId();
-
       const { data, error } = await supabase
         .from('suppliers')
         .insert({
@@ -567,15 +507,13 @@ export class InventoryService {
         })
         .select('*')
         .single();
-
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error creating supplier:', error instanceof Error ? error.message : String(error));
+      logger.error('Inventory', 'Error creating supplier:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   static async getAlertSettings(companyId?: string): Promise<InventoryAlertSettings> {
     try {
       const company_id = companyId || await this.getCurrentCompanyId();
@@ -584,20 +522,16 @@ export class InventoryService {
         .select('email_enabled, sms_enabled, slack_enabled, digest_enabled, auto_reorder_enabled, global_threshold')
         .eq('company_id', company_id)
         .maybeSingle();
-
       if (error) throw error;
-
       if (!data) {
         return await this.saveAlertSettings(defaultInventoryAlertSettings, company_id);
       }
-
       return this.normalizeAlertSettings(data);
     } catch (error) {
-      console.error('Error fetching inventory alert settings:', error instanceof Error ? error.message : String(error));
+      logger.error('Inventory', 'Error fetching inventory alert settings:', error instanceof Error ? error.message : String(error));
       return { ...defaultInventoryAlertSettings };
     }
   }
-
   static async saveAlertSettings(
     settings: InventoryAlertSettings,
     companyId?: string
@@ -605,27 +539,22 @@ export class InventoryService {
     try {
       const company_id = companyId || await this.getCurrentCompanyId();
       const payload = this.serializeAlertSettings(company_id, settings);
-
       const { data, error } = await supabase
         .from('inventory_alert_settings')
         .upsert(payload, { onConflict: 'company_id' })
         .select('email_enabled, sms_enabled, slack_enabled, digest_enabled, auto_reorder_enabled, global_threshold')
         .single();
-
       if (error) throw error;
-
       return this.normalizeAlertSettings(data);
     } catch (error) {
-      console.error('Error saving inventory alert settings:', error instanceof Error ? error.message : String(error));
+      logger.error('Inventory', 'Error saving inventory alert settings:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   static async getInventoryMetrics(companyId?: string): Promise<InventoryMetrics> {
     try {
       const company_id = companyId || await this.getCurrentCompanyId();
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-
       const [items, movements, suppliersRes, warehousesRes] = await Promise.all([
         this.getInventoryItems(company_id),
         this.getStockMovements(company_id, { dateFrom: thirtyDaysAgo, type: 'exit' }),
@@ -639,11 +568,9 @@ export class InventoryService {
           .select('id', { count: 'exact', head: true })
           .eq('company_id', company_id)
       ]);
-
       const movementsOutQuantity = movements
         .filter((movement) => movement.direction === 'out')
         .reduce((sum, movement) => sum + Math.abs(movement.quantity ?? 0), 0);
-
       return calculateInventoryMetrics(items, {
         totalMovements: movements.length,
         totalMovementsOut: movementsOutQuantity,
@@ -651,27 +578,21 @@ export class InventoryService {
         totalWarehouses: warehousesRes.count ?? 0
       });
     } catch (error) {
-      console.error('Error fetching inventory metrics:', error instanceof Error ? error.message : String(error));
+      logger.error('Inventory', 'Error fetching inventory metrics:', error instanceof Error ? error.message : String(error));
       return buildEmptyMetrics();
     }
   }
-
-  
-
   private static async fetchInventoryItem(id: string) {
     const { data, error } = await supabase
       .from('inventory_items')
       .select('id, product_id, product_variant_id, warehouse_id, location_id, unit_cost, quantity_on_hand')
       .eq('id', id)
       .single();
-
     if (error || !data) {
       throw new Error('Inventory item not found');
     }
-
     return data;
   }
-
   private static async upsertProduct(
     payload: ReturnType<typeof buildProductUpsertPayload>,
     options: { productId?: string | null; companyId: string; productCode?: string } 
@@ -683,18 +604,15 @@ export class InventoryService {
         .eq('id', options.productId)
         .select('*')
         .single();
-
       if (error) throw error;
       return data;
     }
-
     const { data: existing } = await supabase
       .from('products')
       .select('*')
       .eq('company_id', options.companyId)
       .eq('code', options.productCode ?? payload.code)
       .maybeSingle();
-
     if (existing) {
       const { data: updated, error } = await supabase
         .from('products')
@@ -702,21 +620,17 @@ export class InventoryService {
         .eq('id', existing.id)
         .select('*')
         .single();
-
       if (error) throw error;
       return updated;
     }
-
     const { data, error } = await supabase
       .from('products')
       .insert(payload)
       .select('*')
       .single();
-
     if (error) throw error;
     return data;
   }
-
   private static async resolveCreateItemContext(
     companyIdOrData: string | NewInventoryItemInput | CreateInventoryItemInput,
     maybeItemData?: NewInventoryItemInput | CreateInventoryItemInput
@@ -727,11 +641,9 @@ export class InventoryService {
       }
       return { companyId: companyIdOrData, payload: maybeItemData };
     }
-
     const companyId = await this.getCurrentCompanyId();
     return { companyId, payload: companyIdOrData };
   }
-
   private static normalizeCreateInventoryInput(
     payload: NewInventoryItemInput | CreateInventoryItemInput,
     companyId: string
@@ -739,7 +651,6 @@ export class InventoryService {
     if ('productName' in payload) {
       return { ...payload, companyId };
     }
-
     return {
       companyId,
       productId: payload.productId,
@@ -760,7 +671,6 @@ export class InventoryService {
       supplierId: payload.supplierId
     } satisfies CreateInventoryItemInput;
   }
-
   private static normalizeUpdateInventoryInput(updates: Partial<InventoryItem>): Partial<CreateInventoryItemInput> {
     return {
       productName: updates.name,
@@ -779,7 +689,6 @@ export class InventoryService {
       productVariantId: updates.productVariantId
     };
   }
-
   private static async resolveMovementContext(
     companyIdOrData: string | NewStockMovementInput,
     maybeMovementData?: NewStockMovementInput
@@ -790,11 +699,9 @@ export class InventoryService {
       }
       return { companyId: companyIdOrData, payload: maybeMovementData };
     }
-
     const companyId = await this.getCurrentCompanyId();
     return { companyId, payload: companyIdOrData };
   }
-
   private static normalizeStockMovementInput(
     payload: NewStockMovementInput,
     companyId: string
@@ -810,7 +717,6 @@ export class InventoryService {
       userId: payload.user_id
     } satisfies StockMovementCreationInput;
   }
-
   private static mapMovementType(input: NewStockMovementInput['type'], direction: 'in' | 'out'): string {
     switch (input) {
       case 'entry':
@@ -824,18 +730,15 @@ export class InventoryService {
         return direction === 'in' ? 'adjustment_in' : 'adjustment_out';
     }
   }
-
   private static sanitizeNumber(value?: number | string | null): number {
     if (value === null || value === undefined) return 0;
     const numeric = Number(value);
     return Number.isNaN(numeric) ? 0 : numeric;
   }
-
   private static normalizeAlertSettings(record: InventoryAlertSettingsRow | null): InventoryAlertSettings {
     if (!record) {
       return { ...defaultInventoryAlertSettings };
     }
-
     return {
       emailEnabled: Boolean(record.email_enabled ?? defaultInventoryAlertSettings.emailEnabled),
       smsEnabled: Boolean(record.sms_enabled ?? defaultInventoryAlertSettings.smsEnabled),
@@ -845,7 +748,6 @@ export class InventoryService {
       globalThreshold: Number(record.global_threshold ?? defaultInventoryAlertSettings.globalThreshold)
     } satisfies InventoryAlertSettings;
   }
-
   private static serializeAlertSettings(companyId: string, settings: InventoryAlertSettings): Required<InventoryAlertSettingsRow> {
     return {
       company_id: companyId,
@@ -857,46 +759,37 @@ export class InventoryService {
       global_threshold: settings.globalThreshold
     };
   }
-
   private static async getCurrentCompanyId(): Promise<string> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       throw new Error('User not authenticated');
     }
-
     const { data: defaultCompany, error: defaultError } = await supabase
       .from('user_companies')
       .select('company_id')
       .eq('user_id', user.id)
       .eq('is_default', true)
       .limit(1);
-
     if (defaultError) {
-      console.error('Error fetching default company:', defaultError.message);
+      logger.error('Inventory', 'Error fetching default company:', defaultError.message);
     }
-
     const companyId = defaultCompany?.[0]?.company_id;
     if (companyId) {
       return companyId;
     }
-
     const { data: fallbackCompanies, error: fallbackError } = await supabase
       .from('user_companies')
       .select('company_id')
       .eq('user_id', user.id)
       .limit(1);
-
     if (fallbackError) {
-      console.error('Error fetching fallback company:', fallbackError.message);
+      logger.error('Inventory', 'Error fetching fallback company:', fallbackError.message);
       throw fallbackError;
     }
-
     if (!fallbackCompanies?.length) {
       throw new Error('No company associated with current user');
     }
-
     return fallbackCompanies[0].company_id;
   }
 }
-
 export default InventoryService;

@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,7 +19,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, XCircle, Mail, Building } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-
+import { logger } from '@/lib/logger';
 interface InvitationData {
   id: string;
   email: string;
@@ -29,7 +28,6 @@ interface InvitationData {
   status: string;
   expires_at: string;
 }
-
 export default function AcceptInvitationPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -40,22 +38,17 @@ export default function AcceptInvitationPage() {
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-
   const token = searchParams.get('token');
-
   useEffect(() => {
     if (!token) {
       setError(t('invitation.invalid_link'));
       setLoading(false);
       return;
     }
-
     loadInvitation();
   }, [token]);
-
   const loadInvitation = async () => {
     if (!token) return;
-
     try {
       const { data, error: invError } = await supabase
         .from('user_invitations')
@@ -69,27 +62,23 @@ export default function AcceptInvitationPage() {
         `)
         .eq('token', token)
         .single();
-
       if (invError || !data) {
         setError(t('invitation.not_found'));
         setLoading(false);
         return;
       }
-
       // Vérifier si l'invitation a expiré
       if (new Date(data.expires_at) < new Date()) {
         setError(t('invitation.expired'));
         setLoading(false);
         return;
       }
-
       // Vérifier si l'invitation est déjà acceptée ou annulée
       if (data.status !== 'pending') {
         setError(t('invitation.already_used'));
         setLoading(false);
         return;
       }
-
       setInvitation({
         id: data.id,
         email: data.email,
@@ -100,51 +89,42 @@ export default function AcceptInvitationPage() {
       });
       setLoading(false);
     } catch (err) {
-      console.error('Error loading invitation:', err);
+      logger.error('AcceptInvitation', 'Error loading invitation:', err);
       setError(t('invitation.load_error'));
       setLoading(false);
     }
   };
-
   const handleAccept = async () => {
     if (!token || !user) return;
-
     // Vérifier que l'email correspond
     if (invitation && user.email?.toLowerCase() !== invitation.email.toLowerCase()) {
       setError(t('invitation.wrong_email', { email: invitation.email }));
       return;
     }
-
     setAccepting(true);
     setError(null);
-
     try {
       const { data, error: acceptError } = await supabase.functions.invoke('accept-invitation', {
         body: { token }
       });
-
       if (acceptError) {
         throw new Error(acceptError.message);
       }
-
       if (data?.error) {
         throw new Error(data.error);
       }
-
       setSuccess(true);
       toast.success(t('invitation.accepted_success'));
-
       // Rediriger vers le dashboard après 2 secondes
       setTimeout(() => {
         navigate('/dashboard');
       }, 2000);
     } catch (err) {
-      console.error('Error accepting invitation:', err);
+      logger.error('AcceptInvitation', 'Error accepting invitation:', err);
       setError(err instanceof Error ? err.message : t('invitation.accept_error'));
       setAccepting(false);
     }
   };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -159,7 +139,6 @@ export default function AcceptInvitationPage() {
       </div>
     );
   }
-
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -175,7 +154,6 @@ export default function AcceptInvitationPage() {
       </div>
     );
   }
-
   if (error && !invitation) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -199,7 +177,6 @@ export default function AcceptInvitationPage() {
       </div>
     );
   }
-
   // Si pas connecté, afficher message pour se connecter
   if (!user && invitation) {
     return (
@@ -250,11 +227,9 @@ export default function AcceptInvitationPage() {
       </div>
     );
   }
-
   // Si connecté avec le bon email, afficher bouton pour accepter
   if (user && invitation) {
     const emailMatches = user.email?.toLowerCase() === invitation.email.toLowerCase();
-
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <Card className="w-full max-w-md">
@@ -288,7 +263,6 @@ export default function AcceptInvitationPage() {
                 <span className="font-semibold">{new Date(invitation.expires_at).toLocaleDateString()}</span>
               </div>
             </div>
-
             {!emailMatches ? (
               <Alert variant="destructive">
                 <AlertDescription>
@@ -333,6 +307,5 @@ export default function AcceptInvitationPage() {
       </div>
     );
   }
-
   return null;
 }

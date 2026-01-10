@@ -29,6 +29,16 @@
     "revenue": "Revenue"
   },
   "accountUpdatedSuccess": "Compte mis Ã  jour avec succÃ¨s",
+  "Accounting": {
+    "JournalTypes": {
+      "Purchases": "Purchases",
+      "Sales": "Sales",
+      "Bank": "Bank",
+      "Cash": "Cash",
+      "General": "General",
+      "Opening": "Opening Balance"
+    }
+  },
   "accounting": {
     "chartDetection": {
       "alternativeNote": "Peut Ãªtre utilisÃ© pour les multinationales ou cas spÃ©cifiques",
@@ -106,9 +116,9 @@
       "totalBalance": "Total balance",
       "totalBalanceDesc": "General balance",
       "totalDebit": "Total debit",
-      "totalDebitDesc": "Debits this month",
+      "totalDebitDesc": "Debits",
       "totalCredit": "Total credit",
-      "totalCreditDesc": "Credits this month",
+      "totalCreditDesc": "Credits",
       "entries": "Entries",
       "entriesDesc": "Entries recorded",
       "pendingEntries": "Pending",
@@ -122,7 +132,15 @@
       "overdue": "Overdue",
       "overdueDesc": "{{amount}} overdue",
       "validationRate": "Validation rate",
-      "validationRateDesc": "Validated entries"
+      "validationRateDesc": "Validated entries",
+      "periodDesc": {
+        "currentMonth": "This month",
+        "currentQuarter": "This quarter",
+        "currentYear": "This year",
+        "lastMonth": "Last month",
+        "lastYear": "Last year",
+        "custom": "Selected period"
+      }
     },
     "refresh": "Refresh",
     "newEntry": "New entry",
@@ -156,11 +174,147 @@
       "accounts": "Chart of accounts",
       "fecImport": "ðŸ“¥ Import FEC",
       "journals": "Journals",
-      "reports": "Reports"
+      "reports": "Reports",
+      "anomalies": "Anomalies"
+    },
+    "nav": {
+      "overview": "Overview",
+      "operations": "Operations",
+      "entries": "Entries",
+      "journals": "Journals",
+      "structure": "Structure",
+      "chartOfAccounts": "Chart of Accounts",
+      "importFEC": "Import FEC",
+      "reports": "Reports",
+      "anomalies": "Anomalies"
     },
     "recentActivity": {
       "title": "Recent activity",
       "noActivity": "No recent activity"
+    },
+    "import": {
+      "title": "Import Data",
+      "subtitle": "Import your accounting data from various formats",
+      "csv_button": "Import CSV",
+      "type": "Import Type",
+      "journal_entries": "Journal Entries",
+      "chart_of_accounts": "Chart of Accounts",
+      "drop_file": "Drop your CSV file here or click to browse",
+      "supported_formats": "Supported formats: CSV, TXT, TSV",
+      "detected_columns": "Detected Columns",
+      "group_by_entry": "Group lines by journal entry",
+      "replace_existing": "Replace existing chart of accounts",
+      "validate": "Validate",
+      "validating": "Validating...",
+      "import": "Import",
+      "importing": "Importing...",
+      "file_parsed": "File parsed successfully",
+      "validation_success": "Validation successful",
+      "validation_errors": "Validation errors detected",
+      "success": "Import successful",
+      "partial_success": "Import completed with errors",
+      "error": {
+        "invalid_file_type": "Invalid file type. Please upload a CSV file.",
+        "parse_failed": "Failed to parse CSV file",
+        "validation_failed": "Validation failed",
+        "import_failed": "Import failed"
+      }
+    },
+    "anomalies": {
+      "title": "Anomaly Detection",
+      "analysis_complete": "Analysis complete",
+      "anomalies_detected": "{{count}} anomaly(ies) detected",
+      "error_detecting": "Unable to detect anomalies",
+      "error_resolving": "Unable to resolve anomaly",
+      "resolved_success": "Anomaly resolved successfully",
+      "loading": "Loading anomalies...",
+      "refresh": "Refresh",
+      "filters": {
+        "severity": "Severity",
+        "type": "Type",
+        "status": "Status"
+      },
+      "severity": {
+        "all": "All",
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      },
+      "status": {
+        "all": "All",
+        "open": "Open",
+        "resolved": "Resolved"
+      }
+    },
+    "workflow": {
+      "status": {
+        "draft": "Draft",
+        "review": "Under Review",
+        "validated": "Validated",
+        "posted": "Posted"
+      },
+      "actions": {
+        "submit": "Submit",
+        "approve": "Approve",
+        "reject": "Reject",
+        "post": "Post"
+      },
+      "confirm_action": "Confirm Action",
+      "comment": "Comment",
+      "comment_required": "Comment is required for rejection",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "success": "Action completed successfully",
+      "error": "Error performing action"
+    },
+    "security": {
+      "title": "Security Logs",
+      "loading_error": "Error loading logs",
+      "stats_error": "Error loading statistics",
+      "export_success": "Export successful",
+      "export_error": "Error exporting",
+      "refresh": "Refresh",
+      "export": "Export",
+      "search_placeholder": "Search logs...",
+      "filters": {
+        "severity": "Severity",
+        "category": "Category",
+        "period": "Period"
+      },
+      "severity": {
+        "all": "All",
+        "info": "Info",
+        "warning": "Warning",
+        "error": "Error",
+        "critical": "Critical"
+      },
+      "category": {
+        "all": "All",
+        "authentication": "Authentication",
+        "export": "Export",
+        "modification": "Modification",
+        "access": "Access",
+        "admin": "Administration"
+      },
+      "stats": {
+        "total": "Total Events",
+        "critical": "Critical",
+        "errors": "Errors",
+        "users": "Active Users"
+      },
+      "details": {
+        "title": "Log Details",
+        "close": "Close",
+        "event_type": "Event Type",
+        "user": "User",
+        "ip_address": "IP Address",
+        "description": "Description",
+        "metadata": "Metadata"
+      },
+      "empty": "No logs found",
+      "loading": "Loading logs...",
+      "no_results": "No results"
     },
     "journalDistribution": {
       "title": "Distribution by Journal",
@@ -168,6 +322,15 @@
       "entries": "Entries",
       "totalJournals": "Total journals",
       "totalEntries": "Total entries"
+    },
+    "budgetVsActual": {
+      "title": "Budget vs Actual",
+      "noData": "No budget categories available",
+      "budget": "Budget",
+      "actual": "Actual",
+      "totalBudget": "Total budget",
+      "totalActual": "Total actual",
+      "totalVariance": "Total variance"
     }
   },
   "accountingEntries": "Ã‰critures comptables",
@@ -297,6 +460,7 @@
     "errors": {
       "noCompany": "No company"
     },
+    "export": "Export",
     "exporting": "Exporting...",
     "forecasts": "PrÃ©visions",
     "getStarted": "Commencer",
@@ -1680,7 +1844,92 @@
   "interval_month": "mois",
   "interval_week": "semaine",
   "interval_year": "annÃ©e",
-  "inventory": "Inventory",
+  "inventory": {
+    "title": "Inventory",
+    "articleModal": {
+      "title": "New Article",
+      "description": "Description",
+      "sectionGeneral": "General Information",
+      "sectionPricing": "Pricing",
+      "sectionStock": "Stock",
+      "sectionSupplier": "Supplier",
+      "sectionAccounting": "Accounting",
+      "reference": "Reference",
+      "referencePlaceholder": "Ex: ART-001",
+      "barcode": "Barcode",
+      "barcodePlaceholder": "Ex: 3245678901234",
+      "name": "Article Name",
+      "namePlaceholder": "Ex: Dell Laptop",
+      "descriptionPlaceholder": "Detailed description of the article",
+      "category": "Category",
+      "categoryPlaceholder": "Select a category",
+      "unit": "Unit of Measure",
+      "purchasePrice": "Purchase Price excl. VAT (€)",
+      "sellingPrice": "Selling Price excl. VAT (€)",
+      "margin": "Margin (%)",
+      "tvaRate": "VAT Rate (%)",
+      "stockQuantity": "Initial Quantity",
+      "stockMin": "Minimum Stock",
+      "stockMax": "Maximum Stock",
+      "warehouse": "Warehouse",
+      "warehousePlaceholder": "Select a warehouse",
+      "supplier": "Supplier",
+      "supplierPlaceholder": "Select a supplier (optional)",
+      "supplierReference": "Supplier Reference",
+      "supplierReferencePlaceholder": "Ex: SUPP-REF-001",
+      "purchaseAccount": "Purchase Account",
+      "purchaseAccountPlaceholder": "Select a purchase account",
+      "salesAccount": "Sales Account",
+      "salesAccountPlaceholder": "Select a sales account",
+      "create": "Create Article",
+      "cancel": "Cancel",
+      "createSupplier": "Create a new supplier",
+      "noSupplier": "No supplier available",
+      "noAccount": "No account available",
+      "noWarehouse": "No warehouse available",
+      "errorNoCompany": "No company selected",
+      "errorNameRequired": "Article name is required",
+      "errorReferenceRequired": "Reference is required",
+      "errorWarehouseRequired": "A warehouse must be selected",
+      "errorCreating": "Error creating article"
+    },
+    "categories": {
+      "matiere_premiere": "Raw Material",
+      "produit_fini": "Finished Product",
+      "service": "Service",
+      "consommable": "Consumable",
+      "equipement": "Equipment",
+      "autre": "Other"
+    },
+    "units": {
+      "unité": "Unit",
+      "pièce": "Piece",
+      "piece": "Piece",
+      "kg": "Kilogram",
+      "g": "Gram",
+      "l": "Liter",
+      "litre": "Liter",
+      "ml": "Milliliter",
+      "m": "Meter",
+      "mètre": "Meter",
+      "metre": "Meter",
+      "cm": "Centimeter",
+      "boîte": "Box",
+      "boite": "Box",
+      "carton": "Carton",
+      "palette": "Pallet",
+      "heure": "Hour",
+      "jour": "Day",
+      "lot": "Batch",
+      "forfait": "Package"
+    },
+    "tvaRates": {
+      "0": "0% - Exempt",
+      "5.5": "5.5% - Reduced Rate",
+      "10": "10% - Intermediate Rate",
+      "20": "20% - Standard Rate"
+    }
+  },
   "inventorypage": {
     "80000": "80000",
     "120000": "120000",
@@ -1728,7 +1977,80 @@
     "stock_initial": "Stock initial",
     "stock_minimum": "Stock minimum",
     "unit": "UnitÃ©",
-    "unit_": "UnitÃ©"
+    "unit_": "UnitÃ©",
+    "articleModal": {
+      "title": "New Article",
+      "description": "Description",
+      "sectionGeneral": "General Information",
+      "sectionPricing": "Pricing",
+      "sectionStock": "Stock",
+      "sectionSupplier": "Supplier",
+      "sectionAccounting": "Accounting",
+      "reference": "Reference",
+      "referencePlaceholder": "Ex: ART-001",
+      "barcode": "Barcode",
+      "barcodePlaceholder": "Ex: 3245678901234",
+      "name": "Article Name",
+      "namePlaceholder": "Ex: Dell Laptop",
+      "descriptionPlaceholder": "Detailed description of the article",
+      "category": "Category",
+      "categoryPlaceholder": "Select a category",
+      "unit": "Unit of Measure",
+      "purchasePrice": "Purchase Price excl. VAT (€)",
+      "sellingPrice": "Selling Price excl. VAT (€)",
+      "margin": "Margin (%)",
+      "tvaRate": "VAT Rate (%)",
+      "stockQuantity": "Initial Quantity",
+      "stockMin": "Minimum Stock",
+      "stockMax": "Maximum Stock",
+      "warehouse": "Warehouse",
+      "warehousePlaceholder": "Select a warehouse",
+      "supplier": "Supplier",
+      "supplierPlaceholder": "Select a supplier (optional)",
+      "supplierReference": "Supplier Reference",
+      "supplierReferencePlaceholder": "Ex: SUPP-REF-001",
+      "purchaseAccount": "Purchase Account",
+      "purchaseAccountPlaceholder": "Select a purchase account",
+      "salesAccount": "Sales Account",
+      "salesAccountPlaceholder": "Select a sales account",
+      "create": "Create Article",
+      "cancel": "Cancel",
+      "createSupplier": "Create a new supplier",
+      "noSupplier": "No supplier available",
+      "noAccount": "No account available",
+      "noWarehouse": "No warehouse available",
+      "errorNoCompany": "No company selected",
+      "errorNameRequired": "Article name is required",
+      "errorReferenceRequired": "Reference is required",
+      "errorWarehouseRequired": "A warehouse must be selected",
+      "errorCreating": "Error creating article"
+    },
+    "categories": {
+      "matiere_premiere": "Raw Material",
+      "produit_fini": "Finished Product",
+      "service": "Service",
+      "consommable": "Consumable",
+      "equipement": "Equipment",
+      "autre": "Other"
+    },
+    "units": {
+      "piece": "Piece",
+      "kg": "Kilogram (kg)",
+      "litre": "Liter (L)",
+      "metre": "Meter (m)",
+      "heure": "Hour (h)",
+      "jour": "Day",
+      "lot": "Batch",
+      "boite": "Box",
+      "carton": "Carton",
+      "palette": "Pallet"
+    },
+    "tvaRates": {
+      "0": "0% - Exempt",
+      "5.5": "5.5% - Reduced Rate",
+      "10": "10% - Intermediate Rate",
+      "20": "20% - Standard Rate"
+    }
   },
   "invoicing": {
     "title": "Invoicing",
@@ -1986,7 +2308,11 @@
         "title": "SÃ©curitÃ© maximale"
       },
       "subtitle": "dans une seule application",
-      "title": "Tout ce dont vous avez besoin"
+      "title": "Tout ce dont vous avez besoin",
+      "regulatory": {
+        "title": "Legal Compliance",
+        "description": "Automatic generation of 35+ legal documents compliant with PCG, SYSCOHADA, IFRS, SCF and PCM standards. PDF and XML export for e-filing."
+      }
     },
     "footer": {
       "company": {
@@ -2040,20 +2366,57 @@
     },
     "hero": {
       "badge": "🚀 Professional Solution - Modern Business Management",
+      "badgeRegulatory": "🌍 Multi-Country Legal Reports (10+ countries)",
       "cta": {
         "beta": "Start Free Trial",
         "demo": "View Demo",
         "start": "30-day Free Trial"
       },
-      "description": "CassKai simplifie la gestion d'entreprise avec une suite complÃ¨te : comptabilitÃ©, facturation, CRM, projets, RH et bien plus. Tout en un, simple et puissant.",
+      "description": "CassKai simplifies business management with a complete suite: accounting, invoicing, CRM, projects, HR and more. All-in-one, simple and powerful.",
       "stats": {
-        "companies": "Entreprises",
+        "companies": "Companies",
         "rating": "Satisfaction",
         "support": "Support",
-        "uptime": "DisponibilitÃ©"
+        "uptime": "Uptime"
       },
-      "subtitle": "en toute simplicitÃ©",
-      "title": "GÃ©rez your entreprise"
+      "subtitle": "with simplicity",
+      "title": "Manage your business"
+    },
+    "regulatory": {
+      "badge": "Legal Compliance",
+      "title": "Automated Legal Reports",
+      "subtitle": "Automatic generation of your regulatory documents in one click",
+      "documentsTitle": "Financial Statements",
+      "feature1Title": "Intelligent Auto-fill",
+      "feature1Desc": "Automatic generation of 35+ legal documents from your general ledger. Balance sheet, income statement, tax declarations...",
+      "feature2Title": "5 Accounting Standards",
+      "feature2Desc": "PCG (France), SYSCOHADA (OHADA), IFRS for SMEs, SCF (Algeria/Tunisia), PCM (Morocco). Compliance guaranteed.",
+      "feature3Title": "Automatic Validation",
+      "feature3Desc": "Automatic accounting checks (balance sheet balance, account consistency). PDF and XML export for e-filing."
+    },
+    "anomaly": {
+      "badge": "AI & Security",
+      "title": "Automatic Anomaly Detection",
+      "subtitle": "Artificial intelligence to detect accounting errors",
+      "description": "Critical & High Detection",
+      "feature1": "Debit/Credit Imbalances",
+      "feature1Desc": "Instant detection of unbalanced entries",
+      "feature2": "Inconsistent Accounts",
+      "feature2Desc": "Automatic verification of account numbers",
+      "feature3": "Suspicious Amounts",
+      "feature3Desc": "Alert on unusual or extreme amounts"
+    },
+    "workflow": {
+      "badge": "Pro Workflow",
+      "title": "Advanced Validation Workflow",
+      "subtitle": "Multi-level validation process for your entries",
+      "description": "Draft → Review → Validation → Final Posting",
+      "step1": "Draft → Review",
+      "step1Desc": "Creation and submission for review",
+      "step2": "Review → Validation",
+      "step2Desc": "Approval or rejection with comments",
+      "step3": "Validation → Posting",
+      "step3Desc": "Final lock in accounting books"
     },
     "nav": {
       "contact": "Contact",
@@ -2080,7 +2443,9 @@
           "onboarding": "Formation incluse",
           "storage": "Stockage illimitÃ©",
           "support": "Support dÃ©diÃ© 24/7",
-          "users": "Utilisateurs illimitÃ©s"
+          "users": "Utilisateurs illimitÃ©s",
+          "regulatory_auto": "Automatic e-filing",
+          "security_logs": "Advanced security logs"
         },
         "name": "Entreprise"
       },
@@ -2115,7 +2480,12 @@
           "projects": "Gestion de projets",
           "reports": "Reports illimitÃ©s",
           "storage": "50 GB de stockage",
-          "support": "Support prioritaire"
+          "support": "Support prioritaire",
+          "ai_full": "🧠 Unlimited AI analysis (7 reports)",
+          "regulatory_all": "35+ legal documents + PDF export",
+          "anomaly": "Anomaly detection",
+          "workflow": "Validation workflow",
+          "csv_import": "Smart CSV import"
         },
         "name": "Professionnel"
       },
@@ -2128,7 +2498,9 @@
           "invoicing": "Invoicing illimitÃ©e",
           "reports": "10 rapports standards",
           "storage": "5 GB de stockage",
-          "support": "Support email"
+          "support": "Support email",
+          "ai": "2 AI reports included",
+          "regulatory": "5 legal documents/month"
         },
         "name": "Starter"
       },
@@ -2851,7 +3223,10 @@
       "revenueEvolution": "Revenue Evolution",
       "expensesByCategory": "Expenses by Category",
       "monthlyComparison": "Monthly Comparison Revenue / Expenses",
-      "amount": "Amount"
+      "amount": "Amount",
+      "noData": "No data available for this period",
+      "periodLabel": "Period",
+      "last6Months": "Last 6 rolling months"
     },
     "dataLoadError": "Error lors du chargement des data comptables",
     "debit": "DÃ©bit",
@@ -2896,7 +3271,91 @@
     "totalRevenues": "TOTAL PRODUITS",
     "trialBalance": "Balance gÃ©nÃ©rale",
     "trialBalanceDesc": "Soldes de tous les accounts",
-    "unbalanced": "Bilan dÃ©sÃ©quilibrÃ©"
+    "unbalanced": "Bilan dÃ©sÃ©quilibrÃ©",
+    "regulatory": {
+      "title": "Regulatory Documents",
+      "subtitle": "Tax returns, financial statements and compliance documents",
+      "newDocument": "New document",
+      "selectTemplate": "Select a document template",
+      "create": "Create document",
+      "creating": "Creating...",
+      "emptyState": {
+        "title": "No regulatory documents",
+        "description": "Create your first document to get started"
+      },
+      "stats": {
+        "total": "Total documents",
+        "draft": "Drafts",
+        "completed": "Completed",
+        "submitted": "Submitted"
+      },
+      "filters": {
+        "allYears": "All fiscal years",
+        "allStatuses": "All statuses",
+        "allStandards": "All standards"
+      },
+      "status": {
+        "draft": "Draft",
+        "completed": "Completed",
+        "submitted": "Submitted",
+        "validated": "Validated",
+        "rejected": "Rejected"
+      },
+      "table": {
+        "document": "Document",
+        "period": "Period",
+        "country": "Country",
+        "status": "Status",
+        "lastUpdate": "Last updated",
+        "actions": "Actions"
+      },
+      "fields": {
+        "template": "Document type",
+        "fiscalYear": "Fiscal year",
+        "period": "Period"
+      },
+      "periods": {
+        "annual": "Annual",
+        "quarterly": "Quarterly",
+        "monthly": "Monthly",
+        "q1": "Quarter 1",
+        "q2": "Quarter 2",
+        "q3": "Quarter 3",
+        "q4": "Quarter 4"
+      },
+      "months": {
+        "M01": "January",
+        "M02": "February",
+        "M03": "March",
+        "M04": "April",
+        "M05": "May",
+        "M06": "June",
+        "M07": "July",
+        "M08": "August",
+        "M09": "September",
+        "M10": "October",
+        "M11": "November",
+        "M12": "December"
+      },
+      "actions": {
+        "save": "Save",
+        "exportPdf": "Export to PDF",
+        "recalculate": "Recalculate"
+      },
+      "validation": {
+        "errors": "Validation errors",
+        "warnings": "Warnings"
+      },
+      "messages": {
+        "saveSuccess": "Document saved successfully",
+        "saveError": "Error saving document",
+        "createError": "Error creating document",
+        "exportSuccess": "PDF generated successfully",
+        "exportError": "Error generating PDF",
+        "recalculateSuccess": "Document recalculated successfully",
+        "recalculateError": "Error recalculating document"
+      }
+    }
   },
   "rules": {
     "title": "Categorization Rules"
@@ -4704,5 +5163,67 @@
       "success": "Success",
       "failed": "Failed"
     }
+  },
+  "regulatory": {
+    "title": "Regulatory Documents",
+    "selectPeriod": "Select period",
+    "fiscalYear": "Fiscal year",
+    "period": "Period",
+    "periods": {
+      "annual": "Annual",
+      "quarterly": "Quarterly",
+      "monthly": "Monthly",
+      "q1": "Quarter 1",
+      "q2": "Quarter 2",
+      "q3": "Quarter 3",
+      "q4": "Quarter 4"
+    },
+    "myDocuments": "My Documents",
+    "documentsDescription": "Manage your tax returns, financial statements and regulatory documents",
+    "newDocument": "New Document",
+    "documentName": "Document name",
+    "category": {
+      "financialStatements": "Financial Statements",
+      "taxReturns": "Tax Returns",
+      "socialDeclarations": "Social Declarations"
+    },
+    "status": {
+      "draft": "Draft",
+      "pending": "Pending",
+      "submitted": "Submitted",
+      "validated": "Validated",
+      "rejected": "Rejected"
+    },
+    "lastModified": "Last modified",
+    "noDocuments": "No documents yet",
+    "filterByCategory": "Filter by category",
+    "filterByStatus": "Filter by status",
+    "allCategories": "All categories",
+    "allStatuses": "All statuses",
+    "fieldRequired": "This field is required",
+    "minValue": "Minimum value: {{min}}",
+    "maxValue": "Maximum value: {{max}}",
+    "calculatedField": "Automatically calculated field",
+    "selectOption": "Select an option",
+    "autoFilling": "Auto-filling in progress...",
+    "unsavedChanges": "Unsaved changes",
+    "editDocument": "Edit Document",
+    "documentCreated": "Document created successfully",
+    "documentSaved": "Document saved successfully",
+    "documentDeleted": "Document deleted successfully",
+    "generatingPdf": "Generating PDF...",
+    "pdfGenerated": "PDF generated successfully",
+    "confirmDelete": "Are you sure you want to delete this document?",
+    "invalidTemplate": "Invalid template",
+    "templateNotFound": "Template not found",
+    "errorLoadingTemplates": "Error loading templates",
+    "errorLoadingDocuments": "Error loading documents",
+    "errorLoadingDocument": "Error loading document",
+    "errorGeneratingDocument": "Error generating document",
+    "errorCreatingDocument": "Error creating document",
+    "errorSavingDocument": "Error saving document",
+    "errorDeletingDocument": "Error deleting document",
+    "errorExportingDocument": "Error exporting document",
+    "submissionError": "Form submission error"
   }
 }

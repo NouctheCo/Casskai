@@ -2,7 +2,6 @@
  * CassKai - Calculateur de Pénalités de Retard
  * Composant pour calculer les pénalités et générer des lettres de relance
  */
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -21,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-
+import { logger } from '@/lib/logger';
 interface LateFeeResult {
   invoiceAmount: number;
   dueDate: Date;
@@ -33,7 +32,6 @@ interface LateFeeResult {
   fixedIndemnity: number;
   totalAmount: number;
 }
-
 export const LateFeeCalculator: React.FC<{
   invoiceId?: string;
   initialAmount?: number;
@@ -47,38 +45,29 @@ export const LateFeeCalculator: React.FC<{
   );
   const [interestRate, setInterestRate] = useState<number>(10.5); // Taux légal France 2025
   const [result, setResult] = useState<LateFeeResult | null>(null);
-
   // Calcule les pénalités
   const calculatePenalties = () => {
     if (!invoiceAmount || !dueDate) {
-      console.warn('Veuillez remplir tous les champs obligatoires');
+      logger.warn('LateFeeCalculator', 'Veuillez remplir tous les champs obligatoires');
       return;
     }
-
     const due = new Date(dueDate);
     const calc = new Date(calculationDate);
-
     // Nombre de jours de retard
     const diffTime = calc.getTime() - due.getTime();
     const daysLate = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
     if (daysLate <= 0) {
-      console.warn('La date de calcul doit être postérieure à la date d\'échéance');
+      logger.warn('LateFeeCalculator', 'La date de calcul doit être postérieure à la date d\'échéance');
       return;
     }
-
     // Taux d'intérêt journalier
     const dailyRate = interestRate / 365 / 100;
-
     // Pénalités de retard
     const penaltyAmount = invoiceAmount * dailyRate * daysLate;
-
     // Indemnité forfaitaire (40€ pour la France)
     const fixedIndemnity = 40;
-
     // Total
     const totalAmount = invoiceAmount + penaltyAmount + fixedIndemnity;
-
     setResult({
       invoiceAmount,
       dueDate: due,
@@ -91,7 +80,6 @@ export const LateFeeCalculator: React.FC<{
       totalAmount
     });
   };
-
   // Formate une devise
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -101,14 +89,11 @@ export const LateFeeCalculator: React.FC<{
       maximumFractionDigits: 2
     }).format(amount);
   };
-
   // Génère une lettre de relance (placeholder)
   const generateReminderLetter = () => {
     if (!result) return;
-
-    console.log('Génération de la lettre de relance - Fonctionnalité à venir');
+    logger.debug('LateFeeCalculator', 'Génération de la lettre de relance - Fonctionnalité à venir');
   };
-
   return (
     <Card className={cn(className)}>
       <CardHeader>
@@ -120,7 +105,6 @@ export const LateFeeCalculator: React.FC<{
           Calculez les pénalités légales pour factures impayées (France)
         </CardDescription>
       </CardHeader>
-
       <CardContent className="space-y-6">
         {/* Formulaire */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -140,7 +124,6 @@ export const LateFeeCalculator: React.FC<{
               placeholder="Ex: 1500.00"
             />
           </div>
-
           {/* Date d'échéance */}
           <div className="space-y-2">
             <Label htmlFor="dueDate" className="flex items-center space-x-1">
@@ -154,7 +137,6 @@ export const LateFeeCalculator: React.FC<{
               onChange={(e) => setDueDate(e.target.value)}
             />
           </div>
-
           {/* Date de calcul */}
           <div className="space-y-2">
             <Label htmlFor="calculationDate" className="flex items-center space-x-1">
@@ -168,7 +150,6 @@ export const LateFeeCalculator: React.FC<{
               onChange={(e) => setCalculationDate(e.target.value)}
             />
           </div>
-
           {/* Taux d'intérêt */}
           <div className="space-y-2">
             <Label htmlFor="interestRate" className="flex items-center space-x-1">
@@ -189,7 +170,6 @@ export const LateFeeCalculator: React.FC<{
             </p>
           </div>
         </div>
-
         {/* Bouton de calcul */}
         <Button
           className="w-full"
@@ -200,7 +180,6 @@ export const LateFeeCalculator: React.FC<{
           <Calculator className="w-4 h-4 mr-2" />
           Calculer les pénalités
         </Button>
-
         {/* Résultats */}
         {result && (
           <motion.div
@@ -220,11 +199,9 @@ export const LateFeeCalculator: React.FC<{
                 </p>
               </div>
             </div>
-
             {/* Détail du calcul */}
             <div className="space-y-3">
               <h4 className="font-semibold text-gray-900 dark:text-white">Détail du calcul</h4>
-
               <div className="space-y-2">
                 {/* Montant initial */}
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
@@ -233,7 +210,6 @@ export const LateFeeCalculator: React.FC<{
                     {formatCurrency(result.invoiceAmount)}
                   </span>
                 </div>
-
                 {/* Pénalités */}
                 <div className="border-l-4 border-orange-400 bg-orange-50 dark:bg-orange-900/20 p-3 rounded">
                   <div className="flex items-center justify-between mb-2">
@@ -250,7 +226,6 @@ export const LateFeeCalculator: React.FC<{
                     <p>• Formule : {formatCurrency(result.invoiceAmount)} × {result.dailyInterestRate.toFixed(4)}% × {result.daysLate} jours</p>
                   </div>
                 </div>
-
                 {/* Indemnité forfaitaire */}
                 <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded">
                   <div>
@@ -265,7 +240,6 @@ export const LateFeeCalculator: React.FC<{
                     {formatCurrency(result.fixedIndemnity)}
                   </span>
                 </div>
-
                 {/* Total */}
                 <div className="flex items-center justify-between p-4 bg-red-100 dark:bg-red-900/30 rounded-lg border-2 border-red-300 dark:border-red-700">
                   <div>
@@ -282,7 +256,6 @@ export const LateFeeCalculator: React.FC<{
                 </div>
               </div>
             </div>
-
             {/* Actions */}
             <div className="flex items-center space-x-3 pt-4 border-t">
               <Button
@@ -293,11 +266,10 @@ export const LateFeeCalculator: React.FC<{
                 <FileText className="w-4 h-4" />
                 <span>Générer lettre de relance</span>
               </Button>
-
               <Button
                 variant="outline"
                 onClick={() => {
-                  console.log('Export PDF - Fonctionnalité à venir');
+                  logger.debug('LateFeeCalculator', 'Export PDF - Fonctionnalité à venir');
                 }}
                 className="flex items-center space-x-2"
               >
@@ -305,7 +277,6 @@ export const LateFeeCalculator: React.FC<{
                 <span>Exporter PDF</span>
               </Button>
             </div>
-
             {/* Information juridique */}
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 flex items-start space-x-3">
               <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />

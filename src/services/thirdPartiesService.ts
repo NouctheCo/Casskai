@@ -12,17 +12,25 @@
 
 import { supabase } from '@/lib/supabase';
 
-import { 
+import { logger } from '@/lib/logger';
 
-  ThirdParty, 
+import { unifiedThirdPartiesService } from './unifiedThirdPartiesService';
 
-  ThirdPartyDashboardData, 
+import { getAgingReport as getAgingReportFromService } from './thirdPartiesAgingReport';
 
-  AgingReport, 
+import {
+
+  ThirdParty,
+
+  ThirdPartyDashboardData,
+
+  AgingReport,
 
   ThirdPartyServiceResponse,
 
-  ExportConfig
+  ExportConfig,
+
+  Transaction
 
 } from '@/types/third-parties.types';
 
@@ -162,7 +170,7 @@ class ThirdPartiesService {
 
       if (type) {
 
-        query = query.eq('invoice_type', type);
+        query = query.eq('type', type);
 
       }
 
@@ -222,7 +230,7 @@ class ThirdPartiesService {
 
     } catch (error) {
 
-      console.error('Error fetching third parties:', error instanceof Error ? error.message : String(error));
+      logger.error('ThirdParties', 'Error fetching third parties', error);
 
       throw error;
 
@@ -264,7 +272,7 @@ class ThirdPartiesService {
 
     } catch (error) {
 
-      console.error('Error fetching third party:', error instanceof Error ? error.message : String(error));
+      logger.error('ThirdParties', 'Error fetching third party', error);
 
       throw error;
 
@@ -314,7 +322,7 @@ class ThirdPartiesService {
 
     } catch (error) {
 
-      console.error('Error creating third party:', error instanceof Error ? error.message : String(error));
+      logger.error('ThirdParties', 'Error creating third party', error);
 
       throw error;
 
@@ -358,7 +366,7 @@ class ThirdPartiesService {
 
     } catch (error) {
 
-      console.error('Error updating third party:', error instanceof Error ? error.message : String(error));
+      logger.error('ThirdParties', 'Error updating third party', error);
 
       throw error;
 
@@ -418,7 +426,7 @@ class ThirdPartiesService {
 
     } catch (error) {
 
-      console.error('Error deleting third party:', error instanceof Error ? error.message : String(error));
+      logger.error('ThirdParties', 'Error deleting third party', error);
 
       throw error;
 
@@ -482,7 +490,7 @@ class ThirdPartiesService {
 
         .eq('company_id', companyId)
 
-        .eq('invoice_type', 'customer')
+        .eq('type', 'customer')
 
         .eq('is_active', true)
 
@@ -526,7 +534,7 @@ class ThirdPartiesService {
 
     } catch (error) {
 
-      console.error('Error fetching third party stats:', error instanceof Error ? error.message : String(error));
+      logger.error('ThirdParties', 'Error fetching third party stats', error);
 
       throw error;
 
@@ -558,7 +566,7 @@ class ThirdPartiesService {
 
       if (type) {
 
-        supabaseQuery = supabaseQuery.eq('invoice_type', type);
+        supabaseQuery = supabaseQuery.eq('type', type);
 
       }
 
@@ -584,7 +592,7 @@ class ThirdPartiesService {
 
     } catch (error) {
 
-      console.error('Error searching third parties:', error instanceof Error ? error.message : String(error));
+      logger.error('ThirdParties', 'Error searching third parties', error);
 
       throw error;
 
@@ -594,15 +602,24 @@ class ThirdPartiesService {
 
 
 
+  /**
+   * Get dashboard data for third parties
+   *
+   * @deprecated This function now delegates to specialized services:
+   * - unifiedThirdPartiesService.getDashboardStats() for financial stats
+   * - thirdPartiesAgingReport.getAgingReport() for aging analysis
+   *
+   * Consider using those services directly for better performance.
+   */
   async getDashboardData(enterpriseId: string): Promise<ThirdPartyServiceResponse<ThirdPartyDashboardData>> {
 
     try {
 
-      // Get stats
+      // Get unified stats from dedicated service
 
-      const stats = await this.getThirdPartyStats();
+      const unifiedStats = await unifiedThirdPartiesService.getDashboardStats(enterpriseId);
 
-      
+
 
       // Get recent third parties
 
@@ -624,9 +641,97 @@ class ThirdPartiesService {
 
 
 
-      // Get aging report summary
+      // Calculate new_this_month
 
-      const agingData = await this.getAgingReport(enterpriseId);
+      const startOfMonth = new Date();
+
+      startOfMonth.setDate(1);
+
+      startOfMonth.setHours(0, 0, 0, 0);
+
+
+
+      const { count: newThisMonth } = await supabase
+
+        .from('third_parties')
+
+        .select('*', { count: 'exact', head: true })
+
+        .eq('company_id', enterpriseId)
+
+        .gte('created_at', startOfMonth.toISOString());
+
+
+
+      // Get aging report from dedicated service
+
+      const agingData = await getAgingReportFromService(enterpriseId);
+
+
+
+      // Get recent transactions
+
+      const { data: recentTransactions } = await supabase
+
+        .from('bank_transactions')
+
+        .select('id, transaction_date, description, amount, third_party_id')
+
+        .eq('company_id', enterpriseId)
+
+        .not('third_party_id', 'is', null)
+
+        .order('transaction_date', { ascending: false })
+
+        .limit(10);
+
+
+
+      // Calculate overdue amounts from invoices
+
+      const { data: overdueInvoices } = await supabase
+
+        .from('invoices')
+
+        .select('remaining_amount, invoice_type')
+
+        .eq('company_id', enterpriseId)
+
+        .eq('status', 'overdue');
+
+
+
+      let overdue_receivables = 0;
+
+      let overdue_payables = 0;
+
+      let overdue_count = 0;
+
+
+
+      (overdueInvoices || []).forEach(inv => {
+
+        const amount = inv.remaining_amount || 0;
+
+        if (inv.invoice_type === 'sale') {
+
+          overdue_receivables += amount;
+
+        } else if (inv.invoice_type === 'purchase') {
+
+          overdue_payables += amount;
+
+        }
+
+        overdue_count++;
+
+      });
+
+
+
+      // Get local stats for compatibility
+
+      const stats = await this.getThirdPartyStats();
 
 
 
@@ -642,15 +747,15 @@ class ThirdPartiesService {
 
           active_suppliers: stats.active_suppliers,
 
-          new_this_month: 0, // TODO: Calculate from created_at
+          new_this_month: newThisMonth || 0,
 
-          total_receivables: 0, // TODO: Calculate from invoices
+          total_receivables: unifiedStats.total_receivables,
 
-          total_payables: 0, // TODO: Calculate from bills
+          total_payables: unifiedStats.total_payables,
 
-          overdue_receivables: 0, // TODO: Calculate overdue invoices
+          overdue_receivables,
 
-          overdue_payables: 0, // TODO: Calculate overdue bills
+          overdue_payables,
 
           top_clients_by_revenue: [],
 
@@ -662,11 +767,11 @@ class ThirdPartiesService {
 
         aging_summary: agingData.data || [],
 
-        recent_transactions: [], // TODO: Implement transactions
+        recent_transactions: (recentTransactions || []) as Transaction[],
 
         alerts: {
 
-          overdue_invoices: 0,
+          overdue_invoices: overdue_count,
 
           credit_limit_exceeded: 0,
 
@@ -678,17 +783,27 @@ class ThirdPartiesService {
 
 
 
+      logger.info('ThirdParties', 'Dashboard data fetched successfully', {
+
+        stats: dashboardData.stats,
+
+        recent_count: recentThirdParties?.length || 0
+
+      });
+
+
+
       return { data: dashboardData };
 
     } catch (error) {
 
-      console.error('Error fetching dashboard data:', error instanceof Error ? error.message : String(error));
+      logger.error('ThirdParties', 'Error fetching dashboard data', error);
 
-      return { 
+      return {
 
         data: {} as ThirdPartyDashboardData,
 
-        error: { message: 'Failed to fetch dashboard data' } 
+        error: { message: 'Failed to fetch dashboard data' }
 
       };
 
@@ -698,29 +813,48 @@ class ThirdPartiesService {
 
 
 
-  async getAgingReport(_enterpriseId: string): Promise<ThirdPartyServiceResponse<AgingReport[]>> {
+  /**
+   * Get aging report for third parties
+   *
+   * @deprecated Use thirdPartiesAgingReport.getAgingReport() directly instead.
+   * This function now acts as a simple wrapper for compatibility.
+   *
+   * @param enterpriseId - Company ID
+   * @returns Aging report grouped by age buckets (0-30, 31-60, 61-90, 91-120, >120 days)
+   */
+  async getAgingReport(enterpriseId: string): Promise<ThirdPartyServiceResponse<AgingReport[]>> {
 
     try {
 
-      // TODO: Implement real aging report calculation
+      logger.debug('ThirdParties', 'Fetching aging report', { enterpriseId });
 
-      // For now, return empty data
 
-      const mockData: AgingReport[] = [];
 
-      
+      // Delegate to specialized aging report service
 
-      return { data: mockData };
+      const result = await getAgingReportFromService(enterpriseId);
+
+
+
+      logger.info('ThirdParties', 'Aging report fetched successfully', {
+
+        count: result.data?.length || 0
+
+      });
+
+
+
+      return result;
 
     } catch (error) {
 
-      console.error('Error fetching aging report:', error instanceof Error ? error.message : String(error));
+      logger.error('ThirdParties', 'Error fetching aging report', error);
 
-      return { 
+      return {
 
         data: [],
 
-        error: { message: 'Failed to fetch aging report' } 
+        error: { message: 'Failed to fetch aging report' }
 
       };
 

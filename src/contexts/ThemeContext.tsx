@@ -20,7 +20,7 @@ import React, { createContext, useContext, useEffect } from 'react';
     
     const ThemeContext = createContext<ThemeContextType | null>(null);
 
-    export const ThemeProvider = ({ children, defaultTheme = 'system', storageKey = 'vite-ui-theme' }) => {
+    export const ThemeProvider = ({ children, defaultTheme = 'system', storageKey = 'vite-ui-theme' }: { children: React.ReactNode; defaultTheme?: string; storageKey?: string }) => {
       const [theme, setTheme] = useLocalStorage(storageKey, defaultTheme);
 
       useEffect(() => {
@@ -36,9 +36,9 @@ import React, { createContext, useContext, useEffect } from 'react';
         root.classList.add(theme);
       }, [theme]);
 
-      const value = {
+      const value: ThemeContextType = {
         theme,
-        setTheme: (newTheme: 'light' | 'dark') => {
+        setTheme: (newTheme: string) => {
           setTheme(newTheme);
         },
       };

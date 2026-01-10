@@ -12,6 +12,16 @@
   },
   "accountCreatedSuccess": "Compte créé avec succès",
   "accountDescriptionPlaceholder": "Description du compte",
+  "Accounting": {
+    "JournalTypes": {
+      "Purchases": "Achats",
+      "Sales": "Ventes",
+      "Bank": "Banque",
+      "Cash": "Caisse",
+      "General": "Général",
+      "Opening": "À-nouveaux"
+    }
+  },
   "accounting": {
     "chartDetection": {
       "alternativeNote": "Peut être utilisé pour les multinationales ou cas spécifiques",
@@ -89,9 +99,9 @@
       "totalBalance": "Solde total",
       "totalBalanceDesc": "Balance générale",
       "totalDebit": "Total débit",
-      "totalDebitDesc": "Débits ce mois",
+      "totalDebitDesc": "Débits",
       "totalCredit": "Total crédit",
-      "totalCreditDesc": "Crédits ce mois",
+      "totalCreditDesc": "Crédits",
       "entries": "Écritures",
       "entriesDesc": "Écritures saisies",
       "pendingEntries": "En attente",
@@ -105,7 +115,15 @@
       "overdue": "En retard",
       "overdueDesc": "{{amount}} € de retard",
       "validationRate": "Taux validation",
-      "validationRateDesc": "Écritures validées"
+      "validationRateDesc": "Écritures validées",
+      "periodDesc": {
+        "currentMonth": "Ce mois",
+        "currentQuarter": "Ce trimestre",
+        "currentYear": "Cette année",
+        "lastMonth": "Mois dernier",
+        "lastYear": "Année dernière",
+        "custom": "Période sélectionnée"
+      }
     },
     "journalDistribution": {
       "title": "Répartition par journal",
@@ -113,6 +131,15 @@
       "entries": "Écritures",
       "totalJournals": "Total journaux",
       "totalEntries": "Total écritures"
+    },
+    "budgetVsActual": {
+      "title": "Budget vs Réel",
+      "noData": "Aucune catégorie budgétaire disponible",
+      "budget": "Budget",
+      "actual": "Réel",
+      "totalBudget": "Budget total",
+      "totalActual": "Réel total",
+      "totalVariance": "Écart total"
     },
     "refresh": "Actualiser",
     "newEntry": "Nouvelle écriture",
@@ -146,11 +173,147 @@
       "accounts": "Plan comptable",
       "fecImport": "📥 Import FEC",
       "journals": "Journaux",
-      "reports": "Rapports"
+      "reports": "Rapports",
+      "anomalies": "Anomalies"
+    },
+    "nav": {
+      "overview": "Vue d'ensemble",
+      "operations": "Opérations",
+      "entries": "Écritures",
+      "journals": "Journaux",
+      "structure": "Structure",
+      "chartOfAccounts": "Plan comptable",
+      "importFEC": "Import FEC",
+      "reports": "Rapports",
+      "anomalies": "Anomalies"
     },
     "recentActivity": {
       "title": "Activité récente",
       "noActivity": "Aucune activité récente"
+    },
+    "import": {
+      "title": "Importer des données",
+      "subtitle": "Importez vos données comptables depuis différents formats",
+      "csv_button": "Importer CSV",
+      "type": "Type d'import",
+      "journal_entries": "Écritures comptables",
+      "chart_of_accounts": "Plan comptable",
+      "drop_file": "Déposez votre fichier CSV ici ou cliquez pour parcourir",
+      "supported_formats": "Formats supportés : CSV, TXT, TSV",
+      "detected_columns": "Colonnes détectées",
+      "group_by_entry": "Grouper les lignes par écriture",
+      "replace_existing": "Remplacer le plan comptable existant",
+      "validate": "Valider",
+      "validating": "Validation en cours...",
+      "import": "Importer",
+      "importing": "Import en cours...",
+      "file_parsed": "Fichier analysé avec succès",
+      "validation_success": "Validation réussie",
+      "validation_errors": "Erreurs de validation détectées",
+      "success": "Import réussi",
+      "partial_success": "Import terminé avec des erreurs",
+      "error": {
+        "invalid_file_type": "Type de fichier invalide. Veuillez télécharger un fichier CSV.",
+        "parse_failed": "Échec de l'analyse du fichier CSV",
+        "validation_failed": "Échec de la validation",
+        "import_failed": "Échec de l'import"
+      }
+    },
+    "anomalies": {
+      "title": "Détection d'anomalies",
+      "analysis_complete": "Analyse terminée",
+      "anomalies_detected": "{{count}} anomalie(s) détectée(s)",
+      "error_detecting": "Impossible de détecter les anomalies",
+      "error_resolving": "Impossible de résoudre l'anomalie",
+      "resolved_success": "Anomalie résolue avec succès",
+      "loading": "Chargement des anomalies...",
+      "refresh": "Actualiser",
+      "filters": {
+        "severity": "Sévérité",
+        "type": "Type",
+        "status": "Statut"
+      },
+      "severity": {
+        "all": "Toutes",
+        "critical": "Critique",
+        "high": "Haute",
+        "medium": "Moyenne",
+        "low": "Basse"
+      },
+      "status": {
+        "all": "Tous",
+        "open": "Ouverts",
+        "resolved": "Résolus"
+      }
+    },
+    "workflow": {
+      "status": {
+        "draft": "Brouillon",
+        "review": "En révision",
+        "validated": "Validé",
+        "posted": "Comptabilisé"
+      },
+      "actions": {
+        "submit": "Soumettre",
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "post": "Comptabiliser"
+      },
+      "confirm_action": "Confirmer l'action",
+      "comment": "Commentaire",
+      "comment_required": "Le commentaire est obligatoire pour le rejet",
+      "confirm": "Confirmer",
+      "cancel": "Annuler",
+      "success": "Action effectuée avec succès",
+      "error": "Erreur lors de l'action"
+    },
+    "security": {
+      "title": "Logs de sécurité",
+      "loading_error": "Erreur lors du chargement des logs",
+      "stats_error": "Erreur lors du chargement des statistiques",
+      "export_success": "Export réussi",
+      "export_error": "Erreur lors de l'export",
+      "refresh": "Actualiser",
+      "export": "Exporter",
+      "search_placeholder": "Rechercher dans les logs...",
+      "filters": {
+        "severity": "Sévérité",
+        "category": "Catégorie",
+        "period": "Période"
+      },
+      "severity": {
+        "all": "Tous",
+        "info": "Info",
+        "warning": "Avertissement",
+        "error": "Erreur",
+        "critical": "Critique"
+      },
+      "category": {
+        "all": "Toutes",
+        "authentication": "Authentification",
+        "export": "Export",
+        "modification": "Modification",
+        "access": "Accès",
+        "admin": "Administration"
+      },
+      "stats": {
+        "total": "Total événements",
+        "critical": "Critique",
+        "errors": "Erreurs",
+        "users": "Utilisateurs actifs"
+      },
+      "details": {
+        "title": "Détails du log",
+        "close": "Fermer",
+        "event_type": "Type d'événement",
+        "user": "Utilisateur",
+        "ip_address": "Adresse IP",
+        "description": "Description",
+        "metadata": "Métadonnées"
+      },
+      "empty": "Aucun log trouvé",
+      "loading": "Chargement des logs...",
+      "no_results": "Aucun résultat"
     }
   },
   "accounting_standards": {
@@ -213,7 +376,29 @@
     },
     "categories": {
       "manage": "Gérer les catégories",
-      "comingSoon": "Gestion des catégories à venir"
+      "list": "Liste des catégories",
+      "add": "Ajouter une catégorie",
+      "edit": "Modifier la catégorie",
+      "name": "Nom",
+      "code": "Code comptable",
+      "method": "Méthode",
+      "duration": "Durée",
+      "empty": "Aucune catégorie définie",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette catégorie ?",
+      "namePlaceholder": "Ex: Matériel informatique",
+      "accounts": "Comptes comptables",
+      "accountAsset": "Compte immobilisation",
+      "accountDepreciation": "Compte amortissement",
+      "accountExpense": "Compte de dotation",
+      "defaultSettings": "Paramètres par défaut",
+      "success": {
+        "created": "Catégorie créée avec succès",
+        "updated": "Catégorie mise à jour avec succès",
+        "deleted": "Catégorie supprimée avec succès"
+      },
+      "errors": {
+        "nameRequired": "Le nom est requis"
+      }
     },
     "depreciationMethod": {
       "linear": "Linéaire",
@@ -221,17 +406,26 @@
       "unitsOfProduction": "Unités d'œuvre"
     },
     "detail": {
-      "generalInfo": "Informations générales",
-      "history": "Historique",
-      "noHistory": "Aucun historique disponible",
+      "financial": "Informations financières",
       "tabs": {
-        "details": "Détails",
-        "depreciation": "Amortissement",
-        "history": "Historique"
+        "attachments": "Documents"
       }
     },
     "entries": {
-      "comingSoon": "Génération d'écritures à venir"
+      "description": "Génère automatiquement les écritures de dotation aux amortissements pour la période sélectionnée",
+      "fiscalYear": "Exercice fiscal",
+      "period": "Période",
+      "allPeriods": "Toutes les périodes",
+      "periodHint": "Laissez vide pour générer toutes les périodes de l'exercice",
+      "warning": "Les écritures générées seront automatiquement passées en comptabilité",
+      "success": "{{count}} écriture(s) générée(s) pour un montant total de {{amount}} €",
+      "partialSuccess": "Génération partiellement réussie",
+      "successTitle": "Écritures générées avec succès",
+      "partialTitle": "Génération avec erreurs",
+      "entriesCreated": "Écritures créées",
+      "totalAmount": "Montant total",
+      "errors": "Erreurs rencontrées",
+      "generating": "Génération en cours..."
     },
     "errors": {
       "loadFailed": "Impossible de charger les données",
@@ -299,61 +493,6 @@
       "title": "Registre des immobilisations"
     },
     "schedule": {
-      "comingSoon": "Plan d'amortissement à venir",
-      "periods": "période(s)",
-      "title": "Plan d'amortissement"
-    },
-    "status": {
-      "active": "Actif",
-      "disposed": "Cédé",
-      "fullyDepreciated": "Amorti",
-      "underMaintenance": "En maintenance"
-    },
-    "success": {
-      "created": "Immobilisation créée avec succès",
-      "updated": "Immobilisation mise à jour avec succès"
-    },
-    "table": {
-      "acquisitionDate": "Date acquisition",
-      "acquisitionValue": "Valeur acquisition",
-      "assetNumber": "N° inventaire",
-      "category": "Catégorie",
-      "method": "Méthode",
-      "name": "Nom",
-      "netBookValue": "VNC",
-      "status": "Statut"
-    },
-    "warnings": {
-      "pendingEntries": "écriture(s) d'amortissement en attente",
-      "pendingEntriesDescription": "Des dotations aux amortissements doivent être passées en comptabilité"
-    },
-    "categories": {
-      "manage": "Gérer les catégories",
-      "list": "Liste des catégories",
-      "add": "Ajouter une catégorie",
-      "edit": "Modifier la catégorie",
-      "name": "Nom",
-      "code": "Code comptable",
-      "method": "Méthode",
-      "duration": "Durée",
-      "empty": "Aucune catégorie définie",
-      "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette catégorie ?",
-      "namePlaceholder": "Ex: Matériel informatique",
-      "accounts": "Comptes comptables",
-      "accountAsset": "Compte immobilisation",
-      "accountDepreciation": "Compte amortissement",
-      "accountExpense": "Compte de dotation",
-      "defaultSettings": "Paramètres par défaut",
-      "success": {
-        "created": "Catégorie créée avec succès",
-        "updated": "Catégorie mise à jour avec succès",
-        "deleted": "Catégorie supprimée avec succès"
-      },
-      "errors": {
-        "nameRequired": "Le nom est requis"
-      }
-    },
-    "schedule": {
       "export": "Exporter CSV",
       "exportSuccess": "Plan d'amortissement exporté avec succès",
       "totalPeriods": "Périodes totales",
@@ -379,21 +518,29 @@
       "prorataLegend": "Prorata temporis (jours)",
       "viewFullSchedule": "Cliquez sur l'icône calendrier dans le tableau pour voir le plan complet"
     },
-    "entries": {
-      "description": "Génère automatiquement les écritures de dotation aux amortissements pour la période sélectionnée",
-      "fiscalYear": "Exercice fiscal",
-      "period": "Période",
-      "allPeriods": "Toutes les périodes",
-      "periodHint": "Laissez vide pour générer toutes les périodes de l'exercice",
-      "warning": "Les écritures générées seront automatiquement passées en comptabilité",
-      "success": "{{count}} écriture(s) générée(s) pour un montant total de {{amount}} €",
-      "partialSuccess": "Génération partiellement réussie",
-      "successTitle": "Écritures générées avec succès",
-      "partialTitle": "Génération avec erreurs",
-      "entriesCreated": "Écritures créées",
-      "totalAmount": "Montant total",
-      "errors": "Erreurs rencontrées",
-      "generating": "Génération en cours..."
+    "status": {
+      "active": "Actif",
+      "disposed": "Cédé",
+      "fullyDepreciated": "Amorti",
+      "underMaintenance": "En maintenance"
+    },
+    "success": {
+      "created": "Immobilisation créée avec succès",
+      "updated": "Immobilisation mise à jour avec succès"
+    },
+    "table": {
+      "acquisitionDate": "Date acquisition",
+      "acquisitionValue": "Valeur acquisition",
+      "assetNumber": "N° inventaire",
+      "category": "Catégorie",
+      "method": "Méthode",
+      "name": "Nom",
+      "netBookValue": "VNC",
+      "status": "Statut"
+    },
+    "warnings": {
+      "pendingEntries": "écriture(s) d'amortissement en attente",
+      "pendingEntriesDescription": "Des dotations aux amortissements doivent être passées en comptabilité"
     },
     "attachments": {
       "title": "Documents joints",
@@ -422,12 +569,6 @@
       "created": "Création",
       "lastUpdate": "Dernière modification",
       "lastDepreciation": "Dernier amortissement"
-    },
-    "detail": {
-      "financial": "Informations financières",
-      "tabs": {
-        "attachments": "Documents"
-      }
     }
   },
   "auth": {
@@ -525,6 +666,7 @@
     "errors": {
       "noCompany": "Aucune entreprise"
     },
+    "export": "Exporter",
     "exporting": "Exportation...",
     "refresh": "Actualiser",
     "forecasts": "Prévisions",
@@ -1954,7 +2096,100 @@
   "interval_month": "mois",
   "interval_week": "semaine",
   "interval_year": "année",
-  "inventory": "Inventaire",
+  "inventory": {
+    "title": "Inventaire",
+    "units": {
+      "unité": "Unité",
+      "pièce": "Pièce",
+      "kg": "Kilogramme",
+      "g": "Gramme",
+      "l": "Litre",
+      "ml": "Millilitre",
+      "m": "Mètre",
+      "mètre": "Mètre",
+      "cm": "Centimètre",
+      "boîte": "Boîte",
+      "carton": "Carton",
+      "palette": "Palette",
+      "heure": "Heure",
+      "jour": "Jour",
+      "forfait": "Forfait"
+    },
+    "articleModal": {
+      "title": "Nouvel article",
+      "description": "Description",
+      "sectionGeneral": "Informations générales",
+      "sectionPricing": "Tarification",
+      "sectionStock": "Stock",
+      "sectionSupplier": "Fournisseur",
+      "sectionAccounting": "Comptabilité",
+      "reference": "Référence",
+      "referencePlaceholder": "Ex: ART-001",
+      "barcode": "Code-barres",
+      "barcodePlaceholder": "Ex: 3245678901234",
+      "name": "Nom de l'article",
+      "namePlaceholder": "Ex: Ordinateur portable Dell",
+      "descriptionPlaceholder": "Description détaillée de l'article",
+      "category": "Catégorie",
+      "categoryPlaceholder": "Sélectionnez une catégorie",
+      "unit": "Unité de mesure",
+      "purchasePrice": "Prix d'achat HT (€)",
+      "sellingPrice": "Prix de vente HT (€)",
+      "margin": "Marge (%)",
+      "tvaRate": "Taux de TVA (%)",
+      "stockQuantity": "Quantité initiale",
+      "stockMin": "Stock minimum",
+      "stockMax": "Stock maximum",
+      "warehouse": "Entrepôt",
+      "warehousePlaceholder": "Sélectionnez un entrepôt",
+      "supplier": "Fournisseur",
+      "supplierPlaceholder": "Sélectionnez un fournisseur (optionnel)",
+      "supplierReference": "Référence fournisseur",
+      "supplierReferencePlaceholder": "Ex: SUPP-REF-001",
+      "purchaseAccount": "Compte d'achat",
+      "purchaseAccountPlaceholder": "Sélectionnez un compte d'achat",
+      "salesAccount": "Compte de vente",
+      "salesAccountPlaceholder": "Sélectionnez un compte de vente",
+      "create": "Créer l'article",
+      "cancel": "Annuler",
+      "createSupplier": "Créer un nouveau fournisseur",
+      "noSupplier": "Aucun fournisseur disponible",
+      "noAccount": "Aucun compte disponible",
+      "noWarehouse": "Aucun entrepôt disponible",
+      "errorNoCompany": "Aucune entreprise sélectionnée",
+      "errorNameRequired": "Le nom de l'article est obligatoire",
+      "errorReferenceRequired": "La référence est obligatoire",
+      "errorWarehouseRequired": "Un entrepôt doit être sélectionné",
+      "errorCreating": "Erreur lors de la création de l'article"
+    },
+    "categories": {
+      "matiere_premiere": "Matière première",
+      "produit_fini": "Produit fini",
+      "service": "Service",
+      "consommable": "Consommable",
+      "equipement": "Équipement",
+      "autre": "Autre"
+    },
+    "units": {
+      "piece": "Pièce",
+      "kg": "Kilogramme (kg)",
+      "litre": "Litre (L)",
+      "metre": "Mètre (m)",
+      "heure": "Heure (h)",
+      "jour": "Jour",
+      "lot": "Lot",
+      "boite": "Boîte",
+      "carton": "Carton",
+      "palette": "Palette",
+      "pièce": "Pièce"
+    },
+    "tvaRates": {
+      "0": "0% - Exonéré",
+      "5.5": "5,5% - Taux réduit",
+      "10": "10% - Taux intermédiaire",
+      "20": "20% - Taux normal"
+    }
+  },
   "invoicing": {
     "title": "Facturation",
     "subtitle": "Gestion professionnelle des factures et devis",
@@ -2106,7 +2341,80 @@
     "stock_initial": "Stock initial",
     "stock_minimum": "Stock minimum",
     "unit": "Unité",
-    "unit_": "Unité"
+    "unit_": "Unité",
+    "articleModal": {
+      "title": "Nouvel article",
+      "description": "Description",
+      "sectionGeneral": "Informations générales",
+      "sectionPricing": "Tarification",
+      "sectionStock": "Stock",
+      "sectionSupplier": "Fournisseur",
+      "sectionAccounting": "Comptabilité",
+      "reference": "Référence",
+      "referencePlaceholder": "Ex: ART-001",
+      "barcode": "Code-barres",
+      "barcodePlaceholder": "Ex: 3245678901234",
+      "name": "Nom de l'article",
+      "namePlaceholder": "Ex: Ordinateur portable Dell",
+      "descriptionPlaceholder": "Description détaillée de l'article",
+      "category": "Catégorie",
+      "categoryPlaceholder": "Sélectionnez une catégorie",
+      "unit": "Unité de mesure",
+      "purchasePrice": "Prix d'achat HT (€)",
+      "sellingPrice": "Prix de vente HT (€)",
+      "margin": "Marge (%)",
+      "tvaRate": "Taux de TVA (%)",
+      "stockQuantity": "Quantité initiale",
+      "stockMin": "Stock minimum",
+      "stockMax": "Stock maximum",
+      "warehouse": "Entrepôt",
+      "warehousePlaceholder": "Sélectionnez un entrepôt",
+      "supplier": "Fournisseur",
+      "supplierPlaceholder": "Sélectionnez un fournisseur (optionnel)",
+      "supplierReference": "Référence fournisseur",
+      "supplierReferencePlaceholder": "Ex: SUPP-REF-001",
+      "purchaseAccount": "Compte d'achat",
+      "purchaseAccountPlaceholder": "Sélectionnez un compte d'achat",
+      "salesAccount": "Compte de vente",
+      "salesAccountPlaceholder": "Sélectionnez un compte de vente",
+      "create": "Créer l'article",
+      "cancel": "Annuler",
+      "createSupplier": "Créer un nouveau fournisseur",
+      "noSupplier": "Aucun fournisseur disponible",
+      "noAccount": "Aucun compte disponible",
+      "noWarehouse": "Aucun entrepôt disponible",
+      "errorNoCompany": "Aucune entreprise sélectionnée",
+      "errorNameRequired": "Le nom de l'article est obligatoire",
+      "errorReferenceRequired": "La référence est obligatoire",
+      "errorWarehouseRequired": "Un entrepôt doit être sélectionné",
+      "errorCreating": "Erreur lors de la création de l'article"
+    },
+    "categories": {
+      "matiere_premiere": "Matière première",
+      "produit_fini": "Produit fini",
+      "service": "Service",
+      "consommable": "Consommable",
+      "equipement": "Équipement",
+      "autre": "Autre"
+    },
+    "units": {
+      "piece": "Pièce",
+      "kg": "Kilogramme (kg)",
+      "litre": "Litre (L)",
+      "metre": "Mètre (m)",
+      "heure": "Heure (h)",
+      "jour": "Jour",
+      "lot": "Lot",
+      "boite": "Boîte",
+      "carton": "Carton",
+      "palette": "Palette"
+    },
+    "tvaRates": {
+      "0": "0% - Exonéré",
+      "5.5": "5,5% - Taux réduit",
+      "10": "10% - Taux intermédiaire",
+      "20": "20% - Taux normal"
+    }
   },
   "journal": "Journal",
   "journal_entries": {
@@ -2152,7 +2460,6 @@
     "file_size": "Taille",
     "file_type": "Type",
     "file_name": "Nom du fichier",
-    "description": "Description",
     "uploaded_at": "Téléchargé le",
     "confirm_delete": "Êtes-vous sûr de vouloir supprimer cette pièce jointe ?",
     "max_file_size": "Taille maximale: 50 MB",
@@ -2256,6 +2563,10 @@
         "description": "Planifiez, suivez et livrez vos projets à temps. Gestion d'équipes, budgets et échéances dans une interface intuitive.",
         "title": "Gestion de Projets"
       },
+      "regulatory": {
+        "description": "Génération automatique de 35+ documents légaux conformes aux normes PCG, SYSCOHADA, IFRS, SCF et PCM. Export PDF et XML pour télédéclaration.",
+        "title": "Conformité Légale"
+      },
       "security": {
         "description": "Données chiffrées, sauvegardes automatiques et conformité RGPD.",
         "title": "Sécurité maximale"
@@ -2315,6 +2626,7 @@
     },
     "hero": {
       "badge": "🚀 Solution professionnelle - Gestion d'entreprise moderne",
+      "badgeRegulatory": "🌍 Rapports Légaux Multi-Pays (10+ pays)",
       "cta": {
         "beta": "Démarrer gratuitement",
         "demo": "Voir la démo",
@@ -2329,6 +2641,42 @@
       },
       "subtitle": "en toute simplicité",
       "title": "Gérez votre entreprise"
+    },
+    "regulatory": {
+      "badge": "Conformité Légale",
+      "title": "Rapports Légaux Automatisés",
+      "subtitle": "Génération automatique de vos documents réglementaires en un clic",
+      "documentsTitle": "États Financiers",
+      "feature1Title": "Auto-remplissage Intelligent",
+      "feature1Desc": "Génération automatique de 35+ documents légaux depuis votre grand livre comptable. Bilan, compte de résultat, déclarations fiscales...",
+      "feature2Title": "5 Standards Comptables",
+      "feature2Desc": "PCG (France), SYSCOHADA (OHADA), IFRS for SMEs, SCF (Algérie/Tunisie), PCM (Maroc). Conformité garantie.",
+      "feature3Title": "Validation Automatique",
+      "feature3Desc": "Vérifications comptables automatiques (équilibre bilan, cohérence des comptes). Export PDF et XML pour télédéclaration."
+    },
+    "anomaly": {
+      "badge": "IA & Sécurité",
+      "title": "Détection Automatique des Anomalies",
+      "subtitle": "Intelligence artificielle pour détecter les erreurs comptables",
+      "description": "Détection Critical & High",
+      "feature1": "Déséquilibres Débit/Crédit",
+      "feature1Desc": "Détection instantanée des écritures non équilibrées",
+      "feature2": "Comptes Incohérents",
+      "feature2Desc": "Vérification automatique des numéros de comptes",
+      "feature3": "Montants Suspects",
+      "feature3Desc": "Alerte sur les montants inhabituels ou extrêmes"
+    },
+    "workflow": {
+      "badge": "Workflow Pro",
+      "title": "Workflow de Validation Avancé",
+      "subtitle": "Processus de validation multi-niveaux pour vos écritures",
+      "description": "Brouillon → Révision → Validation → Comptabilisation définitive",
+      "step1": "Brouillon → Révision",
+      "step1Desc": "Création et soumission pour révision",
+      "step2": "Révision → Validation",
+      "step2Desc": "Approbation ou rejet avec commentaires",
+      "step3": "Validation → Comptabilisation",
+      "step3Desc": "Verrouillage définitif dans les livres comptables"
     },
     "nav": {
       "contact": "Contact",
@@ -2353,6 +2701,8 @@
           "hr_advanced": "RH avancées",
           "integrations": "Intégrations personnalisées",
           "onboarding": "Formation incluse",
+          "regulatory_auto": "Télédéclaration automatique",
+          "security_logs": "Logs de sécurité avancés",
           "storage": "Stockage illimité",
           "support": "Support dédié 24/7",
           "users": "Utilisateurs illimités"
@@ -2382,15 +2732,20 @@
         "description": "Pour les entreprises en croissance",
         "features": {
           "advanced": "Comptabilité avancée",
+          "ai_full": "🧠 Analyses IA illimitées (7 rapports)",
+          "anomaly": "Détection d'anomalies",
           "api": "API Access",
           "clients": "Clients illimités",
           "crm": "CRM complet",
+          "csv_import": "Import CSV intelligent",
           "everything": "Tout du plan Starter",
           "hr": "RH de base",
           "projects": "Gestion de projets",
+          "regulatory_all": "35+ documents légaux + Export PDF",
           "reports": "Rapports illimités",
           "storage": "50 GB de stockage",
-          "support": "Support prioritaire"
+          "support": "Support prioritaire",
+          "workflow": "Workflow de validation"
         },
         "name": "Professionnel"
       },
@@ -2399,8 +2754,10 @@
         "description": "Parfait pour débuter",
         "features": {
           "accounting": "Comptabilité de base",
+          "ai": "2 rapports IA inclus",
           "clients": "Jusqu'à 100 clients",
           "invoicing": "Facturation illimitée",
+          "regulatory": "5 documents légaux/mois",
           "reports": "10 rapports standards",
           "storage": "5 GB de stockage",
           "support": "Support email"
@@ -2973,13 +3330,7 @@
       "generateReport": "Générer rapport PDF",
       "markAsPaid": "Marquer comme payé"
     },
-    "status": {
-      "realTime": "En temps réel",
-      "pending": "En attente",
-      "paid": "Payé",
-      "overdue": "En retard",
-      "cancelled": "Annulé"
-    },
+    "status": "Statut",
     "createPurchase": "Nouvel achat",
     "description": "Description",
     "filters": {
@@ -3051,7 +3402,6 @@
       "totalPurchasesDescription": "Nombre total d'achats",
       "urgent": "Urgent"
     },
-    "status": "Statut",
     "table": {
       "amountHT": "Montant HT",
       "amountTTC": "Montant TTC",
@@ -3133,7 +3483,10 @@
       "revenueEvolution": "Évolution du CA",
       "expensesByCategory": "Charges par catégorie",
       "monthlyComparison": "Comparaison mensuelle Produits / Charges",
-      "amount": "Montant"
+      "amount": "Montant",
+      "noData": "Aucune donnée disponible pour cette période",
+      "periodLabel": "Période",
+      "last6Months": "6 derniers mois glissants"
     },
     "dataLoadError": "Erreur lors du chargement des données comptables",
     "debit": "Débit",
@@ -3178,7 +3531,91 @@
     "totalRevenues": "TOTAL PRODUITS",
     "trialBalance": "Balance générale",
     "trialBalanceDesc": "Soldes de tous les comptes",
-    "unbalanced": "Bilan déséquilibré"
+    "unbalanced": "Bilan déséquilibré",
+    "regulatory": {
+      "title": "Documents Réglementaires",
+      "subtitle": "Déclarations fiscales, états financiers et documents de conformité",
+      "newDocument": "Nouveau document",
+      "selectTemplate": "Sélectionnez un modèle de document",
+      "create": "Créer le document",
+      "creating": "Création en cours...",
+      "emptyState": {
+        "title": "Aucun document réglementaire",
+        "description": "Créez votre premier document pour démarrer"
+      },
+      "stats": {
+        "total": "Total documents",
+        "draft": "Brouillons",
+        "completed": "Complétés",
+        "submitted": "Soumis"
+      },
+      "filters": {
+        "allYears": "Tous les exercices",
+        "allStatuses": "Tous les statuts",
+        "allStandards": "Tous les standards"
+      },
+      "status": {
+        "draft": "Brouillon",
+        "completed": "Complété",
+        "submitted": "Soumis",
+        "validated": "Validé",
+        "rejected": "Rejeté"
+      },
+      "table": {
+        "document": "Document",
+        "period": "Période",
+        "country": "Pays",
+        "status": "Statut",
+        "lastUpdate": "Dernière modification",
+        "actions": "Actions"
+      },
+      "fields": {
+        "template": "Type de document",
+        "fiscalYear": "Exercice fiscal",
+        "period": "Période"
+      },
+      "periods": {
+        "annual": "Annuel",
+        "quarterly": "Trimestriel",
+        "monthly": "Mensuel",
+        "q1": "Trimestre 1",
+        "q2": "Trimestre 2",
+        "q3": "Trimestre 3",
+        "q4": "Trimestre 4"
+      },
+      "months": {
+        "M01": "Janvier",
+        "M02": "Février",
+        "M03": "Mars",
+        "M04": "Avril",
+        "M05": "Mai",
+        "M06": "Juin",
+        "M07": "Juillet",
+        "M08": "Août",
+        "M09": "Septembre",
+        "M10": "Octobre",
+        "M11": "Novembre",
+        "M12": "Décembre"
+      },
+      "actions": {
+        "save": "Enregistrer",
+        "exportPdf": "Exporter en PDF",
+        "recalculate": "Recalculer"
+      },
+      "validation": {
+        "errors": "Erreurs de validation",
+        "warnings": "Avertissements"
+      },
+      "messages": {
+        "saveSuccess": "Document enregistré avec succès",
+        "saveError": "Erreur lors de l'enregistrement du document",
+        "createError": "Erreur lors de la création du document",
+        "exportSuccess": "PDF généré avec succès",
+        "exportError": "Erreur lors de la génération du PDF",
+        "recalculateSuccess": "Document recalculé avec succès",
+        "recalculateError": "Erreur lors du recalcul du document"
+      }
+    }
   },
   "rules": {
     "title": "Règles de catégorisation"
@@ -4726,5 +5163,76 @@
       "title": "Validateur d'Identifiant d'Entreprise",
       "description": "Validez SIREN, SIRET, BCE et autres identifiants"
     }
+  },
+  "regulatory": {
+    "title": "Documents Réglementaires",
+    "selectPeriod": "Sélectionner la période",
+    "fiscalYear": "Exercice fiscal",
+    "period": "Période",
+    "periods": {
+      "annual": "Annuel",
+      "quarterly": "Trimestriel",
+      "monthly": "Mensuel",
+      "q1": "Trimestre 1",
+      "q2": "Trimestre 2",
+      "q3": "Trimestre 3",
+      "q4": "Trimestre 4"
+    },
+    "myDocuments": "Mes Documents",
+    "documentsDescription": "Gérez vos déclarations fiscales, états financiers et documents réglementaires",
+    "newDocument": "Nouveau Document",
+    "documentName": "Nom du document",
+    "lastModified": "Dernière modification",
+    "noDocuments": "Aucun document pour le moment",
+    "filterByCategory": "Filtrer par catégorie",
+    "filterByStatus": "Filtrer par statut",
+    "allCategories": "Toutes les catégories",
+    "allStatuses": "Tous les statuts",
+    "category": {
+      "label": "Catégorie",
+      "financial_statements": "États Financiers",
+      "financialStatements": "États Financiers",
+      "tax_returns": "Déclarations Fiscales",
+      "taxReturns": "Déclarations Fiscales",
+      "social_declarations": "Déclarations Sociales",
+      "socialDeclarations": "Déclarations Sociales",
+      "statistical_reports": "Rapports Statistiques",
+      "regulatory_filings": "Dépôts Réglementaires",
+      "other": "Autre"
+    },
+    "status": {
+      "label": "Statut",
+      "draft": "Brouillon",
+      "pending": "En attente",
+      "completed": "Complété",
+      "submitted": "Soumis",
+      "validated": "Validé",
+      "rejected": "Rejeté"
+    },
+    "fieldRequired": "Ce champ est requis",
+    "minValue": "Valeur minimale: {{min}}",
+    "maxValue": "Valeur maximale: {{max}}",
+    "calculatedField": "Champ calculé automatiquement",
+    "selectOption": "Sélectionner une option",
+    "autoFilling": "Auto-remplissage en cours...",
+    "unsavedChanges": "Modifications non sauvegardées",
+    "editDocument": "Modifier le Document",
+    "documentCreated": "Document créé avec succès",
+    "documentSaved": "Document sauvegardé avec succès",
+    "documentDeleted": "Document supprimé avec succès",
+    "generatingPdf": "Génération du PDF en cours...",
+    "pdfGenerated": "PDF généré avec succès",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce document ?",
+    "invalidTemplate": "Template invalide",
+    "templateNotFound": "Template non trouvé",
+    "errorLoadingTemplates": "Erreur lors du chargement des templates",
+    "errorLoadingDocuments": "Erreur lors du chargement des documents",
+    "errorLoadingDocument": "Erreur lors du chargement du document",
+    "errorGeneratingDocument": "Erreur lors de la génération du document",
+    "errorCreatingDocument": "Erreur lors de la création du document",
+    "errorSavingDocument": "Erreur lors de la sauvegarde du document",
+    "errorDeletingDocument": "Erreur lors de la suppression du document",
+    "errorExportingDocument": "Erreur lors de l'export du document",
+    "submissionError": "Erreur lors de la soumission du formulaire"
   }
 }

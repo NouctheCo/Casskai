@@ -9,8 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
-
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/supabase';
 import type {
@@ -24,20 +22,17 @@ import type {
 import { auditService } from './auditService';
 import AccountingRulesService from './accountingRulesService';
 import { kpiCacheService } from './kpiCacheService';
-
+import { logger } from '@/lib/logger';
 type JournalEntryInsert = Database['public']['Tables']['journal_entries']['Insert'];
 type JournalEntryUpdate = Database['public']['Tables']['journal_entries']['Update'];
 type JournalEntryLineInsert = Database['public']['Tables']['journal_entry_lines']['Insert'];
-
 type PaginatedResult<T> = {
   data: T[];
   count: number;
 };
-
 type ServiceResult<T> =
   | { success: true; data: T }
   | { success: false; error: string };
-
 type JournalEntryListFilters = {
   page?: number;
   limit?: number;
@@ -51,50 +46,39 @@ type JournalEntryListFilters = {
   sortBy?: 'entry_date' | 'created_at';
   sortOrder?: 'asc' | 'desc';
 };
-
 const BALANCE_TOLERANCE = 0.01;
-
 function coerceNumber(value: unknown): number {
   const parsed = typeof value === 'string' ? parseFloat(value) : Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 }
-
 class JournalEntriesService {
   private async generateReferenceNumber(companyId: string): Promise<string> {
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
-    
     // Récupérer le nombre d'écritures du jour
     const { count } = await supabase
       .from('journal_entries')
       .select('*', { count: 'exact', head: true })
       .eq('company_id', companyId)
       .gte('created_at', `${year}-${month}-${day}T00:00:00`);
-    
     const sequenceNumber = String((count || 0) + 1).padStart(4, '0');
     return `${year}${month}${day}-${sequenceNumber}`;
   }
-
   async createJournalEntry(payload: JournalEntryPayload): Promise<ServiceResult<JournalEntryWithItems>> {
-    console.log('[JournalEntriesService] createJournalEntry called with:', payload);
-
+    logger.debug('JournalEntries', '[JournalEntriesService] createJournalEntry called with:', payload);
     try {
       this.ensureBalanced(payload.items);
-
       // Si journal_id n'est pas fourni, récupérer le premier journal actif de la company
       let journalId = payload.journalId;
-
-      console.warn('🔍 [JournalEntriesService] payload.journalId:', payload.journalId);
-      console.warn('🔍 [JournalEntriesService] journalId initial:', journalId);
-      console.warn('🔍 [JournalEntriesService] Tentative récupération journal par défaut...');
-
+      logger.warn('JournalEntries', '🔍 [JournalEntriesService] payload.journalId:', payload.journalId);
+      logger.warn('JournalEntries', '🔍 [JournalEntriesService] journalId initial:', journalId);
+      logger.warn('JournalEntries', '🔍 [JournalEntriesService] Tentative récupération journal par défaut...');
       if (!journalId) {
         try {
-          console.warn('🔍 Récupération journal par défaut pour company:', payload.companyId);
-          console.warn('⚠️ ATTENTION: Aucun journal spécifié, utilisation du fallback');
-
+          logger.warn('JournalEntries', '🔍 Récupération journal par défaut pour company:', payload.companyId);
+          logger.warn('JournalEntries', '⚠️ ATTENTION: Aucun journal spécifié, utilisation du fallback');
           // Récupérer le journal OD (Opérations Diverses) en priorité pour les écritures manuelles
           const { data: defaultJournal, error: journalError } = await supabase
             .from('journals')
@@ -104,12 +88,9 @@ class JournalEntriesService {
             .eq('type', 'miscellaneous') // Priorité au journal OD
             .limit(1)
             .single();
-
-          console.warn('🔍 Résultat query journals:', { data: defaultJournal, error: journalError });
-
+          logger.warn('JournalEntries', '🔍 Résultat query journals:', { data: defaultJournal, error: journalError });
           if (journalError) {
-            console.error('❌ Erreur récupération journal OD:', journalError);
-
+            logger.error('JournalEntries', '❌ Erreur récupération journal OD:', journalError);
             // Si pas de journal OD, prendre le premier journal actif
             const { data: anyJournal } = await supabase
               .from('journals')
@@ -118,33 +99,27 @@ class JournalEntriesService {
               .eq('is_active', true)
               .limit(1)
               .single();
-
             if (!anyJournal) {
               throw new Error('Aucun journal actif trouvé pour cette entreprise. Veuillez créer au moins un journal.');
             }
-
             journalId = anyJournal.id;
-            console.warn(`⚠️ Journal de secours utilisé: ${anyJournal.code} - ${anyJournal.name} (type: ${anyJournal.type})`);
+            logger.warn('JournalEntries', `⚠️ Journal de secours utilisé: ${anyJournal.code} - ${anyJournal.name} (type: ${anyJournal.type})`);
           } else {
             journalId = defaultJournal.id;
-            console.warn('✅ Journal OD trouvé:', defaultJournal);
+            logger.warn('JournalEntries', '✅ Journal OD trouvé:', defaultJournal);
           }
         } catch (error) {
-          console.error('💥 Exception récupération journal:', error);
+          logger.error('JournalEntries', '💥 Exception récupération journal:', error);
           throw error;
         }
       }
-
-      console.warn('🔍 journalId final avant génération numéro:', journalId);
-
+      logger.warn('JournalEntries', '🔍 journalId final avant génération numéro:', journalId);
       // Vérification finale : journalId doit être défini
       if (!journalId) {
         throw new Error('Impossible de déterminer le journal pour cette écriture. Veuillez spécifier un journal valide.');
       }
-
       const entryNumber = payload.entryNumber ?? (await this.generateEntryNumber(payload.companyId, journalId));
       const referenceNumber = payload.referenceNumber ?? (await this.generateReferenceNumber(payload.companyId));
-
       const entryInsert: JournalEntryInsert = {
         company_id: payload.companyId,
         entry_date: payload.entryDate,
@@ -154,31 +129,24 @@ class JournalEntriesService {
         status: payload.status ?? 'draft',
         entry_number: entryNumber,
       };
-
-      console.warn('🔍 Payload final pour insertion:', entryInsert);
-
+      logger.warn('JournalEntries', '🔍 Payload final pour insertion:', entryInsert);
       const { data: entry, error: entryError } = await supabase
         .from('journal_entries')
         .insert(entryInsert)
         .select('*')
         .single();
-
       if (entryError || !entry) {
         throw entryError ?? new Error('Failed to create journal entry');
       }
-
       const linesInsert = await this.normalizeLines(payload.companyId, entry.id, payload.items);
-
       const { data: lines, error: linesError } = await supabase
         .from('journal_entry_lines')
         .insert(linesInsert)
         .select('*, chart_of_accounts!account_id (id, account_number, account_name, account_type, account_class)');
-
       if (linesError) {
         await supabase.from('journal_entries').delete().eq('id', entry.id);
         throw linesError;
       }
-
       // ✅ Audit Log: CREATE journal entry
       auditService.log({
         event_type: 'CREATE',
@@ -194,11 +162,9 @@ class JournalEntriesService {
         },
         security_level: 'standard',
         compliance_tags: ['RGPD']
-      }).catch(err => console.error('Audit log failed:', err));
-
+      }).catch(err => logger.error('JournalEntries', 'Audit log failed:', err));
       // 🎯 NOUVELLE: Invalider le cache KPI après création
       kpiCacheService.invalidateCache(payload.companyId);
-
       return {
         success: true,
         data: {
@@ -208,40 +174,32 @@ class JournalEntriesService {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to create journal entry';
-      console.error('[JournalEntriesService] createJournalEntry failed:', error);
+      logger.error('JournalEntries', '[JournalEntriesService] createJournalEntry failed:', error);
       return { success: false, error: message };
     }
   }
-
   async updateJournalEntry(entryId: string, payload: JournalEntryPayload): Promise<ServiceResult<JournalEntryWithItems>> {
     try {
       this.ensureBalanced(payload.items);
-
       // ✅ Récupérer toutes les données existantes pour l'audit
       const { data: existingEntry, error: fetchError } = await supabase
         .from('journal_entries')
         .select('*')
         .eq('id', entryId)
         .single();
-
       if (fetchError || !existingEntry) {
         throw fetchError ?? new Error('Journal entry not found');
       }
-
       if (existingEntry.company_id !== payload.companyId) {
         throw new Error('Journal entry does not belong to the provided company');
       }
-
       // Si journal_id n'est pas fourni, récupérer le premier journal actif de la company
       let journalId = payload.journalId;
-
-      console.warn('🔍 [JournalEntriesService] updateJournalEntry - payload.journalId:', payload.journalId);
-      console.warn('🔍 [JournalEntriesService] updateJournalEntry - journalId initial:', journalId);
-
+      logger.warn('JournalEntries', '🔍 [JournalEntriesService] updateJournalEntry - payload.journalId:', payload.journalId);
+      logger.warn('JournalEntries', '🔍 [JournalEntriesService] updateJournalEntry - journalId initial:', journalId);
       if (!journalId) {
         try {
-          console.warn('🔍 [JournalEntriesService] updateJournalEntry - Récupération journal par défaut pour company:', payload.companyId);
-
+          logger.warn('JournalEntries', '🔍 [JournalEntriesService] updateJournalEntry - Récupération journal par défaut pour company:', payload.companyId);
           const { data: defaultJournal, error: journalError } = await supabase
             .from('journals')
             .select('id, code, name')
@@ -249,31 +207,24 @@ class JournalEntriesService {
             .eq('is_active', true)
             .limit(1)
             .single();
-
-          console.warn('🔍 [JournalEntriesService] updateJournalEntry - Résultat query journals:', { data: defaultJournal, error: journalError });
-
+          logger.warn('JournalEntries', '🔍 [JournalEntriesService] updateJournalEntry - Résultat query journals:', { data: defaultJournal, error: journalError });
           if (journalError) {
-            console.error('❌ [JournalEntriesService] updateJournalEntry - Erreur récupération journal:', journalError);
+            logger.error('JournalEntries', '❌ [JournalEntriesService] updateJournalEntry - Erreur récupération journal:', journalError);
             throw new Error(`Erreur récupération journal: ${journalError.message}`);
           }
-
           if (!defaultJournal) {
-            console.error('❌ [JournalEntriesService] updateJournalEntry - Aucun journal trouvé');
+            logger.error('JournalEntries', '❌ [JournalEntriesService] updateJournalEntry - Aucun journal trouvé');
             throw new Error('Aucun journal actif trouvé pour cette entreprise');
           }
-
           journalId = defaultJournal.id;
-          console.warn('✅ [JournalEntriesService] updateJournalEntry - Journal par défaut trouvé:', defaultJournal);
+          logger.warn('JournalEntries', '✅ [JournalEntriesService] updateJournalEntry - Journal par défaut trouvé:', defaultJournal);
         } catch (error) {
-          console.error('💥 [JournalEntriesService] updateJournalEntry - Exception récupération journal:', error);
+          logger.error('JournalEntries', '💥 [JournalEntriesService] updateJournalEntry - Exception récupération journal:', error);
           throw error;
         }
       }
-
-      console.warn('🔍 [JournalEntriesService] updateJournalEntry - journalId final:', journalId);
-
+      logger.warn('JournalEntries', '🔍 [JournalEntriesService] updateJournalEntry - journalId final:', journalId);
       const referenceNumber = payload.referenceNumber ?? existingEntry.reference_number ?? (await this.generateReferenceNumber(payload.companyId));
-
       const entryUpdate: JournalEntryUpdate = {
         entry_date: payload.entryDate,
         description: payload.description,
@@ -282,43 +233,34 @@ class JournalEntriesService {
         status: payload.status ?? existingEntry.status ?? 'draft',
         entry_number: payload.entryNumber ?? existingEntry.entry_number,
       };
-
       const { data: updatedEntry, error: updateError } = await supabase
         .from('journal_entries')
         .update(entryUpdate)
         .eq('id', entryId)
         .select('*')
         .single();
-
       if (updateError || !updatedEntry) {
         throw updateError ?? new Error('Failed to update journal entry');
       }
-
       const { error: deleteError } = await supabase
         .from('journal_entry_lines')
         .delete()
         .eq('journal_entry_id', entryId);
-
       if (deleteError) {
         throw deleteError;
       }
-
       const linesInsert = await this.normalizeLines(payload.companyId, entryId, payload.items);
-
       const { data: lines, error: linesError } = await supabase
         .from('journal_entry_lines')
         .insert(linesInsert)
         .select('*, chart_of_accounts!account_id (id, account_number, account_name, account_type, account_class)');
-
       if (linesError) {
         throw linesError;
       }
-
       // ✅ Audit Log: UPDATE journal entry
       const changedFields = Object.keys(entryUpdate).filter(
         key => existingEntry[key] !== entryUpdate[key as keyof typeof entryUpdate]
       );
-
       auditService.log({
         event_type: 'UPDATE',
         table_name: 'journal_entries',
@@ -340,11 +282,9 @@ class JournalEntriesService {
         changed_fields: changedFields,
         security_level: 'standard',
         compliance_tags: ['RGPD']
-      }).catch(err => console.error('Audit log failed:', err));
-
+      }).catch(err => logger.error('JournalEntries', 'Audit log failed:', err));
       // 🎯 NOUVELLE: Invalider le cache KPI après mise à jour
       kpiCacheService.invalidateCache(payload.companyId);
-
       return {
         success: true,
         data: {
@@ -357,7 +297,6 @@ class JournalEntriesService {
       return { success: false, error: message };
     }
   }
-
   async deleteJournalEntry(entryId: string, companyId: string): Promise<ServiceResult<null>> {
     try {
       // ✅ Récupérer l'entrée avant suppression pour l'audit
@@ -367,26 +306,21 @@ class JournalEntriesService {
         .eq('id', entryId)
         .eq('company_id', companyId)
         .single();
-
       const { error: linesError } = await supabase
         .from('journal_entry_lines')
         .delete()
         .eq('journal_entry_id', entryId);
-
       if (linesError) {
         throw linesError;
       }
-
       const { error: entryError } = await supabase
         .from('journal_entries')
         .delete()
         .eq('id', entryId)
         .eq('company_id', companyId);
-
       if (entryError) {
         throw entryError;
       }
-
       // ✅ Audit Log: DELETE journal entry (CRITICAL)
       if (entryToDelete) {
         auditService.log({
@@ -402,55 +336,45 @@ class JournalEntriesService {
           },
           security_level: 'critical', // ⚠️ Suppression = toujours critical
           compliance_tags: ['RGPD']
-        }).catch(err => console.error('Audit log failed:', err));
+        }).catch(err => logger.error('JournalEntries', 'Audit log failed:', err));
       }
-
       // 🎯 NOUVELLE: Invalider le cache KPI après suppression
       kpiCacheService.invalidateCache(companyId);
-
       return { success: true, data: null };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to delete journal entry';
       return { success: false, error: message };
     }
   }
-
   async deleteAllJournalEntries(companyId: string): Promise<ServiceResult<null>> {
     try {
       const { data: entries, error: entriesError } = await supabase
         .from('journal_entries')
         .select('id')
         .eq('company_id', companyId);
-
       if (entriesError) {
         throw entriesError;
       }
-
       const entryIds = (entries ?? []).map(({ id }) => id);
-
       if (entryIds.length > 0) {
         await supabase
           .from('journal_entry_lines')
           .delete()
           .in('journal_entry_id', entryIds);
       }
-
       const { error: deleteEntriesError } = await supabase
         .from('journal_entries')
         .delete()
         .eq('company_id', companyId);
-
       if (deleteEntriesError) {
         throw deleteEntriesError;
       }
-
       return { success: true, data: null };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to delete journal entries';
       return { success: false, error: message };
     }
   }
-
   async getJournalEntries(
     companyId: string,
     filters: JournalEntryListFilters = {},
@@ -469,7 +393,6 @@ class JournalEntriesService {
         sortBy = 'entry_date',
         sortOrder = 'desc',
       } = filters;
-
       let query = supabase
         .from('journal_entries')
         .select(
@@ -483,63 +406,48 @@ class JournalEntriesService {
           { count: 'exact' },
         )
         .eq('company_id', companyId);
-
       if (dateFrom) {
         query = query.gte('entry_date', dateFrom);
       }
-
       if (dateTo) {
         query = query.lte('entry_date', dateTo);
       }
-
       if (journalId) {
         query = query.eq('journal_id', journalId);
       }
-
       if (reference) {
         query = query.ilike('reference_number', `%${reference}%`);
       }
-
       if (description) {
         query = query.ilike('description', `%${description}%`);
       }
-
       if (status && status !== 'all') {
         query = query.eq('status', status);
       }
       // Sinon, on ne filtre PAS par statut - on montre TOUT
-
       if (accountId) {
         const { data: entryIds, error: accountFilterError } = await supabase
           .from('journal_entry_lines')
           .select('journal_entry_id')
           .eq('account_id', accountId);
-
         if (accountFilterError) {
           throw accountFilterError;
         }
-
         const ids = (entryIds ?? []).map((row) => row.journal_entry_id);
         if (ids.length === 0) {
           return { success: true, data: { data: [], count: 0 } };
         }
-
         query = query.in('id', ids);
       }
-
       query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-
       if (limit) {
         const offset = (page - 1) * limit;
         query = query.range(offset, offset + limit - 1);
       }
-
       const { data, error, count } = await query;
-
       if (error) {
         throw error;
       }
-
       return {
         success: true,
         data: {
@@ -552,7 +460,6 @@ class JournalEntriesService {
       return { success: false, error: message };
     }
   }
-
   async updateEntryStatus(
     entryId: string,
     status: JournalEntryStatus,
@@ -573,18 +480,15 @@ class JournalEntriesService {
         `,
         )
         .single();
-
       if (error || !data) {
         throw error ?? new Error('Failed to update journal entry status');
       }
-
       return { success: true, data };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to update journal entry status';
       return { success: false, error: message };
     }
   }
-
   async getEntriesStats(companyId: string): Promise<ServiceResult<{
     totalEntries: number;
     draftEntries: number;
@@ -598,27 +502,21 @@ class JournalEntriesService {
         .from('journal_entries')
         .select('id, status')
         .eq('company_id', companyId);
-
       if (entriesError) {
         throw entriesError;
       }
-
       const entryIds = (entries ?? []).map((entry) => entry.id);
-
       let lines: { debit_amount: number | null; credit_amount: number | null }[] = [];
       if (entryIds.length > 0) {
         const { data: linesData, error: linesError } = await supabase
           .from('journal_entry_lines')
           .select('debit_amount, credit_amount, journal_entry_id')
           .in('journal_entry_id', entryIds);
-
         if (linesError) {
           throw linesError;
         }
-
         lines = linesData ?? [];
       }
-
       const totals = lines.reduce(
         (acc, line) => {
           acc.totalDebit += coerceNumber(line.debit_amount);
@@ -627,7 +525,6 @@ class JournalEntriesService {
         },
         { totalDebit: 0, totalCredit: 0 },
       );
-
       const stats = {
         totalEntries: entries?.length ?? 0,
         draftEntries: entries?.filter((entry) => entry.status === 'draft').length ?? 0,
@@ -636,14 +533,12 @@ class JournalEntriesService {
         totalDebit: totals.totalDebit,
         totalCredit: totals.totalCredit,
       };
-
       return { success: true, data: stats };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to compute journal entry stats';
       return { success: false, error: message };
     }
   }
-
   async getAccountsList(companyId: string): Promise<MinimalAccount[]> {
     const { data, error } = await supabase
       .from('chart_of_accounts')
@@ -654,15 +549,12 @@ class JournalEntriesService {
       // Commenté le filtre is_detail_account pour avoir tous les comptes
       // .eq('is_detail_account', true)
       .order('account_number', { ascending: true });
-
     if (error) {
-      console.error('Error fetching accounts list:', error);
+      logger.error('JournalEntries', 'Error fetching accounts list:', error);
       return [];
     }
-
     return data ?? [];
   }
-
   async getJournalsList(companyId: string): Promise<MinimalJournal[]> {
     const { data, error } = await supabase
       .from('journals')
@@ -670,15 +562,12 @@ class JournalEntriesService {
       .eq('company_id', companyId)
       .eq('is_active', true)
       .order('code', { ascending: true });
-
     if (error) {
-      console.error('Error fetching journals list:', error);
+      logger.error('JournalEntries', 'Error fetching journals list:', error);
       return [];
     }
-
     return data ?? [];
   }
-
   async getJournalEntryById(entryId: string, companyId: string): Promise<ServiceResult<JournalEntryWithItems>> {
     try {
       const { data, error } = await supabase
@@ -695,27 +584,22 @@ class JournalEntriesService {
         .eq('id', entryId)
         .eq('company_id', companyId)
         .single();
-
       if (error || !data) {
         throw error ?? new Error('Journal entry not found');
       }
-
       return { success: true, data };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch journal entry';
       return { success: false, error: message };
     }
   }
-
   private ensureBalanced(items: JournalEntryLineForm[]): void {
     const totalDebit = items.reduce((sum, item) => sum + coerceNumber(item.debitAmount), 0);
     const totalCredit = items.reduce((sum, item) => sum + coerceNumber(item.creditAmount), 0);
-
     if (Math.abs(totalDebit - totalCredit) > BALANCE_TOLERANCE) {
       throw new Error('Journal entry is not balanced');
     }
   }
-
   /**
    * ✅ NOUVELLE MÉTHODE: Valider une écriture selon les règles comptables
    */
@@ -730,9 +614,7 @@ class JournalEntriesService {
       .select('id, account_number')
       .eq('company_id', companyId)
       .in('id', accountIds);
-
     const accountMap = new Map((accounts || []).map(acc => [acc.id, acc.account_number || '']));
-
     // Construire l'objet pour la validation
     const entryToValidate = {
       lines: items.map(item => ({
@@ -741,10 +623,8 @@ class JournalEntriesService {
         creditAmount: coerceNumber(item.creditAmount),
       })),
     };
-
     return AccountingRulesService.validateJournalEntry(entryToValidate);
   }
-
   private async normalizeLines(
     companyId: string,
     entryId: string,
@@ -753,30 +633,24 @@ class JournalEntriesService {
     if (!items?.length) {
       throw new Error('At least one journal entry line is required');
     }
-
     const accountIds = Array.from(new Set(items.map((item) => item.accountId))).filter(Boolean);
     if (accountIds.length === 0) {
       throw new Error('At least one valid account is required');
     }
-
     const { data: accounts, error: accountsError } = await supabase
       .from('chart_of_accounts')
       .select('id, account_number, account_name')
       .eq('company_id', companyId)
       .in('id', accountIds);
-
     if (accountsError) {
       throw accountsError;
     }
-
     const accountMap = new Map((accounts ?? []).map((account) => [account.id, account]));
-
     return items.map((item, index) => {
       const accountInfo = accountMap.get(item.accountId);
       if (!accountInfo) {
         throw new Error(`Account ${item.accountId} not found or inactive.`);
       }
-
       return {
         journal_entry_id: entryId,
         account_id: item.accountId,
@@ -789,26 +663,21 @@ class JournalEntriesService {
       };
     });
   }
-
   private async fetchJournalCode(journalId?: string | null): Promise<string | null> {
     if (!journalId) {
       return null;
     }
-
     const { data, error } = await supabase
       .from('journals')
       .select('code')
       .eq('id', journalId)
       .single();
-
     if (error) {
-      console.warn('Failed to fetch journal code:', error);
+      logger.warn('JournalEntries', 'Failed to fetch journal code:', error);
       return null;
     }
-
     return data?.code ?? null;
   }
-
   private async generateEntryNumber(companyId: string, journalId?: string | null): Promise<string | null> {
     // ✅ Utiliser le service de règles comptables pour générer le numéro
     if (!journalId) {
@@ -816,16 +685,14 @@ class JournalEntriesService {
       const year = new Date().getFullYear();
       return `OD-${year}-${Date.now().toString().slice(-6)}`;
     }
-
     try {
       const entryDate = new Date().toISOString();
       return await AccountingRulesService.generateEntryNumber(companyId, journalId, entryDate);
     } catch (error) {
-      console.warn('Failed to generate entry number, falling back to timestamp-based value:', error);
+      logger.warn('JournalEntries', 'Failed to generate entry number, falling back to timestamp-based value:', error);
       return `JR-${Date.now()}`;
     }
   }
-
   /**
    * Met à jour le statut d'une écriture comptable
    * @param entryId - ID de l'écriture
@@ -839,8 +706,7 @@ class JournalEntriesService {
     companyId: string
   ): Promise<ServiceResult<JournalEntryWithItems>> {
     try {
-      console.log(`[journalEntriesService] Updating entry ${entryId} status to ${newStatus}`);
-
+      logger.debug('JournalEntries', `[journalEntriesService] Updating entry ${entryId} status to ${newStatus}`);
       // Vérifier que l'écriture appartient bien à l'entreprise
       const { data: existingEntry, error: checkError } = await supabase
         .from('journal_entries')
@@ -848,11 +714,9 @@ class JournalEntriesService {
         .eq('id', entryId)
         .eq('company_id', companyId)
         .single();
-
       if (checkError || !existingEntry) {
         throw new Error('Écriture introuvable ou accès non autorisé');
       }
-
       // Mettre à jour le statut
       const { data: updatedEntry, error: updateError } = await supabase
         .from('journal_entries')
@@ -874,13 +738,10 @@ class JournalEntriesService {
           )
         `)
         .single();
-
       if (updateError || !updatedEntry) {
         throw new Error(updateError?.message || 'Échec de la mise à jour du statut');
       }
-
-      console.log(`[journalEntriesService] Entry ${entryId} status updated successfully`);
-
+      logger.debug('JournalEntries', `[journalEntriesService] Entry ${entryId} status updated successfully`);
       // ✅ Audit Log: STATUS CHANGE (HIGH security si validation)
       auditService.log({
         event_type: 'UPDATE',
@@ -892,15 +753,14 @@ class JournalEntriesService {
         changed_fields: ['status'],
         security_level: newStatus === 'posted' || newStatus === 'imported' ? 'high' : 'standard',
         compliance_tags: ['RGPD']
-      }).catch(err => console.error('Audit log failed:', err));
-
+      }).catch(err => logger.error('JournalEntries', 'Audit log failed:', err));
       return {
         success: true,
         data: updatedEntry as unknown as JournalEntryWithItems
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      console.error('[journalEntriesService] Error updating entry status:', errorMessage);
+      logger.error('JournalEntries', '[journalEntriesService] Error updating entry status:', errorMessage);
       return {
         success: false,
         error: errorMessage
@@ -908,5 +768,4 @@ class JournalEntriesService {
     }
   }
 }
-
 export const journalEntriesService = new JournalEntriesService();

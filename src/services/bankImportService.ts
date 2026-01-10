@@ -9,14 +9,12 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Service d'importation des relevés bancaires
  * Supporte les formats CSV, OFX, QIF
  */
-
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface BankTransaction {
   id?: string;
   bank_account_id: string;
@@ -34,7 +32,6 @@ export interface BankTransaction {
   updated_at?: string;
   status?: 'pending' | 'reconciled' | 'ignored';
 }
-
 export interface BankAccount {
   id?: string;
   company_id: string;
@@ -51,7 +48,6 @@ export interface BankAccount {
   created_at?: string;
   updated_at?: string;
 }
-
 export interface ImportResult {
   success: boolean;
   message: string;
@@ -61,9 +57,7 @@ export interface ImportResult {
   transactions: BankTransaction[];
   errors?: string[];
 }
-
 class BankImportService {
-  
   /**
    * Importe un fichier CSV de relevé bancaire
    */
@@ -71,7 +65,6 @@ class BankImportService {
     try {
       const text = await file.text();
       const lines = text.split('\n');
-      
       if (lines.length < 2) {
         return {
           success: false,
@@ -83,21 +76,16 @@ class BankImportService {
           errors: ['Fichier CSV vide ou invalide']
         };
       }
-
       const headers = this.parseCSVLine(lines[0]);
       const dataLines = lines.slice(1).filter(line => line.trim());
-      
       // Auto-détection du mapping si non fourni
       const finalMapping = mapping || this.detectCSVMapping(headers);
-      
       const transactions: BankTransaction[] = [];
       const errors: string[] = [];
-      
       for (let i = 0; i < dataLines.length; i++) {
         try {
           const values = this.parseCSVLine(dataLines[i]);
           if (values.length < headers.length / 2) continue; // Skip incomplete lines
-          
           const transaction = this.parseCSVTransaction(values, finalMapping, accountId, companyId);
           if (transaction) {
             transactions.push(transaction);
@@ -106,10 +94,8 @@ class BankImportService {
           errors.push(`Ligne ${i + 2}: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
         }
       }
-
       // Sauvegarde en base
       const saveResult = await this.saveTransactions(transactions);
-      
       const combinedErrors = [...errors, ...saveResult.errors];
       return {
         success: saveResult.success,
@@ -122,9 +108,8 @@ class BankImportService {
         transactions,
         errors: combinedErrors.length > 0 ? combinedErrors : undefined
       };
-
     } catch (error: unknown) {
-      console.error('Erreur import CSV:', error);
+      logger.error('BankImport', 'Erreur import CSV:', error);
       return {
         success: false,
         message: `Erreur lors de l'import: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`,
@@ -136,17 +121,14 @@ class BankImportService {
       };
     }
   }
-
   /**
    * Importe un fichier OFX (Open Financial Exchange)
    */
   async importOFX(file: File, accountId: string, companyId: string): Promise<ImportResult> {
     try {
       const text = await file.text();
-      
       // Parse OFX format
       const transactions = await this.parseOFXTransactions(text, accountId, companyId);
-      
       if (transactions.length === 0) {
         return {
           success: false,
@@ -157,9 +139,7 @@ class BankImportService {
           transactions: []
         };
       }
-
       const saveResult = await this.saveTransactions(transactions);
-      
       return {
         success: saveResult.success,
         message: `${saveResult.imported_count} transactions OFX importées`,
@@ -169,9 +149,8 @@ class BankImportService {
         transactions,
         errors: saveResult.errors.length > 0 ? saveResult.errors : undefined
       };
-
     } catch (error: unknown) {
-      console.error('Erreur import OFX:', error);
+      logger.error('BankImport', 'Erreur import OFX:', error);
       return {
         success: false,
         message: `Erreur lors de l'import OFX: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`,
@@ -182,7 +161,6 @@ class BankImportService {
       };
     }
   }
-
   /**
    * Importe un fichier QIF (Quicken Interchange Format)
    */
@@ -190,7 +168,6 @@ class BankImportService {
     try {
       const text = await file.text();
       const transactions = await this.parseQIFTransactions(text, accountId, companyId);
-      
       if (transactions.length === 0) {
         return {
           success: false,
@@ -201,9 +178,7 @@ class BankImportService {
           transactions: []
         };
       }
-
       const saveResult = await this.saveTransactions(transactions);
-      
       return {
         success: saveResult.success,
         message: `${saveResult.imported_count} transactions QIF importées`,
@@ -213,9 +188,8 @@ class BankImportService {
         transactions,
         errors: saveResult.errors.length > 0 ? saveResult.errors : undefined
       };
-
     } catch (error: unknown) {
-      console.error('Erreur import QIF:', error);
+      logger.error('BankImport', 'Erreur import QIF:', error);
       return {
         success: false,
         message: `Erreur lors de l'import QIF: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`,
@@ -226,19 +200,15 @@ class BankImportService {
       };
     }
   }
-
   /**
    * Parse les transactions OFX
    */
   private async parseOFXTransactions(ofxContent: string, accountId: string, companyId: string): Promise<BankTransaction[]> {
     const transactions: BankTransaction[] = [];
-    
     // Simple regex parsing pour OFX (version simplifiée)
     const stmtTrnPattern = /<STMTTRN>(.*?)<\/STMTTRN>/gs;
     const matches = ofxContent.match(stmtTrnPattern);
-    
     if (!matches) return transactions;
-    
     for (const match of matches) {
       try {
         const _trnType = this.extractOFXTag(match, 'TRNTYPE');
@@ -246,7 +216,6 @@ class BankImportService {
         const trnAmt = this.extractOFXTag(match, 'TRNAMT');
         const fitId = this.extractOFXTag(match, 'FITID');
         const memo = this.extractOFXTag(match, 'MEMO') || this.extractOFXTag(match, 'NAME') || '';
-        
         if (dtPosted && trnAmt) {
           const transaction: BankTransaction = {
             bank_account_id: accountId,
@@ -260,14 +229,12 @@ class BankImportService {
             import_source: 'ofx',
             status: 'pending'
           };
-          
           transactions.push(transaction);
         }
       } catch (error: unknown) {
-        console.warn('Erreur parsing transaction OFX:', error);
+        logger.warn('BankImport', 'Erreur parsing transaction OFX:', error);
       }
     }
-    
     return transactions;
   }
   private async parseQIFTransactions(qifContent: string, accountId: string, companyId: string): Promise<BankTransaction[]> {
@@ -275,14 +242,11 @@ class BankImportService {
     // Normaliser les fins de lignes (gérer CRLF Windows et CR Mac)
     const content = qifContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     const lines = content.split('\n');
-
     let currentTransaction: Partial<BankTransaction> = {};
     let seenTypeHeader = false;
-    
     for (const rawLine of lines) {
       const trimmed = rawLine.trim();
       if (!trimmed) continue;
-
       // Sauter l'entête tant que !Type: n'est pas rencontré
       if (trimmed.startsWith('!')) {
         if (trimmed.startsWith('!Type:')) {
@@ -290,21 +254,18 @@ class BankImportService {
         }
         continue;
       }
-
       if (!seenTypeHeader) {
         // Ignorer tout avant l'entête QIF
         continue;
       }
-
       const code = trimmed.charAt(0);
       const value = trimmed.substring(1).trim();
-      
       switch (code) {
         case 'D': // Date
           try {
             currentTransaction.transaction_date = this.parseQIFDate(value);
           } catch (error) {
-            console.warn(`Erreur parsing date QIF: ${value}`, error);
+            logger.warn('BankImport', `Erreur parsing date QIF: ${value}`, error);
           }
           break;
         case 'T': // Amount
@@ -317,7 +278,7 @@ class BankImportService {
               currentTransaction.amount = isParenNegative ? -Math.abs(amount) : amount;
             }
           } catch (error) {
-            console.warn(`Erreur parsing montant QIF: ${value}`, error);
+            logger.warn('BankImport', `Erreur parsing montant QIF: ${value}`, error);
           }
           break;
         case 'P': // Payee/Description
@@ -353,13 +314,12 @@ class BankImportService {
               status: 'pending'
             } as BankTransaction);
           } else {
-            console.warn('Transaction QIF incomplète (date ou montant manquant)', currentTransaction);
+            logger.warn('BankImport', 'Transaction QIF incomplète (date ou montant manquant)', currentTransaction);
           }
           currentTransaction = {};
           break;
       }
     }
-
     // Flush potentiel si le fichier ne termine pas par '^'
     if (currentTransaction.transaction_date && currentTransaction.amount !== undefined) {
       transactions.push({
@@ -375,10 +335,8 @@ class BankImportService {
         status: 'pending'
       } as BankTransaction);
     }
-    
     return transactions;
   }
-
   /**
    * Sauvegarde les transactions en base
    */
@@ -386,7 +344,6 @@ class BankImportService {
     let imported = 0;
     let skipped = 0;
     const errors: string[] = [];
-    
     for (const transaction of transactions) {
       try {
         // Vérifier si la transaction existe déjà
@@ -397,15 +354,13 @@ class BankImportService {
           .eq('transaction_date', transaction.transaction_date)
           .eq('amount', transaction.amount)
           .eq('description', transaction.description);
-          
         if (checkError) {
-          console.warn('Erreur vérification doublons:', checkError);
+          logger.warn('BankImport', 'Erreur vérification doublons:', checkError);
           // Continuer même si la vérification échoue
         } else if (existing && existing.length > 0) {
           skipped++;
           continue;
         }
-        
         const { error } = await supabase
           .from('bank_transactions')
           .insert([{
@@ -422,9 +377,8 @@ class BankImportService {
             import_source: transaction.import_source || 'csv',
             status: transaction.status || 'pending'
           }]);
-          
         if (error) {
-          console.warn('Erreur sauvegarde via client, tentative REST fallback:', error);
+          logger.warn('BankImport', 'Erreur sauvegarde via client, tentative REST fallback:', error);
           try {
             const resp = await fetch(`${SUPABASE_URL}/rest/v1/bank_transactions`, {
               method: 'POST',
@@ -449,27 +403,23 @@ class BankImportService {
                 status: transaction.status || 'pending'
               }])
             });
-
             if (!resp.ok) {
               const text = await resp.text();
-              console.error('REST fallback insert failed', resp.status, text);
+              logger.error('BankImport', 'REST fallback insert failed', resp.status, text);
               errors.push(`REST insert failed: ${resp.status}`);
               continue;
             }
           } catch (fallbackErr) {
-            console.error('Exception during REST fallback insert:', fallbackErr);
+            logger.error('BankImport', 'Exception during REST fallback insert:', fallbackErr);
             errors.push('Exception during REST fallback');
             continue;
           }
         }
-        
         imported++;
-        
       } catch (error: unknown) {
-        console.error('Erreur traitement transaction:', error);
+        logger.error('BankImport', 'Erreur traitement transaction:', error);
       }
       }
-    
     return {
       success: imported > 0,
       imported_count: imported,
@@ -477,7 +427,6 @@ class BankImportService {
       errors
     };
   }
-
   /**
    * Utilitaires de parsing
    */
@@ -485,10 +434,8 @@ class BankImportService {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
-    
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
-      
       if (char === '"') {
         inQuotes = !inQuotes;
       } else if (char === ',' && !inQuotes) {
@@ -498,11 +445,9 @@ class BankImportService {
         current += char;
       }
     }
-    
     result.push(current.trim());
     return result;
   }
-
   private detectCSVMapping(headers: string[]): CSVMapping {
     const mapping: CSVMapping = {
       date: -1,
@@ -510,10 +455,8 @@ class BankImportService {
       description: -1,
       reference: -1
     };
-    
     headers.forEach((header, index) => {
       const lower = header.toLowerCase();
-      
       if (lower.includes('date') || lower.includes('jour')) {
         mapping.date = index;
       } else if (lower.includes('montant') || lower.includes('amount') || lower.includes('crédit') || lower.includes('débit')) {
@@ -524,27 +467,21 @@ class BankImportService {
         mapping.reference = index;
       }
     });
-    
     return mapping;
   }
-
   private parseCSVTransaction(values: string[], mapping: CSVMapping, accountId: string, companyId: string): BankTransaction | null {
     try {
       const dateStr = values[mapping.date]?.trim();
       const amountStr = values[mapping.amount]?.trim();
       const description = values[mapping.description]?.trim() || 'Transaction importée';
       const reference = mapping.reference >= 0 ? values[mapping.reference]?.trim() : undefined;
-      
       if (!dateStr || !amountStr) return null;
-      
       // Parse date (formats français courants)
       const date = this.parseDate(dateStr);
       if (!date) return null;
-      
       // Parse amount
       const amount = parseFloat(amountStr.replace(',', '.').replace(/[^\d.-]/g, ''));
       if (isNaN(amount)) return null;
-      
       return {
         bank_account_id: accountId,
         company_id: companyId,
@@ -557,12 +494,10 @@ class BankImportService {
         import_source: 'csv',
         status: 'pending'
       };
-      
     } catch (error: unknown) {
       throw new Error(`Erreur parsing transaction: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
-
   private parseDate(dateStr: string): string | null {
     // Formats supportés: DD/MM/YYYY, YYYY-MM-DD, DD-MM-YYYY
     const formats = [
@@ -570,12 +505,10 @@ class BankImportService {
       /^(\d{4})-(\d{1,2})-(\d{1,2})$/, // YYYY-MM-DD  
       /^(\d{1,2})-(\d{1,2})-(\d{4})$/, // DD-MM-YYYY
     ];
-    
     for (const format of formats) {
       const match = dateStr.match(format);
       if (match) {
         let year, month, day;
-        
         if (format === formats[1]) { // YYYY-MM-DD
           year = match[1];
           month = match[2].padStart(2, '0');
@@ -585,14 +518,11 @@ class BankImportService {
           month = match[2].padStart(2, '0');
           year = match[3];
         }
-        
         return `${year}-${month}-${day}`;
       }
     }
-    
     return null;
   }
-
   private parseOFXDate(ofxDate: string): string {
     // OFX date format: YYYYMMDD ou YYYYMMDDHHMMSS
     const dateOnly = ofxDate.substring(0, 8);
@@ -601,16 +531,13 @@ class BankImportService {
     const day = dateOnly.substring(6, 8);
     return `${year}-${month}-${day}`;
   }
-
   private parseQIFDate(qifDate: string): string {
     // QIF date formats:
     // - MM/DD/YYYY (US format)
     // - DD/MM/YYYY (EU format)
     // - DD/MM/YY (2-digit year)
     // - YYYYMMDD
-    
     const trimmed = qifDate.trim();
-    
     // Format YYYYMMDD
     if (/^\d{8}$/.test(trimmed)) {
       const year = trimmed.substring(0, 4);
@@ -618,19 +545,16 @@ class BankImportService {
       const day = trimmed.substring(6, 8);
       return `${year}-${month}-${day}`;
     }
-    
     // Format avec slashes: MM/DD/YYYY ou DD/MM/YYYY ou DD/MM/YY
     const parts = trimmed.split('/');
     if (parts.length === 3) {
       let first = parseInt(parts[0], 10);
       let second = parseInt(parts[1], 10);
       let yearPart = parts[2];
-      
       // Déterminer format: si le premier nombre > 12, c'est obligatoirement DD
       // Sinon, on assume DD/MM (format EU par défaut)
       let day: number;
       let month: number;
-      
       if (first > 12) {
         // C'est DD/MM
         day = first;
@@ -644,29 +568,23 @@ class BankImportService {
         day = first;
         month = second;
       }
-      
       // Handle 2-digit years
       let year = yearPart;
       if (yearPart.length === 2) {
         const yearNum = parseInt(yearPart, 10);
         year = yearNum > 50 ? `19${yearPart}` : `20${yearPart}`;
       }
-      
       const monthStr = month.toString().padStart(2, '0');
       const dayStr = day.toString().padStart(2, '0');
-      
       return `${year}-${monthStr}-${dayStr}`;
     }
-    
     throw new Error(`Format de date QIF invalide: ${qifDate}`);
   }
-
   private extractOFXTag(content: string, tagName: string): string {
     const regex = new RegExp(`<${tagName}>(.*?)(?=<|$)`, 'i');
     const match = content.match(regex);
     return match ? match[1].trim() : '';
   }
-
   /**
    * Récupère les comptes bancaires
    */
@@ -678,16 +596,13 @@ class BankImportService {
         .eq('company_id', companyId)
         .eq('status', 'active')
         .order('account_name');
-        
       if (error) throw error;
       return data || [];
-      
     } catch (error: unknown) {
-      console.error('Erreur récupération comptes bancaires:', error);
+      logger.error('BankImport', 'Erreur récupération comptes bancaires:', error);
       return [];
     }
   }
-
   /**
    * Crée un nouveau compte bancaire
    */
@@ -698,23 +613,19 @@ class BankImportService {
         .insert(account)
         .select()
         .single();
-        
       if (error) throw error;
       return data;
-      
     } catch (error: unknown) {
-      console.error('Erreur création compte bancaire:', error);
+      logger.error('BankImport', 'Erreur création compte bancaire:', error);
       return null;
     }
   }
 }
-
 export interface CSVMapping {
   date: number;
   amount: number;
   description: number;
   reference: number;
 }
-
 export const bankImportService = new BankImportService();
 export default bankImportService;

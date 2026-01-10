@@ -2,7 +2,6 @@
  * Report Archive Tab
  * Onglet d'archivage légal des rapports (conservation 10 ans minimum)
  */
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,12 +17,11 @@ import { reportArchiveService, type ReportArchive, type ArchiveStats } from '@/s
 import { useToast } from '@/hooks/useToast';
 import { format, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
+import { logger } from '@/lib/logger';
 interface ReportArchiveTabProps {
   companyId: string;
   refreshTrigger?: number;
 }
-
 export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTabProps) {
   const { showToast } = useToast();
   const [archives, setArchives] = useState<ReportArchive[]>([]);
@@ -33,11 +31,9 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
   const [typeFilter, setTypeFilter] = useState('all');
   const [fiscalYearFilter, setFiscalYearFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
-
   useEffect(() => {
     loadArchives();
   }, [companyId, refreshTrigger]);
-
   const loadArchives = async () => {
     setLoading(true);
     try {
@@ -49,7 +45,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
         }),
         reportArchiveService.getArchiveStats(companyId)
       ]);
-
       if (archivesResult.success && archivesResult.data) {
         setArchives(archivesResult.data);
       }
@@ -57,13 +52,12 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
         setStats(statsResult.data);
       }
     } catch (error) {
-      console.error('Error loading archives:', error);
+      logger.error('ReportArchiveTab', 'Error loading archives:', error);
       showToast('Erreur lors du chargement des archives', 'error');
     } finally {
       setLoading(false);
     }
   };
-
   const handleDownload = async (archive: ReportArchive) => {
     try {
       // Logger l'accès pour traçabilité
@@ -72,7 +66,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
         companyId, // TODO: use actual user ID
         'download'
       );
-
       const result = await reportArchiveService.downloadReportFile(archive.archive_file_path);
       if (result.success && result.data) {
         const url = URL.createObjectURL(result.data);
@@ -86,17 +79,15 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
         showToast(result.error || 'Erreur lors du téléchargement', 'error');
       }
     } catch (error) {
-      console.error('Error downloading archive:', error);
+      logger.error('ReportArchiveTab', 'Error downloading archive:', error);
       showToast('Erreur lors du téléchargement', 'error');
     }
   };
-
   const calculateDaysUntilDestruction = (retentionUntil: string): number => {
     const today = new Date();
     const retention = new Date(retentionUntil);
     return differenceInDays(retention, today);
   };
-
   const getCategoryBadge = (category?: string) => {
     const config: Record<string, { label: string; color: string; icon: any }> = {
       obligatoire: { label: 'Obligatoire', color: 'bg-red-100 text-red-800', icon: Scale },
@@ -112,7 +103,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
       </Badge>
     );
   };
-
   const filteredArchives = archives.filter(archive => {
     const matchesSearch = searchTerm === '' ||
       archive.report_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -123,9 +113,7 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
     const matchesCategory = categoryFilter === 'all' || archive.archive_category === categoryFilter;
     return matchesSearch && matchesType && matchesFiscalYear && matchesCategory;
   });
-
   const fiscalYears = Array.from(new Set(archives.map(a => a.fiscal_year))).sort((a, b) => b - a);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -136,7 +124,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Statistiques */}
@@ -199,7 +186,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
           </Card>
         </div>
       )}
-
       {/* Filtres */}
       <Card>
         <CardHeader>
@@ -258,7 +244,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
           </div>
         </CardContent>
       </Card>
-
       {/* Liste des archives */}
       <div className="space-y-3">
         {filteredArchives.map((archive) => {
@@ -268,7 +253,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
           const totalDays = archive.retention_years * 365;
           const elapsedDays = totalDays - daysUntil;
           const progressPercentage = Math.min(100, (elapsedDays / totalDays) * 100);
-
           return (
             <Card
               key={archive.id}
@@ -285,7 +269,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
                       </Badge>
                       <h3 className="font-semibold text-lg">{archive.report_name}</h3>
                     </div>
-
                     <div className="flex flex-wrap gap-2 mb-3">
                       {getCategoryBadge(archive.archive_category)}
                       <Badge variant="outline">
@@ -306,7 +289,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
                         </Badge>
                       )}
                     </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-3">
                       <div>
                         <p className="text-gray-600 dark:text-gray-300 mb-1">Date du rapport</p>
@@ -334,7 +316,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
                         </div>
                       </div>
                     </div>
-
                     {/* Statut de rétention */}
                     <div className="mt-4 p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
                       <div className="flex items-center justify-between mb-2">
@@ -362,20 +343,17 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
                         <Progress value={progressPercentage} className="h-2" />
                       )}
                     </div>
-
                     {archive.legal_requirement && (
                       <div className="mt-3 p-3 bg-blue-50 rounded-lg dark:bg-blue-900/20">
                         <p className="text-xs font-medium text-blue-900 mb-1 dark:text-blue-100">Base légale</p>
                         <p className="text-sm text-blue-800">{archive.legal_requirement}</p>
                       </div>
                     )}
-
                     {archive.notes && (
                       <div className="mt-3 p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
                         <p className="text-sm text-gray-700 dark:text-gray-300">{archive.notes}</p>
                       </div>
                     )}
-
                     {archive.tags && archive.tags.length > 0 && (
                       <div className="flex gap-1 mt-3">
                         {archive.tags.map((tag, idx) => (
@@ -384,7 +362,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
                       </div>
                     )}
                   </div>
-
                   <div className="flex flex-col gap-2 ml-4">
                     <Button size="sm" variant="outline" className="gap-1" onClick={() => handleDownload(archive)}>
                       <Download className="w-4 h-4" />
@@ -397,7 +374,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
           );
         })}
       </div>
-
       {filteredArchives.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
@@ -411,7 +387,6 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
           </CardContent>
         </Card>
       )}
-
       {/* Info légale */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
         <CardContent className="p-6">

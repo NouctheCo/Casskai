@@ -9,8 +9,8 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from '../lib/supabase';
+import { logger } from '@/lib/logger';
 import {
   ForecastData,
   ForecastScenario,
@@ -25,7 +25,6 @@ import {
   ExpenseLineItem,
   CashFlowItem
 } from '../types/forecasts.types';
-
 /**
  * Get all scenarios (with optional company filtering)
  */
@@ -35,15 +34,11 @@ export async function getScenarios(enterpriseId?: string): Promise<ForecastServi
       .from('forecast_scenarios')
       .select('*')
       .order('created_at', { ascending: false });
-
     if (enterpriseId) {
       query = query.eq('company_id', enterpriseId);
     }
-
     const { data, error } = await query;
-
     if (error) throw error;
-
     const scenarios: ForecastScenario[] = (data || []).map(s => ({
       id: s.id,
       name: s.name,
@@ -54,17 +49,15 @@ export async function getScenarios(enterpriseId?: string): Promise<ForecastServi
       created_at: s.created_at,
       updated_at: s.updated_at
     }));
-
     return { data: scenarios };
   } catch (error) {
-    console.error('Error fetching scenarios:', error);
+    logger.error('ForecastsServiceImplementations', 'Error fetching scenarios:', error);
     return {
       data: [],
       error: { message: 'Erreur lors de la récupération des scénarios' }
     };
   }
 }
-
 /**
  * Create a new scenario
  */
@@ -85,9 +78,7 @@ export async function createScenario(
       })
       .select()
       .single();
-
     if (error) throw error;
-
     const scenario: ForecastScenario = {
       id: data.id,
       name: data.name,
@@ -98,17 +89,15 @@ export async function createScenario(
       created_at: data.created_at,
       updated_at: data.updated_at
     };
-
     return { data: scenario };
   } catch (error) {
-    console.error('Error creating scenario:', error);
+    logger.error('ForecastsServiceImplementations', 'Error creating scenario:', error);
     return {
       data: {} as ForecastScenario,
       error: { message: 'Erreur lors de la création du scénario' }
     };
   }
 }
-
 /**
  * Get periods for a company
  */
@@ -119,9 +108,7 @@ export async function getPeriods(enterpriseId: string): Promise<ForecastServiceR
       .select('*')
       .eq('company_id', enterpriseId)
       .order('start_date', { ascending: false });
-
     if (error) throw error;
-
     const periods: ForecastPeriod[] = (data || []).map(p => ({
       id: p.id,
       name: p.name,
@@ -131,17 +118,15 @@ export async function getPeriods(enterpriseId: string): Promise<ForecastServiceR
       enterprise_id: p.company_id,
       created_at: p.created_at
     }));
-
     return { data: periods };
   } catch (error) {
-    console.error('Error fetching periods:', error);
+    logger.error('ForecastsServiceImplementations', 'Error fetching periods:', error);
     return {
       data: [],
       error: { message: 'Erreur lors de la récupération des périodes' }
     };
   }
 }
-
 /**
  * Get forecasts with optional filters
  */
@@ -158,42 +143,32 @@ export async function getForecasts(
         scenario:forecast_scenarios(id, name, type)
       `)
       .eq('company_id', enterpriseId);
-
     // Apply filters
     if (filters?.scenario_id) {
       query = query.eq('scenario_id', filters.scenario_id);
     }
-
     if (filters?.status) {
       query = query.eq('status', filters.status);
     }
-
     if (filters?.period_id) {
       query = query.eq('period_id', filters.period_id);
     }
-
     if (filters?.search) {
       query = query.ilike('name', `%${filters.search}%`);
     }
-
     const { data: forecastsData, error: forecastsError } = await query.order('created_at', { ascending: false });
-
     if (forecastsError) throw forecastsError;
-
     // For each forecast, fetch its line items
     const forecasts: ForecastData[] = [];
-
     for (const forecast of forecastsData || []) {
       const { data: lineItems, error: lineItemsError } = await supabase
         .from('forecast_line_items')
         .select('*')
         .eq('forecast_id', forecast.id);
-
       if (lineItemsError) {
-        console.error('Error fetching line items:', lineItemsError);
+        logger.error('ForecastsServiceImplementations', 'Error fetching line items:', lineItemsError);
         continue;
       }
-
       // Separate line items by type
       const revenueItems: RevenueLineItem[] = (lineItems || [])
         .filter(item => item.item_type === 'revenue')
@@ -207,7 +182,6 @@ export async function getForecasts(
           seasonality_factor: item.seasonality_factor ? Number(item.seasonality_factor) : undefined,
           confidence_level: item.confidence_level as any
         }));
-
       const expenseItems: ExpenseLineItem[] = (lineItems || [])
         .filter(item => item.item_type === 'expense')
         .map(item => ({
@@ -220,7 +194,6 @@ export async function getForecasts(
           is_recurring: item.is_recurring || false,
           confidence_level: item.confidence_level as any
         }));
-
       const cashFlowItems: CashFlowItem[] = (lineItems || [])
         .filter(item => item.item_type === 'cash_flow')
         .map(item => ({
@@ -232,7 +205,6 @@ export async function getForecasts(
           timing: item.timing || undefined,
           probability: item.probability || undefined
         }));
-
       forecasts.push({
         id: forecast.id,
         name: forecast.name,
@@ -258,17 +230,15 @@ export async function getForecasts(
         opportunities: forecast.opportunities || []
       });
     }
-
     return { data: forecasts };
   } catch (error) {
-    console.error('Error fetching forecasts:', error);
+    logger.error('ForecastsServiceImplementations', 'Error fetching forecasts:', error);
     return {
       data: [],
       error: { message: 'Erreur lors de la récupération des prévisions' }
     };
   }
 }
-
 /**
  * Create a new forecast with line items
  */
@@ -283,11 +253,9 @@ export async function createForecast(
     const netCashFlow = formData.cash_flow_items.reduce((sum, item) =>
       sum + (item.type === 'inflow' ? item.amount : -item.amount), 0
     );
-
     const grossMargin = totalRevenue > 0 ? ((totalRevenue - totalExpenses) / totalRevenue) * 100 : 0;
     const netMargin = totalRevenue > 0 ? ((totalRevenue - totalExpenses) / totalRevenue) * 100 : 0;
     const breakEvenPoint = totalExpenses;
-
     // Insert forecast
     const { data: forecastData, error: forecastError } = await supabase
       .from('forecasts')
@@ -309,9 +277,7 @@ export async function createForecast(
       })
       .select()
       .single();
-
     if (forecastError) throw forecastError;
-
     // Insert revenue line items
     if (formData.revenue_items.length > 0) {
       const revenueLineItems = formData.revenue_items.map(item => ({
@@ -325,14 +291,11 @@ export async function createForecast(
         seasonality_factor: item.seasonality_factor,
         confidence_level: item.confidence_level
       }));
-
       const { error: revenueError } = await supabase
         .from('forecast_line_items')
         .insert(revenueLineItems);
-
       if (revenueError) throw revenueError;
     }
-
     // Insert expense line items
     if (formData.expense_items.length > 0) {
       const expenseLineItems = formData.expense_items.map(item => ({
@@ -346,14 +309,11 @@ export async function createForecast(
         is_recurring: item.is_recurring,
         confidence_level: item.confidence_level
       }));
-
       const { error: expenseError } = await supabase
         .from('forecast_line_items')
         .insert(expenseLineItems);
-
       if (expenseError) throw expenseError;
     }
-
     // Insert cash flow line items
     if (formData.cash_flow_items.length > 0) {
       const cashFlowLineItems = formData.cash_flow_items.map(item => ({
@@ -366,32 +326,26 @@ export async function createForecast(
         timing: item.timing,
         probability: item.probability
       }));
-
       const { error: cashFlowError } = await supabase
         .from('forecast_line_items')
         .insert(cashFlowLineItems);
-
       if (cashFlowError) throw cashFlowError;
     }
-
     // Fetch created forecast with items
     const result = await getForecasts(enterpriseId, { search: forecastData.name });
     const createdForecast = result.data?.[0];
-
     if (!createdForecast) {
       throw new Error('Failed to retrieve created forecast');
     }
-
     return { data: createdForecast };
   } catch (error) {
-    console.error('Error creating forecast:', error);
+    logger.error('ForecastsServiceImplementations', 'Error creating forecast:', error);
     return {
       data: {} as ForecastData,
       error: { message: 'Erreur lors de la création de la prévision' }
     };
   }
 }
-
 /**
  * Update an existing forecast
  */
@@ -406,7 +360,6 @@ export async function updateForecast(
       .select('company_id')
       .eq('id', forecastId)
       .single();
-
     if (fetchError) throw fetchError;
     if (!existingForecast) {
       return {
@@ -414,17 +367,14 @@ export async function updateForecast(
         error: { message: 'Prévision non trouvée' }
       };
     }
-
     // Calculate totals if items are provided
     const updateData: any = {};
-
     if (formData.name) updateData.name = formData.name;
     if (formData.period_id) updateData.period_id = formData.period_id;
     if (formData.scenario_id) updateData.scenario_id = formData.scenario_id;
     if (formData.key_assumptions) updateData.key_assumptions = formData.key_assumptions;
     if (formData.risk_factors) updateData.risk_factors = formData.risk_factors;
     if (formData.opportunities) updateData.opportunities = formData.opportunities;
-
     // If line items are being updated, delete old ones and insert new ones
     if (formData.revenue_items || formData.expense_items || formData.cash_flow_items) {
       // Delete existing line items
@@ -432,9 +382,7 @@ export async function updateForecast(
         .from('forecast_line_items')
         .delete()
         .eq('forecast_id', forecastId);
-
       if (deleteError) throw deleteError;
-
       // Insert new revenue items
       if (formData.revenue_items && formData.revenue_items.length > 0) {
         const revenueLineItems = formData.revenue_items.map(item => ({
@@ -448,14 +396,11 @@ export async function updateForecast(
           seasonality_factor: item.seasonality_factor,
           confidence_level: item.confidence_level
         }));
-
         const { error: revenueError } = await supabase
           .from('forecast_line_items')
           .insert(revenueLineItems);
-
         if (revenueError) throw revenueError;
       }
-
       // Insert new expense items
       if (formData.expense_items && formData.expense_items.length > 0) {
         const expenseLineItems = formData.expense_items.map(item => ({
@@ -469,14 +414,11 @@ export async function updateForecast(
           is_recurring: item.is_recurring,
           confidence_level: item.confidence_level
         }));
-
         const { error: expenseError } = await supabase
           .from('forecast_line_items')
           .insert(expenseLineItems);
-
         if (expenseError) throw expenseError;
       }
-
       // Insert new cash flow items
       if (formData.cash_flow_items && formData.cash_flow_items.length > 0) {
         const cashFlowLineItems = formData.cash_flow_items.map(item => ({
@@ -489,47 +431,37 @@ export async function updateForecast(
           timing: item.timing,
           probability: item.probability
         }));
-
         const { error: cashFlowError } = await supabase
           .from('forecast_line_items')
           .insert(cashFlowLineItems);
-
         if (cashFlowError) throw cashFlowError;
       }
-
       // Trigger will automatically recalculate totals
     }
-
     // Update forecast metadata
     if (Object.keys(updateData).length > 0) {
       updateData.updated_at = new Date().toISOString();
-
       const { error: updateError } = await supabase
         .from('forecasts')
         .update(updateData)
         .eq('id', forecastId);
-
       if (updateError) throw updateError;
     }
-
     // Fetch updated forecast
     const result = await getForecasts(existingForecast.company_id);
     const updatedForecast = result.data?.find(f => f.id === forecastId);
-
     if (!updatedForecast) {
       throw new Error('Failed to retrieve updated forecast');
     }
-
     return { data: updatedForecast };
   } catch (error) {
-    console.error('Error updating forecast:', error);
+    logger.error('ForecastsServiceImplementations', 'Error updating forecast:', error);
     return {
       data: {} as ForecastData,
       error: { message: 'Erreur lors de la mise à jour de la prévision' }
     };
   }
 }
-
 /**
  * Delete a forecast
  */
@@ -539,19 +471,16 @@ export async function deleteForecast(forecastId: string): Promise<ForecastServic
       .from('forecasts')
       .delete()
       .eq('id', forecastId);
-
     if (error) throw error;
-
     return { data: true };
   } catch (error) {
-    console.error('Error deleting forecast:', error);
+    logger.error('ForecastsServiceImplementations', 'Error deleting forecast:', error);
     return {
       data: false,
       error: { message: 'Erreur lors de la suppression de la prévision' }
     };
   }
 }
-
 /**
  * Get dashboard data for forecasts module
  */
@@ -562,11 +491,9 @@ export async function getDashboardData(
     // Fetch all forecasts
     const forecastsResult = await getForecasts(enterpriseId);
     const forecasts = forecastsResult.data || [];
-
     // Fetch scenarios
     const scenariosResult = await getScenarios(enterpriseId);
     const scenarios = scenariosResult.data || [];
-
     // Calculate summary stats
     const summary = {
       total_forecasts: forecasts.length,
@@ -574,14 +501,12 @@ export async function getDashboardData(
       avg_accuracy: 0, // TODO: Calculate based on actual vs forecast data
       next_review_date: '' // TODO: Calculate from periods
     };
-
     // Calculate scenario performance (mock for now)
     const scenarioPerformance = scenarios.map(scenario => ({
       scenario_name: scenario.name,
       accuracy: 85 + Math.random() * 10, // Mock until we have historical data
       last_updated: scenario.updated_at
     }));
-
     // Get upcoming reviews (forecasts that need review)
     const upcomingReviews = forecasts
       .filter(f => f.status === 'draft' || f.status === 'published')
@@ -591,7 +516,6 @@ export async function getDashboardData(
         review_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Mock: 7 days from now
         status: f.status === 'draft' ? 'pending' : 'scheduled'
       }));
-
     // Calculate key metrics trends
     const keyMetrics = {
       revenue_trend: forecasts.reduce((sum, f) => sum + f.total_revenue, 0) / (forecasts.length || 1),
@@ -599,7 +523,6 @@ export async function getDashboardData(
       cash_flow_trend: forecasts.reduce((sum, f) => sum + f.net_cash_flow, 0) / (forecasts.length || 1),
       profitability_trend: forecasts.reduce((sum, f) => sum + f.net_margin, 0) / (forecasts.length || 1)
     };
-
     const dashboardData: ForecastDashboardData = {
       summary,
       recent_forecasts: forecasts.slice(0, 5),
@@ -607,17 +530,15 @@ export async function getDashboardData(
       upcoming_reviews: upcomingReviews,
       key_metrics: keyMetrics
     };
-
     return { data: dashboardData };
   } catch (error) {
-    console.error('Error fetching dashboard data:', error);
+    logger.error('ForecastsServiceImplementations', 'Error fetching dashboard data:', error);
     return {
       data: {} as ForecastDashboardData,
       error: { message: 'Erreur lors de la récupération des données du tableau de bord' }
     };
   }
 }
-
 /**
  * Perform what-if analysis on a forecast
  */
@@ -635,7 +556,6 @@ export async function performWhatIfAnalysis(
       `)
       .eq('id', forecastId)
       .single();
-
     if (fetchError) throw fetchError;
     if (!forecast) {
       return {
@@ -643,18 +563,15 @@ export async function performWhatIfAnalysis(
         error: { message: 'Prévision non trouvée' }
       };
     }
-
     const baseScenario = (forecast.scenario as any)?.name || 'Base';
     const totalRevenue = Number(forecast.total_revenue) || 0;
     const totalExpenses = Number(forecast.total_expenses) || 0;
     const netCashFlow = Number(forecast.net_cash_flow) || 0;
-
     // Calculate what-if scenarios
     const results = variables.flatMap(variable =>
       variable.test_values.map(value => {
         // Calculate impact based on variable value
         const impactMultiplier = (value - 100) / 100; // e.g., 110 -> 0.10 (10% increase)
-
         return {
           variable_combination: { [variable.name]: value },
           impact_on_revenue: totalRevenue * impactMultiplier,
@@ -664,7 +581,6 @@ export async function performWhatIfAnalysis(
         };
       })
     );
-
     const analysis: WhatIfAnalysis = {
       base_scenario: baseScenario,
       variables: variables.map(v => ({
@@ -674,10 +590,9 @@ export async function performWhatIfAnalysis(
       })),
       results
     };
-
     return { data: analysis };
   } catch (error) {
-    console.error('Error performing what-if analysis:', error);
+    logger.error('ForecastsServiceImplementations', 'Error performing what-if analysis:', error);
     return {
       data: {} as WhatIfAnalysis,
       error: { message: "Erreur lors de l'analyse what-if" }

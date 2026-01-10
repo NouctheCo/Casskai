@@ -9,28 +9,25 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // Extension du hook useHR pour les fonctionnalités de paie et export
 import { useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { hrPayrollService, PayrollCalculation } from '@/services/hrPayrollService';
 import { hrExportService } from '@/services/hrExportService';
 import { Employee, Leave, Expense, TimeEntry } from '@/services/hrService';
-
+import { logger } from '@/lib/logger';
 interface UseHRPayrollParams {
   employees: Employee[];
   leaves: Leave[];
   expenses: Expense[];
   timeEntries: TimeEntry[];
 }
-
 interface UseHRPayrollReturn {
   // Payroll functions
   calculatePayroll: (employeeId: string, periodStart: string, periodEnd: string) => Promise<PayrollCalculation | null>;
   processMonthlyPayroll: (year: number, month: number) => Promise<{ success: boolean; processed: number; errors: string[] }>;
   generatePayslip: (payroll: PayrollCalculation) => Promise<void>;
   createPayrollJournalEntry: (payroll: PayrollCalculation) => Promise<{ success: boolean; error?: string; entryId?: string }>;
-
   // Export functions
   exportEmployeesToCSV: () => void;
   exportEmployeesToExcel: () => void;
@@ -41,7 +38,6 @@ interface UseHRPayrollReturn {
   exportMonthlyPayrollReport: (payrolls: PayrollCalculation[], year: number, month: number) => void;
   exportDADSFormat: (payrolls: PayrollCalculation[], year: number) => void;
 }
-
 /**
  * Hook pour les fonctionnalités avancées RH : Paie et Exports
  * À utiliser en combinaison avec useHR()
@@ -53,9 +49,7 @@ export function useHRPayroll({
   timeEntries
 }: UseHRPayrollParams): UseHRPayrollReturn {
   const { currentCompany } = useAuth();
-
   // ========== PAYROLL FUNCTIONS ==========
-
   /**
    * Calculer la paie pour un employé spécifique
    */
@@ -66,18 +60,16 @@ export function useHRPayroll({
   ): Promise<PayrollCalculation | null> => {
     const employee = employees.find(e => e.id === employeeId);
     if (!employee) {
-      console.error(`Employee ${employeeId} not found`);
+      logger.error('UseHRPayroll', `Employee ${employeeId} not found`);
       return null;
     }
-
     try {
       return await hrPayrollService.calculatePayroll(employee, periodStart, periodEnd);
     } catch (error) {
-      console.error('Error calculating payroll:', error);
+      logger.error('UseHRPayroll', 'Error calculating payroll:', error);
       return null;
     }
   }, [employees]);
-
   /**
    * Traiter la paie mensuelle pour tous les employés actifs
    */
@@ -92,7 +84,6 @@ export function useHRPayroll({
         errors: ['No company selected']
       };
     }
-
     try {
       return await hrPayrollService.processMonthlyPayroll(currentCompany.id, year, month);
     } catch (error) {
@@ -103,14 +94,12 @@ export function useHRPayroll({
       };
     }
   }, [currentCompany?.id]);
-
   /**
    * Générer et télécharger une fiche de paie
    */
   const generatePayslip = useCallback(async (payroll: PayrollCalculation): Promise<void> => {
     try {
       const result = await hrPayrollService.generatePayslip(payroll);
-
       if (result.success && result.pdf) {
         // Télécharger la fiche de paie
         const url = URL.createObjectURL(result.pdf);
@@ -122,15 +111,14 @@ export function useHRPayroll({
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       } else {
-        console.error('Error generating payslip:', result.error);
+        logger.error('UseHRPayroll', 'Error generating payslip:', result.error);
         throw new Error(result.error || 'Failed to generate payslip');
       }
     } catch (error) {
-      console.error('Error in generatePayslip:', error);
+      logger.error('UseHRPayroll', 'Error in generatePayslip:', error);
       throw error;
     }
   }, []);
-
   /**
    * Créer l'écriture comptable pour une paie
    */
@@ -143,7 +131,6 @@ export function useHRPayroll({
         error: 'No company selected'
       };
     }
-
     try {
       return await hrPayrollService.createPayrollJournalEntry(
         currentCompany.id,
@@ -156,51 +143,43 @@ export function useHRPayroll({
       };
     }
   }, [currentCompany?.id]);
-
   // ========== EXPORT FUNCTIONS ==========
-
   /**
    * Exporter les employés en CSV
    */
   const exportEmployeesToCSV = useCallback(() => {
     hrExportService.exportEmployeesToCSV(employees);
   }, [employees]);
-
   /**
    * Exporter les employés en Excel
    */
   const exportEmployeesToExcel = useCallback(() => {
     hrExportService.exportEmployeesToExcel(employees);
   }, [employees]);
-
   /**
    * Exporter les congés en CSV
    */
   const exportLeavesToCSV = useCallback(() => {
     hrExportService.exportLeavesToCSV(leaves);
   }, [leaves]);
-
   /**
    * Exporter les notes de frais en CSV
    */
   const exportExpensesToCSV = useCallback(() => {
     hrExportService.exportExpensesToCSV(expenses);
   }, [expenses]);
-
   /**
    * Exporter les temps de travail en CSV
    */
   const exportTimeEntriesToCSV = useCallback(() => {
     hrExportService.exportTimeEntriesToCSV(timeEntries);
   }, [timeEntries]);
-
   /**
    * Exporter les paies en CSV
    */
   const exportPayrollToCSV = useCallback((payrolls: PayrollCalculation[]) => {
     hrExportService.exportPayrollToCSV(payrolls);
   }, []);
-
   /**
    * Exporter le rapport de paie mensuel
    */
@@ -211,7 +190,6 @@ export function useHRPayroll({
   ) => {
     hrExportService.exportMonthlyPayrollReport(payrolls, year, month);
   }, []);
-
   /**
    * Exporter au format DADS (Déclaration Annuelle des Données Sociales)
    */
@@ -221,14 +199,12 @@ export function useHRPayroll({
   ) => {
     hrExportService.exportDADSFormat(employees, payrolls, year);
   }, [employees]);
-
   return {
     // Payroll
     calculatePayroll,
     processMonthlyPayroll,
     generatePayslip,
     createPayrollJournalEntry,
-
     // Exports
     exportEmployeesToCSV,
     exportEmployeesToExcel,

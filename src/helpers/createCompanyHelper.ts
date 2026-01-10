@@ -31,44 +31,43 @@ export async function createCompanyDirectly(
 
     devLogger.info('✅ Company created successfully:', createdCompany.id);
 
-    // Create user-company relationship
-    devLogger.debug('🔧 Creating user_companies link');
-    
-    const { error: userCompanyError } = await supabase
-      .from('user_companies')
+    // Create user-company relationship in company_users table (RLS requirement)
+    devLogger.debug('🔧 Creating company_users link');
+
+    const { error: companyUserError } = await supabase
+      .from('company_users')
       .insert([{
         user_id: userId,
         company_id: createdCompany.id,
-        role: 'owner',
-        is_active: true,
-        is_default: true,
-        is_owner: true
-      }])
-      .select()
-      .single();
+        role: 'owner'
+      }]);
 
-    if (userCompanyError) {
-      // If user_companies insert fails, it might already exist (idempotence)
-      devLogger.warn('⚠️ user_companies insert warning:', userCompanyError.message);
-      
-      // Try to update instead
-      const { error: updateError } = await supabase
-        .from('user_companies')
-        .update({
-          is_active: true,
-          is_default: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-        .eq('company_id', createdCompany.id);
-
-      if (updateError) {
-        devLogger.error('❌ user_companies update failed:', updateError);
-        throw updateError;
-      }
+    if (companyUserError) {
+      devLogger.error('❌ company_users insert error:', companyUserError);
+      throw companyUserError;
     }
 
-    devLogger.info('✅ Company and user_companies created successfully:', createdCompany.id);
+    devLogger.info('✅ company_users link created');
+
+    // Create default warehouse
+    devLogger.debug('🔧 Creating default warehouse');
+
+    const { error: warehouseError } = await supabase
+      .from('warehouses')
+      .insert([{
+        company_id: createdCompany.id,
+        name: 'Entrepôt principal',
+        code: 'WH-MAIN',
+        is_default: true,
+        is_active: true
+      }]);
+
+    if (warehouseError) {
+      devLogger.error('❌ warehouse insert error:', warehouseError);
+      throw warehouseError;
+    }
+
+    devLogger.info('✅ Company, company_users, and warehouse created successfully:', createdCompany.id);
 
     return {
       success: true,

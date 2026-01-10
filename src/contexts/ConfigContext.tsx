@@ -9,9 +9,8 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
+import { logger } from '@/lib/logger';
 interface AppConfig {
   company: {
     name: string;
@@ -28,7 +27,6 @@ interface AppConfig {
   createdAt: string;
   updatedAt: string;
 }
-
 export interface ConfigContextType {
   config: AppConfig | null;
   isLoading: boolean;
@@ -36,9 +34,7 @@ export interface ConfigContextType {
   error: string | null;
   updateConfig: (updates: Partial<AppConfig>) => void;
 }
-
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
-
 const DEFAULT_CONFIG: AppConfig = {
   company: {
     name: 'Mon Entreprise',
@@ -55,54 +51,44 @@ const DEFAULT_CONFIG: AppConfig = {
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString()
 };
-
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
-    console.warn('🔧 Chargement de la configuration...');
-    
+    logger.warn('Config', '🔧 Chargement de la configuration...');
     try {
       // Charger la configuration depuis localStorage
       const savedConfig = localStorage.getItem('casskai_config');
-      
       if (savedConfig) {
-        console.warn('📦 Configuration trouvée dans localStorage');
+        logger.warn('Config', '📦 Configuration trouvée dans localStorage');
         setConfig(JSON.parse(savedConfig));
       } else {
-        console.warn('📦 Utilisation de la configuration par défaut');
+        logger.warn('Config', '📦 Utilisation de la configuration par défaut');
         setConfig(DEFAULT_CONFIG);
         localStorage.setItem('casskai_config', JSON.stringify(DEFAULT_CONFIG));
       }
     } catch (error) {
-      console.error('...', error);
+      logger.error('Config', '...', error);
       setError('Erreur lors du chargement de la configuration');
       setConfig(DEFAULT_CONFIG);
     } finally {
       setIsLoading(false);
-      console.warn('🏁 Configuration chargée');
+      logger.warn('Config', '🏁 Configuration chargée');
     }
   }, []);
-
   const updateConfig = (updates: Partial<AppConfig>) => {
     if (!config) return;
-    
-    console.warn('🔄 Mise à jour de la configuration:', updates);
-    
+    logger.warn('Config', '🔄 Mise à jour de la configuration:', updates);
     const newConfig = {
       ...config,
       ...updates,
       updatedAt: new Date().toISOString()
     };
-    
     setConfig(newConfig);
     localStorage.setItem('casskai_config', JSON.stringify(newConfig));
-    
-    console.warn('✅ Configuration mise à jour');
+    logger.warn('Config', '✅ Configuration mise à jour');
   };
-
   const value: ConfigContextType = {
     config,
     isLoading,
@@ -110,14 +96,12 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     error,
     updateConfig
   };
-
   return (
     <ConfigContext.Provider value={value}>
       {children}
     </ConfigContext.Provider>
   );
 };
-
 export const useConfigContext = () => {
   const context = useContext(ConfigContext);
   if (context === undefined) {

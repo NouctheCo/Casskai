@@ -1,10 +1,10 @@
 // Configuration WhatsApp pour CassKai
+import { logger } from '@/lib/logger';
 
 export const WHATSAPP_CONFIG = {
   // TODO: Remplacez par votre vrai numéro WhatsApp Business
   // Format international : +33123456789 (sans espaces ni tirets)
   phoneNumber: import.meta.env.VITE_WHATSAPP_PHONE || "+33752027198",
-
   // Messages pré-définis pour différents contextes
   messages: {
     general: "Bonjour ! J'aimerais avoir des informations sur CassKai.",
@@ -16,7 +16,6 @@ export const WHATSAPP_CONFIG = {
     billing: "Bonjour ! J'ai une question sur ma facturation CassKai.",
     technical: "Bonjour ! J'ai un problème technique avec CassKai."
   },
-
   // Configuration de l'agent IA N8n
   ai: {
     enabled: true,
@@ -25,7 +24,6 @@ export const WHATSAPP_CONFIG = {
     transferToHuman: "Un membre de notre équipe va prendre le relais.",
     webhookUrl: import.meta.env.VITE_N8N_WEBHOOK_URL || "https://n8n.srv782070.hstgr.cloud/webhook/whatsapp-casskai",
   },
-
   // Heures d'ouverture pour affichage (optionnel)
   businessHours: {
     timezone: "Europe/Paris",
@@ -39,7 +37,6 @@ export const WHATSAPP_CONFIG = {
       sunday: null, // Fermé
     }
   },
-
   // Tracking/Analytics
   analytics: {
     trackClicks: true,
@@ -47,19 +44,16 @@ export const WHATSAPP_CONFIG = {
     category: 'engagement'
   }
 };
-
 // Fonction utilitaire pour formater le numéro de téléphone
 export function formatWhatsAppNumber(phoneNumber: string): string {
   return phoneNumber.replace(/[^0-9]/g, '');
 }
-
 // Fonction utilitaire pour créer l'URL WhatsApp
 export function createWhatsAppUrl(message: string, phoneNumber?: string): string {
   const phone = phoneNumber || WHATSAPP_CONFIG.phoneNumber;
   const encodedMessage = encodeURIComponent(message);
   return `https://wa.me/${formatWhatsAppNumber(phone)}?text=${encodedMessage}`;
 }
-
 // Fonction pour vérifier si c'est pendant les heures d'ouverture
 export function isBusinessHoursOpen(): boolean {
   const now = new Date();
@@ -69,26 +63,19 @@ export function isBusinessHoursOpen(): boolean {
     hour: '2-digit',
     minute: '2-digit'
   });
-
   const dayConfig = WHATSAPP_CONFIG.businessHours.days[currentDay as keyof typeof WHATSAPP_CONFIG.businessHours.days];
-
   if (!dayConfig) return false; // Fermé ce jour
-
   return currentTime >= dayConfig.open && currentTime <= dayConfig.close;
 }
-
 // Messages contextuels selon l'heure
 export function getContextualMessage(context: keyof typeof WHATSAPP_CONFIG.messages = 'general'): string {
   const baseMessage = WHATSAPP_CONFIG.messages[context];
   const isOpen = isBusinessHoursOpen();
-
   if (!isOpen) {
     return `${baseMessage}\n\nNote: Je vous écris en dehors des heures d'ouverture. Notre agent IA est disponible 24h/7j !`;
   }
-
   return baseMessage;
 }
-
 // Fonction pour envoyer les données à N8n
 export async function sendToN8nWebhook(data: {
   phone: string;
@@ -105,7 +92,6 @@ export async function sendToN8nWebhook(data: {
   if (!WHATSAPP_CONFIG.ai.enabled || !WHATSAPP_CONFIG.ai.webhookUrl) {
     return false;
   }
-
   try {
     const response = await fetch(WHATSAPP_CONFIG.ai.webhookUrl, {
       method: 'POST',
@@ -122,10 +108,9 @@ export async function sendToN8nWebhook(data: {
         }
       })
     });
-
     return response.ok;
   } catch (error) {
-    console.warn('Failed to send to N8n webhook:', error);
+    logger.warn('Whatsapp.config', 'Failed to send to N8n webhook:', error);
     return false;
   }
 }

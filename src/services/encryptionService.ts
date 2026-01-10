@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * 🔐 SERVICE DE CHIFFREMENT AES-256-GCM POUR ARCHIVES LÉGALES
  *
@@ -34,23 +33,19 @@
  * const isEnc = isEncrypted(data);
  * ```
  */
-
-import { logger } from '@/utils/logger';
-
+import { logger } from '@/lib/logger';
 /**
  * 🔑 Récupère la clé de chiffrement depuis l'environnement
  * La clé doit être une chaîne hexadécimale de 64 caractères (32 octets = 256 bits)
  */
 function getEncryptionKey(): string {
   const key = import.meta.env.VITE_ARCHIVE_ENCRYPTION_KEY;
-
   if (!key) {
     throw new Error(
       'VITE_ARCHIVE_ENCRYPTION_KEY manquante dans .env.local. ' +
       'Générez une clé avec: await generateEncryptionKey()'
     );
   }
-
   // Vérifier le format (64 caractères hexadécimaux)
   if (!/^[0-9a-f]{64}$/i.test(key)) {
     throw new Error(
@@ -58,10 +53,8 @@ function getEncryptionKey(): string {
       'Doit être une chaîne hexadécimale de 64 caractères (256 bits).'
     );
   }
-
   return key;
 }
-
 /**
  * 🔧 Convertir une chaîne hexadécimale en ArrayBuffer
  */
@@ -72,7 +65,6 @@ function hexToArrayBuffer(hex: string): ArrayBuffer {
   }
   return bytes.buffer;
 }
-
 /**
  * 🔧 Convertir un ArrayBuffer en chaîne hexadécimale
  */
@@ -82,7 +74,6 @@ function arrayBufferToHex(buffer: ArrayBuffer): string {
     .map(byte => byte.toString(16).padStart(2, '0'))
     .join('');
 }
-
 /**
  * 🔧 Convertir un ArrayBuffer en Base64
  */
@@ -94,7 +85,6 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   }
   return btoa(binary);
 }
-
 /**
  * 🔧 Convertir Base64 en ArrayBuffer
  */
@@ -106,7 +96,6 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
   }
   return bytes.buffer;
 }
-
 /**
  * 🎲 Générer une nouvelle clé de chiffrement AES-256
  * À utiliser UNE SEULE FOIS pour générer la clé initiale
@@ -116,7 +105,7 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
  * @example
  * ```typescript
  * const key = await generateEncryptionKey();
- * console.log('VITE_ARCHIVE_ENCRYPTION_KEY=' + key);
+ * logger.debug('Encryption', 'VITE_ARCHIVE_ENCRYPTION_KEY=' + key);
  * // Copier cette ligne dans .env.local
  * ```
  */
@@ -130,10 +119,8 @@ export async function generateEncryptionKey(): Promise<string> {
       true, // extractable
       ['encrypt', 'decrypt']
     );
-
     const exportedKey = await crypto.subtle.exportKey('raw', key);
     const hexKey = arrayBufferToHex(exportedKey);
-
     logger.info('EncryptionService: Nouvelle clé générée (à stocker dans .env.local)');
     return hexKey;
   } catch (error) {
@@ -141,7 +128,6 @@ export async function generateEncryptionKey(): Promise<string> {
     throw new Error('Impossible de générer la clé de chiffrement');
   }
 }
-
 /**
  * 🔒 Chiffre des données JSON avec AES-256-GCM
  *
@@ -160,7 +146,6 @@ export async function encryptData(data: any): Promise<string> {
     // 1. Récupérer la clé de chiffrement
     const keyHex = getEncryptionKey();
     const keyBuffer = hexToArrayBuffer(keyHex);
-
     // 2. Importer la clé
     const cryptoKey = await crypto.subtle.importKey(
       'raw',
@@ -172,14 +157,11 @@ export async function encryptData(data: any): Promise<string> {
       false, // non extractable
       ['encrypt']
     );
-
     // 3. Générer un IV aléatoire unique (12 octets pour GCM)
     const iv = crypto.getRandomValues(new Uint8Array(12));
-
     // 4. Sérialiser les données en JSON
     const jsonString = JSON.stringify(data);
     const dataBuffer = new TextEncoder().encode(jsonString);
-
     // 5. Chiffrer avec AES-256-GCM
     const encryptedBuffer = await crypto.subtle.encrypt(
       {
@@ -190,19 +172,15 @@ export async function encryptData(data: any): Promise<string> {
       cryptoKey,
       dataBuffer
     );
-
     // 6. Encoder en Base64: iv:encryptedData
     const ivBase64 = arrayBufferToBase64(iv.buffer);
     const encryptedBase64 = arrayBufferToBase64(encryptedBuffer);
     const result = `${ivBase64}:${encryptedBase64}`;
-
     logger.info('EncryptionService: Données chiffrées avec succès', {
       dataSize: jsonString.length,
       encryptedSize: result.length
     });
-
     return result;
-
   } catch (error) {
     logger.error('EncryptionService: Erreur chiffrement', error, {
       errorMessage: error instanceof Error ? error.message : 'Unknown error'
@@ -210,7 +188,6 @@ export async function encryptData(data: any): Promise<string> {
     throw new Error(`Échec du chiffrement des données: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
-
 /**
  * 🔓 Déchiffre des données AES-256-GCM
  *
@@ -230,18 +207,14 @@ export async function decryptData(encryptedData: string): Promise<any> {
     if (!encryptedData || typeof encryptedData !== 'string') {
       throw new Error('Données chiffrées invalides (format incorrect)');
     }
-
     const parts = encryptedData.split(':');
     if (parts.length !== 2) {
       throw new Error('Format de données chiffrées invalide (doit être: iv:encryptedData)');
     }
-
     const [ivBase64, encryptedBase64] = parts;
-
     // 2. Récupérer la clé de chiffrement
     const keyHex = getEncryptionKey();
     const keyBuffer = hexToArrayBuffer(keyHex);
-
     // 3. Importer la clé
     const cryptoKey = await crypto.subtle.importKey(
       'raw',
@@ -253,11 +226,9 @@ export async function decryptData(encryptedData: string): Promise<any> {
       false, // non extractable
       ['decrypt']
     );
-
     // 4. Décoder depuis Base64
     const iv = new Uint8Array(base64ToArrayBuffer(ivBase64));
     const encryptedBuffer = base64ToArrayBuffer(encryptedBase64);
-
     // 5. Déchiffrer avec AES-256-GCM
     const decryptedBuffer = await crypto.subtle.decrypt(
       {
@@ -268,33 +239,26 @@ export async function decryptData(encryptedData: string): Promise<any> {
       cryptoKey,
       encryptedBuffer
     );
-
     // 6. Désérialiser JSON
     const jsonString = new TextDecoder().decode(decryptedBuffer);
     const data = JSON.parse(jsonString);
-
     logger.info('EncryptionService: Données déchiffrées avec succès', {
       dataSize: jsonString.length
     });
-
     return data;
-
   } catch (error) {
     logger.error('EncryptionService: Erreur déchiffrement', error, {
       errorMessage: error instanceof Error ? error.message : 'Unknown error'
     });
-
     // Message d'erreur plus informatif
     if (error instanceof Error && error.message.includes('operation-specific reason')) {
       throw new Error(
         'Échec du déchiffrement: la clé de chiffrement est probablement incorrecte ou les données sont corrompues'
       );
     }
-
     throw new Error(`Échec du déchiffrement des données: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
-
 /**
  * 🔍 Vérifie si des données sont chiffrées
  *
@@ -311,20 +275,16 @@ export function isEncrypted(data: any): boolean {
   if (typeof data !== 'string') {
     return false;
   }
-
   // Format attendu: ivBase64:encryptedBase64
   const parts = data.split(':');
   if (parts.length !== 2) {
     return false;
   }
-
   const [ivPart, encryptedPart] = parts;
-
   // Vérifier que les deux parties ressemblent à du Base64
   const base64Regex = /^[A-Za-z0-9+/]+=*$/;
   return base64Regex.test(ivPart) && base64Regex.test(encryptedPart);
 }
-
 /**
  * 📦 Service d'export pour les tests et l'utilisation externe
  */
@@ -334,5 +294,4 @@ export const encryptionService = {
   decrypt: decryptData,
   isEncrypted
 };
-
 export default encryptionService;

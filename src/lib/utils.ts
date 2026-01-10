@@ -351,3 +351,35 @@ export function generateId(length: number = 16): string {
   return result;
 
 }
+
+/**
+ * Formate un montant pour affichage PDF (sans espace insécable)
+ * L'espace insécable (U+00A0) est remplacé par un espace normal car jsPDF/Helvetica ne le rend pas correctement
+ *
+ * @param amount - Le montant à formater
+ * @param currency - Le code devise (défaut: 'EUR')
+ * @returns Montant formaté avec espace normal au lieu d'espace insécable
+ */
+export function formatCurrencyForPDF(amount: number, currency = 'EUR'): string {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount).replace(/\u00A0/g, ' ');
+}
+
+/**
+ * Formate un nombre pour affichage PDF (sans espace insécable)
+ * L'espace insécable (U+00A0) est remplacé par un espace normal car jsPDF/Helvetica ne le rend pas correctement
+ *
+ * @param value - Le nombre à formater
+ * @param decimals - Nombre de décimales (défaut: 2)
+ * @returns Nombre formaté avec espace normal au lieu d'espace insécable
+ */
+export function formatNumberForPDF(value: number, decimals = 2): string {
+  return new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  }).format(value).replace(/\u00A0/g, ' ');
+}

@@ -3,8 +3,7 @@ import { AlertTriangle, RefreshCw, Home, Bug, ChevronDown, ChevronUp } from 'luc
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { logger } from '@/utils/appLogger';
-
+import { logger } from '@/lib/logger';
 // Types pour l'Error Boundary
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -13,7 +12,6 @@ interface ErrorBoundaryState {
   errorId: string;
   showDetails: boolean;
 }
-
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: React.ComponentType<ErrorFallbackProps>;
@@ -22,7 +20,6 @@ interface ErrorBoundaryProps {
   showReportButton?: boolean;
   isolate?: boolean; // Si true, isole l'erreur sans faire planter toute l'app
 }
-
 interface ErrorFallbackProps {
   error: Error;
   errorInfo: ErrorInfo;
@@ -32,25 +29,21 @@ interface ErrorFallbackProps {
   showDetails: boolean;
   toggleDetails: () => void;
 }
-
 // Service de reporting d'erreurs
 class ErrorReportingService {
   private static instance: ErrorReportingService;
   private apiEndpoint: string;
   private enableLogging: boolean;
-
   private constructor() {
     this.apiEndpoint = '/api/errors'; // Endpoint pour reporter les erreurs
     this.enableLogging = false; // Désactivé temporairement pour éviter les erreurs 405
   }
-
   static getInstance(): ErrorReportingService {
     if (!ErrorReportingService.instance) {
       ErrorReportingService.instance = new ErrorReportingService();
     }
     return ErrorReportingService.instance;
   }
-
   async reportError(
     _error: Error,
     _errorInfo: ErrorInfo,
@@ -58,10 +51,9 @@ class ErrorReportingService {
     _additionalContext?: Record<string, unknown>
   ): Promise<void> {
     // Désactivé pour éviter les erreurs 405 - endpoint /api/errors n'existe pas
-    console.warn('[ErrorBoundary] Error reporting disabled to avoid 405 errors');
+    logger.warn('ErrorBoundary', '[ErrorBoundary] Error reporting disabled to avoid 405 errors');
     return Promise.resolve();
   }
-
   private getUserId(): string | null {
     try {
       // Récupérer l'ID utilisateur depuis le localStorage ou le contexte auth
@@ -70,7 +62,6 @@ class ErrorReportingService {
       return 'anonymous';
     }
   }
-
   // Collecter des infos supplémentaires sur l'environnement
   getEnvironmentInfo(): Record<string, unknown> {
     // Type pour l'API Performance.memory (non standard mais largement supporté)
@@ -79,13 +70,10 @@ class ErrorReportingService {
       totalJSHeapSize: number;
       jsHeapSizeLimit: number;
     }
-
     interface ExtendedPerformance extends Performance {
       memory?: PerformanceMemory;
     }
-
     const extendedPerformance = performance as ExtendedPerformance;
-
     return {
       language: navigator.language,
       platform: navigator.platform,
@@ -99,7 +87,6 @@ class ErrorReportingService {
     };
   }
 }
-
 // Composants de fallback séparés pour réduire la taille de la fonction
 const ErrorHeader: React.FC = () => (
   <CardHeader className="text-center">
@@ -114,7 +101,6 @@ const ErrorHeader: React.FC = () => (
     </CardDescription>
   </CardHeader>
 );
-
 const ErrorActions: React.FC<{
   resetError: () => void;
   reportError: () => void;
@@ -128,7 +114,6 @@ const ErrorActions: React.FC<{
       <RefreshCw className="w-4 h-4 mr-2" />
       Réessayer
     </Button>
-
     <Button
       onClick={() => window.location.href = '/'}
       variant="outline"
@@ -137,7 +122,6 @@ const ErrorActions: React.FC<{
       <Home className="w-4 h-4 mr-2" />
       Retour à l'accueil
     </Button>
-
     <Button
       onClick={reportError}
       variant="ghost"
@@ -149,7 +133,6 @@ const ErrorActions: React.FC<{
     </Button>
   </div>
 );
-
 const ErrorDetails: React.FC<{
   error: Error;
   errorInfo: ErrorInfo;
@@ -168,21 +151,18 @@ const ErrorDetails: React.FC<{
         <ChevronDown className="w-4 h-4" />
       )}
     </button>
-
     {showDetails && (
       <div className="mt-3 p-3 bg-gray-50 rounded text-xs text-gray-600 dark:text-gray-400 font-mono dark:bg-gray-900/30">
         <div className="mb-2">
           <strong>Message:</strong>
           <div className="mt-1 text-red-600 dark:text-red-400">{error.message}</div>
         </div>
-
         <div className="mb-2">
           <strong>Stack trace:</strong>
           <pre className="mt-1 overflow-auto max-h-32 whitespace-pre-wrap">
             {error.stack}
           </pre>
         </div>
-
         <div>
           <strong>Composant:</strong>
           <pre className="mt-1 overflow-auto max-h-20 whitespace-pre-wrap">
@@ -193,7 +173,6 @@ const ErrorDetails: React.FC<{
     )}
   </div>
 );
-
 // Composant de fallback par défaut
 const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({
   error,
@@ -208,7 +187,6 @@ const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 dark:bg-gray-900/30">
       <Card className="w-full max-w-md">
   <ErrorHeader />
-
         <CardContent className="space-y-4">
           <Alert>
             <Bug className="h-4 w-4" />
@@ -216,7 +194,6 @@ const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({
               ID de l'erreur: <code className="bg-gray-100 px-1 rounded text-xs dark:bg-gray-900/50">{errorId}</code>
             </AlertDescription>
           </Alert>
-
           <ErrorActions resetError={resetError} reportError={reportError} />
           <ErrorDetails
             error={error}
@@ -229,11 +206,9 @@ const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({
     </div>
   );
 };
-
 // Error Boundary principal
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private errorReporting: ErrorReportingService;
-
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -243,30 +218,24 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       errorId: '',
       showDetails: false,
     };
-    
     this.errorReporting = ErrorReportingService.getInstance();
   }
-
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
     return {
       hasError: true,
       error,
       errorId,
     };
   }
-
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo });
-
     // Reporter l'erreur
     if (this.props.enableReporting !== false) {
       const additionalContext = {
         ...this.errorReporting.getEnvironmentInfo(),
         props: this.props.isolate ? 'isolated' : 'global',
       };
-
       this.errorReporting.reportError(
         error,
         errorInfo,
@@ -274,13 +243,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         additionalContext
       );
     }
-
     // Callback personnalisé
     if (this.props.onError) {
       this.props.onError(error, errorInfo, this.state.errorId);
     }
   }
-
   resetError = () => {
     this.setState({
       hasError: false,
@@ -290,7 +257,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       showDetails: false,
     });
   };
-
   reportError = async () => {
     if (this.state.error && this.state.errorInfo) {
       await this.errorReporting.reportError(
@@ -299,7 +265,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         this.state.errorId,
         { manualReport: true }
       );
-      
       // Feedback utilisateur via logger (remplace console.warn)
       logger.info("Erreur signalée avec succès à l'équipe technique", {
         errorId: this.state.errorId,
@@ -308,15 +273,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       // toast.success('Merci ! Le problème a été signalé à notre équipe technique.');
     }
   };
-
   toggleDetails = () => {
     this.setState(prev => ({ showDetails: !prev.showDetails }));
   };
-
   public render() {
     if (this.state.hasError && this.state.error && this.state.errorInfo) {
       const FallbackComponent = this.props.fallback || DefaultErrorFallback;
-      
       return (
         <FallbackComponent
           error={this.state.error}
@@ -329,11 +291,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         />
       );
     }
-
     return this.props.children;
   }
 }
-
 // HOC pour wrapper des composants avec une Error Boundary
 function _withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
@@ -344,49 +304,37 @@ function _withErrorBoundary<P extends object>(
       <Component {...props} />
     </ErrorBoundary>
   );
-
   WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
-
   return WrappedComponent;
 }
-
 // Hook pour capturer les erreurs asynchrones
 const _useErrorHandler = () => {
   const reportingService = ErrorReportingService.getInstance();
-
   const handleError = (error: Error, context?: Record<string, unknown>) => {
     const errorId = `async_error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
     // Pour les erreurs async, on simule un ErrorInfo
     const errorInfo: ErrorInfo = {
       componentStack: 'Erreur asynchrone - pas de stack de composant disponible',
     };
-
     reportingService.reportError(error, errorInfo, errorId, {
       ...context,
       type: 'async',
     });
-
     // Log centralisé
     logger.error('[useErrorHandler] Erreur asynchrone', error, context);
   };
-
   return handleError;
 };
-
 // Wrapper pour les erreurs de promesses non gérées
 const _setupGlobalErrorHandling = () => {
   const reportingService = ErrorReportingService.getInstance();
-
   // Erreurs JavaScript non gérées
   window.addEventListener('error', (event) => {
     const error = new Error(event.message);
     error.stack = `${event.filename}:${event.lineno}:${event.colno}`;
-
     const errorInfo: ErrorInfo = {
       componentStack: 'Erreur JavaScript globale',
     };
-
     const errorId = `global_error_${Date.now()}`;
     reportingService.reportError(error, errorInfo, errorId, {
       type: 'global',
@@ -395,14 +343,12 @@ const _setupGlobalErrorHandling = () => {
       colno: event.colno,
     });
   });
-
   // Promesses rejetées non gérées
   window.addEventListener('unhandledrejection', (event) => {
     const error = new Error(`Promesse rejetée: ${event.reason}`);
     const errorInfo: ErrorInfo = {
       componentStack: 'Promesse non gérée',
     };
-
     const errorId = `promise_error_${Date.now()}`;
     reportingService.reportError(error, errorInfo, errorId, {
       type: 'unhandledPromise',
@@ -410,8 +356,6 @@ const _setupGlobalErrorHandling = () => {
     });
   });
 };
-
 export default ErrorBoundary;
- 
 export { ErrorReportingService, _setupGlobalErrorHandling as setupGlobalErrorHandling };
 export type { ErrorBoundaryProps, ErrorFallbackProps };

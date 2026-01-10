@@ -1,7 +1,7 @@
 // Simple i18n configuration
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-
+import { logger } from '@/lib/logger';
 const resources = {
   fr: {
     translation: {
@@ -26,7 +26,6 @@ const resources = {
     }
   }
 };
-
 // Initialize i18n synchronously with proper React integration
 if (!i18n.isInitialized) {
   try {
@@ -48,15 +47,13 @@ if (!i18n.isInitialized) {
       saveMissing: false,
       missingKeyHandler: (lng: string[], ns: string, key: string) => {
         if (process.env.NODE_ENV === 'development') {
-          console.warn(`Missing translation: ${key}`);
+          logger.warn('I18n-simple', `Missing translation: ${key}`);
         }
       }
     });
-    
-    console.log('✅ i18n initialized successfully');
+    logger.debug('I18n-simple', '✅ i18n initialized successfully');
   } catch (error) {
-    console.error('❌ Failed to initialize i18n:', error);
-    
+    logger.error('I18n-simple', '❌ Failed to initialize i18n:', error);
     // Fallback initialization
     try {
       i18n
@@ -68,11 +65,10 @@ if (!i18n.isInitialized) {
           react: { useSuspense: false },
           returnNull: false
         });
-      console.warn('⚠️ i18n initialized with minimal config');
+      logger.warn('I18n-simple', '⚠️ i18n initialized with minimal config');
     } catch (fallbackError) {
-      console.error('❌ Fallback i18n initialization failed:', fallbackError);
+      logger.error('I18n-simple', '❌ Fallback i18n initialization failed:', fallbackError);
     }
   }
 }
-
-export default i18n;
+export default i18n;

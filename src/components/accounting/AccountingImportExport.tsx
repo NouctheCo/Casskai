@@ -12,28 +12,25 @@ import {
   Play,
   RotateCcw
 } from 'lucide-react';
-
 import { Button } from '../ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Progress } from '../ui/progress';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
-
 import { FECParser } from '../../services/fecParser';
 import { CSVImportService } from '../../services/csvImportService';
 import { AccountingValidationService } from '../../services/accountingValidationService';
 import { EntryTemplatesService } from '../../services/entryTemplatesService';
 // import { VATCalculationService } from '../../services/vatCalculationService';
 import { AutomaticLetterageService } from '../../services/automaticLetterageService';
-
-import { 
+import { logger } from '@/lib/logger';
+import {
   ImportSession, 
   ImportResult, 
   CSVMapping,
   EntryTemplate 
 } from '../../types/accounting-import.types';
-
 // Schémas de validation
 const ImportConfigSchema = z.object({
   file: z.instanceof(File).optional(),
@@ -47,23 +44,19 @@ const ImportConfigSchema = z.object({
   validateBeforeImport: z.boolean().default(true),
   autoLetterage: z.boolean().default(false)
 });
-
 const TemplateConfigSchema = z.object({
   templateId: z.string().optional(),
   variables: z.record(z.any()).default({}),
   journalId: z.string().optional(),
   generateRecurring: z.boolean().default(false)
 });
-
 type ImportConfigType = z.infer<typeof ImportConfigSchema>;
 type TemplateConfigType = z.infer<typeof TemplateConfigSchema>;
-
 interface AccountingImportExportProps {
   companyId: string;
   onImportComplete?: (result: ImportResult) => void;
   onError?: (error: string) => void;
 }
-
 export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
   companyId,
   onImportComplete,
@@ -76,7 +69,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
   const [csvMapping, setCsvMapping] = useState<CSVMapping[]>([]);
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [templates, setTemplates] = useState<EntryTemplate[]>([]);
-  
   // Forms
   const importForm = useForm<ImportConfigType>({
     resolver: zodResolver(ImportConfigSchema),
@@ -93,7 +85,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       dateFormat: undefined
     }
   });
-
   const templateForm = useForm<TemplateConfigType>({
     resolver: zodResolver(TemplateConfigSchema),
     defaultValues: {
@@ -103,12 +94,10 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       journalId: undefined
     }
   });
-
   // Chargement initial
   useEffect(() => {
     loadTemplates();
   }, [companyId]);
-
   const loadTemplates = async () => {
     try {
       const loadedTemplates = await EntryTemplatesService.getAllTemplates(companyId);
@@ -121,18 +110,14 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       }
     }
   };
-
   // Gestionnaires d'import
   const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     importForm.setValue('file', file as any);
-    
     try {
       // Analyse automatique du fichier
       const analysis = await CSVImportService.analyzeFile(file);
-      
       // Mise à jour du formulaire avec les détections
       if (analysis.format === 'Excel') {
         importForm.setValue('format', 'Excel');
@@ -142,15 +127,12 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
           importForm.setValue('delimiter', analysis.delimiter);
         }
       }
-      
       if (analysis.encoding) {
         importForm.setValue('encoding', analysis.encoding as any);
       }
-
       // Stockage des données de prévisualisation
       setPreviewData(analysis.preview || []);
       setCsvMapping(analysis.suggestedMapping || []);
-      
     } catch (error) {
       if (error instanceof Error) {
         onError?.(`Erreur analyse fichier: ${error.message}`);
@@ -159,12 +141,9 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       }
     }
   }, [importForm, onError]);
-
   const onImportSubmit: SubmitHandler<ImportConfigType> = async (data) => {
     if (!data.file) return;
-
     setImportProgress(0);
-    
     try {
       // Création de la session d'import
       const session: ImportSession = {
@@ -182,12 +161,9 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
         mapping: csvMapping,
         createdAt: new Date().toISOString()
       };
-
       setImportSession(session);
       setImportProgress(10);
-
       let result: ImportResult;
-
       // Parsing selon le format
       if (session.format === 'FEC') {
         result = await FECParser.parseFEC(data.file, {
@@ -203,49 +179,37 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
           skipEmptyLines: data.skipEmptyLines
         });
       }
-
       setImportProgress(50);
-
       // Validation si demandée
       if (data.validateBeforeImport) {
         session.status = 'validating';
         setImportSession({ ...session });
-
         const validation = await AccountingValidationService.validateBatch(
           result.entries, 
           companyId
         );
-
         // result.entries = validation.valid;
         result.errors.push(...validation.invalid.flatMap(inv => inv.errors));
         result.warnings.push(...validation.warnings);
       }
-
       setImportProgress(80);
-
       // Import en base
       session.status = 'importing';
       setImportSession({ ...session });
-
       // TODO: Implémentation sauvegarde en base
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulation
-
       // Lettrage automatique si demandé
       if (data.autoLetterage && result.entries.length > 0) {
         session.status = 'completed';
         setImportSession({ ...session });
-        
         await AutomaticLetterageService.performAutoLetterage(companyId);
       }
-
       setImportProgress(100);
       session.status = 'completed';
       session.completedAt = new Date().toISOString();
       session.result = result;
-      
       setImportSession({ ...session });
       onImportComplete?.(result);
-
     } catch (error) {
       setImportSession(prev => prev ? { ...prev, status: 'failed' } : null);
       if (error instanceof Error) {
@@ -255,27 +219,23 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       }
     }
   };
-
   // Gestionnaire de templates
   const onTemplateSubmit: SubmitHandler<TemplateConfigType> = async (data) => {
     try {
-      if (!data.journalId) {
-        throw new Error('Journal ID is required');
+      if (!data.journalId || !data.templateId) {
+        throw new Error('Template ID and Journal ID are required');
       }
       const entry = await EntryTemplatesService.applyTemplate(
-        data.templateId,
+        data.templateId as string, // Type assertion after null check
         data.variables,
         companyId,
-        data.journalId
+        data.journalId as string // Type assertion after null check
       );
-
       // TODO: Sauvegarde de l'écriture générée
-      console.warn('Écriture générée:', entry);
-      
+      logger.warn('AccountingImportExport', 'Écriture générée:', entry);
       if (data.generateRecurring) {
         await EntryTemplatesService.processRecurringEntries(companyId);
       }
-
     } catch (error) {
       if (error instanceof Error) {
         onError?.(`Erreur application template: ${error.message}`);
@@ -284,12 +244,11 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       }
     }
   };
-
   // Gestionnaires de lettrage
   const handleAutoLetterage = async () => {
     try {
       const result = await AutomaticLetterageService.performAutoLetterage(companyId);
-      console.warn('Résultat lettrage:', result);
+      logger.warn('AccountingImportExport', 'Résultat lettrage:', result);
     } catch (error) {
       if (error instanceof Error) {
         onError?.(`Erreur lettrage: ${error.message}`);
@@ -298,7 +257,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       }
     }
   };
-
   // Composants de rendu
   const renderImportTab = () => (
     <div className="space-y-6">
@@ -328,7 +286,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                 </p>
               )}
             </div>
-
             {/* Configuration d'import */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -343,7 +300,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                   <option value="Excel">Excel</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium mb-1">Encodage</label>
                 <select 
@@ -356,7 +312,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                 </select>
               </div>
             </div>
-
             {/* Options */}
             <div className="flex flex-wrap gap-4">
               <label className="flex items-center gap-2">
@@ -366,7 +321,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                 />
                 Ignorer la première ligne
               </label>
-
               <label className="flex items-center gap-2">
                 <input 
                   type="checkbox" 
@@ -374,7 +328,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                 />
                 Valider avant import
               </label>
-
               <label className="flex items-center gap-2">
                 <input 
                   type="checkbox" 
@@ -383,14 +336,12 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                 Lettrage automatique
               </label>
             </div>
-
             <Button type="submit" disabled={!importForm.getValues('file') || importProgress > 0}>
               {importProgress > 0 ? 'Import en cours...' : 'Lancer l\'import'}
             </Button>
           </form>
         </CardContent>
       </Card>
-
       {/* Prévisualisation */}
       {previewData.length > 0 && (
         <Card>
@@ -425,7 +376,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
           </CardContent>
         </Card>
       )}
-
       {/* Mapping des colonnes */}
       {csvMapping.length > 0 && (
         <Card>
@@ -453,7 +403,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
           </CardContent>
         </Card>
       )}
-
       {/* Progression d'import */}
       {importSession && (
         <Card>
@@ -472,7 +421,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
           <CardContent>
             <div className="space-y-4">
               <Progress value={importProgress} className="w-full" />
-              
               <div className="grid grid-cols-4 gap-4 text-sm">
                 <div>
                   <div className="text-gray-600 dark:text-gray-400">Statut</div>
@@ -491,7 +439,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                   <div className="font-medium text-red-600 dark:text-red-400">{importSession.errors}</div>
                 </div>
               </div>
-
               {importSession.result && (
                 <div className="mt-4">
                   {importSession.result.errors.length > 0 && (
@@ -510,7 +457,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       )}
     </div>
   );
-
   const renderTemplatesTab = () => (
     <div className="space-y-6">
       <Card>
@@ -536,7 +482,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                 ))}
               </select>
             </div>
-
             {/* Variables dynamiques selon le template sélectionné */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -548,7 +493,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                   className="w-full p-2 border rounded"
                 />
               </div>
-              
               <div>
                 <label className="block text-sm font-medium mb-1">Référence</label>
                 <input 
@@ -558,7 +502,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                 />
               </div>
             </div>
-
             <div className="flex gap-4">
               <label className="flex items-center gap-2">
                 <input 
@@ -568,14 +511,12 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                 Générer les écritures récurrentes
               </label>
             </div>
-
             <Button type="submit">
               Appliquer le template
             </Button>
           </form>
         </CardContent>
       </Card>
-
       {/* Liste des templates disponibles */}
       <Card>
         <CardHeader>
@@ -600,7 +541,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       </Card>
     </div>
   );
-
   const renderLetterageTab = () => (
     <div className="space-y-6">
       <Card>
@@ -616,7 +556,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
               Le lettrage automatique permet de rapprocher les écritures débitrices et créditrices 
               des comptes de tiers (clients, fournisseurs).
             </p>
-
             <div className="flex gap-2">
               <Button onClick={handleAutoLetterage}>
                 <Play className="h-4 w-4 mr-2" />
@@ -628,7 +567,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       </Card>
     </div>
   );
-
   return (
     <div className="w-full max-w-6xl mx-auto p-6">
       <div className="mb-8">
@@ -637,7 +575,6 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
           Gestion avancée des imports de fichiers comptables, templates d\'écritures et lettrage automatique.
         </p>
       </div>
-
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="import">Import</TabsTrigger>
@@ -645,11 +582,9 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
           <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="letterage">Lettrage</TabsTrigger>
         </TabsList>
-
         <TabsContent value="import" className="mt-6">
           {renderImportTab()}
         </TabsContent>
-
         <TabsContent value="export" className="mt-6">
           <Card>
             <CardHeader>
@@ -663,11 +598,9 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="templates" className="mt-6">
           {renderTemplatesTab()}
         </TabsContent>
-
         <TabsContent value="letterage" className="mt-6">
           {renderLetterageTab()}
         </TabsContent>

@@ -9,11 +9,10 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // Service fiscal multi-pays pour CassKai
 import { frenchTaxComplianceService } from './FrenchTaxComplianceService';
 import { getTaxConfiguration } from '../../data/taxConfigurations';
-
+import { logger } from '@/lib/logger';
 export interface CountryTaxConfig {
   country: string;
   countryName: string;
@@ -30,7 +29,6 @@ export interface CountryTaxConfig {
   deadlines: Record<string, string>; // declaration type -> deadline pattern
   languages: string[];
 }
-
 export interface TaxDeclarationType {
   id: string;
   name: string;
@@ -41,7 +39,6 @@ export interface TaxDeclarationType {
   threshold?: number; // Revenue threshold for obligation
   forms: string[];
 }
-
 export interface TaxDeclaration {
   id: string;
   type: string;
@@ -53,7 +50,6 @@ export interface TaxDeclaration {
   warnings?: string[];
   data?: Record<string, unknown>;
 }
-
 export interface ComplianceValidation {
   checks: Array<{
     id: string;
@@ -66,7 +62,6 @@ export interface ComplianceValidation {
   errors: string[];
   warnings: string[];
 }
-
 export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
   // FRANCE
   FR: {
@@ -149,7 +144,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['fr-FR']
   },
-
   // SÉNÉGAL
   SN: {
     country: 'SN',
@@ -179,7 +173,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['fr-SN']
   },
-
   // CÔTE D'IVOIRE
   CI: {
     country: 'CI',
@@ -209,7 +202,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['fr-CI']
   },
-
   // MAROC
   MA: {
     country: 'MA',
@@ -239,7 +231,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['fr-MA', 'ar-MA']
   },
-
   // TUNISIE
   TN: {
     country: 'TN',
@@ -269,7 +260,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['fr-TN', 'ar-TN']
   },
-
   // CAMEROUN
   CM: {
     country: 'CM',
@@ -299,7 +289,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['fr-CM']
   },
-
   // MALI
   ML: {
     country: 'ML',
@@ -329,7 +318,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['fr-ML']
   },
-
   // BURKINA FASO
   BF: {
     country: 'BF',
@@ -359,7 +347,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['fr-BF']
   },
-
   // BÉNIN
   BJ: {
     country: 'BJ',
@@ -389,7 +376,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['fr-BJ']
   },
-
   // TOGO
   TG: {
     country: 'TG',
@@ -419,7 +405,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['fr-TG']
   },
-
   // GABON
   GA: {
     country: 'GA',
@@ -449,7 +434,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['fr-GA']
   },
-
   // GHANA
   GH: {
     country: 'GH',
@@ -479,7 +463,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['en-GH']
   },
-
   // NIGÉRIA
   NG: {
     country: 'NG',
@@ -509,7 +492,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['en-NG']
   },
-
   // ÉTATS-UNIS
   US: {
     country: 'US',
@@ -549,7 +531,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     },
     languages: ['en-US']
   },
-
   // ROYAUME-UNI
   GB: {
     country: 'GB',
@@ -590,7 +571,6 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
     languages: ['en-GB']
   }
 };
-
 type VATCalculation = {
   period: string;
   countryCode: string;
@@ -600,7 +580,6 @@ type VATCalculation = {
   netVAT: number;
   calculations: Array<Record<string, unknown>>;
 };
-
 type CorporateTaxCalculation = {
   period: string;
   countryCode: string;
@@ -608,30 +587,23 @@ type CorporateTaxCalculation = {
   taxableIncome: number;
   corporateTax: number;
 };
-
 type ExportResult = { content: string; filename: string; mimeType: string };
-
 type AutoObligationsResult = {
   countryCode: string;
   obligations: TaxDeclarationType[];
   configured: boolean;
   message: string;
 };
-
 type ComplianceResult = { errors: string[]; warnings: string[]; score: number; maxScore: number };
-
 // Note: Raw declaration helper type removed after switching to unknown-based coercion.
-
 export class MultiCountryTaxService {
   private static instance: MultiCountryTaxService;
-
   static getInstance(): MultiCountryTaxService {
     if (!this.instance) {
       this.instance = new MultiCountryTaxService();
     }
     return this.instance;
   }
-
   /**
    * Obtient la configuration fiscale pour un pays
    */
@@ -668,23 +640,20 @@ export class MultiCountryTaxService {
         languages: ['fr-FR'] // Default, could be enhanced based on country
       };
     }
-
     // Fallback to old config
     const config = COUNTRY_TAX_CONFIGS[countryCode];
     if (!config) {
-      console.warn(`Configuration fiscale non trouvée pour ${countryCode}, utilisation de FR par défaut`);
+      logger.warn('MultiCountryTax', `Configuration fiscale non trouvée pour ${countryCode}, utilisation de FR par défaut`);
       return COUNTRY_TAX_CONFIGS.FR;
     }
     return config;
   }
-
   /**
    * Alias pour getTaxConfig (compatibilité avec le hook)
    */
   getCountryConfig(countryCode: string): CountryTaxConfig {
     return this.getTaxConfig(countryCode);
   }
-
   /**
    * Obtient les taux de TVA pour un pays
    */
@@ -692,7 +661,6 @@ export class MultiCountryTaxService {
     const config = this.getTaxConfig(countryCode);
     return config.vatRates;
   }
-
   /**
    * Obtient le taux d'impôt sur les sociétés
    */
@@ -700,7 +668,6 @@ export class MultiCountryTaxService {
     const config = this.getTaxConfig(countryCode);
     return config.corporateTaxRate;
   }
-
   /**
    * Génère une déclaration selon le pays
    */
@@ -715,12 +682,10 @@ export class MultiCountryTaxService {
       const frenchDeclaration = await this.generateFrenchDeclaration(declarationType, companyId, period);
       return this.convertToStandardDeclaration(frenchDeclaration);
     }
-
     // Pour les autres pays, utiliser les services spécifiques
     const intlDeclaration = await this.generateInternationalDeclaration(countryCode, declarationType, companyId, period);
     return this.convertToStandardDeclaration(intlDeclaration);
   }
-
   /**
    * Calcule la TVA pour une période donnée
    */
@@ -736,7 +701,6 @@ export class MultiCountryTaxService {
       calculations: []
     };
   }
-
   /**
    * Calcule l'impôt sur les sociétés
    */
@@ -750,7 +714,6 @@ export class MultiCountryTaxService {
       corporateTax: 0
     };
   }
-
   /**
    * Exporte les données fiscales
    */
@@ -761,7 +724,6 @@ export class MultiCountryTaxService {
     format: 'pdf' | 'excel' | 'csv' = 'pdf'
   ): Promise<ExportResult> {
     const config = this.getTaxConfig(countryCode);
-
     // Pour la France, utiliser le générateur FEC existant
     if (countryCode === 'FR' && format === 'csv') {
       const fecContent = await frenchTaxComplianceService.generateFEC(companyId, period);
@@ -771,24 +733,20 @@ export class MultiCountryTaxService {
         mimeType: 'text/plain'
       };
     }
-
     // Export générique pour les autres pays/formats
     const exportContent = `Export fiscal ${config.countryName} - ${period}\nFormat: ${format}`;
-
     return {
       content: exportContent,
       filename: `tax_export_${countryCode}_${period}.${format === 'pdf' ? 'pdf' : format === 'excel' ? 'xlsx' : 'csv'}`,
       mimeType: format === 'pdf' ? 'application/pdf' : format === 'excel' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'text/csv'
     };
   }
-
   /**
    * Configuration automatique des obligations fiscales
    */
   async autoConfigureObligations(_companyId: string, countryCode: string): Promise<AutoObligationsResult> {
     const config = this.getTaxConfig(countryCode);
     const mandatoryDeclarations = config.declarations.filter(d => d.mandatory);
-
     return {
       countryCode,
       obligations: mandatoryDeclarations,
@@ -796,7 +754,6 @@ export class MultiCountryTaxService {
       message: `${mandatoryDeclarations.length} obligation(s) configurée(s) pour ${config.countryName}`
     };
   }
-
   /**
    * Valide la conformité fiscale selon le pays
    */
@@ -806,14 +763,12 @@ export class MultiCountryTaxService {
     period: string
   ): Promise<ComplianceResult> {
     // const config = this.getTaxConfig(countryCode); // non requis ici
-
     // Pour la France, utiliser la validation française
     if (countryCode === 'FR') {
       const validation = await frenchTaxComplianceService.validateAccountingTaxConsistency(
         companyId,
         period
       );
-
       return {
         errors: validation.errors,
         warnings: validation.warnings,
@@ -821,49 +776,38 @@ export class MultiCountryTaxService {
         maxScore: validation.checks.length
       };
     }
-
     // Pour les autres pays, validation générique
     return this.validateInternationalCompliance(countryCode, companyId, period);
   }
-
   // Méthodes privées
   private async generateFrenchDeclaration(declarationType: string, companyId: string, period: string) {
     switch (declarationType) {
       case 'CA3':
       case 'TVA_CA3':
         return await frenchTaxComplianceService.generateCA3Declaration(companyId, period);
-
       case 'TVA_CA12':
       case 'CA12':
         // CA12 utilise la même structure que CA3 mais avec fréquence annuelle
         return await frenchTaxComplianceService.generateCA3Declaration(companyId, period);
-
       case 'TVA_CA12E':
       case 'CA12E':
         // CA12E (trimestriel) utilise aussi la structure CA3
         return await frenchTaxComplianceService.generateCA3Declaration(companyId, period);
-
       case 'LIASSE_FISCALE':
         return await frenchTaxComplianceService.generateLiasseFiscale(companyId, period);
-
       case 'IS':
         // IS (Impôt sur les Sociétés) fait partie de la liasse fiscale
         return await frenchTaxComplianceService.generateLiasseFiscale(companyId, period);
-
       case 'CVAE':
         return await frenchTaxComplianceService.generateCVAEDeclaration(companyId, period);
-
       case 'CFE':
         return await frenchTaxComplianceService.generateCFEDeclaration(companyId, period);
-
       case 'DSN':
         return await frenchTaxComplianceService.generateDSNDeclaration(companyId, period);
-
       default:
         throw new Error(`Type de déclaration ${declarationType} non supporté pour la France`);
     }
   }
-
   private async generateInternationalDeclaration(
     countryCode: string,
     declarationType: string,
@@ -880,11 +824,9 @@ export class MultiCountryTaxService {
       generatedAt: new Date().toISOString()
     };
   }
-
   private convertToStandardDeclaration(declaration: unknown): TaxDeclaration {
     const rec: Record<string, unknown> =
       typeof declaration === 'object' && declaration !== null ? (declaration as Record<string, unknown>) : {};
-
     const id = (rec.id as string) || `declaration-${Date.now()}`;
     const type = (rec.type as string) || 'UNKNOWN';
     const period = (rec.period as string) || '';
@@ -895,7 +837,6 @@ export class MultiCountryTaxService {
     const amount = (rec.amount as number) ?? 0;
     const validationErrors = (rec.validationErrors as string[]) || [];
     const warnings = (rec.warnings as string[]) || [];
-
     return {
       id,
       type,
@@ -908,16 +849,13 @@ export class MultiCountryTaxService {
       data: rec
     };
   }
-
   private async validateInternationalCompliance(countryCode: string, _companyId: string, _period: string): Promise<ComplianceResult> {
     const config = this.getTaxConfig(countryCode);
-
     const checks = [
       { name: 'Configuration pays', status: 'ok' as const, message: `Configuration ${countryCode} trouvée` },
       { name: 'Norme comptable', status: 'ok' as const, message: `${config.accountingStandard} appliqué` },
       { name: 'Taux de TVA', status: 'ok' as const, message: `${config.vatRates.standard}% configuré` }
     ];
-
     return {
       errors: [],
       warnings: [],
@@ -926,5 +864,4 @@ export class MultiCountryTaxService {
     };
   }
 }
-
 export const multiCountryTaxService = MultiCountryTaxService.getInstance();

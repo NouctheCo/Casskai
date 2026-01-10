@@ -9,9 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // import { supabase } from '../lib/supabase'; // Commenté pour la compatibilité de build
 import { MARKET_CONFIGS } from '../data/markets';
+import { logger } from '@/lib/logger';
 import {
   OnboardingStep,
   OnboardingData,
@@ -21,7 +21,6 @@ import {
   StepValidationResult,
   OnboardingStepId
 } from '../types/onboarding.types';
-
 // Types spécifiques au service
 export interface OnboardingResponse<T = unknown> {
   success: boolean;
@@ -29,7 +28,6 @@ export interface OnboardingResponse<T = unknown> {
   error?: string;
   errors?: OnboardingValidationError[];
 }
-
 export interface OnboardingSession {
   id: string;
   userId: string;
@@ -37,14 +35,12 @@ export interface OnboardingSession {
   expiresAt: Date;
   isActive: boolean;
 }
-
 export interface OnboardingProgress {
   totalSteps: number;
   completedSteps: number;
   currentStepIndex: number;
   percentage: number;
 }
-
 export interface OnboardingMetrics {
   totalSessions: number;
   completedSessions: number;
@@ -56,20 +52,17 @@ export interface OnboardingMetrics {
     averageTime: number;
   }>;
 }
-
 class OnboardingService {
   private static instance: OnboardingService;
   private cache: Map<string, OnboardingData> = new Map();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
   private readonly SESSION_TIMEOUT = 24 * 60 * 60 * 1000; // 24 heures
-
   static getInstance(): OnboardingService {
     if (!OnboardingService.instance) {
       OnboardingService.instance = new OnboardingService();
     }
     return OnboardingService.instance;
   }
-
   /**
    * Initialise une nouvelle session d'onboarding
    */
@@ -83,7 +76,6 @@ class OnboardingService {
           data: existingSession.data.sessionData
         };
       }
-
       const initialData: OnboardingData = {
         userId,
         selectedModules: [],
@@ -107,10 +99,8 @@ class OnboardingService {
         lastSavedAt: new Date().toISOString(),
         progress: 0
       };
-
       // Simuler l'insertion en base
       await this.simulateDbOperation(200);
-      
       // Créer la session
   const _session: OnboardingSession = {
         id: `session_${userId}_${Date.now()}`,
@@ -119,24 +109,21 @@ class OnboardingService {
         expiresAt: new Date(Date.now() + this.SESSION_TIMEOUT),
         isActive: true
       };
-
       // Mettre en cache
       this.cache.set(userId, initialData);
-
       return {
         success: true,
         data: initialData
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('Error initializing onboarding:', errorMessage);
+      logger.error('Onboarding', 'Error initializing onboarding:', errorMessage);
       return {
         success: false,
         error: this.formatError(error, 'Initialisation de l\'onboarding')
       };
     }
   }
-
   /**
    * Récupère les données d'onboarding pour un utilisateur
    */
@@ -150,10 +137,8 @@ class OnboardingService {
           data: cached
         };
       }
-
       // Simuler récupération depuis la base
       await this.simulateDbOperation(150);
-      
       // Récupérer depuis le localStorage comme fallback
       const localData = this.getLocalStorageData(userId);
       if (localData) {
@@ -163,20 +148,18 @@ class OnboardingService {
           data: localData
         };
       }
-
       return {
         success: false,
         error: 'Aucune session d\'onboarding trouvée'
       };
     } catch (error) {
-      console.error('Error getting onboarding data:', error instanceof Error ? error.message : String(error));
+      logger.error('Onboarding', 'Error getting onboarding data:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Récupération des données d\'onboarding')
       };
     }
   }
-
   /**
    * Met à jour le profil de l'entreprise avec validation
    */
@@ -191,7 +174,6 @@ class OnboardingService {
           errors: validation.errors
         };
       }
-
       // Récupérer les données actuelles
       const currentDataResponse = await this.getOnboardingData(userId);
       if (!currentDataResponse.success || !currentDataResponse.data) {
@@ -200,9 +182,7 @@ class OnboardingService {
           error: 'Session d\'onboarding introuvable'
         };
       }
-
       const currentData = currentDataResponse.data;
-      
       // Mise à jour des préférences basées sur le marché sélectionné
       let updatedPreferences = { ...currentData.preferences };
       if (companyProfile.country) {
@@ -216,7 +196,6 @@ class OnboardingService {
           };
         }
       }
-
       // Mettre à jour les données
       const updatedData: OnboardingData = {
         ...currentData,
@@ -224,27 +203,23 @@ class OnboardingService {
         preferences: updatedPreferences,
         lastSavedAt: new Date().toISOString()
       };
-
       // Simuler sauvegarde en base
       await this.simulateDbOperation(100);
-      
       // Mettre à jour le cache et localStorage
       this.cache.set(userId, updatedData);
       this.saveToLocalStorage(userId, updatedData);
-
       return {
         success: true,
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating company profile:', error instanceof Error ? error.message : String(error));
+      logger.error('Onboarding', 'Error updating company profile:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour du profil entreprise')
       };
     }
   }
-
   /**
    * Met à jour les préférences d'onboarding avec validation
    */
@@ -259,7 +234,6 @@ class OnboardingService {
           errors: validation.errors
         };
       }
-
       // Récupérer les données actuelles
       const currentDataResponse = await this.getOnboardingData(userId);
       if (!currentDataResponse.success || !currentDataResponse.data) {
@@ -268,36 +242,30 @@ class OnboardingService {
           error: 'Session d\'onboarding introuvable'
         };
       }
-
       const currentData = currentDataResponse.data;
-      
       // Mettre à jour les données
       const updatedData: OnboardingData = {
         ...currentData,
         preferences: { ...currentData.preferences, ...preferences },
         lastSavedAt: new Date().toISOString()
       };
-
       // Simuler sauvegarde en base
       await this.simulateDbOperation(100);
-      
       // Mettre à jour le cache et localStorage
       this.cache.set(userId, updatedData);
       this.saveToLocalStorage(userId, updatedData);
-
       return {
         success: true,
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating preferences:', error instanceof Error ? error.message : String(error));
+      logger.error('Onboarding', 'Error updating preferences:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour des préférences')
       };
     }
   }
-
   /**
    * Marque une étape comme terminée avec validation
    */
@@ -312,7 +280,6 @@ class OnboardingService {
           errors: stepValidation.errors
         };
       }
-
       // Récupérer les données actuelles
       const currentDataResponse = await this.getOnboardingData(userId);
       if (!currentDataResponse.success || !currentDataResponse.data) {
@@ -321,18 +288,14 @@ class OnboardingService {
           error: 'Session d\'onboarding introuvable'
         };
       }
-
       const currentData = currentDataResponse.data;
       const completedSteps = [...currentData.completedSteps];
-      
       // Ajouter l'étape si pas déjà complétée
       if (!completedSteps.includes(stepId)) {
         completedSteps.push(stepId);
       }
-
       const nextStep = this.getNextStep(stepId);
       const progress = this.calculateProgress(completedSteps);
-
       // Mettre à jour les données
       const updatedData: OnboardingData = {
         ...currentData,
@@ -341,27 +304,23 @@ class OnboardingService {
         progress,
         lastSavedAt: new Date().toISOString()
       };
-
       // Simuler sauvegarde en base
       await this.simulateDbOperation(150);
-      
       // Mettre à jour le cache et localStorage
       this.cache.set(userId, updatedData);
       this.saveToLocalStorage(userId, updatedData);
-
       return {
         success: true,
         data: updatedData
       };
     } catch (error) {
-      console.error('Error completing step:', error instanceof Error ? error.message : String(error));
+      logger.error('Onboarding', 'Error completing step:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Complétion de l\'\u00e9tape')
       };
     }
   }
-
   /**
    * Finalise l'onboarding avec création de l'entreprise
    */
@@ -375,9 +334,7 @@ class OnboardingService {
           error: 'Session d\'onboarding introuvable'
         };
       }
-
       const onboardingData = dataResponse.data;
-
       // Validation finale de toutes les étapes requises
       const finalValidation = await this.validateFinalOnboarding(onboardingData);
       if (!finalValidation.isValid) {
@@ -387,7 +344,6 @@ class OnboardingService {
           errors: finalValidation.errors
         };
       }
-
       // Créer l'entreprise
       const companyCreationResult = await this.createCompanyFromOnboarding(userId, onboardingData);
       if (!companyCreationResult.success) {
@@ -396,7 +352,6 @@ class OnboardingService {
           error: companyCreationResult.error || 'Erreur lors de la création de l\'entreprise'
         };
       }
-
       // Marquer l'onboarding comme terminé
       const completedData: OnboardingData = {
         ...onboardingData,
@@ -404,14 +359,11 @@ class OnboardingService {
         progress: 100,
         lastSavedAt: new Date().toISOString()
       };
-
       // Simuler sauvegarde finale
       await this.simulateDbOperation(300);
-      
       // Nettoyer le cache
       this.cache.delete(userId);
       this.clearLocalStorageData(userId);
-
       return {
         success: true,
         data: {
@@ -420,14 +372,13 @@ class OnboardingService {
         }
       };
     } catch (error) {
-      console.error('Error completing onboarding:', error instanceof Error ? error.message : String(error));
+      logger.error('Onboarding', 'Error completing onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Finalisation de l\'onboarding')
       };
     }
   }
-
   /**
    * Obtient la prochaine étape dans le parcours
    */
@@ -436,7 +387,6 @@ class OnboardingService {
     const currentIndex = steps.indexOf(currentStep);
     return currentIndex < steps.length - 1 ? steps[currentIndex + 1] : 'complete';
   }
-
   /**
    * Calcule le pourcentage de progression
    */
@@ -448,7 +398,6 @@ class OnboardingService {
     });
     return Math.round((requiredCompletedSteps.length / totalSteps) * 100);
   }
-
   /**
    * Obtient toutes les étapes d'onboarding
    */
@@ -506,7 +455,6 @@ class OnboardingService {
       }
     ];
   }
-
   /**
    * Obtient les secteurs d'activité disponibles
    */
@@ -530,7 +478,6 @@ class OnboardingService {
       { value: 'other', label: 'Autre secteur' }
     ];
   }
-
   /**
    * Obtient les tranches d'effectifs disponibles
    */
@@ -545,7 +492,6 @@ class OnboardingService {
       { value: '500+', label: '500+ employés', category: 'large' }
     ];
   }
-
   /**
    * Obtient les langues disponibles
    */
@@ -558,7 +504,6 @@ class OnboardingService {
       { value: 'pt', label: 'Portugais', nativeName: 'Português' }
     ];
   }
-
   /**
    * Obtient les fuseaux horaires disponibles par région
    */
@@ -570,7 +515,6 @@ class OnboardingService {
       { value: 'Europe/Brussels', label: 'Bruxelles, Belgique', region: 'Europe', offset: 'UTC+1' },
       { value: 'Europe/Madrid', label: 'Madrid, Espagne', region: 'Europe', offset: 'UTC+1' },
       { value: 'Europe/Rome', label: 'Rome, Italie', region: 'Europe', offset: 'UTC+1' },
-      
       // Afrique
       { value: 'Africa/Casablanca', label: 'Casablanca, Maroc', region: 'Afrique', offset: 'UTC+1' },
       { value: 'Africa/Abidjan', label: 'Abidjan, Côte d\'Ivoire', region: 'Afrique', offset: 'UTC+0' },
@@ -581,21 +525,18 @@ class OnboardingService {
       { value: 'Africa/Lome', label: 'Lomé, Togo', region: 'Afrique', offset: 'UTC+0' },
       { value: 'Africa/Tunis', label: 'Tunis, Tunisie', region: 'Afrique', offset: 'UTC+1' },
       { value: 'Africa/Algiers', label: 'Alger, Algérie', region: 'Afrique', offset: 'UTC+1' },
-      
       // Amériques
       { value: 'America/Montreal', label: 'Montréal, Canada', region: 'Amériques', offset: 'UTC-5' },
       { value: 'America/New_York', label: 'New York, États-Unis', region: 'Amériques', offset: 'UTC-5' },
       { value: 'America/Los_Angeles', label: 'Los Angeles, États-Unis', region: 'Amériques', offset: 'UTC-8' }
     ];
   }
-
   /**
    * Obtient les configurations de marché disponibles
    */
   getMarketConfigs() {
     return MARKET_CONFIGS;
   }
-
   /**
    * Obtient les devises disponibles
    */
@@ -613,7 +554,6 @@ class OnboardingService {
       { value: 'DZD', label: 'Dinar algérien', symbol: 'DA', region: 'Afrique du Nord' }
     ];
   }
-
   /**
    * Obtient les formats de date disponibles
    */
@@ -627,7 +567,6 @@ class OnboardingService {
       { value: 'DD-MM-YYYY', label: 'DD-MM-YYYY', example: '15-03-2024' }
     ];
   }
-
   /**
    * Obtient les standards comptables disponibles
    */
@@ -665,17 +604,14 @@ class OnboardingService {
       }
     ];
   }
-
   // ========================================
   // Méthodes de validation
   // ========================================
-
   /**
    * Valide le profil de l'entreprise
    */
   private validateCompanyProfile(profile: Partial<CompanyProfile>): StepValidationResult {
     const errors: OnboardingValidationError[] = [];
-
     if (profile.name !== undefined) {
       if (!profile.name?.trim()) {
         errors.push({
@@ -697,7 +633,6 @@ class OnboardingService {
         });
       }
     }
-
     if (profile.country !== undefined && !profile.country?.trim()) {
       errors.push({
         field: 'country',
@@ -705,7 +640,6 @@ class OnboardingService {
         code: 'REQUIRED'
       });
     }
-
     if (profile.currency !== undefined && !profile.currency?.trim()) {
       errors.push({
         field: 'currency',
@@ -713,7 +647,6 @@ class OnboardingService {
         code: 'REQUIRED'
       });
     }
-
     if (profile.vatNumber !== undefined && profile.vatNumber?.trim()) {
       // Validation basique du numéro de TVA
       const vatRegex = /^[A-Z]{2}[0-9A-Z]+$/;
@@ -725,7 +658,6 @@ class OnboardingService {
         });
       }
     }
-
     if (profile.email !== undefined && profile.email?.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(profile.email)) {
@@ -736,7 +668,6 @@ class OnboardingService {
         });
       }
     }
-
     if (profile.website !== undefined && profile.website?.trim()) {
       try {
         new URL(profile.website);
@@ -748,19 +679,16 @@ class OnboardingService {
         });
       }
     }
-
     return {
       isValid: errors.length === 0,
       errors
     };
   }
-
   /**
    * Valide les préférences
    */
   private validatePreferences(preferences: Partial<OnboardingPreferences>): StepValidationResult {
     const errors: OnboardingValidationError[] = [];
-
     if (preferences.language !== undefined && !preferences.language?.trim()) {
       errors.push({
         field: 'language',
@@ -768,7 +696,6 @@ class OnboardingService {
         code: 'REQUIRED'
       });
     }
-
     if (preferences.currency !== undefined && !preferences.currency?.trim()) {
       errors.push({
         field: 'currency',
@@ -776,7 +703,6 @@ class OnboardingService {
         code: 'REQUIRED'
       });
     }
-
     if (preferences.timezone !== undefined && !preferences.timezone?.trim()) {
       errors.push({
         field: 'timezone',
@@ -784,13 +710,11 @@ class OnboardingService {
         code: 'REQUIRED'
       });
     }
-
     return {
       isValid: errors.length === 0,
       errors
     };
   }
-
   /**
    * Valide une étape spécifique
    */
@@ -802,25 +726,18 @@ class OnboardingService {
         errors: [{ field: 'general', message: 'Données non trouvées', code: 'NO_DATA' }]
       };
     }
-
     const data = dataResponse.data;
-
     switch (stepId) {
       case 'welcome':
         return { isValid: true, errors: [] };
-      
       case 'company':
         return this.validateCompanyProfile(data.companyProfile);
-      
       case 'preferences':
         return this.validatePreferences(data.preferences);
-      
       case 'features':
         return { isValid: true, errors: [] };
-      
       case 'complete':
         return this.validateFinalOnboarding(data);
-      
       default:
         return {
           isValid: false,
@@ -828,13 +745,11 @@ class OnboardingService {
         };
     }
   }
-
   /**
    * Validation finale avant complétion de l'onboarding
    */
   private async validateFinalOnboarding(data: OnboardingData): Promise<StepValidationResult> {
     const errors: OnboardingValidationError[] = [];
-
     // Vérifier que les étapes requises sont complétées
     const requiredSteps: OnboardingStepId[] = ['welcome', 'company', 'preferences'];
     for (const step of requiredSteps) {
@@ -846,25 +761,20 @@ class OnboardingService {
         });
       }
     }
-
     // Validation du profil entreprise
     const companyValidation = this.validateCompanyProfile(data.companyProfile);
     errors.push(...companyValidation.errors);
-
     // Validation des préférences
     const preferencesValidation = this.validatePreferences(data.preferences);
     errors.push(...preferencesValidation.errors);
-
     return {
       isValid: errors.length === 0,
       errors
     };
   }
-
   // ========================================
   // Méthodes utilitaires
   // ========================================
-
   /**
    * Formatage des erreurs
    */
@@ -874,21 +784,18 @@ class OnboardingService {
     }
     return `[${context}] Erreur inconnue: ${JSON.stringify(error)}`;
   }
-
   /**
    * Simulation d'opération base de données
    */
   private async simulateDbOperation(delay: number = 100): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, delay));
   }
-
   /**
    * Gestion du cache
    */
   private getCachedData(userId: string): OnboardingData | null {
     return this.cache.get(userId) || null;
   }
-
   /**
    * Sauvegarde dans localStorage
    */
@@ -897,10 +804,9 @@ class OnboardingService {
       const key = `casskai_onboarding_${userId}`;
       localStorage.setItem(key, JSON.stringify(data));
     } catch (error) {
-      console.warn('Erreur lors de la sauvegarde localStorage:', error);
+      logger.warn('Onboarding', 'Erreur lors de la sauvegarde localStorage:', error);
     }
   }
-
   /**
    * Chargement depuis localStorage
    */
@@ -910,11 +816,10 @@ class OnboardingService {
       const stored = localStorage.getItem(key);
       return stored ? JSON.parse(stored) : null;
     } catch (error) {
-      console.warn('Erreur lors du chargement localStorage:', error);
+      logger.warn('Onboarding', 'Erreur lors du chargement localStorage:', error);
       return null;
     }
   }
-
   /**
    * Nettoyage localStorage
    */
@@ -923,17 +828,15 @@ class OnboardingService {
       const key = `casskai_onboarding_${userId}`;
       localStorage.removeItem(key);
     } catch (error) {
-      console.warn('Erreur lors du nettoyage localStorage:', error);
+      logger.warn('Onboarding', 'Erreur lors du nettoyage localStorage:', error);
     }
   }
-
   /**
    * Récupération d'une session active
    */
   private async getActiveSession(userId: string): Promise<OnboardingResponse<OnboardingSession>> {
     // Simuler la récupération d'une session active
     await this.simulateDbOperation(50);
-    
     const cachedData = this.getCachedData(userId);
     if (cachedData) {
       const session: OnboardingSession = {
@@ -945,10 +848,8 @@ class OnboardingService {
       };
       return { success: true, data: session };
     }
-
     return { success: false, error: 'Aucune session active trouvée' };
   }
-
   /**
    * Création d'entreprise à partir des données d'onboarding
    */
@@ -959,10 +860,8 @@ class OnboardingService {
     try {
       // Simuler la création d'entreprise
       await this.simulateDbOperation(500);
-      
       // Générer un ID d'entreprise
       const companyId = `company_${userId}_${Date.now()}`;
-      
       // Simuler l'insertion en base de données
       const companyData = {
         id: companyId,
@@ -974,9 +873,7 @@ class OnboardingService {
         createdBy: userId,
         createdAt: new Date().toISOString()
       };
-
-      console.warn('Entreprise créée:', companyData);
-      
+      logger.warn('Onboarding', 'Entreprise créée:', companyData);
       return {
         success: true,
         data: { companyId }
@@ -988,14 +885,12 @@ class OnboardingService {
       };
     }
   }
-
   /**
    * Obtient les métriques d'onboarding
    */
   async getOnboardingMetrics(): Promise<OnboardingResponse<OnboardingMetrics>> {
     try {
       await this.simulateDbOperation(200);
-      
       // Simuler des métriques
       const metrics: OnboardingMetrics = {
         totalSessions: 1250,
@@ -1010,7 +905,6 @@ class OnboardingService {
           { stepId: 'complete', completionRate: 78.4, averageTime: 0.5 }
         ]
       };
-      
       return {
         success: true,
         data: metrics
@@ -1022,7 +916,6 @@ class OnboardingService {
       };
     }
   }
-
   /**
    * Obtient le progrès d'onboarding pour un utilisateur
    */
@@ -1035,18 +928,15 @@ class OnboardingService {
           error: 'Données d\'onboarding non trouvées'
         };
       }
-
       const data = dataResponse.data;
       const steps = this.getOnboardingSteps();
       const currentStepIndex = steps.findIndex(step => step.id === data.currentStepId);
-      
       const progress: OnboardingProgress = {
         totalSteps: steps.length,
         completedSteps: data.completedSteps.length,
         currentStepIndex: Math.max(0, currentStepIndex),
         percentage: data.progress
       };
-      
       return {
         success: true,
         data: progress
@@ -1058,14 +948,12 @@ class OnboardingService {
       };
     }
   }
-
   /**
    * Nettoie le cache (utile pour les tests)
    */
   clearCache(): void {
     this.cache.clear();
   }
-
   /**
    * Réinitialise une session d'onboarding
    */
@@ -1074,7 +962,6 @@ class OnboardingService {
       // Nettoyer le cache et localStorage
       this.cache.delete(userId);
       this.clearLocalStorageData(userId);
-      
       // Reinitialiser
       return await this.initializeOnboarding(userId);
     } catch (error) {
@@ -1085,7 +972,6 @@ class OnboardingService {
     }
   }
 }
-
 // Instance singleton
 export const onboardingService = OnboardingService.getInstance();
 export default onboardingService;

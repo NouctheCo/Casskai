@@ -73,6 +73,9 @@ const LazyTeamManagementGuide = React.lazy(() => import('@/pages/docs/TeamManage
 // Nouveaux outils financiers
 const LazyTaxSimulator = React.lazy(() => import('@/pages/Reports/TaxSimulator'));
 const LazyLoanSimulator = React.lazy(() => import('@/pages/Reports/LoanSimulator'));
+const LazyRegulatoryDocuments = React.lazy(() => import('@/pages/Reports/regulatory/RegulatoryDocuments'));
+const LazyComplianceDashboard = React.lazy(() => import('@/pages/Reports/regulatory/ComplianceDashboard'));
+const LazyRegulatoryDocumentsPage = React.lazy(() => import('@/pages/RegulatoryDocumentsPage'));
 
 const AppRouter: React.FC = () => {
   const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding, currentCompany, userCompanies } = useAuth();
@@ -309,6 +312,20 @@ const AppRouter: React.FC = () => {
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
                   <LazyLoanSimulator />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="reports/regulatory" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyRegulatoryDocumentsPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="reports/compliance" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyComplianceDashboard />
                 </Suspense>
               </ProtectedRoute>
             } />

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Leave, Employee } from '@/services/hrService';
-
+import { logger } from '@/lib/logger';
 interface LeaveFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,7 +14,6 @@ interface LeaveFormModalProps {
   employees: Employee[];
   leave?: Leave | null;
 }
-
 export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
   isOpen,
   onClose,
@@ -30,11 +29,9 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
     reason: leave?.reason || '',
     notes: leave?.notes || '',
   });
-
   const [daysCount, setDaysCount] = useState(leave?.days_count || 0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   // Calculer le nombre de jours automatiquement
   useEffect(() => {
     if (formData.start_date && formData.end_date) {
@@ -45,14 +42,11 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
       setDaysCount(diffDays);
     }
   }, [formData.start_date, formData.end_date]);
-
   const validate = () => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.employee_id) newErrors.employee_id = 'Employé requis';
     if (!formData.start_date) newErrors.start_date = 'Date de début requise';
     if (!formData.end_date) newErrors.end_date = 'Date de fin requise';
-
     if (formData.start_date && formData.end_date) {
       const start = new Date(formData.start_date);
       const end = new Date(formData.end_date);
@@ -60,16 +54,12 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
         newErrors.end_date = 'La date de fin doit être après la date de début';
       }
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validate()) return;
-
     setIsSubmitting(true);
     try {
       const success = await onSubmit({
@@ -78,19 +68,16 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
         status: 'pending',
         type: formData.type as any,
       });
-
       if (success) {
         onClose();
       }
     } catch (error) {
-      console.error('Error submitting leave form:', error);
+      logger.error('LeaveFormModal', 'Error submitting leave form:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
-
   if (!isOpen) return null;
-
   const leaveTypes = {
     vacation: 'Congés payés',
     sick: 'Arrêt maladie',
@@ -99,7 +86,6 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
     paternity: 'Congé paternité',
     other: 'Autre'
   };
-
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
@@ -124,7 +110,6 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
             <X className="h-6 w-6" />
           </button>
         </div>
-
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-6">
@@ -150,7 +135,6 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{errors.employee_id}</p>
               )}
             </div>
-
             {/* Type de congé */}
             <div>
               <Label htmlFor="type">Type de congé *</Label>
@@ -170,7 +154,6 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
-
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -186,7 +169,6 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
                   <p className="text-sm text-red-500 mt-1">{errors.start_date}</p>
                 )}
               </div>
-
               <div>
                 <Label htmlFor="end_date">Date de fin *</Label>
                 <Input
@@ -201,7 +183,6 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
                 )}
               </div>
             </div>
-
             {/* Durée calculée */}
             {daysCount > 0 && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-900/20">
@@ -210,7 +191,6 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
                 </p>
               </div>
             )}
-
             {/* Raison */}
             <div>
               <Label htmlFor="reason">Raison</Label>
@@ -222,7 +202,6 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
                 rows={3}
               />
             </div>
-
             {/* Notes */}
             <div>
               <Label htmlFor="notes">Notes internes</Label>
@@ -234,7 +213,6 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
                 rows={2}
               />
             </div>
-
             {/* Info */}
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 dark:bg-amber-900/20">
               <p className="text-sm text-amber-900 dark:text-amber-100">
@@ -242,7 +220,6 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
               </p>
             </div>
           </div>
-
           {/* Footer */}
           <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
             <Button

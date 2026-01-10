@@ -9,11 +9,10 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-
+import { logger } from '@/lib/logger';
 export interface User {
   id: string;
   email: string;
@@ -32,14 +31,12 @@ export interface User {
   phoneNumber?: string;
   invitedBy?: string | null;
 }
-
 export interface UserRole {
   id: string;
   name: string;
   level: number;
   permissions: string[];
 }
-
 export interface CreateUserData {
   email: string;
   firstName: string;
@@ -51,7 +48,6 @@ export interface CreateUserData {
   companyId: string;
   invitedBy?: string;
 }
-
 export interface UpdateUserData {
   firstName?: string;
   lastName?: string;
@@ -61,7 +57,6 @@ export interface UpdateUserData {
   phoneNumber?: string;
   avatar?: string | null;
 }
-
 export interface Invitation {
   id: string;
   email: string;
@@ -74,7 +69,6 @@ export interface Invitation {
   createdAt: string;
   message?: string;
 }
-
 export interface CreateInvitationData {
   email: string;
   role: UserRole;
@@ -82,7 +76,6 @@ export interface CreateInvitationData {
   companyId: string;
   message?: string;
 }
-
 export interface Activity {
   id: string;
   userId: string;
@@ -94,7 +87,6 @@ export interface Activity {
   userAgent: string;
   timestamp: string;
 }
-
 export interface UserStats {
   total: number;
   active: number;
@@ -106,19 +98,15 @@ export interface UserStats {
   recentSignups: number;
   activeToday: number;
 }
-
 export function useUserManagement(companyId: string) {
   const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   // Get all users for a company
   const getUsers = useCallback(async (): Promise<User[]> => {
     if (!currentUser || !companyId) return [];
-
     setLoading(true);
     setError(null);
-
     try {
       const { data: users, error: usersError } = await supabase
         .from('user_companies')
@@ -140,9 +128,7 @@ export function useUserManagement(companyId: string) {
           )
         `)
         .eq('company_id', companyId);
-
       if (usersError) throw usersError;
-
       // Transform data to match User interface
       const transformedUsers = (users || [])
         .filter(uc => uc.users)
@@ -150,7 +136,6 @@ export function useUserManagement(companyId: string) {
           // Supabase returns nested objects in array format, take first element
           const user = Array.isArray(uc.users) ? uc.users[0] : uc.users;
           if (!user) return null;
-
           return {
           id: user.id,
           email: user.email,
@@ -176,25 +161,21 @@ export function useUserManagement(companyId: string) {
         } as User;
         })
         .filter((u: User | null): u is User => u !== null);
-
       return transformedUsers as User[];
     } catch (error) {
       const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to fetch users';
       setError(errorMessage);
-      console.error('...', error);
+      logger.error('UseUserManagement', '...', error);
       return [];
     } finally {
       setLoading(false);
     }
   }, [currentUser, companyId]);
-
   // Get user by ID
   const getUserById = useCallback(async (userId: string): Promise<User | null> => {
     if (!currentUser || !companyId) return null;
-
     setLoading(true);
     setError(null);
-
     try {
       const { data: userCompany, error: userError } = await supabase
         .from('user_companies')
@@ -218,14 +199,11 @@ export function useUserManagement(companyId: string) {
         .eq('company_id', companyId)
         .eq('user_id', userId)
         .single();
-
       if (userError) throw userError;
       if (!userCompany?.users) return null;
-
       // Supabase returns nested objects in array format, take first element
       const userRecord = Array.isArray(userCompany.users) ? userCompany.users[0] : userCompany.users;
       if (!userRecord) return null;
-
       const user: User = {
         id: userRecord.id,
         email: userRecord.email,
@@ -249,30 +227,25 @@ export function useUserManagement(companyId: string) {
         phoneNumber: userRecord.phone_number,
         invitedBy: null
       };
-
       return user;
     } catch (error) {
       const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to fetch user';
       setError(errorMessage);
-      console.error('...', error);
+      logger.error('UseUserManagement', '...', error);
       return null;
     } finally {
       setLoading(false);
     }
   }, [currentUser, companyId]);
-
   // Create invitation (can't create user directly - invite them instead)
   const createInvitation = useCallback(async (invitationData: CreateInvitationData): Promise<Invitation | null> => {
     if (!currentUser) throw new Error('User not authenticated');
-
     setLoading(true);
     setError(null);
-
     try {
       // Create invitation record
       const token = generateInvitationToken();
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-
       const { data: invitation, error: inviteError } = await supabase
         .from('user_invitations')
         .insert({
@@ -287,9 +260,7 @@ export function useUserManagement(companyId: string) {
         })
         .select()
         .single();
-
       if (inviteError) throw inviteError;
-
       // Log activity
       await logActivity(
         currentUser.id,
@@ -298,7 +269,6 @@ export function useUserManagement(companyId: string) {
         invitation.id,
         { email: invitationData.email, role: invitationData.role.name }
       );
-
       return {
         id: invitation.id,
         email: invitation.email,
@@ -314,20 +284,17 @@ export function useUserManagement(companyId: string) {
     } catch (error) {
       const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to create invitation';
       setError(errorMessage);
-      console.error('...', error);
+      logger.error('UseUserManagement', '...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
   }, [currentUser]);
-
   // Update user
   const updateUser = useCallback(async (userId: string, updates: UpdateUserData): Promise<User | null> => {
     if (!currentUser) throw new Error('User not authenticated');
-
     setLoading(true);
     setError(null);
-
     try {
       // Update user profile
       const userUpdates: any = {};
@@ -335,16 +302,13 @@ export function useUserManagement(companyId: string) {
       if (updates.lastName !== undefined) userUpdates.last_name = updates.lastName;
       if (updates.phoneNumber !== undefined) userUpdates.phone_number = updates.phoneNumber;
       if (updates.avatar !== undefined) userUpdates.avatar_url = updates.avatar;
-
       if (Object.keys(userUpdates).length > 0) {
         const { error: userError } = await supabase
           .from('users')
           .update(userUpdates)
           .eq('id', userId);
-
         if (userError) throw userError;
       }
-
       // Update user-company relationship if role changed
       if (updates.role) {
         const { error: roleError } = await supabase
@@ -352,10 +316,8 @@ export function useUserManagement(companyId: string) {
           .update({ role: updates.role.id })
           .eq('user_id', userId)
           .eq('company_id', companyId);
-
         if (roleError) throw roleError;
       }
-
       // Log activity
       await logActivity(
         currentUser.id,
@@ -364,26 +326,22 @@ export function useUserManagement(companyId: string) {
         userId,
         { changes: Object.keys(updates) }
       );
-
       // Return updated user
       return await getUserById(userId);
     } catch (error) {
       const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to update user';
       setError(errorMessage);
-      console.error('...', error);
+      logger.error('UseUserManagement', '...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
   }, [currentUser, companyId, getUserById]);
-
   // Toggle user status
   const toggleUserStatus = useCallback(async (userId: string): Promise<User | null> => {
     if (!currentUser) throw new Error('User not authenticated');
-
     setLoading(true);
     setError(null);
-
     try {
       // Get current status
       const { data: userCompany, error: fetchError } = await supabase
@@ -392,20 +350,15 @@ export function useUserManagement(companyId: string) {
         .eq('user_id', userId)
         .eq('company_id', companyId)
         .single();
-
       if (fetchError) throw fetchError;
-
       const newStatus = !userCompany.is_active;
-
       // Update status
       const { error: updateError } = await supabase
         .from('user_companies')
         .update({ is_active: newStatus })
         .eq('user_id', userId)
         .eq('company_id', companyId);
-
       if (updateError) throw updateError;
-
       // Log activity
       await logActivity(
         currentUser.id,
@@ -414,35 +367,29 @@ export function useUserManagement(companyId: string) {
         userId,
         { newStatus: newStatus ? 'active' : 'inactive', previousStatus: newStatus ? 'inactive' : 'active' }
       );
-
       // Return updated user
       return await getUserById(userId);
     } catch (error) {
       const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to toggle user status';
       setError(errorMessage);
-      console.error('...', error);
+      logger.error('UseUserManagement', '...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
   }, [currentUser, companyId, getUserById]);
-
   // Get invitations
   const getInvitations = useCallback(async (): Promise<Invitation[]> => {
     if (!currentUser || !companyId) return [];
-
     setLoading(true);
     setError(null);
-
     try {
       const { data: invitations, error: invitationsError } = await supabase
         .from('user_invitations')
         .select('*')
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
-
       if (invitationsError) throw invitationsError;
-
       return invitations.map(inv => ({
         id: inv.id,
         email: inv.email,
@@ -463,23 +410,19 @@ export function useUserManagement(companyId: string) {
     } catch (error) {
       const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to fetch invitations';
       setError(errorMessage);
-      console.error('...', error);
+      logger.error('UseUserManagement', '...', error);
       return [];
     } finally {
       setLoading(false);
     }
   }, [currentUser, companyId]);
-
   // Resend invitation
   const resendInvitation = useCallback(async (invitationId: string): Promise<Invitation | null> => {
     if (!currentUser) throw new Error('User not authenticated');
-
     setLoading(true);
     setError(null);
-
     try {
       const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-
       const { data: invitation, error: updateError } = await supabase
         .from('user_invitations')
         .update({
@@ -490,12 +433,9 @@ export function useUserManagement(companyId: string) {
         .eq('company_id', companyId)
         .select()
         .single();
-
       if (updateError) throw updateError;
-
       // Log activity
       await logActivity(currentUser.id, 'invitation.resend', 'invitations', invitationId);
-
       return {
         id: invitation.id,
         email: invitation.email,
@@ -516,48 +456,40 @@ export function useUserManagement(companyId: string) {
     } catch (error) {
       const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to resend invitation';
       setError(errorMessage);
-      console.error('...', error);
+      logger.error('UseUserManagement', '...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
   }, [currentUser, companyId]);
-
   // Cancel invitation
   const cancelInvitation = useCallback(async (invitationId: string): Promise<void> => {
     if (!currentUser) throw new Error('User not authenticated');
-
     setLoading(true);
     setError(null);
-
     try {
       const { error: updateError } = await supabase
         .from('user_invitations')
         .update({ status: 'cancelled' })
         .eq('id', invitationId)
         .eq('company_id', companyId);
-
       if (updateError) throw updateError;
-
       // Log activity
       await logActivity(currentUser.id, 'invitation.cancel', 'invitations', invitationId);
     } catch (error) {
       const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to cancel invitation';
       setError(errorMessage);
-      console.error('...', error);
+      logger.error('UseUserManagement', '...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
   }, [currentUser, companyId]);
-
   // Get user activities
   const getActivities = useCallback(async (limit: number = 50): Promise<Activity[]> => {
     if (!currentUser || !companyId) return [];
-
     setLoading(true);
     setError(null);
-
     try {
       const { data: activities, error: activitiesError } = await supabase
         .from('user_activities')
@@ -565,9 +497,7 @@ export function useUserManagement(companyId: string) {
         .eq('company_id', companyId)
         .order('created_at', { ascending: false })
         .limit(limit);
-
       if (activitiesError) throw activitiesError;
-
       return activities.map(activity => ({
         id: activity.id,
         userId: activity.user_id,
@@ -582,13 +512,12 @@ export function useUserManagement(companyId: string) {
     } catch (error) {
       const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to fetch activities';
       setError(errorMessage);
-      console.error('...', error);
+      logger.error('UseUserManagement', '...', error);
       return [];
     } finally {
       setLoading(false);
     }
   }, [currentUser, companyId]);
-
   // Get user statistics
   const getUserStats = useCallback(async (): Promise<UserStats> => {
     if (!currentUser || !companyId) {
@@ -604,10 +533,8 @@ export function useUserManagement(companyId: string) {
         activeToday: 0
       };
     }
-
     try {
       const users = await getUsers();
-
       const stats: UserStats = {
         total: users.length,
         active: users.filter(u => u.status === 'active').length,
@@ -623,22 +550,19 @@ export function useUserManagement(companyId: string) {
           u.lastLoginAt && new Date(u.lastLoginAt) > new Date(Date.now() - 24 * 60 * 60 * 1000)
         ).length
       };
-
       // Count by role
       users.forEach(user => {
         const roleName = user.role?.name || 'Unknown';
         stats.byRole[roleName] = (stats.byRole[roleName] || 0) + 1;
       });
-
       // Count by department
       users.forEach(user => {
         const department = user.department || 'Unknown';
         stats.byDepartment[department] = (stats.byDepartment[department] || 0) + 1;
       });
-
       return stats;
     } catch (error) {
-      console.error('...', error);
+      logger.error('UseUserManagement', '...', error);
       return {
         total: 0,
         active: 0,
@@ -652,11 +576,9 @@ export function useUserManagement(companyId: string) {
       };
     }
   }, [currentUser, companyId, getUsers]);
-
   // Search users
   const searchUsers = useCallback(async (query: string): Promise<User[]> => {
     if (!query.trim()) return [];
-
     try {
       const users = await getUsers();
       return users.filter(user => {
@@ -664,29 +586,23 @@ export function useUserManagement(companyId: string) {
         return searchableText.includes(query.toLowerCase());
       });
     } catch (error) {
-      console.error('...', error);
+      logger.error('UseUserManagement', '...', error);
       return [];
     }
   }, [getUsers]);
-
   // Permission checking
   const hasPermission = useCallback((user: User, module: string, action: string): boolean => {
     if (!user || !user.permissions) return false;
-    
     // Super admin has all permissions
     if (user.permissions.includes('*:*')) return true;
-    
     // Check specific permission
     const requiredPermission = `${module}:${action}`;
     if (user.permissions.includes(requiredPermission)) return true;
-    
     // Check module-level permission
     const modulePermission = `${module}:manage`;
     if (user.permissions.includes(modulePermission)) return true;
-    
     return false;
   }, []);
-
   return {
     loading,
     error,
@@ -705,7 +621,6 @@ export function useUserManagement(companyId: string) {
     refresh: getUsers,
   };
 }
-
 // Utility functions
 async function logActivity(
   userId: string,
@@ -727,14 +642,12 @@ async function logActivity(
         user_agent: navigator.userAgent
       });
   } catch (error) {
-    console.error('Failed to log activity:', error);
+    logger.error('UseUserManagement', 'Failed to log activity:', error);
   }
 }
-
 function generateInvitationToken(): string {
   return `inv_${  Date.now()  }_${  Math.random().toString(36).substr(2, 16)}`;
 }
-
 function getRoleName(roleId: string): string {
   const roleNames: Record<string, string> = {
     'owner': 'Propriétaire',
@@ -746,7 +659,6 @@ function getRoleName(roleId: string): string {
   };
   return roleNames[roleId] || roleId;
 }
-
 function getRoleLevel(roleId: string): number {
   const roleLevels: Record<string, number> = {
     'owner': 1,
@@ -758,7 +670,6 @@ function getRoleLevel(roleId: string): number {
   };
   return roleLevels[roleId] || 5;
 }
-
 function getRolePermissions(roleId: string): string[] {
   const rolePermissions: Record<string, string[]> = {
     'owner': ['*:*'],

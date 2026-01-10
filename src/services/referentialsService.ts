@@ -9,14 +9,12 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // src/services/referentialsService.ts
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 // =============================================
 // TYPES POUR LES RÉFÉRENTIELS DYNAMIQUES
 // =============================================
-
 export interface CountryReferential {
   code: string;
   name: string;
@@ -31,7 +29,6 @@ export interface CountryReferential {
   is_active: boolean;
   priority_order: number;
 }
-
 export interface SectorReferential {
   sector_code: string;
   sector_name: string;
@@ -43,7 +40,6 @@ export interface SectorReferential {
   is_active: boolean;
   priority_order: number;
 }
-
 export interface CompanySizeReferential {
   size_code: string;
   size_name: string;
@@ -55,7 +51,6 @@ export interface CompanySizeReferential {
   is_active: boolean;
   priority_order: number;
 }
-
 export interface TimezoneReferential {
   timezone_name: string;
   timezone_display: string;
@@ -65,7 +60,6 @@ export interface TimezoneReferential {
   is_active: boolean;
   is_popular: boolean;
 }
-
 export interface CurrencyReferential {
   currency_code: string;
   currency_name: string;
@@ -75,7 +69,6 @@ export interface CurrencyReferential {
   is_major: boolean;
   is_active: boolean;
 }
-
 export interface TaxRateReferential {
   country_code: string;
   tax_name: string;
@@ -84,13 +77,10 @@ export interface TaxRateReferential {
   is_default: boolean;
   is_active: boolean;
 }
-
 // =============================================
 // SERVICE RÉFÉRENTIELS DYNAMIQUES
 // =============================================
-
 class ReferentialsService {
-
   // PAYS ET CONFIGURATION
   async getCountries(): Promise<CountryReferential[]> {
     try {
@@ -99,36 +89,30 @@ class ReferentialsService {
         .select('*')
         .eq('is_active', true)
         .order('priority_order', { ascending: true });
-
       if (error) {
-        console.error('Erreur récupération pays:', error);
+        logger.error('Referentials', 'Erreur récupération pays:', error);
         return this.getFallbackCountries();
       }
-
       return data || [];
     } catch (error) {
-      console.error('Erreur service pays:', error instanceof Error ? error.message : String(error));
+      logger.error('Referentials', 'Erreur service pays:', error instanceof Error ? error.message : String(error));
       return this.getFallbackCountries();
     }
   }
-
   async getCountryConfig(countryCode: string): Promise<any> {
     try {
       const { data, error } = await supabase
         .rpc('get_country_config', { country_code_param: countryCode });
-
       if (error || !data) {
-        console.error('Erreur config pays:', error);
+        logger.error('Referentials', 'Erreur config pays:', error);
         return null;
       }
-
       return data;
     } catch (error) {
-      console.error('Erreur service config pays:', error instanceof Error ? error.message : String(error));
+      logger.error('Referentials', 'Erreur service config pays:', error instanceof Error ? error.message : String(error));
       return null;
     }
   }
-
   // SECTEURS D'ACTIVITÉ
   async getSectors(): Promise<SectorReferential[]> {
     try {
@@ -137,19 +121,16 @@ class ReferentialsService {
         .select('*')
         .eq('is_active', true)
         .order('priority_order', { ascending: true });
-
       if (error) {
-        console.error('Erreur récupération secteurs:', error);
+        logger.error('Referentials', 'Erreur récupération secteurs:', error);
         return this.getFallbackSectors();
       }
-
       return data || [];
     } catch (error) {
-      console.error('Erreur service secteurs:', error instanceof Error ? error.message : String(error));
+      logger.error('Referentials', 'Erreur service secteurs:', error instanceof Error ? error.message : String(error));
       return this.getFallbackSectors();
     }
   }
-
   async searchSectors(searchTerm?: string): Promise<SectorReferential[]> {
     try {
       const { data, error } = await supabase
@@ -157,19 +138,16 @@ class ReferentialsService {
           search_term: searchTerm || null,
           limit_param: 50
         });
-
       if (error) {
-        console.error('Erreur recherche secteurs:', error);
+        logger.error('Referentials', 'Erreur recherche secteurs:', error);
         return this.getFallbackSectors();
       }
-
       return data || [];
     } catch (error) {
-      console.error('Erreur service recherche secteurs:', error instanceof Error ? error.message : String(error));
+      logger.error('Referentials', 'Erreur service recherche secteurs:', error instanceof Error ? error.message : String(error));
       return this.getFallbackSectors();
     }
   }
-
   // TAILLES D'ENTREPRISE
   async getCompanySizes(): Promise<CompanySizeReferential[]> {
     try {
@@ -178,19 +156,16 @@ class ReferentialsService {
         .select('*')
         .eq('is_active', true)
         .order('priority_order', { ascending: true });
-
       if (error) {
-        console.error('Erreur récupération tailles:', error);
+        logger.error('Referentials', 'Erreur récupération tailles:', error);
         return this.getFallbackCompanySizes();
       }
-
       return data || [];
     } catch (error) {
-      console.error('Erreur service tailles:', error instanceof Error ? error.message : String(error));
+      logger.error('Referentials', 'Erreur service tailles:', error instanceof Error ? error.message : String(error));
       return this.getFallbackCompanySizes();
     }
   }
-
   // FUSEAUX HORAIRES
   async getTimezones(): Promise<TimezoneReferential[]> {
     try {
@@ -200,19 +175,16 @@ class ReferentialsService {
         .eq('is_active', true)
         .order('is_popular', { ascending: false })
         .order('timezone_display', { ascending: true });
-
       if (error) {
-        console.error('Erreur récupération fuseaux:', error);
+        logger.error('Referentials', 'Erreur récupération fuseaux:', error);
         return this.getFallbackTimezones();
       }
-
       return data || [];
     } catch (error) {
-      console.error('Erreur service fuseaux:', error instanceof Error ? error.message : String(error));
+      logger.error('Referentials', 'Erreur service fuseaux:', error instanceof Error ? error.message : String(error));
       return this.getFallbackTimezones();
     }
   }
-
   async getPopularTimezones(): Promise<TimezoneReferential[]> {
     try {
       const { data, error } = await supabase
@@ -221,19 +193,16 @@ class ReferentialsService {
         .eq('is_active', true)
         .eq('is_popular', true)
         .order('timezone_display', { ascending: true });
-
       if (error) {
-        console.error('Erreur récupération fuseaux populaires:', error);
+        logger.error('Referentials', 'Erreur récupération fuseaux populaires:', error);
         return this.getFallbackTimezones();
       }
-
       return data || [];
     } catch (error) {
-      console.error('Erreur service fuseaux populaires:', error instanceof Error ? error.message : String(error));
+      logger.error('Referentials', 'Erreur service fuseaux populaires:', error instanceof Error ? error.message : String(error));
       return this.getFallbackTimezones();
     }
   }
-
   // DEVISES
   async getCurrencies(): Promise<CurrencyReferential[]> {
     try {
@@ -243,19 +212,16 @@ class ReferentialsService {
         .eq('is_active', true)
         .order('is_major', { ascending: false })
         .order('currency_name', { ascending: true });
-
       if (error) {
-        console.error('Erreur récupération devises:', error);
+        logger.error('Referentials', 'Erreur récupération devises:', error);
         return this.getFallbackCurrencies();
       }
-
       return data || [];
     } catch (error) {
-      console.error('Erreur service devises:', error instanceof Error ? error.message : String(error));
+      logger.error('Referentials', 'Erreur service devises:', error instanceof Error ? error.message : String(error));
       return this.getFallbackCurrencies();
     }
   }
-
   // TAUX DE TAXES
   async getTaxRates(countryCode: string): Promise<TaxRateReferential[]> {
     try {
@@ -266,23 +232,19 @@ class ReferentialsService {
         .eq('is_active', true)
         .order('is_default', { ascending: false })
         .order('tax_rate', { ascending: false });
-
       if (error) {
-        console.error('Erreur récupération taxes:', error);
+        logger.error('Referentials', 'Erreur récupération taxes:', error);
         return [];
       }
-
       return data || [];
     } catch (error) {
-      console.error('Erreur service taxes:', error instanceof Error ? error.message : String(error));
+      logger.error('Referentials', 'Erreur service taxes:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
-
   // =============================================
   // FALLBACKS EN CAS D'ERREUR (DONNÉES HARDCODÉES)
   // =============================================
-
   private getFallbackCountries(): CountryReferential[] {
     return [
       // Pays prioritaires (Afrique francophone + Europe + Amérique du Nord + Ghana/Nigeria)
@@ -453,7 +415,6 @@ class ReferentialsService {
       }
     ];
   }
-
   private getFallbackSectors(): SectorReferential[] {
     return [
       {
@@ -479,7 +440,6 @@ class ReferentialsService {
       }
     ];
   }
-
   private getFallbackCompanySizes(): CompanySizeReferential[] {
     return [
       {
@@ -502,7 +462,6 @@ class ReferentialsService {
       }
     ];
   }
-
   private getFallbackTimezones(): TimezoneReferential[] {
     return [
       {
@@ -521,7 +480,6 @@ class ReferentialsService {
       }
     ];
   }
-
   private getFallbackCurrencies(): CurrencyReferential[] {
     return [
       {
@@ -543,12 +501,9 @@ class ReferentialsService {
     ];
   }
 }
-
 // Export du service singleton
 export const referentialsService = new ReferentialsService();
-
 // =============================================
 // HOOKS REACT POUR L'UTILISATION FACILE
 // =============================================
-
 export { referentialsService as default };

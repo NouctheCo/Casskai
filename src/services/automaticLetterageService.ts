@@ -9,13 +9,11 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { LetterageRule as _LetterageRule, LetterageCriteria, LetterageMatch, FECEntry as _FECEntry } from '../types/accounting-import.types';
 import { supabase } from '../lib/supabase';
-
+import { logger } from '@/lib/logger';
 // Type alias to use LetterageRule without underscore in the code
 type LetterageRule = _LetterageRule;
-
 interface AccountingEntry extends Record<string, unknown> {
   id?: string;
   account?: string;
@@ -64,19 +62,16 @@ interface AccountingEntry extends Record<string, unknown> {
     company_id?: string;
   }>;
 }
-
 interface LetterGroup {
   letterCode: string;
   entry_date: string;
   entriesCount: number;
   totalAmount: number;
 }
-
 /**
  * Service de lettrage automatique des comptes
  */
 export class AutomaticLetterageService {
-
   /**
    * Règles de lettrage prédéfinies
    */
@@ -126,7 +121,6 @@ export class AutomaticLetterageService {
       autoValidate: true
     }
   ];
-
   /**
    * Lance le lettrage automatique pour une entreprise
    */
@@ -150,26 +144,21 @@ export class AutomaticLetterageService {
     const filteredRules = accountPattern 
       ? rules.filter(rule => this.matchesPattern(rule.accountPattern, accountPattern))
       : rules;
-
     let totalProcessed = 0;
     let totalMatched = 0;
     let totalLettered = 0;
     const results: Array<{ ruleId: string; ruleName: string; matches: LetterageMatch[]; autoValidated: number }> = [];
-
     for (const rule of filteredRules) {
-      console.warn(`Processing rule: ${rule.name}`);
-      
+      logger.warn('AutomaticLetterage', `Processing rule: ${rule.name}`);
       const ruleResult = await this.processLetterageRule(
         companyId, 
         rule, 
         dateFrom, 
         dateTo
       );
-
       totalProcessed += ruleResult.processed;
       totalMatched += ruleResult.matches.length;
       totalLettered += ruleResult.autoValidated;
-
       results.push({
         ruleId: rule.id,
         ruleName: rule.name,
@@ -177,7 +166,6 @@ export class AutomaticLetterageService {
         autoValidated: ruleResult.autoValidated
       });
     }
-
     return {
       totalProcessed,
       matched: totalMatched,
@@ -185,7 +173,6 @@ export class AutomaticLetterageService {
       results
     };
   }
-
   /**
    * Traite une règle de lettrage spécifique
    */
@@ -206,25 +193,20 @@ export class AutomaticLetterageService {
       dateFrom, 
       dateTo
     );
-
     if (unlettered.length === 0) {
       return { processed: 0, matches: [], autoValidated: 0 };
     }
-
     // Groupement par compte pour optimiser le traitement
     const entriesByAccount = this.groupEntriesByAccount(unlettered);
     const matches: LetterageMatch[] = [];
     let autoValidated = 0;
-
     for (const [accountId, entries] of entriesByAccount) {
       const accountMatches = await this.findMatchesForAccount(
         accountId, 
         entries, 
         rule
       );
-
       matches.push(...accountMatches);
-
       // Auto-validation si configurée
       if (rule.autoValidate) {
         for (const match of accountMatches) {
@@ -235,14 +217,12 @@ export class AutomaticLetterageService {
         }
       }
     }
-
     return {
       processed: unlettered.length,
       matches,
       autoValidated
     };
   }
-
   /**
    * Récupère les écritures non lettrées
    */
@@ -285,18 +265,13 @@ export class AutomaticLetterageService {
       .eq('journal_entries.company_id', companyId)
       .is('letterage', null) // Non lettrées
       .like('accounts.number', accountPattern.replace('%', '*'));
-
     if (dateFrom) query = query.gte('journal_entries.entry_date', dateFrom);
     if (dateTo) query = query.lte('journal_entries.entry_date', dateTo);
-
     const result = await query.order('journal_entries.entry_date');
-
     if (!result.data) return [];
-
     return result.data.map((item: AccountingEntry) => {
       const accountFromRelation = item.accounts as { number?: string; name?: string };
       const journalEntry = item.journal_entries as { id?: string; entry_date?: string; reference?: string; description?: string };
-
       return {
         id: item.id as string,
         accountId: item.account_id as string,
@@ -313,13 +288,11 @@ export class AutomaticLetterageService {
       };
     });
   }
-
   /**
    * Groupe les écritures par compte
    */
   private static groupEntriesByAccount(entries: AccountingEntry[]): Map<string, AccountingEntry[]> {
     const groups = new Map<string, AccountingEntry[]>();
-
     entries.forEach(entry => {
       const accountId = entry.accountId;
       if (!accountId) return; // Skip entries without accountId
@@ -328,10 +301,8 @@ export class AutomaticLetterageService {
       }
       groups.get(accountId)!.push(entry);
     });
-
     return groups;
   }
-
   /**
    * Trouve les correspondances pour un compte donné
    */
@@ -341,24 +312,19 @@ export class AutomaticLetterageService {
     rule: LetterageRule
   ): Promise<LetterageMatch[]> {
     const matches: LetterageMatch[] = [];
-
     // Séparation débit/crédit
     const debits = entries.filter(e => (e.debitAmount ?? 0) > 0);
     const credits = entries.filter(e => (e.creditAmount ?? 0) > 0);
-
     // Recherche de correspondances 1:1 (exact)
     const exactMatches = this.findExactMatches(debits, credits, rule);
     matches.push(...exactMatches);
-
     // Recherche de correspondances multiples (1:n, n:1, n:n)
     if (rule.criteria.some(c => !c.exactMatch)) {
       const multipleMatches = await this.findMultipleMatches(debits, credits, rule);
       matches.push(...multipleMatches);
     }
-
     return matches;
   }
-
   /**
    * Recherche de correspondances exactes 1:1
    */
@@ -369,11 +335,9 @@ export class AutomaticLetterageService {
   ): LetterageMatch[] {
     const matches: LetterageMatch[] = [];
     const usedCredits = new Set<string>();
-
     debits.forEach(debit => {
       credits.forEach(credit => {
         if (!credit.id || usedCredits.has(credit.id)) return;
-
         const match = this.evaluateMatch([debit], [credit], rule);
         if (match && match.confidence >= 0.8 && match.difference <= rule.tolerance) {
           matches.push(match);
@@ -381,10 +345,8 @@ export class AutomaticLetterageService {
         }
       });
     });
-
     return matches;
   }
-
   /**
    * Recherche de correspondances multiples
    */
@@ -394,7 +356,6 @@ export class AutomaticLetterageService {
     rule: LetterageRule
   ): Promise<LetterageMatch[]> {
     const matches: LetterageMatch[] = [];
-
     // Correspondance n:1 (plusieurs débits pour un crédit)
     credits.forEach(credit => {
       if (credit.creditAmount === undefined) return;
@@ -406,7 +367,6 @@ export class AutomaticLetterageService {
         }
       });
     });
-
     // Correspondance 1:n (un débit pour plusieurs crédits)
     debits.forEach(debit => {
       if (debit.debitAmount === undefined) return;
@@ -418,10 +378,8 @@ export class AutomaticLetterageService {
         }
       });
     });
-
     return matches;
   }
-
   /**
    * Trouve les combinaisons de débits qui correspondent à un montant
    */
@@ -432,10 +390,8 @@ export class AutomaticLetterageService {
   ): AccountingEntry[][] {
     const combinations: AccountingEntry[][] = [];
     const maxItems = Math.min(debits.length, 5); // Limite pour éviter l'explosion combinatoire
-
     for (let size = 2; size <= maxItems; size++) {
       const combos = this.generateCombinations(debits, size);
-      
       combos.forEach(combo => {
         const total = combo.reduce((sum, item) => sum + (item.debitAmount ?? 0), 0);
         if (Math.abs(total - targetAmount) <= tolerance) {
@@ -443,10 +399,8 @@ export class AutomaticLetterageService {
         }
       });
     }
-
     return combinations;
   }
-
   /**
    * Trouve les combinaisons de crédits qui correspondent à un montant
    */
@@ -457,10 +411,8 @@ export class AutomaticLetterageService {
   ): AccountingEntry[][] {
     const combinations: AccountingEntry[][] = [];
     const maxItems = Math.min(credits.length, 5);
-
     for (let size = 2; size <= maxItems; size++) {
       const combos = this.generateCombinations(credits, size);
-      
       combos.forEach(combo => {
         const total = combo.reduce((sum, item) => sum + (item.creditAmount ?? 0), 0);
         if (Math.abs(total - targetAmount) <= tolerance) {
@@ -468,29 +420,23 @@ export class AutomaticLetterageService {
         }
       });
     }
-
     return combinations;
   }
-
   /**
    * Génère les combinaisons d'éléments
    */
   private static generateCombinations<T>(arr: T[], size: number): T[][] {
     if (size > arr.length) return [];
     if (size === 1) return arr.map(item => [item]);
-
     const combinations: T[][] = [];
-    
     for (let i = 0; i <= arr.length - size; i++) {
       const rest = this.generateCombinations(arr.slice(i + 1), size - 1);
       rest.forEach(combo => {
         combinations.push([arr[i], ...combo]);
       });
     }
-
     return combinations;
   }
-
   /**
    * Évalue une correspondance potentielle
    */
@@ -502,13 +448,10 @@ export class AutomaticLetterageService {
     const totalDebit = debits.reduce((sum, item) => sum + (item.debitAmount ?? 0), 0);
     const totalCredit = credits.reduce((sum, item) => sum + (item.creditAmount ?? 0), 0);
     const difference = Math.abs(totalDebit - totalCredit);
-
     if (difference > rule.tolerance * 2) return null; // Écart trop important
-
     let confidence = 0;
     const maxPoints = rule.criteria.length;
     let points = 0;
-
     // Évaluation selon les critères
     rule.criteria.forEach(criterion => {
       switch (criterion.field) {
@@ -519,7 +462,6 @@ export class AutomaticLetterageService {
             points += 0.8;
           }
           break;
-
         case 'date': {
           const avgDateDiff = this.calculateAverageDateDifference(debits, credits);
           if (criterion.daysWindow && avgDateDiff <= criterion.daysWindow) {
@@ -527,13 +469,11 @@ export class AutomaticLetterageService {
           }
           break;
         }
-
         case 'reference':
           if (this.hasMatchingReference(debits, credits, criterion.exactMatch || false)) {
             points += 1;
           }
           break;
-
         case 'thirdParty':
           if (this.hasMatchingThirdParty(debits, credits)) {
             points += 1;
@@ -541,15 +481,11 @@ export class AutomaticLetterageService {
           break;
       }
     });
-
     confidence = points / maxPoints;
-
     // Bonus pour correspondance exacte
     if (difference === 0) confidence += 0.1;
-
     // Malus pour correspondances multiples
     if (debits.length > 1 || credits.length > 1) confidence -= 0.1;
-
     return {
       debitEntries: debits.map(d => d.id),
       creditEntries: credits.map(c => c.id),
@@ -558,16 +494,13 @@ export class AutomaticLetterageService {
       letterCode: this.generateLetterCode()
     };
   }
-
   /**
    * Calcule la différence moyenne de dates
    */
   private static calculateAverageDateDifference(debits: AccountingEntry[], credits: AccountingEntry[]): number {
     if (debits.length === 0 || credits.length === 0) return Infinity;
-
     let totalDiff = 0;
     let count = 0;
-
     debits.forEach(debit => {
       credits.forEach(credit => {
         const debitDate = new Date(debit.entry_date as any);
@@ -577,10 +510,8 @@ export class AutomaticLetterageService {
         count++;
       });
     });
-
     return count > 0 ? totalDiff / count : Infinity;
   }
-
   /**
    * Vérifie s'il y a une référence commune
    */
@@ -600,25 +531,19 @@ export class AutomaticLetterageService {
     }
     return false;
   }
-
   /**
    * Vérifie si les références correspondent (recherche floue)
    */
   private static referencesMatch(ref1: string | undefined, ref2: string | undefined): boolean {
     if (!ref1 || !ref2) return false;
-    
     const clean1 = ref1.replace(/[^\w]/g, '').toLowerCase();
     const clean2 = ref2.replace(/[^\w]/g, '').toLowerCase();
-    
     if (clean1.includes(clean2) || clean2.includes(clean1)) return true;
-    
     // Recherche de numéros communs
     const numbers1 = clean1.match(/\d{3,}/g) || [];
     const numbers2 = clean2.match(/\d{3,}/g) || [];
-    
     return numbers1.some(n1 => numbers2.some(n2 => n1 === n2));
   }
-
   /**
    * Vérifie s'il y a un tiers commun
    */
@@ -632,34 +557,28 @@ export class AutomaticLetterageService {
     }
     return false;
   }
-
   /**
    * Génère un code de lettrage unique
    */
   private static generateLetterCode(): string {
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let code = '';
-    
     for (let i = 0; i < 3; i++) {
       code += letters.charAt(Math.floor(Math.random() * letters.length));
     }
-    
     const numbers = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     return `${code}${numbers}`;
   }
-
   /**
    * Applique le lettrage à un match
    */
   private static async applyLetterage(match: LetterageMatch): Promise<void> {
     const allEntries = [...match.debitEntries, ...match.creditEntries];
-    
     await supabase
       .from('journal_entry_lines')
       .update({ letterage: match.letterCode })
       .in('id', allEntries);
   }
-
   /**
    * Récupère les règles de lettrage (par défaut + personnalisées)
    */
@@ -668,16 +587,12 @@ export class AutomaticLetterageService {
       .from('letterage_rules')
       .select('*')
       .eq('company_id', companyId);
-
     const rules = [...this.DEFAULT_RULES];
-    
     if (customRules.data) {
       rules.push(...customRules.data.map(this.mapSupabaseToRule));
     }
-
     return rules;
   }
-
   /**
    * Mapping des données Supabase vers LetterageRule
    */
@@ -691,7 +606,6 @@ export class AutomaticLetterageService {
       autoValidate: (data.auto_validate as boolean) || false
     };
   }
-
   /**
    * Vérifie si un pattern correspond
    */
@@ -699,7 +613,6 @@ export class AutomaticLetterageService {
     const regex = new RegExp(`^${  pattern.replace('%', '.*')  }$`);
     return regex.test(account);
   }
-
   /**
    * Dé-lettrage manuel
    */
@@ -713,13 +626,11 @@ export class AutomaticLetterageService {
       .eq('letterage', letterCode)
       .eq('journal_entries.company_id', companyId)
       .select('id');
-
     return {
       success: !result.error,
       unletteredCount: result.data?.length || 0
     };
   }
-
   /**
    * Rapport de lettrage
    */
@@ -764,27 +675,21 @@ export class AutomaticLetterageService {
         journal_entries!inner (entry_date, company_id)
       `)
       .eq('journal_entries.company_id', companyId);
-
     if (accountPattern) {
       query = query.like('account_number', accountPattern.replace('%', '*'));
     }
     if (dateFrom) query = query.gte('journal_entries.entry_date', dateFrom);
     if (dateTo) query = query.lte('journal_entries.entry_date', dateTo);
-
     const result = await query;
-    
     if (!result.data) {
       throw new Error('Erreur lors de la récupération des données');
     }
-
     const totalEntries = result.data.length;
     const letteredEntries = result.data.filter(item => item.letterage).length;
     const unletteredEntries = totalEntries - letteredEntries;
     const letterageRate = totalEntries > 0 ? (letteredEntries / totalEntries) * 100 : 0;
-
     // Statistiques par compte
     const accountStats = new Map<string, { accountNumber: string; accountName: string; totalEntries: number; lettered: number }>();
-
     result.data.forEach((item: AccountingEntry) => {
       const accountNumber = (item.account_number as string) || '';
       const accountName = (item.account_name as string) || '';
@@ -797,18 +702,15 @@ export class AutomaticLetterageService {
           lettered: 0
         });
       }
-
       const stats = accountStats.get(key)!;
       stats.totalEntries++;
       if (item.letterage) stats.lettered++;
     });
-
     const byAccount = Array.from(accountStats.values()).map(stats => ({
       ...stats,
       unlettered: stats.totalEntries - stats.lettered,
       rate: stats.totalEntries > 0 ? (stats.lettered / stats.totalEntries) * 100 : 0
     }));
-
     // Lettrages récents
     const recentQuery = await supabase
       .from('journal_entry_lines')
@@ -822,11 +724,9 @@ export class AutomaticLetterageService {
       .not('letterage', 'is', null)
       .gte('journal_entries.entry_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
       .order('journal_entries.entry_date', { ascending: false });
-
     const recentLettering: LetterGroup[] = [];
     if (recentQuery.data) {
       const letterGroups = new Map<string, LetterGroup>();
-
       recentQuery.data.forEach((item: AccountingEntry) => {
         const key = item.letterage!;
         if (!letterGroups.has(key)) {
@@ -837,15 +737,12 @@ export class AutomaticLetterageService {
             totalAmount: 0
           });
         }
-
         const group = letterGroups.get(key)!;
         group.entriesCount++;
         group.totalAmount += (item.debit_amount || 0) + (item.credit_amount || 0);
       });
-      
       recentLettering.push(...Array.from(letterGroups.values()).slice(0, 10));
     }
-
     return {
       summary: {
         totalEntries,

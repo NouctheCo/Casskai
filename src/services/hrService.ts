@@ -9,11 +9,10 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // Service RH moderne intégré avec Supabase
 import { supabase } from '@/lib/supabase';
 import { auditService } from './auditService';
-
+import { logger } from '@/lib/logger';
 // Types pour les ressources humaines
 export interface Employee {
   id: string;
@@ -40,7 +39,6 @@ export interface Employee {
   updated_at: string;
   full_name?: string;
 }
-
 export interface Leave {
   id: string;
   employee_id: string;
@@ -58,7 +56,6 @@ export interface Leave {
   created_at: string;
   updated_at: string;
 }
-
 export interface Expense {
   id: string;
   employee_id: string;
@@ -77,7 +74,6 @@ export interface Expense {
   created_at: string;
   updated_at: string;
 }
-
 export interface TimeEntry {
   id: string;
   employee_id: string;
@@ -93,7 +89,6 @@ export interface TimeEntry {
   created_at: string;
   updated_at: string;
 }
-
 export interface HRMetrics {
   total_employees: number;
   active_employees: number;
@@ -109,27 +104,21 @@ export interface HRMetrics {
     count: number;
   }>;
 }
-
 export interface HRServiceResponse<T> {
   success: boolean;
   data: T | null;
   error?: string;
 }
-
 export class HRService {
   private static instance: HRService;
-
   private constructor() {}
-
   static getInstance(): HRService {
     if (!this.instance) {
       this.instance = new HRService();
     }
     return this.instance;
   }
-
   // EMPLOYEES
-
   async getEmployees(companyId: string, filters?: {
     department?: string;
     status?: string;
@@ -140,7 +129,6 @@ export class HRService {
         .from('hr_employees')
         .select('*')
         .eq('company_id', companyId);
-
       // Apply filters
       if (filters?.department) {
         query = query.eq('department', filters.department);
@@ -151,30 +139,26 @@ export class HRService {
       if (filters?.search) {
         query = query.or(`first_name.ilike.%${filters.search}%,last_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
       }
-
       const { data, error } = await query.order('created_at', { ascending: false });
-
       if (error) {
-        console.error('Error fetching employees:', error);
+        logger.error('Hr', 'Error fetching employees:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       // Enrich data with computed fields
       const enrichedEmployees = (data || []).map(emp => ({
         ...emp,
         full_name: `${emp.first_name} ${emp.last_name}`
       }));
-
       return {
         success: true,
         data: enrichedEmployees as Employee[]
       };
     } catch (error) {
-      console.error('Error in getEmployees:', error);
+      logger.error('Hr', 'Error in getEmployees:', error);
       return {
         success: false,
         data: null,
@@ -182,7 +166,6 @@ export class HRService {
       };
     }
   }
-
   async createEmployee(companyId: string, employeeData: Omit<Employee, 'id' | 'company_id' | 'created_at' | 'updated_at'>): Promise<HRServiceResponse<Employee>> {
     try {
       const { data, error } = await supabase
@@ -195,16 +178,14 @@ export class HRService {
         })
         .select()
         .single();
-
       if (error) {
-        console.error('Error creating employee:', error);
+        logger.error('Hr', 'Error creating employee:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       // Audit log - employee creation (personal data)
       auditService.log({
         event_type: 'CREATE',
@@ -223,8 +204,7 @@ export class HRService {
         },
         security_level: 'high', // Personal data = high
         compliance_tags: ['RGPD']
-      }).catch(err => console.error('Audit log failed:', err));
-
+      }).catch(err => logger.error('Hr', 'Audit log failed:', err));
       return {
         success: true,
         data: {
@@ -233,7 +213,7 @@ export class HRService {
         } as Employee
       };
     } catch (error) {
-      console.error('Error in createEmployee:', error);
+      logger.error('Hr', 'Error in createEmployee:', error);
       return {
         success: false,
         data: null,
@@ -241,7 +221,6 @@ export class HRService {
       };
     }
   }
-
   async updateEmployee(employeeId: string, updates: Partial<Employee>): Promise<HRServiceResponse<Employee>> {
     try {
       // Fetch old values for audit trail
@@ -250,7 +229,6 @@ export class HRService {
         .select('*')
         .eq('id', employeeId)
         .single();
-
       const { data, error } = await supabase
         .from('hr_employees')
         .update({
@@ -260,27 +238,23 @@ export class HRService {
         .eq('id', employeeId)
         .select()
         .single();
-
       if (error) {
-        console.error('Error updating employee:', error);
+        logger.error('Hr', 'Error updating employee:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       // Audit log - employee update (personal data)
       if (oldEmployee) {
         const changedFields: string[] = [];
         const trackedFields = ['first_name', 'last_name', 'email', 'position', 'department', 'status', 'contract_type', 'salary'];
-
         trackedFields.forEach(field => {
           if (field in updates && oldEmployee[field] !== data[field]) {
             changedFields.push(field);
           }
         });
-
         auditService.log({
           event_type: 'UPDATE',
           table_name: 'hr_employees',
@@ -305,9 +279,8 @@ export class HRService {
           changed_fields: changedFields,
           security_level: 'high', // Personal data = high
           compliance_tags: ['RGPD']
-        }).catch(err => console.error('Audit log failed:', err));
+        }).catch(err => logger.error('Hr', 'Audit log failed:', err));
       }
-
       return {
         success: true,
         data: {
@@ -316,7 +289,7 @@ export class HRService {
         } as Employee
       };
     } catch (error) {
-      console.error('Error in updateEmployee:', error);
+      logger.error('Hr', 'Error in updateEmployee:', error);
       return {
         success: false,
         data: null,
@@ -324,7 +297,6 @@ export class HRService {
       };
     }
   }
-
   async deleteEmployee(employeeId: string): Promise<HRServiceResponse<boolean>> {
     try {
       // Fetch employee data before deletion for audit trail
@@ -333,21 +305,18 @@ export class HRService {
         .select('*')
         .eq('id', employeeId)
         .single();
-
       const { error } = await supabase
         .from('hr_employees')
         .delete()
         .eq('id', employeeId);
-
       if (error) {
-        console.error('Error deleting employee:', error);
+        logger.error('Hr', 'Error deleting employee:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       // Audit log - employee deletion (CRITICAL - personal data deletion)
       if (employeeToDelete) {
         auditService.log({
@@ -366,15 +335,14 @@ export class HRService {
           },
           security_level: 'critical', // Deletion = always critical
           compliance_tags: ['RGPD']
-        }).catch(err => console.error('Audit log failed:', err));
+        }).catch(err => logger.error('Hr', 'Audit log failed:', err));
       }
-
       return {
         success: true,
         data: true
       };
     } catch (error) {
-      console.error('Error in deleteEmployee:', error);
+      logger.error('Hr', 'Error in deleteEmployee:', error);
       return {
         success: false,
         data: null,
@@ -382,9 +350,7 @@ export class HRService {
       };
     }
   }
-
   // LEAVES
-
   async getLeaves(companyId: string, filters?: {
     employeeId?: string;
     status?: string;
@@ -399,7 +365,6 @@ export class HRService {
           employee:hr_employees(first_name, last_name)
         `)
         .eq('company_id', companyId);
-
       // Apply filters
       if (filters?.employeeId) {
         query = query.eq('employee_id', filters.employeeId);
@@ -415,30 +380,26 @@ export class HRService {
         const endOfYear = `${filters.year}-12-31`;
         query = query.gte('start_date', startOfYear).lte('start_date', endOfYear);
       }
-
       const { data, error } = await query.order('start_date', { ascending: false });
-
       if (error) {
-        console.error('Error fetching leaves:', error);
+        logger.error('Hr', 'Error fetching leaves:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       // Enrich with employee names
       const enrichedLeaves = (data || []).map(leave => ({
         ...leave,
         employee_name: leave.employee ? `${leave.employee.first_name} ${leave.employee.last_name}` : 'N/A'
       }));
-
       return {
         success: true,
         data: enrichedLeaves as Leave[]
       };
     } catch (error) {
-      console.error('Error in getLeaves:', error);
+      logger.error('Hr', 'Error in getLeaves:', error);
       return {
         success: false,
         data: null,
@@ -446,7 +407,6 @@ export class HRService {
       };
     }
   }
-
   async createLeave(companyId: string, leaveData: Omit<Leave, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'employee_name'>): Promise<HRServiceResponse<Leave>> {
     try {
       const { data, error } = await supabase
@@ -459,22 +419,20 @@ export class HRService {
         })
         .select()
         .single();
-
       if (error) {
-        console.error('Error creating leave:', error);
+        logger.error('Hr', 'Error creating leave:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       return {
         success: true,
         data: data as Leave
       };
     } catch (error) {
-      console.error('Error in createLeave:', error);
+      logger.error('Hr', 'Error in createLeave:', error);
       return {
         success: false,
         data: null,
@@ -482,7 +440,6 @@ export class HRService {
       };
     }
   }
-
   async updateLeave(leaveId: string, updates: Partial<Leave>): Promise<HRServiceResponse<Leave>> {
     try {
       const { data, error } = await supabase
@@ -494,22 +451,20 @@ export class HRService {
         .eq('id', leaveId)
         .select()
         .single();
-
       if (error) {
-        console.error('Error updating leave:', error);
+        logger.error('Hr', 'Error updating leave:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       return {
         success: true,
         data: data as Leave
       };
     } catch (error) {
-      console.error('Error in updateLeave:', error);
+      logger.error('Hr', 'Error in updateLeave:', error);
       return {
         success: false,
         data: null,
@@ -517,9 +472,7 @@ export class HRService {
       };
     }
   }
-
   // EXPENSES
-
   async getExpenses(companyId: string, filters?: {
     employeeId?: string;
     status?: string;
@@ -534,7 +487,6 @@ export class HRService {
           employee:hr_employees(first_name, last_name)
         `)
         .eq('company_id', companyId);
-
       // Apply filters
       if (filters?.employeeId) {
         query = query.eq('employee_id', filters.employeeId);
@@ -552,30 +504,26 @@ export class HRService {
         date.setMonth(date.getMonth() + 1, 0);
         query = query.lte('expense_date', date.toISOString().split('T')[0]);
       }
-
       const { data, error } = await query.order('expense_date', { ascending: false });
-
       if (error) {
-        console.error('Error fetching expenses:', error);
+        logger.error('Hr', 'Error fetching expenses:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       // Enrich with employee names
       const enrichedExpenses = (data || []).map(expense => ({
         ...expense,
         employee_name: expense.employee ? `${expense.employee.first_name} ${expense.employee.last_name}` : 'N/A'
       }));
-
       return {
         success: true,
         data: enrichedExpenses as Expense[]
       };
     } catch (error) {
-      console.error('Error in getExpenses:', error);
+      logger.error('Hr', 'Error in getExpenses:', error);
       return {
         success: false,
         data: null,
@@ -583,7 +531,6 @@ export class HRService {
       };
     }
   }
-
   async createExpense(companyId: string, expenseData: Omit<Expense, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'employee_name'>): Promise<HRServiceResponse<Expense>> {
     try {
       const { data, error } = await supabase
@@ -596,22 +543,20 @@ export class HRService {
         })
         .select()
         .single();
-
       if (error) {
-        console.error('Error creating expense:', error);
+        logger.error('Hr', 'Error creating expense:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       return {
         success: true,
         data: data as Expense
       };
     } catch (error) {
-      console.error('Error in createExpense:', error);
+      logger.error('Hr', 'Error in createExpense:', error);
       return {
         success: false,
         data: null,
@@ -619,9 +564,7 @@ export class HRService {
       };
     }
   }
-
   // TIME TRACKING
-
   async getTimeEntries(companyId: string, filters?: {
     employeeId?: string;
     date?: string;
@@ -636,7 +579,6 @@ export class HRService {
           employee:hr_employees(first_name, last_name)
         `)
         .eq('company_id', companyId);
-
       // Apply filters
       if (filters?.employeeId) {
         query = query.eq('employee_id', filters.employeeId);
@@ -653,30 +595,26 @@ export class HRService {
         date.setMonth(date.getMonth() + 1, 0);
         query = query.lte('entry_date', date.toISOString().split('T')[0]);
       }
-
       const { data, error } = await query.order('entry_date', { ascending: false });
-
       if (error) {
-        console.error('Error fetching time entries:', error);
+        logger.error('Hr', 'Error fetching time entries:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       // Enrich with employee names
       const enrichedEntries = (data || []).map(entry => ({
         ...entry,
         employee_name: entry.employee ? `${entry.employee.first_name} ${entry.employee.last_name}` : 'N/A'
       }));
-
       return {
         success: true,
         data: enrichedEntries as TimeEntry[]
       };
     } catch (error) {
-      console.error('Error in getTimeEntries:', error);
+      logger.error('Hr', 'Error in getTimeEntries:', error);
       return {
         success: false,
         data: null,
@@ -684,7 +622,6 @@ export class HRService {
       };
     }
   }
-
   async createTimeEntry(companyId: string, timeData: Omit<TimeEntry, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'employee_name'>): Promise<HRServiceResponse<TimeEntry>> {
     try {
       const { data, error } = await supabase
@@ -697,22 +634,20 @@ export class HRService {
         })
         .select()
         .single();
-
       if (error) {
-        console.error('Error creating time entry:', error);
+        logger.error('Hr', 'Error creating time entry:', error);
         return {
           success: false,
           data: null,
           error: error.message
         };
       }
-
       return {
         success: true,
         data: data as TimeEntry
       };
     } catch (error) {
-      console.error('Error in createTimeEntry:', error);
+      logger.error('Hr', 'Error in createTimeEntry:', error);
       return {
         success: false,
         data: null,
@@ -720,9 +655,7 @@ export class HRService {
       };
     }
   }
-
   // METRICS & ANALYTICS
-
   async getHRMetrics(companyId: string): Promise<HRServiceResponse<HRMetrics>> {
     try {
       // Execute parallel queries for better performance
@@ -731,41 +664,32 @@ export class HRService {
         supabase.from('hr_leaves').select('id, status').eq('company_id', companyId),
         supabase.from('hr_expenses').select('amount, status').eq('company_id', companyId)
       ]);
-
       if (employeesResult.error || leavesResult.error || expensesResult.error) {
         throw new Error('Error fetching HR metrics data');
       }
-
       const employees = employeesResult.data || [];
       const leaves = leavesResult.data || [];
       const expenses = expensesResult.data || [];
-
       // Calculate metrics
       const activeEmployees = employees.filter(e => e.status === 'active');
       const thisMonth = new Date().toISOString().slice(0, 7);
       const newHiresThisMonth = employees.filter(e => e.hire_date?.startsWith(thisMonth)).length;
-
       const pendingLeaves = leaves.filter(l => l.status === 'pending').length;
       const approvedLeaves = leaves.filter(l => l.status === 'approved').length;
-
       const pendingExpenses = expenses.filter(e => e.status === 'pending').length;
       const totalExpenseAmount = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-
       const salaries = employees.filter(e => e.salary && e.salary > 0).map(e => e.salary);
       const averageSalary = salaries.length > 0 ? salaries.reduce((sum, s) => sum + s, 0) / salaries.length : 0;
-
       // Department distribution
       const departmentCounts = employees.reduce((acc, emp) => {
         const dept = emp.department || 'Non assigné';
         acc[dept] = (acc[dept] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
-
       const departments = Object.entries(departmentCounts).map(([name, count]) => ({
         name,
         count
       }));
-
       const metrics: HRMetrics = {
         total_employees: employees.length,
         active_employees: activeEmployees.length,
@@ -778,13 +702,12 @@ export class HRService {
         turnover_rate: 0, // Can be calculated with historical data
         departments
       };
-
       return {
         success: true,
         data: metrics
       };
     } catch (error) {
-      console.error('Error in getHRMetrics:', error);
+      logger.error('Hr', 'Error in getHRMetrics:', error);
       return {
         success: false,
         data: null,
@@ -793,6 +716,5 @@ export class HRService {
     }
   }
 }
-
 // Export singleton instance
 export const hrService = HRService.getInstance();

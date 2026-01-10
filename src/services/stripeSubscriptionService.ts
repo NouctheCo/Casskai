@@ -9,19 +9,16 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 let stripePromise: Promise<Stripe | null>;
-
 const getStripe = () => {
   if (!stripePromise) {
     stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
   }
   return stripePromise;
 };
-
 export interface SubscriptionPlan {
   id: string;
   name: string;
@@ -32,27 +29,23 @@ export interface SubscriptionPlan {
   planCode: string;
   savings?: number; // Pourcentage d'économie annuel vs mensuel
 }
-
 export interface CreateSubscriptionData {
   priceId: string;
   enterpriseId: string;
   successUrl: string;
   cancelUrl: string;
 }
-
 /**
  * Service de gestion des abonnements Stripe
  */
 export class StripeSubscriptionService {
   private stripe: Stripe | null = null;
-
   async initialize() {
     if (!this.stripe) {
       this.stripe = await getStripe();
     }
     return this.stripe;
   }
-
   /**
    * Crée une session de checkout Stripe
    */
@@ -61,32 +54,27 @@ export class StripeSubscriptionService {
     if (!stripe) {
       throw new Error('Stripe not initialized');
     }
-
     try {
       // Créer la session de checkout via Supabase Edge Function
       const { data: session, error } = await supabase.functions.invoke('create-checkout-session', {
         body: data
       });
-
       if (error) {
-        console.error('Error creating checkout session:', error);
+        logger.error('StripeSubscription', 'Error creating checkout session:', error);
         throw error;
       }
-
       // Rediriger vers Stripe Checkout
       const result = await stripe.redirectToCheckout({
         sessionId: session.id
       });
-
       if (result.error) {
         throw result.error;
       }
     } catch (error) {
-      console.error('Error in createCheckoutSession:', error instanceof Error ? error.message : String(error));
+      logger.error('StripeSubscription', 'Error in createCheckoutSession:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   /**
    * Met à jour l'abonnement d'une entreprise
    */
@@ -98,18 +86,15 @@ export class StripeSubscriptionService {
           newPriceId
         }
       });
-
       if (error) {
         throw error;
       }
-
       return data;
     } catch (error) {
-      console.error('Error updating subscription:', error instanceof Error ? error.message : String(error));
+      logger.error('StripeSubscription', 'Error updating subscription:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   /**
    * Annule l'abonnement d'une entreprise
    */
@@ -121,18 +106,15 @@ export class StripeSubscriptionService {
           cancelAtPeriodEnd
         }
       });
-
       if (error) {
         throw error;
       }
-
       return data;
     } catch (error) {
-      console.error('Error canceling subscription:', error instanceof Error ? error.message : String(error));
+      logger.error('StripeSubscription', 'Error canceling subscription:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   /**
    * Réactive un abonnement annulé
    */
@@ -143,18 +125,15 @@ export class StripeSubscriptionService {
           enterpriseId
         }
       });
-
       if (error) {
         throw error;
       }
-
       return data;
     } catch (error) {
-      console.error('Error reactivating subscription:', error instanceof Error ? error.message : String(error));
+      logger.error('StripeSubscription', 'Error reactivating subscription:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   /**
    * Récupère les informations de facturation du client
    */
@@ -166,18 +145,15 @@ export class StripeSubscriptionService {
           returnUrl
         }
       });
-
       if (error) {
         throw error;
       }
-
       return data;
     } catch (error) {
-      console.error('Error creating portal session:', error instanceof Error ? error.message : String(error));
+      logger.error('StripeSubscription', 'Error creating portal session:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   /**
    * Redirige vers le portail client Stripe
    */
@@ -186,22 +162,18 @@ export class StripeSubscriptionService {
     if (!stripe) {
       throw new Error('Stripe not initialized');
     }
-
     try {
       const portalSession = await this.getCustomerPortalSession(enterpriseId, returnUrl);
-
       // Rediriger vers le portail
       window.location.href = portalSession.url;
     } catch (error) {
-      console.error('Error redirecting to customer portal:', error instanceof Error ? error.message : String(error));
+      logger.error('StripeSubscription', 'Error redirecting to customer portal:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
 }
-
 // Instance singleton
 export const stripeSubscriptionService = new StripeSubscriptionService();
-
 // Plans d'abonnement disponibles
 export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {

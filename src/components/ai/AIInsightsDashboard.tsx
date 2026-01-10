@@ -41,14 +41,13 @@ import { CashFlowPredictionWidget } from './widgets/CashFlowPredictionWidget';
 import { AIAssistantChat } from './widgets/AIAssistantChat';
 import { SmartAlertsWidget } from './widgets/SmartAlertsWidget';
 import { TaxOptimizationWidget } from './widgets/TaxOptimizationWidget';
-
+import { logger } from '@/lib/logger';
 interface AIInsightsDashboardProps {
   transactions: Transaction[];
   currentBalance: number;
   onTransactionUpdate?: (transactions: Transaction[]) => void;
   className?: string;
 }
-
 export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
   transactions,
   currentBalance,
@@ -61,7 +60,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
   const [cashFlowPredictions, setCashFlowPredictions] = useState<CashFlowPrediction[]>([]);
   const [smartAlerts, setSmartAlerts] = useState<SmartAlert[]>([]);
   const [taxOptimizations, setTaxOptimizations] = useState<TaxOptimization[]>([]);
-  
   // États UI
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
@@ -73,94 +71,78 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
     taxOptimization: true,
     smartAlerts: true
   });
-
   // Initialisation des services IA
   useEffect(() => {
     initializeAI();
   }, []);
-
   // Analyse automatique des transactions
   useEffect(() => {
     if (transactions.length > 0) {
       runAnalysis();
     }
   }, [transactions, aiConfig]);
-
   const initializeAI = async () => {
     try {
       setIsLoading(true);
-      
       // Initialisation des services
       await aiAnalyticsService.initialize();
       await aiAssistantService.initialize();
       aiVisualizationService.initialize();
-      
-      console.warn('AI services initialized successfully');
+      logger.warn('AIInsightsDashboard', 'AI services initialized successfully');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('Failed to initialize AI services:', errorMessage);
+      logger.error('AIInsightsDashboard', 'Failed to initialize AI services:', errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-
   const runAnalysis = async () => {
     if (!aiAnalyticsService.initialized) return;
-    
     try {
       setIsLoading(true);
       const results = await Promise.allSettled([
         // Détection d'anomalies
         aiConfig.anomalyDetection ? aiAnalyticsService.detectAnomalies(transactions) : Promise.resolve({ success: true, data: [] }),
-        
         // Score de santé financière
         aiConfig.healthScoring ? aiAnalyticsService.calculateHealthScore(transactions, [currentBalance]) : Promise.resolve({ success: true, data: null }),
-        
         // Prédiction de trésorerie
         aiConfig.cashFlowPrediction ? aiAnalyticsService.predictCashFlow(
           transactions.map(t => ({ date: new Date(t.date), value: t.amount }))
         ) : Promise.resolve({ success: true, data: [] }),
-        
         // Optimisations fiscales
         aiConfig.taxOptimization ? aiAssistantService.generateTaxOptimizations(transactions) : Promise.resolve({ success: true, data: [] })
       ]);
-
       // Traitement des résultats
       results.forEach((result, index) => {
         if (result.status === 'fulfilled' && result.value.success) {
           switch (index) {
             case 0:
-              setAnomalies(Array.isArray(result.value.data) ? result.value.data : []);
+              setAnomalies(Array.isArray(result.value.data) ? result.value.data as AnomalyDetection[] : []);
               break;
             case 1:
-              setHealthScore(result.value.data || null);
+              setHealthScore((result.value.data as FinancialHealthScore) || null);
               break;
             case 2:
-              setCashFlowPredictions(Array.isArray(result.value.data) ? result.value.data : []);
+              setCashFlowPredictions(Array.isArray(result.value.data) ? result.value.data as CashFlowPrediction[] : []);
               break;
             case 3:
-              setTaxOptimizations(Array.isArray(result.value.data) ? result.value.data : []);
+              setTaxOptimizations(Array.isArray(result.value.data) ? result.value.data as TaxOptimization[] : []);
               break;
           }
         }
       });
-
       // Génération d'alertes intelligentes
       generateSmartAlerts();
-      
       setLastAnalysis(new Date());
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('Error running AI analysis:', errorMessage);
+      logger.error('AIInsightsDashboard', 'Error running AI analysis:', errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-
   const generateSmartAlerts = () => {
     const alerts: SmartAlert[] = [];
-    
     // Alertes basées sur les anomalies
     const criticalAnomalies = anomalies.filter(a => a.severity === 'critical');
     if (criticalAnomalies.length > 0) {
@@ -175,7 +157,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
         isRead: false
       });
     }
-
     // Alertes de santé financière
     if (healthScore && healthScore.overall < 40) {
       alerts.push({
@@ -189,7 +170,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
         isRead: false
       });
     }
-
     // Alertes d'opportunités fiscales
     const highValueOptimizations = taxOptimizations.filter(opt => opt.potentialSavings > 1000);
     if (highValueOptimizations.length > 0) {
@@ -204,18 +184,14 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
         isRead: false
       });
     }
-
     setSmartAlerts(alerts);
   };
-
   const handleRefreshAnalysis = () => {
     runAnalysis();
   };
-
   const _handleConfigUpdate = (newConfig: typeof aiConfig) => {
     setAiConfig(newConfig);
   };
-
   if (isLoading && !lastAnalysis) {
     return (
       <Card className={cn("w-full", className)}>
@@ -236,7 +212,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
       </Card>
     );
   }
-
   return (
     <div className={cn("space-y-6", className)}>
       {/* Header avec statistiques rapides */}
@@ -254,7 +229,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
                 </p>
               </div>
             </div>
-            
             <div className="flex items-center space-x-2">
               <Button 
                 variant="outline" 
@@ -271,7 +245,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
             </div>
           </div>
         </CardHeader>
-        
         <CardContent>
           {/* KPIs rapides de l'IA */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -287,7 +260,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
                 </p>
               </div>
             </motion.div>
-
             <motion.div 
               className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
               whileHover={{ scale: 1.02 }}
@@ -300,7 +272,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
                 </p>
               </div>
             </motion.div>
-
             <motion.div 
               className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
               whileHover={{ scale: 1.02 }}
@@ -313,7 +284,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
                 </p>
               </div>
             </motion.div>
-
             <motion.div 
               className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
               whileHover={{ scale: 1.02 }}
@@ -329,20 +299,18 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
           </div>
         </CardContent>
       </Card>
-
       {/* Alertes intelligentes */}
       {smartAlerts.length > 0 && (
         <SmartAlertsWidget 
           alerts={smartAlerts}
           onAlertAction={(alertId, action) => {
-            console.warn('Alert action:', alertId, action);
+            logger.warn('AIInsightsDashboard', 'Alert action:', alertId, action);
           }}
           onDismissAlert={(alertId) => {
             setSmartAlerts(alerts => alerts.filter(a => a.id !== alertId));
           }}
         />
       )}
-
       {/* Onglets principaux */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5">
@@ -367,7 +335,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
             <span className="hidden sm:inline">Assistant</span>
           </TabsTrigger>
         </TabsList>
-
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -383,7 +350,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
                   isLoading={isLoading}
                   onRefresh={() => runAnalysis()}
                 />
-                
                 <CashFlowPredictionWidget 
                   predictions={cashFlowPredictions}
                   currentBalance={currentBalance}
@@ -391,17 +357,15 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
                 />
               </div>
             </TabsContent>
-
             <TabsContent value="anomalies" className="space-y-6 mt-6">
               <AnomalyDetectionWidget 
                 anomalies={anomalies}
                 onAnomalyAction={(anomalyId, action) => {
-                  console.warn('Anomaly action:', anomalyId, action);
+                  logger.warn('AIInsightsDashboard', 'Anomaly action:', anomalyId, action);
                 }}
                 isLoading={isLoading}
               />
             </TabsContent>
-
             <TabsContent value="predictions" className="space-y-6 mt-6">
               <div className="space-y-6">
                 <CashFlowPredictionWidget 
@@ -410,27 +374,24 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
                   isLoading={isLoading}
                   detailed={true}
                 />
-                
                 {/* Ici on pourrait ajouter d'autres prédictions */}
               </div>
             </TabsContent>
-
             <TabsContent value="optimization" className="space-y-6 mt-6">
               <TaxOptimizationWidget 
                 optimizations={taxOptimizations}
                 onOptimizationAction={(optimizationId, action) => {
-                  console.warn('Optimization action:', optimizationId, action);
+                  logger.warn('AIInsightsDashboard', 'Optimization action:', optimizationId, action);
                 }}
                 isLoading={isLoading}
               />
             </TabsContent>
-
             <TabsContent value="assistant" className="space-y-6 mt-6">
               <AIAssistantChat 
                 transactions={transactions}
                 currentBalance={currentBalance}
                 onQueryProcessed={(query, response) => {
-                  console.warn('AI query processed:', query, response);
+                  logger.warn('AIInsightsDashboard', 'AI query processed:', query, response);
                 }}
               />
             </TabsContent>

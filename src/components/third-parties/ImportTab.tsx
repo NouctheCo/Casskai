@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
-
+import { logger } from '@/lib/logger';
 interface ImportRow {
   name: string;
   type: string;
@@ -32,11 +32,9 @@ interface ImportRow {
   isValid: boolean;
   errors: string[];
 }
-
 interface ImportTabProps {
   companyId: string;
 }
-
 export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
   const { t: _t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,7 +43,6 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
   const [importing, setImporting] = useState(false);
   const [importComplete, setImportComplete] = useState(false);
   const [importStats, setImportStats] = useState({ success: 0, errors: 0 });
-
   const downloadTemplate = () => {
     const template = [
       {
@@ -85,11 +82,9 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
         vat_number: 'FR11122233301'
       }
     ];
-
     const ws = XLSX.utils.json_to_sheet(template);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Tiers');
-
     // Largeur des colonnes
     ws['!cols'] = [
       { wch: 25 }, // name
@@ -103,44 +98,35 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
       { wch: 18 }, // siret
       { wch: 18 }  // vat_number
     ];
-
     XLSX.writeFile(wb, 'template_import_tiers.xlsx');
     toastSuccess('Modèle téléchargé');
   };
-
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setSelectedFile(file);
     setImportComplete(false);
-
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json<any>(sheet);
-
       const rows: ImportRow[] = jsonData.map((row, _index) => {
         const errors: string[] = [];
         const name = row.name?.toString().trim() || '';
         const type = row.type?.toString().toLowerCase().trim() || '';
         const email = row.email?.toString().trim() || '';
-
         // Validation
         if (!name) {
           errors.push('Nom obligatoire');
         }
-
         if (!['customer', 'supplier', 'both', 'prospect'].includes(type)) {
           errors.push('Type invalide (customer/supplier/both/prospect)');
         }
-
         if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
           errors.push('Email invalide');
         }
-
         return {
           name,
           type,
@@ -156,32 +142,27 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
           errors
         };
       });
-
       setImportData(rows);
       toastSuccess(`${rows.length} ligne(s) chargée(s)`);
     } catch (error) {
-      console.error('Erreur lecture fichier:', error);
+      logger.error('ImportTab', 'Erreur lecture fichier:', error);
       toastError('Impossible de lire le fichier');
       setSelectedFile(null);
     }
   };
-
   const handleImport = async () => {
     if (!companyId) {
       toastError('Entreprise non définie');
       return;
     }
-
     const validRows = importData.filter(row => row.isValid);
     if (validRows.length === 0) {
       toastError('Aucune ligne valide à importer');
       return;
     }
-
     setImporting(true);
     let successCount = 0;
     let errorCount = 0;
-
     for (const row of validRows) {
       try {
         const { error } = await supabase.from('third_parties').insert({
@@ -198,31 +179,25 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
           vat_number: row.vat_number || null,
           is_active: true
         });
-
         if (error) throw error;
         successCount++;
       } catch (error) {
-        console.error('Erreur import ligne:', row.name, error);
+        logger.error('ImportTab', 'Erreur import ligne:', row.name, error);
         errorCount++;
       }
     }
-
     setImporting(false);
     setImportComplete(true);
     setImportStats({ success: successCount, errors: errorCount });
-
     if (successCount > 0) {
       toastSuccess(`${successCount} tiers importé(s) avec succès`);
     }
-
     if (errorCount > 0) {
       toastError(`${errorCount} erreur(s) lors de l'import`);
     }
   };
-
   const validCount = importData.filter(row => row.isValid).length;
   const invalidCount = importData.length - validCount;
-
   return (
     <div className="space-y-6">
       {/* Instructions */}
@@ -244,7 +219,6 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
           </div>
         </AlertDescription>
       </Alert>
-
       {/* Télécharger le modèle */}
       <Card>
         <CardHeader>
@@ -263,7 +237,6 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
           </p>
         </CardContent>
       </Card>
-
       {/* Charger le fichier */}
       <Card>
         <CardHeader>
@@ -288,7 +261,6 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
                 </Badge>
               )}
             </div>
-
             {importData.length > 0 && (
               <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
                 <div className="flex-1 space-y-1">
@@ -305,7 +277,6 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
                     </div>
                   )}
                 </div>
-
                 {!importComplete && (
                   <Button
                     onClick={handleImport}
@@ -329,7 +300,6 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
           </div>
         </CardContent>
       </Card>
-
       {/* Résultats de l'import */}
       {importComplete && (
         <Card>
@@ -349,7 +319,6 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
                   {importStats.success}
                 </Badge>
               </div>
-
               {importStats.errors > 0 && (
                 <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950 rounded">
                   <span className="font-medium text-red-700 dark:text-red-300">
@@ -358,7 +327,6 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
                   <Badge variant="destructive">{importStats.errors}</Badge>
                 </div>
               )}
-
               <Button
                 onClick={() => {
                   setImportData([]);
@@ -377,7 +345,6 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
           </CardContent>
         </Card>
       )}
-
       {/* Prévisualisation des données */}
       {importData.length > 0 && !importComplete && (
         <Card>
@@ -439,7 +406,6 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
                   ))}
                 </tbody>
               </table>
-
               {importData.length > 20 && (
                 <p className="text-sm text-muted-foreground text-center mt-4">
                   ... et {importData.length - 20} autre(s) ligne(s)

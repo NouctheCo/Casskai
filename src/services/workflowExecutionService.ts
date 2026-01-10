@@ -182,12 +182,12 @@ async function executeCreateRecord(
   companyId: string
 ): Promise<any> {
   const tableName = getTableName(action.entity_type);
-  const fields = { ...action.fields, company_id: companyId };
+  const fields: Record<string, unknown> = { ...action.fields, company_id: companyId };
 
   // Remplacer les variables dans les champs
   Object.keys(fields).forEach(key => {
     if (typeof fields[key] === 'string') {
-      fields[key] = replaceVariables(fields[key], data);
+      fields[key] = replaceVariables(fields[key] as string, data);
     }
   });
 

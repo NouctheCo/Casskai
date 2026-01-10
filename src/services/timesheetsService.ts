@@ -3,9 +3,8 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface Timesheet {
   id: string;
   company_id: string;
@@ -25,7 +24,6 @@ export interface Timesheet {
   created_at: string;
   updated_at: string;
 }
-
 export interface TimesheetWithDetails extends Timesheet {
   project_name?: string;
   task_name?: string;
@@ -33,7 +31,6 @@ export interface TimesheetWithDetails extends Timesheet {
   user_email?: string;
   approved_by_name?: string;
 }
-
 export interface CreateTimesheetInput {
   project_id: string;
   task_id?: string;
@@ -45,7 +42,6 @@ export interface CreateTimesheetInput {
   hourly_rate?: number;
   status?: 'draft' | 'submitted' | 'approved' | 'rejected' | 'invoiced';
 }
-
 export interface UpdateTimesheetInput {
   date?: string;
   hours?: number;
@@ -56,7 +52,6 @@ export interface UpdateTimesheetInput {
   approved_by?: string;
   approved_at?: string;
 }
-
 export interface TimesheetFilters {
   project_id?: string;
   task_id?: string;
@@ -66,7 +61,6 @@ export interface TimesheetFilters {
   status?: string;
   is_billable?: boolean;
 }
-
 class TimesheetsService {
   /**
    * Get all timesheets with optional filters
@@ -82,7 +76,6 @@ class TimesheetsService {
         approver:approved_by(id, email)
       `)
       .eq('company_id', companyId);
-
     // Apply filters
     if (filters?.project_id) {
       query = query.eq('project_id', filters.project_id);
@@ -105,16 +98,12 @@ class TimesheetsService {
     if (filters?.is_billable !== undefined) {
       query = query.eq('is_billable', filters.is_billable);
     }
-
     query = query.order('date', { ascending: false }).order('created_at', { ascending: false });
-
     const { data, error } = await query;
-
     if (error) {
-      console.error('Error fetching timesheets:', error);
+      logger.error('Timesheets', 'Error fetching timesheets:', error);
       throw error;
     }
-
     // Transform data with relations
     return (data || []).map(timesheet => ({
       ...timesheet,
@@ -125,7 +114,6 @@ class TimesheetsService {
       approved_by_name: timesheet.approver?.email
     }));
   }
-
   /**
    * Get timesheet by ID
    */
@@ -141,12 +129,10 @@ class TimesheetsService {
       `)
       .eq('id', timesheetId)
       .single();
-
     if (error) {
-      console.error('Error fetching timesheet:', error);
+      logger.error('Timesheets', 'Error fetching timesheet:', error);
       return null;
     }
-
     return {
       ...data,
       project_name: data.projects?.name,
@@ -156,7 +142,6 @@ class TimesheetsService {
       approved_by_name: data.approver?.email
     };
   }
-
   /**
    * Get timesheets by project
    */
@@ -171,12 +156,10 @@ class TimesheetsService {
       `)
       .eq('project_id', projectId)
       .order('date', { ascending: false });
-
     if (error) {
-      console.error('Error fetching timesheets by project:', error);
+      logger.error('Timesheets', 'Error fetching timesheets by project:', error);
       throw error;
     }
-
     return (data || []).map(timesheet => ({
       ...timesheet,
       project_name: timesheet.projects?.name,
@@ -185,7 +168,6 @@ class TimesheetsService {
       user_email: timesheet.users?.email
     }));
   }
-
   /**
    * Create a new timesheet
    */
@@ -200,15 +182,12 @@ class TimesheetsService {
       })
       .select()
       .single();
-
     if (error) {
-      console.error('Error creating timesheet:', error);
+      logger.error('Timesheets', 'Error creating timesheet:', error);
       throw error;
     }
-
     return data;
   }
-
   /**
    * Update timesheet
    */
@@ -222,15 +201,12 @@ class TimesheetsService {
       .eq('id', timesheetId)
       .select()
       .single();
-
     if (error) {
-      console.error('Error updating timesheet:', error);
+      logger.error('Timesheets', 'Error updating timesheet:', error);
       throw error;
     }
-
     return data;
   }
-
   /**
    * Delete timesheet
    */
@@ -239,20 +215,17 @@ class TimesheetsService {
       .from('timesheets')
       .delete()
       .eq('id', timesheetId);
-
     if (error) {
-      console.error('Error deleting timesheet:', error);
+      logger.error('Timesheets', 'Error deleting timesheet:', error);
       throw error;
     }
   }
-
   /**
    * Submit timesheet for approval
    */
   async submitTimesheet(timesheetId: string): Promise<Timesheet> {
     return this.updateTimesheet(timesheetId, { status: 'submitted' });
   }
-
   /**
    * Approve timesheet
    */
@@ -263,7 +236,6 @@ class TimesheetsService {
       approved_at: new Date().toISOString()
     });
   }
-
   /**
    * Reject timesheet
    */
@@ -274,7 +246,6 @@ class TimesheetsService {
       approved_at: new Date().toISOString()
     });
   }
-
   /**
    * Get timesheet statistics
    */
@@ -290,7 +261,6 @@ class TimesheetsService {
     rejectedCount: number;
   }> {
     const timesheets = await this.getTimesheets(companyId, filters);
-
     const stats = {
       totalHours: timesheets.reduce((sum, t) => sum + t.hours, 0),
       billableHours: timesheets.filter(t => t.is_billable).reduce((sum, t) => sum + t.hours, 0),
@@ -302,10 +272,8 @@ class TimesheetsService {
       approvedCount: timesheets.filter(t => t.status === 'approved').length,
       rejectedCount: timesheets.filter(t => t.status === 'rejected').length
     };
-
     return stats;
   }
-
   /**
    * Get weekly timesheets for a user
    */
@@ -314,7 +282,6 @@ class TimesheetsService {
     const weekStartDate = new Date(weekStart);
     const weekEndDate = new Date(weekStartDate);
     weekEndDate.setDate(weekEndDate.getDate() + 6);
-
     return this.getTimesheets(companyId, {
       user_id: userId,
       date_from: weekStart,
@@ -322,6 +289,5 @@ class TimesheetsService {
     });
   }
 }
-
 export const timesheetsService = new TimesheetsService();
 export default timesheetsService;

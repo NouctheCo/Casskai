@@ -89,7 +89,15 @@ import {
 
   TrendingUp,
 
-  BarChart3
+  BarChart3,
+
+  FileCheck,
+
+  AlertTriangle,
+
+  GitBranch,
+
+  Upload
 
 } from 'lucide-react';
 
@@ -199,25 +207,47 @@ const HeroSection = () => {
 
           >
 
-            {/* Badge de nouveauté */}
+            {/* Badges de nouveauté */}
 
-            <motion.div
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
 
-              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-800 dark:text-purple-200 text-sm font-medium mb-8 rounded-full border border-purple-200/50 dark:border-purple-700/50 shadow-sm"
+              <motion.div
 
-              whileHover={{ scale: 1.05 }}
+                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-800 dark:text-purple-200 text-sm font-medium rounded-full border border-purple-200/50 dark:border-purple-700/50 shadow-sm"
 
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                whileHover={{ scale: 1.05 }}
 
-            >
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
 
-              <Brain className="w-4 h-4 mr-2 animate-pulse" />
+              >
 
-              {t('landing.hero.badge', '🚀 Nouveau : Analyses IA intégrées')}
+                <Brain className="w-4 h-4 mr-2 animate-pulse" />
 
-              <ArrowRight className="w-4 h-4 ml-2" />
+                {t('landing.hero.badge', '🚀 Nouveau : Analyses IA intégrées')}
 
-            </motion.div>
+                <ArrowRight className="w-4 h-4 ml-2" />
+
+              </motion.div>
+
+
+
+              <motion.div
+
+                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 text-green-800 dark:text-green-200 text-sm font-medium rounded-full border border-green-200/50 dark:border-green-700/50 shadow-sm"
+
+                whileHover={{ scale: 1.05 }}
+
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+
+              >
+
+                <FileCheck className="w-4 h-4 mr-2" />
+
+                {t('landing.hero.badgeRegulatory', '🌍 Rapports Légaux Multi-Pays (10+ pays)')}
+
+              </motion.div>
+
+            </div>
 
             
 
@@ -734,6 +764,504 @@ const AIAnalysisSection = () => {
 
 
 
+// Regulatory Compliance Section
+
+const RegulatoryComplianceSection = () => {
+
+  const { t } = useTranslation();
+
+
+
+  const complianceFeatures = [
+
+    {
+
+      icon: FileCheck,
+
+      title: t('landing.regulatory.feature1Title', 'Auto-remplissage Intelligent'),
+
+      description: t('landing.regulatory.feature1Desc', 'Génération automatique de 35+ documents légaux depuis votre grand livre comptable. Bilan, compte de résultat, déclarations fiscales...'),
+
+      stats: '35+ documents'
+
+    },
+
+    {
+
+      icon: Globe,
+
+      title: t('landing.regulatory.feature2Title', '5 Standards Comptables'),
+
+      description: t('landing.regulatory.feature2Desc', 'PCG (France), SYSCOHADA (OHADA), IFRS for SMEs, SCF (Algérie/Tunisie), PCM (Maroc). Conformité garantie.'),
+
+      stats: '10+ pays'
+
+    },
+
+    {
+
+      icon: Shield,
+
+      title: t('landing.regulatory.feature3Title', 'Validation Automatique'),
+
+      description: t('landing.regulatory.feature3Desc', 'Vérifications comptables automatiques (équilibre bilan, cohérence des comptes). Export PDF et XML pour télédéclaration.'),
+
+      stats: '100% conforme'
+
+    }
+
+  ];
+
+
+
+  return (
+
+    <section className="py-12 md:py-16 bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <AnimatedSection>
+
+          {/* Header */}
+
+          <div className="text-center mb-10">
+
+            <motion.div
+
+              className="inline-flex items-center px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-full mb-4 text-sm"
+
+              whileHover={{ scale: 1.05 }}
+
+            >
+
+              <FileCheck className="w-3 h-3 mr-1.5" />
+
+              {t('landing.regulatory.badge', 'Conformité Réglementaire Multi-Pays')}
+
+            </motion.div>
+
+
+
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+
+              {t('landing.regulatory.title', 'Rapports Légaux Automatisés')}
+
+            </h2>
+
+
+
+            <p className="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-6">
+
+              {t('landing.regulatory.subtitle', 'Générez vos déclarations fiscales et états financiers en un clic. Conformité garantie pour France, OHADA, Maghreb et Afrique anglophone.')}
+
+            </p>
+
+
+
+            {/* Country flags */}
+
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+
+              <Badge variant="outline" className="px-2 py-1 text-xs">🇫🇷 France (PCG)</Badge>
+
+              <Badge variant="outline" className="px-2 py-1 text-xs">🌍 OHADA (SYSCOHADA)</Badge>
+
+              <Badge variant="outline" className="px-2 py-1 text-xs">🇩🇿 Algérie/Tunisie (SCF)</Badge>
+
+              <Badge variant="outline" className="px-2 py-1 text-xs">🇲🇦 Maroc (PCM)</Badge>
+
+              <Badge variant="outline" className="px-2 py-1 text-xs">🇰🇪 Afrique anglophone (IFRS)</Badge>
+
+            </div>
+
+          </div>
+
+
+
+          {/* Features Grid */}
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
+
+            {complianceFeatures.map((feature, index) => (
+
+              <motion.div
+
+                key={index}
+
+                initial={{ opacity: 0, y: 20 }}
+
+                animate={{ opacity: 1, y: 0 }}
+
+                transition={{ delay: index * 0.1 }}
+
+              >
+
+                <Card className="h-full hover:shadow-lg transition-shadow duration-300 border hover:border-green-200 dark:hover:border-green-700">
+
+                  <CardHeader className="pb-3">
+
+                    <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-3">
+
+                      <feature.icon className="w-5 h-5 text-green-600 dark:text-green-400" />
+
+                    </div>
+
+                    <CardTitle className="text-lg mb-2">{feature.title}</CardTitle>
+
+                    <Badge variant="secondary" className="w-fit text-xs">{feature.stats}</Badge>
+
+                  </CardHeader>
+
+                  <CardContent className="pt-0">
+
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{feature.description}</p>
+
+                  </CardContent>
+
+                </Card>
+
+              </motion.div>
+
+            ))}
+
+          </div>
+
+
+
+          {/* Document types showcase */}
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg">
+
+            <h3 className="text-lg md:text-xl font-bold text-center mb-4 text-gray-900 dark:text-white">
+
+              {t('landing.regulatory.documentsTitle', 'Types de Documents Disponibles')}
+
+            </h3>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-3">
+
+              <div className="text-center p-2 md:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+
+                <FileText className="w-6 h-6 md:w-7 md:h-7 mx-auto mb-1.5 text-blue-600" />
+
+                <p className="text-xs font-medium">Bilan</p>
+
+              </div>
+
+              <div className="text-center p-2 md:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+
+                <FileText className="w-6 h-6 md:w-7 md:h-7 mx-auto mb-1.5 text-blue-600" />
+
+                <p className="text-xs font-medium">Compte de Résultat</p>
+
+              </div>
+
+              <div className="text-center p-2 md:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+
+                <FileText className="w-6 h-6 md:w-7 md:h-7 mx-auto mb-1.5 text-blue-600" />
+
+                <p className="text-xs font-medium">Tableau de Flux</p>
+
+              </div>
+
+              <div className="text-center p-2 md:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+
+                <FileText className="w-6 h-6 md:w-7 md:h-7 mx-auto mb-1.5 text-blue-600" />
+
+                <p className="text-xs font-medium">Déclarations Fiscales</p>
+
+              </div>
+
+              <div className="text-center p-2 md:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+
+                <FileText className="w-6 h-6 md:w-7 md:h-7 mx-auto mb-1.5 text-purple-600" />
+
+                <p className="text-xs font-medium">TVA (CA3)</p>
+
+              </div>
+
+              <div className="text-center p-2 md:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+
+                <FileText className="w-6 h-6 md:w-7 md:h-7 mx-auto mb-1.5 text-purple-600" />
+
+                <p className="text-xs font-medium">Liasse Fiscale</p>
+
+              </div>
+
+              <div className="text-center p-2 md:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+
+                <FileText className="w-6 h-6 md:w-7 md:h-7 mx-auto mb-1.5 text-green-600" />
+
+                <p className="text-xs font-medium">États OHADA</p>
+
+              </div>
+
+              <div className="text-center p-2 md:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+
+                <FileText className="w-6 h-6 md:w-7 md:h-7 mx-auto mb-1.5 text-green-600" />
+
+                <p className="text-xs font-medium">Financial Statements</p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </AnimatedSection>
+
+      </div>
+
+    </section>
+
+  );
+
+};
+
+
+
+// Anomaly Detection & Workflow Section
+
+const AnomalyAndWorkflowSection = () => {
+
+  const { t } = useTranslation();
+
+
+
+  return (
+
+    <section className="py-12 md:py-16 bg-white dark:bg-gray-900">
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <AnimatedSection>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">
+
+            {/* Anomaly Detection */}
+
+            <div>
+
+              <div className="mb-6">
+
+                <motion.div
+
+                  className="inline-flex items-center px-3 py-1.5 bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 rounded-full mb-4 text-sm"
+
+                  whileHover={{ scale: 1.05 }}
+
+                >
+
+                  <AlertTriangle className="w-3 h-3 mr-1.5" />
+
+                  {t('landing.anomaly.badge', 'Détection d\'Anomalies')}
+
+                </motion.div>
+
+
+
+                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+
+                  {t('landing.anomaly.title', 'Détection Automatique des Anomalies')}
+
+                </h3>
+
+
+
+                <p className="text-base text-gray-600 dark:text-gray-300 mb-4">
+
+                  {t('landing.anomaly.description', 'Notre IA analyse votre comptabilité et détecte automatiquement les incohérences, erreurs et anomalies. Résolution guidée étape par étape.')}
+
+                </p>
+
+              </div>
+
+
+
+              <div className="space-y-3">
+
+                <div className="flex items-start">
+
+                  <div className="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center mr-3">
+
+                    <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+
+                  </div>
+
+                  <div>
+
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-0.5">Détection Critical & High</h4>
+
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Erreurs bloquantes identifiées instantanément</p>
+
+                  </div>
+
+                </div>
+
+
+
+                <div className="flex items-start">
+
+                  <div className="flex-shrink-0 w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mr-3">
+
+                    <AlertTriangle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+
+                  </div>
+
+                  <div>
+
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-0.5">Résolution Guidée</h4>
+
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Suggestions de correction automatiques</p>
+
+                  </div>
+
+                </div>
+
+
+
+                <div className="flex items-start">
+
+                  <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-3">
+
+                    <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+
+                  </div>
+
+                  <div>
+
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-0.5">Statistiques Détaillées</h4>
+
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Suivi par sévérité, type et statut</p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+
+            {/* Workflow Validation */}
+
+            <div>
+
+              <div className="mb-6">
+
+                <motion.div
+
+                  className="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full mb-4 text-sm"
+
+                  whileHover={{ scale: 1.05 }}
+
+                >
+
+                  <GitBranch className="w-3 h-3 mr-1.5" />
+
+                  {t('landing.workflow.badge', 'Validation Multi-Niveaux')}
+
+                </motion.div>
+
+
+
+                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+
+                  {t('landing.workflow.title', 'Workflow de Validation Avancé')}
+
+                </h3>
+
+
+
+                <p className="text-base text-gray-600 dark:text-gray-300 mb-4">
+
+                  {t('landing.workflow.description', 'Circuit de validation configurable pour vos écritures comptables. Traçabilité complète des approbations et verrouillage des périodes.')}
+
+                </p>
+
+              </div>
+
+
+
+              <div className="space-y-3">
+
+                <div className="flex items-start">
+
+                  <div className="flex-shrink-0 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mr-3">
+
+                    <FileText className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+
+                  </div>
+
+                  <div>
+
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-0.5">Draft → Review</h4>
+
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Soumission pour révision par comptable</p>
+
+                  </div>
+
+                </div>
+
+
+
+                <div className="flex items-start">
+
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-3">
+
+                    <CheckCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+
+                  </div>
+
+                  <div>
+
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-0.5">Review → Validated</h4>
+
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Validation par expert-comptable</p>
+
+                  </div>
+
+                </div>
+
+
+
+                <div className="flex items-start">
+
+                  <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-3">
+
+                    <Lock className="w-4 h-4 text-green-600 dark:text-green-400" />
+
+                  </div>
+
+                  <div>
+
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-0.5">Validated → Posted</h4>
+
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Comptabilisation et verrouillage définitif</p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </AnimatedSection>
+
+      </div>
+
+    </section>
+
+  );
+
+};
+
+
+
 // Section Avantages - Honnête et sans chiffres inventés
 
 const AdvantagesSection = () => {
@@ -824,6 +1352,32 @@ const AdvantagesSection = () => {
 
     {
 
+      icon: Upload,
+
+      title: "Import CSV Intelligent",
+
+      description: "Import automatique des écritures comptables et plan comptable",
+
+      benefits: [
+
+        "Import écritures depuis CSV/Excel",
+
+        "Mapping automatique des colonnes",
+
+        "Validation et détection d'erreurs",
+
+        "Import du plan comptable complet"
+
+      ],
+
+      color: 'from-orange-500 to-red-600',
+
+      bgColor: 'bg-orange-50 dark:bg-orange-900/20'
+
+    },
+
+    {
+
       icon: Shield,
 
       title: "Conformité & Sécurité",
@@ -838,7 +1392,7 @@ const AdvantagesSection = () => {
 
         "RGPD natif",
 
-        "Sauvegardes automatiques"
+        "Logs de sécurité détaillés"
 
       ],
 
@@ -1128,6 +1682,22 @@ const FeaturesSection = () => {
 
       details: ['Import des fichiers bancaires', 'Rapprochement auto', 'Suivi trésorerie', 'Prévisions cash-flow']
 
+    },
+
+    {
+
+      icon: FileCheck,
+
+      title: t('landing.features.regulatory.title', 'Conformité Réglementaire'),
+
+      description: t('landing.features.regulatory.description', 'Génération automatique de 35+ documents légaux pour 10 pays. PCG, SYSCOHADA, IFRS, SCF, PCM. Export PDF et télédéclaration.'),
+
+      color: 'from-green-500 to-emerald-600',
+
+      bgColor: 'bg-green-50 dark:bg-green-900/20',
+
+      details: ['35+ documents légaux', '5 standards comptables', '10+ pays couverts', 'Export PDF/XML']
+
     }
 
   ];
@@ -1412,6 +1982,10 @@ const PricingSection = () => {
 
         t('landing.pricing.starter.features.reports', '10 rapports standards'),
 
+        t('landing.pricing.starter.features.ai', 'Analyses IA basiques'),
+
+        t('landing.pricing.starter.features.regulatory', 'Documents légaux essentiels'),
+
         t('landing.pricing.starter.features.support', 'Support email'),
 
         t('landing.pricing.starter.features.storage', '5 GB de stockage')
@@ -1452,6 +2026,16 @@ const PricingSection = () => {
 
         t('landing.pricing.professional.features.reports', 'Rapports illimités'),
 
+        t('landing.pricing.professional.features.ai_full', '🧠 Analyses IA illimitées (7 rapports)'),
+
+        t('landing.pricing.professional.features.regulatory_all', '35+ documents légaux + Export PDF'),
+
+        t('landing.pricing.professional.features.anomaly', 'Détection d\'anomalies'),
+
+        t('landing.pricing.professional.features.workflow', 'Workflow de validation'),
+
+        t('landing.pricing.professional.features.csv_import', 'Import CSV intelligent'),
+
         t('landing.pricing.professional.features.api', 'API Access'),
 
         t('landing.pricing.professional.features.storage', '50 GB de stockage'),
@@ -1491,6 +2075,10 @@ const PricingSection = () => {
         t('landing.pricing.enterprise.features.forecasting', 'Prévisions financières'),
 
         t('landing.pricing.enterprise.features.audit', 'Piste d\'audit complète'),
+
+        t('landing.pricing.enterprise.features.regulatory_auto', 'Télédéclaration automatique'),
+
+        t('landing.pricing.enterprise.features.security_logs', 'Logs de sécurité avancés'),
 
         t('landing.pricing.enterprise.features.integrations', 'Intégrations personnalisées'),
 
@@ -2666,6 +3254,42 @@ const Footer = () => {
 
             </div>
 
+
+
+            <div>
+
+              <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">{t('landing.footer.accountingStandards.title', 'Standards Comptables')}</h4>
+
+              <div className="space-y-2">
+
+                <Badge className="px-2 py-1 bg-blue-900/50 text-blue-400 border-blue-700/50 text-xs">
+
+                  <FileCheck className="w-3 h-3 mr-1" />
+
+                  PCG (France)
+
+                </Badge>
+
+                <Badge className="px-2 py-1 bg-green-900/50 text-green-400 border-green-700/50 text-xs">
+
+                  <FileCheck className="w-3 h-3 mr-1" />
+
+                  SYSCOHADA (OHADA)
+
+                </Badge>
+
+                <Badge className="px-2 py-1 bg-orange-900/50 text-orange-400 border-orange-700/50 text-xs">
+
+                  <FileCheck className="w-3 h-3 mr-1" />
+
+                  IFRS / SCF / PCM
+
+                </Badge>
+
+              </div>
+
+            </div>
+
             <div>
 
               <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">{t('landing.footer.convention.title')}</h4>
@@ -2762,6 +3386,10 @@ const LandingPage = () => {
         <HeroSection />
 
         <AIAnalysisSection />
+
+        <RegulatoryComplianceSection />
+
+        <AnomalyAndWorkflowSection />
 
 
 

@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,7 +18,7 @@ import {
   type SecurityLevel
 } from '@/services/auditService';
 import { Shield, Calendar, User, Database, Filter, Download, RefreshCw, AlertTriangle } from 'lucide-react';
-
+import { logger } from '@/lib/logger';
 interface AuditLog {
   id: string;
   event_type: AuditAction;
@@ -37,14 +36,12 @@ interface AuditLog {
   user_agent: string | null;
   event_timestamp: string;
 }
-
 export const AuditLogsPage: React.FC = () => {
   const { t } = useTranslation();
   const { currentCompany, user } = useAuth();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   // Filtres
   const [filters, setFilters] = useState({
     event_type: '',
@@ -55,46 +52,37 @@ export const AuditLogsPage: React.FC = () => {
     end_date: '',
     limit: 100
   });
-
   const [showFilters, setShowFilters] = useState(false);
-
   // Charger les logs
   const loadLogs = async () => {
     if (!currentCompany?.id) return;
-
     try {
       setLoading(true);
       setError(null);
-
       const options: any = {
         limit: filters.limit || 100
       };
-
       if (filters.event_type) options.event_type = filters.event_type;
       if (filters.table_name) options.table_name = filters.table_name;
       if (filters.security_level) options.security_level = filters.security_level;
       if (filters.user_id) options.user_id = filters.user_id;
       if (filters.start_date) options.start_date = filters.start_date;
       if (filters.end_date) options.end_date = filters.end_date;
-
       const data = await auditService.getCompanyLogs(currentCompany.id, options);
       setLogs(data || []);
     } catch (err) {
-      console.error('Erreur chargement logs:', err);
+      logger.error('AuditLogs', 'Erreur chargement logs:', err);
       setError(t('auditLogs.loadError'));
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     loadLogs();
   }, [currentCompany?.id]);
-
   // Export CSV
   const exportToCSV = () => {
     if (logs.length === 0) return;
-
     const headers = ['Date', 'Action', 'Table', 'Utilisateur', 'Niveau', 'Détails'];
     const rows = logs.map(log => [
       new Date(log.event_timestamp).toLocaleString('fr-FR'),
@@ -104,19 +92,16 @@ export const AuditLogsPage: React.FC = () => {
       log.security_level,
       JSON.stringify(log.new_values || log.old_values || {})
     ]);
-
     const csvContent = [
       headers.join(','),
       ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
     ].join('\n');
-
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `audit-logs-${currentCompany?.name}-${Date.now()}.csv`;
     link.click();
   };
-
   // Badge de niveau de sécurité
   const SecurityBadge: React.FC<{ level: SecurityLevel }> = ({ level }) => {
     const colors = {
@@ -125,14 +110,12 @@ export const AuditLogsPage: React.FC = () => {
       high: 'bg-orange-100 text-orange-700',
       critical: 'bg-red-100 text-red-700'
     };
-
     return (
       <span className={`px-2 py-1 rounded text-xs font-medium ${colors[level]}`}>
         {level.toUpperCase()}
       </span>
     );
   };
-
   // Badge d'action
   const ActionBadge: React.FC<{ action: AuditAction }> = ({ action }) => {
     const colors: Record<string, string> = {
@@ -145,16 +128,13 @@ export const AuditLogsPage: React.FC = () => {
       RGPD_EXPORT: 'bg-yellow-100 text-yellow-700',
       RGPD_DELETE_ACCOUNT: 'bg-red-100 text-red-700'
     };
-
     const color = colors[action] || 'bg-gray-100 text-gray-700';
-
     return (
       <span className={`px-2 py-1 rounded text-xs font-medium ${color}`}>
         {action}
       </span>
     );
   };
-
   if (!user) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -162,7 +142,6 @@ export const AuditLogsPage: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* En-tête */}
@@ -177,7 +156,6 @@ export const AuditLogsPage: React.FC = () => {
               {t('auditLogs.subtitle', { company: currentCompany?.name || t('common.yourCompany', 'votre entreprise') })}
             </p>
           </div>
-
           <div className="flex gap-2">
             <button
               type="button"
@@ -207,7 +185,6 @@ export const AuditLogsPage: React.FC = () => {
             </button>
           </div>
         </div>
-
         {/* Filtres */}
         {showFilters && (
           <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-900/30">
@@ -233,7 +210,6 @@ export const AuditLogsPage: React.FC = () => {
                   <option value="RGPD_DELETE_ACCOUNT">RGPD_DELETE_ACCOUNT</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t('auditLogs.filterLabels.table')}
@@ -247,7 +223,6 @@ export const AuditLogsPage: React.FC = () => {
                   title={t('auditLogs.filterLabels.table')}
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t('auditLogs.filterLabels.securityLevel')}
@@ -265,7 +240,6 @@ export const AuditLogsPage: React.FC = () => {
                   <option value="critical">{t('auditLogs.securityLevels.critical')}</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t('auditLogs.filterLabels.startDate')}
@@ -278,7 +252,6 @@ export const AuditLogsPage: React.FC = () => {
                   title={t('auditLogs.filterLabels.startDate')}
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t('auditLogs.filterLabels.endDate')}
@@ -291,7 +264,6 @@ export const AuditLogsPage: React.FC = () => {
                   title={t('auditLogs.filterLabels.endDate')}
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t('auditLogs.filterLabels.limit')}
@@ -309,7 +281,6 @@ export const AuditLogsPage: React.FC = () => {
                 </select>
               </div>
             </div>
-
             <button
               type="button"
               onClick={loadLogs}
@@ -320,7 +291,6 @@ export const AuditLogsPage: React.FC = () => {
           </div>
         )}
       </div>
-
       {/* Erreur */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3 dark:bg-red-900/20">
@@ -331,7 +301,6 @@ export const AuditLogsPage: React.FC = () => {
           </div>
         </div>
       )}
-
       {/* Stats rapides */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
@@ -343,7 +312,6 @@ export const AuditLogsPage: React.FC = () => {
             <Database className="w-8 h-8 text-blue-600" />
           </div>
         </div>
-
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
           <div className="flex items-center justify-between">
             <div>
@@ -355,7 +323,6 @@ export const AuditLogsPage: React.FC = () => {
             <Shield className="w-8 h-8 text-red-600 dark:text-red-400" />
           </div>
         </div>
-
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
           <div className="flex items-center justify-between">
             <div>
@@ -367,7 +334,6 @@ export const AuditLogsPage: React.FC = () => {
             <User className="w-8 h-8 text-purple-600" />
           </div>
         </div>
-
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
           <div className="flex items-center justify-between">
             <div>
@@ -384,7 +350,6 @@ export const AuditLogsPage: React.FC = () => {
           </div>
         </div>
       </div>
-
       {/* Table des logs */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
         {loading ? (
@@ -506,7 +471,6 @@ export const AuditLogsPage: React.FC = () => {
           </div>
         )}
       </div>
-
       {/* Note de conformité */}
       <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-900/20">
         <h3 className="text-sm font-semibold text-blue-900 mb-2 dark:text-blue-100">
@@ -519,5 +483,4 @@ export const AuditLogsPage: React.FC = () => {
     </div>
   );
 };
-
 export default AuditLogsPage;

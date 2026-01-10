@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -28,13 +27,12 @@ import { Download, CheckCircle, Circle, Calendar } from 'lucide-react';
 import assetsService from '@/services/assetsService';
 import type { Asset, AssetDepreciationScheduleLine } from '@/types/assets.types';
 import { formatCurrency } from '@/lib/utils';
-
+import { logger } from '@/lib/logger';
 interface DepreciationScheduleDialogProps {
   open: boolean;
   onClose: () => void;
   assetId: string;
 }
-
 export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProps> = ({
   open,
   onClose,
@@ -44,13 +42,11 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
   const [loading, setLoading] = useState(true);
   const [asset, setAsset] = useState<Asset | null>(null);
   const [schedule, setSchedule] = useState<AssetDepreciationScheduleLine[]>([]);
-
   useEffect(() => {
     if (open && assetId) {
       loadSchedule();
     }
   }, [open, assetId]);
-
   const loadSchedule = async () => {
     setLoading(true);
     try {
@@ -61,16 +57,14 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
       setAsset(assetData);
       setSchedule(scheduleData);
     } catch (error: any) {
-      console.error('Error loading schedule:', error);
+      logger.error('DepreciationScheduleDialog', 'Error loading schedule:', error);
       toast.error(t('assets.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
   };
-
   const handleExportCSV = () => {
     if (!asset || schedule.length === 0) return;
-
     // Préparer les données CSV
     const headers = [
       'Exercice',
@@ -84,7 +78,6 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
       'Prorata (jours)',
       'Statut'
     ].join(';');
-
     const rows = schedule.map(line => [
       line.fiscal_year,
       line.period_number,
@@ -97,27 +90,21 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
       line.prorata_days || '-',
       line.is_posted ? 'Passée' : 'En attente'
     ].join(';'));
-
     const csv = [headers, ...rows].join('\n');
-
     // Télécharger le fichier
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `amortissement_${asset.asset_number || asset.id}_${Date.now()}.csv`;
     link.click();
-
     toast.success(t('assets.schedule.exportSuccess'));
   };
-
   const getTotalDepreciation = () => {
     return schedule.reduce((sum, line) => sum + line.depreciation_amount, 0);
   };
-
   const getPostedCount = () => {
     return schedule.filter(line => line.is_posted).length;
   };
-
   if (loading || !asset) {
     return (
       <Dialog open={open} onOpenChange={onClose}>
@@ -129,7 +116,6 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
       </Dialog>
     );
   }
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -150,7 +136,6 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
             </Button>
           </DialogTitle>
         </DialogHeader>
-
         {/* Résumé */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card>
@@ -163,7 +148,6 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
               <div className="text-2xl font-bold">{schedule.length}</div>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -176,7 +160,6 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -189,7 +172,6 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -203,7 +185,6 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
             </CardContent>
           </Card>
         </div>
-
         {/* Tableau du plan */}
         {schedule.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
@@ -282,7 +263,6 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
                     </TableCell>
                   </TableRow>
                 ))}
-
                 {/* Ligne de total */}
                 <TableRow className="bg-gray-100 dark:bg-gray-800 font-bold">
                   <TableCell colSpan={5} className="text-right">
@@ -303,7 +283,6 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
             </Table>
           </div>
         )}
-
         {/* Légende */}
         <div className="flex items-center gap-6 text-sm text-muted-foreground border-t pt-4">
           <div className="flex items-center gap-2">

@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 /**
  * Page de gestion des immobilisations
  * - Registre des immobilisations
@@ -11,7 +10,6 @@
  * - Calculs automatiques
  * - Écritures comptables
  */
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
@@ -57,18 +55,16 @@ import type {
   DepreciationMethod,
 } from '@/types/assets.types';
 import { formatCurrency } from '@/lib/utils';
-
 // Sous-composants (à créer séparément pour modularité)
 import { AssetFormDialog } from '@/components/assets/AssetFormDialog';
 import { AssetDetailDialog } from '@/components/assets/AssetDetailDialog';
 import { CategoryManagementDialog } from '@/components/assets/CategoryManagementDialog';
 import { DepreciationScheduleDialog } from '@/components/assets/DepreciationScheduleDialog';
 import { GenerateEntriesDialog } from '@/components/assets/GenerateEntriesDialog';
-
+import { logger } from '@/lib/logger';
 const AssetsPage: React.FC = () => {
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
-
   // États
   const [loading, setLoading] = useState(true);
   const [assets, setAssets] = useState<AssetListItem[]>([]);
@@ -76,34 +72,29 @@ const AssetsPage: React.FC = () => {
   const [statistics, setStatistics] = useState<AssetStatistics | null>(null);
   const [filters, setFilters] = useState<AssetFilters>({ status: 'all' });
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
-
   // Dialogs
   const [showAssetForm, setShowAssetForm] = useState(false);
   const [showAssetDetail, setShowAssetDetail] = useState(false);
   const [showCategoryManagement, setShowCategoryManagement] = useState(false);
   const [showDepreciationSchedule, setShowDepreciationSchedule] = useState(false);
   const [showGenerateEntries, setShowGenerateEntries] = useState(false);
-
   // Charger les données au montage
   useEffect(() => {
     if (currentCompany?.id) {
       loadData();
     }
   }, [currentCompany?.id]);
-
   // Recharger quand les filtres changent
   useEffect(() => {
     if (currentCompany?.id) {
       loadAssets();
     }
   }, [filters, currentCompany?.id]);
-
   /**
    * Charger toutes les données
    */
   const loadData = async () => {
     if (!currentCompany?.id) return;
-
     setLoading(true);
     try {
       await Promise.all([
@@ -112,39 +103,35 @@ const AssetsPage: React.FC = () => {
         loadStatistics(),
       ]);
     } catch (error: any) {
-      console.error('Error loading data:', error);
+      logger.error('Assets', 'Error loading data:', error);
       toast.error(t('assets.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
   };
-
   /**
    * Charger les immobilisations
    */
   const loadAssets = async () => {
     if (!currentCompany?.id) return;
-
     try {
       const data = await assetsService.getAssets(currentCompany.id, filters);
       setAssets(data);
     } catch (error: any) {
-      console.error('Error loading assets:', error);
+      logger.error('Assets', 'Error loading assets:', error);
       throw error;
     }
   };
-
   /**
    * Charger les catégories depuis le plan comptable (comptes classe 2)
    */
   const loadCategories = async () => {
     if (!currentCompany?.id) {
-      console.log('[AssetsPage] companyId non disponible pour charger les catégories');
+      logger.debug('Assets', '[AssetsPage] companyId non disponible pour charger les catégories');
       return;
     }
-
     try {
-      console.log('[AssetsPage] Chargement des catégories pour company:', currentCompany.id);
+      logger.debug('Assets', '[AssetsPage] Chargement des catégories pour company:', currentCompany.id);
       // Charger les comptes 21x (immobilisations corporelles) depuis le plan comptable
       const { data: chartOfAccounts, error } = await supabase
         .from('chart_of_accounts')
@@ -152,18 +139,13 @@ const AssetsPage: React.FC = () => {
         .eq('company_id', currentCompany.id)
         .like('account_number', '21%')
         .order('account_number');
-
       if (error) throw error;
-
-      console.log('[AssetsPage] Comptes 21x chargés:', chartOfAccounts);
-
+      logger.debug('Assets', '[AssetsPage] Comptes 21x chargés:', chartOfAccounts);
       // Filtrer pour garder uniquement les comptes principaux (211, 213, 215, 2181, 2182, etc.)
       const mainCategories = chartOfAccounts?.filter(acc =>
         acc.account_number.length <= 4 && acc.account_number.startsWith('21')
       ) || [];
-
-      console.log('[AssetsPage] Catégories principales filtrées:', mainCategories);
-
+      logger.debug('Assets', '[AssetsPage] Catégories principales filtrées:', mainCategories);
       // Convertir en format AssetCategory
       const categoriesData: AssetCategory[] = mainCategories.map(acc => ({
         id: acc.id,
@@ -178,37 +160,32 @@ const AssetsPage: React.FC = () => {
         created_at: acc.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }));
-
-      console.log('[AssetsPage] Catégories converties:', categoriesData);
+      logger.debug('Assets', '[AssetsPage] Catégories converties:', categoriesData);
       setCategories(categoriesData);
     } catch (error: any) {
-      console.error('[AssetsPage] Error loading categories:', error);
+      logger.error('Assets', '[AssetsPage] Error loading categories:', error);
       throw error;
     }
   };
-
   /**
    * Charger les statistiques
    */
   const loadStatistics = async () => {
     if (!currentCompany?.id) return;
-
     try {
       const data = await assetsService.getAssetStatistics(currentCompany.id);
       setStatistics(data);
     } catch (error: any) {
-      console.error('Error loading statistics:', error);
+      logger.error('Assets', 'Error loading statistics:', error);
       throw error;
     }
   };
-
   /**
    * Gérer le changement de filtre de recherche
    */
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilters((prev) => ({ ...prev, search: e.target.value }));
   };
-
   /**
    * Gérer le changement de filtre de statut
    */
@@ -218,7 +195,6 @@ const AssetsPage: React.FC = () => {
       status: value as AssetStatus | 'all'
     }));
   };
-
   /**
    * Gérer le changement de filtre de catégorie
    */
@@ -228,7 +204,6 @@ const AssetsPage: React.FC = () => {
       category_id: value === 'all' ? undefined : value
     }));
   };
-
   /**
    * Ouvrir le détail d'une immobilisation
    */
@@ -236,7 +211,6 @@ const AssetsPage: React.FC = () => {
     setSelectedAssetId(assetId);
     setShowAssetDetail(true);
   };
-
   /**
    * Ouvrir le plan d'amortissement
    */
@@ -244,7 +218,6 @@ const AssetsPage: React.FC = () => {
     setSelectedAssetId(assetId);
     setShowDepreciationSchedule(true);
   };
-
   /**
    * Badge de statut
    */
@@ -255,11 +228,9 @@ const AssetsPage: React.FC = () => {
       disposed: { label: t('assets.status.disposed'), variant: 'destructive' },
       under_maintenance: { label: t('assets.status.underMaintenance'), variant: 'warning' },
     };
-
     const { label, variant } = variants[status];
     return <Badge variant={variant}>{label}</Badge>;
   };
-
   /**
    * Badge de méthode d'amortissement
    */
@@ -271,7 +242,6 @@ const AssetsPage: React.FC = () => {
     };
     return labels[method];
   };
-
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* En-tête */}
@@ -285,7 +255,6 @@ const AssetsPage: React.FC = () => {
             {t('assets.subtitle')}
           </p>
         </div>
-
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -294,7 +263,6 @@ const AssetsPage: React.FC = () => {
             <Settings className="w-4 h-4 mr-2" />
             {t('assets.categories.manage')}
           </Button>
-
           <Button
             variant="outline"
             onClick={() => setShowGenerateEntries(true)}
@@ -302,14 +270,12 @@ const AssetsPage: React.FC = () => {
             <FileText className="w-4 h-4 mr-2" />
             {t('assets.actions.generateEntries')}
           </Button>
-
           <Button onClick={() => setShowAssetForm(true)}>
             <Plus className="w-4 h-4 mr-2" />
             {t('assets.actions.createAsset')}
           </Button>
         </div>
       </div>
-
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -327,7 +293,6 @@ const AssetsPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -343,7 +308,6 @@ const AssetsPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -360,7 +324,6 @@ const AssetsPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -377,7 +340,6 @@ const AssetsPage: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-
       {/* Alerte écritures en attente */}
       {statistics && statistics.pending_depreciation_entries > 0 && (
         <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950/20">
@@ -404,7 +366,6 @@ const AssetsPage: React.FC = () => {
           </CardContent>
         </Card>
       )}
-
       {/* Filtres et recherche */}
       <Card>
         <CardContent className="pt-6">
@@ -421,7 +382,6 @@ const AssetsPage: React.FC = () => {
                 />
               </div>
             </div>
-
             {/* Filtre statut */}
             <Select
               value={filters.status || 'all'}
@@ -438,7 +398,6 @@ const AssetsPage: React.FC = () => {
                 <SelectItem value="under_maintenance">{t('assets.status.underMaintenance')}</SelectItem>
               </SelectContent>
             </Select>
-
             {/* Filtre catégorie */}
             <Select
               value={filters.category_id || 'all'}
@@ -459,7 +418,6 @@ const AssetsPage: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-
       {/* Tableau des immobilisations */}
       <Card>
         <CardHeader>
@@ -556,7 +514,6 @@ const AssetsPage: React.FC = () => {
           </Table>
         </CardContent>
       </Card>
-
       {/* Dialogs */}
       {showAssetForm && (
         <AssetFormDialog
@@ -569,7 +526,6 @@ const AssetsPage: React.FC = () => {
           onCategoryCreated={loadCategories}
         />
       )}
-
       {showAssetDetail && selectedAssetId && (
         <AssetDetailDialog
           open={showAssetDetail}
@@ -581,7 +537,6 @@ const AssetsPage: React.FC = () => {
           assetId={selectedAssetId}
         />
       )}
-
       {showCategoryManagement && (
         <CategoryManagementDialog
           open={showCategoryManagement}
@@ -591,7 +546,6 @@ const AssetsPage: React.FC = () => {
           }}
         />
       )}
-
       {showDepreciationSchedule && selectedAssetId && (
         <DepreciationScheduleDialog
           open={showDepreciationSchedule}
@@ -602,7 +556,6 @@ const AssetsPage: React.FC = () => {
           assetId={selectedAssetId}
         />
       )}
-
       {showGenerateEntries && (
         <GenerateEntriesDialog
           open={showGenerateEntries}
@@ -615,5 +568,4 @@ const AssetsPage: React.FC = () => {
     </div>
   );
 };
-
 export default AssetsPage;

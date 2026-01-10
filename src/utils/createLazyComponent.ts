@@ -1,15 +1,13 @@
 import { lazy, ComponentType, LazyExoticComponent } from 'react';
-
+import { logger } from '@/lib/logger';
 // Configuration du préchargement intelligent
 interface LazyComponentConfig {
   priority: 'high' | 'medium' | 'low';
   preloadCondition?: () => boolean;
   chunkName?: string;
 }
-
 // Utilitaire pour créer des composants lazy avec préchargement intelligent
 type Preloadable<T extends ComponentType<unknown>> = LazyExoticComponent<T> & { preload?: () => Promise<{ default: T }> };
-
 export function createLazyComponent<T extends ComponentType<unknown>>(
   factory: () => Promise<{ default: T }>,
   config: LazyComponentConfig = { priority: 'medium' }
@@ -20,14 +18,12 @@ export function createLazyComponent<T extends ComponentType<unknown>>(
       if (config.preloadCondition?.()) {
         return factory();
       }
-      
       // Délai stratégique selon la priorité
       const delay = {
         high: 0,
         medium: 100,
         low: 200
       }[config.priority] || 100;
-      
       return new Promise<{ default: T }>((resolve, reject) => {
         setTimeout(() => {
           factory()
@@ -36,13 +32,11 @@ export function createLazyComponent<T extends ComponentType<unknown>>(
         }, delay);
       });
     } catch (error) {
-      console.error('Error in lazy component factory:', error instanceof Error ? error.message : String(error));
+      logger.error('CreateLazy', 'Error in lazy component factory:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   });
-
   // Méthode pour précharger manuellement
   (LazyComponent as Preloadable<T>).preload = () => factory();
-  
   return LazyComponent as Preloadable<T>;
-}
+}

@@ -1,5 +1,5 @@
 import React, { ComponentType, lazy } from 'react';
-
+import { logger } from '@/lib/logger';
 /**
  * Enhanced lazy loading with retry logic for better reliability
  * Automatically retries failed chunk loads up to 3 times
@@ -13,7 +13,6 @@ export function lazyWithRetry<T extends ComponentType<unknown>>(
     return new Promise<{ default: T }>((resolve, _reject) => {
       const attemptLoad = async () => {
         let lastError: Error | null = null;
-
         for (let attempt = 0; attempt < retries; attempt++) {
           try {
             const component = await componentImport();
@@ -21,11 +20,10 @@ export function lazyWithRetry<T extends ComponentType<unknown>>(
             return;
           } catch (error) {
             lastError = error as Error;
-            console.warn(
+            logger.warn('lazyWithRetry', 
               `[Lazy Loading] Attempt ${attempt + 1}/${retries} failed for component:`,
               error
             );
-
             // Wait before retrying (exponential backoff)
             if (attempt < retries - 1) {
               await new Promise((resolveDelay) =>
@@ -34,10 +32,8 @@ export function lazyWithRetry<T extends ComponentType<unknown>>(
             }
           }
         }
-
         // If all retries failed, show user-friendly error
-        console.error('[Lazy Loading] All retry attempts failed:', lastError);
-        
+        logger.error('LazyWithRetry', '[Lazy Loading] All retry attempts failed:', lastError);
         // Return a simple error component without JSX
         const ErrorComponent = () => React.createElement('div', {
           className: 'flex flex-col items-center justify-center min-h-[400px] p-8 text-center',
@@ -58,19 +54,16 @@ export function lazyWithRetry<T extends ComponentType<unknown>>(
             }, 'Recharger la page')
           ]
         });
-        
         resolve({
           default: ErrorComponent as unknown as T,
         });
       };
-
       attemptLoad().catch((error) => {
-        console.error('[Lazy Loading] Fatal error:', error);
+        logger.error('LazyWithRetry', '[Lazy Loading] Fatal error:', error);
       });
     });
   });
 }
-
 /**
  * Preload a lazy component
  * Useful for prefetching routes the user is likely to visit
@@ -79,10 +72,9 @@ export function preloadComponent(
   componentImport: () => Promise<{ default: ComponentType<unknown> }>
 ): void {
   componentImport().catch((error) => {
-    console.warn('[Preload] Failed to preload component:', error);
+    logger.warn('LazyWithRetry', '[Preload] Failed to preload component:', error);
   });
 }
-
 /**
  * Create a lazy component with preload capability
  */
@@ -90,7 +82,6 @@ export function lazyWithPreload<T extends ComponentType<unknown>>(
   componentImport: () => Promise<{ default: T }>
 ) {
   const LazyComponent = lazyWithRetry(componentImport);
-  
   return {
     Component: LazyComponent,
     preload: () => preloadComponent(componentImport),

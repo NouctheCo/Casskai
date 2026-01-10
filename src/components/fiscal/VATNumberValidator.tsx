@@ -2,7 +2,6 @@
  * CassKai - Vérificateur de numéro de TVA intracommunautaire
  * Validation format + API VIES (Union Européenne)
  */
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -23,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-
+import { logger } from '@/lib/logger';
 // Formats TVA par pays UE
 const VAT_FORMATS: Record<string, RegExp> = {
   FR: /^FR[0-9A-Z]{2}[0-9]{9}$/,
@@ -54,7 +53,6 @@ const VAT_FORMATS: Record<string, RegExp> = {
   CY: /^CY[0-9]{8}[A-Z]$/,
   GR: /^(EL|GR)[0-9]{9}$/
 };
-
 interface VATValidationResult {
   vatNumber: string;
   countryCode: string;
@@ -66,13 +64,11 @@ interface VATValidationResult {
   verificationDate: Date;
   errorMessage?: string;
 }
-
 export const VATNumberValidator: React.FC<{ className?: string }> = ({ className }) => {
   const [vatNumber, setVatNumber] = useState<string>('');
   const [isValidating, setIsValidating] = useState<boolean>(false);
   const [result, setResult] = useState<VATValidationResult | null>(null);
   const [validationHistory, setValidationHistory] = useState<VATValidationResult[]>([]);
-
   // Formate le numéro de TVA (espaces tous les 3-4 caractères)
   const formatVATNumber = (value: string): string => {
     const cleaned = value.replace(/\s/g, '').toUpperCase();
@@ -87,20 +83,16 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
     // Format générique
     return cleaned.replace(/(.{4})/g, '$1 ').trim();
   };
-
   // Valide le format du numéro de TVA
   const validateFormat = (vat: string): { isValid: boolean; countryCode: string } => {
     const cleaned = vat.replace(/\s/g, '').toUpperCase();
     const countryCode = cleaned.slice(0, 2);
-
     if (!VAT_FORMATS[countryCode]) {
       return { isValid: false, countryCode };
     }
-
     const isValid = VAT_FORMATS[countryCode].test(cleaned);
     return { isValid, countryCode };
   };
-
   // Simule l'appel à l'API VIES (en production, faire un vrai appel)
   const validateWithVIES = async (_vat: string, _countryCode: string): Promise<{
     isValid: boolean;
@@ -110,13 +102,11 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
   }> => {
     // Simulation d'un délai d'API
     await new Promise(resolve => setTimeout(resolve, 1500));
-
     // En production, faire un vrai appel à l'API VIES
     // Endpoint: https://ec.europa.eu/taxation_customs/vies/services/checkVatService
     //
     // Pour l'instant, on simule une réponse
     const isValid = Math.random() > 0.2; // 80% de succès
-
     if (isValid) {
       return {
         isValid: true,
@@ -130,23 +120,18 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
       };
     }
   };
-
   // Valide le numéro de TVA
   const validate = async () => {
     if (!vatNumber.trim()) {
-      console.warn('Veuillez saisir un numéro de TVA');
+      logger.warn('VATNumberValidator', 'Veuillez saisir un numéro de TVA');
       return;
     }
-
     setIsValidating(true);
     setResult(null);
-
     try {
       const cleaned = vatNumber.replace(/\s/g, '').toUpperCase();
-
       // Étape 1 : Validation du format
       const { isValid: isFormatValid, countryCode } = validateFormat(cleaned);
-
       if (!isFormatValid) {
         const result: VATValidationResult = {
           vatNumber: cleaned,
@@ -160,10 +145,8 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
         addToHistory(result);
         return;
       }
-
       // Étape 2 : Validation via API VIES
       const viesResult = await validateWithVIES(cleaned, countryCode);
-
       const validationResult: VATValidationResult = {
         vatNumber: cleaned,
         countryCode,
@@ -175,7 +158,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
         verificationDate: new Date(),
         errorMessage: viesResult.errorMessage
       };
-
       setResult(validationResult);
       addToHistory(validationResult);
     } catch (error) {
@@ -193,18 +175,15 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
       setIsValidating(false);
     }
   };
-
   // Ajoute à l'historique
   const addToHistory = (result: VATValidationResult) => {
     setValidationHistory(prev => [result, ...prev.slice(0, 9)]); // Garde les 10 derniers
   };
-
   // Exporte la preuve de vérification
   const exportProof = () => {
     if (!result) return;
-    console.log('Export PDF de la preuve de vérification - Fonctionnalité à venir');
+    logger.debug('VATNumberValidator', 'Export PDF de la preuve de vérification - Fonctionnalité à venir');
   };
-
   return (
     <Card className={cn(className)}>
       <CardHeader>
@@ -216,7 +195,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
           Validez les numéros de TVA de l'Union Européenne via l'API VIES
         </CardDescription>
       </CardHeader>
-
       <CardContent className="space-y-6">
         {/* Formulaire de saisie */}
         <div className="space-y-4">
@@ -249,7 +227,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
               Formaté : {formatVATNumber(vatNumber)}
             </p>
           </div>
-
           {/* Information sur les formats */}
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 flex items-start space-x-2">
             <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
@@ -265,7 +242,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
             </div>
           </div>
         </div>
-
         {/* Résultat de validation */}
         <AnimatePresence mode="wait">
           {result && (
@@ -288,7 +264,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
                 ) : (
                   <XCircle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0" />
                 )}
-
                 <div className="flex-1">
                   <h4 className={cn(
                     "font-bold text-lg",
@@ -312,11 +287,9 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
                   </p>
                 </div>
               </div>
-
               {/* Détails de validation */}
               <div className="space-y-3">
                 <h4 className="font-semibold text-gray-900 dark:text-white">Détails</h4>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {/* Numéro de TVA */}
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border">
@@ -325,7 +298,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
                       {formatVATNumber(result.vatNumber)}
                     </p>
                   </div>
-
                   {/* Pays */}
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border">
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Pays</p>
@@ -340,7 +312,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
                       </span>
                     </div>
                   </div>
-
                   {/* Format */}
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border">
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Validation format</p>
@@ -355,7 +326,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
                       </span>
                     </div>
                   </div>
-
                   {/* VIES */}
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border">
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Validation VIES</p>
@@ -371,7 +341,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
                     </div>
                   </div>
                 </div>
-
                 {/* Informations entreprise */}
                 {result.isValid && result.companyName && (
                   <div className="border rounded-lg p-4 space-y-3 bg-white dark:bg-gray-800">
@@ -379,13 +348,11 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
                       <Building className="w-4 h-4" />
                       <span>Informations entreprise</span>
                     </h5>
-
                     <div className="space-y-2">
                       <div>
                         <p className="text-xs text-gray-500 dark:text-gray-400">Raison sociale</p>
                         <p className="font-medium text-gray-900 dark:text-white">{result.companyName}</p>
                       </div>
-
                       {result.companyAddress && (
                         <div>
                           <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-1">
@@ -395,7 +362,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
                           <p className="text-sm text-gray-700 dark:text-gray-300">{result.companyAddress}</p>
                         </div>
                       )}
-
                       <div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-1">
                           <Calendar className="w-3 h-3" />
@@ -408,7 +374,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
                     </div>
                   </div>
                 )}
-
                 {/* Actions */}
                 {result.isValid && (
                   <div className="flex items-center space-x-2">
@@ -426,12 +391,10 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Historique */}
         {validationHistory.length > 0 && (
           <div className="border-t pt-6 space-y-3">
             <h4 className="font-semibold text-gray-900 dark:text-white">Historique des vérifications</h4>
-
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {validationHistory.map((item, index) => (
                 <div
@@ -453,7 +416,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
                       </p>
                     </div>
                   </div>
-
                   <Badge className={cn(
                     item.isValid
                       ? "bg-green-100 text-green-800 border-green-200"
@@ -466,7 +428,6 @@ export const VATNumberValidator: React.FC<{ className?: string }> = ({ className
             </div>
           </div>
         )}
-
         {/* Avertissement */}
         <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 flex items-start space-x-2">
           <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />

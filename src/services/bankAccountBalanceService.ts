@@ -10,10 +10,9 @@
  * 1. Mise à jour automatique en temps réel (lors de la création d'une écriture banque)
  * 2. Recalcul manuel / ponctuel (pour corriger les dérives)
  */
-
 import { supabase } from '@/lib/supabase';
 import { JournalType } from './accountingRulesService';
-
+import { logger } from '@/lib/logger';
 export interface BankAccountBalanceUpdate {
   account_id: string;
   new_balance: number;
@@ -21,24 +20,20 @@ export interface BankAccountBalanceUpdate {
   reason: string;
   reference?: string;
 }
-
 class BankAccountBalanceService {
   private static instance: BankAccountBalanceService;
-
   static getInstance(): BankAccountBalanceService {
     if (!BankAccountBalanceService.instance) {
       BankAccountBalanceService.instance = new BankAccountBalanceService();
     }
     return BankAccountBalanceService.instance;
   }
-
   /**
    * ========================================================================
    * APPROCHE 1 : MISE À JOUR AUTOMATIQUE EN TEMPS RÉEL
    * ========================================================================
    * Appelée automatiquement quand une écriture comptable est créée/modifiée
    */
-
   /**
    * Met à jour le solde d'un compte bancaire après une écriture comptable
    * Appelée après la création/modification d'une écriture dans le journal banque
@@ -64,26 +59,21 @@ class BankAccountBalanceService {
         .eq('id', journalEntryId)
         .eq('company_id', companyId)
         .single();
-
       if (entryError || !entry) {
-        console.error('Erreur récupération écriture:', entryError);
+        logger.error('BankAccountBalance', 'Erreur récupération écriture:', entryError);
         return null;
       }
-
       // 2. Trouver la ligne relative au compte bancaire
       const lines = (entry.journal_entry_lines || []) as any[];
       const bankLine = lines.find(
         (l) => l.account_id === bankAccountId
       );
-
       if (!bankLine) {
-        console.log('Aucune ligne bancaire trouvée dans cette écriture');
+        logger.debug('BankAccountBalance', 'Aucune ligne bancaire trouvée dans cette écriture');
         return null;
       }
-
       // 3. Calculer le mouvement (débit = entrée, crédit = sortie)
       const movement = (bankLine.debit_amount || 0) - (bankLine.credit_amount || 0);
-
       // 4. Récupérer le solde actuel du compte
       const { data: account, error: accountError } = await supabase
         .from('bank_accounts')
@@ -91,15 +81,12 @@ class BankAccountBalanceService {
         .eq('id', bankAccountId)
         .eq('company_id', companyId)
         .single();
-
       if (accountError || !account) {
-        console.error('Erreur récupération compte:', accountError);
+        logger.error('BankAccountBalance', 'Erreur récupération compte:', accountError);
         return null;
       }
-
       const previousBalance = account.current_balance || 0;
       const newBalance = previousBalance + movement;
-
       // 5. Mettre à jour le solde
       const { error: updateError } = await supabase
         .from('bank_accounts')
@@ -109,16 +96,13 @@ class BankAccountBalanceService {
         })
         .eq('id', bankAccountId)
         .eq('company_id', companyId);
-
       if (updateError) {
-        console.error('Erreur mise à jour solde:', updateError);
+        logger.error('BankAccountBalance', 'Erreur mise à jour solde:', updateError);
         return null;
       }
-
-      console.log(
+      logger.debug('bankAccountBalance', 
         `✅ Solde bancaire ${bankAccountId} mis à jour: ${previousBalance}€ → ${newBalance}€ (mouvement: ${movement}€)`
       );
-
       return {
         account_id: bankAccountId,
         new_balance: newBalance,
@@ -127,11 +111,10 @@ class BankAccountBalanceService {
         reference: journalEntryId
       };
     } catch (error) {
-      console.error('Erreur dans updateBalanceFromJournalEntry:', error);
+      logger.error('BankAccountBalance', 'Erreur dans updateBalanceFromJournalEntry:', error);
       return null;
     }
   }
-
   /**
    * Met à jour tous les comptes bancaires impactés par une écriture
    * (en cas de virement entre deux comptes bancaires, par exemple)
@@ -142,7 +125,6 @@ class BankAccountBalanceService {
   ): Promise<BankAccountBalanceUpdate[]> {
     try {
       const updates: BankAccountBalanceUpdate[] = [];
-
       // 1. Récupérer l'écriture
       const { data: entry, error: entryError } = await supabase
         .from('journal_entries')
@@ -157,20 +139,15 @@ class BankAccountBalanceService {
         .eq('id', journalEntryId)
         .eq('company_id', companyId)
         .single();
-
       if (entryError || !entry) return updates;
-
       // 2. Récupérer tous les comptes bancaires de l'entreprise
       const { data: bankAccounts, error: accountsError } = await supabase
         .from('bank_accounts')
         .select('id')
         .eq('company_id', companyId)
         .eq('is_active', true);
-
       if (accountsError || !bankAccounts) return updates;
-
       // 3. Pour chaque compte bancaire, vérifier s'il est impacté
-      
       for (const account of bankAccounts) {
         const update = await this.updateBalanceFromJournalEntry(
           companyId,
@@ -181,21 +158,18 @@ class BankAccountBalanceService {
           updates.push(update);
         }
       }
-
       return updates;
     } catch (error) {
-      console.error('Erreur dans updateBalancesFromJournalEntry:', error);
+      logger.error('BankAccountBalance', 'Erreur dans updateBalancesFromJournalEntry:', error);
       return [];
     }
   }
-
   /**
    * ========================================================================
    * APPROCHE 2 : RECALCUL MANUEL / PONCTUEL
    * ========================================================================
    * À utiliser pour corriger les dérives ou lors de maintenance
    */
-
   /**
    * Recalcule complètement le solde d'un compte bancaire
    * Basé sur initial_balance + toutes les opérations comptables
@@ -212,7 +186,6 @@ class BankAccountBalanceService {
         .eq('id', bankAccountId)
         .eq('company_id', companyId)
         .single();
-
       if (accountError || !account) {
         return {
           success: false,
@@ -220,9 +193,7 @@ class BankAccountBalanceService {
           message: 'Compte bancaire non trouvé'
         };
       }
-
       const initialBalance = account.initial_balance || 0;
-
       // 2. Récupérer le journal banque
       const { data: journal, error: journalError } = await supabase
         .from('journals')
@@ -230,7 +201,6 @@ class BankAccountBalanceService {
         .eq('company_id', companyId)
         .eq('journal_type', JournalType.BANK)
         .single();
-
       if (journalError || !journal) {
         return {
           success: false,
@@ -238,7 +208,6 @@ class BankAccountBalanceService {
           message: 'Journal banque non trouvé'
         };
       }
-
       // 3. Récupérer toutes les lignes de journal pour ce compte
       const { data: entries, error: entriesError } = await supabase
         .from('journal_entries')
@@ -252,7 +221,6 @@ class BankAccountBalanceService {
         `)
         .eq('company_id', companyId)
         .eq('journal_id', journal.id);
-
       if (entriesError) {
         return {
           success: false,
@@ -260,24 +228,19 @@ class BankAccountBalanceService {
           message: 'Erreur lors de la récupération des écritures'
         };
       }
-
       // 4. Calculer la somme de tous les mouvements
       let totalMovement = 0;
-
       if (entries) {
         for (const entry of entries) {
           const lines = (entry.journal_entry_lines || []) as any[];
           const bankLine = lines.find((l) => l.account_id === bankAccountId);
-          
           if (bankLine) {
             const movement = (bankLine.debit_amount || 0) - (bankLine.credit_amount || 0);
             totalMovement += movement;
           }
         }
       }
-
       const calculatedBalance = initialBalance + totalMovement;
-
       // 5. Mettre à jour le solde
       const { error: updateError } = await supabase
         .from('bank_accounts')
@@ -287,7 +250,6 @@ class BankAccountBalanceService {
         })
         .eq('id', bankAccountId)
         .eq('company_id', companyId);
-
       if (updateError) {
         return {
           success: false,
@@ -295,10 +257,8 @@ class BankAccountBalanceService {
           message: 'Erreur lors de la mise à jour du solde'
         };
       }
-
       const previousBalance = account.current_balance || 0;
       const difference = calculatedBalance - previousBalance;
-
       if (difference === 0) {
         return {
           success: true,
@@ -313,7 +273,7 @@ class BankAccountBalanceService {
         };
       }
     } catch (error) {
-      console.error('Erreur dans recalculateBankAccountBalance:', error);
+      logger.error('BankAccountBalance', 'Erreur dans recalculateBankAccountBalance:', error);
       return {
         success: false,
         newBalance: 0,
@@ -321,7 +281,6 @@ class BankAccountBalanceService {
       };
     }
   }
-
   /**
    * Recalcule tous les comptes bancaires d'une entreprise
    */
@@ -335,14 +294,12 @@ class BankAccountBalanceService {
         .select('id')
         .eq('company_id', companyId)
         .eq('is_active', true);
-
       if (accountsError || !accounts) {
         return {
           success: false,
           results: []
         };
       }
-
       // 2. Recalculer chaque compte
       const results = [];
       for (const account of accounts) {
@@ -352,20 +309,18 @@ class BankAccountBalanceService {
           message: result.message
         });
       }
-
       return {
         success: true,
         results
       };
     } catch (error) {
-      console.error('Erreur dans recalculateAllBankAccountBalances:', error);
+      logger.error('BankAccountBalance', 'Erreur dans recalculateAllBankAccountBalances:', error);
       return {
         success: false,
         results: []
       };
     }
   }
-
   /**
    * Récupère l'historique des mouvements sur un compte bancaire
    * Utile pour déboguer
@@ -389,11 +344,9 @@ class BankAccountBalanceService {
         .eq('company_id', companyId)
         .eq('journal_type', JournalType.BANK)
         .single();
-
       if (journalError || !journal) {
         return [];
       }
-
       const { data: entries, error: entriesError } = await supabase
         .from('journal_entries')
         .select(`
@@ -410,17 +363,14 @@ class BankAccountBalanceService {
         .eq('journal_id', journal.id)
         .order('entry_date', { ascending: false })
         .limit(limit);
-
       if (entriesError) {
         return [];
       }
-
       const movements = [];
       if (entries) {
         for (const entry of entries) {
           const lines = (entry.journal_entry_lines || []) as any[];
           const bankLine = lines.find((l) => l.account_id === bankAccountId);
-          
           if (bankLine) {
             movements.push({
               entryId: entry.id,
@@ -433,13 +383,11 @@ class BankAccountBalanceService {
           }
         }
       }
-
       return movements;
     } catch (error) {
-      console.error('Erreur dans getBankAccountMovementHistory:', error);
+      logger.error('BankAccountBalance', 'Erreur dans getBankAccountMovementHistory:', error);
       return [];
     }
   }
 }
-
 export const bankAccountBalanceService = BankAccountBalanceService.getInstance();

@@ -12,6 +12,8 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+import { logger } from '@/lib/logger';
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -76,9 +78,9 @@ export const SUPABASE_ANON_KEY = supabaseAnonKey;
 
 export const handleSupabaseError = (error: unknown) => {
 
-  console.error('Supabase error:', error);
+  logger.error('Supabase', 'Supabase error', error);
 
-  
+
 
   if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
 
@@ -88,7 +90,7 @@ export const handleSupabaseError = (error: unknown) => {
 
     }
 
-    
+
 
     if (error.message.includes('Row Level Security')) {
 
@@ -96,13 +98,13 @@ export const handleSupabaseError = (error: unknown) => {
 
     }
 
-    
+
 
     return error.message;
 
   }
 
-  
+
 
   return 'An unexpected error occurred.';
 
@@ -176,7 +178,7 @@ export const getUserCompanies = async (userId?: string) => {
 
         error.code === '42P17') {
 
-      console.warn('🔄 RLS/Policy error in getUserCompanies - returning empty array for onboarding');
+      logger.warn('Supabase', 'RLS/Policy error in getUserCompanies - returning empty array for onboarding');
 
       return [];
 

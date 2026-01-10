@@ -5,6 +5,9 @@ import { CountryInfo } from '../types/config';
 export const APP_VERSION = '1.0.0';
 
 export const SUPPORTED_COUNTRIES: CountryInfo[] = [
+  // ============================================================================
+  // EUROPE
+  // ============================================================================
   {
     code: 'FR',
     name: 'France',
@@ -25,11 +28,39 @@ export const SUPPORTED_COUNTRIES: CountryInfo[] = [
     currency: 'EUR',
     timezone: 'Europe/Brussels',
     fiscalYearStart: '01-01',
-    accountingStandard: 'BELGIAN',
+    accountingStandard: 'PCG',
     taxRates: [
       { name: 'TVA Standard', rate: 21, type: 'VAT', isDefault: true },
       { name: 'TVA Réduite', rate: 12, type: 'VAT', isDefault: false },
       { name: 'TVA Super Réduite', rate: 6, type: 'VAT', isDefault: false }
+    ]
+  },
+
+  // ============================================================================
+  // AFRIQUE DE L'OUEST - ZONE CFA (SYSCOHADA)
+  // ============================================================================
+  {
+    code: 'SN',
+    name: 'Sénégal',
+    currency: 'XOF',
+    timezone: 'Africa/Dakar',
+    fiscalYearStart: '01-01',
+    accountingStandard: 'SYSCOHADA',
+    taxRates: [
+      { name: 'TVA Standard', rate: 18, type: 'VAT', isDefault: true },
+      { name: 'TVA Réduite', rate: 10, type: 'VAT', isDefault: false }
+    ]
+  },
+  {
+    code: 'CI',
+    name: 'Côte d\'Ivoire',
+    currency: 'XOF',
+    timezone: 'Africa/Abidjan',
+    fiscalYearStart: '01-01',
+    accountingStandard: 'SYSCOHADA',
+    taxRates: [
+      { name: 'TVA Standard', rate: 18, type: 'VAT', isDefault: true },
+      { name: 'TVA Réduite', rate: 9, type: 'VAT', isDefault: false }
     ]
   },
   {
@@ -44,14 +75,107 @@ export const SUPPORTED_COUNTRIES: CountryInfo[] = [
     ]
   },
   {
-    code: 'CI',
-    name: 'Côte d\'Ivoire',
-    currency: 'XOF',
-    timezone: 'Africa/Abidjan',
+    code: 'CM',
+    name: 'Cameroun',
+    currency: 'XAF',
+    timezone: 'Africa/Douala',
     fiscalYearStart: '01-01',
     accountingStandard: 'SYSCOHADA',
     taxRates: [
-      { name: 'TVA Standard', rate: 18, type: 'VAT', isDefault: true }
+      { name: 'TVA Standard', rate: 19.25, type: 'VAT', isDefault: true }
+    ]
+  },
+
+  // ============================================================================
+  // AFRIQUE ANGLOPHONE (IFRS)
+  // ============================================================================
+  {
+    code: 'NG',
+    name: 'Nigeria',
+    currency: 'NGN',
+    timezone: 'Africa/Lagos',
+    fiscalYearStart: '01-01',
+    accountingStandard: 'IFRS',
+    taxRates: [
+      { name: 'VAT Standard', rate: 7.5, type: 'VAT', isDefault: true }
+    ]
+  },
+  {
+    code: 'GH',
+    name: 'Ghana',
+    currency: 'GHS',
+    timezone: 'Africa/Accra',
+    fiscalYearStart: '01-01',
+    accountingStandard: 'IFRS',
+    taxRates: [
+      { name: 'VAT Standard', rate: 15, type: 'VAT', isDefault: true },
+      { name: 'NHIL', rate: 2.5, type: 'VAT', isDefault: false },
+      { name: 'COVID Levy', rate: 1, type: 'VAT', isDefault: false }
+    ]
+  },
+  {
+    code: 'KE',
+    name: 'Kenya',
+    currency: 'KES',
+    timezone: 'Africa/Nairobi',
+    fiscalYearStart: '01-01',
+    accountingStandard: 'IFRS',
+    taxRates: [
+      { name: 'VAT Standard', rate: 16, type: 'VAT', isDefault: true },
+      { name: 'VAT Reduced', rate: 8, type: 'VAT', isDefault: false }
+    ]
+  },
+  {
+    code: 'ZA',
+    name: 'Afrique du Sud',
+    currency: 'ZAR',
+    timezone: 'Africa/Johannesburg',
+    fiscalYearStart: '03-01',
+    accountingStandard: 'IFRS',
+    taxRates: [
+      { name: 'VAT Standard', rate: 15, type: 'VAT', isDefault: true }
+    ]
+  },
+
+  // ============================================================================
+  // MAGHREB (SCF)
+  // ============================================================================
+  {
+    code: 'MA',
+    name: 'Maroc',
+    currency: 'MAD',
+    timezone: 'Africa/Casablanca',
+    fiscalYearStart: '01-01',
+    accountingStandard: 'SCF',
+    taxRates: [
+      { name: 'TVA Standard', rate: 20, type: 'VAT', isDefault: true },
+      { name: 'TVA Réduite', rate: 14, type: 'VAT', isDefault: false },
+      { name: 'TVA Super Réduite', rate: 7, type: 'VAT', isDefault: false }
+    ]
+  },
+  {
+    code: 'DZ',
+    name: 'Algérie',
+    currency: 'DZD',
+    timezone: 'Africa/Algiers',
+    fiscalYearStart: '01-01',
+    accountingStandard: 'SCF',
+    taxRates: [
+      { name: 'TVA Standard', rate: 19, type: 'VAT', isDefault: true },
+      { name: 'TVA Réduite', rate: 9, type: 'VAT', isDefault: false }
+    ]
+  },
+  {
+    code: 'TN',
+    name: 'Tunisie',
+    currency: 'TND',
+    timezone: 'Africa/Tunis',
+    fiscalYearStart: '01-01',
+    accountingStandard: 'SCF',
+    taxRates: [
+      { name: 'TVA Standard', rate: 19, type: 'VAT', isDefault: true },
+      { name: 'TVA Réduite', rate: 13, type: 'VAT', isDefault: false },
+      { name: 'TVA Super Réduite', rate: 7, type: 'VAT', isDefault: false }
     ]
   }
 ];
@@ -90,6 +214,8 @@ export const DEFAULT_FISCAL_YEAR_START = '01-01';
 export const ACCOUNTING_STANDARDS = {
   PCG: 'Plan Comptable Général (France)',
   SYSCOHADA: 'Système Comptable OHADA',
+  IFRS: 'IFRS for SMEs (International)',
+  SCF: 'Système Comptable Financier (Maghreb)',
   BELGIAN: 'Plan Comptable Belge',
   BASIC: 'Plan Comptable Basique'
 } as const;

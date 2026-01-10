@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { Building, MapPin, Phone, Mail, Globe, Save, Loader2, Trash2, AlertTriangle, Landmark } from 'lucide-react';
+import { Building, MapPin, Phone, Mail, Globe, Save, Loader2, Trash2, AlertTriangle, Landmark, Upload, Image as ImageIcon } from 'lucide-react';
 import { useCountries } from '@/hooks/useReferentials';
 import { CompanyDeletionDialog } from './CompanyDeletionDialog';
 import { BusinessIdValidator } from '@/components/validation/BusinessIdValidator';
@@ -24,6 +24,7 @@ export function CompanySettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [showCompanyDeletion, setShowCompanyDeletion] = useState(false);
   const [settings, setSettings] = useState<CompanySettingsType | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   // Charger les paramètres entreprise
   const loadCompanySettings = async () => {
@@ -91,6 +92,81 @@ export function CompanySettings() {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentCompany?.id) return;
+
+    // Vérifier que c'est une image
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Format invalide',
+        description: 'Veuillez sélectionner un fichier image (PNG, JPG, etc.)',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Vérifier la taille (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: 'Fichier trop volumineux',
+        description: 'La taille du logo ne doit pas dépasser 2 MB',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentCompany.id}/logo.${fileExt}`;
+
+      // Upload vers Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('company-logos')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Récupérer l'URL publique
+      const { data: { publicUrl } } = supabase.storage
+        .from('company-logos')
+        .getPublicUrl(fileName);
+
+      // Mettre à jour la base de données
+      const { error: updateError } = await supabase
+        .from('companies')
+        .update({ logo_url: publicUrl })
+        .eq('id', currentCompany.id);
+
+      if (updateError) throw updateError;
+
+      // Mettre à jour l'état local
+      setSettings(prev => prev ? ({
+        ...prev,
+        branding: { ...prev.branding, logoUrl: publicUrl }
+      }) : prev);
+
+      toast({
+        title: 'Logo mis à jour',
+        description: 'Le logo de votre entreprise a été mis à jour avec succès'
+      });
+
+      await loadCompanySettings();
+    } catch (error) {
+      devLogger.error('[CompanySettings] Erreur upload logo:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de charger le logo',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsUploadingLogo(false);
+      // Réinitialiser l'input pour permettre de réuploader le même fichier
+      e.target.value = '';
     }
   };
 
@@ -418,6 +494,79 @@ export function CompanySettings() {
                 }) : prev)}
                 placeholder="BNPAFRPPXXX"
               />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Logo de l'entreprise */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ImageIcon className="w-5 h-5" />
+            Logo de l'entreprise
+          </CardTitle>
+          <CardDescription>
+            Logo affiché sur les factures, devis et documents officiels
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            {/* Preview du logo actuel */}
+            {settings?.branding?.logoUrl && (
+              <div className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                <div className="flex-shrink-0">
+                  <img
+                    src={settings.branding.logoUrl}
+                    alt="Logo actuel"
+                    className="w-24 h-24 object-contain border border-gray-300 dark:border-gray-600 rounded bg-white"
+                  />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Logo actuel</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Ce logo sera affiché sur vos documents
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Upload du logo */}
+            <div className="space-y-2">
+              <Label htmlFor="logo-upload">
+                {settings?.branding?.logoUrl ? 'Changer le logo' : 'Ajouter un logo'}
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="logo-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  disabled={isUploadingLogo}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('logo-upload')?.click()}
+                  disabled={isUploadingLogo}
+                >
+                  {isUploadingLogo ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Upload...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Parcourir
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Formats acceptés : PNG, JPG, GIF. Taille max : 2 MB. Dimensions recommandées : 400x200px
+              </p>
             </div>
           </div>
         </CardContent>

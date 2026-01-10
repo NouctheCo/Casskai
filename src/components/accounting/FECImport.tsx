@@ -10,12 +10,11 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import FECImportDropzone from './FECImportDropzone';
 import type { ParseResult } from '@/utils/accountingFileParser';
-
+import { logger } from '@/lib/logger';
 interface FECImportProps {
   currentEnterpriseId?: string;
   onImportSuccess?: () => void;
 }
-
 interface ImportResult {
   success: boolean;
   summary?: {
@@ -31,37 +30,30 @@ interface ImportResult {
   };
   error?: string;
 }
-
 const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSuccess }) => {
   const { t } = useLocale();
   const { toast } = useToast();
-
   const [file, setFile] = useState<File | null>(null);
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
-
   const handleFileSelected = useCallback(async (selectedFile: File) => {
     setFile(selectedFile);
     setParsing(true);
     setParseResult(null);
     setImportResult(null);
-
     try {
       // Lire le contenu du fichier
       const content = await accountingImportService.readFileContent(selectedFile);
-
       // Parser avec le parser universel
       const result = await import('@/utils/accountingFileParser').then(module =>
         module.parseAccountingFile(content, {
           defaultCurrency: 'EUR'
         })
       );
-
       setParseResult(result);
-
       if (!result.success) {
         toast({
           variant: 'destructive',
@@ -71,9 +63,8 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
             : t('fecImport.error.parsingFailed', { defaultValue: 'Échec du parsing du fichier' })
         });
       }
-
     } catch (error) {
-      console.error('Erreur lors du parsing:', error);
+      logger.error('FECImport', 'Erreur lors du parsing:', error);
       toast({
         variant: 'destructive',
         title: t('error'),
@@ -83,7 +74,6 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
       setParsing(false);
     }
   }, [t, toast]);
-
   const handleImport = async () => {
     if (!file || !parseResult || !currentEnterpriseId) {
       toast({
@@ -93,7 +83,6 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
       });
       return;
     }
-
     if (!parseResult.success || parseResult.lines.length === 0) {
       toast({
         variant: 'destructive',
@@ -102,15 +91,12 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
       });
       return;
     }
-
-    console.log('🔧 Import pour l\'entreprise:', currentEnterpriseId);
-    console.log('📄 Fichier:', file.name);
-    console.log('📊 Format détecté:', parseResult.format);
-    console.log('📊 Standard:', parseResult.standard);
-
+    logger.debug('FECImport', '🔧 Import pour l\'entreprise:', currentEnterpriseId);
+    logger.debug('FECImport', '📄 Fichier:', file.name);
+    logger.debug('FECImport', '📊 Format détecté:', parseResult.format);
+    logger.debug('FECImport', '📊 Standard:', parseResult.standard);
     setImporting(true);
     setImportProgress(10);
-
     try {
       // Simuler une progression
       const progressInterval = setInterval(() => {
@@ -122,15 +108,12 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
           return prev + 10;
         });
       }, 500);
-
       // Importer les données avec le nouveau service
       const result = await accountingImportService.parseAndImportFile(file, currentEnterpriseId, {
         defaultCurrency: 'EUR'
       });
-
       clearInterval(progressInterval);
       setImportProgress(100);
-
       if (result.success && result.summary) {
         toast({
           title: t('success'),
@@ -139,7 +122,6 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
           })
         });
         setImportResult(result);
-
         // Rafraîchir les données
         if (onImportSuccess) {
           setTimeout(() => onImportSuccess(), 1500);
@@ -151,9 +133,8 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
           description: result.error || t('fecImport.import.failed', { defaultValue: 'Échec de l\'import' })
         });
       }
-
     } catch (error) {
-      console.error('Erreur lors de l\'import:', error);
+      logger.error('FECImport', 'Erreur lors de l\'import:', error);
       toast({
         variant: 'destructive',
         title: t('error'),
@@ -163,14 +144,12 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
       setImporting(false);
     }
   };
-
   const resetState = () => {
     setFile(null);
     setParseResult(null);
     setImportResult(null);
     setImportProgress(0);
   };
-
   return (
     <Card>
       <CardHeader>
@@ -181,7 +160,6 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
           })}
         </CardDescription>
       </CardHeader>
-
       <CardContent className="space-y-6">
         {!file && (
           <FECImportDropzone
@@ -190,14 +168,12 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
             parseResult={parseResult}
           />
         )}
-
         {parsing && (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <span>{t('fecImport.parsing', { defaultValue: 'Analyse du fichier en cours...' })}</span>
           </div>
         )}
-
         {importing && (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -205,7 +181,6 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
             <Progress value={importProgress} className="w-full max-w-md" />
           </div>
         )}
-
         {file && !parsing && !importing && (
           <div className="space-y-4">
             <div className="flex items-center justify-between p-3 border rounded-md bg-muted/30">
@@ -232,7 +207,6 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
                 {t('fecImport.button.clearFile', { defaultValue: "Effacer" })}
               </Button>
             </div>
-
             {parseResult && (
               <FECImportDropzone
                 onFileSelected={handleFileSelected}
@@ -240,7 +214,6 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
                 parseResult={parseResult}
               />
             )}
-
             {parseResult && parseResult.success && parseResult.lines.length > 0 && (
               <Button
                 onClick={handleImport}
@@ -263,7 +236,6 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
             )}
           </div>
         )}
-
         {importResult && (
           <Alert variant={importResult.success ? "default" : "destructive"}>
             {importResult.success ? <CheckCircle className="h-4 w-4 text-green-600" /> : <AlertTriangle className="h-4 w-4" />}
@@ -294,7 +266,6 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
           </Alert>
         )}
       </CardContent>
-
       <CardFooter className="flex justify-between">
         <Button variant="outline" onClick={resetState} disabled={parsing || importing}>
           {t('fecImport.button.reset', { defaultValue: "Réinitialiser" })}
@@ -308,5 +279,4 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
     </Card>
   );
 };
-
 export default FECImport;

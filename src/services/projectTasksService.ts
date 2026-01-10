@@ -3,9 +3,8 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface ProjectTask {
   id: string;
   project_id: string;
@@ -23,12 +22,10 @@ export interface ProjectTask {
   created_at: string;
   updated_at: string;
 }
-
 export interface ProjectTaskWithDetails extends ProjectTask {
   project_name?: string;
   assigned_to_name?: string;
 }
-
 export interface CreateTaskInput {
   project_id: string;
   parent_task_id?: string;
@@ -43,7 +40,6 @@ export interface CreateTaskInput {
   assigned_to?: string;
   sort_order?: number;
 }
-
 export interface UpdateTaskInput {
   name?: string;
   description?: string;
@@ -56,7 +52,6 @@ export interface UpdateTaskInput {
   assigned_to?: string;
   sort_order?: number;
 }
-
 export interface TaskFilters {
   project_id?: string;
   status?: string;
@@ -64,7 +59,6 @@ export interface TaskFilters {
   assigned_to?: string;
   search?: string;
 }
-
 class ProjectTasksService {
   /**
    * Get all tasks with optional filters
@@ -78,7 +72,6 @@ class ProjectTasksService {
         users:assigned_to(id, email)
       `)
       .eq('projects.company_id', companyId);
-
     // Apply filters
     if (filters?.project_id) {
       query = query.eq('project_id', filters.project_id);
@@ -95,16 +88,12 @@ class ProjectTasksService {
     if (filters?.search) {
       query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
     }
-
     query = query.order('sort_order', { ascending: true }).order('created_at', { ascending: false });
-
     const { data, error } = await query;
-
     if (error) {
-      console.error('Error fetching tasks:', error);
+      logger.error('ProjectTasks', 'Error fetching tasks:', error);
       throw error;
     }
-
     // Transform data with relations
     return (data || []).map(task => ({
       ...task,
@@ -112,7 +101,6 @@ class ProjectTasksService {
       assigned_to_name: task.users?.email
     }));
   }
-
   /**
    * Get task by ID
    */
@@ -126,19 +114,16 @@ class ProjectTasksService {
       `)
       .eq('id', taskId)
       .single();
-
     if (error) {
-      console.error('Error fetching task:', error);
+      logger.error('ProjectTasks', 'Error fetching task:', error);
       return null;
     }
-
     return {
       ...data,
       project_name: data.projects?.name,
       assigned_to_name: data.users?.email
     };
   }
-
   /**
    * Get tasks by project
    */
@@ -153,19 +138,16 @@ class ProjectTasksService {
       .eq('project_id', projectId)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false });
-
     if (error) {
-      console.error('Error fetching tasks by project:', error);
+      logger.error('ProjectTasks', 'Error fetching tasks by project:', error);
       throw error;
     }
-
     return (data || []).map(task => ({
       ...task,
       project_name: task.projects?.name,
       assigned_to_name: task.users?.email
     }));
   }
-
   /**
    * Create a new task
    */
@@ -181,15 +163,12 @@ class ProjectTasksService {
       })
       .select()
       .single();
-
     if (error) {
-      console.error('Error creating task:', error);
+      logger.error('ProjectTasks', 'Error creating task:', error);
       throw error;
     }
-
     return data;
   }
-
   /**
    * Update task
    */
@@ -203,15 +182,12 @@ class ProjectTasksService {
       .eq('id', taskId)
       .select()
       .single();
-
     if (error) {
-      console.error('Error updating task:', error);
+      logger.error('ProjectTasks', 'Error updating task:', error);
       throw error;
     }
-
     return data;
   }
-
   /**
    * Delete task
    */
@@ -220,13 +196,11 @@ class ProjectTasksService {
       .from('project_tasks')
       .delete()
       .eq('id', taskId);
-
     if (error) {
-      console.error('Error deleting task:', error);
+      logger.error('ProjectTasks', 'Error deleting task:', error);
       throw error;
     }
   }
-
   /**
    * Update task status
    */
@@ -236,10 +210,8 @@ class ProjectTasksService {
     if (status === 'done') progress = 100;
     if (status === 'in_progress' && progress === 0) progress = 10;
     if (status === 'cancelled') progress = 0;
-
     return this.updateTask(taskId, { status, ...(progress !== undefined && { progress }) });
   }
-
   /**
    * Update task progress
    */
@@ -248,10 +220,8 @@ class ProjectTasksService {
     let status: ProjectTask['status'] | undefined = undefined;
     if (progress === 100) status = 'done';
     else if (progress > 0 && progress < 100) status = 'in_progress';
-
     return this.updateTask(taskId, { progress, ...(status && { status }) });
   }
-
   /**
    * Reorder tasks
    */
@@ -260,7 +230,6 @@ class ProjectTasksService {
       id,
       sort_order: index
     }));
-
     for (const update of updates) {
       await supabase
         .from('project_tasks')
@@ -268,7 +237,6 @@ class ProjectTasksService {
         .eq('id', update.id);
     }
   }
-
   /**
    * Get task statistics for a project
    */
@@ -282,7 +250,6 @@ class ProjectTasksService {
     completionRate: number;
   }> {
     const tasks = await this.getTasksByProject(projectId);
-
     const stats = {
       total: tasks.length,
       todo: tasks.filter(t => t.status === 'todo').length,
@@ -292,10 +259,8 @@ class ProjectTasksService {
       cancelled: tasks.filter(t => t.status === 'cancelled').length,
       completionRate: tasks.length > 0 ? (tasks.filter(t => t.status === 'done').length / tasks.length) * 100 : 0
     };
-
     return stats;
   }
 }
-
 export const projectTasksService = new ProjectTasksService();
 export default projectTasksService;

@@ -9,11 +9,10 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import type OpenAI from 'openai';
 import { supabase } from '@/lib/supabase';
 import { shouldUseEdgeFunction, getEdgeFunctionName, AI_CONFIG, isAIServiceEnabled } from '@/config/ai.config';
-
+import { logger } from '@/lib/logger';
 // Types communs pour les analyses IA
 export interface AIAnalysisResult {
   executiveSummary: string;
@@ -23,7 +22,6 @@ export interface AIAnalysisResult {
   recommendations: string[];
   riskLevel: 'Faible' | 'Modéré' | 'Élevé' | 'Critique';
 }
-
 // Données spécifiques pour chaque type de rapport
 export interface CashFlowData {
   operatingCashFlow: number;
@@ -34,7 +32,6 @@ export interface CashFlowData {
   cashFlowToDebt: number;
   freeCashFlow: number;
 }
-
 export interface ReceivablesData {
   totalReceivables: number;
   current: number; // 0-30 jours
@@ -45,7 +42,6 @@ export interface ReceivablesData {
   collectionRate: number;
   averageOverdueAmount: number;
 }
-
 export interface FinancialRatiosData {
   liquidityRatios: {
     currentRatio: number;
@@ -69,7 +65,6 @@ export interface FinancialRatiosData {
     receivablesTurnover: number;
   };
 }
-
 export interface BudgetVarianceData {
   totalBudget: number;
   totalActual: number;
@@ -83,7 +78,6 @@ export interface BudgetVarianceData {
     variancePercent: number;
   }>;
 }
-
 export interface PayablesData {
   totalPayables: number;
   current: number; // 0-30 jours
@@ -94,7 +88,6 @@ export interface PayablesData {
   paymentRate: number;
   averageOverdueAmount: number;
 }
-
 export interface InventoryData {
   totalInventory: number;
   rawMaterials: number;
@@ -105,7 +98,6 @@ export interface InventoryData {
   obsoleteInventory: number;
   inventoryToSales: number;
 }
-
 /**
  * Service d'analyse IA spécialisé pour les différents types de rapports financiers
  */
@@ -113,20 +105,16 @@ class AIReportAnalysisService {
   private static instance: AIReportAnalysisService;
   private openai: OpenAI | null = null;
   private clientPromise: Promise<OpenAI | null> | null = null;
-
   private constructor() {
   }
-
   private async getClient(): Promise<OpenAI | null> {
     if (this.openai) return this.openai;
     if (this.clientPromise) return this.clientPromise;
-
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     if (!apiKey || apiKey === 'sk-your-openai-api-key') {
-      console.warn('OpenAI API key not configured. Report AI analysis disabled.');
+      logger.warn('AiReportAnalysis', 'OpenAI API key not configured. Report AI analysis disabled.');
       return null;
     }
-
     this.clientPromise = import('openai')
       .then(({ default: OpenAIImport }) => {
         this.openai = new OpenAIImport({
@@ -136,20 +124,17 @@ class AIReportAnalysisService {
         return this.openai;
       })
       .catch((error) => {
-        console.error('Failed to load OpenAI client:', error);
+        logger.error('AiReportAnalysis', 'Failed to load OpenAI client:', error);
         return null;
       });
-
     return this.clientPromise;
   }
-
   static getInstance(): AIReportAnalysisService {
     if (!this.instance) {
       this.instance = new AIReportAnalysisService();
     }
     return this.instance;
   }
-
   /**
    * Méthode générique d'analyse avec fallback
    */
@@ -160,31 +145,26 @@ class AIReportAnalysisService {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return '';
-
         const response = await supabase.functions.invoke(fnName, {
           body: { prompt, reportType }
         });
-
         if (response.error) {
-          console.error('Edge Function reportAnalysis error:', response.error);
+          logger.error('AiReportAnalysis', 'Edge Function reportAnalysis error:', response.error);
           return '';
         }
         return (response.data?.result as string) || '';
       } catch (error) {
-        console.error('Failed calling Edge Function reportAnalysis:', error);
+        logger.error('AiReportAnalysis', 'Failed calling Edge Function reportAnalysis:', error);
         return '';
       }
     }
-
     // En développement, utiliser client OpenAI si clé dispo
     if (!isAIServiceEnabled('reportAnalysis')) {
-      console.warn('AI Report Analysis disabled.');
+      logger.warn('AiReportAnalysis', 'AI Report Analysis disabled.');
       return '';
     }
-
     const client = await this.getClient();
     if (!client) return '';
-
     try {
       const completion = await client.chat.completions.create({
         model: 'gpt-4o-mini',
@@ -205,20 +185,17 @@ IMPORTANT: Réponds UNIQUEMENT avec le format structuré demandé, sans texte su
         temperature: AI_CONFIG.openai.temperature,
         max_tokens: AI_CONFIG.openai.maxTokens
       });
-
       return completion.choices[0]?.message?.content || '';
     } catch (error) {
-      console.error(`Erreur lors de l'analyse IA (${reportType}):`, error);
+      logger.error('AiReportAnalysis', `Erreur lors de l'analyse IA (${reportType}):`, error);
       return '';
     }
   }
-
   /**
    * Analyse du Flux de Trésorerie
    */
   async analyzeCashFlow(data: CashFlowData, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
     const prompt = `Analyse le flux de trésorerie suivant pour la période du ${periodStart} au ${periodEnd}:
-
 FLUX DE TRÉSORERIE:
 - Flux opérationnel: ${this.formatCurrency(data.operatingCashFlow)}
 - Flux d'investissement: ${this.formatCurrency(data.investingCashFlow)}
@@ -227,48 +204,36 @@ FLUX DE TRÉSORERIE:
 - Solde de trésorerie: ${this.formatCurrency(data.cashBalance)}
 - Ratio flux/dette: ${(data.cashFlowToDebt * 100).toFixed(1)}%
 - Free cash flow: ${this.formatCurrency(data.freeCashFlow)}
-
 Fournis une analyse au format suivant (STRICT):
-
 ## RÉSUMÉ EXÉCUTIF
 [2-3 phrases sur la santé de la trésorerie]
-
 ## ANALYSE DE LA TRÉSORERIE
 [Paragraphe d'analyse détaillée avec contexte sur les flux]
-
 ## POINTS FORTS
 - [Point fort 1]
 - [Point fort 2]
 - [Point fort 3]
-
 ## POINTS D'ATTENTION
 - [Point d'attention 1]
 - [Point d'attention 2]
 - [Point d'attention 3]
-
 ## RECOMMANDATIONS PRIORITAIRES
 1. [Recommandation action 1]
 2. [Recommandation action 2]
 3. [Recommandation action 3]
-
 ## NIVEAU DE RISQUE
 [Faible/Modéré/Élevé/Critique] - [Justification en 1 phrase]`;
-
     const response = await this.analyzeWithAI(prompt, 'flux de trésorerie');
-
     if (!response) {
       return this.generateDefaultCashFlowAnalysis(data);
     }
-
     return this.parseAIResponse(response);
   }
-
   /**
    * Analyse des Créances Clients
    */
   async analyzeReceivables(data: ReceivablesData, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
     const prompt = `Analyse les créances clients suivantes pour la période du ${periodStart} au ${periodEnd}:
-
 CRÉANCES CLIENTS:
 - Total créances: ${this.formatCurrency(data.totalReceivables)}
 - À jour (0-30j): ${this.formatCurrency(data.current)} (${((data.current / data.totalReceivables) * 100).toFixed(1)}%)
@@ -278,56 +243,42 @@ CRÉANCES CLIENTS:
 - DSO (délai clients): ${data.dso.toFixed(0)} jours
 - Taux de recouvrement: ${data.collectionRate.toFixed(1)}%
 - Montant moyen en retard: ${this.formatCurrency(data.averageOverdueAmount)}
-
 Fournis une analyse au format structuré (STRICT) avec sections: RÉSUMÉ EXÉCUTIF, ANALYSE DES CRÉANCES, POINTS FORTS, POINTS D'ATTENTION, RECOMMANDATIONS PRIORITAIRES, NIVEAU DE RISQUE.`;
-
     const response = await this.analyzeWithAI(prompt, 'créances clients');
-
     if (!response) {
       return this.generateDefaultReceivablesAnalysis(data);
     }
-
     return this.parseAIResponse(response);
   }
-
   /**
    * Analyse des Ratios Financiers
    */
   async analyzeFinancialRatios(data: FinancialRatiosData, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
     const prompt = `Analyse les ratios financiers suivants pour la période du ${periodStart} au ${periodEnd}:
-
 RATIOS DE LIQUIDITÉ:
 - Ratio de liquidité générale: ${data.liquidityRatios.currentRatio.toFixed(2)}
 - Ratio de liquidité réduite (quick ratio): ${data.liquidityRatios.quickRatio.toFixed(2)}
 - Ratio de liquidité immédiate: ${data.liquidityRatios.cashRatio.toFixed(2)}
-
 RATIOS DE RENTABILITÉ:
 - Marge brute: ${data.profitabilityRatios.grossMargin.toFixed(1)}%
 - Marge nette: ${data.profitabilityRatios.netMargin.toFixed(1)}%
 - ROA (Return on Assets): ${data.profitabilityRatios.roa.toFixed(1)}%
 - ROE (Return on Equity): ${data.profitabilityRatios.roe.toFixed(1)}%
-
 RATIOS D'ENDETTEMENT:
 - Ratio d'endettement (dette/capitaux propres): ${data.leverageRatios.debtToEquity.toFixed(2)}
 - Ratio dette/actifs: ${(data.leverageRatios.debtToAssets * 100).toFixed(1)}%
 - Couverture des intérêts: ${data.leverageRatios.interestCoverage.toFixed(2)}x
-
 RATIOS D'EFFICACITÉ:
 - Rotation des actifs: ${data.efficiencyRatios.assetTurnover.toFixed(2)}x
 - Rotation des stocks: ${data.efficiencyRatios.inventoryTurnover.toFixed(2)}x
 - Rotation des créances: ${data.efficiencyRatios.receivablesTurnover.toFixed(2)}x
-
 Fournis une analyse comparative au format structuré (STRICT) en comparant avec les standards sectoriels.`;
-
     const response = await this.analyzeWithAI(prompt, 'ratios financiers');
-
     if (!response) {
       return this.generateDefaultRatiosAnalysis(data);
     }
-
     return this.parseAIResponse(response);
   }
-
   /**
    * Analyse des Écarts Budgétaires
    */
@@ -335,38 +286,29 @@ Fournis une analyse comparative au format structuré (STRICT) en comparant avec 
     const majorVariancesText = data.majorVariances
       .map(v => `  - ${v.category}: Budget ${this.formatCurrency(v.budget)} vs Réel ${this.formatCurrency(v.actual)} = Écart ${this.formatCurrency(v.variance)} (${v.variancePercent > 0 ? '+' : ''}${v.variancePercent.toFixed(1)}%)`)
       .join('\n');
-
     const prompt = `Analyse les écarts budgétaires suivants pour la période du ${periodStart} au ${periodEnd}:
-
 SYNTHÈSE GLOBALE:
 - Budget total: ${this.formatCurrency(data.totalBudget)}
 - Réalisé total: ${this.formatCurrency(data.totalActual)}
 - Écart total: ${this.formatCurrency(data.totalVariance)} (${data.variancePercentage > 0 ? '+' : ''}${data.variancePercentage.toFixed(1)}%)
-
 PRINCIPAUX ÉCARTS PAR CATÉGORIE:
 ${majorVariancesText}
-
 Fournis une analyse au format structuré (STRICT) en identifiant:
 - Les causes probables des écarts significatifs
 - Les domaines nécessitant des actions correctives
 - Les opportunités d'optimisation
 - Les ajustements budgétaires à envisager`;
-
     const response = await this.analyzeWithAI(prompt, 'écarts budgétaires');
-
     if (!response) {
       return this.generateDefaultBudgetVarianceAnalysis(data);
     }
-
     return this.parseAIResponse(response);
   }
-
   /**
    * Analyse des Dettes Fournisseurs
    */
   async analyzePayables(data: PayablesData, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
     const prompt = `Analyse les dettes fournisseurs suivantes pour la période du ${periodStart} au ${periodEnd}:
-
 DETTES FOURNISSEURS:
 - Total dettes: ${this.formatCurrency(data.totalPayables)}
 - À échéance (0-30j): ${this.formatCurrency(data.current)} (${((data.current / data.totalPayables) * 100).toFixed(1)}%)
@@ -376,24 +318,18 @@ DETTES FOURNISSEURS:
 - DPO (délai paiement fournisseurs): ${data.dpo.toFixed(0)} jours
 - Taux de paiement: ${data.paymentRate.toFixed(1)}%
 - Montant moyen en retard: ${this.formatCurrency(data.averageOverdueAmount)}
-
 Fournis une analyse au format structuré (STRICT) en équilibrant trésorerie vs relations fournisseurs.`;
-
     const response = await this.analyzeWithAI(prompt, 'dettes fournisseurs');
-
     if (!response) {
       return this.generateDefaultPayablesAnalysis(data);
     }
-
     return this.parseAIResponse(response);
   }
-
   /**
    * Analyse de la Valorisation des Stocks
    */
   async analyzeInventory(data: InventoryData, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
     const prompt = `Analyse la valorisation des stocks suivante pour la période du ${periodStart} au ${periodEnd}:
-
 VALORISATION DES STOCKS:
 - Stock total: ${this.formatCurrency(data.totalInventory)}
   - Matières premières: ${this.formatCurrency(data.rawMaterials)}
@@ -403,31 +339,24 @@ VALORISATION DES STOCKS:
 - DIO (Days Inventory Outstanding): ${data.daysInventoryOutstanding.toFixed(0)} jours
 - Stock obsolète: ${this.formatCurrency(data.obsoleteInventory)} (${((data.obsoleteInventory / data.totalInventory) * 100).toFixed(1)}%)
 - Ratio stock/ventes: ${(data.inventoryToSales * 100).toFixed(1)}%
-
 Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation du BFR.`;
-
     const response = await this.analyzeWithAI(prompt, 'valorisation des stocks');
-
     if (!response) {
       return this.generateDefaultInventoryAnalysis(data);
     }
-
     return this.parseAIResponse(response);
   }
-
   /**
    * Parse la réponse de l'IA
    */
   private parseAIResponse(response: string): AIAnalysisResult {
     const sections = this.extractSections(response);
-
     let riskLevel: 'Faible' | 'Modéré' | 'Élevé' | 'Critique' = 'Modéré';
     const riskText = sections.riskLevel.toLowerCase();
     if (riskText.includes('faible')) riskLevel = 'Faible';
     else if (riskText.includes('élevé') || riskText.includes('eleve')) riskLevel = 'Élevé';
     else if (riskText.includes('critique')) riskLevel = 'Critique';
     else if (riskText.includes('modéré') || riskText.includes('modere')) riskLevel = 'Modéré';
-
     return {
       executiveSummary: sections.executiveSummary || 'Analyse en cours...',
       financialHealth: sections.financialHealth || 'Diagnostic en cours...',
@@ -437,7 +366,6 @@ Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation 
       riskLevel
     };
   }
-
   /**
    * Extrait les sections du texte généré par l'IA
    */
@@ -457,34 +385,26 @@ Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation 
       recommendations: [] as string[],
       riskLevel: ''
     };
-
     // Résumé Exécutif
     const summaryMatch = text.match(/##\s*RÉSUMÉ EXÉCUTIF\s*\n([\s\S]*?)(?=\n##|$)/i);
     if (summaryMatch) result.executiveSummary = summaryMatch[1].trim();
-
     // Analyse (peut avoir différents titres)
     const healthMatch = text.match(/##\s*ANALYSE[^\n]*\n([\s\S]*?)(?=\n##|$)/i);
     if (healthMatch) result.financialHealth = healthMatch[1].trim();
-
     // Points Forts
     const strengthsMatch = text.match(/##\s*POINTS FORTS\s*\n([\s\S]*?)(?=\n##|$)/i);
     if (strengthsMatch) result.strengths = this.extractBulletPoints(strengthsMatch[1]);
-
     // Points d'Attention
     const concernsMatch = text.match(/##\s*POINTS D'ATTENTION\s*\n([\s\S]*?)(?=\n##|$)/i);
     if (concernsMatch) result.concerns = this.extractBulletPoints(concernsMatch[1]);
-
     // Recommandations
     const recoMatch = text.match(/##\s*RECOMMANDATIONS PRIORITAIRES\s*\n([\s\S]*?)(?=\n##|$)/i);
     if (recoMatch) result.recommendations = this.extractBulletPoints(recoMatch[1]);
-
     // Niveau de Risque
     const riskMatch = text.match(/##\s*NIVEAU DE RISQUE\s*\n([\s\S]*?)$/i);
     if (riskMatch) result.riskLevel = riskMatch[1].trim();
-
     return result;
   }
-
   /**
    * Extrait les bullet points
    */
@@ -495,13 +415,11 @@ Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation 
       .map(line => line.replace(/^[-•*\d.]\s*/, '').trim())
       .filter(line => line.length > 0);
   }
-
   /**
    * Analyses par défaut (fallback)
    */
   private generateDefaultCashFlowAnalysis(data: CashFlowData): AIAnalysisResult {
     const riskLevel = data.netCashFlow < 0 ? 'Élevé' : data.cashBalance < 10000 ? 'Modéré' : 'Faible';
-
     return {
       executiveSummary: `Le flux de trésorerie net s'élève à ${this.formatCurrency(data.netCashFlow)}. Le solde de trésorerie est de ${this.formatCurrency(data.cashBalance)}.`,
       financialHealth: `L'analyse du flux de trésorerie montre un flux opérationnel de ${this.formatCurrency(data.operatingCashFlow)}. Le free cash flow de ${this.formatCurrency(data.freeCashFlow)} indique la capacité de l'entreprise à générer de la trésorerie après investissements.`,
@@ -519,11 +437,9 @@ Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation 
       riskLevel
     };
   }
-
   private generateDefaultReceivablesAnalysis(data: ReceivablesData): AIAnalysisResult {
     const overduePercent = ((data.overdue30 + data.overdue60 + data.overdue90) / data.totalReceivables) * 100;
     const riskLevel = overduePercent > 30 ? 'Élevé' : overduePercent > 15 ? 'Modéré' : 'Faible';
-
     return {
       executiveSummary: `Les créances clients totalisent ${this.formatCurrency(data.totalReceivables)} avec un DSO de ${data.dso.toFixed(0)} jours. ${overduePercent.toFixed(1)}% des créances sont en retard.`,
       financialHealth: `Le délai moyen de paiement (DSO) de ${data.dso.toFixed(0)} jours impacte le besoin en fonds de roulement. Le taux de recouvrement de ${data.collectionRate.toFixed(1)}% nécessite une surveillance.`,
@@ -541,12 +457,10 @@ Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation 
       riskLevel
     };
   }
-
   private generateDefaultRatiosAnalysis(data: FinancialRatiosData): AIAnalysisResult {
     const liquidityOk = data.liquidityRatios.currentRatio >= 1.5;
     const profitabilityOk = data.profitabilityRatios.netMargin > 5;
     const riskLevel = (!liquidityOk && !profitabilityOk) ? 'Élevé' : (!liquidityOk || !profitabilityOk) ? 'Modéré' : 'Faible';
-
     return {
       executiveSummary: `Les ratios financiers montrent ${liquidityOk ? 'une bonne' : 'une'} liquidité (${data.liquidityRatios.currentRatio.toFixed(2)}) et une rentabilité ${profitabilityOk ? 'satisfaisante' : 'à améliorer'} (marge nette: ${data.profitabilityRatios.netMargin.toFixed(1)}%).`,
       financialHealth: `L'analyse des ratios révèle une structure financière ${liquidityOk ? 'solide' : 'sous tension'}. La rentabilité des capitaux propres (ROE) de ${data.profitabilityRatios.roe.toFixed(1)}% ${data.profitabilityRatios.roe > 15 ? 'est excellente' : 'mérite attention'}.`,
@@ -566,12 +480,10 @@ Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation 
       riskLevel
     };
   }
-
   private generateDefaultBudgetVarianceAnalysis(data: BudgetVarianceData): AIAnalysisResult {
     const isOverBudget = data.totalVariance > 0;
     const variancePercent = Math.abs(data.variancePercentage);
     const riskLevel = variancePercent > 20 ? 'Élevé' : variancePercent > 10 ? 'Modéré' : 'Faible';
-
     return {
       executiveSummary: `Le budget présente un écart ${isOverBudget ? 'défavorable' : 'favorable'} de ${this.formatCurrency(Math.abs(data.totalVariance))} (${Math.abs(data.variancePercentage).toFixed(1)}%).`,
       financialHealth: `L'analyse des écarts budgétaires révèle ${data.majorVariances.length} postes avec des variations significatives. Une révision budgétaire ${variancePercent > 15 ? 'est nécessaire' : 'peut être envisagée'}.`,
@@ -589,11 +501,9 @@ Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation 
       riskLevel
     };
   }
-
   private generateDefaultPayablesAnalysis(data: PayablesData): AIAnalysisResult {
     const overduePercent = ((data.overdue30 + data.overdue60 + data.overdue90) / data.totalPayables) * 100;
     const riskLevel = overduePercent > 30 ? 'Élevé' : overduePercent > 15 ? 'Modéré' : 'Faible';
-
     return {
       executiveSummary: `Les dettes fournisseurs totalisent ${this.formatCurrency(data.totalPayables)} avec un DPO de ${data.dpo.toFixed(0)} jours. ${overduePercent.toFixed(1)}% des dettes sont en retard.`,
       financialHealth: `Le délai moyen de paiement fournisseurs (DPO) de ${data.dpo.toFixed(0)} jours ${data.dpo > 60 ? 'peut impacter les relations commerciales' : 'est correct'}. Le taux de paiement de ${data.paymentRate.toFixed(1)}% ${data.paymentRate < 90 ? 'nécessite une amélioration' : 'est satisfaisant'}.`,
@@ -611,11 +521,9 @@ Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation 
       riskLevel
     };
   }
-
   private generateDefaultInventoryAnalysis(data: InventoryData): AIAnalysisResult {
     const obsoletePercent = (data.obsoleteInventory / data.totalInventory) * 100;
     const riskLevel = obsoletePercent > 15 || data.daysInventoryOutstanding > 90 ? 'Élevé' : obsoletePercent > 10 || data.daysInventoryOutstanding > 60 ? 'Modéré' : 'Faible';
-
     return {
       executiveSummary: `Le stock total s'élève à ${this.formatCurrency(data.totalInventory)} avec une rotation de ${data.inventoryTurnover.toFixed(2)}x par an (${data.daysInventoryOutstanding.toFixed(0)} jours). ${obsoletePercent.toFixed(1)}% du stock est obsolète.`,
       financialHealth: `La rotation des stocks de ${data.inventoryTurnover.toFixed(2)}x ${data.inventoryTurnover > 6 ? 'est excellente' : data.inventoryTurnover > 4 ? 'est correcte' : 'nécessite optimisation'}. Le DIO de ${data.daysInventoryOutstanding.toFixed(0)} jours impacte le BFR.`,
@@ -634,7 +542,6 @@ Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation 
       riskLevel
     };
   }
-
   /**
    * Formate un montant en devise
    */
@@ -646,5 +553,4 @@ Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation 
     }).format(value);
   }
 }
-
 export const aiReportAnalysisService = AIReportAnalysisService.getInstance();

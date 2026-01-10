@@ -9,16 +9,15 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Hook métier pour la gestion des contrats et RFA
  * Suit les patterns existants de l'application CassKai
  */
-
 import { useState, useEffect, useCallback } from 'react';
 import { useEnterprise } from '../contexts/EnterpriseContext';
 import { useToast } from '../components/ui/use-toast';
 import { contractsService } from '../services/contractsService';
+import { logger } from '@/lib/logger';
 import {
   ContractData,
   ContractFormData,
@@ -30,7 +29,6 @@ import {
   SimulationResult,
   TurnoverScenario
 } from '../types/contracts.types';
-
 interface UseContractsReturn {
   // États
   contracts: ContractData[];
@@ -39,46 +37,38 @@ interface UseContractsReturn {
   simulationResults: SimulationResult[];
   loading: boolean;
   error: string | null;
-  
   // Filtres
   filters: ContractFilters;
   rfaFilters: RFAFilters;
   setFilters: (filters: ContractFilters) => void;
   setRFAFilters: (filters: RFAFilters) => void;
-  
   // Actions contrats
   loadContracts: () => Promise<void>;
   createContract: (formData: ContractFormData) => Promise<boolean>;
   updateContract: (id: string, formData: Partial<ContractFormData>) => Promise<boolean>;
   archiveContract: (id: string) => Promise<boolean>;
-  
   // Actions RFA
   loadRFACalculations: () => Promise<void>;
   createRFACalculation: (formData: RFAFormData) => Promise<boolean>;
   simulateRFA: (contractId: string, scenarios: TurnoverScenario[]) => Promise<void>;
   sendContractSummary: (contractId: string, recipientEmail: string) => Promise<boolean>;
   runAutoMonthlyRFA: () => Promise<void>;
-  
   // Dashboard
   loadDashboardData: () => Promise<void>;
   refreshDashboard: () => Promise<void>;
-  
   // Export
   exportContracts: () => void;
   exportRFACalculations: () => void;
-  
   // Utilitaires
   getContractById: (id: string) => ContractData | undefined;
   getRFAForContract: (contractId: string) => RFACalculation[];
 }
-
 /**
  * Hook principal pour la gestion des contrats
  */
 export const useContracts = (): UseContractsReturn => {
   const { currentEnterpriseId } = useEnterprise();
   const { toast } = useToast();
-
   // États principaux
   const [contracts, setContracts] = useState<ContractData[]>([]);
   const [dashboardData, setDashboardData] = useState<ContractsDashboardData | null>(null);
@@ -86,44 +76,36 @@ export const useContracts = (): UseContractsReturn => {
   const [simulationResults, setSimulationResults] = useState<SimulationResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, _setError] = useState<string | null>(null);
-
   // Filtres
   const [filters, setFilters] = useState<ContractFilters>({});
   const [rfaFilters, setRFAFilters] = useState<RFAFilters>({});
-
   // Chargement des contrats
   const loadContracts = useCallback(async () => {
     if (!currentEnterpriseId) return;
-
     setLoading(true);
-
     try {
       const response = await contractsService.getContracts(currentEnterpriseId, filters);
-
       if (response.success && response.data) {
         setContracts(response.data);
       } else {
         // Dont show error - just log and show empty state
         setContracts([]);
-        console.warn('Contracts data unavailable');
+        logger.warn('UseContracts', 'Contracts data unavailable');
       }
     } catch (err) {
       // Dont show error - just log and show empty state
-      console.warn('Error loading contracts:', err);
+      logger.warn('UseContracts', 'Error loading contracts:', err);
       setContracts([]);
     } finally {
       setLoading(false);
     }
   }, [currentEnterpriseId, filters]);
-
   // Création d'un contrat
   const createContract = useCallback(async (formData: ContractFormData): Promise<boolean> => {
     if (!currentEnterpriseId) return false;
-
     setLoading(true);
     try {
       const response = await contractsService.createContract(currentEnterpriseId, formData);
-      
       if (response.success) {
         toast({
           title: "Succès",
@@ -153,13 +135,11 @@ export const useContracts = (): UseContractsReturn => {
       setLoading(false);
     }
   }, [currentEnterpriseId, toast, loadContracts]);
-
   // Mise à jour d'un contrat
   const updateContract = useCallback(async (id: string, formData: Partial<ContractFormData>): Promise<boolean> => {
     setLoading(true);
     try {
       const response = await contractsService.updateContract(id, formData);
-      
       if (response.success) {
         toast({
           title: "Succès",
@@ -189,13 +169,11 @@ export const useContracts = (): UseContractsReturn => {
       setLoading(false);
     }
   }, [toast, loadContracts]);
-
   // Archivage d'un contrat
   const archiveContract = useCallback(async (id: string): Promise<boolean> => {
     setLoading(true);
     try {
       const response = await contractsService.archiveContract(id);
-      
       if (response.success) {
         toast({
           title: "Succès",
@@ -225,16 +203,12 @@ export const useContracts = (): UseContractsReturn => {
       setLoading(false);
     }
   }, [toast, loadContracts]);
-
   // Chargement des calculs RFA
   const loadRFACalculations = useCallback(async () => {
     if (!currentEnterpriseId) return;
-
     setLoading(true);
-
     try {
       const response = await contractsService.getRFACalculations(currentEnterpriseId, rfaFilters);
-      
       if (response.success && response.data) {
         setRFACalculations(response.data);
       } else {
@@ -255,15 +229,12 @@ export const useContracts = (): UseContractsReturn => {
       setLoading(false);
     }
   }, [currentEnterpriseId, rfaFilters, toast]);
-
   // Création d'un calcul RFA
   const createRFACalculation = useCallback(async (formData: RFAFormData): Promise<boolean> => {
     if (!currentEnterpriseId) return false;
-
     setLoading(true);
     try {
       const response = await contractsService.createRFACalculation(currentEnterpriseId, formData);
-      
       if (response.success) {
         toast({
           title: "Succès",
@@ -293,13 +264,11 @@ export const useContracts = (): UseContractsReturn => {
       setLoading(false);
     }
   }, [currentEnterpriseId, toast, loadRFACalculations]);
-
   // Simulation RFA
   const simulateRFA = useCallback(async (contractId: string, scenarios: TurnoverScenario[]) => {
     setLoading(true);
     try {
       const response = await contractsService.simulateRFA(contractId, scenarios);
-      
       if (response.success && response.data) {
         setSimulationResults(response.data);
         toast({
@@ -325,11 +294,9 @@ export const useContracts = (): UseContractsReturn => {
       setLoading(false);
     }
   }, [toast]);
-
   // Envoi d'un état de contrat par email (interne ou client)
   const sendContractSummary = useCallback(async (contractId: string, recipientEmail: string) => {
     if (!currentEnterpriseId) return false;
-
     setLoading(true);
     try {
       const response = await contractsService.sendContractSummaryEmail(currentEnterpriseId, contractId, recipientEmail);
@@ -359,15 +326,12 @@ export const useContracts = (): UseContractsReturn => {
       setLoading(false);
     }
   }, [currentEnterpriseId, toast]);
-
   // Chargement des données dashboard
   const loadDashboardData = useCallback(async () => {
     if (!currentEnterpriseId) return;
-
     setLoading(true);
     try {
       const response = await contractsService.getDashboardData(currentEnterpriseId);
-      
       if (response.success && response.data) {
         setDashboardData(response.data);
       } else {
@@ -379,7 +343,6 @@ export const useContracts = (): UseContractsReturn => {
       setLoading(false);
     }
   }, [currentEnterpriseId]);
-
   // Calcul automatique du mois en cours (utile pour envoyer un état rapide)
   const runAutoMonthlyRFA = useCallback(async () => {
     if (!currentEnterpriseId) return;
@@ -412,7 +375,6 @@ export const useContracts = (): UseContractsReturn => {
       setLoading(false);
     }
   }, [currentEnterpriseId, toast, loadRFACalculations, loadDashboardData]);
-
   // Actualisation complète du dashboard
   const refreshDashboard = useCallback(async () => {
     await Promise.all([
@@ -421,7 +383,6 @@ export const useContracts = (): UseContractsReturn => {
       loadDashboardData()
     ]);
   }, [loadContracts, loadRFACalculations, loadDashboardData]);
-
   // Export des contrats
   const exportContracts = useCallback(() => {
     contractsService.exportToCSV(contracts, 'contrats');
@@ -431,7 +392,6 @@ export const useContracts = (): UseContractsReturn => {
       variant: "default"
     });
   }, [contracts, toast]);
-
   // Export des calculs RFA
   const exportRFACalculations = useCallback(() => {
     contractsService.exportRFAToCSV(rfaCalculations, 'calculs_rfa');
@@ -441,36 +401,30 @@ export const useContracts = (): UseContractsReturn => {
       variant: "default"
     });
   }, [rfaCalculations, toast]);
-
   // Utilitaires
   const getContractById = useCallback((id: string): ContractData | undefined => {
     return contracts.find(contract => contract.id === id);
   }, [contracts]);
-
   const getRFAForContract = useCallback((contractId: string): RFACalculation[] => {
     return rfaCalculations.filter(calc => calc.contract_id === contractId);
   }, [rfaCalculations]);
-
   // Chargement initial
   useEffect(() => {
     if (currentEnterpriseId) {
       refreshDashboard();
     }
   }, [currentEnterpriseId, refreshDashboard]);
-
   // Rechargement lors des changements de filtres
   useEffect(() => {
     if (currentEnterpriseId) {
       loadContracts();
     }
   }, [filters, loadContracts]);
-
   useEffect(() => {
     if (currentEnterpriseId) {
       loadRFACalculations();
     }
   }, [rfaFilters, loadRFACalculations]);
-
   return {
     // États
     contracts,
@@ -479,40 +433,33 @@ export const useContracts = (): UseContractsReturn => {
     simulationResults,
     loading,
     error,
-    
     // Filtres
     filters,
     rfaFilters,
     setFilters,
     setRFAFilters,
-    
     // Actions contrats
     loadContracts,
     createContract,
     updateContract,
     archiveContract,
-    
     // Actions RFA
     loadRFACalculations,
     createRFACalculation,
     simulateRFA,
     sendContractSummary,
     runAutoMonthlyRFA,
-    
     // Dashboard
     loadDashboardData,
     refreshDashboard,
-    
     // Export
     exportContracts,
     exportRFACalculations,
-    
     // Utilitaires
     getContractById,
     getRFAForContract
   };
 };
-
 /**
  * Hook simplifié pour les simulations RFA
  */
@@ -520,14 +467,11 @@ export const useRFASimulation = (contractId?: string) => {
   const [results, setResults] = useState<SimulationResult[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-
   const runSimulation = useCallback(async (scenarios: TurnoverScenario[]) => {
     if (!contractId) return;
-
     setLoading(true);
     try {
       const response = await contractsService.simulateRFA(contractId, scenarios);
-      
       if (response.success && response.data) {
         setResults(response.data);
       } else {
@@ -547,11 +491,9 @@ export const useRFASimulation = (contractId?: string) => {
       setLoading(false);
     }
   }, [contractId, toast]);
-
   const clearResults = useCallback(() => {
     setResults([]);
   }, []);
-
   return {
     results,
     loading,

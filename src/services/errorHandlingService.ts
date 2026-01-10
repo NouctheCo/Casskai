@@ -9,10 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface ErrorContext {
   service?: string;
   method?: string;
@@ -20,7 +19,6 @@ export interface ErrorContext {
   companyId?: string;
   additional?: Record<string, unknown>;
 }
-
 export interface ApiError {
   code: string;
   message: string;
@@ -30,21 +28,17 @@ export interface ApiError {
   technicalMessage: string;
   retryable: boolean;
 }
-
 export class ErrorHandlingService {
   private static instance: ErrorHandlingService;
   private readonly maxRetries = 3;
   private readonly retryDelays = [1000, 2000, 4000]; // Progressive delays
-  
   private constructor() {}
-
   static getInstance(): ErrorHandlingService {
     if (!ErrorHandlingService.instance) {
       ErrorHandlingService.instance = new ErrorHandlingService();
     }
     return ErrorHandlingService.instance;
   }
-
   /**
    * Wrapper pour les appels API Supabase avec gestion d'erreur complète
    */
@@ -54,30 +48,24 @@ export class ErrorHandlingService {
     maxRetries: number = this.maxRetries
   ): Promise<T> {
     let lastError: Error;
-    
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         return await operation();
       } catch (error) {
         lastError = error as Error;
-
         // Log the attempt
-        console.warn(`[${context.service}/${context.method}] Attempt ${attempt + 1} failed:`, error);
-
+        logger.warn('ErrorHandling', `[${context.service}/${context.method}] Attempt ${attempt + 1} failed:`, error);
         // Don't retry if it's the last attempt or if error is not retryable
         if (attempt === maxRetries || !this.isRetryableError(error as Error)) {
           break;
         }
-        
         // Wait before retrying
         await this.delay(this.retryDelays[attempt] || 4000);
       }
     }
-    
     // All retries failed, handle the error
     return this.handleError(lastError!, context);
   }
-
   /**
    * Wrapper pour les appels Supabase
    */
@@ -87,15 +75,12 @@ export class ErrorHandlingService {
   ): Promise<T> {
     return this.executeWithRetry(async () => {
       const { data, error } = await operation();
-      
       if (error) {
         throw this.createApiError(error, context);
       }
-      
       return data as T;
     }, context);
   }
-
   /**
    * Wrapper pour les appels fetch
    */
@@ -112,17 +97,14 @@ export class ErrorHandlingService {
           ...options.headers,
         },
       });
-      
       if (!response.ok) {
         const errorText = await response.text();
         let errorData;
-        
         try {
           errorData = JSON.parse(errorText);
         } catch {
           errorData = { message: errorText };
         }
-        
         throw this.createApiError({
           message: errorData.message || `HTTP ${response.status}: ${response.statusText}`,
           code: errorData.code || `HTTP_${response.status}`,
@@ -130,40 +112,31 @@ export class ErrorHandlingService {
           ...errorData,
         }, context);
       }
-      
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         return await response.json();
       }
-      
       return await response.text() as unknown as T;
     }, context);
   }
-
   /**
    * Gestion centralisée des erreurs
    */
   private handleError<_T>(error: Error, context: ErrorContext): never {
     const apiError = (error as unknown as {statusCode?: string}).statusCode ? (error as unknown as ApiError) : this.createApiError(error, context);
-
     // Log error for monitoring
     this.logError(apiError, context);
-
     // Show user notification
     this.showErrorToUser(apiError);
-
     // Report to error tracking service
     this.reportError(apiError, context);
-
     throw apiError;
   }
-
   /**
    * Création d'une erreur API structurée
    */
   private createApiError(error: unknown, context: ErrorContext): ApiError {
     const err = error as Record<string, unknown>;
-
     // Map des erreurs Supabase communes
     const supabaseErrorMap: Record<string, Partial<ApiError>> = {
       'PGRST116': {
@@ -192,7 +165,6 @@ export class ErrorHandlingService {
         retryable: false,
       },
     };
-
     // Map des erreurs HTTP communes
     const httpErrorMap: Record<number, Partial<ApiError>> = {
       400: {
@@ -246,13 +218,10 @@ export class ErrorHandlingService {
         retryable: true,
       },
     };
-
     const errorCode = String(err.code || (err.status ? String(err.status) : 'UNKNOWN'));
     const errorStatus = typeof err.status === 'number' ? err.status : undefined;
     const errorMapping = supabaseErrorMap[errorCode] || (errorStatus ? httpErrorMap[errorStatus] : undefined) || {};
-
     const severity = this.determineSeverity(error, context);
-
     return {
       code: errorCode,
       message: String((err as unknown as Error).message || 'Une erreur inconnue s\'est produite'),
@@ -264,36 +233,29 @@ export class ErrorHandlingService {
       ...errorMapping,
     };
   }
-
   /**
    * Détermine la sévérité d'une erreur selon le contexte
    */
   private determineSeverity(error: unknown, context: ErrorContext): ApiError['severity'] {
     const err = error as Record<string, unknown>;
-
     // Erreurs critiques dans les services financiers
     if (context.service && ['invoicingService', 'accountingService', 'subscriptionService'].includes(context.service)) {
       return 'critical';
     }
-
     // Erreurs de connexion/auth
     if (err.status === 401 || err.code === 'PGRST301') {
       return 'high';
     }
-
     // Erreurs serveur
     if (typeof err.status === 'number' && err.status >= 500) {
       return 'high';
     }
-
     // Erreurs client
     if (typeof err.status === 'number' && err.status >= 400 && err.status < 500) {
       return 'medium';
     }
-
     return 'low';
   }
-
   /**
    * Message utilisateur par défaut selon la sévérité
    */
@@ -309,36 +271,29 @@ export class ErrorHandlingService {
         return 'Opération impossible pour le moment.';
     }
   }
-
   /**
    * Détermine si une erreur peut être retentée
    */
   private isRetryableError(error: unknown): boolean {
     const err = error as Record<string, unknown>;
-
     // Erreurs réseau temporaires
     if ((err as unknown as Error).name === 'NetworkError' || (typeof (err as unknown as Error).message === 'string' && (err as unknown as Error).message.includes('fetch'))) {
       return true;
     }
-
     // Erreurs serveur temporaires
     if (typeof err.status === 'number' && err.status >= 500 && err.status <= 504) {
       return true;
     }
-
     // Rate limiting
     if (err.status === 429) {
       return true;
     }
-
     // Timeout
     if ((err as unknown as Error).name === 'TimeoutError') {
       return true;
     }
-
     return false;
   }
-
   /**
    * Affiche l'erreur à l'utilisateur via toast
    */
@@ -350,7 +305,6 @@ export class ErrorHandlingService {
         onClick: () => window.location.reload(),
       } : undefined,
     };
-
     switch (error.severity) {
       case 'critical':
         toast.error(`🚨 ${error.userMessage}`, {
@@ -362,21 +316,17 @@ export class ErrorHandlingService {
           },
         });
         break;
-        
       case 'high':
         toast.error(`⚠️ ${error.userMessage}`, toastOptions);
         break;
-        
       case 'medium':
         toast.error(error.userMessage, toastOptions);
         break;
-        
       default:
         toast.warning(error.userMessage, { duration: 3000 });
         break;
     }
   }
-
   /**
    * Durée du toast selon la sévérité
    */
@@ -388,7 +338,6 @@ export class ErrorHandlingService {
       default: return 3000;
     }
   }
-
   /**
    * Log de l'erreur pour le monitoring
    */
@@ -409,16 +358,13 @@ export class ErrorHandlingService {
       userId: context.userId,
       companyId: context.companyId,
     };
-
     console[logLevel]('[ErrorHandlingService]', logData);
-    
     // En production, envoyer vers un service de monitoring
     if (process.env.NODE_ENV === 'production') {
       // Placeholder pour l'intégration avec un service comme Sentry, LogRocket, etc.
       this.sendToMonitoringService(logData);
     }
   }
-
   /**
    * Niveau de log selon la sévérité
    */
@@ -433,7 +379,6 @@ export class ErrorHandlingService {
         return 'info';
     }
   }
-
   /**
    * Report d'erreur vers un service externe
    */
@@ -441,7 +386,6 @@ export class ErrorHandlingService {
     try {
       // Ne reporter que les erreurs importantes
       if (error.severity === 'low') return;
-      
       // Envoyer vers Supabase pour tracking interne
       await supabase.from('error_logs').insert({
         error_code: error.code,
@@ -459,12 +403,10 @@ export class ErrorHandlingService {
         },
         created_at: new Date().toISOString(),
       }).select().single();
-      
     } catch (reportingError) {
-      console.error('[ErrorHandlingService] Failed to report error:', reportingError);
+      logger.error('ErrorHandling', '[ErrorHandlingService] Failed to report error:', reportingError);
     }
   }
-
   /**
    * Envoyer vers service de monitoring externe
    */
@@ -475,7 +417,6 @@ export class ErrorHandlingService {
     // - Datadog
     // - New Relic
     // etc.
-    
     // Exemple Sentry:
     if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).Sentry) {
       const Sentry = (window as unknown as Record<string, unknown>).Sentry as { captureException: (error: Error, options: Record<string, unknown>) => void };
@@ -491,7 +432,6 @@ export class ErrorHandlingService {
       });
     }
   }
-
   /**
    * Utilitaire pour créer le delay
    */
@@ -499,10 +439,8 @@ export class ErrorHandlingService {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
-
 // Instance singleton
 export const errorHandler = ErrorHandlingService.getInstance();
-
 // Hook React pour utiliser facilement le service d'erreur
 export const useErrorHandler = () => {
   return {
@@ -511,19 +449,16 @@ export const useErrorHandler = () => {
     fetchCall: errorHandler.fetchCall.bind(errorHandler),
   };
 };
-
 // Décorateur pour wrapper automatiquement les méthodes de service
 export function withErrorHandling(service: string) {
   return function (target: Record<string, unknown>, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
-
     descriptor.value = async function (...args: unknown[]) {
       const context: ErrorContext = {
         service,
         method: propertyName,
         // userId et companyId peuvent être récupérés depuis le contexte
       };
-      
       return errorHandler.executeWithRetry(
         () => method.apply(this, args),
         context
@@ -531,5 +466,4 @@ export function withErrorHandling(service: string) {
     };
   };
 }
-
 export default ErrorHandlingService;

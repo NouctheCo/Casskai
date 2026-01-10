@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
-
+import { logger } from '@/lib/logger';
 interface Transaction {
   id: string;
   type: 'invoice' | 'payment' | 'credit_note' | 'purchase';
@@ -42,17 +42,14 @@ interface Transaction {
   description?: string;
   days_overdue?: number;
 }
-
 interface TransactionsTabProps {
   companyId: string;
 }
-
 export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) => {
   const { t: _t } = useTranslation();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-
   // Filtres
   const [selectedThirdParty, setSelectedThirdParty] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -60,17 +57,14 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [searchText, setSearchText] = useState<string>('');
-
   // Liste des tiers pour le filtre
   const [thirdParties, setThirdParties] = useState<Array<{ id: string; name: string }>>([]);
-
   useEffect(() => {
     if (companyId) {
       loadData();
       loadThirdParties();
     }
   }, [companyId]);
-
   useEffect(() => {
     applyFilters();
   }, [
@@ -82,30 +76,52 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
     endDate,
     searchText
   ]);
-
   const loadThirdParties = async () => {
     try {
-      const { data, error } = await supabase
-        .from('third_parties')
+      // Charger les clients
+      const { data: customers, error: custError } = await supabase
+        .from('customers')
         .select('id, name')
         .eq('company_id', companyId)
         .eq('is_active', true)
         .order('name');
 
-      if (error) throw error;
-      setThirdParties(data || []);
+      if (custError) {
+        logger.error('TransactionsTab', 'Error loading customers:', custError);
+        throw custError;
+      }
+
+      // Charger les fournisseurs
+      const { data: suppliers, error: suppError } = await supabase
+        .from('suppliers')
+        .select('id, name')
+        .eq('company_id', companyId)
+        .eq('is_active', true)
+        .order('name');
+
+      if (suppError) {
+        logger.error('TransactionsTab', 'Error loading suppliers:', suppError);
+        throw suppError;
+      }
+
+      // Combiner les deux listes
+      const combined = [
+        ...(customers || []),
+        ...(suppliers || [])
+      ];
+
+      logger.debug('TransactionsTab', `📋 Loaded ${customers?.length || 0} customers and ${suppliers?.length || 0} suppliers`);
+      setThirdParties(combined);
     } catch (error) {
-      console.error('Erreur chargement tiers:', error);
+      logger.error('TransactionsTab', 'Erreur chargement tiers:', error);
     }
   };
-
   const loadData = async () => {
     setLoading(true);
     try {
       const today = new Date();
       const allTransactions: Transaction[] = [];
-
-      // 1. Charger les factures clients (invoices)
+      // 1. Charger les factures clients (invoices) avec relation vers customers
       const { data: invoices, error: invError } = await supabase
         .from('invoices')
         .select(`
@@ -113,8 +129,8 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           invoice_number,
           invoice_date,
           due_date,
-          third_party_id,
-          third_parties(name, type),
+          customer_id,
+          client:customers!customer_id(name),
           total_incl_tax,
           paid_amount,
           status
@@ -122,7 +138,12 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
         .eq('company_id', companyId)
         .eq('invoice_type', 'sale');
 
-      if (invError) throw invError;
+      if (invError) {
+        logger.error('TransactionsTab', 'Error loading invoices:', invError);
+        throw invError;
+      }
+
+      logger.debug('TransactionsTab', `📄 Loaded ${invoices?.length || 0} invoices`);
 
       (invoices || []).forEach((inv: any) => {
         const balance = (inv.total_incl_tax || 0) - (inv.paid_amount || 0);
@@ -130,16 +151,15 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
         const daysOverdue = dueDate && dueDate < today
           ? Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24))
           : 0;
-
         allTransactions.push({
           id: inv.id,
           type: 'invoice',
           reference: inv.invoice_number || '',
           date: inv.invoice_date || '',
           due_date: inv.due_date,
-          third_party_id: inv.third_party_id || '',
-          third_party_name: inv.third_parties?.name || 'Inconnu',
-          third_type: inv.third_parties?.type || 'customer',
+          third_party_id: inv.customer_id || '',
+          third_party_name: inv.client?.name || 'Inconnu',
+          third_type: 'customer',
           amount: inv.total_incl_tax || 0,
           paid_amount: inv.paid_amount || 0,
           balance,
@@ -147,8 +167,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           days_overdue: daysOverdue > 0 ? daysOverdue : undefined
         });
       });
-
-      // 2. Charger les achats (purchases)
+      // 2. Charger les achats (purchases) avec relation vers suppliers
       const { data: purchases, error: purchError } = await supabase
         .from('purchases')
         .select(`
@@ -157,22 +176,26 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           purchase_date,
           due_date,
           supplier_id,
-          third_parties!purchases_supplier_id_fkey(name, type),
-          total_ttc,
-          paid_amount,
-          status
+          supplier:suppliers!supplier_id(name),
+          total_amount,
+          payment_status
         `)
         .eq('company_id', companyId);
 
-      if (purchError) throw purchError;
+      if (purchError) {
+        logger.error('TransactionsTab', 'Error loading purchases:', purchError);
+        throw purchError;
+      }
+
+      logger.debug('TransactionsTab', `🛒 Loaded ${purchases?.length || 0} purchases`);
 
       (purchases || []).forEach((purch: any) => {
-        const balance = (purch.total_ttc || 0) - (purch.paid_amount || 0);
+        // Pour purchases: pas de paid_amount, on utilise payment_status
+        const balance = purch.payment_status === 'paid' ? 0 : (purch.total_amount || 0);
         const dueDate = purch.due_date ? new Date(purch.due_date) : null;
         const daysOverdue = dueDate && dueDate < today
           ? Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24))
           : 0;
-
         allTransactions.push({
           id: purch.id,
           type: 'purchase',
@@ -180,25 +203,24 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           date: purch.purchase_date || '',
           due_date: purch.due_date,
           third_party_id: purch.supplier_id || '',
-          third_party_name: purch.third_parties?.name || 'Inconnu',
-          third_type: purch.third_parties?.type || 'supplier',
-          amount: purch.total_ttc || 0,
-          paid_amount: purch.paid_amount || 0,
+          third_party_name: purch.supplier?.name || 'Inconnu',
+          third_type: 'supplier',
+          amount: purch.total_amount || 0,
+          paid_amount: purch.payment_status === 'paid' ? (purch.total_amount || 0) : 0,
           balance,
-          status: purch.status || 'draft',
+          status: purch.payment_status || 'unpaid',
           days_overdue: daysOverdue > 0 ? daysOverdue : undefined
         });
       });
-
       // 3. Charger les paiements reçus (payments received)
+      // Note: payments peuvent être reliés via invoice_id plutôt que directement aux tiers
       const { data: paymentsReceived, error: payRecError } = await supabase
         .from('payments')
         .select(`
           id,
           reference,
           payment_date,
-          third_party_id,
-          third_parties(name, type),
+          invoice_id,
           amount,
           payment_method,
           description
@@ -206,25 +228,28 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
         .eq('company_id', companyId)
         .eq('type', 'received');
 
-      if (payRecError) throw payRecError;
-
-      (paymentsReceived || []).forEach((pay: any) => {
-        allTransactions.push({
-          id: pay.id,
-          type: 'payment',
-          reference: pay.reference || '',
-          date: pay.payment_date || '',
-          third_party_id: pay.third_party_id || '',
-          third_party_name: pay.third_parties?.name || 'Inconnu',
-          third_type: pay.third_parties?.type || 'customer',
-          amount: pay.amount || 0,
-          paid_amount: pay.amount || 0,
-          balance: 0,
-          status: 'paid',
-          description: pay.description
+      if (payRecError) {
+        logger.warn('TransactionsTab', 'Error loading payments received (may not exist):', payRecError);
+        // Ne pas throw, continuer avec les autres données
+      } else {
+        logger.debug('TransactionsTab', `💰 Loaded ${paymentsReceived?.length || 0} payments received`);
+        (paymentsReceived || []).forEach((pay: any) => {
+          allTransactions.push({
+            id: pay.id,
+            type: 'payment',
+            reference: pay.reference || '',
+            date: pay.payment_date || '',
+            third_party_id: '', // TODO: récupérer via invoice_id si nécessaire
+            third_party_name: 'Paiement reçu',
+            third_type: 'customer',
+            amount: pay.amount || 0,
+            paid_amount: pay.amount || 0,
+            balance: 0,
+            status: 'paid',
+            description: pay.description
+          });
         });
-      });
-
+      }
       // 4. Charger les paiements émis (payments sent)
       const { data: paymentsSent, error: paySentError } = await supabase
         .from('payments')
@@ -232,8 +257,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           id,
           reference,
           payment_date,
-          third_party_id,
-          third_parties(name, type),
+          invoice_id,
           amount,
           payment_method,
           description
@@ -241,52 +265,52 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
         .eq('company_id', companyId)
         .eq('type', 'sent');
 
-      if (paySentError) throw paySentError;
-
-      (paymentsSent || []).forEach((pay: any) => {
-        allTransactions.push({
-          id: pay.id,
-          type: 'payment',
-          reference: pay.reference || '',
-          date: pay.payment_date || '',
-          third_party_id: pay.third_party_id || '',
-          third_party_name: pay.third_parties?.name || 'Inconnu',
-          third_type: pay.third_parties?.type || 'supplier',
-          amount: pay.amount || 0,
-          paid_amount: pay.amount || 0,
-          balance: 0,
-          status: 'paid',
-          description: pay.description
+      if (paySentError) {
+        logger.warn('TransactionsTab', 'Error loading payments sent (may not exist):', paySentError);
+        // Ne pas throw, continuer avec les autres données
+      } else {
+        logger.debug('TransactionsTab', `💸 Loaded ${paymentsSent?.length || 0} payments sent`);
+        (paymentsSent || []).forEach((pay: any) => {
+          allTransactions.push({
+            id: pay.id,
+            type: 'payment',
+            reference: pay.reference || '',
+            date: pay.payment_date || '',
+            third_party_id: '', // TODO: récupérer via invoice_id si nécessaire
+            third_party_name: 'Paiement émis',
+            third_type: 'supplier',
+            amount: pay.amount || 0,
+            paid_amount: pay.amount || 0,
+            balance: 0,
+            status: 'paid',
+            description: pay.description
+          });
         });
-      });
-
+      }
       // Trier par date décroissante
       allTransactions.sort((a, b) =>
         new Date(b.date).getTime() - new Date(a.date).getTime()
       );
 
+      logger.debug('TransactionsTab', `✅ Total transactions loaded: ${allTransactions.length}`);
       setTransactions(allTransactions);
     } catch (error) {
-      console.error('Erreur chargement transactions:', error);
+      logger.error('TransactionsTab', 'Erreur chargement transactions:', error);
       toastError('Impossible de charger les transactions');
     } finally {
       setLoading(false);
     }
   };
-
   const applyFilters = () => {
     let filtered = [...transactions];
-
     // Filtre par tiers
     if (selectedThirdParty !== 'all') {
       filtered = filtered.filter(t => t.third_party_id === selectedThirdParty);
     }
-
     // Filtre par type
     if (selectedType !== 'all') {
       filtered = filtered.filter(t => t.type === selectedType);
     }
-
     // Filtre par statut
     if (selectedStatus === 'unpaid') {
       filtered = filtered.filter(t => t.balance > 0 && t.type !== 'payment');
@@ -295,7 +319,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
     } else if (selectedStatus === 'overdue') {
       filtered = filtered.filter(t => t.days_overdue && t.days_overdue > 0);
     }
-
     // Filtre par dates
     if (startDate) {
       filtered = filtered.filter(t => new Date(t.date) >= new Date(startDate));
@@ -303,7 +326,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
     if (endDate) {
       filtered = filtered.filter(t => new Date(t.date) <= new Date(endDate));
     }
-
     // Filtre par recherche
     if (searchText.trim()) {
       const search = searchText.toLowerCase();
@@ -312,35 +334,27 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
         t.third_party_name.toLowerCase().includes(search)
       );
     }
-
     setFilteredTransactions(filtered);
   };
-
   const calculateTotals = () => {
     const invoicesTotal = transactions
       .filter(t => t.type === 'invoice')
       .reduce((sum, t) => sum + t.amount, 0);
-
     const purchasesTotal = transactions
       .filter(t => t.type === 'purchase')
       .reduce((sum, t) => sum + t.amount, 0);
-
     const receivablesTotal = transactions
       .filter(t => t.type === 'invoice')
       .reduce((sum, t) => sum + t.balance, 0);
-
     const payablesTotal = transactions
       .filter(t => t.type === 'purchase')
       .reduce((sum, t) => sum + t.balance, 0);
-
     const overdueReceivables = transactions
       .filter(t => t.type === 'invoice' && t.days_overdue && t.days_overdue > 0)
       .reduce((sum, t) => sum + t.balance, 0);
-
     const overduePayables = transactions
       .filter(t => t.type === 'purchase' && t.days_overdue && t.days_overdue > 0)
       .reduce((sum, t) => sum + t.balance, 0);
-
     return {
       invoicesTotal,
       purchasesTotal,
@@ -350,7 +364,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
       overduePayables
     };
   };
-
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'invoice':
@@ -363,7 +376,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
         return <FileText className="h-4 w-4" />;
     }
   };
-
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'invoice':
@@ -378,27 +390,21 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
         return type;
     }
   };
-
   const getStatusBadge = (transaction: Transaction) => {
     if (transaction.type === 'payment') {
       return <Badge variant="default">Payé</Badge>;
     }
-
     if (transaction.days_overdue && transaction.days_overdue > 0) {
       return <Badge variant="destructive">En retard ({transaction.days_overdue}j)</Badge>;
     }
-
     if (transaction.balance === 0) {
       return <Badge variant="default">Payé</Badge>;
     }
-
     if (transaction.balance > 0 && transaction.balance < transaction.amount) {
       return <Badge variant="secondary">Partiel</Badge>;
     }
-
     return <Badge variant="outline">Impayé</Badge>;
   };
-
   const handleExport = () => {
     // Export CSV simple
     const csv = [
@@ -414,18 +420,14 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
         t.days_overdue ? `En retard (${t.days_overdue}j)` : (t.balance === 0 ? 'Payé' : 'Impayé')
       ].join(';'))
     ].join('\n');
-
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
-
     toastSuccess('Export réussi');
   };
-
   const totals = calculateTotals();
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -436,7 +438,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* KPIs */}
@@ -454,7 +455,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -468,7 +468,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -484,7 +483,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -500,7 +498,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -514,7 +511,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -529,7 +525,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           </CardContent>
         </Card>
       </div>
-
       {/* Filtres */}
       <Card>
         <CardHeader>
@@ -556,7 +551,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
                 </SelectContent>
               </Select>
             </div>
-
             <div className="space-y-2">
               <Label>Type</Label>
               <Select value={selectedType} onValueChange={setSelectedType}>
@@ -571,7 +565,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
                 </SelectContent>
               </Select>
             </div>
-
             <div className="space-y-2">
               <Label>Statut</Label>
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -586,7 +579,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
                 </SelectContent>
               </Select>
             </div>
-
             <div className="space-y-2">
               <Label>Date début</Label>
               <Input
@@ -595,7 +587,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
                 onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
-
             <div className="space-y-2">
               <Label>Date fin</Label>
               <Input
@@ -604,7 +595,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
                 onChange={(e) => setEndDate(e.target.value)}
               />
             </div>
-
             <div className="space-y-2">
               <Label>Recherche</Label>
               <Input
@@ -614,7 +604,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
               />
             </div>
           </div>
-
           <div className="mt-4 flex justify-end">
             <Button onClick={handleExport} variant="outline">
               <FileDown className="h-4 w-4 mr-2" />
@@ -623,7 +612,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           </div>
         </CardContent>
       </Card>
-
       {/* Tableau des transactions */}
       <Card>
         <CardHeader>
@@ -702,7 +690,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
               </tbody>
             </table>
           </div>
-
           {/* Totaux des transactions filtrées */}
           {filteredTransactions.length > 0 && (
             <div className="mt-4 pt-4 border-t">

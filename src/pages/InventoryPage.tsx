@@ -22,10 +22,14 @@ import ProductionTab from '@/components/inventory/ProductionTab';
 import SuppliersTab from '@/components/inventory/SuppliersTab';
 import AlertsTab from '@/components/inventory/AlertsTab';
 import InventoryDialogs from '@/components/inventory/InventoryDialogs';
+import NewArticleModal from '@/components/inventory/NewArticleModal';
+import { ThirdPartyFormDialog } from '@/components/third-parties/ThirdPartyFormDialog';
 import { useInventoryPageController } from '@/hooks/useInventoryPageController';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function InventoryPage() {
   const { t } = useTranslation();
+  const { currentCompany } = useAuth();
   const {
     activeTab,
     setActiveTab,
@@ -37,7 +41,11 @@ export default function InventoryPage() {
     alertsProps,
     headerProps,
     statsProps,
-    dialogsProps
+    dialogsProps,
+    newArticleModalOpen,
+    setNewArticleModalOpen,
+    supplierFormDialogOpen,
+    setSupplierFormDialogOpen
   } = useInventoryPageController();
 
   return (
@@ -82,6 +90,35 @@ export default function InventoryPage() {
       </Tabs>
 
       <InventoryDialogs {...dialogsProps} />
+
+      <NewArticleModal
+        isOpen={newArticleModalOpen}
+        onClose={() => {
+          setNewArticleModalOpen(false);
+        }}
+        onSuccess={(articleId) => {
+          logger.debug('InventoryPage', 'Article created successfully, ID:', articleId);
+          setNewArticleModalOpen(false);
+          // Recharger la page pour afficher le nouvel article
+          window.location.reload();
+        }}
+      />
+
+      {/* Modal unifié de création de fournisseur (même que dans NewArticleModal) */}
+      {currentCompany && (
+        <ThirdPartyFormDialog
+          open={supplierFormDialogOpen}
+          onClose={() => setSupplierFormDialogOpen(false)}
+          onSuccess={() => {
+            logger.debug('InventoryPage', 'Supplier created successfully from Suppliers tab');
+            setSupplierFormDialogOpen(false);
+            // Rafraîchir la liste des fournisseurs
+            window.location.reload();
+          }}
+          companyId={currentCompany.id}
+          defaultType="supplier"
+        />
+      )}
     </div>
   );
 }

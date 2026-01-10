@@ -2,9 +2,8 @@
  * Service de suppression d'entreprise avec consensus des propriétaires
  * Gère la demande, l'approbation et l'export FEC avant suppression
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface CompanyDeletionRequest {
   id: string;
   company_id: string;
@@ -17,7 +16,6 @@ export interface CompanyDeletionRequest {
   created_at: string;
   other_owners_count: number;
 }
-
 export interface CompanyDeletionApproval {
   id: string;
   deletion_request_id: string;
@@ -27,17 +25,14 @@ export interface CompanyDeletionApproval {
   approved_at?: string;
   created_at: string;
 }
-
 class CompanyDeletionService {
   private static instance: CompanyDeletionService;
-
   static getInstance(): CompanyDeletionService {
     if (!CompanyDeletionService.instance) {
       CompanyDeletionService.instance = new CompanyDeletionService();
     }
     return CompanyDeletionService.instance;
   }
-
   /**
    * Initie une demande de suppression d'entreprise
    */
@@ -52,7 +47,6 @@ class CompanyDeletionService {
   }> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Utilisateur non authentifié');
-
     try {
       // Appeler la Edge Function
       const { data, error } = await supabase.functions.invoke('delete-company', {
@@ -62,16 +56,13 @@ class CompanyDeletionService {
           export_requested: exportRequested
         }
       });
-
       if (error) {
-        console.error('❌ Erreur deletion request:', error);
+        logger.error('CompanyDeletion', '❌ Erreur deletion request:', error);
         return { success: false, error: error.message || 'Erreur lors de la création de la demande' };
       }
-
       if (!data.success) {
         return { success: false, error: data.error || 'Erreur inconnue' };
       }
-
       return {
         success: true,
         deletion_request: {
@@ -88,14 +79,13 @@ class CompanyDeletionService {
         }
       };
     } catch (error) {
-      console.error('❌ Erreur:', error);
+      logger.error('CompanyDeletion', '❌ Erreur:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
       };
     }
   }
-
   /**
    * Récupère l'état d'une demande de suppression
    */
@@ -107,11 +97,8 @@ class CompanyDeletionService {
         .eq('company_id', companyId)
         .in('status', ['pending', 'approval_pending', 'approved'])
         .maybeSingle();
-
       if (error && error.code !== '42P01') throw error;
-
       if (!data) return null;
-
       return {
         id: data.id,
         company_id: data.company_id,
@@ -125,11 +112,10 @@ class CompanyDeletionService {
         other_owners_count: data.metadata?.other_owners_count || 0
       };
     } catch (error) {
-      console.error('❌ Erreur récupération statut:', error);
+      logger.error('CompanyDeletion', '❌ Erreur récupération statut:', error);
       return null;
     }
   }
-
   /**
    * Approuve une demande de suppression d'entreprise
    */
@@ -143,7 +129,6 @@ class CompanyDeletionService {
   }> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Utilisateur non authentifié');
-
     try {
       // Appeler la Edge Function
       const { data, error } = await supabase.functions.invoke('approve-company-deletion', {
@@ -153,26 +138,22 @@ class CompanyDeletionService {
           reason: reason || null
         }
       });
-
       if (error) {
-        console.error('❌ Erreur approbation:', error);
+        logger.error('CompanyDeletion', '❌ Erreur approbation:', error);
         return { success: false, error: error.message || 'Erreur lors de l\'approbation' };
       }
-
       if (!data.success) {
         return { success: false, error: data.error || 'Erreur inconnue' };
       }
-
       return { success: true };
     } catch (error) {
-      console.error('❌ Erreur:', error);
+      logger.error('CompanyDeletion', '❌ Erreur:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
       };
     }
   }
-
   /**
    * Rejette une demande de suppression d'entreprise
    */
@@ -185,7 +166,6 @@ class CompanyDeletionService {
   }> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Utilisateur non authentifié');
-
     try {
       // Appeler la Edge Function
       const { data, error } = await supabase.functions.invoke('approve-company-deletion', {
@@ -195,26 +175,22 @@ class CompanyDeletionService {
           reason: reason || null
         }
       });
-
       if (error) {
-        console.error('❌ Erreur rejet:', error);
+        logger.error('CompanyDeletion', '❌ Erreur rejet:', error);
         return { success: false, error: error.message || 'Erreur lors du rejet' };
       }
-
       if (!data.success) {
         return { success: false, error: data.error || 'Erreur inconnue' };
       }
-
       return { success: true };
     } catch (error) {
-      console.error('❌ Erreur:', error);
+      logger.error('CompanyDeletion', '❌ Erreur:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
       };
     }
   }
-
   /**
    * Annule une demande de suppression d'entreprise
    */
@@ -234,26 +210,22 @@ class CompanyDeletionService {
           cancellation_reason: reason || null
         })
         .eq('id', deletionRequestId);
-
       if (error && error.code !== '42P01') throw error;
-
       return { success: true };
     } catch (error) {
-      console.error('❌ Erreur annulation:', error);
+      logger.error('CompanyDeletion', '❌ Erreur annulation:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
       };
     }
   }
-
   /**
    * Récupère les demandes en attente d'approbation pour un utilisateur
    */
   async getPendingApprovalsForUser(): Promise<CompanyDeletionRequest[]> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
-
     try {
       const { data, error } = await supabase
         .from('company_deletion_approvals')
@@ -274,9 +246,7 @@ class CompanyDeletionService {
         .eq('approver_id', user.id)
         .eq('approved', false)
         .is('approved_at', null);
-
       if (error && error.code !== '42P01') throw error;
-
       return (data || [])
         .map((d: any) => d.deletion_request)
         .filter(Boolean)
@@ -293,10 +263,9 @@ class CompanyDeletionService {
           other_owners_count: dr.metadata?.other_owners_count || 0
         }));
     } catch (error) {
-      console.error('❌ Erreur récupération approvals:', error);
+      logger.error('CompanyDeletion', '❌ Erreur récupération approvals:', error);
       return [];
     }
   }
 }
-
 export const companyDeletionService = CompanyDeletionService.getInstance();

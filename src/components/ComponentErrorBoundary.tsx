@@ -1,50 +1,42 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-
+import { logger } from '@/lib/logger';
 interface Props {
   children: ReactNode;
   componentName?: string;
   showError?: boolean;
   fallback?: ReactNode;
 }
-
 interface State {
   hasError: boolean;
   error?: Error;
 }
-
 export class ComponentErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
   };
-
   public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
-
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const componentName = this.props.componentName || 'Unknown Component';
-    console.error(`ComponentErrorBoundary caught an error in ${componentName}:`, error, errorInfo);
-    
+    logger.error('ComponentErrorBoundary', `ComponentErrorBoundary caught an error in ${componentName}:`, error, errorInfo);
     // Log error details for debugging
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`🔴 Component Error: ${componentName}`);
-      console.error('Error:', error);
-      console.error('Error Info:', errorInfo);
+      logger.warn('ComponentErrorBoundary', `🔴 Component Error: ${componentName}`);
+      logger.error('ComponentErrorBoundary', 'Error:', error);
+      logger.error('ComponentErrorBoundary', 'Error Info:', errorInfo);
     }
   }
-
   private handleRetry = () => {
     this.setState({ hasError: false, error: undefined });
   };
-
   public render() {
     if (this.state.hasError) {
       // Custom fallback UI
       if (this.props.fallback) {
         return this.props.fallback;
       }
-
       // Default minimal error UI
       return (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:bg-red-900/20">
@@ -54,11 +46,9 @@ export class ComponentErrorBoundary extends Component<Props, State> {
               {this.props.componentName || 'Component'} Error
             </h3>
           </div>
-          
           <p className="text-sm text-red-700 mb-3">
             This component encountered an error and couldn't render properly.
           </p>
-          
           <button
             onClick={this.handleRetry}
             className="inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium dark:text-red-400"
@@ -66,7 +56,6 @@ export class ComponentErrorBoundary extends Component<Props, State> {
             <RefreshCw className="h-3 w-3" />
             Try Again
           </button>
-          
           {this.props.showError && process.env.NODE_ENV === 'development' && this.state.error && (
             <details className="mt-3 p-2 bg-white dark:bg-gray-800 rounded border text-xs">
               <summary className="cursor-pointer font-medium text-gray-700 dark:text-gray-300">
@@ -85,9 +74,7 @@ export class ComponentErrorBoundary extends Component<Props, State> {
         </div>
       );
     }
-
     return this.props.children;
   }
 }
-
 export default ComponentErrorBoundary;

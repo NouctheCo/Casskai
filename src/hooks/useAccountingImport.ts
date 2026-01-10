@@ -9,25 +9,22 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-
 import { FECParser } from '../services/fecParser';
 import { CSVImportService } from '../services/csvImportService';
 import { AccountingValidationService } from '../services/accountingValidationService';
 import { VATCalculationService } from '../services/vatCalculationService';
 import { AutomaticLetterageService } from '../services/automaticLetterageService';
-
-import { 
+import { logger } from '@/lib/logger';
+import {
   ImportResult, 
   ImportSession, 
   CSVMapping, 
   FileParserOptions 
 } from '../types/accounting-import.types';
-
 // Schéma de validation pour la configuration d'import
 const ImportConfigSchema = z.object({
   file: z.instanceof(File, { message: 'Fichier requis' }),
@@ -40,16 +37,13 @@ const ImportConfigSchema = z.object({
   autoLetterage: z.boolean().default(false),
   journalId: z.string().uuid('ID journal invalide').optional(),
 });
-
 export type ImportConfig = z.infer<typeof ImportConfigSchema>;
-
 interface UseAccountingImportOptions {
   companyId: string;
   onImportComplete?: (result: ImportResult) => void;
   onProgress?: (progress: number) => void;
   onError?: (error: string) => void;
 }
-
 export function useAccountingImport({
   companyId,
   onImportComplete,
@@ -63,7 +57,6 @@ export function useAccountingImport({
   const [csvMapping, setCsvMapping] = useState<CSVMapping[]>([]);
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [fileAnalysis, setFileAnalysis] = useState<any>(null);
-
   // Form pour la configuration d'import
   const form = useForm({
     resolver: zodResolver(ImportConfigSchema),
@@ -76,33 +69,27 @@ export function useAccountingImport({
       autoLetterage: false,
     }
   });
-
   // Met à jour le progrès
   const updateProgress = useCallback((newProgress: number) => {
     setProgress(newProgress);
     onProgress?.(newProgress);
   }, [onProgress]);
-
   // Gestion des erreurs
   const handleError = useCallback((error: string) => {
-    console.error('Import error:', error);
+    logger.error('UseAccountingImport', 'Import error:', error);
     onError?.(error);
     setIsImporting(false);
     setImportSession(prev => prev ? { ...prev, status: 'failed' } : null);
   }, [onError]);
-
   // Analyse automatique du fichier
   const analyzeFile = useCallback(async (file: File) => {
     try {
       const analysis = await CSVImportService.analyzeFile(file);
-      
       setFileAnalysis(analysis);
       setPreviewData(analysis.preview || []);
       setCsvMapping(analysis.suggestedMapping || []);
-
       // Mise à jour automatique du formulaire
       (form.setValue as any)('file', file);
-
       if (analysis.format === 'Excel') {
         form.setValue('format', 'Excel');
       } else if (analysis.format === 'CSV') {
@@ -111,25 +98,20 @@ export function useAccountingImport({
           (form.setValue as any)('delimiter', analysis.delimiter);
         }
       }
-      
       if (analysis.encoding) {
         form.setValue('encoding', analysis.encoding as any);
       }
-
       return analysis;
     } catch (error: unknown) {
       handleError(`Erreur analyse fichier: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       throw error;
     }
   }, [form, handleError]);
-
   // Import principal
   const performImport = useCallback(async (config: ImportConfig) => {
     if (!config.file || isImporting) return;
-
     setIsImporting(true);
     setProgress(0);
-
     try {
       // Création de la session d'import
       const session: ImportSession = {
@@ -146,50 +128,39 @@ export function useAccountingImport({
         mapping: csvMapping,
         createdAt: new Date().toISOString()
       };
-
       setImportSession(session);
       updateProgress(5);
-
       // ÉTAPE 1: Parsing du fichier
       let parseResult: ImportResult;
-      
       if (session.format === 'FEC') {
         parseResult = await parseFECFile(config);
       } else {
         parseResult = await parseCSVFile(config);
       }
-
       updateProgress(30);
-
       // ÉTAPE 2: Validation des données
       if (config.validateBeforeImport) {
         session.status = 'validating';
         setImportSession({ ...session });
-
         parseResult = await validateEntries(parseResult);
         updateProgress(60);
       }
-
       // ÉTAPE 3: Sauvegarde en base
       session.status = 'importing';
       setImportSession({ ...session });
-
       const savedResult = await saveEntriesToDatabase(parseResult);
       updateProgress(85);
-
       // ÉTAPE 4: Lettrage automatique optionnel
       if (config.autoLetterage && savedResult.validRows > 0) {
         await performAutoLetterage();
         updateProgress(95);
       }
-
       // ÉTAPE 5: Finalisation
       const finalResult = {
         ...savedResult,
         totalRows: parseResult.totalRows,
         validRows: savedResult.validRows
       };
-
       session.status = 'completed';
       session.completedAt = new Date().toISOString();
       session.result = finalResult;
@@ -197,13 +168,10 @@ export function useAccountingImport({
       session.validRows = finalResult.validRows;
       session.errors = finalResult.errors.length;
       session.warnings = finalResult.warnings.length;
-
       setImportSession(session);
       updateProgress(100);
-      
       onImportComplete?.(finalResult);
       return finalResult;
-
     } catch (error: unknown) {
       handleError(`Erreur import: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       throw error;
@@ -218,7 +186,6 @@ export function useAccountingImport({
     handleError, 
     onImportComplete
   ]);
-
   // Parse fichier FEC
   const parseFECFile = useCallback(async (config: ImportConfig): Promise<ImportResult> => {
     const options: FileParserOptions = {
@@ -226,10 +193,8 @@ export function useAccountingImport({
       skipFirstRow: config.skipFirstRow,
       skipEmptyLines: config.skipEmptyLines
     };
-
     return await FECParser.parseFEC(config.file, options);
   }, []);
-
   // Parse fichier CSV/Excel
   const parseCSVFile = useCallback(async (config: ImportConfig): Promise<ImportResult> => {
     const options: FileParserOptions = {
@@ -238,17 +203,14 @@ export function useAccountingImport({
       skipFirstRow: config.skipFirstRow,
       skipEmptyLines: config.skipEmptyLines
     };
-
     return await CSVImportService.importWithMapping(config.file, csvMapping, options);
   }, [csvMapping]);
-
   // Validation des écritures
   const validateEntries = useCallback(async (result: ImportResult): Promise<ImportResult> => {
     const validation = await AccountingValidationService.validateBatch(
       result.entries, 
       companyId
     );
-
     return {
       ...result,
       entries: validation.valid as any,
@@ -257,43 +219,35 @@ export function useAccountingImport({
       validRows: validation.valid.length
     };
   }, [companyId]);
-
   // Sauvegarde en base (simulation pour l'exemple)
   const saveEntriesToDatabase = useCallback(async (result: ImportResult): Promise<ImportResult> => {
     // TODO: Implémentation réelle de la sauvegarde avec Supabase
-    
     // Simulation du processus de sauvegarde
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
     // Pour l'instant, retourne le résultat tel quel
     return result;
   }, []);
-
   // Lettrage automatique
   const performAutoLetterage = useCallback(async () => {
     try {
       await AutomaticLetterageService.performAutoLetterage(companyId);
     } catch (error: unknown) {
-      console.warn('Erreur lettrage automatique:', error);
+      logger.warn('UseAccountingImport', 'Erreur lettrage automatique:', error);
       // N'interrompt pas l'import si le lettrage échoue
     }
   }, [companyId]);
-
   // Détection du format de fichier
   const detectFileFormat = (file: File): 'FEC' | 'CSV' | 'Excel' => {
     const extension = file.name.split('.').pop()?.toLowerCase();
     const excelExtensions = ['xlsx', 'xls', 'xlsm'];
-    
     if (excelExtensions.includes(extension || '')) return 'Excel';
     if (extension === 'txt' || file.name.toLowerCase().includes('fec')) return 'FEC';
     return 'CSV';
   };
-
   // Mise à jour du mapping CSV
   const updateCSVMapping = useCallback((mapping: CSVMapping[]) => {
     setCsvMapping(mapping);
   }, []);
-
   // Reset de l'import
   const resetImport = useCallback(() => {
     setImportSession(null);
@@ -304,7 +258,6 @@ export function useAccountingImport({
     setFileAnalysis(null);
     form.reset();
   }, [form]);
-
   // Validation d'une écriture individuelle
   const validateSingleEntry = useCallback(async (entry: any) => {
     try {
@@ -314,7 +267,6 @@ export function useAccountingImport({
       throw error;
     }
   }, [companyId, handleError]);
-
   // Calcul TVA pour une écriture
   const calculateVAT = useCallback((params: {
     amountHT: number;
@@ -329,7 +281,6 @@ export function useAccountingImport({
       throw error;
     }
   }, [handleError]);
-
   // Génération des écritures TVA
   const generateVATEntries = useCallback(async (params: {
     invoiceLines: Array<{
@@ -351,7 +302,6 @@ export function useAccountingImport({
       throw error;
     }
   }, [companyId, handleError]);
-
   // Vérification des doublons
   const checkDuplicates = useCallback(async (entries: any[]) => {
     try {
@@ -361,7 +311,6 @@ export function useAccountingImport({
       throw error;
     }
   }, [companyId, handleError]);
-
   return {
     // États
     importSession,
@@ -370,24 +319,20 @@ export function useAccountingImport({
     csvMapping,
     previewData,
     fileAnalysis,
-
     // Form
     form,
     formErrors: form.formState.errors,
     isFormValid: form.formState.isValid,
-
     // Actions principales
     analyzeFile,
     performImport: form.handleSubmit(performImport as any),
     resetImport,
-
     // Utilitaires
     updateCSVMapping,
     validateSingleEntry,
     calculateVAT,
     generateVATEntries,
     checkDuplicates,
-
     // États dérivés
     canImport: !isImporting && (form.watch as any)('file') !== undefined,
     hasPreview: previewData.length > 0,
@@ -396,5 +341,4 @@ export function useAccountingImport({
     isFailed: importSession?.status === 'failed'
   };
 }
-
 export default useAccountingImport;

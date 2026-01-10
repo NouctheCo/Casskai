@@ -9,12 +9,11 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase, getCurrentCompany } from '../lib/supabase';
 import { FECParser } from './fecParser';
 import type { ImportResult, FECEntry } from '../types/accounting-import.types';
 import { auditService } from './auditService';
-
+import { logger } from '@/lib/logger';
 interface ImportSummary {
   journalsCreated: number;
   journalsExisting: number;
@@ -24,13 +23,11 @@ interface ImportSummary {
   entriesWithErrors: number;
   errors: any[];
 }
-
 interface DatabaseImportResult {
   success: boolean;
   summary?: ImportSummary;
   error?: string;
 }
-
 /**
  * Service pour gérer l'import des fichiers FEC (Fichier des Écritures Comptables)
  */
@@ -42,7 +39,6 @@ export const fecImportService = {
     try {
       // 1. Parse le fichier FEC
       const parseResult = await FECParser.parseFEC(file);
-      
       if (!parseResult.success || parseResult.entries.length === 0) {
         return {
           success: false,
@@ -51,7 +47,6 @@ export const fecImportService = {
             : 'Aucune écriture valide trouvée'
         };
       }
-
       // 2. Obtenir l'entreprise courante si pas fournie
       const enterpriseId = companyId || await this.getCurrentEnterpriseId();
       if (!enterpriseId) {
@@ -60,19 +55,16 @@ export const fecImportService = {
           error: 'Aucune entreprise sélectionnée'
         };
       }
-
       // 3. Importer en base de données
       return await this.importParsedData(parseResult, enterpriseId);
-      
     } catch (error: unknown) {
-      console.error('Erreur lors du parsing et import FEC:', error);
+      logger.error('FecImport', 'Erreur lors du parsing et import FEC:', error);
       return {
         success: false,
         error: error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue'
       };
     }
   },
-
   /**
    * Importe les données FEC parsées dans la base de données
    */
@@ -80,7 +72,6 @@ export const fecImportService = {
     try {
       // Grouper les entrées par journal
       const journalCodes = [...new Set(parseResult.entries.map(e => e.journalCode))];
-      
       // Grouper les comptes
       const accounts = new Map<string, { name: string; entries: FECEntry[] }>();
       parseResult.entries.forEach(entry => {
@@ -89,7 +80,6 @@ export const fecImportService = {
         }
         accounts.get(entry.accountNumber)!.entries.push(entry);
       });
-
       // Grouper les écritures par journal et numéro
       const entriesByJournalAndNum = new Map<string, FECEntry[]>();
       parseResult.entries.forEach(entry => {
@@ -99,16 +89,12 @@ export const fecImportService = {
         }
         entriesByJournalAndNum.get(key)!.push(entry);
       });
-
       // 1. Créer les journaux manquants
       const journalsResult = await this.createMissingJournals(journalCodes, companyId);
-      
       // 2. Créer les comptes manquants
       const accountsResult = await this.createMissingAccounts(accounts, companyId);
-      
       // 3. Créer les écritures comptables
       const entriesResult = await this.createJournalEntries(entriesByJournalAndNum, companyId);
-
       const summary = {
         journalsCreated: journalsResult.created,
         journalsExisting: journalsResult.existing,
@@ -118,7 +104,6 @@ export const fecImportService = {
         entriesWithErrors: entriesResult.errors.length,
         errors: entriesResult.errors
       };
-
       // 4. Logger l'import dans l'audit trail
       try {
         await auditService.log({
@@ -139,22 +124,20 @@ export const fecImportService = {
         });
       } catch (auditError) {
         // Ne pas bloquer l'import si le log échoue
-        console.warn('Audit log failed (non-blocking):', auditError);
+        logger.warn('FecImport', 'Audit log failed (non-blocking):', auditError);
       }
-
       return {
         success: true,
         summary
       };
     } catch (error: unknown) {
-      console.error('Erreur lors de l\'import FEC:', error);
+      logger.error('FecImport', 'Erreur lors de l\'import FEC:', error);
       return {
         success: false,
         error: error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Une erreur est survenue lors de l\'importation'
       };
     }
   },
-
   /**
    * Obtient l'ID de l'entreprise courante
    */
@@ -163,11 +146,10 @@ export const fecImportService = {
       const company = await getCurrentCompany();
       return company ? (company as any).id : null;
     } catch (error: unknown) {
-      console.error('Erreur lors de la récupération de l\'entreprise:', error);
+      logger.error('FecImport', 'Erreur lors de la récupération de l\'entreprise:', error);
       return null;
     }
   },
-
   /**
    * Importe les données FEC dans la base de données (ancienne interface pour compatibilité)
    */
@@ -175,13 +157,10 @@ export const fecImportService = {
     try {
       // 1. Créer les journaux manquants
       const journalsResult = await this.createMissingJournals(data.journals, companyId);
-      
       // 2. Créer les comptes manquants
       const accountsResult = await this.createMissingAccounts(data.accounts, companyId);
-      
       // 3. Créer les écritures comptables
       const entriesResult = await this.createJournalEntries(data.entriesByJournalAndNum, companyId);
-      
       return {
         success: true,
         entries: entriesResult,
@@ -196,14 +175,13 @@ export const fecImportService = {
         }
       } as any;
     } catch (error: unknown) {
-      console.error('Erreur lors de l\'import FEC:', error);
+      logger.error('FecImport', 'Erreur lors de l\'import FEC:', error);
       return {
         success: false,
         error: (error instanceof Error ? error.message : 'Une erreur est survenue') || 'Une erreur est survenue lors de l\'importation'
       };
     }
   },
-  
   /**
    * Utilitaire pour obtenir le type de journal basé sur le code
    */
@@ -217,7 +195,6 @@ export const fecImportService = {
     if (upperCode.startsWith('EX')) return 'REVERSAL';
     return 'OD';
   },
-
   /**
    * Utilitaire pour obtenir le type de compte
    */
@@ -234,14 +211,12 @@ export const fecImportService = {
       default: return 'OTHER';
     }
   },
-
   /**
    * Utilitaire pour obtenir la classe de compte
    */
   getAccountClass(accountNumber: string): string {
     return `CLASSE_${accountNumber.charAt(0)}`;
   },
-
   /**
    * Formate une date FEC (AAAAMMJJ) au format SQL
    */
@@ -252,7 +227,6 @@ export const fecImportService = {
     const day = fecDate.substring(6, 8);
     return `${year}-${month}-${day}`;
   },
-
   /**
    * Crée les journaux manquants dans la base de données
    */
@@ -263,18 +237,14 @@ export const fecImportService = {
         .from('journals')
         .select('code')
         .eq('company_id', companyId);
-      
       if (fetchError) throw fetchError;
-      
       const existingCodes = new Set(existingJournals.map(j => j.code));
       const journalsToCreate = [];
-      
       // 2. Identifier les journaux à créer
       for (const code of journalCodes) {
         if (!existingCodes.has(code)) {
           const type = this.getJournalType(code);
           let name = '';
-          
           switch (type) {
             case 'OPENING':
               name = 'Journal des à-nouveaux';
@@ -300,7 +270,6 @@ export const fecImportService = {
             default:
               name = `Journal ${code}`;
           }
-          
           journalsToCreate.push({
             company_id: companyId,
             code,
@@ -312,34 +281,29 @@ export const fecImportService = {
           });
         }
       }
-      
       // 3. Créer les journaux manquants
       if (journalsToCreate.length > 0) {
         const { data: createdJournals, error: insertError } = await supabase
           .from('journals')
           .insert(journalsToCreate)
           .select();
-        
         if (insertError) throw insertError;
-        
         return {
           created: journalsToCreate.length,
           existing: existingCodes.size,
           journals: createdJournals
         };
       }
-      
       return {
         created: 0,
         existing: existingCodes.size,
         journals: []
       };
     } catch (error: unknown) {
-      console.error('Erreur lors de la création des journaux:', error);
+      logger.error('FecImport', 'Erreur lors de la création des journaux:', error);
       throw error;
     }
   },
-  
   /**
    * Crée les comptes manquants dans la base de données
    */
@@ -350,18 +314,14 @@ export const fecImportService = {
         .from('chart_of_accounts')
         .select('account_number')
         .eq('company_id', companyId);
-      
       if (fetchError) throw fetchError;
-      
       const existingAccountNumbers = new Set((existingAccounts || []).map(a => a.account_number));
       const accountsToCreate = [];
-      
       // 2. Identifier les comptes à créer
       for (const [accountNumber, accountInfo] of accountsData) {
         if (!existingAccountNumbers.has(accountNumber)) {
           const type = this.getAccountType(accountNumber);
           const accountClass = this.getAccountClass(accountNumber);
-          
           accountsToCreate.push({
             company_id: companyId,
             account_number: accountNumber,
@@ -378,34 +338,29 @@ export const fecImportService = {
           });
         }
       }
-      
       // 3. Créer les comptes manquants
       if (accountsToCreate.length > 0) {
         const { data: createdAccounts, error: insertError } = await supabase
           .from('chart_of_accounts')
           .insert(accountsToCreate)
           .select();
-        
         if (insertError) throw insertError;
-        
         return {
           created: accountsToCreate.length,
           existing: existingAccountNumbers.size,
           accounts: createdAccounts
         };
       }
-      
       return {
         created: 0,
         existing: existingAccountNumbers.size,
         accounts: []
       };
     } catch (error: unknown) {
-      console.error('Erreur lors de la création des comptes:', error);
+      logger.error('FecImport', 'Erreur lors de la création des comptes:', error);
       throw error;
     }
   },
-  
   /**
    * Crée les écritures comptables dans la base de données
    */
@@ -416,31 +371,43 @@ export const fecImportService = {
         .from('journals')
         .select('id, code')
         .eq('company_id', companyId);
-      
       if (journalsError) throw journalsError;
-      
       const { data: accounts, error: accountsError } = await supabase
         .from('chart_of_accounts')
         .select('id, account_number')
         .eq('company_id', companyId);
-      
       if (accountsError) throw accountsError;
-      
       // Créer des maps pour faciliter la recherche
       const journalMap = new Map(journals.map(j => [j.code, j.id]));
       const accountMap = new Map((accounts || []).map(a => [a.account_number, a.id]));
-      
       // 2. Préparer les écritures à créer
-      const journalEntriesToCreate = [];
-      const journalEntryLinesToCreate = [];
-      const errors = [];
-      
+      const journalEntriesToCreate: Array<{
+        company_id: string;
+        journal_id: string;
+        entry_date: string;
+        description: string;
+        reference_number: string;
+        status: string;
+        imported_from_fec: boolean;
+        fec_journal_code: string;
+        fec_entry_num: string;
+        original_fec_data: string;
+      }> = [];
+      const journalEntryLinesToCreate: Array<{
+        journal_entry_id: string;
+        account_id: string;
+        description: string;
+        debit_amount: number;
+        credit_amount: number;
+        line_order: number;
+        account_number: string;
+        account_name: string | null;
+      }> = [];
+      const errors: Array<{ key?: string; message: string }> = [];
       for (const [key, entriesGroup] of entriesByJournalAndNum) {
         if (entriesGroup.length === 0) continue;
-        
         const [journalCode, ecritureNum] = key.split('-');
         const journalId = journalMap.get(journalCode);
-        
         if (!journalId) {
           errors.push({
             key,
@@ -448,11 +415,9 @@ export const fecImportService = {
           });
           continue;
         }
-        
         // Prendre les informations de la première entrée du groupe
         const firstEntry = entriesGroup[0];
         const entryDate = this.formatDateForSQL(firstEntry.date);
-        
         // Créer l'entrée de journal
         const journalEntry = {
           company_id: companyId,
@@ -466,10 +431,8 @@ export const fecImportService = {
           fec_entry_num: ecritureNum,
           original_fec_data: JSON.stringify(entriesGroup)
         };
-        
         journalEntriesToCreate.push(journalEntry);
       }
-      
       // 3. Insérer les écritures de journal
       let createdEntries = [];
       if (journalEntriesToCreate.length > 0) {
@@ -477,11 +440,9 @@ export const fecImportService = {
           .from('journal_entries')
           .insert(journalEntriesToCreate)
           .select();
-        
         if (insertError) throw insertError;
         createdEntries = insertedEntries;
       }
-      
       // 4. Préparer les lignes d'écritures
       const entryMap = new Map();
       createdEntries.forEach((entry, index) => {
@@ -497,10 +458,8 @@ export const fecImportService = {
           entryMap.set(key, entry.id);
         }
       });
-      
       for (const [key, entriesGroup] of entriesByJournalAndNum) {
         const journalEntryId = entryMap.get(key);
-        
         if (!journalEntryId) {
           errors.push({
             key,
@@ -508,11 +467,9 @@ export const fecImportService = {
           });
           continue;
         }
-        
         // Créer les lignes d'écriture
         entriesGroup.forEach((entry, index) => {
           const accountId = accountMap.get(entry.accountNumber);
-          
           if (!accountId) {
             errors.push({
               key,
@@ -520,7 +477,6 @@ export const fecImportService = {
             });
             return;
           }
-          
           journalEntryLinesToCreate.push({
             journal_entry_id: journalEntryId,
             account_id: accountId,
@@ -533,7 +489,6 @@ export const fecImportService = {
           });
         });
       }
-      
       // 5. Insérer les lignes d'écritures
       if (journalEntryLinesToCreate.length > 0) {
         // Insérer par lots de 100 pour éviter les problèmes de taille de requête
@@ -543,7 +498,6 @@ export const fecImportService = {
           const { error: itemsError } = await supabase
             .from('journal_entry_lines')
             .insert(batch);
-          
           if (itemsError) {
             errors.push({
               message: `Error inserting batch of journal entry lines: ${itemsError.message}`
@@ -551,14 +505,13 @@ export const fecImportService = {
           }
         }
       }
-      
       return {
         created: createdEntries.length,
         itemsCreated: journalEntryLinesToCreate.length,
         errors
       };
     } catch (error: unknown) {
-      console.error('Erreur lors de la création des écritures:', error);
+      logger.error('FecImport', 'Erreur lors de la création des écritures:', error);
       throw error;
     }
   }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
-import { logger } from '@/utils/appLogger';
+import { logger } from '@/lib/logger';
 
 interface Props {
   children: ReactNode;

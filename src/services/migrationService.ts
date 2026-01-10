@@ -9,36 +9,30 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // src/services/migrationService.ts
 import { supabase } from '../lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface MigrationResult {
   success: boolean;
   error?: string;
   migrationsApplied: number;
   details?: string;
 }
-
 export interface MigrationInfo {
   version: string;
   name: string;
   applied: boolean;
   appliedAt?: string;
 }
-
 class MigrationService {
   private static instance: MigrationService;
-
   private constructor() {}
-
   static getInstance(): MigrationService {
     if (!MigrationService.instance) {
       MigrationService.instance = new MigrationService();
     }
     return MigrationService.instance;
   }
-
   /**
    * Vérifie si les migrations sont nécessaires
    */
@@ -50,18 +44,15 @@ class MigrationService {
         .select('table_name')
         .eq('table_schema', 'public')
         .eq('table_name', 'companies');
-
       if (tablesError) {
-        console.error('Erreur lors de la vérification des tables:', tablesError);
+        logger.error('Migration', 'Erreur lors de la vérification des tables:', tablesError);
         return [
           { version: '001', name: 'initial_schema', applied: false },
           { version: '002', name: 'default_data', applied: false },
           { version: '003', name: 'functions_and_triggers', applied: false },
         ];
       }
-
       const companiesTableExists = tablesData && tablesData.length > 0;
-
       // Vérifier si la fonction get_dashboard_stats existe
       let _functionsData = false;
       let functionsError = null;
@@ -71,17 +62,13 @@ class MigrationService {
       } catch (error: any) {
         functionsError = error;
       }
-
       const functionsExist = !functionsError;
-
       // Vérifier si les devises par défaut existent
       const { data: currenciesData, error: currenciesError } = await supabase
         .from('currencies')
         .select('code')
         .limit(1);
-
       const defaultDataExists = !currenciesError && currenciesData && currenciesData.length > 0;
-
       return [
         { 
           version: '001', 
@@ -103,7 +90,7 @@ class MigrationService {
         },
       ];
     } catch (error) {
-      console.error('Erreur lors de la vérification des migrations:', error);
+      logger.error('Migration', 'Erreur lors de la vérification des migrations:', error);
       return [
         { version: '001', name: 'initial_schema', applied: false },
         { version: '002', name: 'default_data', applied: false },
@@ -111,17 +98,14 @@ class MigrationService {
       ];
     }
   }
-
   /**
    * Applique les migrations manquantes
    */
   async applyMigrations(): Promise<MigrationResult> {
     try {
-      console.warn('🚀 Début de l\'application des migrations...');
-      
+      logger.warn('Migration', '🚀 Début de l\'application des migrations...');
       const migrationsStatus = await this.checkMigrationsStatus();
       const pendingMigrations = migrationsStatus.filter(m => !m.applied);
-      
       if (pendingMigrations.length === 0) {
         return {
           success: true,
@@ -129,13 +113,10 @@ class MigrationService {
           details: 'Toutes les migrations sont déjà appliquées'
         };
       }
-
       let appliedCount = 0;
-
       // Appliquer les migrations dans l'ordre
       for (const migration of pendingMigrations) {
-        console.warn(`📋 Application de la migration ${migration.version}: ${migration.name}`);
-        
+        logger.warn('Migration', `📋 Application de la migration ${migration.version}: ${migration.name}`);
         try {
           switch (migration.version) {
             case '001':
@@ -148,15 +129,13 @@ class MigrationService {
               await this.applyFunctionsAndTriggersMigration();
               break;
             default:
-              console.warn(`Migration inconnue: ${migration.version}`);
+              logger.warn('Migration', `Migration inconnue: ${migration.version}`);
               continue;
           }
-          
           appliedCount++;
-          console.warn(`✅ Migration ${migration.version} appliquée avec succès`);
-          
+          logger.warn('Migration', `✅ Migration ${migration.version} appliquée avec succès`);
         } catch (migrationError) {
-          console.error(`❌ Erreur lors de l'application de la migration ${migration.version}:`, migrationError);
+          logger.error('Migration', `❌ Erreur lors de l'application de la migration ${migration.version}:`, migrationError);
           if (migrationError instanceof Error) {
             throw new Error(`Migration ${migration.version} échouée: ${migrationError.message}`);
           } else {
@@ -164,15 +143,13 @@ class MigrationService {
           }
         }
       }
-
       return {
         success: true,
         migrationsApplied: appliedCount,
         details: `${appliedCount} migration(s) appliquée(s) avec succès`
       };
-
     } catch (error) {
-      console.error('❌ Erreur lors de l\'application des migrations:', error);
+      logger.error('Migration', '❌ Erreur lors de l\'application des migrations:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : JSON.stringify(error),
@@ -180,7 +157,6 @@ class MigrationService {
       };
     }
   }
-
   /**
    * Applique la migration du schéma initial
    */
@@ -192,19 +168,16 @@ class MigrationService {
       'accounts', 'journals', 'journal_entries', 'journal_entry_lines',
       'bank_accounts', 'bank_transactions', 'third_parties', 'currencies', 'exchange_rates'
     ];
-
     for (const tableName of requiredTables) {
       const { data: _data, error } = await supabase
         .from(tableName)
         .select('*')
         .limit(1);
-
       if (error && error.code !== 'PGRST116') { // PGRST116 = table not found
         throw new Error(`Table ${tableName} non accessible: ${error.message}`);
       }
     }
   }
-
   /**
    * Applique la migration des données par défaut
    */
@@ -213,7 +186,6 @@ class MigrationService {
     const { data: existingCurrencies } = await supabase
       .from('currencies')
       .select('code');
-
     if (!existingCurrencies || existingCurrencies.length === 0) {
       // Insérer les devises par défaut
       const defaultCurrencies = [
@@ -224,21 +196,17 @@ class MigrationService {
         { code: 'XAF', name: 'CFA Franc BEAC', symbol: 'FCFA', decimal_places: 0 },
         { code: 'MAD', name: 'Moroccan Dirham', symbol: 'DH', decimal_places: 2 },
       ];
-
       const { error: currencyError } = await supabase
         .from('currencies')
         .insert(defaultCurrencies);
-
       if (currencyError) {
         throw new Error(`Erreur lors de l'insertion des devises: ${currencyError.message}`);
       }
     }
-
     // Vérifier et insérer les permissions par défaut
     const { data: existingPermissions } = await supabase
       .from('permissions')
       .select('name');
-
     if (!existingPermissions || existingPermissions.length === 0) {
       const defaultPermissions = [
         { name: 'view_dashboard', description: 'Voir le tableau de bord', module: 'dashboard' },
@@ -260,22 +228,18 @@ class MigrationService {
         { name: 'manage_company_users', description: 'Gérer les utilisateurs', module: 'settings' },
         { name: 'manage_company_roles', description: 'Gérer les rôles', module: 'settings' },
       ];
-
       const { error: permissionError } = await supabase
         .from('permissions')
         .insert(defaultPermissions);
-
       if (permissionError) {
         throw new Error(`Erreur lors de l'insertion des permissions: ${permissionError.message}`);
       }
     }
-
     // Vérifier et insérer les rôles par défaut
     const { data: existingRoles } = await supabase
       .from('roles')
       .select('name')
       .is('company_id', null);
-
     if (!existingRoles || existingRoles.length === 0) {
       const defaultRoles = [
         { name: 'super_admin', description: 'Super administrateur système', is_system_role: true },
@@ -284,17 +248,14 @@ class MigrationService {
         { name: 'user', description: 'Utilisateur standard', is_system_role: true },
         { name: 'viewer', description: 'Consultation uniquement', is_system_role: true },
       ];
-
       const { error: roleError } = await supabase
         .from('roles')
         .insert(defaultRoles);
-
       if (roleError) {
         throw new Error(`Erreur lors de l'insertion des rôles: ${roleError.message}`);
       }
     }
   }
-
   /**
    * Applique la migration des fonctions et triggers
    */
@@ -310,18 +271,15 @@ class MigrationService {
         throw new Error('Fonction get_dashboard_stats non trouvée. Appliquez la migration 003 via Supabase CLI.');
       }
     }
-
     // Vérifier que la vue account_balances existe
     const { error: viewError } = await supabase
       .from('account_balances')
       .select('*')
       .limit(1);
-
     if (viewError && viewError.code !== 'PGRST116') {
       throw new Error(`Vue account_balances non accessible: ${viewError.message}`);
     }
   }
-
   /**
    * Crée une entreprise avec le plan comptable par défaut
    */
@@ -344,24 +302,21 @@ class MigrationService {
         p_currency: currency,
         p_accounting_standard: accountingStandard
       });
-
       if (error) {
         throw error;
       }
-
       return {
         success: true,
         companyId: data
       };
     } catch (error) {
-      console.error('Erreur lors de la création de l\'entreprise:', error);
+      logger.error('Migration', 'Erreur lors de la création de l\'entreprise:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : JSON.stringify(error)
       };
     }
   }
-
   /**
    * Finalise la configuration d'une entreprise
    */
@@ -370,21 +325,18 @@ class MigrationService {
       const { error } = await supabase.rpc('finalize_company_setup', {
         p_company_id: companyId
       });
-
       if (error) {
         throw error;
       }
-
       return { success: true };
     } catch (error) {
-      console.error('Erreur lors de la finalisation:', error);
+      logger.error('Migration', 'Erreur lors de la finalisation:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : JSON.stringify(error)
       };
     }
   }
-
   /**
    * Valide les données comptables d'une entreprise
    */
@@ -393,24 +345,21 @@ class MigrationService {
       const { data, error } = await supabase.rpc('validate_accounting_data', {
         p_company_id: companyId
       });
-
       if (error) {
         throw error;
       }
-
       return {
         success: true,
         data
       };
     } catch (error) {
-      console.error('Erreur lors de la validation:', error);
+      logger.error('Migration', 'Erreur lors de la validation:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : JSON.stringify(error)
       };
     }
   }
-
   /**
    * Recalcule tous les soldes des comptes
    */
@@ -419,17 +368,15 @@ class MigrationService {
       const { data, error } = await supabase.rpc('recalculate_all_account_balances', {
         p_company_id: companyId
       });
-
       if (error) {
         throw error;
       }
-
       return {
         success: true,
         updatedCount: data
       };
     } catch (error) {
-      console.error('Erreur lors du recalcul:', error);
+      logger.error('Migration', 'Erreur lors du recalcul:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : JSON.stringify(error)
@@ -437,5 +384,4 @@ class MigrationService {
     }
   }
 }
-
 export default MigrationService;

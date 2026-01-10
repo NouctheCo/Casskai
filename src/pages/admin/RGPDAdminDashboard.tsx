@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * 🛡️ Dashboard Admin RGPD
  * 
@@ -20,12 +19,11 @@
  * 
  * ⚠️ Accès : super-admin uniquement
  */
-
 import { useState, useEffect } from 'react';
 import { Shield, Download, Trash2, Clock, AlertTriangle, CheckCircle, TrendingUp, FileText, Eye } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-
+import { logger } from '@/lib/logger';
 interface RGPDMetrics {
   total_exports: number;
   total_deletions: number;
@@ -35,7 +33,6 @@ interface RGPDMetrics {
   deletions_last_30_days: number;
   pending_requests: number;
 }
-
 interface RGPDLog {
   id: string;
   user_id: string;
@@ -46,33 +43,28 @@ interface RGPDLog {
   execution_time_ms: number;
   error_message?: string;
 }
-
 export default function RGPDAdminDashboard() {
   const { user } = useAuth();
   const [metrics, setMetrics] = useState<RGPDMetrics | null>(null);
   const [logs, setLogs] = useState<RGPDLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'export' | 'delete' | 'consent'>('all');
-
   useEffect(() => {
     loadMetrics();
     loadLogs();
   }, [filter]);
-
   const loadMetrics = async () => {
     try {
       const { data, error } = await supabase
         .from('rgpd_audit_summary')
         .select('*')
         .single();
-
       if (error) throw error;
       setMetrics(data);
     } catch (error) {
-      console.error('Error loading RGPD metrics:', error);
+      logger.error('RGPDAdminDashboard', 'Error loading RGPD metrics:', error);
     }
   };
-
   const loadLogs = async () => {
     try {
       setLoading(true);
@@ -81,22 +73,18 @@ export default function RGPDAdminDashboard() {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
-
       if (filter !== 'all') {
         query = query.eq('action_type', filter);
       }
-
       const { data, error } = await query;
-
       if (error) throw error;
       setLogs(data || []);
     } catch (error) {
-      console.error('Error loading RGPD logs:', error);
+      logger.error('RGPDAdminDashboard', 'Error loading RGPD logs:', error);
     } finally {
       setLoading(false);
     }
   };
-
   const exportLogs = () => {
     const csv = [
       ['Date', 'User Email', 'Action', 'Status', 'Temps (ms)', 'Erreur'].join(','),
@@ -109,7 +97,6 @@ export default function RGPDAdminDashboard() {
         log.error_message || ''
       ].join(','))
     ].join('\n');
-
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -117,7 +104,6 @@ export default function RGPDAdminDashboard() {
     a.download = `rgpd_logs_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
   };
-
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -133,7 +119,6 @@ export default function RGPDAdminDashboard() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
@@ -149,7 +134,6 @@ export default function RGPDAdminDashboard() {
             Monitoring des activités de protection des données
           </p>
         </div>
-
         {/* Metrics Cards */}
         {metrics && (
           <div className="grid md:grid-cols-4 gap-6 mb-8">
@@ -171,7 +155,6 @@ export default function RGPDAdminDashboard() {
                 +{metrics.exports_last_30_days} derniers 30j
               </div>
             </div>
-
             {/* Total Deletions */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-4">
@@ -190,7 +173,6 @@ export default function RGPDAdminDashboard() {
                 +{metrics.deletions_last_30_days} derniers 30j
               </div>
             </div>
-
             {/* Avg Export Time */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-4">
@@ -209,7 +191,6 @@ export default function RGPDAdminDashboard() {
                 Objectif RGPD: &lt; 30s
               </div>
             </div>
-
             {/* Pending Requests */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-4">
@@ -232,7 +213,6 @@ export default function RGPDAdminDashboard() {
             </div>
           </div>
         )}
-
         {/* Alerts Section */}
         {metrics && (metrics.pending_requests > 5 || metrics.avg_export_time_seconds > 25) && (
           <div className="bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500 p-4 mb-8">
@@ -254,7 +234,6 @@ export default function RGPDAdminDashboard() {
             </div>
           </div>
         )}
-
         {/* Filters & Export */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
@@ -264,7 +243,6 @@ export default function RGPDAdminDashboard() {
                 Logs d'audit ({logs.length})
               </h2>
             </div>
-            
             <div className="flex items-center gap-3">
               {/* Filter */}
               <select
@@ -278,7 +256,6 @@ export default function RGPDAdminDashboard() {
                 <option value="delete">Suppressions uniquement</option>
                 <option value="consent">Consentements uniquement</option>
               </select>
-
               {/* Export Button */}
               <button
                 onClick={exportLogs}
@@ -290,7 +267,6 @@ export default function RGPDAdminDashboard() {
             </div>
           </div>
         </div>
-
         {/* Logs Table */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
           {loading ? (
@@ -372,7 +348,6 @@ export default function RGPDAdminDashboard() {
             </div>
           )}
         </div>
-
         {/* Footer Info */}
         <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-300">
           <p>

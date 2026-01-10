@@ -1,7 +1,6 @@
 /**
  * Onglet de gestion des comptes bancaires
  */
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,13 +9,12 @@ import { Plus, Edit, Trash2, CreditCard, Building2 } from 'lucide-react';
 import { BankAccountFormModal } from './BankAccountFormModal';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 interface BankAccountsTabProps {
   companyId: string;
   accounts: any[];
   onRefresh: () => void;
 }
-
 export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
   companyId,
   accounts,
@@ -24,17 +22,14 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingAccount, setEditingAccount] = useState<any | null>(null);
-
   const handleCreate = () => {
     setEditingAccount(null);
     setShowModal(true);
   };
-
   const handleEdit = (account: any) => {
     setEditingAccount(account);
     setShowModal(true);
   };
-
   const handleSubmit = async (formData: any) => {
     try {
       if (editingAccount) {
@@ -46,7 +41,6 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
             current_balance: formData.initial_balance || 0
           })
           .eq('id', editingAccount.id);
-
         if (error) throw error;
         toast.success('Compte bancaire modifié');
       } else {
@@ -60,47 +54,39 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
             current_balance: formData.initial_balance || 0,
             is_active: true
           });
-
         if (error) throw error;
         toast.success('Compte bancaire créé');
       }
-
       onRefresh();
       return true;
     } catch (error: any) {
-      console.error('Error saving account:', error);
+      logger.error('BankAccountsTab', 'Error saving account:', error);
       toast.error(error.message || 'Erreur lors de l\'enregistrement');
       return false;
     }
   };
-
   const handleDelete = async (accountId: string) => {
     // eslint-disable-next-line no-alert
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce compte bancaire ?')) {
       return;
     }
-
     try {
       const { error } = await supabase
         .from('bank_accounts')
         .update({ is_active: false })
         .eq('id', accountId);
-
       if (error) throw error;
-
       toast.success('Compte bancaire supprimé');
       onRefresh();
     } catch (error: any) {
-      console.error('Error deleting account:', error);
+      logger.error('BankAccountsTab', 'Error deleting account:', error);
       toast.error('Erreur lors de la suppression');
     }
   };
-
   const formatIBAN = (iban?: string) => {
     if (!iban) return 'Non renseigné';
     return `${iban.substring(0, 20)  }...`;
   };
-
   return (
     <>
       <Card>
@@ -214,7 +200,6 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
               ))}
             </div>
           )}
-
           {/* Info */}
           {accounts.length > 0 && (
             <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
@@ -225,7 +210,6 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
           )}
         </CardContent>
       </Card>
-
       <BankAccountFormModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}

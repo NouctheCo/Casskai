@@ -2,7 +2,6 @@
  * Panneau de calcul et affichage des RFA (Remises de Fin d'Année)
  * Affiche les KPIs globaux et détails par contrat avec projections
  */
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { rfaCalculationService, ContractRFAData } from '@/services/rfaCalculationService';
@@ -14,34 +13,30 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-
+import { logger } from '@/lib/logger';
 export const RFACalculationsPanel: React.FC = () => {
   const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(true);
   const [contractsData, setContractsData] = useState<ContractRFAData[]>([]);
   const [expandedContract, setExpandedContract] = useState<string | null>(null);
   const [selectedYear] = useState(new Date().getFullYear());
-
   useEffect(() => {
     if (currentCompany?.id) {
       loadData();
     }
   }, [currentCompany?.id, selectedYear]);
-
   const loadData = async () => {
     if (!currentCompany?.id) return;
-
     setLoading(true);
     try {
       const data = await rfaCalculationService.calculateAllContractsRFA(currentCompany.id);
       setContractsData(data);
     } catch (error) {
-      console.error('Erreur chargement RFA:', error);
+      logger.error('RFACalculationsPanel', 'Erreur chargement RFA:', error);
     } finally {
       setLoading(false);
     }
   };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
@@ -50,11 +45,9 @@ export const RFACalculationsPanel: React.FC = () => {
       maximumFractionDigits: 0
     }).format(amount);
   };
-
   const formatPercent = (value: number) => {
     return `${value.toFixed(1)}%`;
   };
-
   // Totaux globaux
   const totals = {
     currentRevenue: contractsData.reduce((sum, c) => sum + c.currentRevenue, 0),
@@ -63,7 +56,6 @@ export const RFACalculationsPanel: React.FC = () => {
     rfaProjected: contractsData.reduce((sum, c) => sum + c.rfa.projectedEndOfYear, 0),
     pendingQuotes: contractsData.reduce((sum, c) => sum + c.pendingQuotes.total, 0)
   };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -72,7 +64,6 @@ export const RFACalculationsPanel: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* En-tête avec KPIs globaux */}
@@ -87,7 +78,6 @@ export const RFACalculationsPanel: React.FC = () => {
             <div className="text-xs text-blue-200 mt-1">Facturé à date</div>
           </CardContent>
         </Card>
-
         <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-purple-100 text-sm mb-1">
@@ -98,7 +88,6 @@ export const RFACalculationsPanel: React.FC = () => {
             <div className="text-xs text-purple-200 mt-1">Prorata + Devis</div>
           </CardContent>
         </Card>
-
         <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-green-100 text-sm mb-1">
@@ -109,7 +98,6 @@ export const RFACalculationsPanel: React.FC = () => {
             <div className="text-xs text-green-200 mt-1">Sur CA actuel</div>
           </CardContent>
         </Card>
-
         <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-orange-100 text-sm mb-1">
@@ -120,7 +108,6 @@ export const RFACalculationsPanel: React.FC = () => {
             <div className="text-xs text-orange-200 mt-1">Estimation</div>
           </CardContent>
         </Card>
-
         <Card className="bg-gradient-to-br from-gray-600 to-gray-700 text-white border-0">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-gray-300 text-sm mb-1">
@@ -134,7 +121,6 @@ export const RFACalculationsPanel: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-
       {/* Liste des contrats avec détails */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -172,7 +158,6 @@ export const RFACalculationsPanel: React.FC = () => {
           )}
         </CardContent>
       </Card>
-
       {/* Légende / Explication */}
       <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
         <CardContent className="p-4">
@@ -191,7 +176,6 @@ export const RFACalculationsPanel: React.FC = () => {
     </div>
   );
 };
-
 // Composant pour une ligne de contrat
 const ContractRFARow: React.FC<{
   data: ContractRFAData;
@@ -200,7 +184,6 @@ const ContractRFARow: React.FC<{
   formatCurrency: (n: number) => string;
   formatPercent: (n: number) => string;
 }> = ({ data, isExpanded, onToggle, formatCurrency, formatPercent }) => {
-
   return (
     <div>
       {/* Ligne principale */}
@@ -218,7 +201,6 @@ const ContractRFARow: React.FC<{
               <div className="text-sm text-gray-500 dark:text-gray-300">{data.contract.client_name}</div>
             </div>
           </div>
-
           <div className="flex items-center gap-8">
             {/* Progression */}
             <div className="text-center">
@@ -231,13 +213,11 @@ const ContractRFARow: React.FC<{
               </div>
               <div className="text-xs mt-1">{formatPercent(data.periodProgress.percentage)}</div>
             </div>
-
             {/* CA Actuel */}
             <div className="text-center min-w-[100px]">
               <div className="text-xs text-gray-500 dark:text-gray-300">CA Actuel</div>
               <div className="font-semibold">{formatCurrency(data.currentRevenue)}</div>
             </div>
-
             {/* CA Projeté */}
             <div className="text-center min-w-[100px]">
               <div className="text-xs text-gray-500 dark:text-gray-300">CA Projeté</div>
@@ -245,7 +225,6 @@ const ContractRFARow: React.FC<{
                 {formatCurrency(data.projectedRevenue.endOfYear)}
               </div>
             </div>
-
             {/* RFA Actuelle */}
             <div className="text-center min-w-[100px]">
               <div className="text-xs text-gray-500 dark:text-gray-300">RFA à Date</div>
@@ -253,7 +232,6 @@ const ContractRFARow: React.FC<{
                 {formatCurrency(data.rfa.current)}
               </div>
             </div>
-
             {/* RFA Projetée */}
             <div className="text-center min-w-[100px]">
               <div className="text-xs text-gray-500 dark:text-gray-300">RFA Projetée</div>
@@ -264,7 +242,6 @@ const ContractRFARow: React.FC<{
           </div>
         </div>
       </div>
-
       {/* Détails étendus */}
       {isExpanded && (
         <div className="px-4 py-4 bg-gray-50 dark:bg-gray-900 border-t">
@@ -275,7 +252,6 @@ const ContractRFARow: React.FC<{
                 <DollarSign className="h-4 w-4" />
                 Chiffre d'Affaires
               </h4>
-
               <div className="bg-white dark:bg-gray-800 rounded-lg p-3 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500 dark:text-gray-300">CA Facturé</span>
@@ -299,14 +275,12 @@ const ContractRFARow: React.FC<{
                 </div>
               </div>
             </div>
-
             {/* Colonne 2 : Projections */}
             <div className="space-y-3">
               <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
                 Projections
               </h4>
-
               <div className="bg-white dark:bg-gray-800 rounded-lg p-3 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500 dark:text-gray-300">Prorata temporis</span>
@@ -330,14 +304,12 @@ const ContractRFARow: React.FC<{
                 </div>
               </div>
             </div>
-
             {/* Colonne 3 : Barème RFA */}
             <div className="space-y-3">
               <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <Calculator className="h-4 w-4" />
                 Calcul RFA
               </h4>
-
               <div className="bg-white dark:bg-gray-800 rounded-lg p-3">
                 <table className="w-full text-xs">
                   <thead>
@@ -366,7 +338,6 @@ const ContractRFARow: React.FC<{
                   </tfoot>
                 </table>
               </div>
-
               {/* Comparaison RFA */}
               <div className="flex items-center justify-between bg-orange-50 dark:bg-orange-900/20 rounded-lg p-2 text-sm">
                 <span className="text-orange-700 dark:text-orange-300">RFA projetée fin d'année :</span>
@@ -382,7 +353,6 @@ const ContractRFARow: React.FC<{
               </div>
             </div>
           </div>
-
           {/* Timeline du contrat */}
           <div className="mt-4 pt-4 border-t">
             <div className="flex items-center gap-4 text-sm flex-wrap">

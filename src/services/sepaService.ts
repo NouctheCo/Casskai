@@ -3,9 +3,8 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface SepaPayment {
   id: string;
   beneficiaryName: string;
@@ -17,7 +16,6 @@ export interface SepaPayment {
   type: 'supplier_invoice' | 'expense_report';
   sourceId: string; // ID de la facture ou note de frais
 }
-
 export interface BankAccount {
   id: string;
   iban: string;
@@ -25,7 +23,6 @@ export interface BankAccount {
   account_name: string;
   bank_name: string;
 }
-
 export interface SepaXmlGenerationOptions {
   companyId: string;
   companyName: string;
@@ -35,7 +32,6 @@ export interface SepaXmlGenerationOptions {
   messageId?: string;
   paymentInfoId?: string;
 }
-
 export class SepaService {
   /**
    * Génère un ID de message unique pour SEPA
@@ -45,7 +41,6 @@ export class SepaService {
     const random = Math.random().toString(36).substring(2, 8).toUpperCase();
     return `MSG${timestamp}${random}`;
   }
-
   /**
    * Génère un ID de lot de paiement unique
    */
@@ -54,7 +49,6 @@ export class SepaService {
     const random = Math.random().toString(36).substring(2, 8).toUpperCase();
     return `PMT${timestamp}${random}`;
   }
-
   /**
    * Génère un ID end-to-end unique pour une transaction
    */
@@ -62,27 +56,22 @@ export class SepaService {
     const timestamp = Date.now();
     return `E2E${timestamp}${String(index + 1).padStart(4, '0')}`;
   }
-
   /**
    * Valide un IBAN
    */
   private static validateIban(iban: string): boolean {
     // Enlever les espaces et mettre en majuscules
     const cleanIban = iban.replace(/\s/g, '').toUpperCase();
-
     // Vérifier le format basique (longueur minimale et caractères autorisés)
     if (!/^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/.test(cleanIban)) {
       return false;
     }
-
     // Vérifier la longueur selon le pays (France = 27 caractères)
     if (cleanIban.startsWith('FR') && cleanIban.length !== 27) {
       return false;
     }
-
     return true;
   }
-
   /**
    * Formate un IBAN pour affichage (avec espaces tous les 4 caractères)
    */
@@ -90,7 +79,6 @@ export class SepaService {
     const cleanIban = iban.replace(/\s/g, '').toUpperCase();
     return cleanIban.match(/.{1,4}/g)?.join(' ') || cleanIban;
   }
-
   /**
    * Échappe les caractères XML spéciaux
    */
@@ -102,7 +90,6 @@ export class SepaService {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&apos;');
   }
-
   /**
    * Génère le fichier XML SEPA pain.001.001.03 (virement SEPA)
    */
@@ -115,16 +102,13 @@ export class SepaService {
       messageId = this.generateMessageId(),
       paymentInfoId = this.generatePaymentInfoId(),
     } = options;
-
     // Validation
     if (payments.length === 0) {
       throw new Error('Aucun paiement à générer');
     }
-
     if (!this.validateIban(emitterAccount.iban)) {
       throw new Error(`IBAN émetteur invalide: ${emitterAccount.iban}`);
     }
-
     for (const payment of payments) {
       if (!this.validateIban(payment.beneficiaryIban)) {
         throw new Error(`IBAN bénéficiaire invalide: ${payment.beneficiaryIban} (${payment.beneficiaryName})`);
@@ -133,12 +117,10 @@ export class SepaService {
         throw new Error(`Montant invalide: ${payment.amount} (${payment.beneficiaryName})`);
       }
     }
-
     // Calculs
     const numberOfTransactions = payments.length;
     const controlSum = payments.reduce((sum, p) => sum + p.amount, 0);
     const creationDateTime = new Date().toISOString();
-
     // Génération XML
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -205,22 +187,21 @@ export class SepaService {
     </PmtInf>
   </CstmrCdtTrfInitn>
 </Document>`;
-
     return xml;
   }
-
   /**
    * Récupère les factures fournisseurs impayées
    */
   static async getUnpaidSupplierInvoices(companyId: string) {
+    // ✅ Utiliser la table suppliers via supplier_id au lieu de la VIEW third_parties
     const { data, error } = await supabase
       .from('invoices')
       .select(`
         id,
         invoice_number,
         total_amount,
-        third_party_id,
-        third_parties!inner(
+        supplier_id,
+        suppliers!inner(
           id,
           name,
           iban,
@@ -230,18 +211,16 @@ export class SepaService {
       .eq('company_id', companyId)
       .eq('invoice_type', 'purchase')
       .eq('status', 'pending')
-      .not('third_parties.iban', 'is', null)
+      .not('suppliers.iban', 'is', null)
       .order('invoice_date', { ascending: true });
-
     if (error) throw error;
-
     return (data || []).map(invoice => {
-      const thirdParty = Array.isArray(invoice.third_parties) ? invoice.third_parties[0] : invoice.third_parties;
+      const supplier = Array.isArray(invoice.suppliers) ? invoice.suppliers[0] : invoice.suppliers;
       return {
         id: invoice.id,
-        beneficiaryName: thirdParty?.name || '',
-        beneficiaryIban: thirdParty?.iban || '',
-        beneficiaryBic: thirdParty?.bic || '',
+        beneficiaryName: supplier?.name || '',
+        beneficiaryIban: supplier?.iban || '',
+        beneficiaryBic: supplier?.bic || '',
         amount: invoice.total_amount,
         reference: invoice.invoice_number,
         description: `Facture fournisseur ${invoice.invoice_number}`,
@@ -250,7 +229,6 @@ export class SepaService {
       };
     });
   }
-
   /**
    * Récupère les notes de frais validées
    */
@@ -274,9 +252,7 @@ export class SepaService {
       .eq('status', 'approved')
       .not('employees.iban', 'is', null)
       .order('submission_date', { ascending: true });
-
     if (error) throw error;
-
     return (data || []).map(report => {
       const employee = Array.isArray(report.employees) ? report.employees[0] : report.employees;
       return {
@@ -292,7 +268,6 @@ export class SepaService {
       };
     });
   }
-
   /**
    * Récupère les comptes bancaires de l'entreprise
    */
@@ -304,12 +279,9 @@ export class SepaService {
       .eq('is_active', true)
       .not('iban', 'is', null)
       .order('account_name');
-
     if (error) throw error;
-
     return data || [];
   }
-
   /**
    * Met à jour le statut des paiements après génération SEPA
    */
@@ -317,11 +289,9 @@ export class SepaService {
     const supplierInvoiceIds = payments
       .filter(p => p.type === 'supplier_invoice')
       .map(p => p.sourceId);
-
     const expenseReportIds = payments
       .filter(p => p.type === 'expense_report')
       .map(p => p.sourceId);
-
     // Mettre à jour les factures fournisseurs
     if (supplierInvoiceIds.length > 0) {
       const { error: invoiceError } = await supabase
@@ -329,12 +299,10 @@ export class SepaService {
         .update({ status: 'processing', payment_status: 'processing' })
         .in('id', supplierInvoiceIds)
         .eq('company_id', companyId);
-
       if (invoiceError) {
-        console.error('Erreur mise à jour factures:', invoiceError);
+        logger.error('Sepa', 'Erreur mise à jour factures:', invoiceError);
       }
     }
-
     // Mettre à jour les notes de frais
     if (expenseReportIds.length > 0) {
       const { error: expenseError } = await supabase
@@ -342,13 +310,11 @@ export class SepaService {
         .update({ status: 'processing' })
         .in('id', expenseReportIds)
         .eq('company_id', companyId);
-
       if (expenseError) {
-        console.error('Erreur mise à jour notes de frais:', expenseError);
+        logger.error('Sepa', 'Erreur mise à jour notes de frais:', expenseError);
       }
     }
   }
-
   /**
    * Télécharge le fichier XML SEPA
    */

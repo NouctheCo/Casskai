@@ -45,13 +45,28 @@ export interface UserDataExport {
   export_metadata: {
     export_date: string;
     export_format: 'json';
+    format?: string;          // Alias pour export_format
     user_id: string;
     requested_by: string;
+    requested_at?: string;    // Alias pour export_date
     rgpd_article: 'Article 15 & 20';
   };
 
   // Données personnelles
   personal_data: {
+    email: string;
+    full_name: string | null;
+    first_name: string | null;
+    last_name: string | null;
+    phone: string | null;
+    avatar_url: string | null;
+    created_at: string;
+    updated_at: string;
+    last_login: string | null;
+  };
+
+  // Alias pour compatibilité avec les tests
+  profile?: {
     email: string;
     full_name: string | null;
     first_name: string | null;
@@ -108,6 +123,16 @@ export interface UserDataExport {
     created_at: string;
     // Métadonnées uniquement, pas le contenu
   }>;
+
+  // Alias pour compatibilité avec les tests
+  business_data?: {
+    invoices: Array<any>;
+    invoices_count?: number;
+    journal_entries: Array<any>;
+    journal_entries_count?: number;
+    documents: Array<any>;
+    contacts_count?: number;
+  };
 
   activity_log: Array<{
     action: string;

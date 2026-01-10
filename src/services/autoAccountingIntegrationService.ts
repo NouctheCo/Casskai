@@ -12,20 +12,18 @@
  * Les règles comptables sont UNIVERSELLES et s'appliquent quel que soit
  * le référentiel (PCG, SYSCOHADA, IFRS, etc.)
  */
-
 import { supabase } from '@/lib/supabase';
 import { journalEntriesService } from './journalEntriesService';
 import { JournalType } from './accountingRulesService';
 import AccountMappingService, { UniversalAccountType } from './accountMappingService';
 import { bankAccountBalanceService } from './bankAccountBalanceService';
 import type { JournalEntryPayload } from '@/types/journalEntries.types';
-
+import { logger } from '@/lib/logger';
 /**
  * ========================================================================
  * MODULE FACTURATION - Génération automatique d'écritures
  * ========================================================================
  */
-
 export interface InvoiceData {
   id: string;
   company_id: string;
@@ -39,14 +37,12 @@ export interface InvoiceData {
   total_incl_tax: number;    // TTC
   lines: InvoiceLineData[];
 }
-
 export interface InvoiceLineData {
   account_id?: string;
   description: string;
   subtotal_excl_tax: number;
   tax_amount: number;
 }
-
 /**
  * Génère automatiquement une écriture comptable depuis une facture
  *
@@ -67,35 +63,29 @@ export async function generateInvoiceJournalEntry(
 ): Promise<{ success: boolean; entryId?: string; error?: string }> {
   try {
     const { company_id, type, third_party_id, invoice_date } = invoice;
-
     // 1. Récupérer le journal approprié
     const journalType = type === 'sale' ? JournalType.SALE : JournalType.PURCHASE;
     const journal = await getJournalByType(company_id, journalType);
-
     if (!journal) {
       return {
         success: false,
         error: `Journal ${journalType} non trouvé pour cette entreprise`,
       };
     }
-
     // 2. Récupérer le compte du tiers (411 clients ou 401 fournisseurs)
     const thirdPartyAccount = await getThirdPartyAccount(
       company_id,
       third_party_id,
       type
     );
-
     if (!thirdPartyAccount) {
       return {
         success: false,
         error: `Compte ${type === 'sale' ? 'client (411)' : 'fournisseur (401)'} non trouvé`,
       };
     }
-
     // 3. Construire les lignes d'écriture
     const lines = [];
-
     if (type === 'sale') {
       // === FACTURE DE VENTE ===
       // Débit 411 Clients (TTC)
@@ -105,7 +95,6 @@ export async function generateInvoiceJournalEntry(
         creditAmount: 0,
         description: `Client ${invoice.third_party_name || ''} - ${invoice.invoice_number}`,
       });
-
       // Crédit 707 Ventes (HT) - une ligne par ligne de facture
       for (const line of invoice.lines) {
         if (line.account_id && line.subtotal_excl_tax > 0) {
@@ -117,18 +106,15 @@ export async function generateInvoiceJournalEntry(
           });
         }
       }
-
       // Crédit TVA collectée (44571 PCG, 4433 SYSCOHADA, VAT Payable IFRS)
       if (invoice.total_tax_amount > 0) {
         const vatAccount = await AccountMappingService.findAccountByType(
           company_id,
           UniversalAccountType.VAT_COLLECTED
         );
-
         if (!vatAccount) {
           return { success: false, error: 'Compte TVA collectée non trouvé dans le plan comptable' };
         }
-
         lines.push({
           accountId: vatAccount.id,
           debitAmount: 0,
@@ -149,18 +135,15 @@ export async function generateInvoiceJournalEntry(
           });
         }
       }
-
       // Débit TVA déductible (44566 PCG, 4431 SYSCOHADA, VAT Receivable IFRS)
       if (invoice.total_tax_amount > 0) {
         const vatAccount = await AccountMappingService.findAccountByType(
           company_id,
           UniversalAccountType.VAT_DEDUCTIBLE
         );
-
         if (!vatAccount) {
           return { success: false, error: 'Compte TVA déductible non trouvé dans le plan comptable' };
         }
-
         lines.push({
           accountId: vatAccount.id,
           debitAmount: invoice.total_tax_amount,
@@ -168,7 +151,6 @@ export async function generateInvoiceJournalEntry(
           description: 'TVA déductible',
         });
       }
-
       // Crédit 401 Fournisseurs (TTC)
       lines.push({
         accountId: thirdPartyAccount.id,
@@ -177,7 +159,6 @@ export async function generateInvoiceJournalEntry(
         description: `Fournisseur ${invoice.third_party_name || ''} - ${invoice.invoice_number}`,
       });
     }
-
     // 4. Créer l'écriture comptable
     const payload: JournalEntryPayload = {
       companyId: company_id,
@@ -188,35 +169,30 @@ export async function generateInvoiceJournalEntry(
       status: 'draft', // En brouillon, l'utilisateur valide ensuite
       items: lines,
     };
-
     const result = await journalEntriesService.createJournalEntry(payload);
-
     if (result.success && result.data) {
       return {
         success: true,
         entryId: result.data.id,
       };
     }
-
     return {
       success: false,
       error: ('error' in result ? result.error : 'Erreur lors de la création de l\'écriture'),
     };
   } catch (error) {
-    console.error('Error generating invoice journal entry:', error);
+    logger.error('AutoAccountingIntegration', 'Error generating invoice journal entry:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erreur inconnue',
     };
   }
 }
-
 /**
  * ========================================================================
  * MODULE BANQUES - Génération automatique d'écritures
  * ========================================================================
  */
-
 export interface BankTransactionData {
   id: string;
   company_id: string;
@@ -229,7 +205,6 @@ export interface BankTransactionData {
   third_party_id?: string;
   reference?: string;
 }
-
 /**
  * Génère automatiquement une écriture bancaire
  *
@@ -248,22 +223,18 @@ export async function generateBankTransactionEntry(
 ): Promise<{ success: boolean; entryId?: string; error?: string }> {
   try {
     const { company_id, bank_account_id, transaction_date, amount, type, counterpart_account_id, description, reference } = transaction;
-
     // Récupérer le journal banque
     const journal = await getJournalByType(company_id, JournalType.BANK);
     if (!journal) {
       return { success: false, error: 'Journal banque non trouvé' };
     }
-
     // Récupérer le compte bancaire
     const bankAccount = await getAccountById(company_id, bank_account_id);
     if (!bankAccount) {
       return { success: false, error: 'Compte bancaire non trouvé' };
     }
-
     // Construire les lignes
     const lines = [];
-
     if (type === 'credit') {
       // ENCAISSEMENT (entrée d'argent sur le compte)
       lines.push({
@@ -272,7 +243,6 @@ export async function generateBankTransactionEntry(
         creditAmount: 0,
         description,
       });
-
       if (counterpart_account_id) {
         lines.push({
           accountId: counterpart_account_id,
@@ -291,7 +261,6 @@ export async function generateBankTransactionEntry(
           description,
         });
       }
-
       lines.push({
         accountId: bank_account_id,
         debitAmount: 0,
@@ -299,7 +268,6 @@ export async function generateBankTransactionEntry(
         description,
       });
     }
-
     const payload: JournalEntryPayload = {
       companyId: company_id,
       entryDate: transaction_date,
@@ -309,33 +277,27 @@ export async function generateBankTransactionEntry(
       status: 'draft',
       items: lines,
     };
-
     const result = await journalEntriesService.createJournalEntry(payload);
-
     if (result.success && result.data) {
       // ✅ MISE À JOUR AUTOMATIQUE DU SOLDE BANCAIRE
       // Dès qu'une écriture banque est créée, on met à jour le solde du compte
       await bankAccountBalanceService.updateBalancesFromJournalEntry(company_id, result.data.id);
-
       return { success: true, entryId: result.data.id };
     }
-
     return { success: false, error: ('error' in result ? result.error : 'Erreur lors de la création de l\'écriture') };
   } catch (error) {
-    console.error('Error generating bank transaction entry:', error);
+    logger.error('AutoAccountingIntegration', 'Error generating bank transaction entry:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erreur inconnue',
     };
   }
 }
-
 /**
  * ========================================================================
  * MODULE ACHATS - Génération automatique d'écritures
  * ========================================================================
  */
-
 export interface PurchaseOrderData {
   id: string;
   company_id: string;
@@ -352,7 +314,6 @@ export interface PurchaseOrderData {
     amount_excl_tax: number;
   }>;
 }
-
 /**
  * Génère automatiquement une écriture d'achat
  * (Similaire à une facture d'achat, utilise le même principe)
@@ -379,16 +340,13 @@ export async function generatePurchaseOrderEntry(
       tax_amount: 0, // Calculé globalement
     })),
   };
-
   return generateInvoiceJournalEntry(invoiceData);
 }
-
 /**
  * ========================================================================
  * FONCTIONS UTILITAIRES
  * ========================================================================
  */
-
 /**
  * Récupère un journal par son type
  */
@@ -401,15 +359,12 @@ async function getJournalByType(companyId: string, type: JournalType) {
     .eq('is_active', true)
     .limit(1)
     .single();
-
   if (error) {
-    console.error('Error fetching journal:', error);
+    logger.error('AutoAccountingIntegration', 'Error fetching journal:', error);
     return null;
   }
-
   return data;
 }
-
 /**
  * Récupère le compte d'un tiers (client ou fournisseur)
  * ✅ Utilise le mapping automatique multi-référentiels
@@ -423,11 +378,9 @@ async function getThirdPartyAccount(
   const accountType = type === 'sale'
     ? UniversalAccountType.CUSTOMERS    // 411 (PCG), Receivables (IFRS)
     : UniversalAccountType.SUPPLIERS;   // 401 (PCG), Payables (IFRS)
-
   // ✅ Le service trouve automatiquement le bon compte selon le référentiel
   return await AccountMappingService.findAccountByType(companyId, accountType);
 }
-
 /**
  * Récupère un compte par son numéro
  */
@@ -439,15 +392,12 @@ async function _getAccountByNumber(companyId: string, accountNumber: string) {
     .eq('account_number', accountNumber)
     .eq('is_active', true)
     .single();
-
   if (error) {
-    console.error(`Error fetching account ${accountNumber}:`, error);
+    logger.error('AutoAccountingIntegration', `Error fetching account ${accountNumber}:`, error);
     return null;
   }
-
   return data;
 }
-
 /**
  * Récupère un compte par son ID
  */
@@ -459,25 +409,20 @@ async function getAccountById(companyId: string, accountId: string) {
     .eq('id', accountId)
     .eq('is_active', true)
     .single();
-
   if (error) {
-    console.error(`Error fetching account ${accountId}:`, error);
+    logger.error('AutoAccountingIntegration', `Error fetching account ${accountId}:`, error);
     return null;
   }
-
   return data;
 }
-
 /**
  * ========================================================================
  * EXPORTS
  * ========================================================================
  */
-
 export const autoAccountingService = {
   generateInvoiceJournalEntry,
   generateBankTransactionEntry,
   generatePurchaseOrderEntry,
 };
-
 export default autoAccountingService;

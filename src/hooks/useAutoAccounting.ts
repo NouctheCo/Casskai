@@ -2,15 +2,13 @@
  * Hook React pour l'intégration automatique comptable
  * Utilisable dans tous les modules (Facturation, Banques, Achats)
  */
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { autoAccountingService, type BankTransactionData, type InvoiceData, type PurchaseOrderData } from '@/services/autoAccountingIntegrationService';
-
+import { logger } from '@/lib/logger';
 export function useAutoAccounting() {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
-
   /**
    * Génère automatiquement une écriture depuis une facture
    */
@@ -18,7 +16,6 @@ export function useAutoAccounting() {
     setIsGenerating(true);
     try {
       const result = await autoAccountingService.generateInvoiceJournalEntry(invoice);
-
       if (result.success) {
         toast({
           title: "✅ Écriture comptable créée",
@@ -34,7 +31,7 @@ export function useAutoAccounting() {
         return { success: false, error: result.error };
       }
     } catch (error) {
-      console.error('Error generating journal entry from invoice:', error);
+      logger.error('UseAutoAccounting', 'Error generating journal entry from invoice:', error);
       toast({
         title: "❌ Erreur",
         description: "Impossible de générer l'écriture automatiquement",
@@ -45,7 +42,6 @@ export function useAutoAccounting() {
       setIsGenerating(false);
     }
   };
-
   /**
    * Génère automatiquement une écriture depuis une transaction bancaire
    */
@@ -53,7 +49,6 @@ export function useAutoAccounting() {
     setIsGenerating(true);
     try {
       const result = await autoAccountingService.generateBankTransactionEntry(transaction);
-
       if (result.success) {
         toast({
           title: "✅ Écriture bancaire créée",
@@ -69,7 +64,7 @@ export function useAutoAccounting() {
         return { success: false, error: result.error };
       }
     } catch (error) {
-      console.error('Error generating journal entry from bank transaction:', error);
+      logger.error('UseAutoAccounting', 'Error generating journal entry from bank transaction:', error);
       toast({
         title: "❌ Erreur",
         description: "Impossible de générer l'écriture automatiquement",
@@ -80,7 +75,6 @@ export function useAutoAccounting() {
       setIsGenerating(false);
     }
   };
-
   /**
    * Génère automatiquement une écriture depuis un achat
    */
@@ -88,7 +82,6 @@ export function useAutoAccounting() {
     setIsGenerating(true);
     try {
       const result = await autoAccountingService.generatePurchaseOrderEntry(purchase);
-
       if (result.success) {
         toast({
           title: "✅ Écriture d'achat créée",
@@ -104,7 +97,7 @@ export function useAutoAccounting() {
         return { success: false, error: result.error };
       }
     } catch (error) {
-      console.error('Error generating journal entry from purchase:', error);
+      logger.error('UseAutoAccounting', 'Error generating journal entry from purchase:', error);
       toast({
         title: "❌ Erreur",
         description: "Impossible de générer l'écriture automatiquement",
@@ -115,7 +108,6 @@ export function useAutoAccounting() {
       setIsGenerating(false);
     }
   };
-
   return {
     generateFromInvoice,
     generateFromBankTransaction,

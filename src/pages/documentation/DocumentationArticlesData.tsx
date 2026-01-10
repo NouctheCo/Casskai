@@ -9,9 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 // Base de données des articles de documentation
 // Fichier extrait depuis DocumentationArticlePage.tsx pour réduire la complexité
+import { logger } from '@/lib/logger';
 
 export interface ArticleData {
   id: string;
@@ -27,7 +27,6 @@ export interface ArticleData {
   content: string[];
   relatedArticles?: string[];
 }
-
 export const articlesDatabase: Record<string, ArticleData> = {
   'creer-votre-premier-compte': {
     id: 'creer-votre-premier-compte',
@@ -97,7 +96,6 @@ export const articlesDatabase: Record<string, ArticleData> = {
       'invitation-des-collaborateurs'
     ]
   },
-
   'creer-une-facture': {
     id: 'creer-une-facture',
     title: 'Comment créer votre première facture',
@@ -176,7 +174,6 @@ export const articlesDatabase: Record<string, ArticleData> = {
       'factures-recurrentes'
     ]
   },
-
   'configuration-plan-comptable-syscohada': {
     id: 'configuration-plan-comptable-syscohada',
     title: 'Configuration des plans comptables',
@@ -280,7 +277,6 @@ export const articlesDatabase: Record<string, ArticleData> = {
       'export-fec'
     ]
   },
-
   'invitation-et-gestion-des-utilisateurs': {
     id: 'invitation-et-gestion-des-utilisateurs',
     title: 'Invitation et gestion des utilisateurs',
@@ -388,7 +384,6 @@ export const articlesDatabase: Record<string, ArticleData> = {
       'securite-des-acces'
     ]
   },
-
   'connexion-bancaire-automatique': {
     id: 'connexion-bancaire-automatique',
     title: 'Connexion bancaire automatique',
@@ -1750,7 +1745,7 @@ export const articlesDatabase: Record<string, ArticleData> = {
       '    }));',
       '',
       '    await sheet.addRows(rows);',
-      '    console.log(`${rows.length} factures exportées vers Google Sheets`);',
+      '    logger.debug('DocumentationArticlesData', `${rows.length} factures exportées vers Google Sheets`);',
       '  }',
       '}',
       '',
@@ -1798,7 +1793,7 @@ export const articlesDatabase: Record<string, ArticleData> = {
       '      const data = await response.json();',
       '      setInvoices(data.data);',
       '    } catch (error) {',
-      '      console.error(\'Erreur fetch:\', error instanceof Error ? error.message : String(error));',
+      '      logger.error('DocumentationArticlesData', \'Erreur fetch:\', error instanceof Error ? error.message : String(error));',
       '    } finally {',
       '      setLoading(false);',
       '    }',

@@ -9,10 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from '@/lib/supabase';
 import { AIInsight, SmartAlert, CashFlowPrediction, TaxOptimization, AnomalyDetection } from '@/types/ai.types';
-
+import { logger } from '@/lib/logger';
 interface AIServiceResponse<T = any> {
   data?: T;
   error?: string;
@@ -20,19 +19,16 @@ interface AIServiceResponse<T = any> {
   confidence?: number;
   processingTime?: number;
 }
-
 interface ChatRequest {
   query: string;
   context_type?: 'dashboard' | 'accounting' | 'invoicing' | 'reports' | 'general';
   company_id: string;
 }
-
 interface _AnalysisRequest {
   type: 'financial_health' | 'cash_flow' | 'anomaly_detection' | 'tax_optimization';
   company_id: string;
   data?: any;
 }
-
 type TransactionWithLines = {
   id?: string;
   description?: string;
@@ -48,33 +44,26 @@ type TransactionWithLines = {
   }>;
   [key: string]: unknown;
 };
-
 export class OpenAIService {
   private static instance: OpenAIService;
   private baseUrl: string;
-
   private constructor() {
     this.baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
   }
-
   static getInstance(): OpenAIService {
     if (!OpenAIService.instance) {
       OpenAIService.instance = new OpenAIService();
     }
     return OpenAIService.instance;
   }
-
   // 🤖 Assistant conversationnel
   async chat(request: ChatRequest): Promise<AIServiceResponse<{ response: string; sources: string[]; suggestions?: string[] }>> {
     const startTime = performance.now();
-
     try {
       const { data: { session } } = await supabase.auth.getSession();
-
       if (!session) {
         return { success: false, error: 'Authentication required' };
       }
-
       const response = await fetch(`${this.baseUrl}/ai-assistant`, {
         method: 'POST',
         headers: {
@@ -83,28 +72,24 @@ export class OpenAIService {
         },
         body: JSON.stringify(request),
       });
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
       const processingTime = performance.now() - startTime;
-
       return {
         success: true,
         data,
         processingTime
       };
     } catch (error) {
-      console.error('OpenAI Chat Error:', error);
+      logger.error('OpenAI', 'OpenAI Chat Error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur de communication avec l\'IA'
       };
     }
   }
-
   // 📊 Analyse financière intelligente
   async analyzeFinancialHealth(companyId: string): Promise<AIServiceResponse<AIInsight[]>> {
     try {
@@ -118,34 +103,29 @@ export class OpenAIService {
         .eq('company_id', companyId)
         .gte('entry_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
         .order('entry_date', { ascending: false });
-
       const { data: accounts } = await supabase
         .from('chart_of_accounts')
         .select('account_code:account_number, account_name, account_type, current_balance')
         .eq('company_id', companyId)
         .eq('is_active', true);
-
       if (!transactions || !accounts) {
         return { success: false, error: 'Données insuffisantes pour l\'analyse' };
       }
-
       // Générer des insights IA
       const insights = this.generateFinancialInsights(transactions, accounts);
-
       return {
         success: true,
         data: insights,
         confidence: 0.85
       };
     } catch (error) {
-      console.error('Financial Health Analysis Error:', error);
+      logger.error('OpenAI', 'Financial Health Analysis Error:', error);
       return {
         success: false,
         error: 'Erreur lors de l\'analyse financière'
       };
     }
   }
-
   // 🔮 Prédictions cash-flow
   async predictCashFlow(companyId: string, months: number = 6): Promise<AIServiceResponse<CashFlowPrediction[]>> {
     try {
@@ -159,28 +139,24 @@ export class OpenAIService {
         .eq('company_id', companyId)
         .gte('entry_date', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
         .order('entry_date', { ascending: true });
-
       if (!transactions || transactions.length < 10) {
         return { success: false, error: 'Historique insuffisant pour les prédictions (minimum 10 transactions)' };
       }
-
       // Analyser les patterns et générer les prédictions
       const predictions = this.generateCashFlowPredictions(transactions, months);
-
       return {
         success: true,
         data: predictions,
         confidence: 0.75
       };
     } catch (error) {
-      console.error('Cash Flow Prediction Error:', error);
+      logger.error('OpenAI', 'Cash Flow Prediction Error:', error);
       return {
         success: false,
         error: 'Erreur lors de la prédiction de trésorerie'
       };
     }
   }
-
   // 🚨 Détection d'anomalies
   async detectAnomalies(companyId: string): Promise<AIServiceResponse<AnomalyDetection[]>> {
     try {
@@ -193,27 +169,23 @@ export class OpenAIService {
         .eq('company_id', companyId)
         .gte('entry_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
         .order('entry_date', { ascending: false });
-
       if (!recentTransactions || recentTransactions.length === 0) {
         return { success: true, data: [] };
       }
-
       const anomalies = this.detectTransactionAnomalies(recentTransactions);
-
       return {
         success: true,
         data: anomalies,
         confidence: 0.80
       };
     } catch (error) {
-      console.error('Anomaly Detection Error:', error);
+      logger.error('OpenAI', 'Anomaly Detection Error:', error);
       return {
         success: false,
         error: 'Erreur lors de la détection d\'anomalies'
       };
     }
   }
-
   // 💡 Suggestions d'optimisation fiscale
   async getTaxOptimizations(companyId: string): Promise<AIServiceResponse<TaxOptimization[]>> {
     try {
@@ -222,11 +194,9 @@ export class OpenAIService {
         .select('country, default_currency, accounting_standard')
         .eq('id', companyId)
         .single();
-
       if (!company) {
         return { success: false, error: 'Entreprise non trouvée' };
       }
-
       // Récupérer les données pour l'analyse fiscale
       const { data: transactions } = await supabase
         .from('journal_entries')
@@ -236,23 +206,20 @@ export class OpenAIService {
         `)
         .eq('company_id', companyId)
         .gte('entry_date', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString());
-
       const optimizations = this.generateTaxOptimizations(company, transactions || []);
-
       return {
         success: true,
         data: optimizations,
         confidence: 0.70
       };
     } catch (error) {
-      console.error('Tax Optimization Error:', error);
+      logger.error('OpenAI', 'Tax Optimization Error:', error);
       return {
         success: false,
         error: 'Erreur lors de l\'analyse fiscale'
       };
     }
   }
-
   // 🔔 Générer des alertes intelligentes
   async generateSmartAlerts(companyId: string): Promise<AIServiceResponse<SmartAlert[]>> {
     try {
@@ -261,9 +228,7 @@ export class OpenAIService {
         this.predictCashFlow(companyId, 3),
         this.detectAnomalies(companyId)
       ]);
-
       const alerts: SmartAlert[] = [];
-
       // Alertes basées sur la santé financière
       if (healthResult.success && healthResult.data) {
         const criticalInsights = healthResult.data.filter(insight => insight.priority === 'high');
@@ -281,7 +246,6 @@ export class OpenAIService {
           });
         });
       }
-
       // Alertes basées sur les prédictions cash-flow
       if (cashFlowResult.success && cashFlowResult.data) {
         const negativePredictions = cashFlowResult.data.filter(p => p.predictedBalance < 0);
@@ -302,7 +266,6 @@ export class OpenAIService {
           });
         }
       }
-
       // Alertes basées sur les anomalies
       if (anomalyResult.success && anomalyResult.data) {
         const criticalAnomalies = anomalyResult.data.filter(a => a.severity === 'high' || a.severity === 'critical');
@@ -322,29 +285,25 @@ export class OpenAIService {
           });
         });
       }
-
       return {
         success: true,
         data: alerts,
         confidence: 0.85
       };
     } catch (error) {
-      console.error('Smart Alerts Generation Error:', error);
+      logger.error('OpenAI', 'Smart Alerts Generation Error:', error);
       return {
         success: false,
         error: 'Erreur lors de la génération des alertes'
       };
     }
   }
-
   // Méthodes privées d'analyse
   private generateFinancialInsights(transactions: any[], accounts: any[]): AIInsight[] {
     const insights: AIInsight[] = [];
-
     // Analyse de la liquidité
     const cashAccounts = accounts.filter(a => a.account_code.startsWith('512') || a.account_code.startsWith('53'));
     const totalCash = cashAccounts.reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
-
     if (totalCash < 5000) {
       insights.push({
         id: 'liquidity_low',
@@ -361,13 +320,11 @@ export class OpenAIService {
         ]
       });
     }
-
     // Analyse des revenus
     const recentRevenue = transactions
       .filter(t => new Date(t.entry_date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
       .filter(t => t.journal_entry_lines?.some((line: any) => line.account_number.startsWith('70')))
       .reduce((sum, t) => sum + t.total_amount, 0);
-
     const previousRevenue = transactions
       .filter(t => {
         const date = new Date(t.entry_date);
@@ -376,7 +333,6 @@ export class OpenAIService {
       })
       .filter(t => t.journal_entry_lines?.some((line: any) => line.account_number.startsWith('70')))
       .reduce((sum, t) => sum + t.total_amount, 0);
-
     if (previousRevenue > 0) {
       const revenueChange = ((recentRevenue - previousRevenue) / previousRevenue) * 100;
       if (revenueChange > 10) {
@@ -407,28 +363,21 @@ export class OpenAIService {
         });
       }
     }
-
     return insights;
   }
-
   private generateCashFlowPredictions(transactions: TransactionWithLines[], months: number): CashFlowPrediction[] {
     const predictions: CashFlowPrediction[] = [];
-
     // Analyser les patterns mensuels
     const monthlyData = this.analyzeMonthlyPatterns(transactions);
-
     for (let i = 1; i <= months; i++) {
       const futureDate = new Date();
       futureDate.setMonth(futureDate.getMonth() + i);
-
       // Prédiction simple basée sur les moyennes mobiles
       const avgIncome = monthlyData.avgMonthlyIncome;
       const avgExpenses = monthlyData.avgMonthlyExpenses;
       const trend = monthlyData.trend;
-
       const predictedIncome = avgIncome * (1 + trend * i * 0.1);
       const predictedExpenses = avgExpenses * (1 + trend * i * 0.05);
-
       predictions.push({
         id: `prediction_${i}`,
         month: futureDate.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' }),
@@ -446,10 +395,8 @@ export class OpenAIService {
         trend: predictedIncome > avgIncome ? 'up' : predictedIncome < avgIncome ? 'down' : 'stable'
       });
     }
-
     return predictions;
   }
-
   private analyzeMonthlyPatterns(transactions: TransactionWithLines[]) {
     // Grouper par mois
     const monthlyGroups = transactions.reduce<Record<string, TransactionWithLines[]>>((groups, transaction) => {
@@ -458,7 +405,6 @@ export class OpenAIService {
       groups[month].push(transaction);
       return groups;
     }, {});
-
     const monthlyTotals = Object.entries(monthlyGroups).map(([month, txns]) => {
       const typedTxns = Array.isArray(txns) ? (txns as TransactionWithLines[]) : [];
       const income = typedTxns
@@ -471,70 +417,57 @@ export class OpenAIService {
           transaction.journal_entry_lines?.some(line => line.account_number?.startsWith('6'))
         )
         .reduce((sum, transaction) => sum + (Number(transaction.total_amount) || 0), 0);
-
       return { month, income, expenses };
     });
-
     const avgMonthlyIncome = monthlyTotals.reduce((sum, m) => sum + m.income, 0) / monthlyTotals.length;
     const avgMonthlyExpenses = monthlyTotals.reduce((sum, m) => sum + m.expenses, 0) / monthlyTotals.length;
-
     // Calculer la tendance (très simplifié)
     const recent = monthlyTotals.slice(-3);
     const older = monthlyTotals.slice(-6, -3);
     const recentAvg = recent.reduce((sum, m) => sum + (m.income - m.expenses), 0) / recent.length;
     const olderAvg = older.length > 0 ? older.reduce((sum, m) => sum + (m.income - m.expenses), 0) / older.length : recentAvg;
     const trend = olderAvg !== 0 ? (recentAvg - olderAvg) / Math.abs(olderAvg) : 0;
-
     return { avgMonthlyIncome, avgMonthlyExpenses, trend };
   }
-
   private detectTransactionAnomalies(transactions: TransactionWithLines[]): AnomalyDetection[] {
     const anomalies: AnomalyDetection[] = [];
-
     // Calculer les statistiques pour détecter les outliers
     const amounts = transactions.map(t => t.total_amount);
     const mean = amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
     const stdDev = Math.sqrt(amounts.reduce((sum, amount) => sum + Math.pow(amount - mean, 2), 0) / amounts.length);
     const threshold = mean + (2 * stdDev); // 2 écarts-types
-
     transactions.forEach(transaction => {
       const reasons: string[] = [];
       let score = 0;
       let severity: 'low' | 'medium' | 'high' | 'critical' = 'low';
-
       // Montant inhabituel
       if (Math.abs(transaction.total_amount) > threshold) {
         reasons.push(`Montant inhabituel (${transaction.total_amount.toLocaleString()}€)`);
         score += 0.4;
         severity = 'medium';
       }
-
       // Weekend ou jour férié
       const date = new Date(transaction.entry_date);
       if (date.getDay() === 0 || date.getDay() === 6) {
         reasons.push('Transaction un weekend');
         score += 0.2;
       }
-
       // Heure tardive (si on avait l'heure)
       if (transaction.reference?.includes('URGENT') || transaction.description?.toLowerCase().includes('urgent')) {
         reasons.push('Transaction marquée comme urgente');
         score += 0.3;
         severity = 'medium';
       }
-
       // Description suspecte
       const suspiciousKeywords = ['cash', 'espèce', 'remboursement personnel', 'avance'];
       const hasSuspiciousKeyword = suspiciousKeywords.some(keyword =>
         transaction.description?.toLowerCase().includes(keyword)
       );
-
       if (hasSuspiciousKeyword) {
         reasons.push('Description contenant des mots-clés suspects');
         score += 0.5;
         severity = 'high';
       }
-
       // Si anomalie détectée
       if (score > 0.3) {
         anomalies.push({
@@ -567,20 +500,16 @@ export class OpenAIService {
         });
       }
     });
-
     return anomalies.sort((a, b) => b.score - a.score);
   }
-
   private generateTaxOptimizations(company: any, transactions: any[]): TaxOptimization[] {
     const optimizations: TaxOptimization[] = [];
-
     // Optimisation TVA
     const vatTransactions = transactions.filter(t =>
       t.journal_entry_lines?.some((line: any) =>
         typeof line.account_number === 'string' && line.account_number.includes('445')
       )
     );
-
     if (vatTransactions.length > 10) {
       optimizations.push({
         id: 'vat_optimization',
@@ -600,12 +529,10 @@ export class OpenAIService {
         estimatedTime: '2-3 heures'
       });
     }
-
     // Optimisation amortissements
     const assetAccounts = transactions.filter(t =>
       t.journal_entry_lines?.some((line: any) => line.account_number.startsWith('2'))
     );
-
     if (assetAccounts.length > 0) {
       optimizations.push({
         id: 'depreciation_optimization',
@@ -627,9 +554,7 @@ export class OpenAIService {
         estimatedTime: '1 jour'
       });
     }
-
     return optimizations;
   }
 }
-
 export const openAIService = OpenAIService.getInstance();

@@ -3,9 +3,8 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface ProjectResource {
   id: string;
   project_id: string;
@@ -17,13 +16,11 @@ export interface ProjectResource {
   hourly_rate?: number;
   created_at: string;
 }
-
 export interface ProjectResourceWithDetails extends ProjectResource {
   project_name?: string;
   user_name?: string;
   user_email?: string;
 }
-
 export interface CreateResourceInput {
   project_id: string;
   user_id: string;
@@ -33,7 +30,6 @@ export interface CreateResourceInput {
   end_date?: string;
   hourly_rate?: number;
 }
-
 export interface UpdateResourceInput {
   role?: string;
   allocation_percentage?: number;
@@ -41,12 +37,10 @@ export interface UpdateResourceInput {
   end_date?: string;
   hourly_rate?: number;
 }
-
 export interface ResourceFilters {
   project_id?: string;
   user_id?: string;
 }
-
 class ProjectResourcesService {
   /**
    * Get all resources with optional filters
@@ -60,7 +54,6 @@ class ProjectResourcesService {
         users:user_id(id, email)
       `)
       .eq('projects.company_id', companyId);
-
     // Apply filters
     if (filters?.project_id) {
       query = query.eq('project_id', filters.project_id);
@@ -68,16 +61,12 @@ class ProjectResourcesService {
     if (filters?.user_id) {
       query = query.eq('user_id', filters.user_id);
     }
-
     query = query.order('created_at', { ascending: false });
-
     const { data, error } = await query;
-
     if (error) {
-      console.error('Error fetching resources:', error);
+      logger.error('ProjectResources', 'Error fetching resources:', error);
       throw error;
     }
-
     // Transform data with relations
     return (data || []).map(resource => ({
       ...resource,
@@ -86,7 +75,6 @@ class ProjectResourcesService {
       user_email: resource.users?.email
     }));
   }
-
   /**
    * Get resource by ID
    */
@@ -100,12 +88,10 @@ class ProjectResourcesService {
       `)
       .eq('id', resourceId)
       .single();
-
     if (error) {
-      console.error('Error fetching resource:', error);
+      logger.error('ProjectResources', 'Error fetching resource:', error);
       return null;
     }
-
     return {
       ...data,
       project_name: data.projects?.name,
@@ -113,7 +99,6 @@ class ProjectResourcesService {
       user_email: data.users?.email
     };
   }
-
   /**
    * Get resources by project
    */
@@ -127,12 +112,10 @@ class ProjectResourcesService {
       `)
       .eq('project_id', projectId)
       .order('created_at', { ascending: false });
-
     if (error) {
-      console.error('Error fetching resources by project:', error);
+      logger.error('ProjectResources', 'Error fetching resources by project:', error);
       throw error;
     }
-
     return (data || []).map(resource => ({
       ...resource,
       project_name: resource.projects?.name,
@@ -140,7 +123,6 @@ class ProjectResourcesService {
       user_email: resource.users?.email
     }));
   }
-
   /**
    * Get resources by user
    */
@@ -154,12 +136,10 @@ class ProjectResourcesService {
       `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
-
     if (error) {
-      console.error('Error fetching resources by user:', error);
+      logger.error('ProjectResources', 'Error fetching resources by user:', error);
       throw error;
     }
-
     return (data || []).map(resource => ({
       ...resource,
       project_name: resource.projects?.name,
@@ -167,7 +147,6 @@ class ProjectResourcesService {
       user_email: resource.users?.email
     }));
   }
-
   /**
    * Create a new resource allocation
    */
@@ -180,15 +159,12 @@ class ProjectResourcesService {
       })
       .select()
       .single();
-
     if (error) {
-      console.error('Error creating resource:', error);
+      logger.error('ProjectResources', 'Error creating resource:', error);
       throw error;
     }
-
     return data;
   }
-
   /**
    * Update resource allocation
    */
@@ -199,15 +175,12 @@ class ProjectResourcesService {
       .eq('id', resourceId)
       .select()
       .single();
-
     if (error) {
-      console.error('Error updating resource:', error);
+      logger.error('ProjectResources', 'Error updating resource:', error);
       throw error;
     }
-
     return data;
   }
-
   /**
    * Delete resource allocation
    */
@@ -216,13 +189,11 @@ class ProjectResourcesService {
       .from('project_resources')
       .delete()
       .eq('id', resourceId);
-
     if (error) {
-      console.error('Error deleting resource:', error);
+      logger.error('ProjectResources', 'Error deleting resource:', error);
       throw error;
     }
   }
-
   /**
    * Get resource statistics for a company
    */
@@ -233,10 +204,8 @@ class ProjectResourcesService {
     averageAllocation: number;
   }> {
     const resources = await this.getResources(companyId);
-
     const uniqueUsers = new Set(resources.map(r => r.user_id));
     const uniqueProjects = new Set(resources.map(r => r.project_id));
-
     const stats = {
       totalResources: uniqueUsers.size,
       activeProjects: uniqueProjects.size,
@@ -245,10 +214,8 @@ class ProjectResourcesService {
         ? resources.reduce((sum, r) => sum + r.allocation_percentage, 0) / resources.length
         : 0
     };
-
     return stats;
   }
-
   /**
    * Get resource availability (projects they're allocated to)
    */
@@ -258,9 +225,7 @@ class ProjectResourcesService {
     projects: Array<{ project_id: string; project_name: string; allocation: number }>;
   }> {
     const resources = await this.getResourcesByUser(userId);
-
     const totalAllocation = resources.reduce((sum, r) => sum + r.allocation_percentage, 0);
-
     return {
       totalAllocation,
       availableCapacity: Math.max(0, 100 - totalAllocation),
@@ -271,7 +236,6 @@ class ProjectResourcesService {
       }))
     };
   }
-
   /**
    * Check if user can be allocated to a project (capacity check)
    */
@@ -280,6 +244,5 @@ class ProjectResourcesService {
     return availability.availableCapacity >= requestedAllocation;
   }
 }
-
 export const projectResourcesService = new ProjectResourcesService();
 export default projectResourcesService;

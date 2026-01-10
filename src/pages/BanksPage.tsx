@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,12 +36,11 @@ import {
 import { BankAccountsTab } from '@/components/banking/BankAccountsTab';
 import { SepaPaymentGenerator } from '@/components/banking/SepaPaymentGenerator';
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 const BanksPageNew: React.FC = () => {
   const { user, currentCompany } = useAuth();
   const { t } = useTranslation();
   const { generateFromBankTransaction } = useAutoAccounting();
-
   // State
   const [bankAccounts, setBankAccounts] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<BankStorageTransaction[]>([]);
@@ -57,18 +55,15 @@ const BanksPageNew: React.FC = () => {
     discrepancies: 0,
     autoMatchRate: 0
   });
-
   // Load data on mount
   useEffect(() => {
     if (user?.id && currentCompany?.id) {
       loadData();
     }
   }, [user?.id, currentCompany?.id]);
-
   // Load all data
   const loadData = async () => {
     if (!currentCompany?.id) return;
-
     setLoading(true);
     try {
       // Check and migrate localStorage data if exists
@@ -86,11 +81,9 @@ const BanksPageNew: React.FC = () => {
           }
         }
       }
-
       // Load accounts
       const accounts = await bankStorageAdapter.loadBankAccounts(currentCompany.id);
       setBankAccounts(accounts);
-
       // Create default account if none exists
       if (accounts.length === 0) {
         const newAccount = await bankStorageAdapter.ensureDefaultAccount(currentCompany.id, user!.id);
@@ -101,26 +94,21 @@ const BanksPageNew: React.FC = () => {
       } else {
         setSelectedAccountId(accounts[0].id);
       }
-
       // Load transactions
       await loadTransactions();
-
       // Load metrics
       await loadMetrics();
-
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Banks', 'Error loading data:', error);
       toastError(error instanceof Error ? error.message : "Impossible de charger les données"
      );
     } finally {
       setLoading(false);
     }
   };
-
   // Load transactions
   const loadTransactions = async () => {
     if (!currentCompany?.id) return;
-
     try {
       const txns = await bankStorageAdapter.loadTransactions(
         currentCompany.id,
@@ -128,27 +116,23 @@ const BanksPageNew: React.FC = () => {
       );
       setTransactions(txns);
     } catch (error) {
-      console.error('Error loading transactions:', error);
+      logger.error('Banks', 'Error loading transactions:', error);
     }
   };
-
   // Load metrics
   const loadMetrics = async () => {
     if (!currentCompany?.id) return;
-
     try {
       const m = await bankStorageAdapter.getReconciliationMetrics(currentCompany.id);
       setMetrics(m);
     } catch (error) {
-      console.error('Error loading metrics:', error);
+      logger.error('Banks', 'Error loading metrics:', error);
     }
   };
-
   // Handle file import
   const handleFileImport = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !currentCompany?.id) return;
-
     setUploading(true);
     try {
       // Ensure account exists
@@ -160,22 +144,19 @@ const BanksPageNew: React.FC = () => {
         setSelectedAccountId(accountId);
         setBankAccounts([account]);
       }
-
       // Import file with error handling
       const result = await bankStorageAdapter.importFile(file, accountId, currentCompany.id);
-
       if (result.success) {
         toastSuccess(`${result.imported_count} transactions importées, ${result.skipped_count} doublons ignorés`);
-
         // Reload data
         await loadTransactions();
         await loadMetrics();
       } else {
         toastError(result.message + (result.errors ? ` (${result.errors.length} erreurs)` : ''));
-        console.error('Import failed:', result);
+        logger.error('Banks', 'Import failed:', result);
       }
     } catch (error) {
-      console.error('Import error:', error);
+      logger.error('Banks', 'Import error:', error);
       toastError(error instanceof Error ? error.message : "Impossible d'importer le fichier");
     } finally {
       setUploading(false);
@@ -183,12 +164,10 @@ const BanksPageNew: React.FC = () => {
       event.target.value = ''; // Reset input
     }
   }, [currentCompany?.id, selectedAccountId, user!.id]);
-
   // Handle reconciliation
   const handleReconcile = async (transactionId: string) => {
     try {
       const success = await bankStorageAdapter.reconcileTransaction(transactionId);
-
       if (success) {
         // ✅ NOUVEAU : Générer automatiquement l'écriture comptable
         if (currentCompany?.id) {
@@ -208,24 +187,21 @@ const BanksPageNew: React.FC = () => {
               });
             }
           } catch (error) {
-            console.warn('Auto-accounting generation failed, but reconciliation succeeded:', error);
+            logger.warn('Banks', 'Auto-accounting generation failed, but reconciliation succeeded:', error);
           }
         }
-
         toastSuccess("La transaction a été marquée comme réconciliée"
        );
-
         // Reload
         await loadTransactions();
         await loadMetrics();
       }
     } catch (error) {
-      console.error('Reconciliation error:', error);
+      logger.error('Banks', 'Reconciliation error:', error);
       toastError("Impossible de réconcilier la transaction"
      );
     }
   };
-
   // Unreconcile (send back to categorization)
   const handleUnreconcile = async (transactionId: string) => {
     try {
@@ -236,11 +212,10 @@ const BanksPageNew: React.FC = () => {
         await loadMetrics();
       }
     } catch (error) {
-      console.error('Unreconcile error:', error);
+      logger.error('Banks', 'Unreconcile error:', error);
       toastError("Impossible de renvoyer la transaction en catégorisation");
     }
   };
-
   // Purge history for selected account
   const handlePurgeHistory = async () => {
     if (!currentCompany?.id) return;
@@ -258,11 +233,10 @@ const BanksPageNew: React.FC = () => {
       await loadTransactions();
       await loadMetrics();
     } catch (error) {
-      console.error('Purge history error:', error);
+      logger.error('Banks', 'Purge history error:', error);
       toastError("La purge a échoué. Vérifiez les droits ou contactez le support.");
     }
   };
-
   if (!user) {
     return (
       <div className="container mx-auto p-6">
@@ -274,7 +248,6 @@ const BanksPageNew: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -284,7 +257,6 @@ const BanksPageNew: React.FC = () => {
           {t('banking.subtitle')}
         </p>
       </div>
-
       {/* Tabs Navigation */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
         <div className="flex border-b">
@@ -350,7 +322,6 @@ const BanksPageNew: React.FC = () => {
           </button>
         </div>
       </div>
-
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -364,7 +335,6 @@ const BanksPageNew: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -376,7 +346,6 @@ const BanksPageNew: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -388,7 +357,6 @@ const BanksPageNew: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -401,7 +369,6 @@ const BanksPageNew: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-
       {/* Tab Content: Import */}
       {activeTab === 'import' && (
         <Card>
@@ -430,7 +397,6 @@ const BanksPageNew: React.FC = () => {
                   const ibanDisplay = account.iban
                     ? `(•••• ${account.iban.replace(/\s/g, '').slice(-4)})`
                     : '(⚠️ IBAN non configuré)';
-
                   return (
                     <option key={account.id} value={account.id}>
                       {account.bank_name} - {account.account_name} {ibanDisplay}
@@ -440,7 +406,6 @@ const BanksPageNew: React.FC = () => {
               )}
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
               {t('banking.import.fileLabel')}
@@ -453,7 +418,6 @@ const BanksPageNew: React.FC = () => {
               disabled={uploading || loading}
             />
           </div>
-
           {uploading && (
             <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -463,7 +427,6 @@ const BanksPageNew: React.FC = () => {
         </CardContent>
       </Card>
       )}
-
       {/* Tab Content: Categorization */}
       {activeTab === 'categorization' && selectedAccountId && (
         <TransactionCategorization
@@ -472,7 +435,6 @@ const BanksPageNew: React.FC = () => {
           onRefresh={loadData}
         />
       )}
-
       {/* Tab Content: History */}
       {activeTab === 'history' && (
       <Card>
@@ -579,7 +541,6 @@ const BanksPageNew: React.FC = () => {
                   ))}
                 </tbody>
               </table>
-
               {transactions.length > 100 && (
                 <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-300">
                   {t('banking.history.pagination', { shown: 100, total: transactions.length })}
@@ -590,7 +551,6 @@ const BanksPageNew: React.FC = () => {
         </CardContent>
       </Card>
       )}
-
       {/* Tab Content: Bank Accounts */}
       {activeTab === 'accounts' && (
         <BankAccountsTab
@@ -599,7 +559,6 @@ const BanksPageNew: React.FC = () => {
           onRefresh={loadData}
         />
       )}
-
       {/* Tab Content: SEPA Transfers */}
       {activeTab === 'sepa-transfers' && (
         <SepaPaymentGenerator onNavigateToAccounts={() => setActiveTab('accounts')} />
@@ -607,5 +566,4 @@ const BanksPageNew: React.FC = () => {
     </div>
   );
 };
-
 export default BanksPageNew;

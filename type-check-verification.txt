@@ -1,4 +1,0 @@
-
-> casskai@1.0.0 type-check
-> tsc --noEmit -p tsconfig.app.json
-

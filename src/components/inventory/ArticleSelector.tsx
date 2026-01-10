@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,7 +12,7 @@ import { Loader2, Plus } from 'lucide-react';
 import { articlesService, ArticleWithRelations } from '@/services/articlesService';
 import { useAuth } from '@/contexts/AuthContext';
 import NewArticleModal from './NewArticleModal';
-
+import { logger } from '@/lib/logger';
 interface ArticleSelectorProps {
   value: string;
   onChange: (articleId: string) => void;
@@ -24,7 +23,6 @@ interface ArticleSelectorProps {
   className?: string;
   includeInactive?: boolean;
 }
-
 const ArticleSelector: React.FC<ArticleSelectorProps> = ({
   value,
   onChange,
@@ -40,7 +38,6 @@ const ArticleSelector: React.FC<ArticleSelectorProps> = ({
   const [articles, setArticles] = useState<ArticleWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   // ✅ BON : Chargement automatique au montage (pas de condition if (open))
   useEffect(() => {
     const fetchArticles = async () => {
@@ -48,14 +45,13 @@ const ArticleSelector: React.FC<ArticleSelectorProps> = ({
         setLoading(false);
         return;
       }
-
       try {
         setLoading(true);
         const filters = includeInactive ? undefined : { is_active: true };
         const articlesData = await articlesService.getArticles(currentCompany.id, filters);
         setArticles(articlesData || []);
       } catch (error) {
-        console.error('Error fetching articles:', error);
+        logger.error('ArticleSelector', 'Error fetching articles:', error);
         // ⚠️ Ne pas afficher de toast si liste vide (c'est normal pour une nouvelle entreprise)
         if (articles.length === 0) {
           setArticles([]);
@@ -64,13 +60,10 @@ const ArticleSelector: React.FC<ArticleSelectorProps> = ({
         setLoading(false);
       }
     };
-
     fetchArticles();
   }, [currentCompany?.id, includeInactive, toast]);
-
   const handleArticleChange = (articleId: string) => {
     onChange(articleId);
-
     // Si un callback est fourni, passer les données complètes de l'article
     if (onArticleSelected) {
       const selectedArticle = articles.find(a => a.id === articleId);
@@ -79,19 +72,15 @@ const ArticleSelector: React.FC<ArticleSelectorProps> = ({
       }
     }
   };
-
   const handleArticleCreated = async (articleId: string) => {
     // Recharger la liste des articles
     if (!currentCompany?.id) return;
-
     try {
       const filters = includeInactive ? undefined : { is_active: true };
       const articlesData = await articlesService.getArticles(currentCompany.id, filters);
       setArticles(articlesData || []);
-
       // Auto-sélectionner l'article créé
       onChange(articleId);
-
       // Si un callback est fourni, passer les données complètes de l'article
       if (onArticleSelected) {
         const createdArticle = articlesData.find(a => a.id === articleId);
@@ -99,16 +88,14 @@ const ArticleSelector: React.FC<ArticleSelectorProps> = ({
           onArticleSelected(createdArticle);
         }
       }
-
       toast({
         title: 'Article créé',
         description: 'L\'article a été créé avec succès et sélectionné',
       });
     } catch (error) {
-      console.error('Error reloading articles:', error);
+      logger.error('ArticleSelector', 'Error reloading articles:', error);
     }
   };
-
   if (loading) {
     return (
       <div className={className}>
@@ -124,7 +111,6 @@ const ArticleSelector: React.FC<ArticleSelectorProps> = ({
       </div>
     );
   }
-
   return (
     <div className={className}>
       {label && (
@@ -151,7 +137,6 @@ const ArticleSelector: React.FC<ArticleSelectorProps> = ({
             )}
           </SelectContent>
         </Select>
-
         <Button
           type="button"
           variant="outline"
@@ -162,7 +147,6 @@ const ArticleSelector: React.FC<ArticleSelectorProps> = ({
           <Plus className="w-4 h-4" />
         </Button>
       </div>
-
       <NewArticleModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -171,5 +155,4 @@ const ArticleSelector: React.FC<ArticleSelectorProps> = ({
     </div>
   );
 };
-
 export default ArticleSelector;

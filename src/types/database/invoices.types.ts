@@ -44,6 +44,8 @@ export interface InvoiceWithDetails extends Invoice {
 
   invoice_lines?: InvoiceLine[]
 
+  invoice_items?: InvoiceLine[]
+
   payments?: Array<{
 
     id: string

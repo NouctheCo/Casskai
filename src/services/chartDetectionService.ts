@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * 🌍 SERVICE DÉTECTION PLAN COMPTABLE
  * 
@@ -25,15 +24,13 @@
  * - 🔄 UK GAAP (Royaume-Uni)
  * - 🔄 US GAAP (États-Unis)
  */
-
 import { SYSCOHADA_PLAN, SYSCOHADA_ACCOUNTS } from '@/data/syscohada';
 import PCG_FRANCE from '@/data/pcg';
 import type { AccountPlan } from '@/types/accounting';
-
+import { logger } from '@/lib/logger';
 // ========================================
 // CONSTANTES GÉOGRAPHIQUES
 // ========================================
-
 /** Pays membres de l'OHADA (Organisation pour l'Harmonisation en Afrique du Droit des Affaires) */
 export const OHADA_COUNTRIES = [
   'BJ', // Bénin
@@ -54,21 +51,18 @@ export const OHADA_COUNTRIES = [
   'TD', // Tchad
   'TG'  // Togo
 ] as const;
-
 /** Pays de l'Union Européenne */
 export const EU_COUNTRIES = [
   'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR',
   'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL',
   'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'
 ] as const;
-
 /** Pays du Maghreb utilisant SCF/PCG Adapté */
 export const MAGHREB_COUNTRIES = [
   'DZ', // Algérie (SCF - Système Comptable Financier)
   'MA', // Maroc (PCG marocain inspiré du français)
   'TN'  // Tunisie (Système comptable tunisien inspiré du français)
 ] as const;
-
 /** Pays anglophones africains utilisant IFRS */
 export const IFRS_AFRICA_COUNTRIES = [
   'ZA', // Afrique du Sud
@@ -82,17 +76,14 @@ export const IFRS_AFRICA_COUNTRIES = [
   'ZW', // Zimbabwe
   'BW'  // Botswana
 ] as const;
-
 /** Mapping pays → Plan comptable recommandé */
 export const COUNTRY_TO_CHART_MAP: Record<string, 'SYSCOHADA' | 'PCG' | 'SCF' | 'IAS_IFRS' | 'UK_GAAP' | 'US_GAAP'> = {
   // OHADA (17 pays)
   ...Object.fromEntries(OHADA_COUNTRIES.map(c => [c, 'SYSCOHADA' as const])),
-
   // France, Belgique, Luxembourg (PCG)
   'FR': 'PCG',
   'BE': 'PCG',
   'LU': 'PCG',
-
   // DOM-TOM français
   'RE': 'PCG', // Réunion
   'GP': 'PCG', // Guadeloupe
@@ -101,27 +92,20 @@ export const COUNTRY_TO_CHART_MAP: Record<string, 'SYSCOHADA' | 'PCG' | 'SCF' | 
   'YT': 'PCG', // Mayotte
   'NC': 'PCG', // Nouvelle-Calédonie
   'PF': 'PCG', // Polynésie française
-
   // Maghreb (3 pays - SCF/PCG Adapté)
   ...Object.fromEntries(MAGHREB_COUNTRIES.map(c => [c, 'SCF' as const])),
-
   // Afrique anglophone (10 pays - IFRS)
   ...Object.fromEntries(IFRS_AFRICA_COUNTRIES.map(c => [c, 'IAS_IFRS' as const])),
-
   // UK
   'GB': 'UK_GAAP',
-
   // USA
   'US': 'US_GAAP',
-
   // Autres pays UE (peuvent choisir IAS/IFRS ou plan local)
   ...Object.fromEntries(EU_COUNTRIES.filter(c => !['FR', 'BE', 'LU'].includes(c)).map(c => [c, 'IAS_IFRS' as const]))
 };
-
 // ========================================
 // TYPES
 // ========================================
-
 export interface ChartDetectionResult {
   recommended: AccountPlan;
   alternatives: AccountPlan[];
@@ -131,11 +115,9 @@ export interface ChartDetectionResult {
   confidence: 'HIGH' | 'MEDIUM' | 'LOW';
   reasoning: string;
 }
-
 // ========================================
 // DÉTECTION AUTOMATIQUE
 // ========================================
-
 /**
  * Détecte le plan comptable recommandé pour une entreprise
  * @param countryCode Code pays ISO 3166-1 alpha-2 (ex: "FR", "CI", "SN")
@@ -149,7 +131,6 @@ export function detectChartOfAccounts(
   _industry?: string
 ): ChartDetectionResult {
   const upperCode = countryCode.toUpperCase();
-
   // Déterminer zone géographique
   const zone = (OHADA_COUNTRIES as readonly string[]).includes(upperCode)
     ? 'OHADA'
@@ -160,7 +141,6 @@ export function detectChartOfAccounts(
     : (EU_COUNTRIES as readonly string[]).includes(upperCode)
     ? 'EU'
     : 'OTHER';
-
   // Détection OHADA (confidence HIGH)
   if (zone === 'OHADA') {
     return {
@@ -173,7 +153,6 @@ export function detectChartOfAccounts(
       reasoning: `Pays membre de l'OHADA. Le SYSCOHADA révisé 2017 est obligatoire pour la comptabilité officielle dans les ${OHADA_COUNTRIES.length} pays membres.`
     };
   }
-
   // Maghreb - SCF/PCG Adapté (confidence HIGH)
   if (zone === 'MAGHREB') {
     return {
@@ -186,7 +165,6 @@ export function detectChartOfAccounts(
       reasoning: 'Système Comptable Financier (SCF) ou PCG adapté. Le PCG français est utilisé comme base car les standards du Maghreb s\'en inspirent fortement.'
     };
   }
-
   // Afrique anglophone - IFRS (confidence HIGH)
   if (zone === 'IFRS_AFRICA') {
     return {
@@ -199,7 +177,6 @@ export function detectChartOfAccounts(
       reasoning: 'Standards internationaux IFRS obligatoires dans ce pays. Templates IFRS complets seront déployés prochainement.'
     };
   }
-
   // France, Belgique, Luxembourg + DOM-TOM (confidence HIGH)
   if (['FR', 'BE', 'LU', 'RE', 'GP', 'MQ', 'GF', 'YT', 'NC', 'PF'].includes(upperCode)) {
     return {
@@ -212,7 +189,6 @@ export function detectChartOfAccounts(
       reasoning: 'Plan Comptable Général (PCG) français, obligatoire en France, Belgique, Luxembourg et DOM-TOM.'
     };
   }
-
   // UE - Grandes entreprises (IAS/IFRS recommandé)
   if (zone === 'EU' && companySize === 'large') {
     return {
@@ -225,7 +201,6 @@ export function detectChartOfAccounts(
       reasoning: 'Union Européenne - IAS/IFRS recommandé pour grandes entreprises (en développement). PCG utilisé temporairement.'
     };
   }
-
   // UE - PME (Plan local recommandé)
   if (zone === 'EU') {
     return {
@@ -238,7 +213,6 @@ export function detectChartOfAccounts(
       reasoning: 'Union Européenne - PCG français utilisé par défaut. Possibilité d\'adapter au plan comptable local selon le pays.'
     };
   }
-
   // Autres pays (fallback PCG)
   return {
     recommended: PCG_FRANCE,
@@ -250,21 +224,18 @@ export function detectChartOfAccounts(
     reasoning: 'Pays hors OHADA/UE. Plan Comptable Général français utilisé par défaut. Peut nécessiter adaptation locale.'
   };
 }
-
 /**
  * Vérifie si un pays doit utiliser SYSCOHADA
  */
 export function requiresSYSCOHADA(countryCode: string): boolean {
   return (OHADA_COUNTRIES as readonly string[]).includes(countryCode.toUpperCase());
 }
-
 /**
  * Obtient le plan comptable selon le code
  */
 export function getChartPlanByCode(code: 'SYSCOHADA' | 'PCG'): AccountPlan {
   return code === 'SYSCOHADA' ? SYSCOHADA_PLAN : PCG_FRANCE;
 }
-
 /**
  * Liste tous les comptes disponibles pour un plan
  */
@@ -272,15 +243,12 @@ export function getAccountsForPlan(code: 'SYSCOHADA' | 'PCG') {
   if (code === 'SYSCOHADA') {
     return SYSCOHADA_ACCOUNTS;
   }
-  
   // TODO: Implémenter PCG_ACCOUNTS similaire
   return SYSCOHADA_ACCOUNTS; // Fallback
 }
-
 // ========================================
 // UTILITAIRES
 // ========================================
-
 /** Mapping code pays → Nom pays (simplifié) */
 function getCountryName(code: string): string {
   const names: Record<string, string> = {
@@ -302,7 +270,6 @@ function getCountryName(code: string): string {
     'SN': 'Sénégal',
     'TD': 'Tchad',
     'TG': 'Togo',
-    
     // France
     'FR': 'France',
     'RE': 'La Réunion',
@@ -310,7 +277,6 @@ function getCountryName(code: string): string {
     'MQ': 'Martinique',
     'GF': 'Guyane',
     'YT': 'Mayotte',
-    
     // Autres
     'US': 'United States',
     'GB': 'United Kingdom',
@@ -324,10 +290,8 @@ function getCountryName(code: string): string {
     'DZ': 'Algérie',
     'TN': 'Tunisie'
   };
-  
   return names[code] || code;
 }
-
 /**
  * Format un numéro de compte SYSCOHADA pour affichage
  * Ex: "601" → "601 - Achats de marchandises"
@@ -336,7 +300,6 @@ export function formatSYSCOHADAAccount(accountNumber: string): string {
   const account = SYSCOHADA_ACCOUNTS.find(a => a.number === accountNumber);
   return account ? `${account.number} - ${account.name}` : accountNumber;
 }
-
 /**
  * Recherche comptes SYSCOHADA par mot-clé
  */
@@ -347,30 +310,23 @@ export function searchSYSCOHADAAccounts(query: string): typeof SYSCOHADA_ACCOUNT
     acc.name.toLowerCase().includes(lowerQuery)
   );
 }
-
 // ========================================
 // EXEMPLES UTILISATION
 // ========================================
-
 /*
-
 // 1. Détection automatique à la création d'entreprise
 const detection = detectChartOfAccounts('SN'); // Sénégal
-console.log(detection.recommended); // SYSCOHADA_PLAN
-console.log(detection.reasoning); // "Pays membre de l'OHADA..."
-
+logger.debug('ChartDetection', 'Debug', detection.recommended); // SYSCOHADA_PLAN
+logger.debug('ChartDetection', 'Debug', detection.reasoning); // "Pays membre de l'OHADA..."
 // 2. Vérification OHADA obligatoire
 if (requiresSYSCOHADA('CI')) {
   // Forcer SYSCOHADA pour Côte d'Ivoire
   setCompanyChart(SYSCOHADA_PLAN);
 }
-
 // 3. Recherche de comptes
 const results = searchSYSCOHADAAccounts('achats');
 // [{number: "601", name: "Achats de marchandises", ...}, ...]
-
 // 4. Format affichage
 const formatted = formatSYSCOHADAAccount("601");
 // "601 - Achats de marchandises"
-
 */

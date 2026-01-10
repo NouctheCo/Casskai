@@ -9,9 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 import {
   SubscriptionResponse,
   PaymentResponse,
@@ -21,19 +21,15 @@ import {
   Invoice,
   SUBSCRIPTION_PLANS
 } from '@/types/subscription.types';
-
 // Configuration Stripe
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-
 if (!STRIPE_PUBLISHABLE_KEY) {
-  console.warn('[StripeService] ⚠️ VITE_STRIPE_PUBLISHABLE_KEY is not configured. Stripe features will not work.');
+  logger.warn('Stripe', '[StripeService] ⚠️ VITE_STRIPE_PUBLISHABLE_KEY is not configured. Stripe features will not work.');
 }
-
 class RealStripeService {
   private stripe: Promise<Stripe | null> | null = null;
   private initialized = false;
-
   constructor() {
     if (STRIPE_PUBLISHABLE_KEY) {
       this.stripe = loadStripe(STRIPE_PUBLISHABLE_KEY);
@@ -41,36 +37,31 @@ class RealStripeService {
       this.stripe = Promise.resolve(null);
     }
   }
-
   async initialize(): Promise<Stripe | null> {
     if (!this.initialized) {
       this.initialized = true;
     }
     return await this.stripe;
   }
-
   /**
    * Vérifie si Stripe est correctement configuré et disponible
    */
   isStripeAvailable(): boolean {
     return !!STRIPE_PUBLISHABLE_KEY && !!this.stripe;
   }
-
   /**
    * Obtient l'instance Stripe, ou null si non disponible
    */
   async getStripe(): Promise<Stripe | null> {
     if (!this.isStripeAvailable()) {
-      console.warn('[StripeService] Stripe is not available - check VITE_STRIPE_PUBLISHABLE_KEY configuration');
+      logger.warn('Stripe', '[StripeService] Stripe is not available - check VITE_STRIPE_PUBLISHABLE_KEY configuration');
       return null;
     }
     return await this.initialize();
   }
-
   // ================================
   // GESTION DES PRODUITS ET PRIX
   // ================================
-
   /**
    * Crée automatiquement les produits et prix Stripe
    */
@@ -83,19 +74,16 @@ class RealStripeService {
         },
         body: JSON.stringify({ plans: SUBSCRIPTION_PLANS })
       });
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const result = await response.json();
       return { success: true, ...result };
     } catch (error) {
-      console.error('Error creating Stripe products:', error);
+      logger.error('Stripe', 'Error creating Stripe products:', error);
       return { success: false, error: 'Impossible de créer les produits Stripe' };
     }
   }
-
   /**
    * Synchronise les prix Stripe avec la base de données
    */
@@ -103,9 +91,7 @@ class RealStripeService {
     try {
       const response = await fetch(`${API_BASE_URL}/stripe/sync-prices`);
       if (!response.ok) throw new Error('Failed to sync prices');
-      
       const { prices } = await response.json();
-      
       // Mettre à jour les prix dans Supabase
       for (const price of prices) {
         await supabase
@@ -118,18 +104,15 @@ class RealStripeService {
           })
           .eq('id', price.metadata.plan_id);
       }
-
       return true;
     } catch (error) {
-      console.error('Error syncing Stripe prices:', error);
+      logger.error('Stripe', 'Error syncing Stripe prices:', error);
       return false;
     }
   }
-
   // ================================
   // ABONNEMENTS
   // ================================
-
   /**
    * Crée une session de checkout Stripe
    */
@@ -146,25 +129,20 @@ class RealStripeService {
         .select('*')
         .eq('id', planId)
         .single();
-
       if (planError || !plan) {
         return { success: false, error: 'Plan non trouvé' };
       }
-
       if (!plan.stripe_price_id) {
         return { success: false, error: 'Prix Stripe non configuré pour ce plan' };
       }
-
       // Obtenir le token JWT de la session courante
       const { data: { session } } = await supabase.auth.getSession();
-
       if (!session) {
         return {
           success: false,
           error: 'Vous devez être connecté pour créer un abonnement'
         };
       }
-
       // Utiliser la fonction Edge Supabase avec authentification
       const { data: sessionData, error: sessionError } = await supabase.functions.invoke('create-checkout-session', {
         body: {
@@ -175,36 +153,32 @@ class RealStripeService {
           Authorization: `Bearer ${session.access_token}`
         }
       });
-
       if (sessionError) {
-        console.error('Error creating checkout session:', sessionError);
+        logger.error('Stripe', 'Error creating checkout session:', sessionError);
         return {
           success: false,
           error: 'Impossible de créer la session de paiement'
         };
       }
-
       return {
         success: true,
         checkoutUrl: sessionData.sessionId ? `https://checkout.stripe.com/pay/${sessionData.sessionId}` : undefined
       };
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      logger.error('Stripe', 'Error creating checkout session:', error);
       return {
         success: false,
         error: 'Impossible de créer la session de paiement'
       };
     }
   }
-
   /**
    * Récupère l'abonnement actuel depuis Supabase
    */
   async getCurrentSubscription(userId: string): Promise<SubscriptionResponse> {
-    console.warn('[StripeService] getCurrentSubscription called for user:', userId);
-
+    logger.warn('Stripe', '[StripeService] getCurrentSubscription called for user:', userId);
     try {
-      console.warn('[StripeService] Executing subscription query...');
+      logger.warn('Stripe', '[StripeService] Executing subscription query...');
       const { data: subscription, error } = await supabase
         .from('subscriptions')
         .select(`
@@ -231,38 +205,29 @@ class RealStripeService {
         .in('status', ['active', 'trialing'])
         .order('created_at', { ascending: false })
         .limit(1);
-
-      console.warn('[StripeService] Query result:', { data: subscription, error });
-
+      logger.warn('Stripe', '[StripeService] Query result:', { data: subscription, error });
       if (error) {
-        console.error('[StripeService] Database error:', error);
+        logger.error('Stripe', '[StripeService] Database error:', error);
         return { success: false, error: `Erreur base de données: ${error.message}` };
       }
-
       if (!subscription || subscription.length === 0) {
-        console.warn('[StripeService] No subscription found for user');
+        logger.warn('Stripe', '[StripeService] No subscription found for user');
         return { success: true, subscription: undefined };
       }
-
-      console.warn('[StripeService] Found subscription:', subscription[0]);
-
+      logger.warn('Stripe', '[StripeService] Found subscription:', subscription[0]);
       const sub = subscription[0];
-
       // Fetch the plan details separately
-      console.warn('[StripeService] Fetching plan details for plan_id:', sub.plan_id);
+      logger.warn('Stripe', '[StripeService] Fetching plan details for plan_id:', sub.plan_id);
       const { data: plan, error: planError } = await supabase
         .from('subscription_plans')
         .select('id, name, price, currency, billing_period, is_trial, trial_days, stripe_price_id, is_active')
         .eq('id', sub.plan_id)
         .single();
-
-      console.warn('[StripeService] Plan fetch result:', { data: plan, error: planError });
-
+      logger.warn('Stripe', '[StripeService] Plan fetch result:', { data: plan, error: planError });
       if (planError) {
-        console.error('[StripeService] Error fetching plan:', planError);
+        logger.error('Stripe', '[StripeService] Error fetching plan:', planError);
         return { success: false, error: `Erreur récupération plan: ${planError.message}` };
       }
-
       // Convertir en format UserSubscription
       const userSubscription: UserSubscription = {
         id: sub.id,
@@ -291,19 +256,16 @@ class RealStripeService {
           supportLevel: 'basic'
         } : undefined
       };
-
-      console.warn('[StripeService] Converted subscription:', userSubscription);
+      logger.warn('Stripe', '[StripeService] Converted subscription:', userSubscription);
       return { success: true, subscription: userSubscription };
-
     } catch (error) {
-      console.error('[StripeService] Unexpected error:', error);
+      logger.error('Stripe', '[StripeService] Unexpected error:', error);
       return {
         success: false,
         error: `Erreur inattendue: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
-
   /**
    * Annule un abonnement
    */
@@ -316,25 +278,22 @@ class RealStripeService {
           cancelAtPeriodEnd: true
         }
       });
-
       if (error) {
-        console.error('Error canceling subscription:', error);
+        logger.error('Stripe', 'Error canceling subscription:', error);
         return {
           success: false,
           error: 'Impossible d\'annuler l\'abonnement'
         };
       }
-
       return { success: true };
     } catch (error) {
-      console.error('Error in cancelSubscription:', error);
+      logger.error('Stripe', 'Error in cancelSubscription:', error);
       return {
         success: false,
         error: 'Impossible d\'annuler l\'abonnement'
       };
     }
   }
-
   /**
    * Met à jour un abonnement
    */
@@ -349,11 +308,9 @@ class RealStripeService {
         .select('stripe_price_id')
         .eq('id', newPlanId)
         .single();
-
       if (planError || !plan?.stripe_price_id) {
         return { success: false, error: 'Plan non trouvé' };
       }
-
       const response = await fetch(`${API_BASE_URL}/stripe/update-subscription`, {
         method: 'POST',
         headers: {
@@ -364,11 +321,9 @@ class RealStripeService {
           newPriceId: plan.stripe_price_id
         })
       });
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       // Mettre à jour dans Supabase
       const { error: updateError } = await supabase
         .from('user_subscriptions')
@@ -377,25 +332,21 @@ class RealStripeService {
           updated_at: new Date().toISOString()
         })
         .eq('stripe_subscription_id', stripeSubscriptionId);
-
       if (updateError) {
-        console.error('Error updating subscription in Supabase:', updateError);
+        logger.error('Stripe', 'Error updating subscription in Supabase:', updateError);
       }
-
       return { success: true };
     } catch (error) {
-      console.error('Error updating subscription:', error);
+      logger.error('Stripe', 'Error updating subscription:', error);
       return {
         success: false,
         error: 'Impossible de modifier l\'abonnement'
       };
     }
   }
-
   // ================================
   // MÉTHODES DE PAIEMENT
   // ================================
-
   /**
    * Récupère les méthodes de paiement depuis Supabase
    */
@@ -406,12 +357,10 @@ class RealStripeService {
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
-
       if (error) {
-        console.error('Error fetching payment methods:', error);
+        logger.error('Stripe', 'Error fetching payment methods:', error);
         return [];
       }
-
       return methods.map(method => ({
         id: method.id,
         userId: method.user_id,
@@ -425,11 +374,10 @@ class RealStripeService {
         createdAt: new Date(method.created_at)
       }));
     } catch (error) {
-      console.error('Error fetching payment methods:', error);
+      logger.error('Stripe', 'Error fetching payment methods:', error);
       return [];
     }
   }
-
   /**
    * Ajoute une méthode de paiement
    */
@@ -445,13 +393,10 @@ class RealStripeService {
           userId
         })
       });
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const paymentMethod = await response.json();
-      
       // Sauvegarder dans Supabase
       const { data: savedMethod, error } = await supabase
         .from('payment_methods')
@@ -467,12 +412,10 @@ class RealStripeService {
         })
         .select()
         .single();
-
       if (error) {
-        console.error('Error saving payment method:', error);
+        logger.error('Stripe', 'Error saving payment method:', error);
         return { success: false, error: 'Erreur de sauvegarde' };
       }
-
       return {
         success: true,
         paymentMethod: {
@@ -489,14 +432,13 @@ class RealStripeService {
         }
       };
     } catch (error) {
-      console.error('Error adding payment method:', error);
+      logger.error('Stripe', 'Error adding payment method:', error);
       return {
         success: false,
         error: 'Impossible d\'ajouter le moyen de paiement'
       };
     }
   }
-
   /**
    * Supprime une méthode de paiement
    */
@@ -510,35 +452,29 @@ class RealStripeService {
         },
         body: JSON.stringify({ paymentMethodId })
       });
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       // Supprimer de Supabase
       const { error } = await supabase
         .from('payment_methods')
         .delete()
         .eq('stripe_payment_method_id', paymentMethodId);
-
       if (error) {
-        console.error('Error deleting payment method from Supabase:', error);
+        logger.error('Stripe', 'Error deleting payment method from Supabase:', error);
       }
-
       return { success: true };
     } catch (error) {
-      console.error('Error removing payment method:', error);
+      logger.error('Stripe', 'Error removing payment method:', error);
       return {
         success: false,
         error: 'Impossible de supprimer le moyen de paiement'
       };
     }
   }
-
   // ================================
   // PORTAIL DE FACTURATION
   // ================================
-
   /**
    * Crée une session du portail de facturation
    */
@@ -557,29 +493,25 @@ class RealStripeService {
           returnUrl
         })
       });
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const session = await response.json();
       return {
         success: true,
         portalUrl: session.url
       };
     } catch (error) {
-      console.error('Error creating billing portal session:', error);
+      logger.error('Stripe', 'Error creating billing portal session:', error);
       return {
         success: false,
         error: 'Impossible d\'accéder au portail de facturation'
       };
     }
   }
-
   // ================================
   // FACTURES
   // ================================
-
   /**
    * Récupère les factures depuis Supabase
    */
@@ -591,12 +523,10 @@ class RealStripeService {
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(limit);
-
       if (error) {
-        console.error('Error fetching invoices:', error);
+        logger.error('Stripe', 'Error fetching invoices:', error);
         return [];
       }
-
       return invoices.map(inv => ({
         id: inv.id,
         userId: inv.user_id,
@@ -612,15 +542,13 @@ class RealStripeService {
         createdAt: new Date(inv.created_at)
       }));
     } catch (error) {
-      console.error('Error fetching invoices:', error);
+      logger.error('Stripe', 'Error fetching invoices:', error);
       return [];
     }
   }
-
   // ================================
   // UTILITAIRES
   // ================================
-
   /**
    * Redirige vers la checkout Stripe
    */
@@ -628,21 +556,18 @@ class RealStripeService {
     try {
       const stripe = await this.getStripe();
       if (!stripe) {
-        console.warn('[StripeService] Cannot redirect to checkout - Stripe not available');
+        logger.warn('Stripe', '[StripeService] Cannot redirect to checkout - Stripe not available');
         return { error: 'Stripe not configured' };
       }
-
       const { error } = await stripe.redirectToCheckout({
         sessionId
       });
-
       return { error };
     } catch (error) {
-      console.error('Error redirecting to checkout:', error);
+      logger.error('Stripe', 'Error redirecting to checkout:', error);
       return { error };
     }
   }
-
   /**
    * Vérifie la santé de l'API
    */
@@ -651,11 +576,10 @@ class RealStripeService {
       const response = await fetch(`${API_BASE_URL}/stripe/health`);
       return response.ok;
     } catch (error) {
-      console.error('Stripe service health check failed:', error);
+      logger.error('Stripe', 'Stripe service health check failed:', error);
       return false;
     }
   }
 }
-
 export const stripeService = new RealStripeService();
 export default stripeService;

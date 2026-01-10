@@ -15,6 +15,7 @@ import { useLocale } from '@/contexts/LocaleContext';
 import { supabase } from '@/lib/supabase';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
 import { getBudgetCategoryLabel } from '@/utils/budgetCategoryMapping';
+import { logger } from '@/lib/logger';
 import {
   Search,
   Filter,
@@ -25,26 +26,22 @@ import {
   Unlink,
   Plus
 } from 'lucide-react';
-
 interface BudgetCategory {
   id: string;
   category: string;
   subcategory: string | null;
   category_type: 'revenue' | 'expense' | 'capex';
 }
-
 export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { currentEnterpriseId?: string }) {
   const { user: _user } = useAuth();
   const { toast } = useToast();
   const { t, locale } = useLocale();
   const { enterprises, currentEnterprise, currentEnterpriseId: contextEnterpriseId } = useEnterprise();
-
   const companyId = currentEnterpriseId ?? contextEnterpriseId ?? undefined;
   const resolvedCompany = useMemo(() => {
     if (!companyId) return null;
     return enterprises.find((enterprise) => enterprise.id === companyId) || currentEnterprise || null;
   }, [companyId, enterprises, currentEnterprise]);
-
   const {
     accounts,
     loading,
@@ -52,7 +49,6 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
     fetchAccounts,
     refresh
   } = useAccounting(companyId || '');
-
   const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([]);
   const [accountMappings, setAccountMappings] = useState<Map<string, string>>(new Map());
   const [searchTerm, setSearchTerm] = useState('');
@@ -66,54 +62,44 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
     name: '',
     parentId: '__none__'
   });
-
   // Charger les catégories budgétaires disponibles
   useEffect(() => {
     if (!companyId) return;
-
     const loadBudgetCategories = async () => {
       try {
         const { data, error } = await supabase
           .from('budget_categories')
           .select('id, category, subcategory, category_type')
           .eq('company_id', companyId);
-
         if (error) throw error;
         setBudgetCategories(data || []);
       } catch (err) {
-        console.error('Failed to load budget categories:', err);
+        logger.error('ChartOfAccountsEnhanced', 'Failed to load budget categories:', err);
       }
     };
-
     loadBudgetCategories();
   }, [companyId]);
-
   // Charger les mappings existants
   useEffect(() => {
     if (!companyId || !accounts || accounts.length === 0) return;
-
     const loadExistingMappings = async () => {
       try {
         const { data, error } = await supabase
           .from('category_account_map')
           .select('account_number, category_id')
           .eq('company_id', companyId);
-
         if (error) throw error;
-
         const mappingsMap = new Map<string, string>();
         data?.forEach(mapping => {
           mappingsMap.set(mapping.account_number, mapping.category_id);
         });
         setAccountMappings(mappingsMap);
       } catch (err) {
-        console.error('Failed to load mappings:', err);
+        logger.error('ChartOfAccountsEnhanced', 'Failed to load mappings:', err);
       }
     };
-
     loadExistingMappings();
   }, [companyId, accounts]);
-
   // Initialiser le plan comptable standard
   const handleInitializeStandardPlan = async () => {
     if (!companyId) {
@@ -124,25 +110,19 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
       });
       return;
     }
-
     setInitializingChart(true);
-
     try {
-      console.log('🔧 Initializing chart of accounts for company:', companyId);
-      console.log('🌍 Country:', resolvedCompany?.countryCode || 'FR');
-
+      logger.debug('ChartOfAccountsEnhanced', '🔧 Initializing chart of accounts for company:', companyId);
+      logger.debug('ChartOfAccountsEnhanced', '🌍 Country:', resolvedCompany?.countryCode || 'FR');
       const { data, error } = await supabase.rpc('initialize_chart_of_accounts', {
         p_company_id: companyId,
         p_country: resolvedCompany?.countryCode || 'FR'
       });
-
       if (error) {
-        console.error('❌ RPC Error:', error);
+        logger.error('ChartOfAccountsEnhanced', '❌ RPC Error:', error);
         throw error;
       }
-
-      console.log('✅ RPC Response:', data);
-
+      logger.debug('ChartOfAccountsEnhanced', '✅ RPC Response:', data);
       if (data?.success) {
         toast({
           title: 'Succès',
@@ -157,7 +137,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
             setTimeout(() => window.location.reload(), 1000);
           }
         } catch (reloadError) {
-          console.error('❗ Failed to refresh accounts after init:', reloadError);
+          logger.error('ChartOfAccountsEnhanced', '❗ Failed to refresh accounts after init:', reloadError);
           setTimeout(() => window.location.reload(), 1000);
         }
       } else {
@@ -167,9 +147,8 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
           description: data?.error || 'Erreur lors de l\'initialisation'
         });
       }
-
     } catch (err) {
-      console.error('❌ Error initializing chart of accounts:', err);
+      logger.error('ChartOfAccountsEnhanced', '❌ Error initializing chart of accounts:', err);
       toast({
         variant: 'destructive',
         title: 'Erreur',
@@ -179,13 +158,10 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
       setInitializingChart(false);
     }
   };
-
   // Sauvegarder un mapping compte ↔ catégorie
   const handleSaveMapping = async (accountNumber: string, categoryId: string | null) => {
     if (!companyId) return;
-
     setSavingMapping(accountNumber);
-
     try {
       // Si categoryId est null, supprimer le mapping
       if (!categoryId || categoryId === 'none') {
@@ -194,14 +170,11 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
           .delete()
           .eq('company_id', companyId)
           .eq('account_number', accountNumber);
-
         if (error) throw error;
-
         // Mettre à jour l'état local
         const newMappings = new Map(accountMappings);
         newMappings.delete(accountNumber);
         setAccountMappings(newMappings);
-
         toast({
           title: 'Mapping supprimé',
           description: `Le compte ${accountNumber} n'est plus mappé`
@@ -217,14 +190,11 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
           }, {
             onConflict: 'company_id,category_id,account_number'
           });
-
         if (error) throw error;
-
         // Mettre à jour l'état local
         const newMappings = new Map(accountMappings);
         newMappings.set(accountNumber, categoryId);
         setAccountMappings(newMappings);
-
         const category = budgetCategories.find(c => c.id === categoryId);
         toast({
           title: 'Mapping enregistré',
@@ -232,7 +202,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
         });
       }
     } catch (err: any) {
-      console.error('Save mapping failed:', err);
+      logger.error('ChartOfAccountsEnhanced', 'Save mapping failed:', err);
       toast({
         variant: 'destructive',
         title: 'Erreur',
@@ -242,11 +212,9 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
       setSavingMapping(null);
     }
   };
-
   // Créer un compte auxiliaire
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!companyId) {
       toast({
         variant: 'destructive',
@@ -255,14 +223,11 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
       });
       return;
     }
-
     try {
       // Déterminer le parent réel (null si "__none__")
       const realParentId = newAccount.parentId === '__none__' ? null : newAccount.parentId;
-
       // Récupérer les infos du compte parent si présent
       const parentAccount = realParentId ? accounts?.find(a => a.id === realParentId) : null;
-
       if (realParentId && !parentAccount) {
         toast({
           variant: 'destructive',
@@ -271,22 +236,19 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
         });
         return;
       }
-
       // Déterminer les propriétés du compte
       let accountType: string;
       let accountClass: number | null;
       let level: number;
-
       if (parentAccount) {
         // Compte auxiliaire : hérite du parent
         accountType = parentAccount.account_type;
-        accountClass = parentAccount.account_class;
+        accountClass = parentAccount.account_class ?? null;
         level = (parentAccount.level || 0) + 1;
       } else {
         // Compte principal : détermine type/classe depuis le numéro
         const firstDigit = newAccount.number.charAt(0);
         accountClass = parseInt(firstDigit) || null;
-
         // Déterminer le type selon la classe
         switch (firstDigit) {
           case '1': accountType = 'equity'; break;
@@ -300,7 +262,6 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
         }
         level = 0;
       }
-
       const { data: _data, error } = await supabase
         .from('chart_of_accounts')
         .insert({
@@ -316,26 +277,21 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
         })
         .select()
         .single();
-
       if (error) throw error;
-
       toast({
         title: 'Succès',
         description: parentAccount ? 'Compte auxiliaire créé avec succès' : 'Compte principal créé avec succès'
       });
-
       setShowAddAccountModal(false);
       setNewAccount({ number: '', name: '', parentId: '__none__' });
-
       // Recharger les comptes
       if (typeof fetchAccounts === 'function') {
         await fetchAccounts();
       } else if (typeof refresh === 'function') {
         await Promise.resolve(refresh());
       }
-
     } catch (err: any) {
-      console.error('Erreur création compte:', err);
+      logger.error('ChartOfAccountsEnhanced', 'Erreur création compte:', err);
       toast({
         variant: 'destructive',
         title: 'Erreur',
@@ -343,19 +299,15 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
       });
     }
   };
-
   // Filtrer les comptes
   const filteredAccounts = accounts?.filter(account => {
     const matchesSearch = !searchTerm ||
       account.account_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
       account.account_name.toLowerCase().includes(searchTerm.toLowerCase());
-
     const matchesClass = !classFilter || classFilter === 'all' || String(account.account_class) === classFilter;
     const matchesType = !typeFilter || typeFilter === 'all' || account.account_type === typeFilter;
-
     return matchesSearch && matchesClass && matchesType;
   });
-
   // Grouper les catégories par type pour le select
   const categoriesByType = budgetCategories
     .filter(cat => cat.id && cat.id.trim() !== '') // Filter out empty IDs
@@ -364,7 +316,6 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
       acc[cat.category_type].push(cat);
       return acc;
     }, {} as Record<string, BudgetCategory[]>);
-
   const renderCategoryBadge = (categoryId: string | null, accountNumber: string) => {
     // Si pas de mapping manuel, afficher le mapping automatique
     if (!categoryId) {
@@ -380,16 +331,13 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
         </Badge>
       );
     }
-
     const category = budgetCategories.find(c => c.id === categoryId);
     if (!category) return null;
-
     const typeColors = {
       revenue: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-200',
       expense: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900 dark:text-red-200',
       capex: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-200'
     };
-
     return (
       <Badge variant="outline" className={typeColors[category.category_type]}>
         <Link className="w-3 h-3 mr-1" />
@@ -397,7 +345,6 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
       </Badge>
     );
   };
-
   if (!companyId && !loading) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center p-8">
@@ -407,7 +354,6 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
       </div>
     );
   }
-
   return (
     <Card>
       <CardHeader>
@@ -450,7 +396,6 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
             )}
           </div>
         </div>
-
         <div className="mt-4 flex flex-col md:flex-row gap-2">
           <div className="relative flex-grow">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -493,7 +438,6 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
           </Select>
         </div>
       </CardHeader>
-
       <CardContent>
         {loading ? (
           <Table>
@@ -560,7 +504,6 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
                 {filteredAccounts?.map((account) => {
                   const currentMapping = accountMappings.get(account.account_number);
                   const isSaving = savingMapping === account.account_number;
-
                   return (
                     <TableRow key={account.id}>
                       <TableCell className="font-mono text-sm">{account.account_number}</TableCell>
@@ -588,7 +531,6 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
                                   Aucune catégorie
                                 </span>
                               </SelectItem>
-
                               {Object.entries(categoriesByType).map(([type, cats]) => (
                                 <React.Fragment key={type}>
                                   <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
@@ -618,7 +560,6 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
           </div>
         )}
       </CardContent>
-
       {/* Modale d'ajout de compte auxiliaire */}
       {showAddAccountModal && createPortal(
         <div

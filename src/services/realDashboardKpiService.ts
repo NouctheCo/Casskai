@@ -3,11 +3,10 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import { supabase } from '@/lib/supabase';
 import type { DashboardMetric, DashboardChart } from '@/types/enterprise-dashboard.types';
 import { kpiCacheService } from './kpiCacheService';
-
+import { logger } from '@/lib/logger';
 export interface RealKPIData {
   revenue_ytd: number;
   revenue_growth: number;
@@ -21,7 +20,6 @@ export interface RealKPIData {
   top_clients: { name: string; amount: number }[];
   expense_breakdown: { category: string; amount: number }[];
 }
-
 /**
  * Service de calcul des KPIs réels depuis la base de données
  */
@@ -34,14 +32,12 @@ export class RealDashboardKpiService {
     // 🎯 NOUVEAU: Vérifier le cache en premier
     const cachedData = kpiCacheService.getCache(companyId);
     if (cachedData && kpiCacheService.isCacheValid(companyId)) {
-      console.log('[RealDashboardKpiService] Cache KPI utilisé pour', companyId);
+      logger.debug('RealDashboardKpi', '[RealDashboardKpiService] Cache KPI utilisé pour', companyId);
       return cachedData;
     }
-
     const year = fiscalYear || new Date().getFullYear();
     const startOfYear = `${year}-01-01`;
     const endOfYear = `${year}-12-31`;
-
     // Calculer en parallèle pour optimiser les performances
     const [
       revenueData,
@@ -64,22 +60,18 @@ export class RealDashboardKpiService {
       this.getTopClients(companyId, startOfYear, endOfYear),
       this.getExpenseBreakdown(companyId, startOfYear, endOfYear),
     ]);
-
     // Calculer le taux de croissance
     const revenue_growth = previousRevenueData > 0
       ? ((revenueData - previousRevenueData) / previousRevenueData) * 100
       : 0;
-
     // Calculer la marge bénéficiaire
     const profit_margin = revenueData > 0
       ? ((revenueData - purchasesData) / revenueData) * 100
       : 0;
-
     // Calculer le runway (en jours)
     const monthlyBurn = purchasesData / 12;
     const dailyBurn = monthlyBurn / 30;
     const cash_runway_days = dailyBurn > 0 ? Math.floor(cashData / dailyBurn) : 999;
-
     const result = {
       revenue_ytd: revenueData,
       revenue_growth,
@@ -93,91 +85,122 @@ export class RealDashboardKpiService {
       top_clients: topClients,
       expense_breakdown: expenseBreakdown,
     };
-
     // 🎯 NOUVEAU: Sauvegarder en cache
     kpiCacheService.setCache(companyId, result);
-
     return result;
   }
-
   /**
    * Calcule le chiffre d'affaires sur une période
-   * SOURCE: Écritures comptables (comptes de classe 7) via chart_of_accounts.current_balance
+   * SOURCE PRIMAIRE: Factures de vente (invoices)
+   * Les écritures comptables sont utilisées en fallback
    */
   private async calculateRevenue(
     companyId: string,
-    _startDate: string,
-    _endDate: string
+    startDate: string,
+    endDate: string
   ): Promise<number> {
     try {
-      // NOUVELLE APPROCHE: Lire depuis les écritures comptables (source de vérité)
-      // Les comptes de classe 7 = Produits (CA)
-      const { data, error } = await supabase
+      // APPROCHE 1: Lire depuis les factures (source de vérité métier)
+      const { data: invoices, error: invoicesError } = await supabase
+        .from('invoices')
+        .select('total_incl_tax, status, invoice_type')
+        .eq('company_id', companyId)
+        .eq('invoice_type', 'sale')
+        .in('status', ['sent', 'paid', 'partially_paid'])
+        .neq('status', 'cancelled')
+        .gte('invoice_date', startDate)
+        .lte('invoice_date', endDate);
+
+      if (!invoicesError && invoices && invoices.length > 0) {
+        const totalRevenue = invoices.reduce((sum, inv) =>
+          sum + Number(inv.total_incl_tax || 0), 0);
+        logger.debug('RealDashboardKpi', `[calculateRevenue] From invoices: ${totalRevenue} € (${invoices.length} factures)`);
+        return totalRevenue;
+      }
+
+      // APPROCHE 2 (Fallback): Lire depuis les comptes comptables classe 7
+      const { data: accounts, error: accountsError } = await supabase
         .from('chart_of_accounts')
         .select('current_balance, account_number')
         .eq('company_id', companyId)
         .eq('account_class', 7)
         .eq('is_active', true);
 
-      if (error) {
-        console.error('Error calculating revenue from accounting:', error);
-        return 0;
+      if (!accountsError && accounts) {
+        const totalRevenue = accounts.reduce((sum, account) =>
+          sum + Math.abs(account.current_balance || 0), 0);
+        logger.debug('RealDashboardKpi', `[calculateRevenue] From accounts: ${totalRevenue} €`);
+        return totalRevenue;
       }
 
-      // Le current_balance est automatiquement mis à jour par le trigger
-      // Pour les comptes de produits (classe 7), le solde = Crédit - Débit
-      const totalRevenue = data?.reduce((sum, account) => {
-        return sum + Math.abs(account.current_balance || 0);
-      }, 0) || 0;
-
-      console.log(`[realDashboardKpiService] Revenue calculated from ${data?.length || 0} revenue accounts: ${totalRevenue} €`);
-
-      return totalRevenue;
+      return 0;
     } catch (error) {
-      console.error('Exception calculating revenue:', error);
+      logger.error('RealDashboardKpi', 'Exception calculating revenue:', error);
       return 0;
     }
   }
-
   /**
    * Calcule le total des achats/charges sur une période
-   * SOURCE: Écritures comptables (comptes de classe 6) via chart_of_accounts.current_balance
+   * SOURCE PRIMAIRE: Factures d'achat ou table purchases
    */
   private async calculatePurchases(
     companyId: string,
-    _startDate: string,
-    _endDate: string
+    startDate: string,
+    endDate: string
   ): Promise<number> {
     try {
-      // NOUVELLE APPROCHE: Lire depuis les écritures comptables (source de vérité)
-      // Les comptes de classe 6 = Charges (achats, dépenses)
-      const { data, error } = await supabase
+      // APPROCHE 1: Lire depuis la table purchases
+      const { data: purchases, error: purchasesError } = await supabase
+        .from('purchases')
+        .select('total_incl_tax, total_amount')
+        .eq('company_id', companyId)
+        .gte('purchase_date', startDate)
+        .lte('purchase_date', endDate);
+
+      if (!purchasesError && purchases && purchases.length > 0) {
+        const totalExpenses = purchases.reduce((sum, p) =>
+          sum + Number(p.total_incl_tax || p.total_amount || 0), 0);
+        logger.debug('RealDashboardKpi', `[calculatePurchases] From purchases: ${totalExpenses} €`);
+        return totalExpenses;
+      }
+
+      // APPROCHE 2: Lire depuis les factures d'achat
+      const { data: invoices, error: invoicesError } = await supabase
+        .from('invoices')
+        .select('total_incl_tax')
+        .eq('company_id', companyId)
+        .eq('invoice_type', 'purchase')
+        .in('status', ['sent', 'paid', 'partially_paid'])
+        .gte('invoice_date', startDate)
+        .lte('invoice_date', endDate);
+
+      if (!invoicesError && invoices && invoices.length > 0) {
+        const totalExpenses = invoices.reduce((sum, inv) =>
+          sum + Number(inv.total_incl_tax || 0), 0);
+        logger.debug('RealDashboardKpi', `[calculatePurchases] From invoices: ${totalExpenses} €`);
+        return totalExpenses;
+      }
+
+      // APPROCHE 3 (Fallback): Comptes classe 6
+      const { data: accounts, error: accountsError } = await supabase
         .from('chart_of_accounts')
-        .select('current_balance, account_number')
+        .select('current_balance')
         .eq('company_id', companyId)
         .eq('account_class', 6)
         .eq('is_active', true);
 
-      if (error) {
-        console.error('Error calculating expenses from accounting:', error);
-        return 0;
+      if (!accountsError && accounts) {
+        const totalExpenses = accounts.reduce((sum, account) =>
+          sum + Math.abs(account.current_balance || 0), 0);
+        return totalExpenses;
       }
 
-      // Le current_balance est automatiquement mis à jour par le trigger
-      // Pour les comptes de charges (classe 6), le solde = Débit - Crédit
-      const totalExpenses = data?.reduce((sum, account) => {
-        return sum + Math.abs(account.current_balance || 0);
-      }, 0) || 0;
-
-      console.log(`[realDashboardKpiService] Expenses calculated from ${data?.length || 0} expense accounts: ${totalExpenses} €`);
-
-      return totalExpenses;
+      return 0;
     } catch (error) {
-      console.error('Exception calculating expenses:', error);
+      logger.error('RealDashboardKpi', 'Exception calculating purchases:', error);
       return 0;
     }
   }
-
   /**
    * Compte le nombre de factures sur une période
    */
@@ -193,136 +216,138 @@ export class RealDashboardKpiService {
         .eq('company_id', companyId)
         .gte('invoice_date', startDate)
         .lte('invoice_date', endDate);
-
       if (error) {
-        console.error('Error counting invoices:', error);
+        logger.error('RealDashboardKpi', 'Error counting invoices:', error);
         return 0;
       }
-
       return count || 0;
     } catch (error) {
-      console.error('Exception counting invoices:', error);
+      logger.error('RealDashboardKpi', 'Exception counting invoices:', error);
       return 0;
     }
   }
-
   /**
    * Compte le nombre de factures en attente de paiement
    */
   private async countPendingInvoices(companyId: string): Promise<number> {
     try {
-      const { count, error } = await supabase
+      const { count, error} = await supabase
         .from('invoices')
         .select('*', { count: 'exact', head: true })
         .eq('company_id', companyId)
-        .in('status', ['draft', 'sent', 'overdue']);
-
+        .eq('invoice_type', 'sale') // ✅ Seulement les factures de vente
+        .in('status', ['draft', 'sent', 'overdue'])
+        .neq('status', 'cancelled'); // ✅ Exclure les factures annulées
       if (error) {
-        console.error('Error counting pending invoices:', error);
+        logger.error('RealDashboardKpi', 'Error counting pending invoices:', error);
         return 0;
       }
-
       return count || 0;
     } catch (error) {
-      console.error('Exception counting pending invoices:', error);
+      logger.error('RealDashboardKpi', 'Exception counting pending invoices:', error);
       return 0;
     }
   }
-
   /**
    * Calcule le solde de trésorerie actuel
-   * SOURCE: Écritures comptables (comptes de classe 5) via chart_of_accounts.current_balance
+   * SOURCE: Comptes bancaires
    */
   private async calculateCashBalance(companyId: string): Promise<number> {
     try {
-      // NOUVELLE APPROCHE: Lire depuis les écritures comptables (source de vérité)
-      // Les comptes de classe 5 = Trésorerie (banques, caisses)
-      const { data, error } = await supabase
+      // Lire depuis les comptes bancaires
+      const { data: bankAccounts, error: bankError } = await supabase
+        .from('bank_accounts')
+        .select('current_balance')
+        .eq('company_id', companyId)
+        .eq('is_active', true);
+
+      if (!bankError && bankAccounts && bankAccounts.length > 0) {
+        const totalCash = bankAccounts.reduce((sum, account) =>
+          sum + Number(account.current_balance || 0), 0);
+        logger.debug('RealDashboardKpi', `[calculateCashBalance] From bank_accounts: ${totalCash} €`);
+        return totalCash;
+      }
+
+      // Fallback: Comptes classe 5 (trésorerie comptable)
+      const { data: accounts, error } = await supabase
         .from('chart_of_accounts')
-        .select('current_balance, account_number, account_name')
+        .select('current_balance')
         .eq('company_id', companyId)
         .eq('account_class', 5)
         .eq('is_active', true);
 
-      if (error) {
-        console.error('Error calculating cash balance from accounting:', error);
-        return 0;
+      if (!error && accounts) {
+        return accounts.reduce((sum, account) =>
+          sum + Math.abs(account.current_balance || 0), 0);
       }
 
-      // Le current_balance est automatiquement mis à jour par le trigger
-      // Pour les comptes de trésorerie (classe 5), le solde = Débit - Crédit
-      const totalCash = data?.reduce((sum, account) => {
-        return sum + (account.current_balance || 0);
-      }, 0) || 0;
-
-      console.log(`[realDashboardKpiService] Cash balance calculated from ${data?.length || 0} cash accounts: ${totalCash} €`);
-
-      return totalCash;
+      return 0;
     } catch (error) {
-      console.error('Exception calculating cash balance:', error);
+      logger.error('RealDashboardKpi', 'Exception calculating cash balance:', error);
       return 0;
     }
   }
-
   /**
-   * Calcule le CA mensuel pour les graphiques
-   * SOURCE: Écritures comptables (comptes de classe 7) agrégées par mois
+   * Calcule le CA mensuel pour le graphique
    */
   private async calculateMonthlyRevenue(
     companyId: string,
     year: number
   ): Promise<{ month: string; amount: number }[]> {
     try {
-      const monthlyData: { month: string; amount: number }[] = [];
+      const startDate = `${year}-01-01`;
+      const endDate = `${year}-12-31`;
 
-      for (let month = 1; month <= 12; month++) {
-        const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
-        const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+      const { data: invoices, error } = await supabase
+        .from('invoices')
+        .select('total_incl_tax, invoice_date')
+        .eq('company_id', companyId)
+        .eq('invoice_type', 'sale')
+        .in('status', ['sent', 'paid', 'partially_paid'])
+        .gte('invoice_date', startDate)
+        .lte('invoice_date', endDate);
 
-        // Lire depuis les écritures comptables pour ce mois
-        const { data, error } = await supabase
-          .from('journal_entry_lines')
-          .select(`
-            credit_amount,
-            debit_amount,
-            account_number,
-            journal_entries!inner (
-              entry_date,
-              status,
-              company_id
-            ),
-            chart_of_accounts!inner (
-              account_class
-            )
-          `)
-          .eq('journal_entries.company_id', companyId)
-          .gte('journal_entries.entry_date', startDate)
-          .lte('journal_entries.entry_date', endDate)
-          .in('journal_entries.status', ['posted', 'imported'])
-          .eq('chart_of_accounts.account_class', 7);
-
-        if (error) {
-          console.error(`Error calculating revenue for month ${month}:`, error);
-          monthlyData.push({ month: month.toString(), amount: 0 });
-        } else {
-          // Pour les comptes de classe 7 (produits), CA = Crédit - Débit
-          const amount = data?.reduce((sum, line) => {
-            return sum + ((line.credit_amount || 0) - (line.debit_amount || 0));
-          }, 0) || 0;
-
-          monthlyData.push({ month: month.toString(), amount: Math.abs(amount) });
-        }
+      if (error || !invoices) {
+        logger.error('RealDashboardKpi', 'Error fetching monthly revenue:', error);
+        // Retourner les 12 mois à 0
+        return Array.from({ length: 12 }, (_, i) => ({
+          month: String(i + 1),
+          amount: 0
+        }));
       }
 
-      return monthlyData;
+      // Initialiser tous les mois à 0
+      const monthlyData = new Map<number, number>();
+      for (let i = 1; i <= 12; i++) {
+        monthlyData.set(i, 0);
+      }
+
+      // Agréger par mois
+      invoices.forEach((invoice) => {
+        const date = new Date(invoice.invoice_date);
+        const month = date.getMonth() + 1;
+        const amount = Number(invoice.total_incl_tax || 0);
+        monthlyData.set(month, (monthlyData.get(month) || 0) + amount);
+      });
+
+      // Convertir en tableau
+      return Array.from(monthlyData.entries())
+        .sort((a, b) => a[0] - b[0])
+        .map(([month, amount]) => ({
+          month: String(month),
+          amount
+        }));
     } catch (error) {
-      console.error('Exception calculating monthly revenue:', error);
-      return Array.from({ length: 12 }, (_, i) => ({ month: (i + 1).toString(), amount: 0 }));
+      logger.error('RealDashboardKpi', 'Exception calculating monthly revenue:', error);
+      return Array.from({ length: 12 }, (_, i) => ({
+        month: String(i + 1),
+        amount: 0
+      }));
     }
   }
-
   /**
    * Récupère les top clients par CA
+   * ✅ Utilise la table customers via la FK customer_id au lieu de la VIEW third_parties
    */
   private async getTopClients(
     companyId: string,
@@ -330,41 +355,41 @@ export class RealDashboardKpiService {
     endDate: string
   ): Promise<{ name: string; amount: number }[]> {
     try {
+      // ✅ Utiliser la table customers au lieu de la VIEW third_parties
       const { data, error } = await supabase
         .from('invoices')
         .select(`
           total_incl_tax,
-          third_parties!inner(name)
+          customer_id,
+          customers!inner(id, name)
         `)
         .eq('company_id', companyId)
-        .in('status', ['paid', 'partially_paid'])
+        .eq('invoice_type', 'sale') // ✅ Seulement les factures de vente
+        .in('status', ['sent', 'paid', 'partially_paid']) // ✅ Inclure aussi 'sent'
+        .neq('status', 'cancelled') // ✅ Exclure les factures annulées
         .gte('invoice_date', startDate)
         .lte('invoice_date', endDate);
-
       if (error) {
-        console.error('Error fetching top clients:', error);
+        logger.error('RealDashboardKpi', 'Error fetching top clients:', error);
         return [];
       }
-
       // Agréger par client
       const clientMap = new Map<string, number>();
       data?.forEach((invoice: any) => {
-        const clientName = invoice.third_parties?.name || 'Client inconnu';
+        const clientName = invoice.customers?.name || 'Client inconnu';
         const amount = invoice.total_incl_tax || 0;
         clientMap.set(clientName, (clientMap.get(clientName) || 0) + amount);
       });
-
       // Convertir en tableau et trier
       return Array.from(clientMap.entries())
         .map(([name, amount]) => ({ name, amount }))
         .sort((a, b) => b.amount - a.amount)
         .slice(0, 5); // Top 5 clients
     } catch (error) {
-      console.error('Exception fetching top clients:', error);
+      logger.error('RealDashboardKpi', 'Exception fetching top clients:', error);
       return [];
     }
   }
-
   /**
    * Récupère la répartition des dépenses par catégorie
    */
@@ -374,36 +399,62 @@ export class RealDashboardKpiService {
     endDate: string
   ): Promise<{ category: string; amount: number }[]> {
     try {
-      const { data, error } = await supabase
+      // Try purchases table first
+      const { data: purchasesData, error: purchasesError } = await supabase
         .from('purchases')
-        .select('total_amount, description')
+        .select('total_incl_tax, total_amount, description')
         .eq('company_id', companyId)
         .gte('purchase_date', startDate)
         .lte('purchase_date', endDate);
 
-      if (error) {
-        console.error('Error fetching expense breakdown:', error);
+      if (!purchasesError && purchasesData && purchasesData.length > 0) {
+        // Agréger par catégorie (utiliser description comme proxy pour la catégorie)
+        const categoryMap = new Map<string, number>();
+        purchasesData.forEach((purchase: any) => {
+          const category = purchase.description || 'Non catégorisé';
+          const amount = purchase.total_incl_tax || purchase.total_amount || 0; // ✅ Use total_incl_tax first
+          categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
+        });
+        // Convertir en tableau et trier
+        return Array.from(categoryMap.entries())
+          .map(([category, amount]) => ({ category, amount }))
+          .sort((a, b) => b.amount - a.amount)
+          .slice(0, 5); // Top 5 categories
+      }
+
+      // Fallback: Use invoices with invoice_type='purchase'
+      const { data: invoicesData, error: invoicesError } = await supabase
+        .from('invoices')
+        .select('total_incl_tax, description, supplier:suppliers(name)')
+        .eq('company_id', companyId)
+        .eq('invoice_type', 'purchase')
+        .in('status', ['sent', 'paid', 'partially_paid'])
+        .gte('invoice_date', startDate)
+        .lte('invoice_date', endDate);
+
+      if (invoicesError || !invoicesData) {
+        logger.error('RealDashboardKpi', 'Error fetching expense breakdown:', invoicesError);
         return [];
       }
 
-      // Agréger par catégorie (utiliser description comme proxy pour la catégorie)
+      // Agréger par fournisseur
       const categoryMap = new Map<string, number>();
-      data?.forEach((purchase: any) => {
-        const category = purchase.description || 'Non catégorisé';
-        const amount = purchase.total_amount || 0;
+      invoicesData.forEach((invoice: any) => {
+        const category = invoice.supplier?.name || invoice.description || 'Non catégorisé';
+        const amount = invoice.total_incl_tax || 0;
         categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
       });
 
       // Convertir en tableau et trier
       return Array.from(categoryMap.entries())
         .map(([category, amount]) => ({ category, amount }))
-        .sort((a, b) => b.amount - a.amount);
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 5); // Top 5 categories
     } catch (error) {
-      console.error('Exception fetching expense breakdown:', error);
+      logger.error('RealDashboardKpi', 'Exception fetching expense breakdown:', error);
       return [];
     }
   }
-
   /**
    * Génère les métriques pour le dashboard
    * @param kpiData Données KPI calculées
@@ -423,7 +474,6 @@ export class RealDashboardKpiService {
       };
       return fallbacks[key] || key;
     });
-
     return [
       {
         id: 'revenue_ytd',
@@ -475,7 +525,6 @@ export class RealDashboardKpiService {
       },
     ];
   }
-
   /**
    * Génère les graphiques pour le dashboard
    * @param kpiData Données KPI calculées
@@ -493,13 +542,23 @@ export class RealDashboardKpiService {
       return fallbacks[key] || key;
     });
 
+    // Helper to get month names in French
+    const getMonthName = (monthNumber: string | number): string => {
+      const monthNames = [
+        'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+        'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+      ];
+      const index = typeof monthNumber === 'string' ? parseInt(monthNumber) - 1 : monthNumber - 1;
+      return monthNames[index] || `Mois ${monthNumber}`;
+    };
+
     return [
       {
         id: 'monthly_revenue',
         type: 'line',
         title: translate('dashboard.operational.charts.monthly_revenue'),
         data: kpiData.monthly_revenue.map((item) => ({
-          label: `${translate('dashboard.operational.periods.month')} ${item.month}`,
+          label: getMonthName(item.month),
           value: item.amount,
         })),
         color: '#3b82f6',
@@ -526,6 +585,5 @@ export class RealDashboardKpiService {
     ];
   }
 }
-
 // Export singleton instance
 export const realDashboardKpiService = new RealDashboardKpiService();

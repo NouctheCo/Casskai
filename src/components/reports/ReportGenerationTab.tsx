@@ -2,7 +2,6 @@
  * Report Generation Tab
  * Onglet de génération de rapports avec sauvegarde automatique
  */
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,15 +18,13 @@ import { reportArchiveService } from '@/services/reportArchiveService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { format } from 'date-fns';
-
+import { logger } from '@/lib/logger';
 interface ReportGenerationTabProps {
   companyId: string;
   refreshTrigger?: number;
   onReportGenerated?: () => void;
 }
-
 type ReportType = 'balance_sheet' | 'income_statement' | 'trial_balance' | 'general_ledger' | 'vat_report';
-
 export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _refreshTrigger, onReportGenerated }: ReportGenerationTabProps) {
   const { currentCompany } = useAuth();
   const { showToast } = useToast();
@@ -37,7 +34,6 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   const [reportNotes, setReportNotes] = useState('');
-
   const accountingReports = [
     {
       type: 'balance_sheet' as ReportType,
@@ -90,12 +86,16 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
       estimatedTime: '4-5 min'
     }
   ];
-
   const getPeriodDates = (period: string) => {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
-
+    logger.debug('ReportGenerationTab - Calculating period dates', {
+      period,
+      currentYear,
+      currentMonth: currentMonth + 1,
+      currentDate: now.toISOString().split('T')[0]
+    });
     switch (period) {
       case 'current-month':
         return {
@@ -123,11 +123,15 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
           end: new Date(year, month + 1, 0).toISOString().split('T')[0]
         };
       }
-      case 'last-year':
-        return {
-          start: new Date(currentYear - 1, 0, 1).toISOString().split('T')[0],
-          end: new Date(currentYear - 1, 11, 31).toISOString().split('T')[0]
+      case 'last-year': {
+        const lastYear = currentYear - 1;
+        const dates = {
+          start: new Date(lastYear, 0, 1).toISOString().split('T')[0],
+          end: new Date(lastYear, 11, 31).toISOString().split('T')[0]
         };
+        logger.debug('ReportGenerationTab', `📅 [ReportGeneration] last-year calculated:`, { lastYear, ...dates });
+        return dates;
+      }
       case 'custom':
         return {
           start: customStartDate,
@@ -140,73 +144,64 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
         };
     }
   };
-
   const handleGenerateReport = async (reportType: ReportType, reportName: string) => {
     setIsGenerating(reportType);
-    console.log('[ReportGeneration] Starting report generation:', { reportType, reportName });
-
+    logger.debug('ReportGenerationTab', '[ReportGeneration] Starting report generation:', { reportType, reportName });
     try {
       const periodDates = getPeriodDates(selectedPeriod);
-      console.log('[ReportGeneration] Period dates:', periodDates);
-
+      logger.debug('ReportGenerationTab', '[ReportGeneration] Period dates:', periodDates);
       if (selectedPeriod === 'custom' && (!customStartDate || !customEndDate)) {
-        console.log('[ReportGeneration] Missing custom dates');
+        logger.debug('ReportGenerationTab', '[ReportGeneration] Missing custom dates');
         showToast('Veuillez sélectionner les dates de début et fin', 'error');
         setIsGenerating(null);
         return;
       }
-
       if (!currentCompany?.id) {
-        console.error('[ReportGeneration] No company selected');
+        logger.error('ReportGenerationTab', '[ReportGeneration] No company selected');
         throw new Error('Aucune entreprise sélectionnée');
       }
-
-      console.log('[ReportGeneration] Company ID:', currentCompany.id);
-
+      logger.debug('ReportGenerationTab', '[ReportGeneration] Company ID:', currentCompany.id);
       const filters: ReportFilters = {
         companyId: currentCompany.id,
         startDate: periodDates.start,
         endDate: periodDates.end
       };
-
       const exportOptions = {
         format: 'pdf' as const,
         title: `${reportName} - ${selectedPeriod}`,
         companyInfo: {
           name: currentCompany.name,
-          address: currentCompany.address,
-          phone: currentCompany.phone,
-          email: currentCompany.email
+          address: currentCompany.address ?? undefined,
+          phone: currentCompany.phone ?? undefined,
+          email: currentCompany.email ?? undefined
         }
       };
-
       // Générer le rapport
-      console.log('[ReportGeneration] Generating report with filters:', filters);
+      logger.debug('ReportGenerationTab', '[ReportGeneration] Generating report with filters:', filters);
       let downloadUrl: string;
       switch (reportType) {
         case 'balance_sheet':
-          console.log('[ReportGeneration] Calling generateBalanceSheet...');
+          logger.debug('ReportGenerationTab', '[ReportGeneration] Calling generateBalanceSheet...');
           downloadUrl = await reportGenerationService.generateBalanceSheet(filters, exportOptions);
           break;
         case 'income_statement':
-          console.log('[ReportGeneration] Calling generateIncomeStatement...');
+          logger.debug('ReportGenerationTab', '[ReportGeneration] Calling generateIncomeStatement...');
           downloadUrl = await reportGenerationService.generateIncomeStatement(filters, exportOptions);
           break;
         case 'trial_balance':
-          console.log('[ReportGeneration] Calling generateTrialBalance...');
+          logger.debug('ReportGenerationTab', '[ReportGeneration] Calling generateTrialBalance...');
           downloadUrl = await reportGenerationService.generateTrialBalance(filters, exportOptions);
           break;
         case 'general_ledger':
-          console.log('[ReportGeneration] Calling generateGeneralLedger...');
+          logger.debug('ReportGenerationTab', '[ReportGeneration] Calling generateGeneralLedger...');
           downloadUrl = await reportGenerationService.generateGeneralLedger(filters, exportOptions);
           break;
         default:
           throw new Error('Type de rapport non supporté');
       }
-      console.log('[ReportGeneration] Report generated, download URL:', downloadUrl);
-
+      logger.debug('ReportGenerationTab', '[ReportGeneration] Report generated, download URL:', downloadUrl);
       // Sauvegarder dans la base de données
-      console.log('[ReportGeneration] Saving report to database...');
+      logger.debug('ReportGenerationTab', '[ReportGeneration] Saving report to database...');
       const fiscalYear = new Date(periodDates.start).getFullYear();
       const saveResult = await reportArchiveService.createGeneratedReport({
         company_id: currentCompany.id,
@@ -230,48 +225,41 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
         notes: reportNotes || undefined,
         tags: [reportType, `FY${fiscalYear}`, selectedPeriod]
       });
-
       if (!saveResult.success) {
-        console.error('[ReportGeneration] Failed to save report metadata:', saveResult.error);
+        logger.error('ReportGenerationTab', '[ReportGeneration] Failed to save report metadata:', saveResult.error);
         // Continue anyway - le fichier est généré
       } else {
-        console.log('[ReportGeneration] Report saved successfully to database');
+        logger.debug('ReportGenerationTab', '[ReportGeneration] Report saved successfully to database');
       }
-
       // Télécharger automatiquement
       if (downloadUrl) {
-        console.log('[ReportGeneration] Triggering download...');
+        logger.debug('ReportGenerationTab', '[ReportGeneration] Triggering download...');
         const link = document.createElement('a');
         link.href = downloadUrl;
         link.download = `${reportName}_${format(new Date(), 'yyyyMMdd')}.pdf`;
         link.click();
       }
-
-      console.log('[ReportGeneration] Showing success toast...');
+      logger.debug('ReportGenerationTab', '[ReportGeneration] Showing success toast...');
       showToast('Rapport généré avec succès', 'success');
-      console.log('[ReportGeneration] Success toast shown');
-
+      logger.debug('ReportGenerationTab', '[ReportGeneration] Success toast shown');
       // Réinitialiser les notes
       setReportNotes('');
-
       // Notifier le parent
       if (onReportGenerated) {
         onReportGenerated();
       }
-
     } catch (error) {
-      console.error('[ReportGeneration] Error generating report:', error);
-      console.error('[ReportGeneration] Error details:', {
+      logger.error('ReportGenerationTab', 'Error generating report', {
         message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
+        stack: error instanceof Error ? error.stack : undefined,
+        error
       });
       showToast("Impossible de générer le rapport. Veuillez réessayer.", 'error');
     } finally {
-      console.log('[ReportGeneration] Cleaning up, setting isGenerating to null');
+      logger.debug('ReportGenerationTab', '[ReportGeneration] Cleaning up, setting isGenerating to null');
       setIsGenerating(null);
     }
   };
-
   const getColorClasses = (color: string) => {
     const colors: Record<string, string> = {
       blue: 'from-blue-500 to-blue-600',
@@ -285,11 +273,9 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
     };
     return colors[color] || colors.blue;
   };
-
   const filteredReports = selectedReportType === 'all'
     ? accountingReports
     : accountingReports.filter(r => r.type === selectedReportType);
-
   return (
     <div className="space-y-6">
       {/* Filtres et configuration */}
@@ -317,7 +303,6 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
                 </SelectContent>
               </Select>
             </div>
-
             <div>
               <label className="text-sm font-medium mb-2 block">Filtrer par type</label>
               <Select value={selectedReportType} onValueChange={(v) => setSelectedReportType(v as ReportType | 'all')}>
@@ -336,7 +321,6 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
               </Select>
             </div>
           </div>
-
           {selectedPeriod === 'custom' && (
             <div className="grid gap-4 md:grid-cols-2">
               <div>
@@ -357,7 +341,6 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
               </div>
             </div>
           )}
-
           <div>
             <label className="text-sm font-medium mb-2 block">Notes (optionnel)</label>
             <Textarea
@@ -369,7 +352,6 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
           </div>
         </CardContent>
       </Card>
-
       {/* Grille des rapports */}
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {filteredReports.map((report) => (
@@ -388,13 +370,11 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
                     </Badge>
                   </div>
                 </div>
-
                 <div className="space-y-2">
                   <h3 className="font-semibold text-lg">{report.name}</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{report.description}</p>
                   <Badge variant="outline" className="text-xs">{report.category}</Badge>
                 </div>
-
                 <Button
                   size="sm"
                   className="w-full"
@@ -418,7 +398,6 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
           </Card>
         ))}
       </div>
-
       {/* Info conformité */}
       <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
         <CardContent className="p-6">

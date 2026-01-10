@@ -8,14 +8,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Employee } from '@/services/hrService';
 import type { DocumentType } from '@/types/hr-documents.types';
-
+import { logger } from '@/lib/logger';
 interface DocumentUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: any) => Promise<boolean>;
   employees: Employee[];
 }
-
 export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
   isOpen,
   onClose,
@@ -34,11 +33,9 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
     tags: '',
     notes: ''
   });
-
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const documentTypes: Record<DocumentType, string> = {
     contract: 'Contrat de travail',
     amendment: 'Avenant au contrat',
@@ -54,50 +51,40 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
     evaluation: 'Document d\'évaluation',
     other: 'Autre'
   };
-
   const validate = () => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.employee_id) newErrors.employee_id = 'Employé requis';
     if (!formData.title.trim()) newErrors.title = 'Titre requis';
     if (!file) newErrors.file = 'Fichier requis';
     if (file && file.size > 10 * 1024 * 1024) {
       newErrors.file = 'Le fichier ne doit pas dépasser 10 MB';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validate() || !file) return;
-
     setIsSubmitting(true);
     try {
       const tagsArray = formData.tags
         ? formData.tags.split(',').map(t => t.trim()).filter(Boolean)
         : [];
-
       const success = await onSubmit({
         ...formData,
         file,
         tags: tagsArray
       });
-
       if (success) {
         onClose();
       }
     } catch (error) {
-      console.error('Error submitting document:', error);
+      logger.error('DocumentUploadModal', 'Error submitting document:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
-
   if (!isOpen) return null;
-
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
@@ -120,7 +107,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
             <X className="h-6 w-6" />
           </button>
         </div>
-
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-6">
@@ -146,7 +132,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{errors.employee_id}</p>
               )}
             </div>
-
             {/* Document Type */}
             <div>
               <Label htmlFor="document_type">Type de document *</Label>
@@ -166,7 +151,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
-
             {/* Title */}
             <div>
               <Label htmlFor="title">Titre *</Label>
@@ -181,7 +165,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{errors.title}</p>
               )}
             </div>
-
             {/* Description */}
             <div>
               <Label htmlFor="description">Description</Label>
@@ -193,7 +176,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                 rows={3}
               />
             </div>
-
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -205,7 +187,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                   onChange={e => setFormData({ ...formData, issue_date: e.target.value })}
                 />
               </div>
-
               <div>
                 <Label htmlFor="expiry_date">Date d'expiration</Label>
                 <Input
@@ -217,7 +198,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                 <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">Optionnel - pour documents temporaires</p>
               </div>
             </div>
-
             {/* File Upload */}
             <div>
               <Label htmlFor="file">Fichier *</Label>
@@ -268,7 +248,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                 <p className="text-sm text-red-500 mt-1">{errors.file}</p>
               )}
             </div>
-
             {/* Tags */}
             <div>
               <Label htmlFor="tags">Tags</Label>
@@ -279,7 +258,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                 placeholder="Séparez par des virgules: urgent, confidentiel, 2025"
               />
             </div>
-
             {/* Checkboxes */}
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
@@ -294,7 +272,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                   Document confidentiel
                 </Label>
               </div>
-
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="requires_signature"
@@ -308,7 +285,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                 </Label>
               </div>
             </div>
-
             {/* Notes */}
             <div>
               <Label htmlFor="notes">Notes internes</Label>
@@ -320,7 +296,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                 rows={2}
               />
             </div>
-
             {/* Info */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-900/20">
               <p className="text-sm text-blue-900 dark:text-blue-100">
@@ -328,7 +303,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
               </p>
             </div>
           </div>
-
           {/* Footer */}
           <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
             <Button

@@ -2,7 +2,6 @@
  * Dropdown de sélection de compte comptable pour le module Budget
  * Permet de lier chaque ligne budgétaire à un compte du plan comptable
  */
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, ChevronDown, Plus, Loader2 } from 'lucide-react';
 import { ChartOfAccountsService } from '@/services/chartOfAccountsService';
@@ -14,12 +13,12 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
+import { logger } from '@/lib/logger';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-
 export interface AccountOption {
   id: string;
   account_number: string;
@@ -28,7 +27,6 @@ export interface AccountOption {
   budget_category: string | null;
   account_class: number | null;
 }
-
 interface AccountSelectDropdownProps {
   value: string; // account_id sélectionné
   companyId: string;
@@ -38,7 +36,6 @@ interface AccountSelectDropdownProps {
   disabled?: boolean;
   onCreateNew?: () => void;
 }
-
 export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
   value,
   companyId,
@@ -52,11 +49,9 @@ export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
   const [accounts, setAccounts] = useState<AccountOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-
   useEffect(() => {
     loadAccounts();
   }, [companyId, filterType]);
-
   const loadAccounts = async () => {
     try {
       setLoading(true);
@@ -64,7 +59,6 @@ export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
       const allAccounts = await chartService.getAccounts(companyId, {
         isActive: true
       });
-
       // Filtrer selon le type demandé
       let filteredAccounts = allAccounts;
       if (filterType === 'revenue') {
@@ -72,7 +66,6 @@ export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
       } else if (filterType === 'expense') {
         filteredAccounts = allAccounts.filter(acc => acc.account_class === 6);
       }
-
       // Map to AccountOption to ensure all required fields are present
       const mappedAccounts: AccountOption[] = filteredAccounts.map(acc => ({
         id: acc.id,
@@ -84,16 +77,14 @@ export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
       }));
       setAccounts(mappedAccounts);
     } catch (error) {
-      console.error('Error loading accounts:', error);
+      logger.error('AccountSelectDropdown', 'Error loading accounts:', error);
     } finally {
       setLoading(false);
     }
   };
-
   // Grouper les comptes par catégorie budget
   const groupedAccounts = useMemo(() => {
     const groups: Record<string, AccountOption[]> = {};
-
     accounts.forEach(account => {
       const category = account.budget_category || 'Non catégorisé';
       if (!groups[category]) {
@@ -101,7 +92,6 @@ export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
       }
       groups[category].push(account);
     });
-
     // Trier les groupes et les comptes à l'intérieur
     return Object.keys(groups)
       .sort()
@@ -112,11 +102,9 @@ export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
         )
       }));
   }, [accounts]);
-
   // Filtrer selon la recherche
   const filteredGroups = useMemo(() => {
     if (!search) return groupedAccounts;
-
     const searchLower = search.toLowerCase();
     return groupedAccounts
       .map(group => ({
@@ -130,14 +118,11 @@ export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
       }))
       .filter(group => group.accounts.length > 0);
   }, [groupedAccounts, search]);
-
   // Trouver le compte sélectionné
   const selectedAccount = accounts.find(acc => acc.id === value);
-
   const displayValue = selectedAccount
     ? `${selectedAccount.account_number} - ${selectedAccount.account_name}`
     : placeholder;
-
   return (
     <div className="w-full">
       <Popover open={open} onOpenChange={setOpen}>
@@ -162,7 +147,6 @@ export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-
         <PopoverContent className="w-[600px] p-0" align="start">
           <Command>
             <div className="flex items-center border-b px-3">
@@ -175,7 +159,6 @@ export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
                 className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
-
             <CommandList className="max-h-[400px] overflow-y-auto">
               {filteredGroups.length === 0 ? (
                 <CommandEmpty>
@@ -231,7 +214,6 @@ export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
                       ))}
                     </CommandGroup>
                   ))}
-
                   {onCreateNew && (
                     <div className="border-t p-2">
                       <Button
@@ -254,7 +236,6 @@ export const AccountSelectDropdown: React.FC<AccountSelectDropdownProps> = ({
           </Command>
         </PopoverContent>
       </Popover>
-
       {selectedAccount && selectedAccount.budget_category && (
         <p className="mt-1 text-xs text-muted-foreground">
           Catégorie : {selectedAccount.budget_category}

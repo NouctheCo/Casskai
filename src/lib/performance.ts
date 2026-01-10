@@ -9,34 +9,28 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Performance monitoring and optimization utilities
  */
-
 import { useEffect, useRef } from 'react';
-
+import { logger } from '@/lib/logger';
 /**
  * Track component render performance
  */
 export const useRenderPerformance = (componentName: string) => {
   const renderCount = useRef(0);
   const startTime = useRef(Date.now());
-
   useEffect(() => {
     renderCount.current += 1;
     const renderTime = Date.now() - startTime.current;
-
     if (import.meta.env.DEV && renderTime > 16) {
-      console.warn(
+      logger.warn('performance', 
         `[Performance] ${componentName} rendered ${renderCount.current} times, last render took ${renderTime}ms`
       );
     }
-
     startTime.current = Date.now();
   });
 };
-
 /**
  * Debounce function for search inputs and resize handlers
  */
@@ -45,13 +39,11 @@ export const debounce = <T extends (...args: any[]) => any>(
   wait: number
 ): ((...args: Parameters<T>) => void) => {
   let timeout: ReturnType<typeof setTimeout> | null = null;
-
   return (...args: Parameters<T>) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
 };
-
 /**
  * Throttle function for scroll handlers
  */
@@ -60,7 +52,6 @@ export const throttle = <T extends (...args: any[]) => any>(
   limit: number
 ): ((...args: Parameters<T>) => void) => {
   let inThrottle: boolean;
-
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args);
@@ -69,14 +60,12 @@ export const throttle = <T extends (...args: any[]) => any>(
     }
   };
 };
-
 /**
  * Lazy load images with Intersection Observer
  */
 export const useLazyImage = (src: string): [string | null, boolean] => {
   const imageSrcRef = useRef<string | null>(null);
   const isLoadedRef = useRef(false);
-
   useEffect(() => {
     const img = new Image();
     img.src = src;
@@ -85,25 +74,20 @@ export const useLazyImage = (src: string): [string | null, boolean] => {
       isLoadedRef.current = true;
     };
   }, [src]);
-
   return [imageSrcRef.current, isLoadedRef.current];
 };
-
 /**
  * Measure component mount time
  */
 export const measureComponentMount = (componentName: string) => {
   const startTime = performance.now();
-
   return () => {
     const endTime = performance.now();
     const mountTime = endTime - startTime;
-
     // Ne logger que si trop lent
     if (import.meta.env.DEV && mountTime > 100) {
-      console.warn(`[Mount Time] ${componentName}: ${mountTime.toFixed(2)}ms`);
+      logger.warn('Performance', `[Mount Time] ${componentName}: ${mountTime.toFixed(2)}ms`);
     }
-
     // Send to analytics in production
     if (import.meta.env.PROD && window.plausible) {
       window.plausible('Component Mount', {
@@ -115,7 +99,6 @@ export const measureComponentMount = (componentName: string) => {
     }
   };
 };
-
 /**
  * Detect slow renders and log them
  */
@@ -125,18 +108,16 @@ export const useSlowRenderDetector = (
 ) => {
   useEffect(() => {
     const startTime = performance.now();
-
     return () => {
       const renderTime = performance.now() - startTime;
       if (renderTime > threshold && import.meta.env.DEV) {
-        console.warn(
+        logger.warn('performance', 
           `[Slow Render] ${componentName} took ${renderTime.toFixed(2)}ms (threshold: ${threshold}ms)`
         );
       }
     };
   });
 };
-
 /**
  * Preload critical resources
  */
@@ -148,7 +129,6 @@ export const preloadResource = (href: string, as: string, type?: string) => {
   if (type) link.type = type;
   document.head.appendChild(link);
 };
-
 /**
  * Prefetch route components
  */
@@ -159,7 +139,6 @@ export const prefetchRoute = (routePath: string) => {
   link.href = routePath;
   document.head.appendChild(link);
 };
-
 /**
  * Web Vitals tracking
  */
@@ -204,7 +183,6 @@ export const trackWebVitals = () => {
     });
   }
 };
-
 /**
  * Optimized memo comparison for complex objects
  */
@@ -218,17 +196,13 @@ export const deepEqual = (obj1: any, obj2: any): boolean => {
   ) {
     return false;
   }
-
   const keys1 = Object.keys(obj1);
   const keys2 = Object.keys(obj2);
-
   if (keys1.length !== keys2.length) return false;
-
   for (const key of keys1) {
     if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
       return false;
     }
   }
-
   return true;
 };

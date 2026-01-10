@@ -9,10 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from '../lib/supabase';
 import { AgingReport, ThirdPartyServiceResponse } from '../types/third-parties.types';
-
+import { logger } from '@/lib/logger';
 /**
  * Calculate aging report for third parties (clients/suppliers)
  * Shows outstanding amounts grouped by age (0-30, 31-60, 61-90, 91-120, >120 days)
@@ -24,12 +23,10 @@ export async function getAgingReport(enterpriseId: string): Promise<ThirdPartySe
       .from('third_parties')
       .select('id, name')
       .eq('company_id', enterpriseId);
-
     if (tpError) throw tpError;
     if (!thirdParties || thirdParties.length === 0) {
       return { data: [] };
     }
-
     // Fetch all unpaid journal entries for these third parties
     // Assuming we need to calculate based on journal entries linked to third parties
     // We'll look at accounts in class 4 (third party accounts)
@@ -46,12 +43,9 @@ export async function getAgingReport(enterpriseId: string): Promise<ThirdPartySe
       .eq('company_id', enterpriseId)
       .not('third_party_id', 'is', null)
       .order('entry_date', { ascending: true });
-
     if (entriesError) throw entriesError;
-
     const now = new Date();
     const agingReports: AgingReport[] = [];
-
     // Group entries by third_party_id
     const entriesByThirdParty = (entries || []).reduce((acc, entry) => {
       const tpId = entry.third_party_id!;
@@ -61,15 +55,12 @@ export async function getAgingReport(enterpriseId: string): Promise<ThirdPartySe
       acc[tpId].push(entry);
       return acc;
     }, {} as Record<string, typeof entries>);
-
     // Calculate aging for each third party
     for (const thirdParty of thirdParties) {
       const tpEntries = entriesByThirdParty[thirdParty.id] || [];
-
       if (tpEntries.length === 0) {
         continue; // Skip third parties with no entries
       }
-
       // Calculate balance for each entry and age
       const buckets = {
         current: 0,           // 0-30 days
@@ -78,10 +69,8 @@ export async function getAgingReport(enterpriseId: string): Promise<ThirdPartySe
         bucket_90: 0,         // 91-120 days
         bucket_over_120: 0,   // >120 days
       };
-
       let totalOutstanding = 0;
       let oldestDate: Date | null = null;
-
       for (const entry of tpEntries) {
         // Calculate balance: debit - credit for receivables (client), credit - debit for payables (supplier)
         // For accounts starting with 41 (clients): debit increases balance, credit decreases
@@ -90,21 +79,16 @@ export async function getAgingReport(enterpriseId: string): Promise<ThirdPartySe
         const balance = isClient
           ? (Number(entry.debit_amount) || 0) - (Number(entry.credit_amount) || 0)
           : (Number(entry.credit_amount) || 0) - (Number(entry.debit_amount) || 0);
-
         if (balance <= 0) {
           continue; // Skip if fully paid or negative
         }
-
         totalOutstanding += balance;
-
         // Calculate age in days
         const entryDate = new Date(entry.entry_date);
         if (!oldestDate || entryDate < oldestDate) {
           oldestDate = entryDate;
         }
-
         const ageInDays = Math.floor((now.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
-
         // Distribute into buckets
         if (ageInDays <= 30) {
           buckets.current += balance;
@@ -118,7 +102,6 @@ export async function getAgingReport(enterpriseId: string): Promise<ThirdPartySe
           buckets.bucket_over_120 += balance;
         }
       }
-
       if (totalOutstanding > 0) {
         agingReports.push({
           third_party_id: thirdParty.id,
@@ -129,13 +112,11 @@ export async function getAgingReport(enterpriseId: string): Promise<ThirdPartySe
         });
       }
     }
-
     // Sort by total outstanding descending
     agingReports.sort((a, b) => b.total_outstanding - a.total_outstanding);
-
     return { data: agingReports };
   } catch (error) {
-    console.error('Error calculating aging report:', error instanceof Error ? error.message : String(error));
+    logger.error('ThirdPartiesAgingReport', 'Error calculating aging report:', error instanceof Error ? error.message : String(error));
     return {
       data: [],
       error: { message: 'Failed to calculate aging report' }

@@ -1,7 +1,7 @@
 // Wrapper pour le lazy loading intelligent des composants lourds
 import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { useInView } from 'framer-motion';
-
+import { logger } from '@/lib/logger';
 interface LazyWrapperProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
@@ -10,7 +10,6 @@ interface LazyWrapperProps {
   priority?: 'high' | 'normal' | 'low';
   preloadDelay?: number;
 }
-
 // Skeleton par défaut
 const DefaultSkeleton = () => (
   <div className="animate-pulse">
@@ -19,7 +18,6 @@ const DefaultSkeleton = () => (
     <div className="h-4 bg-gray-200 rounded w-5/6"></div>
   </div>
 );
-
 export const LazyWrapper: React.FC<LazyWrapperProps> = ({
   children,
   fallback = <DefaultSkeleton />,
@@ -35,7 +33,6 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
     ref,
     ({ once: true, margin } as unknown) as Parameters<typeof useInView>[1]
   );
-
   useEffect(() => {
     if (isInView && !shouldRender) {
       if (preloadDelay > 0) {
@@ -49,7 +46,6 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
       }
     }
   }, [isInView, shouldRender, preloadDelay]);
-
   // Préchargement basé sur la priorité
   useEffect(() => {
     if (priority === 'high') {
@@ -64,7 +60,6 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
       return () => clearTimeout(timer);
     }
   }, [priority, isInView]);
-
   return (
     <div ref={ref}>
       {shouldRender ? (
@@ -86,34 +81,28 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
     </div>
   );
 };
-
 // Hook pour la gestion intelligente du lazy loading
 export const useLazyLoading = () => {
   const [loadedModules, setLoadedModules] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
-
   const preloadModule = React.useCallback(async (moduleId: string, importFn: () => Promise<unknown>) => {
     if (loadedModules.has(moduleId)) return;
-
     setLoading(true);
     try {
       await importFn();
       setLoadedModules(prev => new Set([...prev, moduleId]));
     } catch (error) {
-      console.warn(`Failed to preload module ${moduleId}:`, error);
+      logger.warn('LazyWrapper', `Failed to preload module ${moduleId}:`, error);
     } finally {
       setLoading(false);
     }
   }, [loadedModules]);
-
   const preloadModules = React.useCallback(async (modules: Array<{ id: string; import: () => Promise<unknown> }>) => {
     const promises = modules
       .filter(m => !loadedModules.has(m.id))
       .map(m => preloadModule(m.id, m.import));
-    
     await Promise.allSettled(promises);
   }, [loadedModules, preloadModule]);
-
   return {
     preloadModule,
     preloadModules,
@@ -122,7 +111,6 @@ export const useLazyLoading = () => {
     isLoaded: (moduleId: string) => loadedModules.has(moduleId),
   };
 };
-
 // Composant pour les metrics de lazy loading
 export const LazyLoadingMetrics: React.FC = () => {
   const [metrics, setMetrics] = useState({
@@ -131,7 +119,6 @@ export const LazyLoadingMetrics: React.FC = () => {
     failedComponents: 0,
     averageLoadTime: 0,
   });
-
   useEffect(() => {
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
@@ -146,12 +133,9 @@ export const LazyLoadingMetrics: React.FC = () => {
         }
       });
     });
-
     observer.observe({ entryTypes: ['measure'] });
-
     return () => observer.disconnect();
   }, []);
-
   // Allow tests to override via global flag to avoid mutating import.meta.env
   const isDev = (globalThis as unknown as { importMetaEnvDev?: boolean }).importMetaEnvDev ?? import.meta.env.DEV;
   if (isDev) {
@@ -165,10 +149,8 @@ export const LazyLoadingMetrics: React.FC = () => {
       </div>
     );
   }
-
   return null;
 };
-
 // HOC pour wrapper automatiquement les composants avec lazy loading
 export const withLazyLoading = <P extends object>(
   Component: React.ComponentType<P>,
@@ -180,7 +162,6 @@ export const withLazyLoading = <P extends object>(
 ) => {
   const LazyComponent = (props: P) => {
     const Skeleton = options.skeleton || DefaultSkeleton;
-    
     return (
       <LazyWrapper
         priority={options.priority}
@@ -191,10 +172,7 @@ export const withLazyLoading = <P extends object>(
       </LazyWrapper>
     );
   };
-
   LazyComponent.displayName = `withLazyLoading(${Component.displayName || Component.name})`;
-  
   return LazyComponent;
 };
-
 export default LazyWrapper;

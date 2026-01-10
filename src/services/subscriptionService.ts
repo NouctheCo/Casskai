@@ -9,32 +9,28 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from '@/lib/supabase';
-import { 
+import { logger } from '@/lib/logger';
+import {
   UserSubscription, 
   SubscriptionPlan, 
   getModulesForPlan, 
   isModuleAllowedForPlan, 
   SUBSCRIPTION_PLANS as PREDEFINED_PLANS
 } from '@/types/subscription.types';
-
 export interface UsageLimits {
   feature_name: string;
   current_usage: number;
   limit_value: number | null;
   percentage_used: number;
 }
-
 export interface FeatureAccess {
   canAccess: boolean;
   reason?: string;
   currentUsage?: number;
   limit?: number;
 }
-
 class SubscriptionService {
-  
   /**
    * Vérifie si l'utilisateur peut accéder à une fonctionnalité
    */
@@ -45,19 +41,16 @@ class SubscriptionService {
           p_user_id: userId,
           p_feature_name: featureName
         });
-
       if (error) {
-        console.error('Error checking feature access:', error);
+        logger.error('Subscription', 'Error checking feature access:', error);
         return { canAccess: false, reason: 'Erreur de vérification' };
       }
-
       return { canAccess: data };
     } catch (error) {
-      console.error('Error in canAccessFeature:', error);
+      logger.error('Subscription', 'Error in canAccessFeature:', error);
       return { canAccess: false, reason: 'Erreur inattendue' };
     }
   }
-
   /**
    * Incrémente l'usage d'une fonctionnalité
    */
@@ -73,19 +66,16 @@ class SubscriptionService {
           p_feature_name: featureName,
           p_increment: increment
         });
-
       if (error) {
-        console.error('Error incrementing usage:', error);
+        logger.error('Subscription', 'Error incrementing usage:', error);
         return false;
       }
-
       return data;
     } catch (error) {
-      console.error('Error in incrementFeatureUsage:', error);
+      logger.error('Subscription', 'Error in incrementFeatureUsage:', error);
       return false;
     }
   }
-
   /**
    * Récupère les limites d'usage de l'utilisateur
    */
@@ -95,26 +85,22 @@ class SubscriptionService {
         .rpc('get_user_usage_limits', {
           p_user_id: userId
         });
-
       if (error) {
-        console.error('Error getting usage limits:', error);
+        logger.error('Subscription', 'Error getting usage limits:', error);
         return [];
       }
-
       return data || [];
     } catch (error) {
-      console.error('Error in getUserUsageLimits:', error);
+      logger.error('Subscription', 'Error in getUserUsageLimits:', error);
       return [];
     }
   }
-
   /**
    * Récupère l'abonnement actuel de l'utilisateur
    */
   async getCurrentSubscription(userId: string): Promise<UserSubscription | null> {
     try {
-      console.warn('[SubscriptionService] getCurrentSubscription called for user:', userId);
-
+      logger.warn('Subscription', '[SubscriptionService] getCurrentSubscription called for user:', userId);
       // First get the subscription
       const { data: subscription, error: subError } = await supabase
         .from('subscriptions')
@@ -143,33 +129,26 @@ class SubscriptionService {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
-
       if (subError) {
-        console.warn('[SubscriptionService] Erreur requête subscription:', subError);
+        logger.warn('Subscription', '[SubscriptionService] Erreur requête subscription:', subError);
         return null;
       }
-
       if (!subscription) {
-        console.warn('[SubscriptionService] No subscription found for user');
+        logger.warn('Subscription', '[SubscriptionService] No subscription found for user');
         return null;
       }
-
-      console.warn('[SubscriptionService] Found subscription:', subscription);
-
+      logger.warn('Subscription', '[SubscriptionService] Found subscription:', subscription);
       // Then get the plan details separately
       const { data: plan, error: planError } = await supabase
         .from('subscription_plans')
         .select('id, name, price, currency, billing_period, is_trial, trial_days, stripe_price_id, is_active')
         .eq('id', subscription.plan_id)
         .single();
-
       if (planError) {
-        console.error('[SubscriptionService] Error fetching plan:', planError);
+        logger.error('Subscription', '[SubscriptionService] Error fetching plan:', planError);
         return null;
       }
-
-      console.warn('[SubscriptionService] Plan fetched:', plan);
-
+      logger.warn('Subscription', '[SubscriptionService] Plan fetched:', plan);
       // Convert to UserSubscription format
       const userSubscription: UserSubscription = {
         id: subscription.id,
@@ -198,16 +177,13 @@ class SubscriptionService {
           supportLevel: 'basic'
         } : undefined
       };
-
-      console.warn('[SubscriptionService] Converted subscription:', userSubscription);
+      logger.warn('Subscription', '[SubscriptionService] Converted subscription:', userSubscription);
       return userSubscription;
-
     } catch (error) {
-      console.error('Error getting current subscription:', error);
+      logger.error('Subscription', 'Error getting current subscription:', error);
       return null;
     }
   }
-
   /**
    * Met à jour le statut d'un abonnement (typiquement via webhook Stripe)
    */
@@ -225,19 +201,16 @@ class SubscriptionService {
           updated_at: new Date().toISOString()
         })
         .eq('stripe_subscription_id', subscriptionId);
-
       if (error) {
-        console.error('Error updating subscription status:', error);
+        logger.error('Subscription', 'Error updating subscription status:', error);
         return false;
       }
-
       return true;
     } catch (error) {
-      console.error('Error in updateSubscriptionStatus:', error);
+      logger.error('Subscription', 'Error in updateSubscriptionStatus:', error);
       return false;
     }
   }
-
   /**
    * Crée un abonnement d'essai pour un utilisateur
    */
@@ -250,46 +223,38 @@ class SubscriptionService {
         p_user_id: userId,
         p_company_id: companyId || null
       });
-
       if (error) {
-        console.error('Error creating trial subscription:', error);
+        logger.error('Subscription', 'Error creating trial subscription:', error);
         return { success: false, error: error.message };
       }
-
       if (data === 'ALREADY_EXISTS') {
         return { success: false, error: 'Un essai existe déjà pour cet utilisateur' };
       }
-
       if (!data) {
         return { success: false, error: 'Erreur lors de la création de l\'essai' };
       }
-
       return { success: true, subscriptionId: data };
     } catch (error) {
-      console.error('Error in createTrialSubscription:', error);
+      logger.error('Subscription', 'Error in createTrialSubscription:', error);
       return { success: false, error: 'Erreur inattendue' };
     }
   }
-
   /**
    * Expire les essais qui ont dépassé leur date de fin
    */
   async expireTrials(): Promise<{ expiredCount: number; error?: string }> {
     try {
       const { data, error } = await supabase.rpc('expire_trials');
-
       if (error) {
-        console.error('Error expiring trials:', error);
+        logger.error('Subscription', 'Error expiring trials:', error);
         return { expiredCount: 0, error: error.message };
       }
-
       return { expiredCount: data || 0 };
     } catch (error) {
-      console.error('Error in expireTrials:', error);
+      logger.error('Subscription', 'Error in expireTrials:', error);
       return { expiredCount: 0, error: 'Erreur inattendue' };
     }
   }
-
   /**
    * Récupère tous les plans d'abonnement disponibles
    */
@@ -300,12 +265,10 @@ class SubscriptionService {
         .select('*')
         .eq('is_active', true)
         .order('price', { ascending: true });
-
       if (error) {
-        console.error('Error getting plans:', error);
+        logger.error('Subscription', 'Error getting plans:', error);
         return [];
       }
-
       return data.map(plan => ({
         id: plan.id,
         name: plan.name,
@@ -323,11 +286,10 @@ class SubscriptionService {
         supportLevel: plan.support_level as 'basic' | 'priority' | 'dedicated'
       }));
     } catch (error) {
-      console.error('Error in getAvailablePlans:', error);
+      logger.error('Subscription', 'Error in getAvailablePlans:', error);
       return [];
     }
   }
-
   /**
    * Vérifie si un abonnement est proche de l'expiration
    */
@@ -336,16 +298,12 @@ class SubscriptionService {
     const expirationDate = subscription.status === 'trialing' 
       ? subscription.trialEnd 
       : subscription.currentPeriodEnd;
-    
     if (!expirationDate) return false;
-
     const daysUntilExpiration = Math.ceil(
       (expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
     );
-
     return daysUntilExpiration <= daysThreshold;
   }
-
   /**
    * Calcule les jours restants jusqu'à l'expiration
    */
@@ -354,14 +312,11 @@ class SubscriptionService {
     const expirationDate = subscription.status === 'trialing' 
       ? subscription.trialEnd 
       : subscription.currentPeriodEnd;
-    
     if (!expirationDate) return 0;
-
     return Math.max(0, Math.ceil(
       (expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
     ));
   }
-
   /**
    * Vérifie les quotas avant d'autoriser une action
    */
@@ -374,19 +329,15 @@ class SubscriptionService {
       // Récupérer les limites actuelles
       const limits = await this.getUserUsageLimits(userId);
       const featureLimit = limits.find(l => l.feature_name === featureName);
-
       if (!featureLimit) {
         // Pas de limite configurée, autoriser
         return { allowed: true };
       }
-
       if (featureLimit.limit_value === null) {
         // Limite illimitée
         return { allowed: true, usage: featureLimit };
       }
-
       const newUsage = featureLimit.current_usage + increment;
-      
       if (newUsage > featureLimit.limit_value) {
         return {
           allowed: false,
@@ -394,14 +345,12 @@ class SubscriptionService {
           usage: featureLimit
         };
       }
-
       return { allowed: true, usage: featureLimit };
     } catch (error) {
-      console.error('Error checking quota:', error);
+      logger.error('Subscription', 'Error checking quota:', error);
       return { allowed: false, message: 'Erreur de vérification des quotas' };
     }
   }
-
   /**
    * Obtenir le plan actuel de l'utilisateur avec fallback intelligent
    */
@@ -409,46 +358,38 @@ class SubscriptionService {
     try {
       // Essayer de récupérer depuis Supabase d'abord
       const subscription = await this.getCurrentSubscription(userId);
-      
       if (subscription && subscription.status === 'trialing') {
         return 'trial';
       }
-      
       if (subscription && subscription.status === 'active') {
         return subscription.planId;
       }
-
       // Vérifier le localStorage pour les utilisateurs sans DB
       const localPlan = localStorage.getItem(`user_plan_${userId}`);
       if (localPlan) {
         return localPlan;
       }
-
       // Vérifier si c'est un nouvel utilisateur (période d'essai)
       return await this.checkTrialStatus(userId);
     } catch (error) {
-      console.error('[SubscriptionService] Erreur récupération plan:', error);
+      logger.error('Subscription', '[SubscriptionService] Erreur récupération plan:', error);
       return await this.checkTrialStatus(userId);
     }
   }
-
   /**
    * Vérifier le statut d'essai avec localStorage fallback
    */
   private async checkTrialStatus(userId: string): Promise<string> {
     const trialKey = `trial_start_${userId}`;
     const trialStart = localStorage.getItem(trialKey);
-    
     if (!trialStart) {
       // Première connexion, démarrer l'essai
       localStorage.setItem(trialKey, new Date().toISOString());
       return 'trial';
     }
-
     const trialStartDate = new Date(trialStart);
     const now = new Date();
     const daysDiff = Math.floor((now.getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24));
-
     if (daysDiff < 30) {
       return 'trial';
     } else {
@@ -456,27 +397,23 @@ class SubscriptionService {
       return 'starter';
     }
   }
-
   /**
    * Obtenir les modules disponibles pour un plan
    */
   getAvailableModules(planId: string): string[] {
     return getModulesForPlan(planId);
   }
-
   /**
    * Vérifier si un module est disponible dans le plan
    */
   isModuleAvailableInPlan(moduleKey: string, planId: string): boolean {
     return isModuleAllowedForPlan(moduleKey, planId);
   }
-
   /**
    * Obtenir les jours restants d'essai
    */
   async getTrialDaysRemaining(userId: string): Promise<number> {
     const subscription = await this.getCurrentSubscription(userId);
-    
     if (subscription && subscription.status === 'trialing' && subscription.trialEnd) {
       const now = new Date();
       const daysRemaining = Math.ceil(
@@ -484,20 +421,15 @@ class SubscriptionService {
       );
       return Math.max(0, daysRemaining);
     }
-
     // Fallback localStorage pour les utilisateurs sans DB
     const trialKey = `trial_start_${userId}`;
     const trialStart = localStorage.getItem(trialKey);
-    
     if (!trialStart) return 30;
-
     const trialStartDate = new Date(trialStart);
     const now = new Date();
     const daysDiff = Math.floor((now.getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24));
-
     return Math.max(0, 30 - daysDiff);
   }
-
   /**
    * Changer de plan (avec support localStorage)
    */
@@ -505,46 +437,37 @@ class SubscriptionService {
     try {
       // Essayer la mise à jour en DB d'abord
       const subscription = await this.getCurrentSubscription(userId);
-      
       if (subscription) {
         const { error } = await supabase
           .from('subscriptions')
           .update({ plan_id: newPlanId, updated_at: new Date().toISOString() })
           .eq('user_id', userId);
-
         if (error) {
-          console.warn('[SubscriptionService] Erreur mise à jour DB, fallback localStorage');
+          logger.warn('Subscription', '[SubscriptionService] Erreur mise à jour DB, fallback localStorage');
         }
       }
-
       // Toujours sauvegarder en localStorage comme fallback
       const subscriptionKey = `user_plan_${userId}`;
       localStorage.setItem(subscriptionKey, newPlanId);
-      
       // Émettre un événement pour que les composants se mettent à jour
       window.dispatchEvent(new CustomEvent('subscription-changed', { 
         detail: { userId, newPlanId } 
       }));
-
       return true;
     } catch (error) {
-      console.error('[SubscriptionService] Erreur changement plan:', error);
+      logger.error('Subscription', '[SubscriptionService] Erreur changement plan:', error);
       return false;
     }
   }
-
   /**
    * Obtenir le prix de mise à niveau
    */
   getUpgradePrice(currentPlan: string, targetPlan: string): number {
     const current = PREDEFINED_PLANS.find(p => p.id === currentPlan);
     const target = PREDEFINED_PLANS.find(p => p.id === targetPlan);
-    
     if (!current || !target) return 0;
-    
     return Math.max(0, target.price - current.price);
   }
-
   /**
    * Vérifier si l'utilisateur peut accéder à un module
    */
@@ -552,7 +475,6 @@ class SubscriptionService {
     const currentPlan = await this.getCurrentUserPlan(userId);
     return this.isModuleAvailableInPlan(moduleKey, currentPlan);
   }
-
   /**
    * Obtenir les modules manquants pour un plan cible
    */
@@ -560,25 +482,20 @@ class SubscriptionService {
     const availableModules = this.getAvailableModules(currentPlan);
     return targetModules.filter(module => !availableModules.includes(module));
   }
-
   /**
    * Recommander un plan pour des modules spécifiques
    */
   recommendPlanForModules(desiredModules: string[]): string {
     for (const plan of PREDEFINED_PLANS) {
       if (plan.id === 'trial') continue;
-      
       const availableModules = this.getAvailableModules(plan.id);
       const hasAllModules = desiredModules.every(module => availableModules.includes(module));
-      
       if (hasAllModules) {
         return plan.id;
       }
     }
-    
     return 'enterprise'; // Par défaut si aucun plan ne convient
   }
-
   /**
    * Vérifier si l'utilisateur est en période d'essai
    */
@@ -586,7 +503,6 @@ class SubscriptionService {
     const currentPlan = await this.getCurrentUserPlan(userId);
     return currentPlan === 'trial';
   }
-
   /**
    * Obtenir les informations du plan actuel
    */
@@ -594,7 +510,6 @@ class SubscriptionService {
     const planId = await this.getCurrentUserPlan(userId);
     return PREDEFINED_PLANS.find(p => p.id === planId) || null;
   }
-
   /**
    * Obtenir le statut complet de l'abonnement d'un utilisateur
    */
@@ -604,19 +519,16 @@ class SubscriptionService {
         .rpc('get_user_subscription_status', {
           p_user_id: userId
         });
-
       if (error) {
-        console.error('Error getting user subscription status:', error);
+        logger.error('Subscription', 'Error getting user subscription status:', error);
         return null;
       }
-
       return data && data.length > 0 ? data[0] : null;
     } catch (error) {
-      console.error('Error in getUserSubscriptionStatus:', error);
+      logger.error('Subscription', 'Error in getUserSubscriptionStatus:', error);
       return null;
     }
   }
-
   /**
    * Obtenir les modules autorisés pour un plan depuis Supabase
    */
@@ -626,19 +538,16 @@ class SubscriptionService {
         .rpc('get_allowed_modules_for_plan', {
           p_plan_id: planId
         });
-
       if (error) {
-        console.error('Error getting allowed modules:', error);
+        logger.error('Subscription', 'Error getting allowed modules:', error);
         return [];
       }
-
       return data || [];
     } catch (error) {
-      console.error('Error in getAllowedModulesForPlan:', error);
+      logger.error('Subscription', 'Error in getAllowedModulesForPlan:', error);
       return [];
     }
   }
 }
-
 export const subscriptionService = new SubscriptionService();
 export default subscriptionService;

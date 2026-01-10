@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * 📋 SERVICE DE GESTION DES DEMANDES RGPD (Requests/Tickets)
  *
@@ -29,9 +28,8 @@
  * Ce service = Workflow administratif des demandes
  * rgpdService = Exécution technique des droits RGPD
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 // Types pour les demandes RGPD
 export interface GDPRRequest {
   id: string;
@@ -51,7 +49,6 @@ export interface GDPRRequest {
   created_at: string;
   updated_at: string;
 }
-
 export interface GDPRRequestCreate {
   type: string;
   email: string;
@@ -60,7 +57,6 @@ export interface GDPRRequestCreate {
   company?: string;
   description: string;
 }
-
 export class GDPRService {
   // Créer une nouvelle demande RGPD
   static async createGDPRRequest(requestData: GDPRRequestCreate): Promise<GDPRRequest> {
@@ -80,11 +76,10 @@ export class GDPRService {
         })
         .select()
         .single();
-
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error creating GDPR request:', error instanceof Error ? error.message : String(error));
+      logger.error('GdprRequests', 'Error creating GDPR request:', error instanceof Error ? error.message : String(error));
       // Fallback: retourner un objet mock si la base de données n'est pas disponible
       return {
         id: `gdpr_${Date.now()}`,
@@ -102,7 +97,6 @@ export class GDPRService {
       };
     }
   }
-
   // Récupérer toutes les demandes RGPD (pour l'admin)
   static async getGDPRRequests(status?: string): Promise<GDPRRequest[]> {
     try {
@@ -110,22 +104,18 @@ export class GDPRService {
         .from('gdpr_requests')
         .select('*')
         .order('submitted_at', { ascending: false });
-
       if (status) {
         query = query.eq('status', status);
       }
-
       const { data, error } = await query;
-
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching GDPR requests:', error instanceof Error ? error.message : String(error));
+      logger.error('GdprRequests', 'Error fetching GDPR requests:', error instanceof Error ? error.message : String(error));
       // Retourner des données mock en cas d'erreur
       return this.getMockGDPRRequests();
     }
   }
-
   // Récupérer les demandes RGPD par email
   static async getGDPRRequestsByEmail(email: string): Promise<GDPRRequest[]> {
     try {
@@ -134,15 +124,13 @@ export class GDPRService {
         .select('*')
         .eq('email', email)
         .order('submitted_at', { ascending: false });
-
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching GDPR requests by email:', error instanceof Error ? error.message : String(error));
+      logger.error('GdprRequests', 'Error fetching GDPR requests by email:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
-
   // Mettre à jour le statut d'une demande RGPD
   static async updateGDPRRequestStatus(
     id: string, 
@@ -155,43 +143,36 @@ export class GDPRService {
         status,
         updated_at: new Date().toISOString()
       };
-
       if (status === 'completed' || status === 'rejected') {
         updates.processed_at = new Date().toISOString();
         updates.processed_by = processedBy;
         updates.response = response;
       }
-
       const { data, error } = await supabase
         .from('gdpr_requests')
         .update(updates)
         .eq('id', id)
         .select()
         .single();
-
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error updating GDPR request status:', error instanceof Error ? error.message : String(error));
+      logger.error('GdprRequests', 'Error updating GDPR request status:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
-
   // Envoyer un email de confirmation automatique
   static async sendConfirmationEmail(request: GDPRRequest): Promise<void> {
     try {
       // Dans un vrai projet, ceci utiliserait un service d'email comme SendGrid, Mailgun, etc.
-      console.warn('Sending GDPR request confirmation email to:', request.email);
-      
+      logger.warn('GdprRequests', 'Sending GDPR request confirmation email to:', request.email);
       // Simulation d'un envoi d'email
       // Ici on pourrait intégrer avec Supabase Edge Functions ou un service tiers
-      
     } catch (error) {
-      console.error('Error sending confirmation email:', error instanceof Error ? error.message : String(error));
+      logger.error('GdprRequests', 'Error sending confirmation email:', error instanceof Error ? error.message : String(error));
       // Ne pas faire échouer la création de la demande si l'email échoue
     }
   }
-
   // Calculer la priorité basée sur le type de demande
   private static calculatePriority(type: string): 'low' | 'medium' | 'high' | 'urgent' {
     switch (type) {
@@ -211,7 +192,6 @@ export class GDPRService {
         return 'medium';
     }
   }
-
   // Données mock pour le fallback
   private static getMockGDPRRequests(): GDPRRequest[] {
     return [
@@ -244,38 +224,30 @@ export class GDPRService {
       }
     ];
   }
-
   // Valider les données de la demande
   static validateGDPRRequest(requestData: GDPRRequestCreate): string[] {
     const errors: string[] = [];
-
     if (!requestData.type || requestData.type.trim() === '') {
       errors.push('Le type de demande est obligatoire');
     }
-
     if (!requestData.email || requestData.email.trim() === '') {
       errors.push('L\'adresse email est obligatoire');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requestData.email)) {
       errors.push('L\'adresse email n\'est pas valide');
     }
-
     if (!requestData.firstName || requestData.firstName.trim() === '') {
       errors.push('Le prénom est obligatoire');
     }
-
     if (!requestData.lastName || requestData.lastName.trim() === '') {
       errors.push('Le nom est obligatoire');
     }
-
     if (!requestData.description || requestData.description.trim() === '') {
       errors.push('La description de votre demande est obligatoire');
     } else if (requestData.description.length < 10) {
       errors.push('La description doit contenir au moins 10 caractères');
     }
-
     return errors;
   }
-
   // Obtenir les délais légaux par type de demande
   static getLegalTimeframe(type: string): string {
     switch (type) {
@@ -296,5 +268,4 @@ export class GDPRService {
     }
   }
 }
-
 export default GDPRService;

@@ -458,9 +458,9 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
 
     stripeProductId: 'prod_enterprise',
 
-    maxUsers: null,
+    maxUsers: undefined,
 
-    maxClients: null,
+    maxClients: undefined,
 
     storageLimit: '500 GB',
 
@@ -510,9 +510,9 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
 
     stripeProductId: 'prod_enterprise',
 
-    maxUsers: null,
+    maxUsers: undefined,
 
-    maxClients: null,
+    maxClients: undefined,
 
     storageLimit: '500 GB',
 

@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -19,49 +18,42 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/contexts/LocaleContext';
 import { changeLanguageAndDetectCountry } from '@/i18n/i18n';
-
+import { logger } from '@/lib/logger';
 const languages = [
   { code: 'fr', name: 'Français', flag: '🇫🇷', description: 'Français' },
   { code: 'en', name: 'English', flag: '🇬🇧', description: 'English' },
   { code: 'es', name: 'Español', flag: '🇪🇸', description: 'Español' }
 ];
-
 export default function LanguageStep() {
   const { goToNextStep, updatePreferences } = useOnboarding();
   const { i18n } = useTranslation();
   const { locale: currentLanguage, setLocale } = useLocale();
   const [selectedLanguage, setSelectedLanguage] = React.useState<string>(currentLanguage || 'fr');
   const [isChanging, setIsChanging] = React.useState(false);
-
   // Initialize with current language from i18n
   useEffect(() => {
     if (i18n.language) {
       setSelectedLanguage(i18n.language);
     }
   }, [i18n.language]);
-
   const handleLanguageSelect = async (languageCode: string) => {
     try {
       setIsChanging(true);
       setSelectedLanguage(languageCode);
-
       // Mettre à jour à la fois i18n et le LocaleContext
       setLocale(languageCode);
       await changeLanguageAndDetectCountry(languageCode);
-
       // Sauvegarder dans localStorage pour la persistance
       localStorage.setItem('preferred_language', languageCode);
-
       // Attendre un peu pour voir l'animation avant de passer à l'étape suivante
       setTimeout(() => {
         setIsChanging(false);
       }, 500);
     } catch (error) {
-      console.error('Failed to change language:', error instanceof Error ? error.message : String(error));
+      logger.error('LanguageStep', 'Failed to change language:', error instanceof Error ? error.message : String(error));
       setIsChanging(false);
     }
   };
-
   const handleContinue = async () => {
     // Sauvegarder la langue dans les préférences du contexte onboarding
     try {
@@ -69,15 +61,12 @@ export default function LanguageStep() {
         language: selectedLanguage
       });
     } catch (error) {
-      console.error('Failed to save language preference:', error);
+      logger.error('LanguageStep', 'Failed to save language preference:', error);
     }
-
     // Sauvegarder aussi dans localStorage pour la persistance immédiate
     localStorage.setItem('onboarding_language_selected', selectedLanguage);
-    
     goToNextStep();
   };
-
   return (
     <div className="max-w-4xl mx-auto">
       <Card className="glass-card overflow-hidden">
@@ -90,7 +79,6 @@ export default function LanguageStep() {
           >
             <Globe className="w-10 h-10 text-white" />
           </motion.div>
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -104,7 +92,6 @@ export default function LanguageStep() {
             </CardDescription>
           </motion.div>
         </CardHeader>
-
         <CardContent className="p-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -138,7 +125,6 @@ export default function LanguageStep() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       {lang.description}
                     </p>
-
                     {selectedLanguage === lang.code && (
                       <motion.div
                         initial={{ scale: 0 }}
@@ -154,7 +140,6 @@ export default function LanguageStep() {
               ))}
             </div>
           </motion.div>
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -179,7 +164,6 @@ export default function LanguageStep() {
                 </>
               )}
             </Button>
-
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
               You can change your language anytime in the application settings
             </p>

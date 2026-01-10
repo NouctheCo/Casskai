@@ -11,10 +11,9 @@
  *
  * Le système détecte automatiquement le référentiel et mappe les comptes.
  */
-
 import { supabase } from '@/lib/supabase';
 import { AccountingStandard } from './accountingRulesService';
-
+import { logger } from '@/lib/logger';
 /**
  * Typologie universelle des comptes (indépendante du référentiel)
  */
@@ -25,28 +24,23 @@ export enum UniversalAccountType {
   CASH = 'cash',                           // Caisse / Petty Cash
   FIXED_ASSETS = 'fixed_assets',           // Immobilisations / Fixed Assets
   INVENTORY = 'inventory',                 // Stocks / Inventory
-
   // PASSIF
   SUPPLIERS = 'suppliers',                 // Fournisseurs / Payables
   CAPITAL = 'capital',                     // Capital / Equity
   LOANS = 'loans',                         // Emprunts / Loans
-
   // CHARGES
   PURCHASES = 'purchases',                 // Achats / Purchases / COGS
   SALARIES = 'salaries',                   // Salaires / Salaries
   RENT = 'rent',                          // Loyer / Rent
   UTILITIES = 'utilities',                // Services / Utilities
-
   // PRODUITS
   SALES = 'sales',                        // Ventes / Revenue / Sales
   SERVICES = 'services',                  // Prestations / Services Revenue
   FINANCIAL_INCOME = 'financial_income',  // Produits financiers / Interest Income
-
   // TVA
   VAT_DEDUCTIBLE = 'vat_deductible',      // TVA déductible / VAT Receivable / Sales Tax Receivable
   VAT_COLLECTED = 'vat_collected',        // TVA collectée / VAT Payable / Sales Tax Payable
 }
-
 /**
  * Mapping par référentiel : Type Universel → Numéro de compte
  */
@@ -71,7 +65,6 @@ export const ACCOUNT_MAPPING = {
     [UniversalAccountType.UTILITIES]: '606%',
     [UniversalAccountType.FINANCIAL_INCOME]: '76%',
   },
-
   [AccountingStandard.SYSCOHADA]: {
     // Afrique - SYSCOHADA (très similaire au PCG)
     [UniversalAccountType.CUSTOMERS]: '411%',
@@ -92,7 +85,6 @@ export const ACCOUNT_MAPPING = {
     [UniversalAccountType.UTILITIES]: '605%',
     [UniversalAccountType.FINANCIAL_INCOME]: '77%',
   },
-
   [AccountingStandard.IFRS]: {
     // International - IFRS (structure plus flexible)
     // On cherche par mots-clés dans les libellés
@@ -114,7 +106,6 @@ export const ACCOUNT_MAPPING = {
     [UniversalAccountType.UTILITIES]: '%utilities%|%electricity%',
     [UniversalAccountType.FINANCIAL_INCOME]: '%interest income%|%financial income%',
   },
-
   [AccountingStandard.US_GAAP]: {
     // USA - US GAAP (similaire à IFRS mais avec conventions US)
     [UniversalAccountType.CUSTOMERS]: '%accounts receivable%',
@@ -136,12 +127,10 @@ export const ACCOUNT_MAPPING = {
     [UniversalAccountType.FINANCIAL_INCOME]: '%interest income%',
   },
 };
-
 /**
  * Cache des comptes par entreprise
  */
 const accountsCache = new Map<string, any[]>();
-
 /**
  * Service de mapping automatique
  */
@@ -157,11 +146,9 @@ export class AccountMappingService {
         .select('account_number, account_name')
         .eq('company_id', companyId)
         .limit(50);
-
       if (!accounts || accounts.length === 0) {
         return AccountingStandard.PCG; // Défaut
       }
-
       // Compter les signatures de chaque référentiel
       const scores = {
         [AccountingStandard.PCG]: 0,
@@ -169,41 +156,34 @@ export class AccountMappingService {
         [AccountingStandard.IFRS]: 0,
         [AccountingStandard.US_GAAP]: 0,
       };
-
       for (const account of accounts) {
         const num = account.account_number || '';
         const name = (account.account_name || '').toLowerCase();
-
         // Signatures PCG/SYSCOHADA (numérotation française)
         if (/^[1-8]\d{2,}/.test(num)) {
           scores[AccountingStandard.PCG] += 2;
           scores[AccountingStandard.SYSCOHADA] += 2;
-
           // Différencier PCG vs SYSCOHADA par la TVA
           if (num.startsWith('4456')) scores[AccountingStandard.PCG] += 3;
           if (num.startsWith('443')) scores[AccountingStandard.SYSCOHADA] += 3;
         }
-
         // Signatures IFRS/US GAAP (libellés anglais)
         if (/receivable|payable|revenue|expense/i.test(name)) {
           scores[AccountingStandard.IFRS] += 2;
           scores[AccountingStandard.US_GAAP] += 2;
-
           // Différencier IFRS vs US GAAP
           if (/vat/i.test(name)) scores[AccountingStandard.IFRS] += 1;
           if (/sales tax|cogs/i.test(name)) scores[AccountingStandard.US_GAAP] += 1;
         }
       }
-
       // Retourner le référentiel avec le meilleur score
       const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
       return sorted[0][0] as AccountingStandard;
     } catch (error) {
-      console.error('Error detecting accounting standard:', error);
+      logger.error('AccountMapping', 'Error detecting accounting standard:', error);
       return AccountingStandard.PCG; // Défaut
     }
   }
-
   /**
    * Trouve un compte par son type universel
    * Adapte automatiquement selon le référentiel de l'entreprise
@@ -215,20 +195,17 @@ export class AccountMappingService {
     try {
       // Détecter le référentiel
       const standard = await this.detectAccountingStandard(companyId);
-
       // Récupérer le pattern de recherche
       const mapping = ACCOUNT_MAPPING[standard];
       if (!mapping) {
-        console.error('No mapping found for standard:', standard);
+        logger.error('AccountMapping', 'No mapping found for standard:', standard);
         return null;
       }
-
       const pattern = mapping[accountType];
       if (!pattern) {
-        console.error('No pattern found for account type:', accountType);
+        logger.error('AccountMapping', 'No pattern found for account type:', accountType);
         return null;
       }
-
       // Charger les comptes depuis le cache ou la DB
       let accounts = accountsCache.get(companyId);
       if (!accounts) {
@@ -237,11 +214,9 @@ export class AccountMappingService {
           .select('*')
           .eq('company_id', companyId)
           .eq('is_active', true);
-
         accounts = data || [];
         accountsCache.set(companyId, accounts);
       }
-
       // Recherche selon le type de pattern
       if (standard === AccountingStandard.PCG || standard === AccountingStandard.SYSCOHADA) {
         // Recherche par numéro (avec wildcard %)
@@ -263,11 +238,10 @@ export class AccountMappingService {
         return account || null;
       }
     } catch (error) {
-      console.error('Error finding account by type:', error);
+      logger.error('AccountMapping', 'Error finding account by type:', error);
       return null;
     }
   }
-
   /**
    * Vide le cache (à appeler si le plan comptable change)
    */
@@ -278,7 +252,6 @@ export class AccountMappingService {
       accountsCache.clear();
     }
   }
-
   /**
    * Récupère les comptes principaux nécessaires pour les écritures courantes
    */
@@ -294,5 +267,4 @@ export class AccountMappingService {
     };
   }
 }
-
 export default AccountMappingService;

@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,12 +21,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
 import assetsService from '@/services/assetsService';
-
+import { logger } from '@/lib/logger';
 interface GenerateEntriesDialogProps {
   open: boolean;
   onClose: () => void;
 }
-
 export const GenerateEntriesDialog: React.FC<GenerateEntriesDialogProps> = ({
   open,
   onClose,
@@ -38,25 +36,20 @@ export const GenerateEntriesDialog: React.FC<GenerateEntriesDialogProps> = ({
   const [fiscalYear, setFiscalYear] = useState(new Date().getFullYear());
   const [periodNumber, setPeriodNumber] = useState<number | undefined>(undefined);
   const [result, setResult] = useState<any>(null);
-
   const handleGenerate = async () => {
     if (!currentCompany?.id) {
       toast.error(t('common.errors.noCompany'));
       return;
     }
-
     setLoading(true);
     setResult(null);
-
     try {
       const response = await assetsService.generateDepreciationEntries(
         currentCompany.id,
         fiscalYear,
         periodNumber
       );
-
       setResult(response);
-
       if (response.success) {
         toast.success(
           t('assets.entries.success', {
@@ -68,19 +61,17 @@ export const GenerateEntriesDialog: React.FC<GenerateEntriesDialogProps> = ({
         toast.warning(t('assets.entries.partialSuccess'));
       }
     } catch (error: any) {
-      console.error('Error generating entries:', error);
+      logger.error('GenerateEntriesDialog', 'Error generating entries:', error);
       toast.error(error.message || t('assets.errors.generateFailed'));
     } finally {
       setLoading(false);
     }
   };
-
   const handleClose = () => {
     setResult(null);
     setPeriodNumber(undefined);
     onClose();
   };
-
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl">
@@ -93,7 +84,6 @@ export const GenerateEntriesDialog: React.FC<GenerateEntriesDialogProps> = ({
             {t('assets.entries.description')}
           </DialogDescription>
         </DialogHeader>
-
         <div className="space-y-6">
           {/* Formulaire de sélection */}
           {!result && (
@@ -113,7 +103,6 @@ export const GenerateEntriesDialog: React.FC<GenerateEntriesDialogProps> = ({
                     required
                   />
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="period">
                     {t('assets.entries.period')}
@@ -131,7 +120,6 @@ export const GenerateEntriesDialog: React.FC<GenerateEntriesDialogProps> = ({
                     {t('assets.entries.periodHint')}
                   </p>
                 </div>
-
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
@@ -141,7 +129,6 @@ export const GenerateEntriesDialog: React.FC<GenerateEntriesDialogProps> = ({
               </CardContent>
             </Card>
           )}
-
           {/* Résultat */}
           {result && (
             <Card>
@@ -156,7 +143,6 @@ export const GenerateEntriesDialog: React.FC<GenerateEntriesDialogProps> = ({
                     {result.success ? t('assets.entries.successTitle') : t('assets.entries.partialTitle')}
                   </h3>
                 </div>
-
                 <div className="grid grid-cols-2 gap-4 py-4">
                   <div>
                     <p className="text-sm text-muted-foreground">{t('assets.entries.entriesCreated')}</p>
@@ -167,7 +153,6 @@ export const GenerateEntriesDialog: React.FC<GenerateEntriesDialogProps> = ({
                     <p className="text-2xl font-bold">{result.total_amount.toFixed(2)} €</p>
                   </div>
                 </div>
-
                 {result.errors && result.errors.length > 0 && (
                   <div className="space-y-2">
                     <p className="font-medium text-red-600">
@@ -183,7 +168,6 @@ export const GenerateEntriesDialog: React.FC<GenerateEntriesDialogProps> = ({
                     </div>
                   </div>
                 )}
-
                 <div className="text-sm text-muted-foreground border-t pt-4">
                   <p>
                     {t('assets.entries.period')}: {result.period_start} → {result.period_end}
@@ -192,7 +176,6 @@ export const GenerateEntriesDialog: React.FC<GenerateEntriesDialogProps> = ({
               </CardContent>
             </Card>
           )}
-
           {/* Actions */}
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={handleClose}>

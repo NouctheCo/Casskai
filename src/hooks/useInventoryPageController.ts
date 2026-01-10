@@ -76,6 +76,10 @@ export interface InventoryPageControllerResult {
   suppliersProps: SuppliersTabProps;
   alertsProps: AlertsTabProps;
   dialogsProps: InventoryDialogsProps;
+  newArticleModalOpen: boolean;
+  setNewArticleModalOpen: (open: boolean) => void;
+  supplierFormDialogOpen: boolean;
+  setSupplierFormDialogOpen: (open: boolean) => void;
 }
 
 export function useInventoryPageController(): InventoryPageControllerResult {
@@ -117,6 +121,10 @@ export function useInventoryPageController(): InventoryPageControllerResult {
   const [movementQuantity, setMovementQuantity] = useState('');
   const [movementReason, setMovementReason] = useState('');
 
+  // État pour le dialog unifié de création de fournisseur (ThirdPartyFormDialog)
+  const [supplierFormDialogOpen, setSupplierFormDialogOpen] = useState(false);
+
+  // Ancien state pour SupplierDialog (déprécié - à supprimer)
   const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
   const [supplierName, setSupplierName] = useState('');
   const [supplierEmail, setSupplierEmail] = useState('');
@@ -162,7 +170,8 @@ export function useInventoryPageController(): InventoryPageControllerResult {
     } finally {
       setSuppliersLoading(false);
     }
-  }, [toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - toast is stable in practice
 
   useEffect(() => {
     loadSuppliers();
@@ -178,7 +187,8 @@ export function useInventoryPageController(): InventoryPageControllerResult {
     } finally {
       setProductionLoading(false);
     }
-  }, [toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - toast is stable in practice
 
   useEffect(() => {
     loadProductionOrders();
@@ -311,9 +321,13 @@ export function useInventoryPageController(): InventoryPageControllerResult {
     resetMovementForm();
   }, [handleStockMovement, movementItemId, movementQuantity, movementReason, movementType, toast]);
 
+  // State pour le modal de création d'article
+  const [newArticleModalOpen, setNewArticleModalOpen] = useState(false);
+
   const handleNewArticle = useCallback(() => {
-    toast({ title: 'Prochainement', description: 'La création avancée d’articles arrive bientôt.' });
-  }, [toast]);
+    console.log('🆕 [useInventoryPageController] Opening NewArticleModal');
+    setNewArticleModalOpen(true);
+  }, []);
 
   const handleNewMovement = useCallback(() => {
     setMovementDialogOpen(true);
@@ -531,7 +545,7 @@ export function useInventoryPageController(): InventoryPageControllerResult {
   const suppliersProps: SuppliersTabProps = {
     suppliers,
     loading: suppliersLoading,
-    onNewSupplier: () => setSupplierDialogOpen(true),
+    onNewSupplier: () => setSupplierFormDialogOpen(true), // ✅ Utilise le nouveau dialog unifié
     onEdit: handleEditSupplier,
     onDelete: handleDeleteSupplier
   };
@@ -632,7 +646,11 @@ export function useInventoryPageController(): InventoryPageControllerResult {
     productionProps,
     suppliersProps,
     alertsProps,
-    dialogsProps
+    dialogsProps,
+    newArticleModalOpen,
+    setNewArticleModalOpen,
+    supplierFormDialogOpen,
+    setSupplierFormDialogOpen
   };
 }
 

@@ -10,13 +10,12 @@ import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { crmService } from '../../services/crmService';
 import { useAuth } from '../../contexts/AuthContext';
-
+import { logger } from '@/lib/logger';
 interface NewSupplierModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (supplierId: string) => void;
 }
-
 interface SupplierFormData {
   company_name: string;
   industry: string;
@@ -28,13 +27,11 @@ interface SupplierFormData {
   website: string;
   notes: string;
 }
-
 const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [formData, setFormData] = useState<SupplierFormData>({
     company_name: '',
     industry: '',
@@ -46,30 +43,22 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
     website: '',
     notes: ''
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.company_name.trim()) {
       newErrors.company_name = t('purchases.supplierModal.validation.nameRequired');
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
     if (!validateForm() || !currentCompany) {
       return;
     }
-
     setLoading(true);
-
     try {
       // Utiliser le service CRM pour créer un fournisseur (type = supplier)
       const response = await crmService.createSupplier(currentCompany.id, {
@@ -84,7 +73,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
         notes: formData.notes,
         status: 'active'
       });
-
       if (response.success && response.data) {
         onSuccess(response.data.id);
         onClose();
@@ -107,19 +95,17 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
         setError(errorMessage);
       }
     } catch (err) {
-      console.error('Error creating supplier:', err);
+      logger.error('NewSupplierModal', 'Error creating supplier:', err);
       setError(t('purchases.supplierModal.errorCreating'));
     } finally {
       setLoading(false);
     }
   };
-
   const handleInputChange = (field: keyof SupplierFormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
-
     // Clear error for this field
     if (errors[field]) {
       setErrors(prev => {
@@ -129,7 +115,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
       });
     }
   };
-
   const handleClose = () => {
     if (!loading) {
       onClose();
@@ -137,14 +122,12 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
       setErrors({});
     }
   };
-
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('purchases.supplierModal.title')}</DialogTitle>
         </DialogHeader>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Error Alert */}
           {error && (
@@ -152,7 +135,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-
           {/* Company Name */}
           <div className="space-y-2">
             <Label htmlFor="supplier_name">
@@ -170,7 +152,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
               <p className="text-sm text-red-600 dark:text-red-400">{errors.company_name}</p>
             )}
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Industry */}
             <div className="space-y-2">
@@ -185,7 +166,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
                 disabled={loading}
               />
             </div>
-
             {/* Size */}
             <div className="space-y-2">
               <Label htmlFor="supplier_size">
@@ -207,7 +187,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
               </Select>
             </div>
           </div>
-
           {/* Address */}
           <div className="space-y-2">
             <Label htmlFor="supplier_address">
@@ -221,7 +200,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
               disabled={loading}
             />
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* City */}
             <div className="space-y-2">
@@ -236,7 +214,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
                 disabled={loading}
               />
             </div>
-
             {/* Postal Code */}
             <div className="space-y-2">
               <Label htmlFor="supplier_postal">
@@ -250,7 +227,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
                 disabled={loading}
               />
             </div>
-
             {/* Country */}
             <div className="space-y-2">
               <Label htmlFor="supplier_country">
@@ -265,7 +241,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
               />
             </div>
           </div>
-
           {/* Website */}
           <div className="space-y-2">
             <Label htmlFor="supplier_website">
@@ -280,7 +255,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
               disabled={loading}
             />
           </div>
-
           {/* Notes */}
           <div className="space-y-2">
             <Label htmlFor="supplier_notes">
@@ -295,7 +269,6 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
               disabled={loading}
             />
           </div>
-
           <div className="flex justify-end space-x-2 pt-4">
             <Button
               type="button"
@@ -319,5 +292,4 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
     </Dialog>
   );
 };
-
 export default NewSupplierModal;

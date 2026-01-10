@@ -17,7 +17,7 @@ export const invoicingModule: Module = {
     status: 'available',
     config: { settings: {}, defaultValues: {} },
     permissions: [],
-    dependencies: [],
+    dependencies: ['accounting', 'thirdParties'],
     conflicts: [],
   },
   getRoutes: () => [

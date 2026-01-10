@@ -9,9 +9,8 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface JournalEntryAttachment {
   id: string;
   journal_entry_id: string;
@@ -26,7 +25,6 @@ export interface JournalEntryAttachment {
   created_at: string;
   updated_at: string;
 }
-
 class JournalEntryAttachmentService {
   private readonly BUCKET_NAME = 'journal-entry-attachments';
   private readonly MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
@@ -41,21 +39,18 @@ class JournalEntryAttachmentService {
     'application/vnd.ms-excel',
     'text/plain'
   ];
-
   /**
    * Expose the current max file size in bytes for UI display
    */
   getMaxFileSize(): number {
     return this.MAX_FILE_SIZE;
   }
-
   /**
    * Expose allowed MIME types for client hints
    */
   getAllowedTypes(): string[] {
     return [...this.ALLOWED_TYPES];
   }
-
   /**
    * Upload a file and attach it to a journal entry
    */
@@ -70,16 +65,13 @@ class JournalEntryAttachmentService {
       if (file.size > this.MAX_FILE_SIZE) {
         throw new Error(`Fichier trop volumineux. Taille maximale: ${this.MAX_FILE_SIZE / (1024 * 1024)}MB`);
       }
-
       if (!this.ALLOWED_TYPES.includes(file.type)) {
         throw new Error(`Type de fichier non autorisé: ${file.type}`);
       }
-
       // Create a unique file path
       const timestamp = Date.now();
       const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       const filePath = `${companyId}/${journalEntryId}/${timestamp}_${sanitizedFileName}`;
-
       // Upload to storage
       const { error: uploadError } = await supabase.storage
         .from(this.BUCKET_NAME)
@@ -87,19 +79,16 @@ class JournalEntryAttachmentService {
           cacheControl: '3600',
           upsert: false
         });
-
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        logger.error('JournalEntryAttachment', 'Upload error:', uploadError);
         // Try REST fallback if upload fails
         await this.uploadViaREST(filePath, file);
       }
-
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('User not authenticated');
       }
-
       // Create attachment record
       const { data, error } = await supabase
         .from('journal_entry_attachments')
@@ -116,9 +105,8 @@ class JournalEntryAttachmentService {
         }])
         .select()
         .single();
-
       if (error) {
-        console.error('Attachment record error:', error);
+        logger.error('JournalEntryAttachment', 'Attachment record error:', error);
         // Try REST fallback
         return await this.createAttachmentViaREST({
           journal_entry_id: journalEntryId,
@@ -132,15 +120,12 @@ class JournalEntryAttachmentService {
           uploaded_by: user.id
         });
       }
-
       return data;
-
     } catch (error: unknown) {
-      console.error('Upload attachment error:', error);
+      logger.error('JournalEntryAttachment', 'Upload attachment error:', error);
       throw error;
     }
   }
-
   /**
    * Get attachments for a journal entry
    */
@@ -151,20 +136,16 @@ class JournalEntryAttachmentService {
         .select('*')
         .eq('journal_entry_id', journalEntryId)
         .order('created_at', { ascending: false });
-
       if (error) {
-        console.warn('Error fetching attachments, trying REST:', error);
+        logger.warn('JournalEntryAttachment', 'Error fetching attachments, trying REST:', error);
         return await this.getAttachmentsViaREST(journalEntryId);
       }
-
       return data || [];
-
     } catch (error: unknown) {
-      console.error('Get attachments error:', error);
+      logger.error('JournalEntryAttachment', 'Get attachments error:', error);
       return [];
     }
   }
-
   /**
    * Download an attachment
    */
@@ -173,20 +154,16 @@ class JournalEntryAttachmentService {
       const { data, error } = await supabase.storage
         .from(this.BUCKET_NAME)
         .download(attachment.file_path);
-
       if (error) {
-        console.warn('Download error, trying REST:', error);
+        logger.warn('JournalEntryAttachment', 'Download error, trying REST:', error);
         return await this.downloadViaREST(attachment);
       }
-
       return data;
-
     } catch (error: unknown) {
-      console.error('Download attachment error:', error);
+      logger.error('JournalEntryAttachment', 'Download attachment error:', error);
       return null;
     }
   }
-
   /**
    * Delete an attachment
    */
@@ -196,30 +173,24 @@ class JournalEntryAttachmentService {
       const { error: storageError } = await supabase.storage
         .from(this.BUCKET_NAME)
         .remove([attachment.file_path]);
-
       if (storageError) {
-        console.warn('Storage deletion error, continuing with DB deletion:', storageError);
+        logger.warn('JournalEntryAttachment', 'Storage deletion error, continuing with DB deletion:', storageError);
       }
-
       // Delete database record
       const { error: dbError } = await supabase
         .from('journal_entry_attachments')
         .delete()
         .eq('id', attachment.id);
-
       if (dbError) {
-        console.warn('DB deletion error, trying REST:', dbError);
+        logger.warn('JournalEntryAttachment', 'DB deletion error, trying REST:', dbError);
         return await this.deleteViaREST(attachment.id);
       }
-
       return true;
-
     } catch (error: unknown) {
-      console.error('Delete attachment error:', error);
+      logger.error('JournalEntryAttachment', 'Delete attachment error:', error);
       return false;
     }
   }
-
   /**
    * Generate a public URL for viewing an attachment
    */
@@ -227,17 +198,14 @@ class JournalEntryAttachmentService {
     const { data } = supabase.storage
       .from(this.BUCKET_NAME)
       .getPublicUrl(attachment.file_path);
-
     return data?.publicUrl || '';
   }
-
   /**
    * REST API fallback methods
    */
   private async uploadViaREST(filePath: string, file: File): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
-
     const response = await fetch(
       `${SUPABASE_URL}/storage/v1/object/${this.BUCKET_NAME}/${filePath}`,
       {
@@ -249,12 +217,10 @@ class JournalEntryAttachmentService {
         body: formData
       }
     );
-
     if (!response.ok) {
       throw new Error(`Storage upload failed: ${response.status}`);
     }
   }
-
   private async createAttachmentViaREST(attachmentData: any): Promise<JournalEntryAttachment | null> {
     const response = await fetch(
       `${SUPABASE_URL}/rest/v1/journal_entry_attachments`,
@@ -269,15 +235,12 @@ class JournalEntryAttachmentService {
         body: JSON.stringify([attachmentData])
       }
     );
-
     if (!response.ok) {
       throw new Error(`Attachment creation failed: ${response.status}`);
     }
-
     const data = await response.json();
     return data?.[0] || null;
   }
-
   private async getAttachmentsViaREST(journalEntryId: string): Promise<JournalEntryAttachment[]> {
     const response = await fetch(
       `${SUPABASE_URL}/rest/v1/journal_entry_attachments?journal_entry_id=eq.${journalEntryId}&order=created_at.desc`,
@@ -288,14 +251,11 @@ class JournalEntryAttachmentService {
         }
       }
     );
-
     if (!response.ok) {
       return [];
     }
-
     return await response.json();
   }
-
   private async downloadViaREST(attachment: JournalEntryAttachment): Promise<Blob | null> {
     const response = await fetch(
       `${SUPABASE_URL}/storage/v1/object/${this.BUCKET_NAME}/${attachment.file_path}`,
@@ -306,14 +266,11 @@ class JournalEntryAttachmentService {
         }
       }
     );
-
     if (!response.ok) {
       return null;
     }
-
     return await response.blob();
   }
-
   private async deleteViaREST(attachmentId: string): Promise<boolean> {
     const response = await fetch(
       `${SUPABASE_URL}/rest/v1/journal_entry_attachments?id=eq.${attachmentId}`,
@@ -325,10 +282,8 @@ class JournalEntryAttachmentService {
         }
       }
     );
-
     return response.ok;
   }
 }
-
 export const journalEntryAttachmentService = new JournalEntryAttachmentService();
-export default journalEntryAttachmentService;
+export default journalEntryAttachmentService;

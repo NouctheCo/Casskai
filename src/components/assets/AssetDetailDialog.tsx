@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -33,13 +32,12 @@ import { Edit, Trash2, Upload, FileText, History, XCircle, AlertCircle } from 'l
 import assetsService from '@/services/assetsService';
 import type { Asset, AssetDepreciationScheduleLine, AssetDisposalFormData, DisposalMethod } from '@/types/assets.types';
 import { formatCurrency } from '@/lib/utils';
-
+import { logger } from '@/lib/logger';
 interface AssetDetailDialogProps {
   open: boolean;
   onClose: () => void;
   assetId: string;
 }
-
 export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
   open,
   onClose,
@@ -58,13 +56,11 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
     disposal_method: 'sale',
     notes: '',
   });
-
   useEffect(() => {
     if (open && assetId) {
       loadAssetDetails();
     }
   }, [open, assetId]);
-
   const loadAssetDetails = async () => {
     setLoading(true);
     try {
@@ -75,16 +71,14 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
       setAsset(assetData);
       setSchedule(scheduleData);
     } catch (error: any) {
-      console.error('Error loading asset details:', error);
+      logger.error('AssetDetailDialog', 'Error loading asset details:', error);
       toast.error(t('assets.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
   };
-
   const handleDispose = async () => {
     if (!asset) return;
-
     const confirmed = await confirm({
       title: t('common.confirmation', 'Confirmation'),
       description: t('assets.disposal.confirm'),
@@ -92,34 +86,29 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
       cancelText: t('common.cancel', 'Annuler'),
       variant: 'destructive',
     });
-
     if (!confirmed) return;
-
     setLoading(true);
     try {
       await assetsService.disposeAsset(asset.id, disposalData);
       toast.success(t('assets.disposal.success'));
       onClose();
     } catch (error: any) {
-      console.error('Error disposing asset:', error);
+      logger.error('AssetDetailDialog', 'Error disposing asset:', error);
       toast.error(error.message || t('assets.errors.disposeFailed'));
     } finally {
       setLoading(false);
     }
   };
-
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     // TODO: Implement file upload to Supabase Storage
     toast.info(t('assets.attachments.uploadingFiles', { count: files.length }));
-
     // Simuler l'upload pour la démo
     setTimeout(() => {
       toast.success(t('assets.attachments.uploadSuccess'));
       loadAssetDetails(); // Recharger pour afficher les nouveaux fichiers
     }, 1500);
   };
-
   if (loading || !asset) {
     return (
       <>
@@ -134,12 +123,10 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
       </>
     );
   }
-
   // Calculer plus/moins-value si cession
   const calculateDisposalGain = () => {
     return disposalData.disposal_value - asset.net_book_value;
   };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -163,7 +150,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
             </div>
           </DialogTitle>
         </DialogHeader>
-
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="details">{t('assets.detail.tabs.details')}</TabsTrigger>
@@ -171,7 +157,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
             <TabsTrigger value="depreciation">{t('assets.detail.tabs.depreciation')}</TabsTrigger>
             <TabsTrigger value="history">{t('assets.detail.tabs.history')}</TabsTrigger>
           </TabsList>
-
           {/* Onglet Détails */}
           <TabsContent value="details" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -206,7 +191,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                   </div>
                 </CardContent>
               </Card>
-
               <Card>
                 <CardHeader>
                   <CardTitle>{t('assets.detail.financial')}</CardTitle>
@@ -227,7 +211,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                 </CardContent>
               </Card>
             </div>
-
             {asset.description && (
               <Card>
                 <CardHeader>
@@ -238,7 +221,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                 </CardContent>
               </Card>
             )}
-
             {/* Formulaire de cession */}
             {showDisposalForm && (
               <Card className="border-orange-500">
@@ -254,7 +236,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                       {t('assets.disposal.description')}
                     </AlertDescription>
                   </Alert>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>{t('assets.disposal.date')} *</Label>
@@ -264,7 +245,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                         onChange={(e) => setDisposalData({ ...disposalData, disposal_date: e.target.value })}
                       />
                     </div>
-
                     <div className="space-y-2">
                       <Label>{t('assets.disposal.method')} *</Label>
                       <Select
@@ -281,7 +261,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-
                     <div className="space-y-2">
                       <Label>{t('assets.disposal.value')} (€)</Label>
                       <Input
@@ -292,7 +271,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                         onChange={(e) => setDisposalData({ ...disposalData, disposal_value: parseFloat(e.target.value) || 0 })}
                       />
                     </div>
-
                     <div className="space-y-2">
                       <Label>{t('assets.disposal.gain')}</Label>
                       <div className={`p-2 rounded border ${calculateDisposalGain() >= 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
@@ -300,7 +278,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                       </div>
                     </div>
                   </div>
-
                   <div className="space-y-2">
                     <Label>{t('assets.form.notes')}</Label>
                     <Textarea
@@ -309,7 +286,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                       rows={3}
                     />
                   </div>
-
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setShowDisposalForm(false)}>
                       {t('common.cancel')}
@@ -322,7 +298,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
               </Card>
             )}
           </TabsContent>
-
           {/* Onglet Documents */}
           <TabsContent value="attachments" className="space-y-4">
             <Card>
@@ -354,7 +329,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                     </div>
                   </div>
                 </div>
-
                 {/* Liste des fichiers */}
                 {asset.attachments && asset.attachments.length > 0 ? (
                   <div className="space-y-2">
@@ -389,7 +363,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
               </CardContent>
             </Card>
           </TabsContent>
-
           {/* Onglet Amortissement */}
           <TabsContent value="depreciation">
             <Card>
@@ -406,7 +379,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
               </CardContent>
             </Card>
           </TabsContent>
-
           {/* Onglet Historique */}
           <TabsContent value="history">
             <Card>
@@ -427,7 +399,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                       </p>
                     </div>
                   </div>
-
                   <div className="flex gap-3">
                     <div className="w-2 h-2 rounded-full bg-green-600 mt-2"></div>
                     <div className="flex-1">
@@ -437,7 +408,6 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                       </p>
                     </div>
                   </div>
-
                   {asset.last_depreciation_date && (
                     <div className="flex gap-3">
                       <div className="w-2 h-2 rounded-full bg-orange-600 mt-2"></div>

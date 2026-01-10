@@ -9,12 +9,10 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Main E-invoicing Service
  * Orchestrates the complete e-invoicing workflow
  */
-
 import { supabase } from '../../lib/supabase';
 import {
   EInvoiceFormat,
@@ -26,14 +24,13 @@ import {
   EInvoicingError,
   FeatureDisabledError
 } from '../../types/einvoicing.types';
-
 import { FormattingService } from './core/FormattingService';
 import { ValidationService } from './core/ValidationService';
 import { DispatchService } from './core/DispatchService';
 import { ArchiveService } from './core/ArchiveService';
 import { InvoiceToEN16931Mapper } from './adapters/InvoiceToEN16931Mapper';
 import { FeatureFlagService } from './utils/FeatureFlagService';
-
+import { logger } from '@/lib/logger';
 export class EInvoicingService {
   private formattingService: FormattingService;
   private validationService: ValidationService;
@@ -41,7 +38,6 @@ export class EInvoicingService {
   private archiveService: ArchiveService;
   private mapper: InvoiceToEN16931Mapper;
   private featureFlagService: FeatureFlagService;
-
   constructor() {
     this.formattingService = new FormattingService();
     this.validationService = new ValidationService();
@@ -50,7 +46,6 @@ export class EInvoicingService {
     this.mapper = new InvoiceToEN16931Mapper();
     this.featureFlagService = new FeatureFlagService();
   }
-
   /**
    * Submit an invoice for electronic processing
    */
@@ -67,21 +62,17 @@ export class EInvoicingService {
         validate = true,
         archive = true
       } = options;
-
-      console.warn(`🚀 Starting e-invoice submission for invoice ${invoiceId}`);
-      
+      logger.warn('EInvoicing', `🚀 Starting e-invoice submission for invoice ${invoiceId}`);
       // Step 1: Load and validate invoice
       const invoice = await this.loadInvoice(invoiceId);
       if (!invoice) {
         throw new EInvoicingError(`Invoice ${invoiceId} not found`, 'INVOICE_NOT_FOUND');
       }
-
       // Step 2: Check feature flag
       const isEnabled = await this.featureFlagService.isEInvoicingEnabled(invoice.company_id);
       if (!isEnabled) {
         throw new FeatureDisabledError('einvoicing_v1');
       }
-
       // Step 3: Check if already submitted for this format/channel
       const existingDoc = await this.getExistingDocument(invoiceId, format, channel);
       if (existingDoc && existingDoc.lifecycle_status !== 'DRAFT') {
@@ -91,10 +82,8 @@ export class EInvoicingService {
           document_id: existingDoc.id
         };
       }
-
       // Step 4: Map to EN 16931 format
       const en16931Invoice = await this.mapper.mapInvoiceToEN16931(invoice);
-      
       // Step 5: Validate (if requested)
       if (validate) {
         const validation = await this.validationService.validateEN16931(en16931Invoice);
@@ -106,10 +95,8 @@ export class EInvoicingService {
           };
         }
       }
-
       // Step 6: Format document (Factur-X, UBL, or CII)
       const formattingResult = await this.formattingService.formatDocument(en16931Invoice, format);
-      
       // Step 7: Create or update document record
       const document = await this.createOrUpdateDocument({
         invoice_id: invoiceId,
@@ -118,11 +105,9 @@ export class EInvoicingService {
         channel,
         lifecycle_status: 'DRAFT'
       }, existingDoc?.id);
-
       // Step 8: Archive files (if requested)
       let pdfUrl: string | undefined;
       let xmlUrl: string | undefined;
-      
       if (archive && formattingResult.pdf_content) {
         try {
           const archiveResult = await this.archiveService.storeDocuments(
@@ -137,10 +122,9 @@ export class EInvoicingService {
         } catch (error) {
           // Archiving is optional; continue without URLs if it fails
           const errorMsg = error instanceof Error ? error.message : String(error);
-          console.warn('Archiving documents failed:', errorMsg);
+          logger.warn('EInvoicing', 'Archiving documents failed:', errorMsg);
         }
       }
-
       // Step 9: Update document with file URLs and hashes
       await this.updateDocument(document.id, {
         pdf_url: pdfUrl,
@@ -149,12 +133,10 @@ export class EInvoicingService {
         sha256_xml: formattingResult.sha256_xml,
         xml_content: async ? undefined : formattingResult.xml_content, // Store temporarily if sync
       });
-
       // Step 10: Submit to channel (async or sync)
       if (async) {
         // Queue for async processing
         this.submitToChannelAsync(document.id, formattingResult, channel);
-        
         return {
           success: true,
           document_id: document.id,
@@ -169,20 +151,17 @@ export class EInvoicingService {
           channel,
           document.id
         );
-
         if (submissionResult.success) {
           await this.updateDocument(document.id, {
             lifecycle_status: 'SUBMITTED',
             message_id: submissionResult.message_id,
           });
-
           await this.logAudit('document', document.id, 'submitted', invoice.company_id, {
             format,
             channel,
             message_id: submissionResult.message_id
           });
         }
-
         return {
           success: submissionResult.success,
           document_id: document.id,
@@ -192,24 +171,20 @@ export class EInvoicingService {
           errors: submissionResult.errors
         };
       }
-
     } catch (error) {
-      console.error('Error submitting e-invoice:', error);
-      
+      logger.error('EInvoicing', 'Error submitting e-invoice:', error);
       if (error instanceof EInvoicingError) {
         return {
           success: false,
           errors: [error.message]
         };
       }
-      
       return {
         success: false,
         errors: ['An unexpected error occurred during submission']
       };
     }
   }
-
   /**
    * Get status of an e-invoice document
    */
@@ -220,19 +195,16 @@ export class EInvoicingService {
         .select('*')
         .eq('id', documentId)
         .single();
-
       if (error) {
-        console.error('Error fetching document:', error);
+        logger.error('EInvoicing', 'Error fetching document:', error);
         return null;
       }
-
       return data as EInvDocument;
     } catch (error) {
-      console.error('Error getting document status:', error);
+      logger.error('EInvoicing', 'Error getting document status:', error);
       return null;
     }
   }
-
   /**
    * Update document lifecycle status (typically called by webhooks)
    */
@@ -252,26 +224,22 @@ export class EInvoicingService {
         .eq('message_id', messageId)
         .select('id, company_id')
         .single();
-
       if (error) {
-        console.error('Error updating document status:', error);
+        logger.error('EInvoicing', 'Error updating document status:', error);
         return false;
       }
-
       // Log audit event
       await this.logAudit('document', data.id, 'status_change', data.company_id, {
         new_status: status,
         reason,
         message_id: messageId
       });
-
       return true;
     } catch (error) {
-      console.error('Error updating document status:', error);
+      logger.error('EInvoicing', 'Error updating document status:', error);
       return false;
     }
   }
-
   /**
    * Get all e-invoicing documents for a company
    */
@@ -293,41 +261,32 @@ export class EInvoicingService {
         `)
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
-
       if (options.status) {
         query = query.eq('lifecycle_status', options.status);
       }
-
       if (options.format) {
         query = query.eq('format', options.format);
       }
-
       if (options.limit) {
         query = query.limit(options.limit);
       }
-
       if (options.offset) {
         query = query.range(options.offset, (options.offset + (options.limit || 50)) - 1);
       }
-
       const { data, error } = await query;
-
       if (error) {
-        console.error('Error fetching company documents:', error);
+        logger.error('EInvoicing', 'Error fetching company documents:', error);
         return [];
       }
-
       return data as EInvDocument[];
     } catch (error) {
-      console.error('Error getting company documents:', error);
+      logger.error('EInvoicing', 'Error getting company documents:', error);
       return [];
     }
   }
-
   // ================================
   // PRIVATE METHODS
   // ================================
-
   private async loadInvoice(invoiceId: string) {
     const { data, error } = await supabase
       .from('invoices')
@@ -339,15 +298,12 @@ export class EInvoicingService {
       `)
       .eq('id', invoiceId)
       .single();
-
     if (error) {
-      console.error('Error loading invoice:', error);
+      logger.error('EInvoicing', 'Error loading invoice:', error);
       return null;
     }
-
     return data;
   }
-
   private async getExistingDocument(
     invoiceId: string, 
     format: EInvoiceFormat, 
@@ -360,14 +316,11 @@ export class EInvoicingService {
       .eq('format', format)
       .eq('channel', channel)
       .single();
-
     if (error && error.code !== 'PGRST116') { // Not found is OK
-      console.error('Error checking existing document:', error);
+      logger.error('EInvoicing', 'Error checking existing document:', error);
     }
-
     return data as EInvDocument || null;
   }
-
   private async createOrUpdateDocument(
     data: Partial<EInvDocument>,
     existingId?: string
@@ -379,11 +332,9 @@ export class EInvoicingService {
         .eq('id', existingId)
         .select('*')
         .single();
-
       if (error) {
         throw new EInvoicingError('Failed to update document', 'UPDATE_ERROR', { error });
       }
-
       return updated as EInvDocument;
     } else {
       const { data: created, error } = await supabase
@@ -391,26 +342,21 @@ export class EInvoicingService {
         .insert([data])
         .select('*')
         .single();
-
       if (error) {
         throw new EInvoicingError('Failed to create document', 'CREATE_ERROR', { error });
       }
-
       return created as EInvDocument;
     }
   }
-
   private async updateDocument(id: string, updates: Partial<EInvDocument>): Promise<void> {
     const { error } = await supabase
       .from('einv_documents')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id);
-
     if (error) {
-      console.error('Error updating document:', error);
+      logger.error('EInvoicing', 'Error updating document:', error);
     }
   }
-
   private async submitToChannelAsync(
     documentId: string,
     formattingResult: any,
@@ -425,15 +371,12 @@ export class EInvoicingService {
           channel,
           documentId
         );
-
         const status: EInvoiceLifecycleStatus = submissionResult.success ? 'SUBMITTED' : 'DRAFT';
-        
         await this.updateDocument(documentId, {
           lifecycle_status: status,
           message_id: submissionResult.message_id,
           lifecycle_reason: submissionResult.success ? undefined : submissionResult.errors?.join('; ')
         });
-
         // Get company_id for audit log
         const doc = await this.getDocumentStatus(documentId);
         if (doc) {
@@ -449,10 +392,8 @@ export class EInvoicingService {
             }
           );
         }
-
       } catch (error) {
-        console.error('Async submission failed:', error);
-        
+        logger.error('EInvoicing', 'Async submission failed:', error);
         await this.updateDocument(documentId, {
           lifecycle_status: 'DRAFT',
           lifecycle_reason: `Async submission failed: ${  (error as Error).message}`
@@ -460,7 +401,6 @@ export class EInvoicingService {
       }
     }, 100); // Small delay to return response quickly
   }
-
   private async logAudit(
     entityType: string,
     entityId: string,
@@ -478,7 +418,7 @@ export class EInvoicingService {
         p_meta_json: metadata
       });
     } catch (error) {
-      console.error('Error logging audit:', error);
+      logger.error('EInvoicing', 'Error logging audit:', error);
     }
   }
 }

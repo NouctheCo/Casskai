@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,9 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
-
 import { projectResourcesService, type CreateResourceInput } from '@/services/projectResourcesService';
-
+import { logger } from '@/lib/logger';
 export interface ResourceAllocationModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,7 +20,6 @@ export interface ResourceAllocationModalProps {
   projects: Array<{ id: string; name: string }>;
   users: Array<{ id: string; email: string; name?: string }>;
 }
-
 interface ResourceFormData {
   project_id: string;
   user_id: string;
@@ -32,7 +29,6 @@ interface ResourceFormData {
   end_date: string;
   hourly_rate: number;
 }
-
 const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
   isOpen,
   onClose,
@@ -43,7 +39,6 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [formData, setFormData] = useState<ResourceFormData>({
     project_id: '',
     user_id: '',
@@ -53,9 +48,7 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
     end_date: '',
     hourly_rate: 0
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const handleInputChange = (field: keyof ResourceFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -66,10 +59,8 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
       });
     }
   };
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.project_id) {
       newErrors.project_id = t('projects.resourceModal.errorProject', 'Le projet est requis');
     }
@@ -82,21 +73,16 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
     if (!formData.start_date) {
       newErrors.start_date = t('projects.resourceModal.errorStartDate', 'La date de début est requise');
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
     if (!validateForm()) {
       return;
     }
-
     setLoading(true);
-
     try {
       const resourceData: CreateResourceInput = {
         project_id: formData.project_id,
@@ -107,9 +93,7 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
         end_date: formData.end_date || undefined,
         hourly_rate: formData.hourly_rate > 0 ? formData.hourly_rate : undefined
       };
-
       await projectResourcesService.createResource(resourceData);
-
       // Réinitialiser le formulaire
       setFormData({
         project_id: '',
@@ -120,11 +104,10 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
         end_date: '',
         hourly_rate: 0
       });
-
       onSuccess();
       onClose();
     } catch (err: any) {
-      console.error('Error creating resource allocation:', err);
+      logger.error('ResourceAllocationModal', 'Error creating resource allocation:', err);
       if (err?.message?.includes('duplicate key')) {
         setError(t('projects.resourceModal.errorDuplicate', 'Cette ressource est déjà allouée à ce projet'));
       } else {
@@ -134,7 +117,6 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
       setLoading(false);
     }
   };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -144,7 +126,6 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
             {t('projects.resourceModal.description', 'Assigner un utilisateur à un projet avec un taux d\'allocation')}
           </DialogDescription>
         </DialogHeader>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Projet */}
           <div className="space-y-2">
@@ -165,7 +146,6 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
               <p className="text-sm text-red-600">{errors.project_id}</p>
             )}
           </div>
-
           {/* Utilisateur */}
           <div className="space-y-2">
             <Label htmlFor="user_id">
@@ -187,7 +167,6 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
               <p className="text-sm text-red-600">{errors.user_id}</p>
             )}
           </div>
-
           {/* Rôle */}
           <div className="space-y-2">
             <Label htmlFor="role">
@@ -200,7 +179,6 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
               placeholder={t('projects.resourceModal.rolePlaceholder', 'Ex: Développeur, Chef de projet')}
             />
           </div>
-
           {/* Allocation et taux horaire */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -236,7 +214,6 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
               />
             </div>
           </div>
-
           {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -266,13 +243,11 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
               />
             </div>
           </div>
-
           {error && (
             <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
               <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
             </div>
           )}
-
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
               {t('common.cancel', 'Annuler')}
@@ -287,5 +262,4 @@ const ResourceAllocationModal: React.FC<ResourceAllocationModalProps> = ({
     </Dialog>
   );
 };
-
 export default ResourceAllocationModal;

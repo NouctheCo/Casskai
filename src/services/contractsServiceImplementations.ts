@@ -9,9 +9,9 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import { supabase } from '../lib/supabase';
 import { emailService } from './emailService';
+import { logger } from '@/lib/logger';
 import {
   ContractData,
   ContractFormData,
@@ -27,9 +27,7 @@ import {
   DiscountConfig,
   ContractAlert
 } from '../types/contracts.types';
-
 // Helpers -------------------------------------------------------------------
-
 const getCurrentUserId = async (): Promise<string | null> => {
   try {
     const { data, error } = await supabase.auth.getUser();
@@ -39,37 +37,30 @@ const getCurrentUserId = async (): Promise<string | null> => {
     return null;
   }
 };
-
 const calculateRFAForTurnover = (config: DiscountConfig, turnover: number) => {
   const breakdown: RFATierBreakdown[] = [];
   if (!turnover || turnover <= 0) {
     return { rfaAmount: 0, effectiveRate: 0, breakdown };
   }
-
   if (config.type === 'fixed_percent') {
     const rate = config.rate || 0;
     const rfaAmount = turnover * rate;
     return { rfaAmount, effectiveRate: rate, breakdown };
   }
-
   if (config.type === 'fixed_amount') {
     const amount = config.amount || 0;
     const effectiveRate = turnover > 0 ? amount / turnover : 0;
     return { rfaAmount: amount, effectiveRate, breakdown };
   }
-
   const tiers = [...(config.tiers || [])].sort((a, b) => a.min - b.min);
   let totalRFA = 0;
-
   tiers.forEach((tier, index) => {
     const tierMin = tier.min;
     const tierMax = tier.max ?? Number.MAX_SAFE_INTEGER;
     if (turnover <= tierMin) return;
-
     const tierAmount = Math.max(0, Math.min(turnover, tierMax) - tierMin);
     const tierRFA = tierAmount * tier.rate;
     totalRFA += tierRFA;
-
     breakdown.push({
       tier_index: index,
       tier_min: tierMin,
@@ -79,11 +70,9 @@ const calculateRFAForTurnover = (config: DiscountConfig, turnover: number) => {
       rfa_amount: tierRFA
     });
   });
-
   const effectiveRate = turnover > 0 ? totalRFA / turnover : 0;
   return { rfaAmount: totalRFA, effectiveRate, breakdown };
 };
-
 const logContractHistory = async (
   contractId: string,
   changeType: 'created' | 'updated' | 'status_changed' | 'terminated' | 'renewed',
@@ -102,10 +91,9 @@ const logContractHistory = async (
       changed_by: userId || null
     });
   } catch (err) {
-    console.warn('Unable to log contract history', err);
+    logger.warn('ContractsServiceImplementations', 'Unable to log contract history', err);
   }
 };
-
 const assertNoOverlap = async (
   enterpriseId: string,
   clientId: string,
@@ -114,7 +102,6 @@ const assertNoOverlap = async (
   excludeContractId?: string
 ) => {
   const end = endDate || startDate;
-
   let query = supabase
     .from('contracts')
     .select('id, contract_name, start_date, end_date, status')
@@ -123,23 +110,19 @@ const assertNoOverlap = async (
     .not('status', 'in', '(terminated,cancelled,archived)')
     .lte('start_date', end)
     .gte('end_date', startDate);
-
   if (excludeContractId) {
     query = query.neq('id', excludeContractId);
   }
-
   const { data, error } = await query.limit(1);
   if (error) {
     throw error;
   }
-
   if (data && data.length > 0) {
     const overlap = data[0];
     const message = `Un autre contrat (${overlap.contract_name}) couvre déjà cette période pour ce client.`;
     throw new Error(message);
   }
 };
-
 /**
  * Get all contracts with filters
  */
@@ -155,28 +138,21 @@ export async function getContracts(
         client:customers(id, name)
       `)
       .eq('company_id', enterpriseId);
-
     // Apply filters
     if (filters?.client_id) {
       query = query.eq('client_id', filters.client_id);
     }
-
     if (filters?.status && (filters.status as any) !== 'all') {
       query = query.eq('status', filters.status);
     }
-
     if (filters?.contract_type && (filters.contract_type as any) !== 'all') {
       query = query.eq('rfa_calculation_type', filters.contract_type);
     }
-
     if (filters?.search) {
       query = query.or(`contract_name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
     }
-
     const { data, error } = await query.order('created_at', { ascending: false });
-
     if (error) throw error;
-
     const contracts: ContractData[] = (data || []).map(c => ({
       id: c.id,
       enterprise_id: c.company_id,
@@ -197,14 +173,12 @@ export async function getContracts(
       created_at: c.created_at,
       updated_at: c.updated_at
     }));
-
     return { data: contracts, success: true };
   } catch (error) {
-    console.error('Error fetching contracts:', error);
+    logger.error('ContractsServiceImplementations', 'Error fetching contracts:', error);
     return { data: [], error: { message: String(error) }, success: false };
   }
 }
-
 /**
  * Get contract by ID
  */
@@ -218,13 +192,10 @@ export async function getContract(id: string): Promise<ContractServiceResponse<C
       `)
       .eq('id', id)
       .single();
-
     if (error) throw error;
-
     if (!data) {
       return { data: undefined, error: { message: 'Contract not found' }, success: false };
     }
-
     const contract: ContractData = {
       id: data.id,
       enterprise_id: data.company_id,
@@ -244,14 +215,12 @@ export async function getContract(id: string): Promise<ContractServiceResponse<C
       created_at: data.created_at,
       updated_at: data.updated_at
     } as any;
-
     return { data: contract, success: true };
   } catch (error) {
-    console.error('Error fetching contract:', error);
-    return { data: null, error: { message: String(error) }, success: false };
+    logger.error('ContractsServiceImplementations', 'Error fetching contract:', error);
+    return { data: undefined, error: { message: String(error) }, success: false };
   }
 }
-
 /**
  * Create new contract
  */
@@ -261,7 +230,6 @@ export async function createContract(
 ): Promise<ContractServiceResponse<ContractData>> {
   try {
     await assertNoOverlap(enterpriseId, contractData.client_id, contractData.start_date, contractData.end_date);
-
     const { data, error } = await supabase
       .from('contracts')
       .insert({
@@ -284,9 +252,7 @@ export async function createContract(
         client:customers(id, name)
       `)
       .single();
-
     if (error) throw error;
-
     const contract: ContractData = {
       id: data.id,
       enterprise_id: data.company_id,
@@ -306,16 +272,13 @@ export async function createContract(
       created_at: data.created_at,
       updated_at: data.updated_at
     } as any;
-
-    await logContractHistory(contract.id, 'created', 'Création du contrat', null, contractData as any);
-
+    await logContractHistory(contract.id, 'created', 'Création du contrat', undefined, contractData as any);
     return { data: contract, success: true };
   } catch (error) {
-    console.error('Error creating contract:', error);
-    return { data: null, error: { message: String(error) }, success: false };
+    logger.error('ContractsServiceImplementations', 'Error creating contract:', error);
+    return { data: undefined, error: { message: String(error) }, success: false };
   }
 }
-
 /**
  * Update contract
  */
@@ -330,7 +293,6 @@ export async function updateContract(
       .select('*')
       .eq('id', id)
       .single();
-
     if (currentData && (contractData.client_id || contractData.start_date || contractData.end_date)) {
       await assertNoOverlap(
         currentData.company_id,
@@ -340,9 +302,7 @@ export async function updateContract(
         id
       );
     }
-
     const updateData: any = {};
-
     if (contractData.contract_name) updateData.contract_name = contractData.contract_name;
     if (contractData.client_id) updateData.client_id = contractData.client_id;
     if (contractData.contract_type) updateData.rfa_calculation_type = contractData.contract_type;
@@ -355,7 +315,6 @@ export async function updateContract(
     if ((contractData as any).status) updateData.status = (contractData as any).status;
     if (contractData.currency) updateData.currency = contractData.currency;
     if ((contractData as any).notes !== undefined) updateData.description = (contractData as any).notes;
-
     const { data, error } = await supabase
       .from('contracts')
       .update(updateData)
@@ -365,13 +324,10 @@ export async function updateContract(
         client:customers(id, name)
       `)
       .single();
-
     if (error) throw error;
-
     if (!data) {
       return { data: undefined, error: { message: 'Contract not found' }, success: false };
     }
-
     const contract: ContractData = {
       id: data.id,
       enterprise_id: data.company_id,
@@ -391,20 +347,16 @@ export async function updateContract(
       created_at: data.created_at,
       updated_at: data.updated_at
     } as any;
-
     const changeType = currentData?.end_date && contractData.end_date && contractData.end_date > currentData.end_date
       ? 'renewed'
       : 'updated';
-
     await logContractHistory(id, changeType, 'Mise à jour du contrat', currentData as any, contractData as any);
-
     return { data: contract, success: true };
   } catch (error) {
-    console.error('Error updating contract:', error);
-    return { data: null, error: { message: String(error) }, success: false };
+    logger.error('ContractsServiceImplementations', 'Error updating contract:', error);
+    return { data: undefined, error: { message: String(error) }, success: false };
   }
 }
-
 /**
  * Delete contract
  */
@@ -414,16 +366,13 @@ export async function deleteContract(id: string): Promise<ContractServiceRespons
       .from('contracts')
       .delete()
       .eq('id', id);
-
     if (error) throw error;
-
     return { data: true, success: true };
   } catch (error) {
-    console.error('Error deleting contract:', error);
+    logger.error('ContractsServiceImplementations', 'Error deleting contract:', error);
     return { data: false, error: { message: String(error) }, success: false };
   }
 }
-
 /**
  * Archive contract (set status to 'cancelled')
  */
@@ -433,18 +382,14 @@ export async function archiveContract(id: string): Promise<ContractServiceRespon
       .from('contracts')
       .update({ status: 'cancelled' })
       .eq('id', id);
-
     if (error) throw error;
-
-    await logContractHistory(id, 'status_changed', 'Contrat archivé', null, { status: 'cancelled' });
-
+    await logContractHistory(id, 'status_changed', 'Contrat archivé', undefined, { status: 'cancelled' });
     return { data: true, success: true };
   } catch (error) {
-    console.error('Error archiving contract:', error);
+    logger.error('ContractsServiceImplementations', 'Error archiving contract:', error);
     return { data: false, error: { message: String(error) }, success: false };
   }
 }
-
 /**
  * Get RFA calculations with filters
  */
@@ -460,27 +405,20 @@ export async function getRFACalculations(
         contract:contracts(id, contract_name, client:customers(name))
       `)
       .eq('company_id', enterpriseId);
-
     if (filters?.contract_id) {
       query = query.eq('contract_id', filters.contract_id);
     }
-
     if (filters?.status && (filters.status as any) !== 'all') {
       query = query.eq('status', filters.status);
     }
-
     if (filters?.period_start) {
       query = query.gte('period_start', filters.period_start);
     }
-
     if (filters?.period_end) {
       query = query.lte('period_end', filters.period_end);
     }
-
     const { data, error } = await query.order('period_start', { ascending: false });
-
     if (error) throw error;
-
     const calculations: RFACalculation[] = (data || []).map(r => ({
       id: r.id,
       contract_id: r.contract_id,
@@ -502,14 +440,12 @@ export async function getRFACalculations(
       created_at: r.created_at,
       updated_at: r.updated_at
     }));
-
     return { data: calculations, success: true };
   } catch (error) {
-    console.error('Error fetching RFA calculations:', error);
+    logger.error('ContractsServiceImplementations', 'Error fetching RFA calculations:', error);
     return { data: [], error: { message: String(error) }, success: false };
   }
 }
-
 /**
  * Create RFA calculation
  */
@@ -525,11 +461,8 @@ export async function createRFACalculation(
         p_period_start: rfaData.period_start,
         p_period_end: rfaData.period_end
       });
-
     if (calcError) throw calcError;
-
     const calculation = calcResult[0];
-
     // Insert the calculated RFA
     const { data, error } = await supabase
       .from('rfa_calculations')
@@ -548,9 +481,7 @@ export async function createRFACalculation(
         contract:contracts(id, contract_name, client:customers(name))
       `)
       .single();
-
     if (error) throw error;
-
     const rfa: RFACalculation = {
       id: data.id,
       contract_id: data.contract_id,
@@ -567,14 +498,12 @@ export async function createRFACalculation(
       validated_at: data.validated_at,
       validated_by: data.validated_by
     } as any;
-
     return { data: rfa, success: true };
   } catch (error) {
-    console.error('Error creating RFA calculation:', error);
+    logger.error('ContractsServiceImplementations', 'Error creating RFA calculation:', error);
     return { data: undefined, error: { message: String(error) }, success: false };
   }
 }
-
 /**
  * Automatic monthly RFA calculation for all active contracts
  */
@@ -585,7 +514,6 @@ export async function autoCalculateCurrentMonthRFA(
   const start = new Date(now.getFullYear(), now.getMonth(), 1);
   const periodStart = start.toISOString().split('T')[0];
   const periodEnd = now.toISOString().split('T')[0];
-
   try {
     const { data: contracts, error: contractsError } = await supabase
       .from('contracts')
@@ -594,12 +522,9 @@ export async function autoCalculateCurrentMonthRFA(
       .in('status', ['active', 'draft'])
       .lte('start_date', periodEnd)
       .or(`end_date.is.null,end_date.gte.${periodStart}`);
-
     if (contractsError) throw contractsError;
-
     let processed = 0;
     let updated = 0;
-
     for (const contract of contracts || []) {
       const { data: calcResult, error: calcError } = await supabase
         .rpc('calculate_contract_rfa', {
@@ -607,15 +532,12 @@ export async function autoCalculateCurrentMonthRFA(
           p_period_start: periodStart,
           p_period_end: periodEnd
         });
-
       if (calcError) {
-        console.warn('Auto RFA calculation failed for contract', contract.id, calcError);
+        logger.warn('ContractsServiceImplementations', 'Auto RFA calculation failed for contract', contract.id, calcError);
         continue;
       }
-
       const calculation = calcResult?.[0];
       if (!calculation) continue;
-
       // Upsert logic: if a calculation exists for the same contract & period, update it
       const { data: existing, error: existingError } = await supabase
         .from('rfa_calculations')
@@ -625,12 +547,10 @@ export async function autoCalculateCurrentMonthRFA(
         .eq('period_start', periodStart)
         .eq('period_end', periodEnd)
         .limit(1);
-
       if (existingError) {
-        console.warn('Auto RFA lookup failed', existingError);
+        logger.warn('ContractsServiceImplementations', 'Auto RFA lookup failed', existingError);
         continue;
       }
-
       if (existing && existing.length > 0) {
         const { error: updateError } = await supabase
           .from('rfa_calculations')
@@ -642,7 +562,6 @@ export async function autoCalculateCurrentMonthRFA(
             updated_at: new Date().toISOString()
           })
           .eq('id', existing[0].id);
-
         if (!updateError) {
           updated += 1;
         }
@@ -659,17 +578,14 @@ export async function autoCalculateCurrentMonthRFA(
           currency: contract.currency || 'EUR'
         });
       }
-
       processed += 1;
     }
-
     return { data: { processed, updated }, success: true };
   } catch (error) {
-    console.error('Error running auto RFA calculation:', error);
+    logger.error('ContractsServiceImplementations', 'Error running auto RFA calculation:', error);
     return { data: { processed: 0, updated: 0 }, error: { message: String(error) }, success: false };
   }
 }
-
 /**
  * Simulate RFA results for what-if turnover scenarios
  */
@@ -682,7 +598,6 @@ export async function simulateRFA(
     if (!contractResp.success || !contractResp.data) {
       return { data: [], success: false, error: { message: 'Contrat introuvable' } };
     }
-
     const config = contractResp.data.discount_config;
     const results: SimulationResult[] = scenarios.map((scenario) => {
       const { rfaAmount, effectiveRate, breakdown } = calculateRFAForTurnover(config as DiscountConfig, scenario.amount);
@@ -695,14 +610,12 @@ export async function simulateRFA(
         breakdown
       };
     });
-
     return { data: results, success: true };
   } catch (error) {
-    console.error('Error simulating RFA:', error);
+    logger.error('ContractsServiceImplementations', 'Error simulating RFA:', error);
     return { data: [], error: { message: String(error) }, success: false };
   }
 }
-
 /**
  * Send a contract summary by email (internal follow-up or to client)
  */
@@ -716,7 +629,6 @@ export async function sendContractSummaryEmail(
     if (!contractResp.success || !contractResp.data) {
       return { data: false, success: false, error: { message: 'Contrat introuvable' } };
     }
-
     // Dernier calcul RFA pour donner un état récent
     const { data: recentRFA } = await supabase
       .from('rfa_calculations')
@@ -725,14 +637,11 @@ export async function sendContractSummaryEmail(
       .eq('contract_id', contractId)
       .order('period_end', { ascending: false })
       .limit(1);
-
     const contract = contractResp.data;
     const lastRFA = recentRFA?.[0];
-
     const rfaAmount = lastRFA ? Number(lastRFA.discount_amount || lastRFA.rfa_amount || 0) : 0;
     const turnover = lastRFA ? Number(lastRFA.total_turnover || lastRFA.turnover_amount || 0) : 0;
     const effectiveRate = turnover > 0 ? (rfaAmount / turnover) * 100 : 0;
-
     const html = `
       <h2>État du contrat ${contract.contract_name}</h2>
       <p><strong>Client :</strong> ${contract.client_name || contract.client_id}</p>
@@ -741,21 +650,18 @@ export async function sendContractSummaryEmail(
       <p><strong>Dernier calcul RFA :</strong> ${rfaAmount.toFixed(2)} ${contract.currency} (${effectiveRate.toFixed(2)}%)</p>
       <p><strong>Devise :</strong> ${contract.currency}</p>
     `;
-
     await emailService.sendEmail(enterpriseId, {
       to: recipientEmail,
       subject: `État du contrat ${contract.contract_name}`,
       html,
       text: `État du contrat ${contract.contract_name}\nDernier RFA: ${rfaAmount.toFixed(2)} ${contract.currency} (${effectiveRate.toFixed(2)}%)`
     });
-
     return { data: true, success: true };
   } catch (error) {
-    console.error('Error sending contract summary email:', error);
+    logger.error('ContractsServiceImplementations', 'Error sending contract summary email:', error);
     return { data: false, error: { message: String(error) }, success: false };
   }
 }
-
 /**
  * Get contracts dashboard data
  */
@@ -766,7 +672,6 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
       .from('contracts')
       .select('*')
       .eq('company_id', enterpriseId);
-
     // Get RFA calculations for this year with related data
     const yearStart = new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
     const { data: rfaCalcs } = await supabase
@@ -778,22 +683,18 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
       .eq('company_id', enterpriseId)
       .gte('period_start', yearStart)
       .order('created_at', { ascending: false });
-
     // Calculate stats (using real column names)
     const totalRFAPending = rfaCalcs?.filter(r => r.status === 'calculated' || r.status === 'pending').reduce((sum, r) => sum + Number(r.discount_amount ?? r.rfa_amount ?? 0), 0) || 0;
     const totalRFAPaid = rfaCalcs?.filter(r => r.status === 'validated' || r.status === 'paid').reduce((sum, r) => sum + Number(r.discount_amount ?? r.rfa_amount ?? 0), 0) || 0;
     const totalTurnover = rfaCalcs?.reduce((sum, r) => sum + Number(r.total_turnover ?? r.turnover_amount ?? 0), 0) || 0;
     const averageRFARate = totalTurnover > 0 ? (totalRFAPending + totalRFAPaid) / totalTurnover : 0;
-
     // Get top clients by RFA
     const clientRFAMap = new Map<string, { name: string; totalRFA: number; totalTurnover: number; count: number; currency: string }>();
-
     rfaCalcs?.forEach(rfa => {
       const contract = rfa.contract as any;
       const clientId = contract?.client_id;
       const clientName = contract?.client?.name || 'Client inconnu';
       const currency = contract?.currency || 'EUR';
-
       if (clientId) {
         const existing = clientRFAMap.get(clientId) || { name: clientName, totalRFA: 0, totalTurnover: 0, count: 0, currency };
         existing.totalRFA += Number(rfa.discount_amount ?? rfa.rfa_amount ?? 0) || 0;
@@ -802,7 +703,6 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
         clientRFAMap.set(clientId, existing);
       }
     });
-
     const topClients = Array.from(clientRFAMap.entries())
       .map(([client_id, data]) => ({
         client_id,
@@ -815,7 +715,6 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
       }))
       .sort((a, b) => b.total_rfa - a.total_rfa)
       .slice(0, 5);
-
     // Get recent calculations
     const recentCalculations = (rfaCalcs || []).slice(0, 5).map(r => {
       const contract = r.contract as any;
@@ -841,7 +740,6 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
         updated_at: r.updated_at || r.created_at || new Date().toISOString()
       };
     });
-
     // Generate alerts for contracts expiring soon
     const alerts = (contracts || [])
       .filter(c => {
@@ -864,7 +762,6 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
           created_at: new Date().toISOString()
         };
       });
-
     // Get upcoming renewals (contracts expiring in next 90 days)
     const upcomingRenewals = (contracts || [])
       .filter(c => {
@@ -875,7 +772,6 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
         return endDate <= in90Days;
       })
       .slice(0, 10);
-
     const dashboardData: ContractsDashboardData = {
       stats: {
         total_contracts: contracts?.length || 0,
@@ -907,10 +803,9 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
         updated_at: c.updated_at
       }))
     };
-
     return { data: dashboardData, success: true };
   } catch (error) {
-    console.error('Error fetching dashboard data:', error);
+    logger.error('ContractsServiceImplementations', 'Error fetching dashboard data:', error);
     return {
       data: {
         stats: {
@@ -933,7 +828,6 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
     };
   }
 }
-
 /**
  * Export contracts to CSV
  */
@@ -943,7 +837,6 @@ export async function exportContractsToCSV(
 ): Promise<ContractServiceResponse<string>> {
   try {
     const { data: contracts } = await getContracts(enterpriseId, filters);
-
     const headers = [
       'Nom du contrat',
       'Client',
@@ -953,7 +846,6 @@ export async function exportContractsToCSV(
       'Statut',
       'Devise'
     ];
-
     const csvData = [
       headers.join(','),
       ...(contracts ?? []).map(c => [
@@ -966,10 +858,9 @@ export async function exportContractsToCSV(
         c.currency
       ].join(','))
     ].join('\n');
-
     return { data: csvData, success: true };
   } catch (error) {
-    console.error('Error exporting contracts:', error);
+    logger.error('ContractsServiceImplementations', 'Error exporting contracts:', error);
     return { data: '', error: { message: String(error) }, success: false };
   }
 }

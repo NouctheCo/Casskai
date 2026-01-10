@@ -14,9 +14,14 @@ const localeMap = {
   es,
 };
 
-export function DatePicker({ value, onChange, placeholder, className }) {
+export function DatePicker({ value, onChange, placeholder, className }: {
+  value?: Date | null;
+  onChange: ((date: Date | undefined) => void) | ((date: Date) => void);
+  placeholder?: string;
+  className?: string;
+}) {
   const { locale } = useLocale();
-  const dateLocale = localeMap[locale] || fr;
+  const dateLocale = localeMap[locale as keyof typeof localeMap] || fr;
 
   return (
     <Popover>

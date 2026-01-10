@@ -2,7 +2,6 @@
  * Report History Tab
  * Onglet d'historique des rapports générés avec recherche et filtres
  */
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,12 +16,11 @@ import { reportArchiveService, type GeneratedReport } from '@/services/reportArc
 import { useToast } from '@/hooks/useToast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
+import { logger } from '@/lib/logger';
 interface ReportHistoryTabProps {
   companyId: string;
   refreshTrigger?: number;
 }
-
 export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTabProps) {
   const { showToast } = useToast();
   const [reports, setReports] = useState<GeneratedReport[]>([]);
@@ -31,11 +29,9 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [fiscalYearFilter, setFiscalYearFilter] = useState('all');
-
   useEffect(() => {
     loadReports();
   }, [companyId, refreshTrigger]);
-
   const loadReports = async () => {
     setLoading(true);
     try {
@@ -45,18 +41,16 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
         fiscal_year: fiscalYearFilter !== 'all' ? parseInt(fiscalYearFilter) : undefined,
         search: searchTerm || undefined
       });
-
       if (result.success && result.data) {
         setReports(result.data);
       }
     } catch (error) {
-      console.error('Error loading reports:', error);
+      logger.error('ReportHistoryTab', 'Error loading reports:', error);
       showToast('Erreur lors du chargement des rapports', 'error');
     } finally {
       setLoading(false);
     }
   };
-
   const handleStatusChange = async (reportId: string, newStatus: GeneratedReport['status']) => {
     try {
       const result = await reportArchiveService.updateReportStatus(reportId, newStatus);
@@ -67,18 +61,16 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
         showToast(result.error || 'Erreur lors de la mise à jour', 'error');
       }
     } catch (error) {
-      console.error('Error updating status:', error);
+      logger.error('ReportHistoryTab', 'Error updating status:', error);
       showToast('Erreur lors de la mise à jour du statut', 'error');
     }
   };
-
   const handleDownload = async (report: GeneratedReport) => {
     try {
       if (!report.file_path) {
         showToast('Fichier non disponible', 'error');
         return;
       }
-
       const result = await reportArchiveService.downloadReportFile(report.file_path);
       if (result.success && result.data) {
         const url = URL.createObjectURL(result.data);
@@ -92,22 +84,19 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
         showToast(result.error || 'Erreur lors du téléchargement', 'error');
       }
     } catch (error) {
-      console.error('Error downloading report:', error);
+      logger.error('ReportHistoryTab', 'Error downloading report:', error);
       showToast('Erreur lors du téléchargement', 'error');
     }
   };
-
   const handleDelete = async (report: GeneratedReport) => {
     if (report.is_archived) {
       showToast('Impossible de supprimer un rapport archivé', 'error');
       return;
     }
-
     // eslint-disable-next-line no-alert
     if (!confirm(`Êtes-vous sûr de vouloir supprimer "${report.report_name}" ?`)) {
       return;
     }
-
     try {
       const result = await reportArchiveService.deleteGeneratedReport(report.id);
       if (result.success) {
@@ -117,11 +106,10 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
         showToast(result.error || 'Erreur lors de la suppression', 'error');
       }
     } catch (error) {
-      console.error('Error deleting report:', error);
+      logger.error('ReportHistoryTab', 'Error deleting report:', error);
       showToast('Erreur lors de la suppression', 'error');
     }
   };
-
   const getStatusBadge = (status: string) => {
     const config: Record<string, { label: string; color: string; icon: any }> = {
       draft: { label: 'Brouillon', color: 'bg-gray-100 text-gray-800', icon: Clock },
@@ -138,7 +126,6 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
       </Badge>
     );
   };
-
   const filteredReports = reports.filter(report => {
     const matchesSearch = searchTerm === '' ||
       report.report_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -148,7 +135,6 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
     const matchesFiscalYear = fiscalYearFilter === 'all' || report.fiscal_year?.toString() === fiscalYearFilter;
     return matchesSearch && matchesStatus && matchesType && matchesFiscalYear;
   });
-
   const stats = {
     total: reports.length,
     draft: reports.filter(r => r.status === 'draft').length,
@@ -156,9 +142,7 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
     approved: reports.filter(r => r.status === 'approved').length,
     archived: reports.filter(r => r.is_archived).length
   };
-
   const fiscalYears = Array.from(new Set(reports.map(r => r.fiscal_year).filter(Boolean))).sort((a, b) => b! - a!);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -169,7 +153,6 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Statistiques */}
@@ -215,7 +198,6 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
           </CardContent>
         </Card>
       </div>
-
       {/* Filtres */}
       <Card>
         <CardHeader>
@@ -273,7 +255,6 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
           </div>
         </CardContent>
       </Card>
-
       {/* Liste des rapports */}
       <div className="space-y-3">
         {filteredReports.map((report) => (
@@ -317,7 +298,6 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
                     </div>
                   )}
                 </div>
-
                 <div className="flex gap-2 ml-4">
                   <Button size="sm" variant="outline" onClick={() => handleDownload(report)}>
                     <Download className="w-4 h-4" />
@@ -356,7 +336,6 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
           </Card>
         ))}
       </div>
-
       {filteredReports.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">

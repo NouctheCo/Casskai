@@ -2,9 +2,14 @@ import React from 'react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
+interface ThirdPartyFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+  thirdParty?: unknown;
+  onSubmit?: (data: unknown) => void;
+}
 
-
-export default function ThirdPartyForm({ isOpen, onClose, thirdParty: _thirdParty, onSubmit: _onSubmit }) {
+export default function ThirdPartyForm({ isOpen, onClose, thirdParty: _thirdParty, onSubmit: _onSubmit }: ThirdPartyFormProps) {
 
   return (
 

@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -31,33 +30,27 @@ import {
 } from '@/services/pricingMultiCurrency';
 import { Globe, Check } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
+import { logger } from '@/lib/logger';
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
 export default function PricingPage() {
   const { subscriptionPlan: _subscriptionPlan } = useSubscription();
   const { user } = useAuth();
   const { trialInfo, canCreateTrial, createTrial: _createTrial } = useTrial();
-
   const [isLoading, setIsLoading] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<'month' | 'year'>('month');
   const [selectedCountry, setSelectedCountry] = useState<string>(() => getDefaultCountry());
   const [currentPricing, setCurrentPricing] = useState<CountryPricing | null>(null);
-
   // Charger le pricing pour le pays sélectionné
   useEffect(() => {
     const pricing = generateCountryPricing(selectedCountry);
     setCurrentPricing(pricing);
   }, [selectedCountry]);
-
   const handleChoosePlan = async (planId: string) => {
     if (!user) {
       toastError('Vous devez être connecté pour choisir un plan');
       return;
     }
-
     setIsLoading(true);
-
     try {
       // Gestion spéciale pour le plan gratuit
       if (planId === 'free') {
@@ -65,10 +58,8 @@ export default function PricingPage() {
         window.location.href = '/dashboard';
         return;
       }
-
       // Pour les autres plans, utiliser Stripe via Edge Functions
-      console.warn('🛒 [PricingPage] Starting checkout for plan:', planId);
-
+      logger.warn('Pricing', '🛒 [PricingPage] Starting checkout for plan:', planId);
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {
           planId,
@@ -79,57 +70,47 @@ export default function PricingPage() {
           }
         },
       });
-
-      console.warn('🛒 [PricingPage] Edge function response:', { data, error });
-
+      logger.warn('Pricing', '🛒 [PricingPage] Edge function response:', { data, error });
       if (error) {
         toastError(`Erreur lors de la création de la session: ${(error instanceof Error ? error.message : 'Une erreur est survenue') || 'Erreur inconnue'}`);
         return;
       }
-
       if (!data || !data.sessionId) {
         toastWarning('⚠️ Réponse du service de paiement invalide. Veuillez réessayer.');
         return;
       }
-
       // Redirection vers Stripe Checkout
-      console.warn('🛒 [PricingPage] About to load stripe...');
+      logger.warn('Pricing', '🛒 [PricingPage] About to load stripe...');
       const stripe = await stripePromise;
-      console.warn('🛒 [PricingPage] Stripe loaded:', !!stripe);
-
+      logger.warn('Pricing', '🛒 [PricingPage] Stripe loaded:', !!stripe);
       if (!stripe) {
-        console.error('🛒 [PricingPage] Stripe failed to load - using manual redirect');
-        console.warn('🛒 [PricingPage] Manual redirect to URL:', data.url);
+        logger.error('Pricing', '🛒 [PricingPage] Stripe failed to load - using manual redirect');
+        logger.warn('Pricing', '🛒 [PricingPage] Manual redirect to URL:', data.url);
         window.location.href = data.url;
         return;
       }
-
       // Try Stripe.js redirect first, but with a timeout fallback
-      console.warn('🛒 [PricingPage] Calling stripe.redirectToCheckout with sessionId:', data.sessionId);
-
+      logger.warn('Pricing', '🛒 [PricingPage] Calling stripe.redirectToCheckout with sessionId:', data.sessionId);
       try {
         const redirectPromise = stripe.redirectToCheckout({ sessionId: data.sessionId });
-
         // Set a timeout in case redirectToCheckout hangs
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => reject(new Error('Stripe redirect timeout')), 5000);
         });
-
         const result = await Promise.race([redirectPromise, timeoutPromise]) as { error?: { message: string } };
-        console.warn('🛒 [PricingPage] redirectToCheckout result:', result);
-
+        logger.warn('Pricing', '🛒 [PricingPage] redirectToCheckout result:', result);
         if (result.error) {
-          console.error('🛒 [PricingPage] Stripe redirect error:', result.error);
-          console.warn('🛒 [PricingPage] Using manual redirect fallback');
+          logger.error('Pricing', '🛒 [PricingPage] Stripe redirect error:', result.error);
+          logger.warn('Pricing', '🛒 [PricingPage] Using manual redirect fallback');
           window.location.href = data.url;
         }
       } catch (error: unknown) {
-        console.error('🛒 [PricingPage] Stripe redirect failed or timed out:', error);
-        console.warn('🛒 [PricingPage] Using manual redirect to URL:', data.url);
+        logger.error('Pricing', '🛒 [PricingPage] Stripe redirect failed or timed out:', error);
+        logger.warn('Pricing', '🛒 [PricingPage] Using manual redirect to URL:', data.url);
         window.location.href = data.url;
       }
     } catch (error: unknown) {
-      console.error('Erreur lors du choix du plan:', error);
+      logger.error('Pricing', 'Erreur lors du choix du plan:', error);
       if ((error instanceof Error ? error.name : 'Error') === 'TypeError') {
         toastWarning('⚠️ Problème de connexion réseau. Vérifiez votre connexion Internet et réessayez.');
       } else {
@@ -139,7 +120,6 @@ export default function PricingPage() {
       setIsLoading(false);
     }
   };
-
   if (!currentPricing) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -147,7 +127,6 @@ export default function PricingPage() {
       </div>
     );
   }
-
   const plans = [
     {
       id: 'free',
@@ -220,9 +199,7 @@ export default function PricingPage() {
       popular: false
     }
   ];
-
   const countryGroups = getCountryGroups();
-
   return (
     <>
       <PricingPageSEO />
@@ -234,7 +211,6 @@ export default function PricingPage() {
               Adaptés à {currentPricing.countryName} {currentPricing.flag}
             </p>
           </div>
-
           {/* Sélecteur de pays */}
           <div className="flex flex-col gap-4">
             <Select value={selectedCountry} onValueChange={setSelectedCountry}>
@@ -263,7 +239,6 @@ export default function PricingPage() {
                 ))}
               </SelectContent>
             </Select>
-
             {/* Toggle mensuel/annuel */}
             <div className="flex items-center space-x-4 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               <button
@@ -294,10 +269,8 @@ export default function PricingPage() {
             </div>
           </div>
         </div>
-
         {/* Trial Status */}
         <TrialStatusCard />
-
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {plans.map((plan) => (
             <Card key={plan.id} className={plan.popular ? 'border-2 border-blue-500 relative' : ''}>
@@ -322,7 +295,6 @@ export default function PricingPage() {
                       </div>
                     )}
                   </div>
-
                   {plan.price !== 0 && (
                     <>
                       <div className="flex items-center gap-2">
@@ -333,7 +305,6 @@ export default function PricingPage() {
                           -{plan.discount}%
                         </span>
                       </div>
-
                       {billingPeriod === 'year' && (
                         <div className="text-sm text-green-600 dark:text-green-400 mt-2">
                           Soit {formatPriceWithCurrency(plan.priceYearly, currentPricing.currency)}/an • Économie 20%
@@ -358,7 +329,6 @@ export default function PricingPage() {
                     const fullPlanId = plan.id === 'free'
                       ? 'free'
                       : `${plan.id}_${billingPeriod === 'year' ? 'yearly' : 'monthly'}`;
-
                     handleChoosePlan(fullPlanId);
                   }}
                   className="w-full"

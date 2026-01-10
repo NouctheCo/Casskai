@@ -9,12 +9,10 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-
 /**
  * Analytics utilities for Plausible tracking
  * Privacy-friendly analytics without cookies
  */
-
 /**
  * Track a custom event in Plausible Analytics
  * Only tracks in production environment
@@ -26,6 +24,8 @@
  * trackEvent('Signup', { plan: 'starter' });
  * trackEvent('Invoice Created', { amount: 150, currency: 'EUR' });
  */
+import { logger } from '@/lib/logger';
+
 export const trackEvent = (
   eventName: string,
   props?: Record<string, string | number | boolean>
@@ -35,19 +35,17 @@ export const trackEvent = (
     // Dev mode: ne pas tracker
     return;
   }
-
   // Check if Plausible script is loaded
   if (typeof window.plausible === 'function') {
     try {
       window.plausible(eventName, { props });
     } catch (error) {
-      console.warn('[Analytics] Failed to track event:', error);
+      logger.warn('Analytics', '[Analytics] Failed to track event:', error);
     }
   } else {
-    console.warn('[Analytics] Plausible not loaded');
+    logger.warn('Analytics', '[Analytics] Plausible not loaded');
   }
 };
-
 /**
  * Track a pageview (usually automatic, but can be used for SPAs)
  * Plausible auto-tracks pageviews, this is for manual tracking if needed
@@ -56,16 +54,14 @@ export const trackPageview = (url?: string): void => {
   if (!import.meta.env.PROD) {
     return;
   }
-
   if (typeof window.plausible === 'function') {
     try {
       window.plausible('pageview', url ? { props: { path: url } } : undefined);
     } catch (error) {
-      console.warn('[Analytics] Failed to track pageview:', error);
+      logger.warn('Analytics', '[Analytics] Failed to track pageview:', error);
     }
   }
 };
-
 /**
  * Predefined events for common actions
  * Use these instead of raw trackEvent calls for consistency
@@ -75,7 +71,6 @@ export const analytics = {
   signup: (plan: string) => trackEvent('Signup', { plan }),
   login: () => trackEvent('Login'),
   logout: () => trackEvent('Logout'),
-
   // Subscription events
   subscriptionStarted: (plan: string, amount: number) =>
     trackEvent('Subscription Started', { plan, amount }),
@@ -83,13 +78,11 @@ export const analytics = {
     trackEvent('Subscription Cancelled', { plan }),
   subscriptionUpgraded: (oldPlan: string, newPlan: string) =>
     trackEvent('Subscription Upgraded', { old_plan: oldPlan, new_plan: newPlan }),
-
   // Invoice events
   invoiceCreated: (amount: number, currency: string = 'EUR') =>
     trackEvent('Invoice Created', { amount, currency }),
   invoiceExported: (format: string) =>
     trackEvent('Invoice Exported', { format }),
-
   // Accounting events
   fecExported: (year: number, entries: number) =>
     trackEvent('FEC Exported', { year, entries }),
@@ -97,13 +90,11 @@ export const analytics = {
     trackEvent('Bank Synced', { bank, transactions }),
   journalEntryCreated: (type: string, amount: number) =>
     trackEvent('Journal Entry Created', { type, amount }),
-
   // RGPD events
   dataExported: () => trackEvent('Data Exported'),
   accountDeleted: () => trackEvent('Account Deleted'),
   consentUpdated: (analytics: boolean, marketing: boolean) =>
     trackEvent('Consent Updated', { analytics, marketing }),
-
   // Feature usage
   dashboardViewed: () => trackEvent('Dashboard Viewed'),
   reportGenerated: (type: string) => trackEvent('Report Generated', { type }),

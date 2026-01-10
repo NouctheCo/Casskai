@@ -15,7 +15,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
-
+import { logger } from '@/lib/logger';
 interface Account {
   id: string;
   account_number: string;
@@ -23,7 +23,6 @@ interface Account {
   type: string;
   class: number;
 }
-
 interface BudgetCategory {
   id?: string;
   account_id: string;
@@ -36,7 +35,6 @@ interface BudgetCategory {
   monthly_distribution: number[];
   notes?: string;
 }
-
 interface RepartitionMode {
   id: string;
   name: string;
@@ -44,7 +42,6 @@ interface RepartitionMode {
   description: string;
   calculate: (annual: number) => number[];
 }
-
 const REPARTITION_MODES: RepartitionMode[] = [
   {
     id: 'equal',
@@ -112,7 +109,6 @@ const REPARTITION_MODES: RepartitionMode[] = [
     },
   },
 ];
-
 const MONTHS = [
   'Jan',
   'Fév',
@@ -127,13 +123,11 @@ const MONTHS = [
   'Nov',
   'Déc',
 ];
-
 interface BudgetCategoryFormProps {
   category?: BudgetCategory;
   onSave: (category: BudgetCategory) => void;
   onCancel: () => void;
 }
-
 export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
   category,
   onSave,
@@ -141,10 +135,8 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
 }) => {
   const { currentCompany } = useAuth();
   const { t } = useTranslation();
-
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
-
   const [formData, setFormData] = useState<BudgetCategory>({
     account_id: category?.account_id || '',
     type: category?.type || 'expense',
@@ -154,89 +146,71 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
     subcategory: category?.subcategory || '',
     notes: category?.notes || '',
   });
-
   const [showRepartitionMenu, setShowRepartitionMenu] = useState(false);
   const [selectedRepartitionMode, setSelectedRepartitionMode] = useState<string>('equal');
-
   useEffect(() => {
     const fetchAccounts = async () => {
       if (!currentCompany?.id) return;
-
       const { data, error } = await supabase
         .from('accounts')
         .select('id, account_number, name, type, class')
         .eq('company_id', currentCompany.id)
         .in('class', [6, 7])
         .order('account_number');
-
       if (error) {
-        console.error('Error loading accounts:', error);
+        logger.error('BudgetCategoryForm', 'Error loading accounts:', error);
         toast.error(t('errors.loadAccounts', 'Erreur lors du chargement des comptes'));
       } else {
         setAccounts(data || []);
       }
       setLoadingAccounts(false);
     };
-
     fetchAccounts();
   }, [currentCompany?.id, t]);
-
   const groupedAccounts = useMemo(() => {
     return {
       charges: accounts.filter((a) => a.class === 6),
       produits: accounts.filter((a) => a.class === 7),
     };
   }, [accounts]);
-
   const monthlySum = useMemo(() => {
     return formData.monthly_distribution.reduce((sum, val) => sum + (val || 0), 0);
   }, [formData.monthly_distribution]);
-
   const variance = useMemo(() => {
     return Math.round((formData.annual_amount - monthlySum) * 100) / 100;
   }, [formData.annual_amount, monthlySum]);
-
   const hasVariance = Math.abs(variance) > 0.01;
-
   const applyRepartition = (mode: RepartitionMode) => {
     if (formData.annual_amount <= 0) {
       toast.error(t('errors.enterAnnualAmount', "Veuillez d'abord saisir un montant annuel"));
       return;
     }
-
     const distribution = mode.calculate(formData.annual_amount);
     setFormData({ ...formData, monthly_distribution: distribution });
     setSelectedRepartitionMode(mode.id);
     setShowRepartitionMenu(false);
     toast.success(t('success.distributionApplied', 'Répartition appliquée'));
   };
-
   const adjustToAnnual = () => {
     if (monthlySum === 0) return;
-
     const ratio = formData.annual_amount / monthlySum;
     const adjusted = formData.monthly_distribution.map((val) =>
       Math.round(val * ratio * 100) / 100
     );
-
     const newSum = adjusted.reduce((s, v) => s + v, 0);
     const diff = formData.annual_amount - newSum;
     adjusted[11] = Math.round((adjusted[11] + diff) * 100) / 100;
-
     setFormData({ ...formData, monthly_distribution: adjusted });
     toast.success(t('success.adjusted', 'Répartition ajustée'));
   };
-
   const updateMonth = (index: number, value: number) => {
     const newDistribution = [...formData.monthly_distribution];
     newDistribution[index] = value;
     setFormData({ ...formData, monthly_distribution: newDistribution });
   };
-
   const handleAnnualChange = (value: number) => {
     setFormData({ ...formData, annual_amount: value });
   };
-
   const handleAccountSelect = (accountId: string) => {
     const account = accounts.find((a) => a.id === accountId);
     if (account) {
@@ -247,12 +221,9 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
       });
     }
   };
-
   const isValid = formData.account_id && formData.annual_amount > 0 && !hasVariance;
-
   const handleSubmit = () => {
     if (!isValid) return;
-
     const account = accounts.find((a) => a.id === formData.account_id);
     onSave({
       ...formData,
@@ -260,7 +231,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
       account_name: account?.name,
     });
   };
-
   return (
     <div className="space-y-6">
       {/* Sélection compte comptable */}
@@ -281,7 +251,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
               className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
             >
               <option value="">-- Sélectionner un compte --</option>
-
               <optgroup label="📈 Classe 7 - Produits (Revenus)">
                 {groupedAccounts.produits.map((account) => (
                   <option key={account.id} value={account.id}>
@@ -289,7 +258,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
                   </option>
                 ))}
               </optgroup>
-
               <optgroup label="📉 Classe 6 - Charges (Dépenses)">
                 {groupedAccounts.charges.map((account) => (
                   <option key={account.id} value={account.id}>
@@ -299,7 +267,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
               </optgroup>
             </select>
           )}
-
           {formData.account_id && (
             <div
               className={`mt-2 text-sm flex items-center gap-2 ${
@@ -314,7 +281,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
             </div>
           )}
         </div>
-
         <div>
           <label className="block text-sm font-medium mb-2">
             Sous-catégorie <span className="text-gray-400 dark:text-gray-500">(optionnel)</span>
@@ -328,7 +294,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
           />
         </div>
       </div>
-
       {/* Montant annuel et croissance */}
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -346,7 +311,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">€/an</span>
           </div>
         </div>
-
         <div>
           <label className="block text-sm font-medium mb-2">Taux de croissance annuel (%)</label>
           <div className="relative">
@@ -364,7 +328,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
           </div>
         </div>
       </div>
-
       {/* Répartition mensuelle */}
       <div className="border rounded-lg p-4">
         <div className="flex items-center justify-between mb-4">
@@ -372,7 +335,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
             <Calendar className="h-5 w-5" />
             Répartition mensuelle (€)
           </h3>
-
           <div className="relative">
             <button
               type="button"
@@ -383,7 +345,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
               Répartir automatiquement
               <ChevronDown className="h-4 w-4" />
             </button>
-
             {showRepartitionMenu && (
               <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-xl border z-50">
                 <div className="p-2">
@@ -413,7 +374,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
             )}
           </div>
         </div>
-
         {/* Grille des 12 mois */}
         <div className="grid grid-cols-12 gap-2">
           {MONTHS.map((month, index) => (
@@ -429,7 +389,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
             </div>
           ))}
         </div>
-
         {/* Barre de vérification */}
         <div
           className={`mt-4 p-3 rounded-lg flex items-center justify-between ${
@@ -458,7 +417,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
               )}
             </div>
           </div>
-
           {hasVariance && (
             <button
               type="button"
@@ -470,7 +428,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
             </button>
           )}
         </div>
-
         {/* Graphique répartition */}
         <div className="mt-4 h-20 flex items-end gap-1">
           {formData.monthly_distribution.map((value, index) => {
@@ -487,7 +444,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
           })}
         </div>
       </div>
-
       {/* Notes */}
       <div>
         <label className="block text-sm font-medium mb-2">Notes</label>
@@ -499,7 +455,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
           className="w-full px-3 py-2 border rounded-lg resize-none"
         />
       </div>
-
       {/* Boutons */}
       <div className="flex justify-end gap-3 pt-4 border-t">
         <button
@@ -519,7 +474,6 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
           {category?.id ? 'Modifier' : 'Ajouter'}
         </button>
       </div>
-
       {!isValid && (
         <div className="text-sm text-red-500 text-center">
           {!formData.account_id && 'Veuillez sélectionner un compte comptable. '}

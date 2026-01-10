@@ -3,12 +3,11 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-
 import type OpenAI from 'openai';
 import type { RealKPIData } from './realDashboardKpiService';
 import { supabase } from '@/lib/supabase';
 import { isAIServiceEnabled, shouldUseEdgeFunction, getEdgeFunctionName, AI_CONFIG } from '@/config/ai.config';
-
+import { logger } from '@/lib/logger';
 export interface AIAnalysisResult {
   executive_summary: string;
   key_insights: string[];
@@ -21,24 +20,20 @@ export interface AIAnalysisResult {
     expected_impact: string;
   }[];
 }
-
 /**
  * Service d'analyse IA du dashboard avec OpenAI
  */
 export class AIDashboardAnalysisService {
   private openai: OpenAI | null = null;
   private clientPromise: Promise<OpenAI | null> | null = null;
-
   private async getClient(): Promise<OpenAI | null> {
     if (this.openai) return this.openai;
     if (this.clientPromise) return this.clientPromise;
-
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     if (!apiKey) {
-      console.warn('OpenAI API key not configured. AI analysis will be disabled.');
+      logger.warn('AiDashboardAnalysis', 'OpenAI API key not configured. AI analysis will be disabled.');
       return null;
     }
-
     this.clientPromise = import('openai')
       .then(({ default: OpenAIImport }) => {
         this.openai = new OpenAIImport({
@@ -48,13 +43,11 @@ export class AIDashboardAnalysisService {
         return this.openai;
       })
       .catch((error) => {
-        console.error('Failed to load OpenAI client:', error);
+        logger.error('AiDashboardAnalysis', 'Failed to load OpenAI client:', error);
         return null;
       });
-
     return this.clientPromise;
   }
-
   /**
    * Génère une analyse IA complète des KPIs
    */
@@ -69,37 +62,31 @@ export class AIDashboardAnalysisService {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return this.getFallbackAnalysis(kpiData);
-
         const prompt = this.buildAnalysisPrompt(kpiData, companyName, industryType);
         const response = await supabase.functions.invoke(fnName, {
           body: { prompt, companyName, industryType }
         });
-
         if (response.error) {
-          console.error('Edge Function dashboardAnalysis error:', response.error);
+          logger.error('AiDashboardAnalysis', 'Edge Function dashboardAnalysis error:', response.error);
           return this.getFallbackAnalysis(kpiData);
         }
         return (response.data?.analysis as AIAnalysisResult) || this.getFallbackAnalysis(kpiData);
       } catch (error) {
-        console.error('Failed calling Edge Function dashboardAnalysis:', error);
+        logger.error('AiDashboardAnalysis', 'Failed calling Edge Function dashboardAnalysis:', error);
         return this.getFallbackAnalysis(kpiData);
       }
     }
-
     // En développement, utiliser client OpenAI si clé dispo
     if (!isAIServiceEnabled('dashboardAnalysis')) {
-      console.warn('AI Dashboard Analysis disabled.');
+      logger.warn('AiDashboardAnalysis', 'AI Dashboard Analysis disabled.');
       return this.getFallbackAnalysis(kpiData);
     }
-
     const client = await this.getClient();
     if (!client) {
       return this.getFallbackAnalysis(kpiData);
     }
-
     try {
       const prompt = this.buildAnalysisPrompt(kpiData, companyName, industryType);
-
       const completion = await client.chat.completions.create({
         model: AI_CONFIG.openai.model,
         messages: [
@@ -118,20 +105,17 @@ Tu dois répondre en français et structurer ta réponse au format JSON selon le
         max_tokens: AI_CONFIG.openai.maxTokens,
         response_format: { type: 'json_object' },
       });
-
       const response = completion.choices[0]?.message?.content;
       if (!response) {
         throw new Error('Empty response from OpenAI');
       }
-
       const analysis = JSON.parse(response) as AIAnalysisResult;
       return analysis;
     } catch (error) {
-      console.error('Error analyzing KPIs with OpenAI:', error);
+      logger.error('AiDashboardAnalysis', 'Error analyzing KPIs with OpenAI:', error);
       return this.getFallbackAnalysis(kpiData);
     }
   }
-
   /**
    * Construit le prompt d'analyse pour OpenAI
    */
@@ -142,7 +126,6 @@ Tu dois répondre en français et structurer ta réponse au format JSON selon le
   ): string {
     return `
 Analyse les données financières suivantes pour l'entreprise "${companyName}"${industryType ? ` dans le secteur ${industryType}` : ''} :
-
 **KPIs Clés:**
 - Chiffre d'affaires YTD: ${this.formatCurrency(kpiData.revenue_ytd)}
 - Croissance CA: ${kpiData.revenue_growth.toFixed(1)}%
@@ -152,16 +135,12 @@ Analyse les données financières suivantes pour l'entreprise "${companyName}"${
 - Factures émises: ${kpiData.total_invoices}
 - Factures en attente: ${kpiData.pending_invoices}
 - Total achats: ${this.formatCurrency(kpiData.total_purchases)}
-
 **Évolution mensuelle du CA:**
 ${kpiData.monthly_revenue.map((m, i) => `- Mois ${i + 1}: ${this.formatCurrency(m.amount)}`).join('\n')}
-
 **Top 5 clients:**
 ${kpiData.top_clients.map((c) => `- ${c.name}: ${this.formatCurrency(c.amount)}`).join('\n')}
-
 **Répartition des dépenses:**
 ${kpiData.expense_breakdown.map((e) => `- ${e.category}: ${this.formatCurrency(e.amount)}`).join('\n')}
-
 Fournis une analyse détaillée au format JSON avec la structure suivante:
 {
   "executive_summary": "Résumé exécutif en 2-3 phrases",
@@ -177,7 +156,6 @@ Fournis une analyse détaillée au format JSON avec la structure suivante:
     }
   ]
 }
-
 Concentre-toi sur:
 1. La santé financière globale
 2. Les tendances et signaux d'alerte
@@ -185,7 +163,6 @@ Concentre-toi sur:
 4. Des actions concrètes et priorisées
 `;
   }
-
   /**
    * Génère une analyse de secours si OpenAI n'est pas disponible
    */
@@ -195,7 +172,6 @@ Concentre-toi sur:
     const risks: string[] = [];
     const opportunities: string[] = [];
     const actionItems: AIAnalysisResult['action_items'] = [];
-
     // Analyse de la croissance
     if (kpiData.revenue_growth > 10) {
       insights.push(`Forte croissance du CA de ${kpiData.revenue_growth.toFixed(1)}%`);
@@ -209,7 +185,6 @@ Concentre-toi sur:
         expected_impact: 'Stopper la décroissance et relancer la croissance',
       });
     }
-
     // Analyse de la marge
     if (kpiData.profit_margin < 5) {
       risks.push('Marge bénéficiaire très faible');
@@ -223,7 +198,6 @@ Concentre-toi sur:
       insights.push('Excellente marge bénéficiaire');
       opportunities.push('Réinvestir dans le développement et l\'innovation');
     }
-
     // Analyse du runway
     if (kpiData.cash_runway_days < 60) {
       risks.push('Runway de trésorerie critique');
@@ -236,13 +210,11 @@ Concentre-toi sur:
       insights.push('Trésorerie saine et confortable');
       opportunities.push('Envisager des investissements stratégiques');
     }
-
     // Analyse des factures en attente
     if (kpiData.pending_invoices > kpiData.total_invoices * 0.3) {
       risks.push('Taux élevé de factures en attente');
       recommendations.push('Améliorer le processus de facturation et de relance client');
     }
-
     const executive_summary = `L'entreprise affiche ${
       kpiData.revenue_growth > 0 ? 'une croissance positive' : 'une baisse'
     } avec une marge de ${kpiData.profit_margin.toFixed(1)}%. ${
@@ -250,7 +222,6 @@ Concentre-toi sur:
         ? 'Attention au runway de trésorerie qui nécessite une action immédiate.'
         : 'La trésorerie est dans une situation acceptable.'
     }`;
-
     return {
       executive_summary,
       key_insights: insights.length > 0 ? insights : ['Analyse détaillée non disponible'],
@@ -273,7 +244,6 @@ Concentre-toi sur:
             ],
     };
   }
-
   /**
    * Formate un montant en euros
    */
@@ -283,7 +253,6 @@ Concentre-toi sur:
       currency: 'EUR',
     }).format(amount);
   }
-
   /**
    * Vérifie si OpenAI est configuré
    */
@@ -291,6 +260,5 @@ Concentre-toi sur:
     return this.openai !== null;
   }
 }
-
 // Export singleton instance
 export const aiDashboardAnalysisService = new AIDashboardAnalysisService();

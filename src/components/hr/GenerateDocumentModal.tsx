@@ -2,7 +2,6 @@
  * Generate Document Modal
  * Modal pour générer un document à partir d'un template avec remplissage des variables
  */
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,8 +10,8 @@ import { X, Save, Eye, Send } from 'lucide-react';
 import { hrDocumentTemplatesService } from '@/services/hrDocumentTemplatesService';
 import type { DocumentTemplate, GenerateDocumentRequest } from '@/types/hr-document-templates.types';
 import { createSafeHTML } from '@/utils/sanitize';
+import { logger } from '@/lib/logger';
 type Employee = any; // Employee type not yet defined
-
 interface GenerateDocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,7 +20,6 @@ interface GenerateDocumentModalProps {
   employees: Employee[];
   companyId: string;
 }
-
 export function GenerateDocumentModal({
   isOpen,
   onClose,
@@ -37,7 +35,6 @@ export function GenerateDocumentModal({
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [autoSend, setAutoSend] = useState(false);
-
   useEffect(() => {
     // Pre-fill some variables when employee is selected
     if (selectedEmployee) {
@@ -56,41 +53,34 @@ export function GenerateDocumentModal({
       }
     }
   }, [selectedEmployee, employees]);
-
   const handleVariableChange = (varName: string, value: any) => {
     setVariables({
       ...variables,
       [varName]: value
     });
   };
-
   const handlePreview = () => {
     const html = hrDocumentTemplatesService.replaceVariables(template.content, variables);
     setPreviewHtml(html);
     setShowPreview(true);
   };
-
   const handleGenerate = async () => {
     if (!selectedEmployee) {
       // eslint-disable-next-line no-alert
       alert('Veuillez sélectionner un employé');
       return;
     }
-
     // Validate required variables
     const missingRequired = template.variables
       .filter(v => v.required)
       .filter(v => !variables[v.name] || variables[v.name] === '')
       .map(v => v.label);
-
     if (missingRequired.length > 0) {
       // eslint-disable-next-line no-alert
       alert(`Veuillez remplir les variables requises: ${missingRequired.join(', ')}`);
       return;
     }
-
     setSaving(true);
-
     try {
       const request: GenerateDocumentRequest = {
         template_id: template.id,
@@ -99,9 +89,7 @@ export function GenerateDocumentModal({
         variables_data: variables,
         auto_send: autoSend
       };
-
       const response = await hrDocumentTemplatesService.generateDocument(companyId, request);
-
       if (response.success) {
         onSubmit();
       } else {
@@ -109,16 +97,14 @@ export function GenerateDocumentModal({
         alert(`Erreur: ${response.error}`);
       }
     } catch (error) {
-      console.error('Error generating document:', error);
+      logger.error('GenerateDocumentModal', 'Error generating document:', error);
       // eslint-disable-next-line no-alert
       alert('Erreur lors de la génération du document');
     } finally {
       setSaving(false);
     }
   };
-
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -136,7 +122,6 @@ export function GenerateDocumentModal({
             <X className="w-6 h-6" />
           </button>
         </div>
-
         {/* Body */}
         <div className="flex-1 overflow-y-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
@@ -162,7 +147,6 @@ export function GenerateDocumentModal({
                     ))}
                   </select>
                 </div>
-
                 {/* Document Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -174,7 +158,6 @@ export function GenerateDocumentModal({
                     placeholder="Laissez vide pour génération automatique"
                   />
                 </div>
-
                 {/* Variables */}
                 <div className="border-t pt-4">
                   <h3 className="font-semibold mb-4">Variables du template</h3>
@@ -231,7 +214,6 @@ export function GenerateDocumentModal({
                     ))}
                   </div>
                 </div>
-
                 {/* Options */}
                 <div className="border-t pt-4">
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -246,7 +228,6 @@ export function GenerateDocumentModal({
                 </div>
               </div>
             </div>
-
             {/* Preview */}
             <div className="p-6 bg-gray-50 dark:bg-gray-900/30">
               <div className="flex items-center justify-between mb-4">
@@ -256,7 +237,6 @@ export function GenerateDocumentModal({
                   Actualiser aperçu
                 </Button>
               </div>
-
               {!showPreview ? (
                 <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-300">
                   <div className="text-center">
@@ -275,7 +255,6 @@ export function GenerateDocumentModal({
             </div>
           </div>
         </div>
-
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 dark:bg-gray-900/30">
           <Button type="button" variant="outline" onClick={onClose}>

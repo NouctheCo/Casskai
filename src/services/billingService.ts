@@ -2,30 +2,25 @@
  * CassKai - Service de Facturation (Billing)
  * Appels directs aux Edge Functions Supabase sécurisées
  */
-
 import { supabase } from '@/lib/supabase';
-
+import { logger } from '@/lib/logger';
 export interface CheckoutSessionResponse {
   url: string;
   sessionId?: string;
 }
-
 export interface PortalSessionResponse {
   url: string;
 }
-
 export interface SubscriptionUpdateResponse {
   success: boolean;
   subscription?: any;
   message?: string;
 }
-
 export interface CancelSubscriptionResponse {
   success: boolean;
   subscription?: any;
   message?: string;
 }
-
 /**
  * Gestion centralisée des erreurs Edge Functions
  */
@@ -44,7 +39,6 @@ function handleEdgeFunctionError(error: any): string {
   }
   return error?.message || 'Une erreur est survenue';
 }
-
 export const billingService = {
   /**
    * Créer une session de checkout Stripe
@@ -62,9 +56,7 @@ export const billingService = {
     try {
       // Construire le planId complet (ex: 'starter_monthly')
       const fullPlanId = planId.includes('_') ? planId : `${planId}_${interval}`;
-
-      console.log('[BillingService] Creating checkout session:', { planId: fullPlanId, interval, currency });
-
+      logger.debug('Billing', '[BillingService] Creating checkout session:', { planId: fullPlanId, interval, currency });
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {
           planId: fullPlanId,
@@ -72,24 +64,20 @@ export const billingService = {
           currency
         }
       });
-
       if (error) {
-        console.error('[BillingService] Checkout session error:', error);
+        logger.error('Billing', '[BillingService] Checkout session error:', error);
         throw new Error(handleEdgeFunctionError(error));
       }
-
       if (!data?.url) {
         throw new Error('Aucune URL de checkout retournée par le serveur');
       }
-
-      console.log('[BillingService] Checkout session created:', data);
+      logger.debug('Billing', '[BillingService] Checkout session created:', data);
       return data;
     } catch (error) {
-      console.error('[BillingService] Error creating checkout session:', error);
+      logger.error('Billing', '[BillingService] Error creating checkout session:', error);
       throw error;
     }
   },
-
   /**
    * Ouvrir le portail client Stripe (Customer Portal)
    * Permet à l'utilisateur de gérer son abonnement, paiements, factures, etc.
@@ -98,29 +86,24 @@ export const billingService = {
    */
   async openCustomerPortal(): Promise<PortalSessionResponse> {
     try {
-      console.log('[BillingService] Opening customer portal');
-
+      logger.debug('Billing', '[BillingService] Opening customer portal');
       const { data, error } = await supabase.functions.invoke('create-portal-session', {
         body: {}
       });
-
       if (error) {
-        console.error('[BillingService] Portal session error:', error);
+        logger.error('Billing', '[BillingService] Portal session error:', error);
         throw new Error(handleEdgeFunctionError(error));
       }
-
       if (!data?.url) {
         throw new Error('Aucune URL de portail retournée par le serveur');
       }
-
-      console.log('[BillingService] Portal session created');
+      logger.debug('Billing', '[BillingService] Portal session created');
       return data;
     } catch (error) {
-      console.error('[BillingService] Error opening customer portal:', error);
+      logger.error('Billing', '[BillingService] Error opening customer portal:', error);
       throw error;
     }
   },
-
   /**
    * Changer de plan d'abonnement
    *
@@ -133,32 +116,28 @@ export const billingService = {
     prorationBehavior: 'create_prorations' | 'none' | 'always_invoice' = 'create_prorations'
   ): Promise<SubscriptionUpdateResponse> {
     try {
-      console.log('[BillingService] Updating subscription:', { newPlanId, prorationBehavior });
-
+      logger.debug('Billing', '[BillingService] Updating subscription:', { newPlanId, prorationBehavior });
       const { data, error } = await supabase.functions.invoke('update-subscription', {
         body: {
           new_plan_id: newPlanId,
           proration_behavior: prorationBehavior
         }
       });
-
       if (error) {
-        console.error('[BillingService] Update subscription error:', error);
+        logger.error('Billing', '[BillingService] Update subscription error:', error);
         throw new Error(handleEdgeFunctionError(error));
       }
-
-      console.log('[BillingService] Subscription updated:', data);
+      logger.debug('Billing', '[BillingService] Subscription updated:', data);
       return {
         success: true,
         subscription: data.subscription,
         message: 'Abonnement mis à jour avec succès'
       };
     } catch (error) {
-      console.error('[BillingService] Error updating subscription:', error);
+      logger.error('Billing', '[BillingService] Error updating subscription:', error);
       throw error;
     }
   },
-
   /**
    * Annuler l'abonnement
    *
@@ -171,21 +150,18 @@ export const billingService = {
     reason?: string
   ): Promise<CancelSubscriptionResponse> {
     try {
-      console.log('[BillingService] Canceling subscription:', { cancelAtPeriodEnd, reason });
-
+      logger.debug('Billing', '[BillingService] Canceling subscription:', { cancelAtPeriodEnd, reason });
       const { data, error } = await supabase.functions.invoke('cancel-subscription', {
         body: {
           cancelAtPeriodEnd,
           reason
         }
       });
-
       if (error) {
-        console.error('[BillingService] Cancel subscription error:', error);
+        logger.error('Billing', '[BillingService] Cancel subscription error:', error);
         throw new Error(handleEdgeFunctionError(error));
       }
-
-      console.log('[BillingService] Subscription canceled:', data);
+      logger.debug('Billing', '[BillingService] Subscription canceled:', data);
       return {
         success: true,
         subscription: data.subscription,
@@ -194,11 +170,10 @@ export const billingService = {
           : 'Abonnement annulé immédiatement.'
       };
     } catch (error) {
-      console.error('[BillingService] Error canceling subscription:', error);
+      logger.error('Billing', '[BillingService] Error canceling subscription:', error);
       throw error;
     }
   },
-
   /**
    * Obtenir les détails de l'abonnement actuel depuis Supabase
    *
@@ -226,7 +201,6 @@ export const billingService = {
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
-
       if (error) {
         if (error.code === 'PGRST116') {
           // Aucun abonnement trouvé - ce n'est pas une erreur
@@ -234,14 +208,12 @@ export const billingService = {
         }
         throw error;
       }
-
       return subscription;
     } catch (error) {
-      console.error('[BillingService] Error fetching subscription:', error);
+      logger.error('Billing', '[BillingService] Error fetching subscription:', error);
       throw error;
     }
   },
-
   /**
    * Récupérer la liste des factures Stripe
    *
@@ -255,25 +227,21 @@ export const billingService = {
     status?: 'draft' | 'open' | 'paid' | 'uncollectible' | 'void';
   }): Promise<{ success: boolean; invoices: any[]; has_more: boolean; total_count: number }> {
     try {
-      console.log('[BillingService] Fetching invoices:', options);
-
+      logger.debug('Billing', '[BillingService] Fetching invoices:', options);
       const { data, error } = await supabase.functions.invoke('get-invoices', {
         body: options || {}
       });
-
       if (error) {
-        console.error('[BillingService] Get invoices error:', error);
+        logger.error('Billing', '[BillingService] Get invoices error:', error);
         throw new Error(handleEdgeFunctionError(error));
       }
-
-      console.log('[BillingService] Invoices fetched:', data.total_count);
+      logger.debug('Billing', '[BillingService] Invoices fetched:', data.total_count);
       return data;
     } catch (error) {
-      console.error('[BillingService] Error fetching invoices:', error);
+      logger.error('Billing', '[BillingService] Error fetching invoices:', error);
       throw error;
     }
   },
-
   /**
    * Télécharger le PDF d'une facture Stripe
    *
@@ -286,27 +254,23 @@ export const billingService = {
     format: 'url' | 'pdf' = 'url'
   ): Promise<{ success: boolean; invoice_id: string; invoice_number?: string; pdf_url: string; hosted_url?: string }> {
     try {
-      console.log('[BillingService] Downloading invoice:', { invoiceId, format });
-
+      logger.debug('Billing', '[BillingService] Downloading invoice:', { invoiceId, format });
       const { data, error } = await supabase.functions.invoke('download-invoice', {
         body: {
           invoice_id: invoiceId,
           download_format: format
         }
       });
-
       if (error) {
-        console.error('[BillingService] Download invoice error:', error);
+        logger.error('Billing', '[BillingService] Download invoice error:', error);
         throw new Error(handleEdgeFunctionError(error));
       }
-
-      console.log('[BillingService] Invoice downloaded:', data.invoice_number);
+      logger.debug('Billing', '[BillingService] Invoice downloaded:', data.invoice_number);
       return data;
     } catch (error) {
-      console.error('[BillingService] Error downloading invoice:', error);
+      logger.error('Billing', '[BillingService] Error downloading invoice:', error);
       throw error;
     }
   }
 };
-
 export default billingService;
