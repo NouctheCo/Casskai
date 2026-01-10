@@ -14,41 +14,97 @@ import type {
 } from '../../types/fiscal.types';
 
 /**
- * Configuration des 3 pays Maghreb
+ * Configuration étendue des pays Maghreb avec détails fiscaux
  */
-const MAGHREB_COUNTRIES: Record<string, CountryConfig> = {
-  MA: {
-    name: 'Maroc',
-    currency: 'MAD',
-    vatRate: 20,
-    vatReducedRates: [7, 10, 14],
-    corporateTaxRate: 31,
-    fiscalYearEnd: '12-31',
-    taxFilingDeadline: '03-31',
-    taxAuthority: 'Direction Générale des Impôts (DGI)',
-    onlinePortal: 'https://www.tax.gov.ma'
-  },
+interface MaghrebCountryConfig extends CountryConfig {
+  nameFr: string;
+  corporateTaxReduced?: number;
+  withholdingTaxRates?: Record<string, number>;
+  specificTaxes?: Record<string, number>;
+  vatDeclarationFrequency: 'monthly' | 'quarterly';
+  accountingStandard: string;
+}
+
+const MAGHREB_COUNTRIES: Record<string, MaghrebCountryConfig> = {
   DZ: {
-    name: 'Algérie',
+    name: 'Algeria',
+    nameFr: 'Algérie',
     currency: 'DZD',
     vatRate: 19,
     vatReducedRates: [9],
     corporateTaxRate: 26,
+    corporateTaxReduced: 19, // Pour activités de production
+    withholdingTaxRates: {
+      dividendes: 15,
+      interets: 10,
+      redevances: 24,
+      services: 24
+    },
+    specificTaxes: {
+      tap: 2, // Taxe sur l'Activité Professionnelle
+      minimumIBS: 10000 // Minimum IBS en DZD
+    },
+    vatDeclarationFrequency: 'monthly',
     fiscalYearEnd: '12-31',
     taxFilingDeadline: '04-30',
     taxAuthority: 'Direction Générale des Impôts (DGI)',
+    accountingStandard: 'SCF',
     onlinePortal: 'https://www.mfdgi.gov.dz'
   },
+  MA: {
+    name: 'Morocco',
+    nameFr: 'Maroc',
+    currency: 'MAD',
+    vatRate: 20,
+    vatReducedRates: [14, 10, 7],
+    corporateTaxRate: 31,
+    corporateTaxReduced: 20, // Taux réduit PME
+    withholdingTaxRates: {
+      dividendes: 15,
+      interets: 20,
+      redevances: 10,
+      services: 10
+    },
+    specificTaxes: {
+      cotisationMinimale: 3000, // Minimum IS en MAD (0.5% CA)
+      isBracket1Rate: 10, // 0-300k
+      isBracket1Limit: 300000,
+      isBracket2Rate: 20, // 300k-1M
+      isBracket2Limit: 1000000,
+      isBracket3Rate: 31 // >1M
+    },
+    vatDeclarationFrequency: 'monthly',
+    fiscalYearEnd: '12-31',
+    taxFilingDeadline: '03-31',
+    taxAuthority: 'Direction Générale des Impôts (DGI)',
+    accountingStandard: 'PCM',
+    onlinePortal: 'https://www.tax.gov.ma'
+  },
   TN: {
-    name: 'Tunisie',
+    name: 'Tunisia',
+    nameFr: 'Tunisie',
     currency: 'TND',
     vatRate: 19,
-    vatReducedRates: [7, 13],
+    vatReducedRates: [13, 7],
     corporateTaxRate: 25,
+    corporateTaxReduced: 15, // Taux réduit export
+    withholdingTaxRates: {
+      dividendes: 10,
+      interets: 20,
+      redevances: 15,
+      services: 15
+    },
+    specificTaxes: {
+      fodec: 1, // FODEC 1%
+      tcl: 0.2, // TCL 0.2%
+      minimumIS: 500 // Minimum IS en TND (0.2% CA)
+    },
+    vatDeclarationFrequency: 'monthly',
     fiscalYearEnd: '12-31',
     taxFilingDeadline: '03-25',
     taxAuthority: 'Direction Générale des Impôts (DGI)',
-    onlinePortal: 'https://www.impots.finances.gov.tn'
+    accountingStandard: 'SCE',
+    onlinePortal: 'https://www.finances.gov.tn'
   }
 };
 
@@ -93,24 +149,34 @@ export class SCFTaxComplianceService extends BaseFiscalService {
 
     // ACTIF - Structure SCF/PCM
 
-    // ACTIF NON COURANT
-    const immobilisationsIncorporelles = this.getClassBalance('20', balances);
-    const immobilisationsCorporelles =
-      this.getClassBalance('21', balances) + // Terrains
-      this.getClassBalance('22', balances) + // Constructions
-      this.getClassBalance('23', balances) + // Installations techniques
-      this.getClassBalance('24', balances);  // Matériel
+    // ACTIF NON COURANT - Structure SCF détaillée
+    const ecartAcquisition = this.getClassBalance('207', balances);
+    const immobilisationsIncorporelles = this.sumAccountRange('201', '208', balances);
 
+    const terrains = this.getClassBalance('211', balances);
+    const batiments = this.getClassBalance('213', balances);
+    const autresImmobCorporelles = this.sumAccountPrefix(balances, '215') + this.sumAccountPrefix(balances, '218');
+    const immobilisationsEnConcession = this.getClassBalance('22', balances);
     const immobilisationsEnCours = this.getClassBalance('23', balances);
-    const immobilisationsFinancieres = this.getClassBalance('26', balances) + this.getClassBalance('27', balances);
-    const impotsDifferes = this.getClassBalance('13', balances);
+    const immobilisationsCorporelles = terrains + batiments + autresImmobCorporelles +
+      immobilisationsEnConcession + immobilisationsEnCours;
 
-    const totalActifNonCourant =
-      immobilisationsIncorporelles +
-      immobilisationsCorporelles +
-      immobilisationsEnCours +
-      immobilisationsFinancieres +
-      impotsDifferes;
+    const titresMisEquivalence = this.sumAccountPrefix(balances, '261');
+    const autresParticipations = this.sumAccountPrefix(balances, '262') + this.sumAccountPrefix(balances, '265');
+    const autresTitresImmobilises = this.sumAccountPrefix(balances, '271') + this.sumAccountPrefix(balances, '272');
+    const pretsActifsFinanciers = this.sumAccountPrefix(balances, '274') + this.sumAccountPrefix(balances, '275');
+    const immobilisationsFinancieres = titresMisEquivalence + autresParticipations +
+      autresTitresImmobilises + pretsActifsFinanciers;
+
+    const impotsDifferes = this.getClassBalance('133', balances);
+
+    // Déduire amortissements et dépréciations
+    const amortissements = this.sumAccountPrefix(balances, '28', false);
+    const depreciationsImmo = this.sumAccountPrefix(balances, '29', false);
+
+    const totalActifNonCourant = ecartAcquisition + immobilisationsIncorporelles +
+      immobilisationsCorporelles + immobilisationsFinancieres + impotsDifferes -
+      amortissements - depreciationsImmo;
 
     // ACTIF COURANT
     const stocks =
@@ -612,6 +678,371 @@ export class SCFTaxComplianceService extends BaseFiscalService {
       data: isData,
       validationErrors: [],
       warnings: resultatFiscal < 0 ? ['Déficit fiscal reportable'] : []
+    };
+
+    const id = await this.saveFiscalDeclaration(declaration);
+
+    return {
+      ...declaration,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  /**
+   * ALGÉRIE - Génère la déclaration G50 (TVA mensuelle + TAP)
+   */
+  async generateG50Algeria(companyId: string, period: string): Promise<FiscalDeclaration> {
+    const config = MAGHREB_COUNTRIES.DZ;
+    const [year, month] = period.split('-');
+    const startDate = new Date(`${year}-${month}-01`);
+    const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+    const endDate = new Date(`${year}-${month}-${lastDay}`);
+
+    const balances = await this.getAccountBalances(companyId, [], startDate, endDate);
+
+    // Chiffre d'affaires
+    const caTotal = this.sumAccountPrefix(balances, '70', false);
+    const caTauxNormal = caTotal * 0.85; // Estimation 85% taux normal
+    const caTauxReduit = caTotal * 0.10;
+    const caExonere = caTotal * 0.05;
+
+    // TVA collectée
+    const tvaCollectee19 = caTauxNormal * config.vatRate / 100;
+    const tvaCollectee9 = caTauxReduit * config.vatReducedRates![0] / 100;
+    const totalTvaCollectee = tvaCollectee19 + tvaCollectee9;
+
+    // TVA déductible
+    const tvaDeductibleBiens = this.sumAccountPrefix(balances, '4456');
+    const tvaDeductibleServices = this.sumAccountPrefix(balances, '4457');
+    const tvaDeductibleImmobilisations = this.sumAccountPrefix(balances, '4458');
+    const totalTvaDeductible = tvaDeductibleBiens + tvaDeductibleServices + tvaDeductibleImmobilisations;
+
+    // TVA nette
+    const tvaNette = totalTvaCollectee - totalTvaDeductible;
+    const tvaAPayer = tvaNette > 0 ? tvaNette : 0;
+    const creditTva = tvaNette < 0 ? Math.abs(tvaNette) : 0;
+
+    // TAP (Taxe sur l'Activité Professionnelle)
+    const tapTaux = config.specificTaxes!.tap;
+    const tapMontant = caTotal * tapTaux / 100;
+
+    const data = {
+      periode: period,
+      pays: 'DZ',
+      devise: config.currency,
+      // CA
+      caTauxNormal,
+      caTauxReduit,
+      caExonere,
+      caTotal,
+      // TVA collectée
+      tvaCollectee19,
+      tvaCollectee9,
+      totalTvaCollectee,
+      // TVA déductible
+      tvaDeductibleBiens,
+      tvaDeductibleServices,
+      tvaDeductibleImmobilisations,
+      totalTvaDeductible,
+      // Solde TVA
+      tvaNette,
+      tvaAPayer,
+      creditTva,
+      // TAP
+      tapTaux,
+      tapMontant,
+      // Total
+      totalAPayer: tvaAPayer + tapMontant,
+      autorite: config.taxAuthority
+    };
+
+    const dueDate = new Date(parseInt(year), parseInt(month), 20);
+
+    const declaration: Omit<FiscalDeclaration, 'id' | 'createdAt' | 'updatedAt'> = {
+      type: 'G50',
+      standard: 'SCF',
+      country: 'DZ',
+      period,
+      dueDate,
+      status: 'ready',
+      companyId,
+      data,
+      validationErrors: [],
+      warnings: ['La répartition du CA par taux TVA est estimée - vérifier selon les ventes réelles']
+    };
+
+    const id = await this.saveFiscalDeclaration(declaration);
+
+    return {
+      ...declaration,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  /**
+   * ALGÉRIE - IBS (Impôt sur les Bénéfices des Sociétés)
+   */
+  async generateIBSAlgeria(companyId: string, period: string): Promise<FiscalDeclaration> {
+    const config = MAGHREB_COUNTRIES.DZ;
+    const [year] = period.split('-');
+
+    // Récupérer le compte de résultat
+    const compteResultat = await this.generateIncomeStatement(companyId, period, 'DZ');
+    const resultatComptable = compteResultat.data.resultats.courant;
+    const chiffreAffaires = compteResultat.data.produits.chiffreAffaires;
+
+    // Réintégrations fiscales (simplifié)
+    const reintegrations = {
+      amendesPenalites: 0,
+      chargesNonDeductibles: 0,
+      amortissementsExcessifs: 0,
+      provisionsNonDeductibles: 0,
+      total: 0
+    };
+
+    // Déductions fiscales
+    const deductions = {
+      abattementsReinvestissement: 0,
+      plusValuesExonerees: 0,
+      dividendesRecus: 0,
+      total: 0
+    };
+
+    const resultatFiscal = resultatComptable + reintegrations.total - deductions.total;
+
+    // Taux IBS (19% production, 26% autres)
+    const tauxIBS = config.corporateTaxRate; // Simplification
+    const ibsBrut = Math.max(0, resultatFiscal * tauxIBS / 100);
+
+    // Minimum d'imposition (0.5% du CA avec minimum 10,000 DZD)
+    const minimumImposition = Math.max(config.specificTaxes!.minimumIBS, chiffreAffaires * 0.005);
+    const ibsDu = Math.max(ibsBrut, minimumImposition);
+
+    const data = {
+      periode: period,
+      pays: 'DZ',
+      devise: config.currency,
+      resultatComptable,
+      chiffreAffaires,
+      reintegrations,
+      deductions,
+      resultatFiscal,
+      tauxIBS,
+      ibsBrut,
+      minimumImposition,
+      ibsDu,
+      acomptesVerses: 0,
+      soldeAPayer: ibsDu,
+      autorite: config.taxAuthority
+    };
+
+    const dueDate = new Date(parseInt(year) + 1, 3, 30); // 30 avril N+1
+
+    const declaration: Omit<FiscalDeclaration, 'id' | 'createdAt' | 'updatedAt'> = {
+      type: 'IBS',
+      standard: 'SCF',
+      country: 'DZ',
+      period,
+      dueDate,
+      status: 'ready',
+      companyId,
+      data,
+      validationErrors: [],
+      warnings: [
+        'Vérifier les réintégrations et déductions avec un expert fiscal algérien',
+        'Les acomptes IBS doivent être renseignés manuellement'
+      ]
+    };
+
+    const id = await this.saveFiscalDeclaration(declaration);
+
+    return {
+      ...declaration,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  /**
+   * MAROC - IS avec barème progressif
+   */
+  async generateISMorocco(companyId: string, period: string): Promise<FiscalDeclaration> {
+    const config = MAGHREB_COUNTRIES.MA;
+    const [year] = period.split('-');
+
+    // Récupérer le compte de résultat
+    const compteResultat = await this.generateIncomeStatement(companyId, period, 'MA');
+    const resultatComptable = compteResultat.data.resultats.courant;
+    const chiffreAffaires = compteResultat.data.produits.chiffreAffaires;
+
+    // Réintégrations
+    const reintegrations = {
+      amendesMajorations: 0,
+      liberalites: 0,
+      provisionsNonDeductibles: 0,
+      chargesNonJustifiees: 0,
+      total: 0
+    };
+
+    // Déductions
+    const deductions = {
+      abattements: 0,
+      dividendes: 0,
+      plusValuesExonerees: 0,
+      total: 0
+    };
+
+    const resultatFiscal = resultatComptable + reintegrations.total - deductions.total;
+
+    // Barème IS Maroc : 10% (0-300k), 20% (300k-1M), 31% (>1M)
+    let isCalcule = 0;
+    const bracket1Limit = config.specificTaxes!.isBracket1Limit;
+    const bracket2Limit = config.specificTaxes!.isBracket2Limit;
+
+    if (resultatFiscal <= bracket1Limit) {
+      isCalcule = resultatFiscal * config.specificTaxes!.isBracket1Rate / 100;
+    } else if (resultatFiscal <= bracket2Limit) {
+      isCalcule = bracket1Limit * config.specificTaxes!.isBracket1Rate / 100 +
+        (resultatFiscal - bracket1Limit) * config.specificTaxes!.isBracket2Rate / 100;
+    } else {
+      isCalcule = bracket1Limit * config.specificTaxes!.isBracket1Rate / 100 +
+        (bracket2Limit - bracket1Limit) * config.specificTaxes!.isBracket2Rate / 100 +
+        (resultatFiscal - bracket2Limit) * config.specificTaxes!.isBracket3Rate / 100;
+    }
+
+    // Cotisation minimale (0.5% du CA avec minimum 3000 MAD)
+    const cotisationMinimale = Math.max(config.specificTaxes!.cotisationMinimale, chiffreAffaires * 0.005);
+    const isDu = Math.max(isCalcule, cotisationMinimale);
+
+    const data = {
+      periode: period,
+      pays: 'MA',
+      devise: config.currency,
+      resultatComptable,
+      chiffreAffaires,
+      reintegrations,
+      deductions,
+      resultatFiscal,
+      isCalcule,
+      cotisationMinimale,
+      isDu,
+      acomptesVerses: 0,
+      soldeAPayer: isDu,
+      autorite: config.taxAuthority
+    };
+
+    const dueDate = new Date(parseInt(year) + 1, 2, 31); // 31 mars N+1
+
+    const declaration: Omit<FiscalDeclaration, 'id' | 'createdAt' | 'updatedAt'> = {
+      type: 'IS_MAROC',
+      standard: 'SCF',
+      country: 'MA',
+      period,
+      dueDate,
+      status: 'ready',
+      companyId,
+      data,
+      validationErrors: [],
+      warnings: [
+        'Vérifier les réintégrations et déductions fiscales marocaines',
+        'Les acomptes IS (25% de l\'IS N-1 × 4) doivent être saisis'
+      ]
+    };
+
+    const id = await this.saveFiscalDeclaration(declaration);
+
+    return {
+      ...declaration,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  /**
+   * TUNISIE - TVA avec FODEC et TCL
+   */
+  async generateTVATunisia(companyId: string, period: string): Promise<FiscalDeclaration> {
+    const config = MAGHREB_COUNTRIES.TN;
+    const [year, month] = period.split('-');
+    const startDate = new Date(`${year}-${month}-01`);
+    const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+    const endDate = new Date(`${year}-${month}-${lastDay}`);
+
+    const balances = await this.getAccountBalances(companyId, [], startDate, endDate);
+
+    // Chiffre d'affaires
+    const caTotal = this.sumAccountPrefix(balances, '70', false);
+    const caTaux19 = caTotal * 0.75;
+    const caTaux13 = caTotal * 0.15;
+    const caTaux7 = caTotal * 0.05;
+    const caExonere = caTotal * 0.05;
+
+    // TVA collectée
+    const tva19 = caTaux19 * 19 / 100;
+    const tva13 = caTaux13 * 13 / 100;
+    const tva7 = caTaux7 * 7 / 100;
+    const totalTvaCollectee = tva19 + tva13 + tva7;
+
+    // TVA déductible
+    const tvaDeductible = this.sumAccountPrefix(balances, '4366');
+
+    // TVA nette
+    const tvaNette = totalTvaCollectee - tvaDeductible;
+    const tvaAPayer = tvaNette > 0 ? tvaNette : 0;
+    const creditTva = tvaNette < 0 ? Math.abs(tvaNette) : 0;
+
+    // FODEC (Fonds de Développement de la Compétitivité) - 1%
+    const fodec = caTotal * config.specificTaxes!.fodec / 100;
+
+    // TCL (Taxe sur les Établissements à Caractère Industriel) - 0.2%
+    const tcl = caTotal * config.specificTaxes!.tcl / 100;
+
+    const data = {
+      periode: period,
+      pays: 'TN',
+      devise: config.currency,
+      // CA
+      caTaux19,
+      caTaux13,
+      caTaux7,
+      caExonere,
+      caTotal,
+      // TVA
+      tva19,
+      tva13,
+      tva7,
+      totalTvaCollectee,
+      tvaDeductible,
+      tvaNette,
+      tvaAPayer,
+      creditTva,
+      // Taxes additionnelles
+      fodec,
+      tcl,
+      // Total
+      totalAPayer: tvaAPayer + fodec + tcl,
+      autorite: config.taxAuthority
+    };
+
+    const dueDate = new Date(parseInt(year), parseInt(month), 28);
+
+    const declaration: Omit<FiscalDeclaration, 'id' | 'createdAt' | 'updatedAt'> = {
+      type: 'TVA_TUNISIE',
+      standard: 'SCF',
+      country: 'TN',
+      period,
+      dueDate,
+      status: 'ready',
+      companyId,
+      data,
+      validationErrors: [],
+      warnings: ['La répartition du CA par taux TVA est estimée']
     };
 
     const id = await this.saveFiscalDeclaration(declaration);
