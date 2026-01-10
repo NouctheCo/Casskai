@@ -2,357 +2,559 @@
  * CassKai - Plateforme de gestion financière
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
- * 
- * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
- * Toute reproduction, distribution ou utilisation non autorisée est interdite.
- * 
- * This software is the exclusive property of NOUTCHE CONSEIL.
- * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
 import { supabase } from '@/lib/supabase';
 
-export interface EmailConfig {
-  to: string[];
-  cc?: string[];
-  bcc?: string[];
-  subject: string;
-  template?: string;
-  html?: string;
-  text?: string;
-  attachments?: EmailAttachment[];
-  variables?: Record<string, any>;
-}
+// =====================================================
+// TYPES
+// =====================================================
 
-export interface EmailAttachment {
-  filename: string;
-  content: string | Buffer;
-  contentType?: string;
-  path?: string;
+export interface EmailConfiguration {
+  id: string;
+  company_id: string;
+  provider: 'smtp' | 'sendgrid' | 'mailgun' | 'aws_ses' | 'custom_api';
+  is_active: boolean;
+  is_verified: boolean;
+  
+  // SMTP
+  smtp_host?: string;
+  smtp_port?: number;
+  smtp_secure?: boolean;
+  smtp_username?: string;
+  smtp_password?: string;
+  
+  // API
+  api_key?: string;
+  api_endpoint?: string;
+  
+  // Sender info
+  from_email: string;
+  from_name: string;
+  reply_to_email?: string;
+  email_signature?: string;
+  
+  // Limits
+  daily_limit: number;
+  monthly_limit: number;
+  emails_sent_today: number;
+  emails_sent_month: number;
+  
+  // Monitoring
+  last_test_date?: string;
+  last_test_status?: string;
+  last_error?: string;
+  total_emails_sent?: number;
+  total_errors?: number;
+  
+  // Metadata
+  created_at: string;
+  updated_at: string;
 }
 
 export interface EmailTemplate {
   id: string;
+  company_id: string;
   name: string;
+  description?: string;
+  category?: string;
   subject: string;
-  html: string;
-  variables: string[];
-  category: string;
+  body_html: string;
+  body_text?: string;
+  available_variables: string[];
+  is_system: boolean;
+  usage_count: number;
 }
 
-export interface EmailServiceResponse {
-  success: boolean;
-  messageId?: string;
-  error?: string;
+export interface SendEmailParams {
+  to: string | string[];
+  subject: string;
+  html?: string;
+  text?: string;
+  template_id?: string;
+  variables?: Record<string, string>;
+  attachments?: Array<{
+    filename: string;
+    content: string;
+    contentType?: string;
+  }>;
+  workflow_id?: string;
+  workflow_execution_id?: string;
 }
 
-// Templates d'emails intégrés
-export const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
-  overdue_invoice_reminder: {
-    id: 'overdue_invoice_reminder',
-    name: 'Rappel facture impayée',
-    subject: 'Rappel: Facture {{invoice_number}} en retard de paiement',
-    html: `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-        <h2 style="color: #dc3545; margin-bottom: 20px;">Rappel de paiement</h2>
+export interface EmailLog {
+  id: string;
+  company_id: string;
+  recipient_email: string;
+  subject: string;
+  status: 'pending' | 'sent' | 'failed' | 'bounced';
+  sent_at?: string;
+  error_message?: string;
+  created_at: string;
+}
 
-        <p>Bonjour {{client_name}},</p>
+// =====================================================
+// EMAIL SERVICE
+// =====================================================
 
-        <p>Nous vous informons que la facture <strong>{{invoice_number}}</strong> d'un montant de <strong>{{invoice_amount}}</strong> est en retard de paiement.</p>
+class EmailService {
+  /**
+   * Get active email configuration for company
+   */
+  async getActiveConfiguration(companyId: string): Promise<EmailConfiguration | null> {
+    const { data, error } = await supabase
+      .from('email_configurations')
+      .select('*')
+      .eq('company_id', companyId)
+      .eq('is_active', true)
+      .eq('is_verified', true)
+      .single();
 
-        <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <h4>Détails de la facture :</h4>
-          <ul>
-            <li>Numéro : {{invoice_number}}</li>
-            <li>Date d'émission : {{invoice_date}}</li>
-            <li>Date d'échéance : {{due_date}}</li>
-            <li>Montant : {{invoice_amount}}</li>
-            <li>Jours de retard : {{days_overdue}}</li>
-          </ul>
-        </div>
-
-        <p>Nous vous prions de bien vouloir régulariser cette situation dans les plus brefs délais.</p>
-
-        <p>Pour toute question, n'hésitez pas à nous contacter.</p>
-
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
-          <p style="color: #6c757d; font-size: 14px;">
-            Cordialement,<br>
-            {{company_name}}<br>
-            {{company_email}}<br>
-            {{company_phone}}
-          </p>
-        </div>
-      </div>
-    </div>`,
-    variables: ['client_name', 'invoice_number', 'invoice_amount', 'invoice_date', 'due_date', 'days_overdue', 'company_name', 'company_email', 'company_phone'],
-    category: 'invoicing'
-  },
-
-  monthly_report: {
-    id: 'monthly_report',
-    name: 'Rapport mensuel automatique',
-    subject: 'Rapport mensuel {{month}} {{year}} - {{company_name}}',
-    html: `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-        <h2 style="color: #28a745; margin-bottom: 20px;">📊 Rapport mensuel {{month}} {{year}}</h2>
-
-        <p>Bonjour,</p>
-
-        <p>Veuillez trouver ci-joint votre rapport financier mensuel pour {{month}} {{year}}.</p>
-
-        <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <h4>Résumé des indicateurs :</h4>
-          <ul>
-            <li>Chiffre d'affaires : {{revenue}}</li>
-            <li>Charges : {{expenses}}</li>
-            <li>Résultat net : {{net_result}}</li>
-            <li>Trésorerie : {{cash_flow}}</li>
-          </ul>
-        </div>
-
-        <p>Les rapports détaillés sont disponibles en pièces jointes.</p>
-
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
-          <p style="color: #6c757d; font-size: 14px;">
-            Rapport généré automatiquement par CassKai<br>
-            {{company_name}}
-          </p>
-        </div>
-      </div>
-    </div>`,
-    variables: ['month', 'year', 'company_name', 'revenue', 'expenses', 'net_result', 'cash_flow'],
-    category: 'reports'
-  },
-
-  workflow_notification: {
-    id: 'workflow_notification',
-    name: 'Notification de workflow',
-    subject: 'CassKai: {{workflow_name}} - {{status}}',
-    html: `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-        <h2 style="color: #007bff; margin-bottom: 20px;">🤖 Notification d'automatisation</h2>
-
-        <p>Bonjour,</p>
-
-        <p>Le workflow "<strong>{{workflow_name}}</strong>" s'est exécuté avec le statut : <strong>{{status}}</strong></p>
-
-        <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <h4>Détails de l'exécution :</h4>
-          <ul>
-            <li>Workflow : {{workflow_name}}</li>
-            <li>Statut : {{status}}</li>
-            <li>Date d'exécution : {{execution_date}}</li>
-            <li>Durée : {{duration}}</li>
-            {{#if error_message}}
-            <li style="color: #dc3545;">Erreur : {{error_message}}</li>
-            {{/if}}
-          </ul>
-        </div>
-
-        {{#if results}}
-        <div style="background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <h4>Résultats :</h4>
-          <p>{{results}}</p>
-        </div>
-        {{/if}}
-
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
-          <p style="color: #6c757d; font-size: 14px;">
-            Notification automatique CassKai<br>
-            {{company_name}}
-          </p>
-        </div>
-      </div>
-    </div>`,
-    variables: ['workflow_name', 'status', 'execution_date', 'duration', 'error_message', 'results', 'company_name'],
-    category: 'automation'
-  }
-};
-
-export class EmailService {
-  private static instance: EmailService;
-
-  static getInstance(): EmailService {
-    if (!this.instance) {
-      this.instance = new EmailService();
+    if (error) {
+      console.error('Error fetching email configuration:', error);
+      return null;
     }
-    return this.instance;
+
+    return data;
   }
 
   /**
-   * Remplace les variables dans un template HTML
+   * Get all email configurations for company
    */
-  private replaceTemplateVariables(template: string, variables: Record<string, any>): string {
-    let result = template;
+  async getConfigurations(companyId: string): Promise<EmailConfiguration[]> {
+    const { data, error } = await supabase
+      .from('email_configurations')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false });
 
-    for (const [key, value] of Object.entries(variables)) {
-      const regex = new RegExp(`{{${key}}}`, 'g');
-      result = result.replace(regex, String(value || ''));
+    if (error) throw error;
+    return data || [];
+  }
+
+  /**
+   * Create email configuration
+   */
+  async createConfiguration(
+    companyId: string,
+    config: Partial<EmailConfiguration>
+  ): Promise<EmailConfiguration> {
+    const { data, error} = await supabase
+      .from('email_configurations')
+      .insert({
+        company_id: companyId,
+        ...config
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  /**
+   * Update email configuration
+   */
+  async updateConfiguration(
+    configId: string,
+    updates: Partial<EmailConfiguration>
+  ): Promise<EmailConfiguration> {
+    const { data, error } = await supabase
+      .from('email_configurations')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', configId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  /**
+   * Test email configuration
+   */
+  async testConfiguration(configId: string, testEmail: string): Promise<boolean> {
+    try {
+      const { data: config } = await supabase
+        .from('email_configurations')
+        .select('*')
+        .eq('id', configId)
+        .single();
+
+      if (!config) throw new Error('Configuration non trouvée');
+
+      const result = await this.sendEmailDirect(config, {
+        to: testEmail,
+        subject: '✅ Test de configuration email - CassKai',
+        html: `
+          <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+              <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #2563eb;">Test de Configuration Email Réussi! ✅</h2>
+                <p>Félicitations ! Votre configuration email fonctionne correctement.</p>
+                <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                  <p><strong>Configuration testée:</strong></p>
+                  <ul>
+                    <li>Fournisseur: ${config.provider}</li>
+                    <li>Email d'envoi: ${config.from_email}</li>
+                    <li>Nom d'envoi: ${config.from_name}</li>
+                  </ul>
+                </div>
+                <p>Vous pouvez maintenant utiliser cette configuration pour vos automatisations.</p>
+                ${config.email_signature || ''}
+              </div>
+            </body>
+          </html>
+        `,
+        text: 'Test de configuration email réussi! Votre configuration fonctionne correctement.'
+      });
+
+      // Update test status
+      await supabase
+        .from('email_configurations')
+        .update({
+          last_test_date: new Date().toISOString(),
+          last_test_status: 'success',
+          is_verified: true
+        })
+        .eq('id', configId);
+
+      return result;
+    } catch (error: any) {
+      // Log error
+      await supabase
+        .from('email_configurations')
+        .update({
+          last_test_date: new Date().toISOString(),
+          last_test_status: 'failed',
+          last_error: error.message
+        })
+        .eq('id', configId);
+
+      throw error;
+    }
+  }
+
+  /**
+   * Send email using company configuration
+   */
+  async sendEmail(
+    companyId: string,
+    params: SendEmailParams
+  ): Promise<boolean> {
+    const config = await this.getActiveConfiguration(companyId);
+    
+    if (!config) {
+      throw new Error('Aucune configuration email active. Veuillez configurer votre email dans les paramètres.');
     }
 
-    // Gestion des conditionnels simples {{#if variable}} ... {{/if}}
-    result = result.replace(/{{#if\s+(\w+)}}([\s\S]*?){{\/if}}/g, (match, varName, content) => {
-      return variables[varName] ? content : '';
+    // Check limits
+    if (config.emails_sent_today >= config.daily_limit) {
+      throw new Error(`Limite quotidienne atteinte (${config.daily_limit} emails/jour)`);
+    }
+
+    if (config.emails_sent_month >= config.monthly_limit) {
+      throw new Error(`Limite mensuelle atteinte (${config.monthly_limit} emails/mois)`);
+    }
+
+    // Get template if specified
+    let html = params.html;
+    let text = params.text;
+    let subject = params.subject;
+
+    if (params.template_id) {
+      const template = await this.getTemplate(params.template_id);
+      if (template) {
+        subject = this.replaceVariables(template.subject, params.variables);
+        html = this.replaceVariables(template.body_html, params.variables);
+        text = this.replaceVariables(template.body_text || '', params.variables);
+      }
+    }
+
+    // Add signature
+    if (config.email_signature && html) {
+      html += `<br><br>${config.email_signature}`;
+    }
+
+    // Send email
+    const success = await this.sendEmailDirect(config, {
+      to: params.to,
+      subject,
+      html,
+      text,
+      attachments: params.attachments
     });
 
+    if (success) {
+      // Increment counter
+      await supabase.rpc('increment_email_counter', { config_id: config.id });
+
+      // Log email
+      const recipients = Array.isArray(params.to) ? params.to : [params.to];
+      for (const recipient of recipients) {
+        await this.logEmail(companyId, {
+          email_config_id: config.id,
+          workflow_id: params.workflow_id,
+          workflow_execution_id: params.workflow_execution_id,
+          recipient_email: recipient,
+          subject,
+          body_html: html,
+          body_text: text,
+          status: 'sent',
+          sent_at: new Date().toISOString()
+        });
+      }
+    }
+
+    return success;
+  }
+
+  /**
+   * Send email directly with configuration
+   */
+  private async sendEmailDirect(
+    config: EmailConfiguration,
+    params: {
+      to: string | string[];
+      subject: string;
+      html?: string;
+      text?: string;
+      attachments?: any[];
+    }
+  ): Promise<boolean> {
+    switch (config.provider) {
+      case 'smtp':
+        return this.sendViaSMTP(config, params);
+      
+      case 'sendgrid':
+        return this.sendViaSendGrid(config, params);
+      
+      case 'mailgun':
+        return this.sendViaMailgun(config, params);
+      
+      case 'aws_ses':
+        return this.sendViaAWSSES(config, params);
+      
+      default:
+        throw new Error(`Provider ${config.provider} non supporté`);
+    }
+  }
+
+  /**
+   * Send via SMTP (requires server-side implementation)
+   */
+  private async sendViaSMTP(
+    config: EmailConfiguration,
+    params: {
+      to: string | string[];
+      subject: string;
+      html?: string;
+      text?: string;
+      attachments?: any[];
+    }
+  ): Promise<boolean> {
+    // Call backend API endpoint that handles SMTP
+    const response = await fetch('/api/email/send-smtp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        config: {
+          host: config.smtp_host,
+          port: config.smtp_port,
+          secure: config.smtp_secure,
+          username: config.smtp_username,
+          password: config.smtp_password,
+          from_email: config.from_email,
+          from_name: config.from_name,
+          reply_to: config.reply_to_email
+        },
+        params
+      })
+    });
+
+    return response.ok;
+  }
+
+  /**
+   * Send via SendGrid
+   */
+  private async sendViaSendGrid(
+    config: EmailConfiguration,
+    params: {
+      to: string | string[];
+      subject: string;
+      html?: string;
+      text?: string;
+    }
+  ): Promise<boolean> {
+    const recipients = Array.isArray(params.to) ? params.to : [params.to];
+    
+    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${config.api_key}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        personalizations: [
+          {
+            to: recipients.map(email => ({ email }))
+          }
+        ],
+        from: {
+          email: config.from_email,
+          name: config.from_name
+        },
+        reply_to: config.reply_to_email ? { email: config.reply_to_email } : undefined,
+        subject: params.subject,
+        content: [
+          {
+            type: 'text/plain',
+            value: params.text || ''
+          },
+          {
+            type: 'text/html',
+            value: params.html || ''
+          }
+        ]
+      })
+    });
+
+    return response.ok;
+  }
+
+  /**
+   * Send via Mailgun
+   */
+  private async sendViaMailgun(
+    config: EmailConfiguration,
+    params: {
+      to: string | string[];
+      subject: string;
+      html?: string;
+      text?: string;
+    }
+  ): Promise<boolean> {
+    const formData = new URLSearchParams();
+    formData.append('from', `${config.from_name} <${config.from_email}>`);
+    formData.append('to', Array.isArray(params.to) ? params.to.join(',') : params.to);
+    formData.append('subject', params.subject);
+    if (params.html) formData.append('html', params.html);
+    if (params.text) formData.append('text', params.text);
+    if (config.reply_to_email) formData.append('h:Reply-To', config.reply_to_email);
+
+    const response = await fetch(config.api_endpoint || '', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${btoa(`api:${config.api_key}`)}`
+      },
+      body: formData
+    });
+
+    return response.ok;
+  }
+
+  /**
+   * Send via AWS SES (requires server-side implementation)
+   */
+  private async sendViaAWSSES(
+    config: EmailConfiguration,
+    params: {
+      to: string | string[];
+      subject: string;
+      html?: string;
+      text?: string;
+    }
+  ): Promise<boolean> {
+    // Call backend API endpoint that handles AWS SES
+    const response = await fetch('/api/email/send-ses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        config,
+        params
+      })
+    });
+
+    return response.ok;
+  }
+
+  /**
+   * Replace variables in template
+   */
+  private replaceVariables(
+    template: string,
+    variables?: Record<string, string>
+  ): string {
+    if (!variables) return template;
+
+    let result = template;
+    for (const [key, value] of Object.entries(variables)) {
+      result = result.replace(new RegExp(`{{${key}}}`, 'g'), value);
+    }
     return result;
   }
 
   /**
-   * Envoie un email via Supabase Edge Functions
+   * Get email template
    */
-  async sendEmail(config: EmailConfig, companyId: string): Promise<EmailServiceResponse> {
-    try {
-      let html = config.html || '';
-      let subject = config.subject;
+  async getTemplate(templateId: string): Promise<EmailTemplate | null> {
+    const { data, error } = await supabase
+      .from('email_templates')
+      .select('*')
+      .eq('id', templateId)
+      .single();
 
-      // Si un template est spécifié, l'utiliser
-      if (config.template && EMAIL_TEMPLATES[config.template]) {
-        const template = EMAIL_TEMPLATES[config.template];
-        html = template.html;
-        subject = config.subject || template.subject;
+    if (error) return null;
+    return data;
+  }
 
-        // Remplacer les variables si fournies
-        if (config.variables) {
-          html = this.replaceTemplateVariables(html, config.variables);
-          subject = this.replaceTemplateVariables(subject, config.variables);
-        }
-      } else if (config.variables && html) {
-        // Remplacer les variables dans le HTML fourni
-        html = this.replaceTemplateVariables(html, config.variables);
-        subject = this.replaceTemplateVariables(subject, config.variables);
-      }
+  /**
+   * Get templates for company
+   */
+  async getTemplates(companyId: string): Promise<EmailTemplate[]> {
+    const { data, error } = await supabase
+      .from('email_templates')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('name');
 
-      // Appeler la Edge Function Supabase pour l'envoi d'email
-      const { data, error } = await supabase.functions.invoke('send-email', {
-        body: {
-          to: config.to,
-          cc: config.cc,
-          bcc: config.bcc,
-          subject,
-          html,
-          text: config.text,
-          attachments: config.attachments,
-          companyId
-        }
-      });
+    if (error) throw error;
+    return data || [];
+  }
 
-      if (error) {
-        console.error('Erreur envoi email:', error);
-        return {
-          success: false,
-          error: error.message || 'Erreur lors de l\'envoi de l\'email'
-        };
-      }
-
-      // Log de l'envoi en base pour audit
-      await this.logEmailSent({
+  /**
+   * Log email
+   */
+  private async logEmail(
+    companyId: string,
+    log: any
+  ): Promise<void> {
+    await supabase
+      .from('email_logs')
+      .insert({
         company_id: companyId,
-        to: config.to,
-        subject,
-        template_id: config.template,
-        status: 'sent',
-        message_id: data?.messageId
+        ...log
       });
-
-      return {
-        success: true,
-        messageId: data?.messageId
-      };
-
-    } catch (error) {
-      console.error('Erreur EmailService:', error instanceof Error ? error.message : String(error));
-
-      // En cas d'erreur, on peut fallback sur un faux envoi pour le développement
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('📧 [DEV MODE] Email simulé:', {
-          to: config.to,
-          subject: config.subject,
-          template: config.template
-        });
-
-        return {
-          success: true,
-          messageId: `dev_${Date.now()}`
-        };
-      }
-
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Erreur inconnue'
-      };
-    }
   }
 
   /**
-   * Log les emails envoyés pour audit
+   * Get email logs
    */
-  private async logEmailSent(logData: {
-    company_id: string;
-    to: string[];
-    subject: string;
-    template_id?: string;
-    status: string;
-    message_id?: string;
-  }): Promise<void> {
-    try {
-      await supabase
-        .from('email_logs')
-        .insert({
-          ...logData,
-          sent_at: new Date().toISOString()
-        });
-    } catch (error) {
-      console.warn('Impossible de logger l\'email:', error);
-    }
-  }
+  async getLogs(companyId: string, limit = 100): Promise<EmailLog[]> {
+    const { data, error } = await supabase
+      .from('email_logs')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
-  /**
-   * Récupère les templates disponibles
-   */
-  getAvailableTemplates(): EmailTemplate[] {
-    return Object.values(EMAIL_TEMPLATES);
-  }
-
-  /**
-   * Test de connectivité email
-   */
-  async testEmailConfiguration(companyId: string): Promise<EmailServiceResponse> {
-    return this.sendEmail({
-      to: ['test@example.com'],
-      subject: 'Test de configuration CassKai',
-      html: '<p>Ceci est un test de configuration email pour CassKai.</p>'
-    }, companyId);
-  }
-
-  /**
-   * Envoie un email avec template prédéfini
-   */
-  async sendTemplateEmail(
-    templateId: string,
-    to: string[],
-    variables: Record<string, any>,
-    companyId: string
-  ): Promise<EmailServiceResponse> {
-    const template = EMAIL_TEMPLATES[templateId];
-    if (!template) {
-      return {
-        success: false,
-        error: `Template ${templateId} non trouvé`
-      };
-    }
-
-    return this.sendEmail({
-      to,
-      template: templateId,
-      subject: template.subject,
-      variables
-    }, companyId);
+    if (error) throw error;
+    return data || [];
   }
 }
 
-export const emailService = EmailService.getInstance();
+export const emailService = new EmailService();

@@ -39,7 +39,7 @@ services:
       retries: 3
       start_period: 40s
   
-  # Production build
+  # Production build (managed by Traefik)
   app-prod:
     build:
       context: .
@@ -50,8 +50,7 @@ services:
         - casskai/app:cache
     container_name: casskai-app-prod
     ports:
-      - "80:80"
-      - "443:443"
+      - "5000:5000"  # Internal port only - Traefik manages 80/443
     environment:
       - NODE_ENV=production
     networks:
@@ -59,8 +58,15 @@ services:
     restart: unless-stopped
     profiles:
       - production
+    labels:
+      # Traefik configuration
+      - "traefik.enable=true"
+      - "traefik.http.routers.app-prod.rule=Host(`${DOMAIN_NAME}`)"
+      - "traefik.http.routers.app-prod.entrypoints=websecure"
+      - "traefik.http.routers.app-prod.tls.certresolver=letsencrypt"
+      - "traefik.http.services.app-prod.loadbalancer.server.port=5000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
       timeout: 5s
       retries: 3

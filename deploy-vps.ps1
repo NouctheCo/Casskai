@@ -41,14 +41,38 @@ $deployScript = "cd /var/www && cp -r casskai.app casskai.app.backup.`$(date +%Y
 
 ssh ${VPS_USER}@${VPS_HOST} $deployScript
 
-# 5. Restart services
+# 5. Restart services (Nginx container or host, then PM2)
 Write-Host "[SERVICES] Redemarrage des services..." -ForegroundColor Blue
-ssh ${VPS_USER}@${VPS_HOST} "pkill nginx 2>/dev/null ; sleep 2 ; nginx -g 'daemon on;' && pm2 restart casskai-api && echo 'Services OK'"
+$serviceScript = @'
+set -e
 
-# 6. Test
-Write-Host "[TEST] Test de sante..." -ForegroundColor Blue
+# Reload Nginx if container casskai-proxy exists, else try host nginx
+if docker ps --format '{{.Names}}' | grep -q '^casskai-proxy$'; then
+    echo "[NGINX] Reload via container casskai-proxy"
+    docker exec casskai-proxy nginx -s reload 2>/dev/null || docker restart casskai-proxy
+else
+    if command -v nginx >/dev/null 2>&1; then
+        echo "[NGINX] Reload host nginx"
+        nginx -s reload || nginx -g 'daemon on;'
+    else
+        echo "[NGINX] Aucun nginx detecte (container peut etre gere par Traefik)"
+    fi
+fi
+
+# Restart API via PM2
+cd /var/www/casskai.app/api 2>/dev/null || true
+pm2 restart casskai-api 2>/dev/null || pm2 start server.js --name casskai-api
+pm2 save || true
+echo "[SERVICES] OK"
+'@
+# Strip Windows CR to avoid bash parsing issues on the remote host
+$serviceScript = $serviceScript -replace "`r",""
+ssh ${VPS_USER}@${VPS_HOST} "$serviceScript"
+
+# 6. Tests
+Write-Host "[TEST] Verification Nginx (localhost:8080) et domaine (https)" -ForegroundColor Blue
 Start-Sleep -Seconds 2
-ssh ${VPS_USER}@${VPS_HOST} "curl -s -o /dev/null -w 'HTTP Code: %{http_code}\n' http://localhost:8080/"
+ssh ${VPS_USER}@${VPS_HOST} "curl -s -o /dev/null -w 'Local Nginx: %{http_code}\n' http://127.0.0.1:8080/ ; curl -s -o /dev/null -w 'Domaine: %{http_code}\n' https://casskai.app"
 
 # 7. Cleanup
 Write-Host "[CLEANUP] Nettoyage..." -ForegroundColor Blue

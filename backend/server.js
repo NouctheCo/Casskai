@@ -24,7 +24,8 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Trust proxy for reverse proxy setups (Traefik, Nginx, etc.)
-app.set('trust proxy', true);
+// Use explicit safe ranges to avoid permissive trust-proxy warnings
+app.set('trust proxy', ['127.0.0.1', '::1', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']);
 
 // Security middleware
 app.use(helmet());
@@ -400,8 +401,8 @@ app.use((err, req, res, _next) => {
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
+// 404 handler (avoid wildcard pattern that breaks path-to-regexp)
+app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
 

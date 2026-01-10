@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { BankAccountsTab } from '@/components/banking/BankAccountsTab';
 import { SepaPaymentGenerator } from '@/components/banking/SepaPaymentGenerator';
+import { supabase } from '@/lib/supabase';
 
 const BanksPageNew: React.FC = () => {
   const { user, currentCompany } = useAuth();

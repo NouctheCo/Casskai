@@ -95,8 +95,7 @@ export const contractsService = {
    * Calcule une simulation de RFA
    */
   async simulateRFA(_contractId: string, _scenarios: TurnoverScenario[]): Promise<ContractServiceResponse<SimulationResult[]>> {
-    // TODO: Implement RFA simulation logic
-    return { data: [], success: true };
+    return ContractImpl.simulateRFA(_contractId, _scenarios);
   },
 
   // ==================== DASHBOARD & EXPORTS ====================
@@ -113,6 +112,13 @@ export const contractsService = {
    */
   async exportContractsToCSV(enterpriseId: string, filters?: ContractFilters): Promise<ContractServiceResponse<string>> {
     return ContractImpl.exportContractsToCSV(enterpriseId, filters);
+  },
+
+  /**
+   * Calcul automatique du mois en cours pour tous les contrats actifs
+   */
+  async autoCalculateCurrentMonthRFA(enterpriseId: string): Promise<ContractServiceResponse<{ processed: number; updated: number }>> {
+    return ContractImpl.autoCalculateCurrentMonthRFA(enterpriseId);
   },
 
   /**
@@ -189,6 +195,13 @@ export const contractsService = {
   async generateRFAReport(_contractId: string, _periodStart: string, _periodEnd: string): Promise<ContractServiceResponse<RFAReport>> {
     // TODO: Implement RFA report generation
     return { data: undefined, success: false, error: { message: 'Not implemented yet' } };
+  },
+
+  /**
+   * Envoi d'un état de contrat par email (interne ou client)
+   */
+  async sendContractSummaryEmail(enterpriseId: string, contractId: string, recipientEmail: string): Promise<ContractServiceResponse<boolean>> {
+    return ContractImpl.sendContractSummaryEmail(enterpriseId, contractId, recipientEmail);
   },
 
   // ==================== ALERTES & HISTORIQUE ====================

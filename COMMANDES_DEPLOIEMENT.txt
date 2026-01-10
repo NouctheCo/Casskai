@@ -1,8 +1,23 @@
 =================================================================
-  COMMANDES DE DÉPLOIEMENT - NOUVEAU DESIGN SYSTEM v2.0
+  PROCÉDURE CANONIQUE DE DÉPLOIEMENT (AI‑Friendly)
 =================================================================
 
-📋 COPIER-COLLER CES COMMANDES DANS L'ORDRE
+📋 Utiliser ces commandes comme point d'entrée standard
+
+Windows (PowerShell):
+  npm run build
+  .\deploy-vps.ps1
+
+Linux/Mac (Bash):
+  npm run build
+  ./scripts/deploy.sh
+
+API backend (si changements dans backend/):
+  Windows: .\deploy-backend.ps1
+  Linux/Mac: ./deploy-backend.sh
+
+Variables (optionnel):
+  Copier [ .env.deploy.example ] en .env.deploy et ajuster VPS_HOST/VPS_USER/chemins.
 
 =================================================================
 ÉTAPE 1: VÉRIFIER L'ÉTAT (optionnel)
@@ -12,19 +27,19 @@ git status
 git log -1
 
 =================================================================
-ÉTAPE 2: PUSH VERS GIT
+ÉTAPE 2: PUSH VERS GIT (optionnel)
 =================================================================
 
 git push origin phase1-clean
 
 =================================================================
-ÉTAPE 3: DÉPLOYER SUR VPS (MÉTHODE AUTOMATIQUE RECOMMANDÉE)
+ÉTAPE 3: DÉPLOYER SUR VPS (RECOMMANDÉ)
 =================================================================
 
 .\deploy-vps.ps1
 
 =================================================================
-OU SI TU PRÉFÈRES LE DÉPLOIEMENT MANUEL:
+OU DÉPLOIEMENT MANUEL (alternative)
 =================================================================
 
 # 1. Build local
@@ -33,20 +48,14 @@ npm run build
 # 2. Se connecter au VPS
 ssh root@89.116.111.88
 
-# 3. Sur le VPS, aller dans le dossier
-cd /var/www/casskai.app
+# 3. Sur le VPS, mettre à jour le contenu
+scp -r dist/* root@89.116.111.88:/var/www/casskai.app/
 
-# 4. Pull les dernières modifications
-git pull origin phase1-clean
+# 4. Corriger permissions
+ssh root@89.116.111.88 "chown -R www-data:www-data /var/www/casskai.app && chmod -R 755 /var/www/casskai.app"
 
-# 5. Installer les dépendances (si nécessaire)
-npm install
-
-# 6. Build sur le serveur
-npm run build
-
-# 7. Redémarrer Nginx
-sudo systemctl restart nginx
+# 5. Recharger Nginx (container si présent)
+ssh root@89.116.111.88 "docker exec casskai-proxy nginx -s reload 2>/dev/null || docker restart casskai-proxy || true"
 
 # 8. Vérifier que c'est OK
 curl -I https://casskai.app
@@ -90,8 +99,9 @@ git push origin phase1-clean --force
 COMMANDES DE DEBUG (si nécessaire)
 =================================================================
 
-# Voir les logs du serveur
-ssh root@89.116.111.88 "tail -f /var/log/nginx/error.log"
+# Logs Traefik / Nginx container
+ssh root@89.116.111.88 "docker logs -f casskai-traefik"
+ssh root@89.116.111.88 "docker logs -f casskai-proxy"
 
 # Vérifier que le build s'est bien passé
 npm run type-check
@@ -134,6 +144,7 @@ COMMANDES DE MONITORING
 
 # Vérifier que le site est accessible
 curl -I https://casskai.app
+curl -I http://127.0.0.1:8080
 
 # Tester la vitesse de chargement
 curl -o /dev/null -s -w 'Total: %{time_total}s\n' https://casskai.app

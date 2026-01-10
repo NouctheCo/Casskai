@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Joyride, { STATUS, EVENTS, type CallBackProps, type Step } from 'react-joyride';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -17,201 +17,114 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
   {
     target: 'body',
     content: (
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Bienvenue sur CassKai ! 👋</h2>
-        <p className="text-lg">La plateforme tout-en-un pour piloter votre entreprise : <strong>{companyName}</strong></p>
-        <div className="space-y-2 text-sm">
-          <p>✅ Comptabilité complète et conforme</p>
-          <p>✅ Facturation et devis professionnels</p>
-          <p>✅ CRM et gestion commerciale</p>
-          <p>✅ Gestion de projets et ressources</p>
-          <p>✅ Analyses et tableaux de bord en temps réel</p>
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">⏱️ Ce guide prend 3 minutes</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true
-  },
-  {
-    target: 'body',
-    content: (
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold">🧭 Navigation principale</h3>
-        <p>Accédez à tous vos modules depuis ce menu latéral :</p>
-        <ul className="space-y-1 text-sm">
-          <li><strong>Tableau de bord</strong> - Vue d'ensemble de votre activité</li>
-          <li><strong>Comptabilité</strong> - Grand livre, journaux, plan comptable</li>
-          <li><strong>Facturation</strong> - Créez et gérez vos factures clients</li>
-          <li><strong>CRM</strong> - Prospects, clients, opportunités</li>
-          <li><strong>Projets</strong> - Suivi du temps et des tâches</li>
-          <li><strong>RH</strong> - Gestion des employés et congés</li>
-        </ul>
-        <p className="text-sm text-gray-600 dark:text-gray-400">💡 Utilisez Ctrl+K pour ouvrir la recherche rapide</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true
-  },
-  {
-    target: 'body',
-    content: (
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold">📊 Tableau de bord</h3>
-        <p>Visualisez en temps réel les indicateurs clés de votre entreprise :</p>
-        <ul className="space-y-1 text-sm">
-          <li>• <strong>Chiffre d'affaires</strong> - Évolution mensuelle et annuelle</li>
-          <li>• <strong>Marge bénéficiaire</strong> - Rentabilité de votre activité</li>
-          <li>• <strong>Trésorerie</strong> - Soldes bancaires et runway</li>
-          <li>• <strong>Factures en attente</strong> - Suivi des impayés</li>
-          <li>• <strong>Analyses IA</strong> - Recommandations personnalisées</li>
-        </ul>
-        <p className="text-sm text-gray-600 dark:text-gray-400">Les données sont synchronisées automatiquement depuis votre comptabilité.</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true
-  },
-  {
-    target: 'body',
-    content: (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
-            <span className="text-2xl">🧠</span>
+      <div className="space-y-6 p-2">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 mb-2">
+            <span className="text-3xl">👋</span>
           </div>
-          <h3 className="text-xl font-bold">Intelligence Artificielle</h3>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Bienvenue sur CassKai !
+          </h2>
+          <p className="text-lg text-gray-700 dark:text-gray-200">
+            La plateforme tout-en-un pour piloter <strong className="text-purple-600 dark:text-purple-400">{companyName}</strong>
+          </p>
         </div>
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg border-2 border-purple-200 dark:border-purple-700">
-          <p className="font-semibold text-purple-900 dark:text-purple-200 mb-2">🎉 NOUVEAUTÉ : Analyses IA intégrées !</p>
-          <p className="text-sm text-gray-700 dark:text-gray-300">CassKai intègre une intelligence artificielle de pointe pour analyser automatiquement vos rapports financiers.</p>
+
+        <div className="grid grid-cols-1 gap-2">
+          {[
+            { icon: '💼', text: 'Comptabilité complète et conforme' },
+            { icon: '📄', text: 'Facturation et devis professionnels' },
+            { icon: '🎯', text: 'CRM et gestion commerciale' },
+            { icon: '🚀', text: 'Gestion de projets et ressources' },
+            { icon: '📊', text: 'Analyses IA en temps réel' }
+          ].map((item, idx) => (
+            <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
+              <span className="text-2xl flex-shrink-0">{item.icon}</span>
+              <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{item.text}</span>
+            </div>
+          ))}
         </div>
+
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <span className="text-2xl">⏱️</span>
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Ce guide prend 3 minutes</p>
+        </div>
+      </div>
+    ),
+    placement: 'center',
+    disableBeacon: true
+  },
+  {
+    target: 'body',
+    content: (
+      <div className="space-y-5 p-2">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+            <span className="text-2xl">🧭</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Navigation principale</h3>
+        </div>
+
+        <p className="text-gray-700 dark:text-gray-200">Accédez à tous vos modules depuis le menu latéral</p>
+
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { icon: '📊', name: 'Tableau de bord', desc: 'Vue d\'ensemble' },
+            { icon: '💼', name: 'Comptabilité', desc: 'Grand livre & plan' },
+            { icon: '📄', name: 'Facturation', desc: 'Factures & devis' },
+            { icon: '🎯', name: 'CRM', desc: 'Clients & opportunités' },
+            { icon: '🚀', name: 'Projets', desc: 'Temps & tâches' },
+            { icon: '👔', name: 'RH', desc: 'Employés & congés' }
+          ].map((module, idx) => (
+            <div key={idx} className="p-3 rounded-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-750 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <div className="text-xl mb-1">{module.icon}</div>
+              <div className="font-semibold text-sm text-gray-900 dark:text-white">{module.name}</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">{module.desc}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+          <span className="text-xl">💡</span>
+          <span className="text-sm font-medium text-blue-900 dark:text-blue-100">Utilisez <kbd className="px-2 py-1 text-xs bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600">Ctrl+K</kbd> pour la recherche rapide</span>
+        </div>
+      </div>
+    ),
+    placement: 'center',
+    disableBeacon: true
+  },
+  {
+    target: 'body',
+    content: (
+      <div className="space-y-5 p-2">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+            <span className="text-2xl">📊</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Tableau de bord</h3>
+        </div>
+
+        <p className="text-gray-700 dark:text-gray-200">Visualisez en temps réel les indicateurs clés de votre entreprise</p>
+
         <div className="space-y-2">
-          <p className="font-medium">✨ Ce que l'IA fait pour vous :</p>
-          <ul className="space-y-1 text-sm">
-            <li>• <strong>7 rapports enrichis</strong> - KPI, trésorerie, créances, ratios, budget, dettes, stocks</li>
-            <li>• <strong>Synthèses exécutives</strong> - Vue d'ensemble en langage clair</li>
-            <li>• <strong>Détection des risques</strong> - Alertes proactives sur votre santé financière</li>
-            <li>• <strong>Recommandations d'expert</strong> - Plans d'action personnalisés</li>
-            <li>• <strong>Disponible 24/7</strong> - Sans surcoût, sur tous les plans</li>
-          </ul>
+          {[
+            { icon: '💰', label: 'Chiffre d\'affaires', color: 'from-green-500 to-emerald-500' },
+            { icon: '📈', label: 'Marge bénéficiaire', color: 'from-blue-500 to-cyan-500' },
+            { icon: '🏦', label: 'Trésorerie', color: 'from-purple-500 to-pink-500' },
+            { icon: '⏰', label: 'Factures en attente', color: 'from-orange-500 to-red-500' },
+            { icon: '🧠', label: 'Analyses IA', color: 'from-violet-500 to-purple-500' }
+          ].map((item, idx) => (
+            <div key={idx} className="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.color} flex items-center justify-center flex-shrink-0`}>
+                <span className="text-sm">{item.icon}</span>
+              </div>
+              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{item.label}</span>
+            </div>
+          ))}
         </div>
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm">
-          <p className="font-semibold mb-1">📍 Où trouver les analyses IA ?</p>
-          <p>Accédez au module <strong>Rapports</strong> et générez un rapport. L'IA créera automatiquement une synthèse exécutive en première page.</p>
-        </div>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true
-  },
-  {
-    target: 'body',
-    content: (
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold">📄 Module Facturation</h3>
-        <p>Créez des factures et devis professionnels en quelques clics :</p>
-        <ul className="space-y-1 text-sm">
-          <li>• <strong>Factures clients</strong> - Génération automatique avec numérotation</li>
-          <li>• <strong>Devis</strong> - Convertibles en factures instantanément</li>
-          <li>• <strong>Suivi des paiements</strong> - Relances automatiques</li>
-          <li>• <strong>Export PDF</strong> - Documents personnalisables avec votre logo</li>
-          <li>• <strong>Multidevises</strong> - EUR, USD, GBP et plus</li>
-        </ul>
-        <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">→ Accédez via le menu "Facturation"</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true
-  },
-  {
-    target: 'body',
-    content: (
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold">📚 Module Comptabilité</h3>
-        <p>Une comptabilité complète et conforme aux normes :</p>
-        <ul className="space-y-1 text-sm">
-          <li>• <strong>Plan comptable</strong> - Adapté à votre pays (France, Belgique, etc.)</li>
-          <li>• <strong>Écritures automatiques</strong> - Depuis factures et achats</li>
-          <li>• <strong>Grand livre</strong> - Vue détaillée de tous les mouvements</li>
-          <li>• <strong>Journaux</strong> - Ventes, achats, banque, OD</li>
-          <li>• <strong>Rapports fiscaux</strong> - Déclaration TVA, liasse fiscale</li>
-        </ul>
-        <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">→ Accédez via le menu "Comptabilité"</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true
-  },
-  {
-    target: 'body',
-    content: (
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold">👥 Module CRM</h3>
-        <p>Gérez votre relation client de A à Z :</p>
-        <ul className="space-y-1 text-sm">
-          <li>• <strong>Prospects</strong> - Qualification et scoring</li>
-          <li>• <strong>Clients</strong> - Fiches complètes avec historique</li>
-          <li>• <strong>Opportunités</strong> - Pipeline de vente avec taux de conversion</li>
-          <li>• <strong>Activités</strong> - Appels, emails, rendez-vous</li>
-          <li>• <strong>Reporting</strong> - Performance commerciale</li>
-        </ul>
-        <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">→ Accédez via le menu "CRM"</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true
-  },
-  {
-    target: 'body',
-    content: (
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold">🚀 Module Projets</h3>
-        <p>Pilotez vos projets et suivez le temps :</p>
-        <ul className="space-y-1 text-sm">
-          <li>• <strong>Gestion de projets</strong> - Kanban, Gantt, listes</li>
-          <li>• <strong>Suivi du temps</strong> - Timetracking avec timer intégré</li>
-          <li>• <strong>Tâches</strong> - Assignation et priorisation</li>
-          <li>• <strong>Budget</strong> - Temps passé vs temps prévu</li>
-          <li>• <strong>Facturation</strong> - Conversion automatique en factures</li>
-        </ul>
-        <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">→ Accédez via le menu "Projets"</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true
-  },
-  {
-    target: 'body',
-    content: (
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold">👔 Module RH</h3>
-        <p>Gérez vos ressources humaines efficacement :</p>
-        <ul className="space-y-1 text-sm">
-          <li>• <strong>Employés</strong> - Fiches complètes avec contrats</li>
-          <li>• <strong>Congés</strong> - Demandes et validation</li>
-          <li>• <strong>Notes de frais</strong> - Suivi et remboursements</li>
-          <li>• <strong>Évaluations</strong> - Entretiens annuels</li>
-          <li>• <strong>Documents</strong> - Contrats, avenants, attestations</li>
-        </ul>
-        <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">→ Accédez via le menu "Ressources Humaines"</p>
-      </div>
-    ),
-    placement: 'center',
-    disableBeacon: true
-  },
-  {
-    target: 'body',
-    content: (
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold">💳 Autres modules disponibles</h3>
-        <div className="space-y-2 text-sm">
-          <p><strong>Banque</strong> - Rapprochement bancaire et import de fichiers</p>
-          <p><strong>Achats</strong> - Gestion des fournisseurs et bons de commande</p>
-          <p><strong>Inventaire</strong> - Stock et immobilisations</p>
-          <p><strong>Contrats</strong> - Modèles et signatures électroniques</p>
-          <p><strong>Prévisions</strong> - Budget et forecasting</p>
-          <p><strong>Rapports</strong> - Balance, compte de résultat, bilan</p>
+
+        <div className="p-3 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800">
+          <p className="text-xs text-blue-900 dark:text-blue-100">✨ Données synchronisées automatiquement depuis votre comptabilité</p>
         </div>
       </div>
     ),
@@ -221,27 +134,194 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
   {
     target: 'body',
     content: (
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">🎉 Vous êtes prêt à démarrer !</h2>
+      <div className="space-y-5 p-2">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 via-pink-600 to-rose-600 shadow-lg">
+            <span className="text-3xl">🧠</span>
+          </div>
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Intelligence Artificielle
+          </h3>
+        </div>
+
+        <div className="relative overflow-hidden p-4 rounded-xl bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-rose-900/40 border-2 border-purple-300 dark:border-purple-600">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-2xl"></div>
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">🎉</span>
+              <span className="font-bold text-purple-900 dark:text-white">NOUVEAUTÉ : Analyses IA intégrées !</span>
+            </div>
+            <p className="text-sm text-gray-800 dark:text-gray-100">
+              CassKai intègre une intelligence artificielle de pointe pour analyser automatiquement vos rapports financiers.
+            </p>
+          </div>
+        </div>
+
         <div className="space-y-2">
-          <p className="text-lg">Pour commencer, nous vous recommandons de :</p>
-          <ol className="space-y-2 text-sm list-decimal list-inside">
-            <li>Compléter les paramètres de votre entreprise (logo, coordonnées)</li>
-            <li>Importer vos clients et fournisseurs existants</li>
-            <li>Créer votre première facture ou devis</li>
-            <li>Explorer le tableau de bord et les rapports</li>
-            <li><strong>🧠 Générer un rapport avec analyse IA</strong> pour découvrir la nouveauté</li>
-          </ol>
+          <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <span className="text-xl">✨</span>
+            Ce que l'IA fait pour vous
+          </p>
+          {[
+            { icon: '📊', text: '7 rapports enrichis', sub: 'KPI, trésorerie, créances...' },
+            { icon: '📝', text: 'Synthèses exécutives', sub: 'En langage clair' },
+            { icon: '⚠️', text: 'Détection des risques', sub: 'Alertes proactives' },
+            { icon: '💡', text: 'Recommandations d\'expert', sub: 'Plans d\'action' },
+            { icon: '⏰', text: 'Disponible 24/7', sub: 'Sans surcoût' }
+          ].map((item, idx) => (
+            <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <span className="text-xl flex-shrink-0">{item.icon}</span>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-sm text-gray-900 dark:text-white">{item.text}</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">{item.sub}</div>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-3 rounded-lg text-sm border border-purple-200 dark:border-purple-700">
-          <p className="font-semibold mb-1 text-purple-900 dark:text-purple-200">🌟 N'oubliez pas !</p>
-          <p className="text-gray-700 dark:text-gray-300">L'intelligence artificielle analyse automatiquement tous vos rapports financiers. Aucune configuration nécessaire !</p>
+
+        <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl flex-shrink-0">📍</span>
+            <div>
+              <p className="font-bold mb-1">Où trouver les analyses IA ?</p>
+              <p className="text-sm opacity-95">Module <strong>Rapports</strong> → Générez un rapport → L'IA crée automatiquement une synthèse en première page</p>
+            </div>
+          </div>
         </div>
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm">
-          <p className="font-semibold mb-1">💡 Besoin d'aide ?</p>
-          <p>• Documentation complète disponible dans Paramètres → Aide</p>
-          <p>• Support par email : support@casskai.com</p>
-          <p>• Relancez ce guide à tout moment depuis Paramètres</p>
+      </div>
+    ),
+    placement: 'center',
+    disableBeacon: true
+  },
+  {
+    target: 'body',
+    content: (
+      <div className="space-y-5 p-2">
+        <div className="text-center">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Modules essentiels</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Explorez les fonctionnalités principales de CassKai</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3">
+          {[
+            {
+              icon: '📄',
+              title: 'Facturation',
+              color: 'from-blue-500 to-cyan-500',
+              features: ['Factures & devis', 'Relances auto', 'PDF personnalisés', 'Multidevises']
+            },
+            {
+              icon: '💼',
+              title: 'Comptabilité',
+              color: 'from-emerald-500 to-teal-500',
+              features: ['Plan comptable', 'Écritures auto', 'Grand livre', 'Rapports fiscaux']
+            },
+            {
+              icon: '🎯',
+              title: 'CRM',
+              color: 'from-purple-500 to-pink-500',
+              features: ['Prospects', 'Pipeline de vente', 'Activités', 'Reporting']
+            },
+            {
+              icon: '🚀',
+              title: 'Projets',
+              color: 'from-orange-500 to-red-500',
+              features: ['Kanban & Gantt', 'Timetracking', 'Budgets', 'Facturation']
+            },
+            {
+              icon: '👔',
+              title: 'RH',
+              color: 'from-indigo-500 to-purple-500',
+              features: ['Employés', 'Congés', 'Notes de frais', 'Évaluations']
+            }
+          ].map((module, idx) => (
+            <div key={idx} className="p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-3 mb-2">
+                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${module.color} flex items-center justify-center flex-shrink-0`}>
+                  <span className="text-xl">{module.icon}</span>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-gray-900 dark:text-white">{module.title}</h4>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {module.features.map((feat, fidx) => (
+                      <span key={fidx} className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                        {feat}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border border-gray-200 dark:border-gray-600">
+          <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+            <span className="text-base mr-1">➕</span>
+            <strong>Et aussi:</strong> Banque, Achats, Inventaire, Contrats, Prévisions, Rapports...
+          </p>
+        </div>
+      </div>
+    ),
+    placement: 'center',
+    disableBeacon: true
+  },
+  {
+    target: 'body',
+    content: (
+      <div className="space-y-6 p-2">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 shadow-lg">
+            <span className="text-3xl">🎉</span>
+          </div>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
+            Vous êtes prêt !
+          </h2>
+          <p className="text-gray-700 dark:text-gray-200">Commencez à utiliser CassKai dès maintenant</p>
+        </div>
+
+        <div className="space-y-3">
+          <p className="font-bold text-gray-900 dark:text-white">🚀 Prochaines étapes</p>
+          {[
+            { icon: '⚙️', text: 'Compléter les paramètres de votre entreprise' },
+            { icon: '👥', text: 'Importer vos clients et fournisseurs' },
+            { icon: '📄', text: 'Créer votre première facture ou devis' },
+            { icon: '📊', text: 'Explorer le tableau de bord' },
+            { icon: '🧠', text: 'Générer un rapport avec analyse IA' }
+          ].map((step, idx) => (
+            <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
+                {idx + 1}
+              </div>
+              <span className="text-xl flex-shrink-0">{step.icon}</span>
+              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{step.text}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="relative overflow-hidden p-4 rounded-xl bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-rose-900/40 border-2 border-purple-300 dark:border-purple-600">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-2xl"></div>
+          <div className="relative flex items-start gap-3">
+            <span className="text-2xl flex-shrink-0">🌟</span>
+            <div>
+              <p className="font-bold text-purple-900 dark:text-white mb-1">N'oubliez pas !</p>
+              <p className="text-sm text-gray-800 dark:text-gray-100">L'intelligence artificielle analyse automatiquement tous vos rapports. Aucune configuration nécessaire !</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl flex-shrink-0">💡</span>
+            <div className="space-y-2">
+              <p className="font-bold">Besoin d'aide ?</p>
+              <div className="space-y-1 text-sm opacity-95">
+                <p>• Documentation dans Paramètres → Aide</p>
+                <p>• Email: support@casskai.com</p>
+                <p>• Relancez ce guide depuis Paramètres</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     ),
@@ -340,22 +420,40 @@ export function OnboardingTour({ isNewAccount, companyName }: OnboardingTourProp
       callback={handleJoyrideCallback}
       styles={{
         options: {
-          primaryColor: '#3b82f6',
-          zIndex: 10000
+          primaryColor: '#8b5cf6',
+          zIndex: 10000,
+          overlayColor: 'rgba(0, 0, 0, 0.5)'
         },
         tooltip: {
-          borderRadius: 8,
-          fontSize: 14
+          borderRadius: 16,
+          fontSize: 14,
+          padding: 24,
+          maxWidth: 520,
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+        },
+        tooltipContent: {
+          padding: 0
         },
         buttonNext: {
-          backgroundColor: '#3b82f6',
-          borderRadius: 6,
-          padding: '8px 16px'
+          backgroundColor: '#8b5cf6',
+          borderRadius: 8,
+          padding: '10px 20px',
+          fontSize: 14,
+          fontWeight: 600,
+          boxShadow: '0 4px 6px -1px rgba(139, 92, 246, 0.3)'
         },
         buttonBack: {
-          color: '#6b7280'
+          color: '#6b7280',
+          marginRight: 8,
+          fontSize: 14,
+          fontWeight: 500
         },
         buttonSkip: {
+          color: '#9ca3af',
+          fontSize: 13,
+          fontWeight: 500
+        },
+        buttonClose: {
           color: '#6b7280'
         }
       }}

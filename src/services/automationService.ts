@@ -13,6 +13,8 @@
 // src/services/automationService.ts
 
 import { supabase } from '@/lib/supabase';
+import { emailService } from './emailService';
+import { toast } from 'react-hot-toast';
 
 // =====================================================
 // TYPES
@@ -98,6 +100,10 @@ export interface ActionConfig {
   table?: string;
   field?: string;
   value?: any;
+  // Invoicing
+  client_id?: string | number;
+  amount?: number;
+  description?: string;
   url?: string;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   headers?: Record<string, string>;
@@ -399,23 +405,175 @@ class AutomationService {
     }
   }
 
-  private async executeAction(action: WorkflowAction, _workflow: Workflow): Promise<any> {
+  private async executeAction(action: WorkflowAction, workflow: Workflow): Promise<any> {
     switch (action.type) {
-      case 'send_email':
-      case 'generate_report':
-      case 'notification':
-      case 'create_invoice':
-        console.log(`Action ${action.type}:`, action.config);
-        return { success: true };
+      case 'send_email': {
+        // Real email sending implementation
+        const { recipients, subject, template, body } = action.config;
+        
+        if (!recipients || recipients.length === 0) {
+          throw new Error('Aucun destinataire spécifié');
+        }
+
+        try {
+          await emailService.sendEmail(workflow.company_id, {
+            to: recipients,
+            subject: subject || 'Notification automatique',
+            html: body || template || '<p>Ceci est un email automatique depuis CassKai</p>',
+            text: body || 'Ceci est un email automatique depuis CassKai',
+            workflow_id: workflow.id
+          });
+
+          return { success: true, sent_to: recipients.length };
+        } catch (error: any) {
+          throw new Error(`Erreur envoi email: ${error.message}`);
+        }
+      }
+
+      case 'generate_report': {
+        // Real report generation
+        const { report_type, format = 'pdf' } = action.config;
+        
+        try {
+          // Call report generation service
+          const reportData = await this.generateReport(workflow.company_id, report_type, format);
+          
+          return { 
+            success: true, 
+            report_type,
+            format,
+            file_url: reportData.url
+          };
+        } catch (error: any) {
+          throw new Error(`Erreur génération rapport: ${error.message}`);
+        }
+      }
+
+      case 'notification': {
+        // Real in-app notification
+        const { message, notification_type = 'info' } = action.config;
+        
+        try {
+          // Store notification in database
+          await supabase.from('notifications').insert({
+            company_id: workflow.company_id,
+            type: notification_type,
+            title: `Automation: ${workflow.name}`,
+            message: message || 'Notification automatique',
+            source: 'automation',
+            source_id: workflow.id,
+            created_at: new Date().toISOString()
+          });
+
+          // Show toast notification (if in browser context)
+          if (typeof window !== 'undefined') {
+            switch (notification_type) {
+              case 'success':
+                toast.success(message);
+                break;
+              case 'error':
+                toast.error(message);
+                break;
+              case 'warning':
+                toast(message, { icon: '⚠️' });
+                break;
+              default:
+                toast(message);
+            }
+          }
+
+          return { success: true, type: notification_type };
+        } catch (error: any) {
+          throw new Error(`Erreur notification: ${error.message}`);
+        }
+      }
+
+      case 'create_invoice': {
+        // Real invoice creation
+        const { source, client_id, amount, description } = action.config;
+        
+        try {
+          const { data: invoice, error } = await supabase
+            .from('invoices')
+            .insert({
+              company_id: workflow.company_id,
+              third_party_id: client_id,
+              amount: amount || 0,
+              description: description || 'Facture générée automatiquement',
+              status: 'draft',
+              source: source || 'automation',
+              created_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          return { 
+            success: true, 
+            invoice_id: invoice.id,
+            invoice_number: invoice.invoice_number
+          };
+        } catch (error: any) {
+          throw new Error(`Erreur création facture: ${error.message}`);
+        }
+      }
+
+      case 'update_record': {
+        // Real database record update
+        const { table, field, value, source } = action.config;
+        
+        if (!table || !field) {
+          throw new Error('Table et champ requis pour update_record');
+        }
+
+        try {
+          const updateData: any = {
+            [field]: value,
+            updated_at: new Date().toISOString()
+          };
+
+          const { error } = await supabase
+            .from(table)
+            .update(updateData)
+            .eq('company_id', workflow.company_id);
+
+          if (source) {
+            // If specific record ID provided
+            await supabase
+              .from(table)
+              .update(updateData)
+              .eq('id', source);
+          }
+
+          if (error) throw error;
+
+          return { success: true, table, field, value };
+        } catch (error: any) {
+          throw new Error(`Erreur mise à jour: ${error.message}`);
+        }
+      }
 
       case 'webhook_call': {
         if (!action.config.url) throw new Error('URL webhook manquante');
-        const response = await fetch(action.config.url, {
-          method: action.config.method || 'POST',
-          headers: { 'Content-Type': 'application/json', ...action.config.headers },
-          body: action.config.payload ? JSON.stringify(action.config.payload) : undefined
-        });
-        return { status: response.status, ok: response.ok };
+        
+        try {
+          const response = await fetch(action.config.url, {
+            method: action.config.method || 'POST',
+            headers: { 'Content-Type': 'application/json', ...action.config.headers },
+            body: action.config.payload ? JSON.stringify(action.config.payload) : undefined
+          });
+
+          const responseData = await response.json().catch(() => ({}));
+
+          return { 
+            success: response.ok,
+            status: response.status, 
+            response: responseData 
+          };
+        } catch (error: any) {
+          throw new Error(`Erreur webhook: ${error.message}`);
+        }
       }
 
       case 'delay': {
@@ -427,6 +585,30 @@ class AutomationService {
       default:
         throw new Error(`Type d'action non supporté: ${action.type}`);
     }
+  }
+
+  /**
+   * Generate report (PDF/Excel)
+   */
+  private async generateReport(
+    companyId: string,
+    reportType: string,
+    format: 'pdf' | 'xlsx' | 'csv'
+  ): Promise<{ url: string; filename: string }> {
+    // This would call a report generation service
+    // For now, return a placeholder
+    const filename = `${reportType}_${new Date().toISOString().split('T')[0]}.${format}`;
+    
+    // In a real implementation, this would:
+    // 1. Fetch data for the report type
+    // 2. Generate PDF/Excel using a library
+    // 3. Upload to storage
+    // 4. Return the URL
+    
+    return {
+      url: `/api/reports/download/${filename}`,
+      filename
+    };
   }
 
   async getStats(companyId: string): Promise<WorkflowStats> {

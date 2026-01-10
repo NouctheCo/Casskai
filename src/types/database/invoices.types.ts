@@ -68,6 +68,14 @@ export interface InvoiceWithDetails extends Invoice {
 
   remaining_amount: number
 
+  currency?: string | null
+
+  service_date?: string | null
+
+  delivery_date?: string | null
+
+  vat_exemption_reason?: string | null
+
 }
 
 

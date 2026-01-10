@@ -2,6 +2,8 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
+import { useNavigate } from 'react-router-dom';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Button } from '@/components/ui/button';
@@ -51,6 +53,7 @@ import {
 
 
 const SubscriptionStatus: React.FC = () => {
+  const navigate = useNavigate();
 
   const {
 
@@ -240,7 +243,7 @@ const SubscriptionStatus: React.FC = () => {
 
           </p>
 
-          <Button>
+          <Button onClick={() => navigate('/pricing')}>
 
             Voir les plans
 

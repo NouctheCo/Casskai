@@ -472,7 +472,23 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
         siret: companySettings?.generalInfo?.siret || '',
 
-        vatNumber: companySettings?.generalInfo?.vatNumber || ''
+        vatNumber: companySettings?.generalInfo?.vatNumber || '',
+
+        logo: companySettings?.branding?.logoUrl || '',
+
+        legalMentions: companySettings?.branding?.legalMentions || '',
+
+        defaultTerms: companySettings?.branding?.defaultTermsConditions || '',
+
+        shareCapital: companySettings?.generalInfo?.shareCapital || '',
+
+        mainBankName: companySettings?.accounting?.mainBank?.name || '',
+
+        mainBankIban: companySettings?.accounting?.mainBank?.iban || '',
+
+        mainBankBic: companySettings?.accounting?.mainBank?.bic || '',
+
+        currency: companySettings?.business?.currency || 'EUR'
 
       };
 
@@ -588,7 +604,23 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
         siret: companySettings?.generalInfo?.siret || '',
 
-        vatNumber: companySettings?.generalInfo?.vatNumber || ''
+        vatNumber: companySettings?.generalInfo?.vatNumber || '',
+
+        logo: companySettings?.branding?.logoUrl || '',
+
+        legalMentions: companySettings?.branding?.legalMentions || '',
+
+        defaultTerms: companySettings?.branding?.defaultTermsConditions || '',
+
+        shareCapital: companySettings?.generalInfo?.shareCapital || '',
+
+        mainBankName: companySettings?.accounting?.mainBank?.name || '',
+
+        mainBankIban: companySettings?.accounting?.mainBank?.iban || '',
+
+        mainBankBic: companySettings?.accounting?.mainBank?.bic || '',
+
+        currency: companySettings?.business?.currency || 'EUR'
 
       };
 
@@ -656,7 +688,23 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
         siret: companySettings?.generalInfo?.siret || '',
 
-        vatNumber: companySettings?.generalInfo?.vatNumber || ''
+        vatNumber: companySettings?.generalInfo?.vatNumber || '',
+
+        logo: companySettings?.branding?.logoUrl || '',
+
+        legalMentions: companySettings?.branding?.legalMentions || '',
+
+        defaultTerms: companySettings?.branding?.defaultTermsConditions || '',
+
+        shareCapital: companySettings?.generalInfo?.shareCapital || '',
+
+        mainBankName: companySettings?.accounting?.mainBank?.name || '',
+
+        mainBankIban: companySettings?.accounting?.mainBank?.iban || '',
+
+        mainBankBic: companySettings?.accounting?.mainBank?.bic || '',
+
+        currency: companySettings?.business?.currency || 'EUR'
 
       };
 

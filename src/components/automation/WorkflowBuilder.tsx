@@ -378,6 +378,84 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
           </div>
         );
 
+      case 'update_record':
+        return (
+          <div className="space-y-3">
+            <div>
+              <Label>Table</Label>
+              <Input
+                placeholder="ex: invoices, clients, projects"
+                value={action.config.table || ''}
+                onChange={(e) => updateAction(action.id, {
+                  config: { ...action.config, table: e.target.value }
+                })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Champ</Label>
+                <Input
+                  placeholder="ex: status"
+                  value={action.config.field || ''}
+                  onChange={(e) => updateAction(action.id, {
+                    config: { ...action.config, field: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label>Valeur</Label>
+                <Input
+                  placeholder="ex: paid"
+                  value={(action.config.value ?? '').toString()}
+                  onChange={(e) => updateAction(action.id, {
+                    config: { ...action.config, value: e.target.value }
+                  })}
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'create_invoice':
+        return (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Client ID</Label>
+                <Input
+                  placeholder="ex: uuid du client"
+                  value={(action.config.client_id ?? '').toString()}
+                  onChange={(e) => updateAction(action.id, {
+                    config: { ...action.config, client_id: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label>Montant</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={action.config.amount?.toString() || ''}
+                  onChange={(e) => updateAction(action.id, {
+                    config: { ...action.config, amount: parseFloat(e.target.value) }
+                  })}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                placeholder="Description de la facture"
+                value={action.config.description || ''}
+                onChange={(e) => updateAction(action.id, {
+                  config: { ...action.config, description: e.target.value }
+                })}
+              />
+            </div>
+          </div>
+        );
+
       default:
         return <div>Configuration d'action non implémentée</div>;
     }
@@ -388,6 +466,7 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
       case 'send_email': return Mail;
       case 'generate_report': return FileText;
       case 'notification': return Bell;
+      case 'create_invoice': return FileText;
       case 'update_record': return Database;
       default: return Settings;
     }
@@ -564,8 +643,8 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
                                   <SelectItem value="send_email">Envoi d'email</SelectItem>
                                   <SelectItem value="generate_report">Génération de rapport</SelectItem>
                                   <SelectItem value="notification">Notification</SelectItem>
-                                  <SelectItem value="update_record" disabled>Mise à jour (Bientôt)</SelectItem>
-                                  <SelectItem value="create_invoice" disabled>Création facture (Bientôt)</SelectItem>
+                                  <SelectItem value="update_record">Mise à jour</SelectItem>
+                                  <SelectItem value="create_invoice">Création facture</SelectItem>
                                 </SelectContent>
                               </Select>
                               <Button

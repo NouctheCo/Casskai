@@ -28,6 +28,17 @@ import {
   Zap
 } from 'lucide-react';
 
+type BankTransaction = {
+  id: string;
+  date: string;
+  amount: number;
+  description: string;
+  reference: string;
+  is_reconciled: boolean;
+  suggested_matches?: string[];
+  matched_entry_id?: string;
+};
+
 const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccounts, onReconciliationComplete }) => {
   const { toast } = useToast();
 
@@ -46,7 +57,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   const [reconciledTransactions, setReconciledTransactions] = useState<Set<string>>(new Set());
 
   // Données simulées pour les transactions bancaires et écritures comptables
-  const [bankTransactions, setBankTransactions] = useState([
+  const [bankTransactions, setBankTransactions] = useState<BankTransaction[]>([
     {
       id: 'bt_1',
       date: '2024-01-15',

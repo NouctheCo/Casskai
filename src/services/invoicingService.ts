@@ -82,6 +82,9 @@ export interface CreateInvoiceData {
   invoice_type?: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
   invoice_date: string;
   due_date: string;
+  service_date?: string;
+  delivery_date?: string;
+  vat_exemption_reason?: string;
   currency?: string;
   notes?: string;
 }
@@ -261,6 +264,9 @@ class InvoicingService {
           status: 'draft',
           invoice_date: invoiceData.invoice_date,
           due_date: invoiceData.due_date,
+          service_date: invoiceData.service_date,
+          delivery_date: invoiceData.delivery_date,
+          vat_exemption_reason: invoiceData.vat_exemption_reason,
           subtotal_excl_tax: subtotal,
           total_tax_amount: tax_amount,
           total_incl_tax: total_amount,

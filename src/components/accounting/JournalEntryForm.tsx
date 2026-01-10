@@ -598,13 +598,13 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
         // Upload files if any were selected
         if (selectedFiles.length > 0 && entryId && currentCompanyId) {
 
-          const { uploadAttachment } = await import('@/services/journalEntryAttachmentService');
+          const { journalEntryAttachmentService } = await import('@/services/journalEntryAttachmentService');
 
           for (const file of selectedFiles) {
 
             try {
 
-              await uploadAttachment(entryId, currentCompanyId, file);
+              await journalEntryAttachmentService.uploadAttachment(entryId, currentCompanyId, file);
 
             } catch (uploadError) {
 

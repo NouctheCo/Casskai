@@ -486,17 +486,23 @@ const BillingPage: React.FC = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
 
-        <TabsList className="grid w-full grid-cols-4">
-
-          <TabsTrigger value="overview">{t('billingPage.tabs.overview')}</TabsTrigger>
-
-          <TabsTrigger value="plans">{t('billingPage.tabs.plans')}</TabsTrigger>
-
-          <TabsTrigger value="payment">{t('billingPage.tabs.payment')}</TabsTrigger>
-
-          <TabsTrigger value="invoices">{t('billingPage.tabs.invoices')}</TabsTrigger>
-
-        </TabsList>
+        {/* Cleaner, responsive tab bar */}
+        <div className="sticky top-0 z-20 bg-transparent">
+          <TabsList className="w-full overflow-x-auto flex gap-2 md:grid md:grid-cols-4 bg-transparent p-0 border-b border-gray-200 dark:border-gray-800 rounded-none">
+            <TabsTrigger value="overview" className="text-sm md:text-base px-3 md:px-4 py-2 whitespace-nowrap">
+              {t('billingPage.tabs.overview')}
+            </TabsTrigger>
+            <TabsTrigger value="plans" className="text-sm md:text-base px-3 md:px-4 py-2 whitespace-nowrap">
+              {t('billingPage.tabs.plans')}
+            </TabsTrigger>
+            <TabsTrigger value="payment" className="text-sm md:text-base px-3 md:px-4 py-2 whitespace-nowrap">
+              {t('billingPage.tabs.payment')}
+            </TabsTrigger>
+            <TabsTrigger value="invoices" className="text-sm md:text-base px-3 md:px-4 py-2 whitespace-nowrap">
+              {t('billingPage.tabs.invoices')}
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
 
 

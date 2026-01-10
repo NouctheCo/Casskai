@@ -22,7 +22,7 @@ import { cn } from '../../lib/utils';
     const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(({ className, ...props }, ref) => (
       <h3
         ref={ref}
-        className={cn('text-xl sm:text-2xl font-semibold leading-none tracking-tight', className)}
+        className={cn('text-xl sm:text-2xl font-semibold leading-none tracking-tight text-gray-900 dark:text-white', className)}
         {...props}
       />
     ));
@@ -31,7 +31,7 @@ import { cn } from '../../lib/utils';
     const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(({ className, ...props }, ref) => (
       <p
         ref={ref}
-        className={cn('text-base sm:text-sm text-muted-foreground', className)}
+        className={cn('text-base sm:text-sm text-muted-foreground dark:text-gray-400', className)}
         {...props}
       />
     ));

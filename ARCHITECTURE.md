@@ -106,6 +106,50 @@ src/
 
 ## 🔧 Architecture Backend
 
+### ⚠️ Configuration Actuelle (Déploiement)
+
+**VPS Production (casskai.app)**
+- **Frontend uniquement** : Nginx sert les fichiers statiques React
+- **Backend** : Supabase (DB + Auth + Storage + Edge Functions)
+- **Stripe Checkout** : Via Supabase Edge Functions (Deno serverless)
+- **PM2** : Aucun service actif (pas de serveur Node.js)
+
+**Architecture déployée**
+```
+┌─────────────┐
+│   Browser   │
+└──────┬──────┘
+       │ HTTPS
+┌──────▼────────────┐
+│  Nginx (VPS)      │  Port 8080
+│  casskai.app      │  Serve static files
+└──────┬────────────┘
+       │
+┌──────▼────────────┐
+│  React App        │  Built with Vite
+│  (Frontend)       │  SPA with routing
+└──────┬────────────┘
+       │
+       ├─────────────── Supabase JS SDK
+       │
+┌──────▼────────────────────────┐
+│   Supabase Cloud              │
+│                               │
+│  ┌─────────────────────────┐ │
+│  │ PostgreSQL Database     │ │
+│  │ (Auth + Storage + RLS)  │ │
+│  └─────────────────────────┘ │
+│                               │
+│  ┌─────────────────────────┐ │
+│  │ Edge Functions (Deno)   │ │
+│  │ ├─ create-checkout      │ │◄── Stripe API
+│  │ └─ (autres fonctions)   │ │
+│  └─────────────────────────┘ │
+└───────────────────────────────┘
+```
+
+**Note importante** : Le répertoire `backend/` (Node.js/Express) existe mais **N'EST PAS UTILISÉ**. Voir `backend/README-NOT-USED.md` pour plus de détails.
+
 ### Supabase (Backend as a Service)
 
 **PostgreSQL Database**

@@ -11,6 +11,7 @@
  */
 
 import { supabase } from '../lib/supabase';
+import { emailService } from './emailService';
 import {
   ContractData,
   ContractFormData,
@@ -19,8 +20,125 @@ import {
   RFACalculation,
   RFAFormData,
   RFAFilters,
-  ContractServiceResponse
+  ContractServiceResponse,
+  SimulationResult,
+  TurnoverScenario,
+  RFATierBreakdown,
+  DiscountConfig,
+  ContractAlert
 } from '../types/contracts.types';
+
+// Helpers -------------------------------------------------------------------
+
+const getCurrentUserId = async (): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) return null;
+    return data?.user?.id ?? null;
+  } catch (_err) {
+    return null;
+  }
+};
+
+const calculateRFAForTurnover = (config: DiscountConfig, turnover: number) => {
+  const breakdown: RFATierBreakdown[] = [];
+  if (!turnover || turnover <= 0) {
+    return { rfaAmount: 0, effectiveRate: 0, breakdown };
+  }
+
+  if (config.type === 'fixed_percent') {
+    const rate = config.rate || 0;
+    const rfaAmount = turnover * rate;
+    return { rfaAmount, effectiveRate: rate, breakdown };
+  }
+
+  if (config.type === 'fixed_amount') {
+    const amount = config.amount || 0;
+    const effectiveRate = turnover > 0 ? amount / turnover : 0;
+    return { rfaAmount: amount, effectiveRate, breakdown };
+  }
+
+  const tiers = [...(config.tiers || [])].sort((a, b) => a.min - b.min);
+  let totalRFA = 0;
+
+  tiers.forEach((tier, index) => {
+    const tierMin = tier.min;
+    const tierMax = tier.max ?? Number.MAX_SAFE_INTEGER;
+    if (turnover <= tierMin) return;
+
+    const tierAmount = Math.max(0, Math.min(turnover, tierMax) - tierMin);
+    const tierRFA = tierAmount * tier.rate;
+    totalRFA += tierRFA;
+
+    breakdown.push({
+      tier_index: index,
+      tier_min: tierMin,
+      tier_max: tier.max ?? null,
+      tier_rate: tier.rate,
+      tier_amount: tierAmount,
+      rfa_amount: tierRFA
+    });
+  });
+
+  const effectiveRate = turnover > 0 ? totalRFA / turnover : 0;
+  return { rfaAmount: totalRFA, effectiveRate, breakdown };
+};
+
+const logContractHistory = async (
+  contractId: string,
+  changeType: 'created' | 'updated' | 'status_changed' | 'terminated' | 'renewed',
+  description?: string,
+  oldValues?: Record<string, unknown>,
+  newValues?: Record<string, unknown>
+) => {
+  try {
+    const userId = await getCurrentUserId();
+    await supabase.from('contract_history').insert({
+      contract_id: contractId,
+      change_type: changeType,
+      change_description: description,
+      old_values: oldValues || null,
+      new_values: newValues || null,
+      changed_by: userId || null
+    });
+  } catch (err) {
+    console.warn('Unable to log contract history', err);
+  }
+};
+
+const assertNoOverlap = async (
+  enterpriseId: string,
+  clientId: string,
+  startDate: string,
+  endDate?: string,
+  excludeContractId?: string
+) => {
+  const end = endDate || startDate;
+
+  let query = supabase
+    .from('contracts')
+    .select('id, contract_name, start_date, end_date, status')
+    .eq('company_id', enterpriseId)
+    .eq('client_id', clientId)
+    .not('status', 'in', '(terminated,cancelled,archived)')
+    .lte('start_date', end)
+    .gte('end_date', startDate);
+
+  if (excludeContractId) {
+    query = query.neq('id', excludeContractId);
+  }
+
+  const { data, error } = await query.limit(1);
+  if (error) {
+    throw error;
+  }
+
+  if (data && data.length > 0) {
+    const overlap = data[0];
+    const message = `Un autre contrat (${overlap.contract_name}) couvre déjà cette période pour ce client.`;
+    throw new Error(message);
+  }
+};
 
 /**
  * Get all contracts with filters
@@ -142,6 +260,8 @@ export async function createContract(
   contractData: ContractFormData
 ): Promise<ContractServiceResponse<ContractData>> {
   try {
+    await assertNoOverlap(enterpriseId, contractData.client_id, contractData.start_date, contractData.end_date);
+
     const { data, error } = await supabase
       .from('contracts')
       .insert({
@@ -187,6 +307,8 @@ export async function createContract(
       updated_at: data.updated_at
     } as any;
 
+    await logContractHistory(contract.id, 'created', 'Création du contrat', null, contractData as any);
+
     return { data: contract, success: true };
   } catch (error) {
     console.error('Error creating contract:', error);
@@ -202,6 +324,23 @@ export async function updateContract(
   contractData: Partial<ContractFormData>
 ): Promise<ContractServiceResponse<ContractData>> {
   try {
+    // fetch current state for history
+    const { data: currentData } = await supabase
+      .from('contracts')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (currentData && (contractData.client_id || contractData.start_date || contractData.end_date)) {
+      await assertNoOverlap(
+        currentData.company_id,
+        contractData.client_id || currentData.client_id,
+        contractData.start_date || currentData.start_date,
+        contractData.end_date || currentData.end_date,
+        id
+      );
+    }
+
     const updateData: any = {};
 
     if (contractData.contract_name) updateData.contract_name = contractData.contract_name;
@@ -253,6 +392,12 @@ export async function updateContract(
       updated_at: data.updated_at
     } as any;
 
+    const changeType = currentData?.end_date && contractData.end_date && contractData.end_date > currentData.end_date
+      ? 'renewed'
+      : 'updated';
+
+    await logContractHistory(id, changeType, 'Mise à jour du contrat', currentData as any, contractData as any);
+
     return { data: contract, success: true };
   } catch (error) {
     console.error('Error updating contract:', error);
@@ -290,6 +435,8 @@ export async function archiveContract(id: string): Promise<ContractServiceRespon
       .eq('id', id);
 
     if (error) throw error;
+
+    await logContractHistory(id, 'status_changed', 'Contrat archivé', null, { status: 'cancelled' });
 
     return { data: true, success: true };
   } catch (error) {
@@ -343,8 +490,8 @@ export async function getRFACalculations(
       client_name: (r.contract as any)?.client?.name || 'Client inconnu',
       period_start: r.period_start,
       period_end: r.period_end,
-      turnover_amount: Number(r.turnover_amount) || 0,
-      rfa_amount: Number(r.rfa_amount) || 0,
+      turnover_amount: Number(r.total_turnover ?? r.turnover_amount) || 0,
+      rfa_amount: Number(r.discount_amount ?? r.rfa_amount) || 0,
       tier_reached: 0,
       calculation_details: r.calculation_details || {
         type: (r.contract as any)?.rfa_calculation_type || 'progressive',
@@ -429,6 +576,187 @@ export async function createRFACalculation(
 }
 
 /**
+ * Automatic monthly RFA calculation for all active contracts
+ */
+export async function autoCalculateCurrentMonthRFA(
+  enterpriseId: string
+): Promise<ContractServiceResponse<{ processed: number; updated: number }>> {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const periodStart = start.toISOString().split('T')[0];
+  const periodEnd = now.toISOString().split('T')[0];
+
+  try {
+    const { data: contracts, error: contractsError } = await supabase
+      .from('contracts')
+      .select('id, start_date, end_date, status, company_id, client_id, currency')
+      .eq('company_id', enterpriseId)
+      .in('status', ['active', 'draft'])
+      .lte('start_date', periodEnd)
+      .or(`end_date.is.null,end_date.gte.${periodStart}`);
+
+    if (contractsError) throw contractsError;
+
+    let processed = 0;
+    let updated = 0;
+
+    for (const contract of contracts || []) {
+      const { data: calcResult, error: calcError } = await supabase
+        .rpc('calculate_contract_rfa', {
+          p_contract_id: contract.id,
+          p_period_start: periodStart,
+          p_period_end: periodEnd
+        });
+
+      if (calcError) {
+        console.warn('Auto RFA calculation failed for contract', contract.id, calcError);
+        continue;
+      }
+
+      const calculation = calcResult?.[0];
+      if (!calculation) continue;
+
+      // Upsert logic: if a calculation exists for the same contract & period, update it
+      const { data: existing, error: existingError } = await supabase
+        .from('rfa_calculations')
+        .select('id')
+        .eq('company_id', enterpriseId)
+        .eq('contract_id', contract.id)
+        .eq('period_start', periodStart)
+        .eq('period_end', periodEnd)
+        .limit(1);
+
+      if (existingError) {
+        console.warn('Auto RFA lookup failed', existingError);
+        continue;
+      }
+
+      if (existing && existing.length > 0) {
+        const { error: updateError } = await supabase
+          .from('rfa_calculations')
+          .update({
+            total_turnover: calculation.turnover,
+            discount_amount: calculation.discount_amount,
+            discount_rate: calculation.discount_rate,
+            status: 'calculated',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing[0].id);
+
+        if (!updateError) {
+          updated += 1;
+        }
+      } else {
+        await supabase.from('rfa_calculations').insert({
+          company_id: enterpriseId,
+          contract_id: contract.id,
+          period_start: periodStart,
+          period_end: periodEnd,
+          total_turnover: calculation.turnover,
+          discount_amount: calculation.discount_amount,
+          discount_rate: calculation.discount_rate,
+          status: 'calculated',
+          currency: contract.currency || 'EUR'
+        });
+      }
+
+      processed += 1;
+    }
+
+    return { data: { processed, updated }, success: true };
+  } catch (error) {
+    console.error('Error running auto RFA calculation:', error);
+    return { data: { processed: 0, updated: 0 }, error: { message: String(error) }, success: false };
+  }
+}
+
+/**
+ * Simulate RFA results for what-if turnover scenarios
+ */
+export async function simulateRFA(
+  contractId: string,
+  scenarios: TurnoverScenario[]
+): Promise<ContractServiceResponse<SimulationResult[]>> {
+  try {
+    const contractResp = await getContract(contractId);
+    if (!contractResp.success || !contractResp.data) {
+      return { data: [], success: false, error: { message: 'Contrat introuvable' } };
+    }
+
+    const config = contractResp.data.discount_config;
+    const results: SimulationResult[] = scenarios.map((scenario) => {
+      const { rfaAmount, effectiveRate, breakdown } = calculateRFAForTurnover(config as DiscountConfig, scenario.amount);
+      return {
+        scenario_name: scenario.name,
+        turnover_amount: scenario.amount,
+        rfa_amount: Number(rfaAmount.toFixed(2)),
+        effective_rate: Number(effectiveRate.toFixed(6)),
+        tier_reached: breakdown.length ? breakdown[breakdown.length - 1].tier_index : undefined,
+        breakdown
+      };
+    });
+
+    return { data: results, success: true };
+  } catch (error) {
+    console.error('Error simulating RFA:', error);
+    return { data: [], error: { message: String(error) }, success: false };
+  }
+}
+
+/**
+ * Send a contract summary by email (internal follow-up or to client)
+ */
+export async function sendContractSummaryEmail(
+  enterpriseId: string,
+  contractId: string,
+  recipientEmail: string
+): Promise<ContractServiceResponse<boolean>> {
+  try {
+    const contractResp = await getContract(contractId);
+    if (!contractResp.success || !contractResp.data) {
+      return { data: false, success: false, error: { message: 'Contrat introuvable' } };
+    }
+
+    // Dernier calcul RFA pour donner un état récent
+    const { data: recentRFA } = await supabase
+      .from('rfa_calculations')
+      .select('*')
+      .eq('company_id', enterpriseId)
+      .eq('contract_id', contractId)
+      .order('period_end', { ascending: false })
+      .limit(1);
+
+    const contract = contractResp.data;
+    const lastRFA = recentRFA?.[0];
+
+    const rfaAmount = lastRFA ? Number(lastRFA.discount_amount || lastRFA.rfa_amount || 0) : 0;
+    const turnover = lastRFA ? Number(lastRFA.total_turnover || lastRFA.turnover_amount || 0) : 0;
+    const effectiveRate = turnover > 0 ? (rfaAmount / turnover) * 100 : 0;
+
+    const html = `
+      <h2>État du contrat ${contract.contract_name}</h2>
+      <p><strong>Client :</strong> ${contract.client_name || contract.client_id}</p>
+      <p><strong>Période :</strong> ${contract.start_date} → ${contract.end_date || 'Sans fin'}</p>
+      <p><strong>Type :</strong> ${contract.contract_type}</p>
+      <p><strong>Dernier calcul RFA :</strong> ${rfaAmount.toFixed(2)} ${contract.currency} (${effectiveRate.toFixed(2)}%)</p>
+      <p><strong>Devise :</strong> ${contract.currency}</p>
+    `;
+
+    await emailService.sendEmail(enterpriseId, {
+      to: recipientEmail,
+      subject: `État du contrat ${contract.contract_name}`,
+      html,
+      text: `État du contrat ${contract.contract_name}\nDernier RFA: ${rfaAmount.toFixed(2)} ${contract.currency} (${effectiveRate.toFixed(2)}%)`
+    });
+
+    return { data: true, success: true };
+  } catch (error) {
+    console.error('Error sending contract summary email:', error);
+    return { data: false, error: { message: String(error) }, success: false };
+  }
+}
+
+/**
  * Get contracts dashboard data
  */
 export async function getDashboardData(enterpriseId: string): Promise<ContractServiceResponse<ContractsDashboardData>> {
@@ -452,9 +780,9 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
       .order('created_at', { ascending: false });
 
     // Calculate stats (using real column names)
-    const totalRFAPending = rfaCalcs?.filter(r => r.status === 'calculated' || r.status === 'pending').reduce((sum, r) => sum + Number(r.rfa_amount), 0) || 0;
-    const totalRFAPaid = rfaCalcs?.filter(r => r.status === 'validated' || r.status === 'paid').reduce((sum, r) => sum + Number(r.rfa_amount), 0) || 0;
-    const totalTurnover = rfaCalcs?.reduce((sum, r) => sum + Number(r.turnover_amount), 0) || 0;
+    const totalRFAPending = rfaCalcs?.filter(r => r.status === 'calculated' || r.status === 'pending').reduce((sum, r) => sum + Number(r.discount_amount ?? r.rfa_amount ?? 0), 0) || 0;
+    const totalRFAPaid = rfaCalcs?.filter(r => r.status === 'validated' || r.status === 'paid').reduce((sum, r) => sum + Number(r.discount_amount ?? r.rfa_amount ?? 0), 0) || 0;
+    const totalTurnover = rfaCalcs?.reduce((sum, r) => sum + Number(r.total_turnover ?? r.turnover_amount ?? 0), 0) || 0;
     const averageRFARate = totalTurnover > 0 ? (totalRFAPending + totalRFAPaid) / totalTurnover : 0;
 
     // Get top clients by RFA
@@ -468,8 +796,8 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
 
       if (clientId) {
         const existing = clientRFAMap.get(clientId) || { name: clientName, totalRFA: 0, totalTurnover: 0, count: 0, currency };
-        existing.totalRFA += Number(rfa.rfa_amount) || 0;
-        existing.totalTurnover += Number(rfa.turnover_amount) || 0;
+        existing.totalRFA += Number(rfa.discount_amount ?? rfa.rfa_amount ?? 0) || 0;
+        existing.totalTurnover += Number(rfa.total_turnover ?? rfa.turnover_amount ?? 0) || 0;
         existing.count += 1;
         clientRFAMap.set(clientId, existing);
       }
@@ -500,8 +828,8 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
         client_name: contract?.client?.name || 'Client inconnu',
         period_start: r.period_start,
         period_end: r.period_end,
-        turnover_amount: Number(r.turnover_amount) || 0,
-        rfa_amount: Number(r.rfa_amount) || 0,
+        turnover_amount: Number(r.total_turnover ?? r.turnover_amount) || 0,
+        rfa_amount: Number(r.discount_amount ?? r.rfa_amount) || 0,
         tier_reached: 0,
         calculation_details: r.calculation_details || {
           type: contract?.rfa_calculation_type || 'progressive',

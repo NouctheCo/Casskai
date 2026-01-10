@@ -62,6 +62,7 @@ import OptimizedClientsTab from '@/components/invoicing/OptimizedClientsTab';
 import OptimizedQuotesTab from '@/components/invoicing/OptimizedQuotesTab';
 import OptimizedPaymentsTab from '@/components/invoicing/OptimizedPaymentsTab';
 import { LateFeeCalculator } from '@/components/invoicing/LateFeeCalculator';
+import { InvoiceComplianceSettings } from '@/components/invoicing/InvoiceComplianceSettings';
 
 // Invoicing KPI Card Component
 const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }) => {
@@ -563,48 +564,55 @@ export default function InvoicingPageOptimized() {
         {/* Navigation par onglets */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-2">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-1">
+            <TabsList className="flex w-full flex-nowrap overflow-x-auto gap-2 py-1 px-1">
               <TabsTrigger 
                 value="overview" 
-                className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <Eye className="h-4 w-4" />
                 {t('invoicing.tabs.overview', 'Vue d\'ensemble')}
               </TabsTrigger>
               <TabsTrigger 
                 value="invoices" 
-                className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <FileText className="h-4 w-4" />
                 {t('invoicing.tabs.invoices', 'Factures')}
               </TabsTrigger>
               <TabsTrigger 
                 value="quotes" 
-                className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <Receipt className="h-4 w-4" />
                 {t('invoicing.tabs.quotes', 'Devis')}
               </TabsTrigger>
               <TabsTrigger 
                 value="clients" 
-                className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <Users className="h-4 w-4" />
                 {t('invoicing.tabs.clients', 'Clients')}
               </TabsTrigger>
               <TabsTrigger
                 value="payments"
-                className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <CreditCard className="h-4 w-4" />
                 {t('invoicing.tabs.payments', 'Paiements')}
               </TabsTrigger>
               <TabsTrigger
                 value="late-fees"
-                className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <AlertTriangle className="h-4 w-4" />
                 {t('invoicing.tabs.late_fees', 'Pénalités')}
+              </TabsTrigger>
+              <TabsTrigger
+                value="settings"
+                className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                <FileText className="h-4 w-4" />
+                Configuration
               </TabsTrigger>
             </TabsList>
           </div>
@@ -796,6 +804,30 @@ export default function InvoicingPageOptimized() {
               transition={{ duration: 0.5 }}
             >
               <LateFeeCalculator />
+            </motion.div>
+          </TabsContent>
+
+          {/* Invoice Settings Tab */}
+          <TabsContent value="settings">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <FileText className="h-6 w-6 text-blue-600" />
+                    Configuration des Factures
+                  </CardTitle>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    Paramétrez vos mentions légales et informations obligatoires pour des factures conformes à la législation française.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <InvoiceComplianceSettings />
+                </CardContent>
+              </Card>
             </motion.div>
           </TabsContent>
         </Tabs>

@@ -32,7 +32,11 @@ import {
 
   TaxDeclaration, 
 
-  TaxPayment
+  TaxPayment,
+
+  TaxObligation,
+
+  TaxObligationFormData
 
 } from '../types/tax.types';
 import * as TaxImpl from './taxServiceImplementations';

@@ -56,6 +56,8 @@ interface UseContractsReturn {
   loadRFACalculations: () => Promise<void>;
   createRFACalculation: (formData: RFAFormData) => Promise<boolean>;
   simulateRFA: (contractId: string, scenarios: TurnoverScenario[]) => Promise<void>;
+  sendContractSummary: (contractId: string, recipientEmail: string) => Promise<boolean>;
+  runAutoMonthlyRFA: () => Promise<void>;
   
   // Dashboard
   loadDashboardData: () => Promise<void>;
@@ -324,6 +326,40 @@ export const useContracts = (): UseContractsReturn => {
     }
   }, [toast]);
 
+  // Envoi d'un état de contrat par email (interne ou client)
+  const sendContractSummary = useCallback(async (contractId: string, recipientEmail: string) => {
+    if (!currentEnterpriseId) return false;
+
+    setLoading(true);
+    try {
+      const response = await contractsService.sendContractSummaryEmail(currentEnterpriseId, contractId, recipientEmail);
+      if (response.success) {
+        toast({
+          title: "Email envoyé",
+          description: "L'état du contrat a été envoyé",
+          variant: "default"
+        });
+        return true;
+      }
+      toast({
+        title: "Erreur d'envoi",
+        description: response.error?.message || "Impossible d'envoyer l'email",
+        variant: "destructive"
+      });
+      return false;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [currentEnterpriseId, toast]);
+
   // Chargement des données dashboard
   const loadDashboardData = useCallback(async () => {
     if (!currentEnterpriseId) return;
@@ -343,6 +379,39 @@ export const useContracts = (): UseContractsReturn => {
       setLoading(false);
     }
   }, [currentEnterpriseId]);
+
+  // Calcul automatique du mois en cours (utile pour envoyer un état rapide)
+  const runAutoMonthlyRFA = useCallback(async () => {
+    if (!currentEnterpriseId) return;
+    setLoading(true);
+    try {
+      const response = await contractsService.autoCalculateCurrentMonthRFA(currentEnterpriseId);
+      if (response.success) {
+        toast({
+          title: "Calcul automatique terminé",
+          description: `${response.data?.processed || 0} contrats traités`,
+          variant: "default"
+        });
+        await loadRFACalculations();
+        await loadDashboardData();
+      } else {
+        toast({
+          title: "Calcul automatique en erreur",
+          description: response.error?.message || "Impossible de lancer le calcul",
+          variant: "destructive"
+        });
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [currentEnterpriseId, toast, loadRFACalculations, loadDashboardData]);
 
   // Actualisation complète du dashboard
   const refreshDashboard = useCallback(async () => {
@@ -427,6 +496,8 @@ export const useContracts = (): UseContractsReturn => {
     loadRFACalculations,
     createRFACalculation,
     simulateRFA,
+    sendContractSummary,
+    runAutoMonthlyRFA,
     
     // Dashboard
     loadDashboardData,

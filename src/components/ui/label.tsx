@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from '../../lib/utils';
 
 const labelVariants = cva(
-  "text-base sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 touch-manipulation"
+  "text-base sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 touch-manipulation text-gray-900 dark:text-gray-100"
 );
 
 // Explicitly type the props for React.forwardRef

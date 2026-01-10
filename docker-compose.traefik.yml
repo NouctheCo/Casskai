@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # ===== TRAEFIK (REVERSE PROXY) =====
+  traefik:
+    image: traefik:v2.11
+    container_name: casskai-traefik
+    command:
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--log.level=INFO"
+      - "--accesslog=true"
+      - "--accesslog.filepath=/var/log/traefik/access.log"
+    ports:
+      - "80:80"        # HTTP
+      - "443:443"      # HTTPS
+      - "8080:8080"    # Dashboard (insecure)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+      - traefik_logs:/var/log/traefik
+    networks:
+      - casskai-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      # Basic Auth for dashboard (replace with your credentials)
+      # - "traefik.http.routers.dashboard.middlewares=auth@docker"
+      # - "traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$...encrypted-password..."
+
+  # ===== MIDDLEWARE =====
+  # Uncomment if you want automatic HTTP -> HTTPS redirect
+  # traefik-https-redirect:
+  #   image: traefik:v2.11
+  #   labels:
+  #     - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
+  #     - "traefik.http.routers.http-catchall.entrypoints=web"
+  #     - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
+  #     - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+networks:
+  casskai-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  traefik_logs:
+    driver: local

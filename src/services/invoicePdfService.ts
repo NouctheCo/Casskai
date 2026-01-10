@@ -29,11 +29,24 @@ export interface CompanyInfo {
   address?: string;
   city?: string;
   postalCode?: string;
+  country?: string;
   phone?: string;
   email?: string;
   website?: string;
   siret?: string;
   vatNumber?: string;
+  legalForm?: string;
+  shareCapital?: number | string;
+  rcsCity?: string;
+  rcsNumber?: string;
+  legalMentions?: string;
+  defaultTerms?: string;
+  vatNote?: string;
+  mainBankName?: string;
+  mainBankIban?: string;
+  mainBankBic?: string;
+  paymentInstructions?: string;
+  currency?: string;
   logo?: string;
 }
 
@@ -43,6 +56,7 @@ export class InvoicePdfService {
    */
   static generateInvoicePDF(invoice: InvoiceWithDetails, companyData?: CompanyInfo): jsPDF {
     const doc = new jsPDF();
+    const currency = invoice.currency || companyData?.currency || 'EUR';
     
     // Configuration des couleurs
   const primaryColor = [41, 98, 255]; // Bleu
@@ -54,16 +68,17 @@ export class InvoicePdfService {
     this.addInvoiceAndClientInfo(doc, invoice);
     
     // 3. Tableau des articles
-    this.addItemsTable(doc, invoice);
+    this.addItemsTable(doc, invoice, currency);
     
     // 4. Totaux
-    this.addTotals(doc, invoice);
+    const totalsY = this.addTotals(doc, invoice, currency);
+    const contentEndY = this.addBankDetails(doc, companyData, currency, totalsY);
     
     // 5. Notes et conditions
-    this.addNotesAndTerms(doc, invoice);
+    this.addNotesAndTerms(doc, invoice, companyData, currency, contentEndY);
     
     // 6. Pied de page
-  this.addFooter(doc, companyData);
+  this.addFooter(doc, companyData, currency);
     
     return doc;
   }
@@ -144,6 +159,15 @@ export class InvoicePdfService {
     doc.setFont('helvetica', 'normal');
     doc.text(new Date(invoice.issue_date as string).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
     yPos += 6;
+
+    const serviceDate = (invoice.service_date as string) || (invoice.delivery_date as string);
+    if (serviceDate) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('Prestation:', invoiceInfoX, yPos);
+      doc.setFont('helvetica', 'normal');
+      doc.text(new Date(serviceDate).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
+      yPos += 6;
+    }
     
     if (invoice.due_date) {
       doc.setFont('helvetica', 'bold');
@@ -192,13 +216,13 @@ export class InvoicePdfService {
   /**
    * Ajoute le tableau des articles
    */
-  private static addItemsTable(doc: jsPDF, invoice: InvoiceWithDetails) {
+  private static addItemsTable(doc: jsPDF, invoice: InvoiceWithDetails, currency: string) {
     const tableData = invoice.invoice_lines?.map(item => [
       item.description,
       item.quantity.toString(),
-      this.formatCurrency(item.unit_price),
+      this.formatCurrency(item.unit_price, currency),
       `${item.tax_rate || 0}%`,
-      this.formatCurrency(item.line_total_ttc || (item.quantity * item.unit_price))
+      this.formatCurrency(item.line_total_ttc || (item.quantity * item.unit_price), currency)
     ]) || [];
     
     doc.autoTable({
@@ -234,7 +258,7 @@ export class InvoicePdfService {
   /**
    * Ajoute les totaux
    */
-  private static addTotals(doc: jsPDF, invoice: InvoiceWithDetails) {
+  private static addTotals(doc: jsPDF, invoice: InvoiceWithDetails, currency: string): number {
     const startY = doc.lastAutoTable.finalY + 10;
     const rightX = 190;
     const labelX = 140;
@@ -245,11 +269,11 @@ export class InvoicePdfService {
     // Total HT
     doc.setFont('helvetica', 'normal');
     doc.text('Total HT:', labelX, startY);
-    doc.text(this.formatCurrency(invoice.total_ht), rightX, startY, { align: 'right' });
+    doc.text(this.formatCurrency(invoice.total_ht, currency), rightX, startY, { align: 'right' });
     
     // TVA
     doc.text('TVA:', labelX, startY + 6);
-    doc.text(this.formatCurrency(invoice.total_tva), rightX, startY + 6, { align: 'right' });
+    doc.text(this.formatCurrency(invoice.total_tva, currency), rightX, startY + 6, { align: 'right' });
     
     // Ligne de séparation
     doc.setDrawColor(200);
@@ -260,7 +284,7 @@ export class InvoicePdfService {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.text('Total TTC:', labelX, startY + 16);
-    doc.text(this.formatCurrency(invoice.total_ttc), rightX, startY + 16, { align: 'right' });
+    doc.text(this.formatCurrency(invoice.total_ttc, currency), rightX, startY + 16, { align: 'right' });
     
     // Montant payé et restant dû
     if (invoice.paid_amount > 0) {
@@ -268,57 +292,153 @@ export class InvoicePdfService {
       doc.setFontSize(10);
       doc.setTextColor(0, 150, 0);
       doc.text('Montant payé:', labelX, startY + 24);
-      doc.text(this.formatCurrency(invoice.paid_amount), rightX, startY + 24, { align: 'right' });
+      doc.text(this.formatCurrency(invoice.paid_amount, currency), rightX, startY + 24, { align: 'right' });
       
       if (invoice.remaining_amount > 0) {
         doc.setTextColor(200, 0, 0);
         doc.text('Restant dû:', labelX, startY + 30);
-        doc.text(this.formatCurrency(invoice.remaining_amount), rightX, startY + 30, { align: 'right' });
+        doc.text(this.formatCurrency(invoice.remaining_amount, currency), rightX, startY + 30, { align: 'right' });
       }
     }
+
+    return startY + 30;
+  }
+
+  /**
+   * Ajoute les coordonnées bancaires
+   */
+  private static addBankDetails(
+    doc: jsPDF,
+    companyData: CompanyInfo | undefined,
+    _currency: string,
+    previousSectionY: number
+  ): number {
+    const hasBankInfo =
+      !!(companyData?.mainBankName || companyData?.mainBankIban || companyData?.mainBankBic);
+
+    if (!hasBankInfo) {
+      return previousSectionY;
+    }
+
+    const startY = Math.max(doc.lastAutoTable.finalY + 20, previousSectionY + 8, 160);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0);
+    doc.text('Coordonnées bancaires:', 20, startY);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+
+    let y = startY + 6;
+    if (companyData?.mainBankName) {
+      doc.text(`Banque: ${companyData.mainBankName}`, 20, y);
+      y += 5;
+    }
+    if (companyData?.mainBankIban) {
+      doc.text(`IBAN: ${companyData.mainBankIban}`, 20, y);
+      y += 5;
+    }
+    if (companyData?.mainBankBic) {
+      doc.text(`BIC: ${companyData.mainBankBic}`, 20, y);
+      y += 5;
+    }
+
+    if (companyData?.paymentInstructions) {
+      const lines = doc.splitTextToSize(companyData.paymentInstructions, 170);
+      doc.text(lines, 20, y);
+      y += lines.length * 4 + 2;
+    }
+
+    return y;
   }
   
   /**
    * Ajoute les notes et conditions
    */
-  private static addNotesAndTerms(doc: jsPDF, invoice: InvoiceWithDetails) {
-    let startY = doc.lastAutoTable.finalY + 50;
-    
-    if (invoice.notes || invoice.terms) {
-      startY = Math.max(startY, 200);
-      
-      if (invoice.notes) {
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(0);
-        doc.text('Notes:', 20, startY);
-        
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        const notesLines = doc.splitTextToSize(invoice.notes as string, 170);
-        doc.text(notesLines, 20, startY + 6);
-        startY += 6 + (notesLines.length * 4);
-      }
-      
-      if (invoice.terms) {
-        startY += 5;
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(0);
-        doc.text('Conditions de paiement:', 20, startY);
-        
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        const termsLines = doc.splitTextToSize(invoice.terms as string, 170);
-        doc.text(termsLines, 20, startY + 6);
-      }
+  private static addNotesAndTerms(
+    doc: jsPDF,
+    invoice: InvoiceWithDetails,
+    companyData: CompanyInfo | undefined,
+    _currency: string,
+    minStartY?: number
+  ) {
+    let startY = Math.max(doc.lastAutoTable.finalY + 50, minStartY || 0, 200);
+
+    const sections: Array<{ title: string; lines: string[] }> = [];
+
+    if (invoice.notes) {
+      sections.push({
+        title: 'Notes',
+        lines: doc.splitTextToSize(invoice.notes as string, 170) as string[],
+      });
     }
+
+    const legalTerms: string[] = [];
+
+    const dueDateText = invoice.due_date
+      ? new Date(invoice.due_date as string).toLocaleDateString('fr-FR')
+      : undefined;
+
+    const penaltyRateText =
+      'Pénalités de retard: taux directeur BCE en vigueur + 10 points (minimum légal applicable).';
+    const recoveryFeeText =
+      'Indemnité forfaitaire pour frais de recouvrement: 40€ (art. L441-10 CMF).';
+    const discountText = 'Escompte pour paiement anticipé: aucun (0%) sauf stipulation contraire.';
+
+    const providedTermsRaw = invoice.terms || companyData?.defaultTerms || '';
+    const providedTerms = typeof providedTermsRaw === 'string' ? providedTermsRaw : String(providedTermsRaw);
+    const mergedTerms = providedTerms
+      ? doc.splitTextToSize(providedTerms, 170)
+      : [penaltyRateText, recoveryFeeText, discountText];
+
+    const vatNoteShouldShow = typeof invoice.total_tva === 'number' && invoice.total_tva === 0;
+    const vatNote = vatNoteShouldShow
+      ? invoice.vat_exemption_reason || companyData?.vatNote || 'TVA non applicable, art. 293 B du CGI.'
+      : undefined;
+
+    const serviceDate = (invoice.service_date as string) || (invoice.delivery_date as string);
+    const serviceDateText = serviceDate
+      ? `Date de prestation/livraison: ${new Date(serviceDate).toLocaleDateString('fr-FR')}`
+      : undefined;
+
+    if (dueDateText) {
+      legalTerms.push(`Échéance: ${dueDateText}`);
+    }
+    legalTerms.push(...mergedTerms.filter(Boolean));
+    if (serviceDateText) legalTerms.push(serviceDateText);
+    if (vatNote) legalTerms.push(vatNote);
+    if (companyData?.paymentInstructions) legalTerms.push(companyData.paymentInstructions);
+
+    if (legalTerms.length) {
+      sections.push({
+        title: 'Conditions de paiement',
+        lines: legalTerms,
+      });
+    }
+
+    if (sections.length === 0) {
+      return;
+    }
+
+    sections.forEach(section => {
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0);
+      doc.text(`${section.title}:`, 20, startY);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      const lines = Array.isArray(section.lines) ? section.lines : [section.lines];
+      doc.text(lines, 20, startY + 6);
+      startY += 6 + lines.length * 4 + 4;
+    });
   }
   
   /**
    * Ajoute le pied de page
    */
-  private static addFooter(doc: jsPDF, companyData: CompanyInfo | undefined) {
+  private static addFooter(doc: jsPDF, companyData: CompanyInfo | undefined, currency: string) {
     const pageHeight = doc.internal.pageSize.height;
     const footerY = pageHeight - 20;
     
@@ -327,12 +447,31 @@ export class InvoicePdfService {
     doc.setFont('helvetica', 'normal');
     
     // Informations légales
-    const legalInfo = [];
+    const legalInfo: string[] = [];
+    if (companyData?.legalForm) legalInfo.push(companyData.legalForm);
+    if (companyData?.shareCapital !== undefined) {
+      const capitalValue =
+        typeof companyData.shareCapital === 'number'
+          ? this.formatCurrency(companyData.shareCapital, companyData.currency || currency || 'EUR')
+          : companyData.shareCapital;
+      legalInfo.push(`Capital: ${capitalValue}`);
+    }
     if (companyData?.siret) legalInfo.push(`SIRET: ${companyData.siret}`);
+    if (companyData?.rcsCity || companyData?.rcsNumber) {
+      const rcsNumber = companyData.rcsNumber || companyData.siret;
+      const rcsCity = companyData.rcsCity || companyData.city;
+      const rcsLabel = [rcsCity ? `RCS ${rcsCity}` : 'RCS', rcsNumber].filter(Boolean).join(' ');
+      legalInfo.push(rcsLabel);
+    }
     if (companyData?.vatNumber) legalInfo.push(`TVA: ${companyData.vatNumber}`);
-    
+
     if (legalInfo.length > 0) {
-      doc.text(legalInfo.join(' - '), 105, footerY, { align: 'center' });
+      doc.text(legalInfo.join(' • '), 105, footerY, { align: 'center' });
+    }
+
+    if (companyData?.legalMentions) {
+      const mentionsLines = doc.splitTextToSize(companyData.legalMentions, 180);
+      doc.text(mentionsLines, 105, footerY - 6, { align: 'center' });
     }
 
     // Numéro de page avec total
@@ -344,10 +483,10 @@ export class InvoicePdfService {
   /**
    * Formate un montant en devise
    */
-  private static formatCurrency(amount: number): string {
+  private static formatCurrency(amount: number, currency = 'EUR'): string {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency
     }).format(amount);
   }
   
