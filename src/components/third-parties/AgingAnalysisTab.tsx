@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Select,
   SelectContent,
@@ -11,7 +16,9 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Progress } from '@/components/ui/progress';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   TrendingUp,
   TrendingDown,
@@ -20,7 +27,9 @@ import {
   Clock
 } from 'lucide-react';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface AgingBucket {
   label: string;
   min: number;
@@ -184,7 +193,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-green-600" />
-              <span className="text-2xl font-bold">{totalReceivables.toFixed(2)} €</span>
+              <span className="text-2xl font-bold"><CurrencyAmount amount={totalReceivables} /></span>
             </div>
           </CardContent>
         </Card>
@@ -198,7 +207,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-orange-600" />
               <span className="text-2xl font-bold text-orange-600">
-                {overdueReceivables.toFixed(2)} €
+                <CurrencyAmount amount={overdueReceivables} />
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -217,7 +226,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
-              <span className="text-2xl font-bold">{totalPayables.toFixed(2)} €</span>
+              <span className="text-2xl font-bold"><CurrencyAmount amount={totalPayables} /></span>
             </div>
           </CardContent>
         </Card>
@@ -231,7 +240,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <span className="text-2xl font-bold text-red-600 dark:text-red-400">
-                {overduePayables.toFixed(2)} €
+                <CurrencyAmount amount={overduePayables} />
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -315,7 +324,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
                           <td className="py-3 px-4 text-right font-medium">
                             {bucket.receivables > 0 ? (
                               <span className={isOverdue ? 'text-red-600' : ''}>
-                                {bucket.receivables.toFixed(2)} €
+                                <CurrencyAmount amount={bucket.receivables} />
                               </span>
                             ) : (
                               <span className="text-muted-foreground">0.00 €</span>
@@ -336,7 +345,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
                           <td className="py-3 px-4 text-right font-medium">
                             {bucket.payables > 0 ? (
                               <span className={isOverdue ? 'text-red-600' : ''}>
-                                {bucket.payables.toFixed(2)} €
+                                <CurrencyAmount amount={bucket.payables} />
                               </span>
                             ) : (
                               <span className="text-muted-foreground">0.00 €</span>
@@ -361,13 +370,13 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
                   <td className="py-3 px-4">TOTAL</td>
                   {(viewMode === 'both' || viewMode === 'receivables') && (
                     <>
-                      <td className="py-3 px-4 text-right">{totalReceivables.toFixed(2)} €</td>
+                      <td className="py-3 px-4 text-right"><CurrencyAmount amount={totalReceivables} /></td>
                       <td className="py-3 px-4">100%</td>
                     </>
                   )}
                   {(viewMode === 'both' || viewMode === 'payables') && (
                     <>
-                      <td className="py-3 px-4 text-right">{totalPayables.toFixed(2)} €</td>
+                      <td className="py-3 px-4 text-right"><CurrencyAmount amount={totalPayables} /></td>
                       <td className="py-3 px-4">100%</td>
                     </>
                   )}

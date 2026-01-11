@@ -251,7 +251,7 @@ export const MARKET_PRICING: Record<string, MarketPricing> = {
     countryName: 'France',
     flag: '🇫🇷',
     currency: 'EUR',
-    currencySymbol: '€',
+    currencySymbol: ' EUR',
     region: 'europe',
     language: 'fr',
     starter: {

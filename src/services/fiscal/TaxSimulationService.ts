@@ -207,17 +207,17 @@ export class TaxSimulationService {
       // Taux réduit 15% jusqu'à 42 500€
       if (fiscalProfit <= 42500) {
         const amount = fiscalProfit * 0.15;
-        breakdown.push({ range: '0 - 42 500€', rate: 15, amount });
+        breakdown.push({ range: '0 - 42 500 EUR', rate: 15, amount });
         totalTax += amount;
       } else {
         // 15% sur les premiers 42 500€
         const firstBracket = 42500 * 0.15;
-        breakdown.push({ range: '0 - 42 500€', rate: 15, amount: firstBracket });
+        breakdown.push({ range: '0 - 42 500 EUR', rate: 15, amount: firstBracket });
         totalTax += firstBracket;
 
         // 25% au-delà
         const secondBracket = (fiscalProfit - 42500) * 0.25;
-        breakdown.push({ range: '> 42 500€', rate: 25, amount: secondBracket });
+        breakdown.push({ range: '> 42 500 EUR', rate: 25, amount: secondBracket });
         totalTax += secondBracket;
       }
 

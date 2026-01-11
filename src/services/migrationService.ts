@@ -189,7 +189,7 @@ class MigrationService {
     if (!existingCurrencies || existingCurrencies.length === 0) {
       // Insérer les devises par défaut
       const defaultCurrencies = [
-        { code: 'EUR', name: 'Euro', symbol: '€', decimal_places: 2 },
+        { code: 'EUR', name: 'Euro', symbol: ' EUR', decimal_places: 2 },
         { code: 'USD', name: 'US Dollar', symbol: '$', decimal_places: 2 },
         { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$', decimal_places: 2 },
         { code: 'XOF', name: 'CFA Franc BCEAO', symbol: 'CFA', decimal_places: 0 },

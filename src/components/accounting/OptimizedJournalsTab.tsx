@@ -1,16 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { createPortal } from 'react-dom';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '@/components/ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '@/components/ui/use-toast';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { BarChart3, FileText, CheckCircle, AlertCircle, Eye, X, ToggleLeft, ToggleRight } from 'lucide-react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { journalsStatsService, type JournalStats } from '@/services/journalsStatsService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 export default function OptimizedJournalsTab() {
   const { toast } = useToast();
   const { currentCompany } = useAuth();
@@ -240,7 +253,7 @@ export default function OptimizedJournalsTab() {
               <AlertCircle className="w-5 h-5 text-orange-500" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('journals.totalAmount')}</p>
-                <p className="text-xl font-bold">{summary.totalDebit.toFixed(2)} €</p>
+                <p className="text-xl font-bold"><CurrencyAmount amount={summary.totalDebit} /></p>
               </div>
             </div>
           </CardContent>
@@ -285,10 +298,10 @@ export default function OptimizedJournalsTab() {
                       <Badge variant="secondary">{journal.entriesCount}</Badge>
                     </TableCell>
                     <TableCell className="text-right font-mono">
-                      {journal.totalDebit.toFixed(2)} €
+                      <CurrencyAmount amount={journal.totalDebit} />
                     </TableCell>
                     <TableCell className="text-right font-mono">
-                      {journal.totalCredit.toFixed(2)} €
+                      <CurrencyAmount amount={journal.totalCredit} />
                     </TableCell>
                     <TableCell>{getStatusBadge(journal.isActive ? 'active' : 'inactive')}</TableCell>
                     <TableCell>{journal.lastEntryDate ? new Date(journal.lastEntryDate).toLocaleDateString('fr-FR') : '-'}</TableCell>
@@ -390,11 +403,11 @@ export default function OptimizedJournalsTab() {
                     <p className="text-sm text-gray-500 dark:text-gray-300">{t('journals.entries')}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                    <p className="text-2xl font-bold">{selectedJournal.totalDebit.toFixed(2)} €</p>
+                    <p className="text-2xl font-bold"><CurrencyAmount amount={selectedJournal.totalDebit} /></p>
                     <p className="text-sm text-gray-500 dark:text-gray-300">{t('journals.totalDebit')}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                    <p className="text-2xl font-bold">{selectedJournal.totalCredit.toFixed(2)} €</p>
+                    <p className="text-2xl font-bold"><CurrencyAmount amount={selectedJournal.totalCredit} /></p>
                     <p className="text-sm text-gray-500 dark:text-gray-300">{t('journals.totalCredit')}</p>
                   </div>
                 </div>

@@ -1,32 +1,61 @@
 import React, { useState, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '@/components/ui/input';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Label } from '@/components/ui/label';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '@/components/ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Textarea } from '@/components/ui/textarea';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '@/components/ui/use-toast';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { invoicingService } from '@/services/invoicingService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { thirdPartiesService } from '@/services/thirdPartiesService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import CompanySettingsService from '@/services/companySettingsService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAutoAccounting } from '@/hooks/useAutoAccounting';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useInvoiceEmail } from '@/hooks/useInvoiceEmail';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { InvoicePdfService } from '@/services/invoicePdfService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { articlesService } from '@/services/articlesService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import type { ArticleWithRelations } from '@/services/articlesService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import NewArticleModal from '@/components/inventory/NewArticleModal';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import ClientSelector from '@/components/invoicing/ClientSelector';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import type { InvoiceWithDetails } from '@/types/database/invoices.types';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import type { ThirdParty } from '@/types/third-parties.types';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import type { CompanySettings } from '@/types/company-settings.types';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Plus,
   Search,
@@ -1155,7 +1184,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                             {articles.length > 0 && <div className="border-t my-1"></div>}
                             {articles.map((article) => (
                               <SelectItem key={article.id} value={article.id}>
-                                {article.reference} - {article.name} ({article.selling_price.toFixed(2)}€)
+                                {article.reference} - {article.name} (<CurrencyAmount amount={article.selling_price} />)
                               </SelectItem>
                             ))}
                             {articles.length === 0 && (
@@ -1290,3 +1319,4 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
   );
 };
 export default OptimizedInvoicesTab;
+

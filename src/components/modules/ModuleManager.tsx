@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Button } from '@/components/ui/button';
+import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Badge } from '@/components/ui/badge';
+import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Switch } from '@/components/ui/switch';
+import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Progress } from '@/components/ui/progress';
+import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { logger } from '@/lib/logger';
+import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import {
   Package, 
   Download, 
@@ -361,7 +369,7 @@ const ModuleManager: React.FC = () => {
     if (!pricing || pricing.type === 'free') {
       return 'Gratuit';
     }
-    const price = `${pricing.price}€`;
+    const price = formatAmount(pricing.price);
     const period = pricing.billingPeriod === 'monthly' ? '/mois' : '/an';
     return pricing.type === 'subscription' ? `${price}${period}` : price;
   };

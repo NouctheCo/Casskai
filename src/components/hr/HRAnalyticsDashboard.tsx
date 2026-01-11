@@ -3,8 +3,11 @@
  */
 
 import { useState, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Progress } from '@/components/ui/progress';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Users,
   DollarSign,
@@ -18,7 +21,9 @@ import {
   Percent
 } from 'lucide-react';
 import { hrPerformanceService } from '@/services/hrPerformanceService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { hrTrainingService } from '@/services/hrTrainingService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 
 interface HRAnalyticsDashboardProps {
   companyId: string;
@@ -398,7 +403,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Investissement formation</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {stats.training.total_cost.toLocaleString('fr-FR')} €
+                  <CurrencyAmount amount={stats.training.total_cost} />
                 </p>
               </div>
               <div className="text-right">
@@ -466,3 +471,4 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
     </div>
   );
 }
+

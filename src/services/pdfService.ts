@@ -132,8 +132,8 @@ export class PDFService {
       }
       doc.text(item.description, margin + 2, y + 4);
       doc.text(item.quantity.toString(), rightColumn - 60, y + 4);
-      doc.text(`${item.unitPrice.toFixed(2)}€`, rightColumn - 40, y + 4);
-      doc.text(`${item.total.toFixed(2)}€`, rightColumn, y + 4);
+      doc.text(`${item.unitPrice.toFixed(2)} EUR`, rightColumn - 40, y + 4);
+      doc.text(`${item.total.toFixed(2)} EUR`, rightColumn, y + 4);
       y += 6;
     });
     y += 10;
@@ -141,10 +141,10 @@ export class PDFService {
     const totalsX = rightColumn - 20;
     doc.setFont('helvetica', 'normal');
     doc.text('Sous-total:', totalsX - 30, y);
-    doc.text(`${invoiceData.subtotal.toFixed(2)}€`, totalsX, y);
+    doc.text(`${invoiceData.subtotal.toFixed(2)} EUR`, totalsX, y);
     y += 6;
     doc.text('TVA:', totalsX - 30, y);
-    doc.text(`${invoiceData.taxAmount.toFixed(2)}€`, totalsX, y);
+    doc.text(`${invoiceData.taxAmount.toFixed(2)} EUR`, totalsX, y);
     y += 6;
     // Total avec style
     doc.setFont('helvetica', 'bold');
@@ -152,7 +152,7 @@ export class PDFService {
     doc.rect(totalsX - 35, y - 2, 50, 8, 'F');
     doc.setTextColor(255, 255, 255);
     doc.text('TOTAL:', totalsX - 30, y + 4);
-    doc.text(`${invoiceData.total.toFixed(2)}€`, totalsX, y + 4);
+    doc.text(`${invoiceData.total.toFixed(2)} EUR`, totalsX, y + 4);
     y += 20;
     doc.setTextColor(...textColor);
     doc.setFont('helvetica', 'normal');

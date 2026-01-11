@@ -148,9 +148,9 @@ export const businessPlanService = {
     pdf.setTextColor(0, 0, 0);
 
     const kpis = [
-      ['Chiffre d\'affaires prévisionnel', `${totalRevenue.toLocaleString('fr-FR')} €`],
-      ['Total des charges', `${totalExpenses.toLocaleString('fr-FR')} €`],
-      ['Résultat net prévisionnel', `${netResult.toLocaleString('fr-FR')} €`],
+      ['Chiffre d\'affaires prévisionnel', `${totalRevenue.toLocaleString('fr-FR')} EUR`],
+      ['Total des charges', `${totalExpenses.toLocaleString('fr-FR')} EUR`],
+      ['Résultat net prévisionnel', `${netResult.toLocaleString('fr-FR')} EUR`],
       ['Marge nette', `${margin.toFixed(1)}%`],
     ];
 
@@ -203,10 +203,10 @@ export const businessPlanService = {
       .map((c) => [
         c.account_number || '-',
         c.account_name || 'Revenu',
-        `${c.annual_amount.toLocaleString('fr-FR')} €`,
+        `${c.annual_amount.toLocaleString('fr-FR')} EUR`,
       ]);
 
-    revenueRows.push(['', 'TOTAL PRODUITS', `${totalRevenue.toLocaleString('fr-FR')} €`]);
+    revenueRows.push(['', 'TOTAL PRODUITS', `${totalRevenue.toLocaleString('fr-FR')} EUR`]);
 
     autoTable(pdf, {
       startY: y,
@@ -233,10 +233,10 @@ export const businessPlanService = {
       .map((c) => [
         c.account_number || '-',
         c.account_name || 'Dépense',
-        `${c.annual_amount.toLocaleString('fr-FR')} €`,
+        `${c.annual_amount.toLocaleString('fr-FR')} EUR`,
       ]);
 
-    expenseRows.push(['', 'TOTAL CHARGES', `${totalExpenses.toLocaleString('fr-FR')} €`]);
+    expenseRows.push(['', 'TOTAL CHARGES', `${totalExpenses.toLocaleString('fr-FR')} EUR`]);
 
     autoTable(pdf, {
       startY: y,

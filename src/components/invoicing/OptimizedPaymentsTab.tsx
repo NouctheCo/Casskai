@@ -1,18 +1,33 @@
 import React, { useState, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '@/components/ui/input';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '@/components/ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '@/components/ui/use-toast';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Label } from '@/components/ui/label';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Textarea } from '@/components/ui/textarea';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import paymentsService from '@/services/paymentsService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import ClientSelector from '@/components/invoicing/ClientSelector';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Plus,
   Search,
@@ -127,7 +142,7 @@ const PaymentRow: React.FC<PaymentRowProps> = ({ payment, onEdit, onDelete, onVi
       <TableCell>{new Date(payment.date).toLocaleDateString('fr-FR')}</TableCell>
       <TableCell className="text-right font-mono">
         <span className={payment.type === 'income' ? 'text-green-600' : 'text-red-600'}>
-          {payment.type === 'income' ? '+' : '-'}{payment.amount.toFixed(2)} €
+          {payment.type === 'income' ? '+' : '-'}<CurrencyAmount amount={payment.amount} />
         </span>
       </TableCell>
       <TableCell>{getMethodBadge(payment.method)}</TableCell>
@@ -405,7 +420,7 @@ const PaymentPreviewDialog: React.FC<PaymentPreviewDialogProps> = ({ open, onClo
               <div>
                 <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Montant</Label>
                 <p className={`text-2xl font-bold ${payment.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                  {payment.type === 'income' ? '+' : '-'}{payment.amount.toFixed(2)} €
+                  {payment.type === 'income' ? '+' : '-'}<CurrencyAmount amount={payment.amount} />
                 </p>
               </div>
               <div>
@@ -670,7 +685,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
               <ArrowDownLeft className="w-5 h-5 text-green-500" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Encaissements</p>
-                <p className="text-xl font-bold text-green-600">{summary.totalIncome.toFixed(2)} €</p>
+                <p className="text-xl font-bold text-green-600"><CurrencyAmount amount={summary.totalIncome} /></p>
               </div>
             </div>
           </CardContent>
@@ -681,7 +696,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
               <ArrowUpRight className="w-5 h-5 text-red-500" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Décaissements</p>
-                <p className="text-xl font-bold text-red-600 dark:text-red-400">{summary.totalExpenses.toFixed(2)} €</p>
+                <p className="text-xl font-bold text-red-600 dark:text-red-400"><CurrencyAmount amount={summary.totalExpenses} /></p>
               </div>
             </div>
           </CardContent>
@@ -693,7 +708,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Résultat net</p>
                 <p className={`text-xl font-bold ${netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {netIncome.toFixed(2)} €
+                  <CurrencyAmount amount={netIncome} />
                 </p>
               </div>
             </div>

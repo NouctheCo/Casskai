@@ -37,7 +37,7 @@ export const CURRENCIES: Record<string, Currency> = {
   EUR: {
     code: 'EUR',
     name: 'Euro',
-    symbol: '€',
+    symbol: ' EUR',
     symbolPosition: 'after',
     decimals: 2,
     thousandSeparator: ' ',

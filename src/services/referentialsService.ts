@@ -253,7 +253,7 @@ class ReferentialsService {
         name: 'France',
         currency_code: 'EUR',
         currency_name: 'Euro',
-        currency_symbol: '€',
+        currency_symbol: ' EUR',
         timezone: 'Europe/Paris',
         accounting_standard: 'PCG',
         is_active: true,
@@ -485,7 +485,7 @@ class ReferentialsService {
       {
         currency_code: 'EUR',
         currency_name: 'Euro',
-        currency_symbol: '€',
+        currency_symbol: ' EUR',
         decimal_places: 2,
         is_major: true,
         is_active: true

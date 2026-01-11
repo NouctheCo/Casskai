@@ -34,6 +34,8 @@ import {
   type AnomalySeverity,
   type AnomalyType,
 } from '@/services/accounting/anomalyDetectionService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
+
 interface AnomalyDetectionDashboardProps {
   companyId: string;
   periodId: string;
@@ -266,7 +268,7 @@ export function AnomalyDetectionDashboard({
                   {anomaly.amount && (
                     <div className="text-sm mb-2">
                       <span className="font-medium">Montant:</span>{' '}
-                      <span className="font-mono">{anomaly.amount.toFixed(2)} €</span>
+                      <CurrencyAmount amount={anomaly.amount} />
                     </div>
                   )}
                   {/* Action suggérée */}

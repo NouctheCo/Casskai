@@ -542,7 +542,7 @@ class OnboardingService {
    */
   getCurrencies(): Array<{ value: string; label: string; symbol: string; region: string }> {
     return [
-      { value: 'EUR', label: 'Euro', symbol: '€', region: 'Europe' },
+      { value: 'EUR', label: 'Euro', symbol: ' EUR', region: 'Europe' },
       { value: 'USD', label: 'Dollar américain', symbol: '$', region: 'Amériques' },
       { value: 'GBP', label: 'Livre sterling', symbol: '£', region: 'Europe' },
       { value: 'CAD', label: 'Dollar canadien', symbol: 'C$', region: 'Amériques' },

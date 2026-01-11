@@ -473,7 +473,84 @@ const HeroSection = () => {
 
 };
 
+// Section Compteurs Factuels
+const FactsCounterSection = () => {
+  const { t } = useTranslation();
 
+  const facts = [
+    {
+      value: '26',
+      label: t('landing.facts.countries', 'Pays supportés'),
+      icon: Globe,
+      color: 'text-blue-600'
+    },
+    {
+      value: '4',
+      label: t('landing.facts.standards', 'Standards comptables'),
+      icon: FileCheck,
+      color: 'text-green-600'
+    },
+    {
+      value: '12',
+      label: t('landing.facts.currencies', 'Devises'),
+      icon: DollarSign,
+      color: 'text-purple-600'
+    },
+    {
+      value: '19',
+      label: t('landing.facts.modules', 'Modules intégrés'),
+      icon: Briefcase,
+      color: 'text-orange-600'
+    }
+  ];
+
+  return (
+    <section className="py-12 bg-white dark:bg-gray-900 border-y border-gray-100 dark:border-gray-800">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {facts.map((fact, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="text-center"
+            >
+              <fact.icon className={`w-8 h-8 ${fact.color} mx-auto mb-3`} />
+              <p className={`text-4xl md:text-5xl font-bold ${fact.color} mb-2`}>
+                {fact.value}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                {fact.label}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Standards comptables en badges */}
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Badge variant="outline" className="px-4 py-2 text-sm">
+            <Check className="w-4 h-4 mr-2 text-green-500" />
+            PCG (France, Belgique)
+          </Badge>
+          <Badge variant="outline" className="px-4 py-2 text-sm">
+            <Check className="w-4 h-4 mr-2 text-green-500" />
+            SYSCOHADA (17 pays OHADA)
+          </Badge>
+          <Badge variant="outline" className="px-4 py-2 text-sm">
+            <Check className="w-4 h-4 mr-2 text-green-500" />
+            IFRS (Afrique anglophone)
+          </Badge>
+          <Badge variant="outline" className="px-4 py-2 text-sm">
+            <Check className="w-4 h-4 mr-2 text-green-500" />
+            SCF (Maghreb)
+          </Badge>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // Section Intelligence Artificielle - Nouvelle feature mise en avant
 
@@ -2960,7 +3037,132 @@ const ContactSection = () => {
 
 };
 
+// Section FAQ
+const FAQSection = () => {
+  const { t } = useTranslation();
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
+  const faqs = [
+    {
+      question: t('landing.faq.q1.question', 'CassKai est-il conforme aux normes SYSCOHADA ?'),
+      answer: t('landing.faq.q1.answer', 'Oui, CassKai intègre nativement le plan comptable SYSCOHADA révisé avec les 9 classes de comptes, y compris la classe 8 (HAO). Notre solution génère automatiquement la DSF (Déclaration Statistique et Fiscale), le bilan, le compte de résultat et le TAFIRE conformes aux exigences de l\'OHADA.')
+    },
+    {
+      question: t('landing.faq.q2.question', 'Quels pays sont supportés ?'),
+      answer: t('landing.faq.q2.answer', 'CassKai supporte 26 pays : France, Belgique, Luxembourg (PCG), les 17 pays de la zone OHADA (SYSCOHADA), l\'Algérie, le Maroc, la Tunisie (SCF), ainsi que le Nigeria, Kenya, Ghana et l\'Afrique du Sud (IFRS). Chaque pays dispose de sa configuration fiscale locale.')
+    },
+    {
+      question: t('landing.faq.q3.question', 'Puis-je migrer mes données depuis un autre logiciel ?'),
+      answer: t('landing.faq.q3.answer', 'Oui, CassKai permet d\'importer vos données via des fichiers CSV ou le format FEC (Fichier des Écritures Comptables). Notre équipe peut vous accompagner gratuitement dans la migration depuis Sage, QuickBooks, ou tout autre logiciel comptable.')
+    },
+    {
+      question: t('landing.faq.q4.question', 'Mes données sont-elles sécurisées ?'),
+      answer: t('landing.faq.q4.answer', 'Absolument. CassKai utilise un chiffrement SSL/TLS pour toutes les communications, les données sont stockées sur des serveurs sécurisés en Europe avec des sauvegardes quotidiennes. Nous sommes conformes au RGPD et appliquons les meilleures pratiques de sécurité.')
+    },
+    {
+      question: t('landing.faq.q5.question', 'Comment fonctionne l\'essai gratuit ?'),
+      answer: t('landing.faq.q5.answer', 'L\'essai gratuit de 30 jours vous donne accès à toutes les fonctionnalités du plan Professionnel, sans engagement et sans carte bancaire. À la fin de l\'essai, vous pouvez choisir de passer à un plan payant ou vos données seront conservées 30 jours supplémentaires.')
+    },
+    {
+      question: t('landing.faq.q6.question', 'Proposez-vous une formation ?'),
+      answer: t('landing.faq.q6.answer', 'Oui, nous proposons une documentation complète, des tutoriels vidéo et un support par email. Pour le plan Entreprise, une formation personnalisée est incluse. Nous organisons également des webinaires mensuels gratuits.')
+    },
+    {
+      question: t('landing.faq.q7.question', 'Puis-je utiliser CassKai en plusieurs devises ?'),
+      answer: t('landing.faq.q7.answer', 'Oui, CassKai supporte 12 devises : EUR, XOF (FCFA BCEAO), XAF (FCFA BEAC), USD, MAD (Dirham), DZD (Dinar algérien), TND (Dinar tunisien), NGN (Naira), KES (Shilling kenyan), GHS (Cedi), ZAR (Rand), et EGP (Livre égyptienne).')
+    },
+    {
+      question: t('landing.faq.q8.question', 'La liasse fiscale est-elle générée automatiquement ?'),
+      answer: t('landing.faq.q8.answer', 'Oui, CassKai génère automatiquement la liasse fiscale française (formulaires 2050-2059), la DSF pour les pays OHADA, ainsi que les déclarations de TVA et d\'IS adaptées à chaque pays. Les documents sont exportables en PDF prêts pour le dépôt.')
+    }
+  ];
+
+  return (
+    <section id="faq" className="py-20 bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <Badge className="mb-4 px-4 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+            <MessageCircle className="w-4 h-4 mr-2" />
+            {t('landing.faq.badge', 'Questions fréquentes')}
+          </Badge>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            {t('landing.faq.title', 'Tout ce que vous devez savoir')}
+          </h2>
+          <p className="text-xl text-gray-600 dark:text-gray-300">
+            {t('landing.faq.subtitle', 'Les réponses aux questions les plus posées sur CassKai')}
+          </p>
+        </motion.div>
+
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.05 }}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+            >
+              <button
+                type="button"
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+              >
+                <span className="font-semibold text-gray-900 dark:text-white pr-4">
+                  {faq.question}
+                </span>
+                <motion.div
+                  animate={{ rotate: openIndex === index ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ArrowRight className={`w-5 h-5 text-gray-500 transform ${openIndex === index ? 'rotate-90' : ''}`} />
+                </motion.div>
+              </button>
+
+              <motion.div
+                initial={false}
+                animate={{
+                  height: openIndex === index ? 'auto' : 0,
+                  opacity: openIndex === index ? 1 : 0
+                }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="px-6 pb-4 text-gray-600 dark:text-gray-300 leading-relaxed">
+                  {faq.answer}
+                </div>
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* CTA après FAQ */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-12 text-center"
+        >
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
+            {t('landing.faq.moreQuestions', 'Vous avez d\'autres questions ?')}
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            <Mail className="w-4 h-4 mr-2" />
+            {t('landing.faq.contactUs', 'Contactez-nous')}
+          </Button>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
 
 // Footer
 
@@ -3385,6 +3587,8 @@ const LandingPage = () => {
 
         <HeroSection />
 
+        <FactsCounterSection />
+
         <AIAnalysisSection />
 
         <RegulatoryComplianceSection />
@@ -3734,6 +3938,8 @@ const LandingPage = () => {
         <PricingSection />
 
         <TestimonialsSection />
+
+        <FAQSection />
 
         <ContactSection />
 

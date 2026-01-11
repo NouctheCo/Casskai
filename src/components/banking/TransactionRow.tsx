@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Check, X, ChevronDown, Sparkles, Zap } from 'lucide-react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 
 interface BankTransaction {
   id: string;
@@ -77,7 +80,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
 
   const formatAmount = (amount: number, type: string) => {
     const sign = type === 'credit' ? '+' : '-';
-    return `${sign}${amount.toFixed(2)} €`;
+    return `${sign}$<CurrencyAmount amount={amount} />`;
   };
 
   return (
@@ -242,13 +245,13 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
                               D: {accounts.find((a) => a.id === selectedAccount)?.account_number}
                             </span>
                             <span className="font-medium">
-                              {transaction.amount.toFixed(2)} €
+                              <CurrencyAmount amount={transaction.amount} />
                             </span>
                           </div>
                           <div className="flex justify-between text-green-600">
                             <span>C: 512000 (Banque)</span>
                             <span className="font-medium">
-                              {transaction.amount.toFixed(2)} €
+                              <CurrencyAmount amount={transaction.amount} />
                             </span>
                           </div>
                         </>
@@ -257,7 +260,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
                           <div className="flex justify-between mb-1 text-green-600">
                             <span>D: 512000 (Banque)</span>
                             <span className="font-medium">
-                              {transaction.amount.toFixed(2)} €
+                              <CurrencyAmount amount={transaction.amount} />
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -265,13 +268,13 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
                               C: {accounts.find((a) => a.id === selectedAccount)?.account_number}
                             </span>
                             <span className="font-medium">
-                              {transaction.amount.toFixed(2)} €
+                              <CurrencyAmount amount={transaction.amount} />
                             </span>
                           </div>
                         </>
                       )}
                       <div className="border-t mt-2 pt-2 text-xs text-gray-500 dark:text-gray-300">
-                        Équilibre: D = C = {transaction.amount.toFixed(2)} €
+                        Équilibre: D = C = <CurrencyAmount amount={transaction.amount} />
                       </div>
                     </>
                   ) : (
@@ -288,3 +291,4 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
     </>
   );
 };
+

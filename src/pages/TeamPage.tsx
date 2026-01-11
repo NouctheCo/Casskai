@@ -11,12 +11,19 @@
  */
 
 import React, { useState } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTeam } from '@/hooks/useTeam';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '@/components/ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Dialog,
   DialogContent,
@@ -26,7 +33,9 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Label } from '@/components/ui/label';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Select,
   SelectContent,
@@ -35,6 +44,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,9 +69,13 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { TeamMember, InviteData } from '@/services/teamService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 
 export default function TeamPage() {
   const { t } = useTranslation();
@@ -230,7 +244,7 @@ export default function TeamPage() {
             </div>
             <div className="text-right">
               <div className="text-2xl font-semibold text-blue-600">
-                {seatPrice}€/{t('common.month')}
+                <CurrencyAmount amount={seatPrice} />/{t('common.month')}
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {t('team.cost_per_additional_seat')}
@@ -451,3 +465,4 @@ export default function TeamPage() {
     </div>
   );
 }
+

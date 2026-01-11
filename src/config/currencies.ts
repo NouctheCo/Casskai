@@ -24,7 +24,7 @@ export interface Country {
 export const CURRENCIES: Record<string, Currency> = {
   EUR: {
     code: 'EUR',
-    symbol: '€',
+    symbol: ' EUR',
     name: 'Euro',
     conversionRateFromEUR: 1
   },

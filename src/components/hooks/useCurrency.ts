@@ -24,7 +24,7 @@ export const useCurrency = () => {
 
     name: 'Euro',
 
-    symbol: '€'
+    symbol: ' EUR'
 
   });
 
@@ -36,7 +36,7 @@ export const useCurrency = () => {
 
   const [currencyOptions] = useState<Currency[]>([
 
-    { code: 'EUR', name: 'Euro', symbol: '€' },
+    { code: 'EUR', name: 'Euro', symbol: ' EUR' },
 
     { code: 'USD', name: 'Dollar', symbol: '$' },
 

@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '@/components/ui/input';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Label } from '@/components/ui/label';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Select,
   SelectContent,
@@ -24,8 +31,11 @@ import {
   Clock
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface Transaction {
   id: string;
   type: 'invoice' | 'payment' | 'credit_note' | 'purchase';
@@ -451,7 +461,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-green-600" />
-              <span className="text-2xl font-bold">{totals.receivablesTotal.toFixed(2)} €</span>
+              <span className="text-2xl font-bold"><CurrencyAmount amount={totals.receivablesTotal} /></span>
             </div>
           </CardContent>
         </Card>
@@ -464,7 +474,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
-              <span className="text-2xl font-bold">{totals.payablesTotal.toFixed(2)} €</span>
+              <span className="text-2xl font-bold"><CurrencyAmount amount={totals.payablesTotal} /></span>
             </div>
           </CardContent>
         </Card>
@@ -478,7 +488,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-orange-600" />
               <span className="text-2xl font-bold text-orange-600">
-                {totals.overdueReceivables.toFixed(2)} €
+                <CurrencyAmount amount={totals.overdueReceivables} />
               </span>
             </div>
           </CardContent>
@@ -493,7 +503,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <span className="text-2xl font-bold text-red-600 dark:text-red-400">
-                {totals.overduePayables.toFixed(2)} €
+                <CurrencyAmount amount={totals.overduePayables} />
               </span>
             </div>
           </CardContent>
@@ -507,7 +517,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           <CardContent>
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-blue-600" />
-              <span className="text-2xl font-bold">{totals.invoicesTotal.toFixed(2)} €</span>
+              <span className="text-2xl font-bold"><CurrencyAmount amount={totals.invoicesTotal} /></span>
             </div>
           </CardContent>
         </Card>
@@ -520,7 +530,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           <CardContent>
             <div className="flex items-center gap-2">
               <ShoppingCart className="h-4 w-4 text-purple-600" />
-              <span className="text-2xl font-bold">{totals.purchasesTotal.toFixed(2)} €</span>
+              <span className="text-2xl font-bold"><CurrencyAmount amount={totals.purchasesTotal} /></span>
             </div>
           </CardContent>
         </Card>
@@ -669,14 +679,14 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
                       </td>
                       <td className="py-3 px-4 text-sm">{transaction.third_party_name}</td>
                       <td className="py-3 px-4 text-right font-medium">
-                        {transaction.amount.toFixed(2)} €
+                        <CurrencyAmount amount={transaction.amount} />
                       </td>
                       <td className="py-3 px-4 text-right text-sm text-muted-foreground">
-                        {transaction.paid_amount.toFixed(2)} €
+                        <CurrencyAmount amount={transaction.paid_amount} />
                       </td>
                       <td className="py-3 px-4 text-right font-medium">
                         {transaction.balance > 0 ? (
-                          <span className="text-orange-600">{transaction.balance.toFixed(2)} €</span>
+                          <span className="text-orange-600"><CurrencyAmount amount={transaction.balance} /></span>
                         ) : (
                           <span className="text-green-600">0.00 €</span>
                         )}

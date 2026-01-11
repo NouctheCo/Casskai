@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   MessageCircle,
   Send,
@@ -18,13 +20,21 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '../../ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '../../ui/input';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '../../ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { cn } from '../../../lib/utils';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { aiAssistantService } from '../../../services/aiAssistantService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Transaction, AIAssistantQuery } from '../../../types/ai.types';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface AIAssistantChatProps {
   transactions: Transaction[];
   currentBalance: number;
@@ -409,7 +419,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
         </div>
         {/* Indicateur de contexte */}
         <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-          Contexte: {transactions.length} transactions • Solde: {currentBalance.toLocaleString('fr-FR')}€
+          Contexte: {transactions.length} transactions • Solde: <CurrencyAmount amount={currentBalance} />
         </div>
       </CardContent>
     </Card>

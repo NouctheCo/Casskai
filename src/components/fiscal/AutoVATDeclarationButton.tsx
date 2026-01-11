@@ -2,16 +2,27 @@
  * Bouton pour générer automatiquement une déclaration TVA depuis les écritures comptables
  */
 import React, { useState } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '../ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '../ui/dialog';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '../ui/input';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Label } from '../ui/label';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '../ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '../ui/use-toast';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { createVATDeclaration, previewVATAmount } from '../../services/vatDeclarationService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Sparkles, Loader2, CheckCircle, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card } from '../ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface AutoVATDeclarationButtonProps {
   companyId: string;
   onSuccess?: () => void;
@@ -69,7 +80,7 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
       );
       toast({
         title: '✓ Déclaration TVA créée',
-        description: `Montant à payer: ${result.data.vat_to_pay.toFixed(2)} €`,
+        description: `Montant à payer: $<CurrencyAmount amount={result.data.vat_to_pay} />`,
       });
       setOpen(false);
       onSuccess?.();
@@ -153,7 +164,7 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
                       <p className="text-sm text-gray-600 dark:text-gray-400">TVA collectée</p>
                       <p className="text-2xl font-bold text-green-600 flex items-center gap-1">
                         <TrendingUp className="w-4 h-4" />
-                        {preview.collected.toFixed(2)} €
+                        <CurrencyAmount amount={preview.collected} />
                       </p>
                     </div>
                     {/* TVA déductible */}
@@ -161,7 +172,7 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
                       <p className="text-sm text-gray-600 dark:text-gray-400">TVA déductible</p>
                       <p className="text-2xl font-bold text-orange-600 flex items-center gap-1">
                         <TrendingDown className="w-4 h-4" />
-                        {preview.deductible.toFixed(2)} €
+                        <CurrencyAmount amount={preview.deductible} />
                       </p>
                     </div>
                     {/* À payer */}
@@ -174,7 +185,7 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
                           ? 'text-blue-600'
                           : 'text-gray-600'
                       }`}>
-                        {preview.toPay.toFixed(2)} €
+                        <CurrencyAmount amount={preview.toPay} />
                       </p>
                     </div>
                   </div>

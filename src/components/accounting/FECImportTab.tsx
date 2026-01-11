@@ -993,13 +993,13 @@ export default function FECImportTab() {
 
                             <TableCell className="text-right font-mono">
 
-                              {entry.debit > 0 ? `${entry.debit.toFixed(2)} €` : ''}
+                              {entry.debit > 0 ? `$<CurrencyAmount amount={entry.debit.toFixed(2)} />` : ''}
 
                             </TableCell>
 
                             <TableCell className="text-right font-mono">
 
-                              {entry.credit > 0 ? `${entry.credit.toFixed(2)} €` : ''}
+                              {entry.credit > 0 ? `$<CurrencyAmount amount={entry.credit.toFixed(2)} />` : ''}
 
                             </TableCell>
 

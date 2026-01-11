@@ -24,7 +24,7 @@ export const CURRENCY_RATES: Record<string, CurrencyRate> = {
   'EUR': {
     code: 'EUR',
     name: 'Euro',
-    symbol: '€',
+    symbol: ' EUR',
     rateFromEUR: 1
   },
   'XOF': {
@@ -97,7 +97,7 @@ export function convertPrice(priceEUR: number, targetCurrency: string): number {
 export function formatPriceWithCurrency(price: number, currency: string): string {
   const rate = CURRENCY_RATES[currency];
   if (!rate) {
-    return `${price} €`;
+    return `${price} EUR`;
   }
   // Formatage selon la devise
   switch (currency) {

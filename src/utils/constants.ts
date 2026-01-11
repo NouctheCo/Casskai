@@ -184,7 +184,7 @@ export const SUPPORTED_CURRENCIES = [
   {
     code: 'EUR',
     name: 'Euro',
-    symbol: '€',
+    symbol: ' EUR',
     decimal_places: 2,
     countries: ['FR', 'BE']
   },

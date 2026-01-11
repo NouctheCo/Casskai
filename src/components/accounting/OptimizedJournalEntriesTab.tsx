@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AccountingRulesService from '@/services/accountingRulesService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -183,11 +184,11 @@ function EntryTotals({ totals }: { totals: { totalDebit: number; totalCredit: nu
       <div className="grid md:grid-cols-3 gap-4 text-sm">
         <div className="flex justify-between">
           <span className="font-medium">Total Débit:</span>
-          <span className="font-mono">{totals.totalDebit.toFixed(2)} €</span>
+          <span className="font-mono"><CurrencyAmount amount={totals.totalDebit} /></span>
         </div>
         <div className="flex justify-between">
           <span className="font-medium">Total Crédit:</span>
-          <span className="font-mono">{totals.totalCredit.toFixed(2)} €</span>
+          <span className="font-mono"><CurrencyAmount amount={totals.totalCredit} /></span>
         </div>
         <div className="flex justify-between items-center">
           <span className="font-medium">Équilibre:</span>
@@ -1287,7 +1288,7 @@ export default function OptimizedJournalEntriesTab() {
               <Zap className="w-5 h-5 text-purple-500" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total débits</p>
-                <p className="text-xl font-bold">{summary.totalDebit.toFixed(2)} €</p>
+                <p className="text-xl font-bold"><CurrencyAmount amount={summary.totalDebit} /></p>
               </div>
             </div>
           </CardContent>
@@ -1298,7 +1299,7 @@ export default function OptimizedJournalEntriesTab() {
               <Zap className="w-5 h-5 text-orange-500" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total crédits</p>
-                <p className="text-xl font-bold">{summary.totalCredit.toFixed(2)} €</p>
+                <p className="text-xl font-bold"><CurrencyAmount amount={summary.totalCredit} /></p>
               </div>
             </div>
           </CardContent>

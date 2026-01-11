@@ -6,10 +6,15 @@
  * fournisseurs et banques.
  */
 import React, { useState, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '@/components/ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '@/hooks/useToast';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   getUnlettragedLines,
   findLettrageMatches,
@@ -21,8 +26,11 @@ import {
   type LettrageMatch,
 } from '@/services/accounting/lettrageService';
 import { Checkbox } from '@/components/ui/checkbox';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Check, X, Zap, Trash2, AlertCircle } from 'lucide-react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface LettragePanelProps {
   companyId: string;
   accountType: 'clients' | 'fournisseurs' | 'banque';
@@ -194,7 +202,7 @@ export function LettragePanel({ companyId, accountType }: LettragePanelProps) {
             <div className="flex items-center gap-2">
               <span className="text-sm">Solde:</span>
               <Badge variant={Math.abs(selectedBalance) > 0.05 ? 'destructive' : 'default'}>
-                {selectedBalance.toFixed(2)}€
+                <CurrencyAmount amount={selectedBalance} />
               </Badge>
               {Math.abs(selectedBalance) > 0.05 && (
                 <AlertCircle className="h-4 w-4 text-orange-500" />
@@ -347,7 +355,7 @@ function SuggestionsView({
                   <div className="font-medium">{line.account_number} - {line.account_name}</div>
                   <div className="text-xs text-muted-foreground">{line.description}</div>
                 </div>
-                <div className="text-green-600 font-medium">+{line.net_amount.toFixed(2)}€</div>
+                <div className="text-green-600 font-medium">+<CurrencyAmount amount={line.net_amount} /></div>
               </div>
             ))}
             {/* Credit lines */}
@@ -357,7 +365,7 @@ function SuggestionsView({
                   <div className="font-medium">{line.account_number} - {line.account_name}</div>
                   <div className="text-xs text-muted-foreground">{line.description}</div>
                 </div>
-                <div className="text-red-600 font-medium">{line.net_amount.toFixed(2)}€</div>
+                <div className="text-red-600 font-medium"><CurrencyAmount amount={line.net_amount} /></div>
               </div>
             ))}
           </div>
@@ -365,7 +373,7 @@ function SuggestionsView({
           <div className="mt-3 pt-3 border-t flex items-center justify-between">
             <span className="text-sm font-medium">Solde:</span>
             <Badge variant={Math.abs(match.balance) < 0.05 ? 'default' : 'destructive'}>
-              {match.balance.toFixed(2)}€
+              <CurrencyAmount amount={match.balance} />
             </Badge>
           </div>
         </Card>

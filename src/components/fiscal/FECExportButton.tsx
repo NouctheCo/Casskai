@@ -3,16 +3,27 @@
  * Conforme à la réglementation DGFiP française
  */
 import React, { useState } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '../ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '../ui/dialog';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '../ui/input';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Label } from '../ui/label';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '../ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '../ui/use-toast';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { downloadFECFile, previewFECExport } from '../../services/fecExportService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { FileDown, Loader2, CheckCircle, AlertTriangle, FileText, Download } from 'lucide-react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card } from '../ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface FECExportButtonProps {
   companyId: string;
   companyName?: string;
@@ -166,13 +177,13 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
                     <div className="space-y-1">
                       <p className="text-sm text-gray-600 dark:text-gray-400">Total Débit</p>
                       <p className="text-lg font-bold text-blue-600">
-                        {preview.validation.total_debit.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+                        <CurrencyAmount amount={preview.validation.total_debit} />
                       </p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-gray-600 dark:text-gray-400">Total Crédit</p>
                       <p className="text-lg font-bold text-green-600">
-                        {preview.validation.total_credit.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+                        <CurrencyAmount amount={preview.validation.total_credit} />
                       </p>
                     </div>
                     <div className="space-y-1">
@@ -182,7 +193,7 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
                           ? 'text-green-600'
                           : 'text-red-600'
                       }`}>
-                        {preview.validation.balance_difference.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+                        <CurrencyAmount amount={preview.validation.balance_difference} />
                       </p>
                     </div>
                   </div>

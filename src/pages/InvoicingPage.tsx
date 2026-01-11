@@ -10,23 +10,41 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 import React, { useState, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { motion, AnimatePresence as _AnimatePresence } from 'framer-motion';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription as _CardDescription } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge as _Badge } from '@/components/ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Progress } from '@/components/ui/progress';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { toastSuccess } from '@/lib/toast-helpers';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { PageContainer } from '@/components/ui/PageContainer';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useNavigate } from 'react-router-dom';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { invoicingService } from '@/services/invoicingService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { toast } from 'sonner';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { 
   FileText,
   Receipt,
@@ -57,12 +75,19 @@ import {
 } from 'lucide-react';
 // Import optimized tab components
 import OptimizedInvoicesTab from '@/components/invoicing/OptimizedInvoicesTab';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import OptimizedClientsTab from '@/components/invoicing/OptimizedClientsTab';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import OptimizedQuotesTab from '@/components/invoicing/OptimizedQuotesTab';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import OptimizedPaymentsTab from '@/components/invoicing/OptimizedPaymentsTab';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { LateFeeCalculator } from '@/components/invoicing/LateFeeCalculator';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { InvoiceComplianceSettings } from '@/components/invoicing/InvoiceComplianceSettings';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 // Invoicing KPI Card Component
 const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }: {
   title: string;
@@ -227,7 +252,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
             activityItems.push({
               icon: FileText,
               color: invoice.status === 'paid' ? 'green' : 'blue',
-              description: `Facture ${invoice.invoice_number} - ${customerName} (${amount.toLocaleString('fr-FR')} €)`,
+              description: `Facture ${invoice.invoice_number} - ${customerName} ($<CurrencyAmount amount={amount} />)`,
               time: timeAgo
             });
           }
@@ -242,7 +267,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
             activityItems.push({
               icon: Receipt,
               color: 'purple',
-              description: `Devis ${quote.quote_number} (${amount.toLocaleString('fr-FR')} €)`,
+              description: `Devis ${quote.quote_number} ($<CurrencyAmount amount={amount} />)`,
               time: timeAgo
             });
           }
@@ -584,7 +609,7 @@ export default function InvoicingPageOptimized() {
         >
           <InvoicingKPICard
             title={t('invoicing.kpis.revenue', 'Chiffre d\'affaires')}
-            value={`${invoicingData.totalRevenue.toLocaleString('fr-FR')} €`}
+            value={`$<CurrencyAmount amount={invoicingData.totalRevenue} />`}
             icon={Euro}
             color="blue"
             trend={invoicingData.totalRevenueTrend}
@@ -593,7 +618,7 @@ export default function InvoicingPageOptimized() {
           />
           <InvoicingKPICard
             title={t('invoicing.kpis.paidInvoices', 'Factures payées')}
-            value={`${invoicingData.paidInvoices.toLocaleString('fr-FR')} €`}
+            value={`$<CurrencyAmount amount={invoicingData.paidInvoices} />`}
             icon={CheckCircle}
             color="green"
             trend={invoicingData.paidInvoicesTrend}
@@ -602,7 +627,7 @@ export default function InvoicingPageOptimized() {
           />
           <InvoicingKPICard
             title={t('invoicing.kpis.pendingInvoices', 'En attente')}
-            value={`${invoicingData.pendingInvoices.toLocaleString('fr-FR')} €`}
+            value={`$<CurrencyAmount amount={invoicingData.pendingInvoices} />`}
             icon={Clock}
             color="orange"
             trend={invoicingData.pendingInvoicesTrend}
@@ -611,7 +636,7 @@ export default function InvoicingPageOptimized() {
           />
           <InvoicingKPICard
             title={t('invoicing.kpis.overdueInvoices', 'En retard')}
-            value={`${invoicingData.overdueInvoices.toLocaleString('fr-FR')} €`}
+            value={`$<CurrencyAmount amount={invoicingData.overdueInvoices} />`}
             icon={AlertTriangle}
             color="red"
             trend={invoicingData.overdueInvoicesTrend}
@@ -733,7 +758,7 @@ export default function InvoicingPageOptimized() {
                             <div key={index} className="space-y-2">
                               <div className="flex justify-between text-sm">
                                 <span className="font-medium">{item.name}</span>
-                                <span>{item.amount.toLocaleString('fr-FR')} € ({item.percentage}%)</span>
+                                <span><CurrencyAmount amount={item.amount} /> ({item.percentage}%)</span>
                               </div>
                               <Progress value={item.percentage} className="h-2" />
                             </div>
@@ -783,7 +808,7 @@ export default function InvoicingPageOptimized() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('invoicing.stats.averageValue', 'Valeur moyenne')}</p>
-                        <p className="text-xl font-bold">{invoicingData.averageInvoiceValue.toLocaleString('fr-FR')} €</p>
+                        <p className="text-xl font-bold"><CurrencyAmount amount={invoicingData.averageInvoiceValue} /></p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">{t('invoicing.stats.perInvoice', 'Par facture')}</p>
                       </div>
                     </div>

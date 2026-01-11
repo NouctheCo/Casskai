@@ -12,6 +12,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AccountingNavigation } from '@/components/accounting/AccountingNavigation';
@@ -339,6 +340,7 @@ export default function AccountingPageOptimized() {
   const { isExpired } = useSubscriptionStatus();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { formatAmount } = useCompanyCurrency();
   const [activeTab, setActiveTab] = useState('overview');
   // Debug: Log tab changes
   const handleTabChange = (newTab: string) => {
@@ -652,7 +654,7 @@ export default function AccountingPageOptimized() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <AccountingKPICard
           title={t('accounting.stats.totalBalance', 'Solde total')}
-          value={`${accountingData.totalBalance.toLocaleString('fr-FR')} €`}
+          value={formatAmount(accountingData.totalBalance)}
           icon={DollarSign}
           color="blue"
           trend={accountingData.totalBalanceTrend}
@@ -660,7 +662,7 @@ export default function AccountingPageOptimized() {
         />
         <AccountingKPICard
           title={t('accounting.stats.totalDebit', 'Total débit')}
-          value={`${accountingData.totalDebit.toLocaleString('fr-FR')} €`}
+          value={formatAmount(accountingData.totalDebit)}
           icon={ArrowUpRight}
           color="green"
           trend={accountingData.totalDebitTrend}
@@ -668,7 +670,7 @@ export default function AccountingPageOptimized() {
         />
         <AccountingKPICard
           title={t('accounting.stats.totalCredit', 'Total crédit')}
-          value={`${accountingData.totalCredit.toLocaleString('fr-FR')} €`}
+          value={formatAmount(accountingData.totalCredit)}
           icon={ArrowDownRight}
           color="purple"
           trend={accountingData.totalCreditTrend}
@@ -703,14 +705,14 @@ export default function AccountingPageOptimized() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <AccountingKPICard
           title={t('accounting.stats.receivables', 'À recevoir')}
-          value={`${accountingData.unpaidInvoicesAmount.toLocaleString('fr-FR')} €`}
+          value={formatAmount(accountingData.unpaidInvoicesAmount)}
           icon={Users}
           color="cyan"
           description={t('accounting.stats.receivablesDesc', { count: accountingData.unpaidInvoicesCount })}
         />
         <AccountingKPICard
           title={t('accounting.stats.payables', 'À payer')}
-          value={`${accountingData.unpaidPurchasesAmount.toLocaleString('fr-FR')} €`}
+          value={formatAmount(accountingData.unpaidPurchasesAmount)}
           icon={ShoppingCart}
           color="indigo"
           description={t('accounting.stats.payablesDesc', { count: accountingData.unpaidPurchasesCount })}
@@ -720,7 +722,7 @@ export default function AccountingPageOptimized() {
           value={accountingData.overdueInvoicesCount}
           icon={AlertCircle}
           color={accountingData.overdueInvoicesCount > 0 ? 'red' : 'gray'}
-          description={t('accounting.stats.overdueDesc', { amount: accountingData.overdueAmount.toLocaleString('fr-FR') })}
+          description={t('accounting.stats.overdueDesc', { amount: formatAmount(accountingData.overdueAmount) })}
         />
         <AccountingKPICard
           title={t('accounting.stats.validationRate', 'Taux validation')}

@@ -2808,6 +2808,51 @@
         "content": "J'ai testé la v1.0 pendant 2 mois. Quelques bugs mais l'équipe est réactive. Le module projets sera top quand il sera fini."
       },
       "title": "Premiers utilisateurs"
+    },
+    "facts": {
+      "countries": "Pays supportés",
+      "standards": "Standards comptables",
+      "currencies": "Devises",
+      "modules": "Modules intégrés"
+    },
+    "faq": {
+      "badge": "Questions fréquentes",
+      "title": "Tout ce que vous devez savoir",
+      "subtitle": "Les réponses aux questions les plus posées sur CassKai",
+      "moreQuestions": "Vous avez d'autres questions ?",
+      "contactUs": "Contactez-nous",
+      "q1": {
+        "question": "CassKai est-il conforme aux normes SYSCOHADA ?",
+        "answer": "Oui, CassKai intègre nativement le plan comptable SYSCOHADA révisé avec les 9 classes de comptes, y compris la classe 8 (HAO). Notre solution génère automatiquement la DSF (Déclaration Statistique et Fiscale), le bilan, le compte de résultat et le TAFIRE conformes aux exigences de l'OHADA."
+      },
+      "q2": {
+        "question": "Quels pays sont supportés ?",
+        "answer": "CassKai supporte 26 pays : France, Belgique, Luxembourg (PCG), les 17 pays de la zone OHADA (SYSCOHADA), l'Algérie, le Maroc, la Tunisie (SCF), ainsi que le Nigeria, Kenya, Ghana et l'Afrique du Sud (IFRS). Chaque pays dispose de sa configuration fiscale locale."
+      },
+      "q3": {
+        "question": "Puis-je migrer mes données depuis un autre logiciel ?",
+        "answer": "Oui, CassKai permet d'importer vos données via des fichiers CSV ou le format FEC (Fichier des Écritures Comptables). Notre équipe peut vous accompagner gratuitement dans la migration depuis Sage, QuickBooks, ou tout autre logiciel comptable."
+      },
+      "q4": {
+        "question": "Mes données sont-elles sécurisées ?",
+        "answer": "Absolument. CassKai utilise un chiffrement SSL/TLS pour toutes les communications, les données sont stockées sur des serveurs sécurisés en Europe avec des sauvegardes quotidiennes. Nous sommes conformes au RGPD et appliquons les meilleures pratiques de sécurité."
+      },
+      "q5": {
+        "question": "Comment fonctionne l'essai gratuit ?",
+        "answer": "L'essai gratuit de 30 jours vous donne accès à toutes les fonctionnalités du plan Professionnel, sans engagement et sans carte bancaire. À la fin de l'essai, vous pouvez choisir de passer à un plan payant ou vos données seront conservées 30 jours supplémentaires."
+      },
+      "q6": {
+        "question": "Proposez-vous une formation ?",
+        "answer": "Oui, nous proposons une documentation complète, des tutoriels vidéo et un support par email. Pour le plan Entreprise, une formation personnalisée est incluse. Nous organisons également des webinaires mensuels gratuits."
+      },
+      "q7": {
+        "question": "Puis-je utiliser CassKai en plusieurs devises ?",
+        "answer": "Oui, CassKai supporte 12 devises : EUR, XOF (FCFA BCEAO), XAF (FCFA BEAC), USD, MAD (Dirham), DZD (Dinar algérien), TND (Dinar tunisien), NGN (Naira), KES (Shilling kenyan), GHS (Cedi), ZAR (Rand), et EGP (Livre égyptienne)."
+      },
+      "q8": {
+        "question": "La liasse fiscale est-elle générée automatiquement ?",
+        "answer": "Oui, CassKai génère automatiquement la liasse fiscale française (formulaires 2050-2059), la DSF pour les pays OHADA, ainsi que les déclarations de TVA et d'IS adaptées à chaque pays. Les documents sont exportables en PDF prêts pour le dépôt."
+      }
     }
   },
   "language": "Langue",

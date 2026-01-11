@@ -1,18 +1,33 @@
 import React, { useState, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '@/components/ui/input';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '@/components/ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '@/components/ui/use-toast';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Label } from '@/components/ui/label';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Textarea } from '@/components/ui/textarea';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import quotesService from '@/services/quotesService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import ClientSelector from '@/components/invoicing/ClientSelector';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Plus,
   Search,
@@ -101,7 +116,7 @@ const QuoteRow: React.FC<QuoteRowProps> = ({ quote, onEdit, onDelete, onView, on
       <TableCell>{new Date(quote.date).toLocaleDateString('fr-FR')}</TableCell>
       <TableCell>{new Date(quote.validUntil).toLocaleDateString('fr-FR')}</TableCell>
       <TableCell className="text-right font-mono">
-        {quote.total.toFixed(2)} €
+        <CurrencyAmount amount={quote.total} />
       </TableCell>
       <TableCell>{getStatusBadge(quote.status)}</TableCell>
       <TableCell>
@@ -181,7 +196,7 @@ function QuotePreviewDialog({ open, onClose, quote }: QuotePreviewDialogProps) {
                   (quote.items ?? []).map((item, index) => (
                     <div key={index} className="flex justify-between py-2 border-b last:border-b-0">
                       <span>{item.description}</span>
-                      <span className="font-medium">{item.total.toFixed(2)} €</span>
+                      <span className="font-medium"><CurrencyAmount amount={item.total} /></span>
                     </div>
                   ))
                 ) : (
@@ -190,7 +205,7 @@ function QuotePreviewDialog({ open, onClose, quote }: QuotePreviewDialogProps) {
                 <div className="mt-4 pt-4 border-t">
                   <div className="flex justify-between font-bold">
                     <span>Total:</span>
-                    <span>{quote.total.toFixed(2)} €</span>
+                    <span><CurrencyAmount amount={quote.total} /></span>
                   </div>
                 </div>
               </div>
@@ -551,7 +566,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
               <Euro className="w-5 h-5 text-purple-500" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Montant total</p>
-                <p className="text-xl font-bold">{summary.totalAmount.toFixed(2)} €</p>
+                <p className="text-xl font-bold"><CurrencyAmount amount={summary.totalAmount} /></p>
               </div>
             </div>
           </CardContent>

@@ -27,7 +27,7 @@ export const WEST_AFRICAN_CURRENCIES = {
   },
   'EUR': {
     name: 'Euro',
-    symbol: '€',
+    symbol: ' EUR',
     format: {
       decimal: 2,
       pattern: '#,##0.00 ¤',
@@ -413,7 +413,7 @@ export function useCurrency() {
     formatAmount: (amount: number) => formatCurrency(amount, currentLocale, currentCurrency),
     formatNumber: (value: number) => formatNumber(value, currentLocale),
     formatDate: (date: string | Date) => formatDate(date, currentLocale),
-    currencySymbol: WEST_AFRICAN_CURRENCIES[currentCurrency as keyof typeof WEST_AFRICAN_CURRENCIES]?.symbol || '€',
+    currencySymbol: WEST_AFRICAN_CURRENCIES[currentCurrency as keyof typeof WEST_AFRICAN_CURRENCIES]?.symbol || ' EUR',
     isAfricanMarket: currentLocale.includes('-BJ') || currentLocale.includes('-CI') || currentLocale.includes('-BF') || currentLocale.includes('-ML') || currentLocale.includes('-SN') || currentLocale.includes('-TG')
   };
 }

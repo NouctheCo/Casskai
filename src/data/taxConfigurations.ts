@@ -122,7 +122,7 @@ export const FRANCE_TAX_CONFIG: CountryTaxConfiguration = {
       id: 'CVAE',
       name: 'Cotisation sur la Valeur Ajoutée des Entreprises',
       rate: 0.75,
-      description: 'Taxe sur la valeur ajoutée pour CA > 500k€',
+      description: 'Taxe sur la valeur ajoutée pour CA > 500k EUR',
       calculationBase: 'Valeur ajoutée'
     },
     {
@@ -196,11 +196,11 @@ export const FRANCE_TAX_CONFIG: CountryTaxConfiguration = {
     {
       id: 'CVAE',
       name: 'CVAE - Cotisation sur la Valeur Ajoutée',
-      description: 'Pour entreprises avec CA > 500 000€',
+      description: 'Pour entreprises avec CA > 500 000 EUR',
       frequency: 'annual',
       deadline: '3 mai N+1',
       mandatory: true,
-      applicableIf: 'CA > 500 000€'
+      applicableIf: 'CA > 500 000 EUR'
     },
     {
       id: 'DSN',

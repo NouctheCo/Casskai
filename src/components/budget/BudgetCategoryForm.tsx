@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Calculator,
   AlertTriangle,
@@ -15,7 +19,9 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface Account {
   id: string;
   account_number: string;
@@ -406,12 +412,12 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
             <div>
               <div className="font-medium">
                 Total mensuel :{' '}
-                {monthlySum.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+                <CurrencyAmount amount={monthlySum} />
               </div>
               {hasVariance && (
                 <div className="text-sm text-red-600 dark:text-red-400">
                   Écart de {variance > 0 ? '+' : ''}
-                  {variance.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} € avec le
+                  <CurrencyAmount amount={variance} /> avec le
                   montant annuel
                 </div>
               )}
@@ -438,7 +444,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
                 key={index}
                 className="flex-1 bg-primary/60 hover:bg-primary rounded-t transition-all"
                 style={{ height: `${height}%` }}
-                title={`${MONTHS[index]}: ${value.toLocaleString('fr-FR')} €`}
+                title={`${MONTHS[index]}: $<CurrencyAmount amount={value} />`}
               />
             );
           })}

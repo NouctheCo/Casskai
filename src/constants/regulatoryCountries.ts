@@ -410,7 +410,7 @@ export const COUNTRIES: Record<string, CountryConfig> = {
     ],
     dateFormat: 'dd/MM/yyyy',
     currencyCode: 'EUR',
-    currencySymbol: '€',
+    currencySymbol: ' EUR',
     onlineFilingAvailable: true,
     onlineFilingUrl: 'https://pro.impots.gouv.fr'
   },

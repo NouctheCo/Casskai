@@ -10,9 +10,13 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 import React, { useState } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useParams, useNavigate } from 'react-router-dom';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { toastSuccess } from '@/lib/toast-helpers';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   ArrowLeft,
   Clock,
@@ -28,12 +32,19 @@ import {
   Star
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '@/components/ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { PublicNavigation } from '@/components/navigation/PublicNavigation';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { categoriesData } from './DocumentationCategoryPage';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { WhatsAppChat } from '@/components/chat/WhatsAppChat';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 // Base de données simplifiée des articles
 const articlesDatabase = {
   'creer-votre-premier-compte': {
@@ -1780,8 +1791,10 @@ const articlesDatabase = {
       '',
       '```jsx',
       '// CassKaiApp.js',
-      'import React, { useState, useEffect } from \'react\';',
-      'import { View, FlatList, Text, StyleSheet } from \'react-native\';',
+      'import React, { useState, useEffect } from \'react\';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';',
+      'import { View, FlatList, Text, StyleSheet } from \'react-native\';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';',
       '',
       'const CassKaiApp = () => {',
       '  const [invoices, setInvoices] = useState([]);',
@@ -1811,7 +1824,7 @@ const articlesDatabase = {
       '    <View style={styles.invoiceItem}>',
       '      <Text style={styles.invoiceNumber}>{item.number}</Text>',
       '      <Text>{item.customer.name}</Text>',
-      '      <Text style={styles.amount}>{item.total_ttc}€</Text>',
+      '      <Text style={styles.amount}><CurrencyAmount amount={item.total_ttc} /></Text>',
       '      <Text style={[styles.status, styles[item.status]]}>{item.status}</Text>',
       '    </View>',
       '  );',

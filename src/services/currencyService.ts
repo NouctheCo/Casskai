@@ -123,7 +123,7 @@ export const GLOBAL_CURRENCIES: Currency[] = [
   {
     code: 'EUR',
     name: 'Euro',
-    symbol: '€',
+    symbol: ' EUR',
     decimals: 2,
     format: 'after',
     separator: { thousands: ' ', decimal: ',' },

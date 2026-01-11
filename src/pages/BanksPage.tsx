@@ -10,15 +10,25 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 import React, { useState, useCallback, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '@/components/ui/input';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { toastError, toastSuccess } from '@/lib/toast-helpers';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { bankStorageAdapter, BankStorageTransaction } from '@/services/bankStorageAdapter';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { TransactionCategorization } from '@/components/banking/TransactionCategorization';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAutoAccounting } from '@/hooks/useAutoAccounting';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Upload,
   RefreshCw,
@@ -34,9 +44,13 @@ import {
   Trash2
 } from 'lucide-react';
 import { BankAccountsTab } from '@/components/banking/BankAccountsTab';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { SepaPaymentGenerator } from '@/components/banking/SepaPaymentGenerator';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 const BanksPageNew: React.FC = () => {
   const { user, currentCompany } = useAuth();
   const { t } = useTranslation();
@@ -154,9 +168,11 @@ const BanksPageNew: React.FC = () => {
       } else {
         toastError(result.message + (result.errors ? ` (${result.errors.length} erreurs)` : ''));
         logger.error('Banks', 'Import failed:', result);
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
       }
     } catch (error) {
       logger.error('Banks', 'Import error:', error);
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
       toastError(error instanceof Error ? error.message : "Impossible d'importer le fichier");
     } finally {
       setUploading(false);
@@ -502,7 +518,7 @@ const BanksPageNew: React.FC = () => {
                           ) : (
                             <TrendingDown className="h-4 w-4" />
                           )}
-                          {transaction.amount.toFixed(2)} €
+                          <CurrencyAmount amount={transaction.amount} />
                         </div>
                       </td>
                       <td className="px-4 py-3 text-center">

@@ -114,7 +114,7 @@ export class BudgetImportExportService {
         ['growth_rate', 'Taux de croissance annuel', 10, '%', 'Général'],
         ['inflation_rate', 'Taux d\'inflation prévu', 2.5, '%', 'Économique'],
         ['employee_count', 'Nombre d\'employés', 25, 'personnes', 'RH'],
-        ['avg_salary', 'Salaire moyen mensuel', 3500, '€', 'RH'],
+        ['avg_salary', 'Salaire moyen mensuel', 3500, ' EUR', 'RH'],
       ];
       const wsAssumptions = XLSX.utils.aoa_to_sheet(assumptionsData);
       wsAssumptions['!cols'] = [

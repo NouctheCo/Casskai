@@ -1,16 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '@/components/ui/input';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Label } from '@/components/ui/label';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '@/components/ui/badge';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Textarea } from '@/components/ui/textarea';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '@/components/ui/use-toast';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Plus,
   Search,
@@ -586,7 +599,7 @@ export default function OptimizedClientsTab() {
               <Euro className="w-5 h-5 text-purple-500" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">CA total</p>
-                <p className="text-xl font-bold">{summary.totalRevenue.toFixed(2)} €</p>
+                <p className="text-xl font-bold"><CurrencyAmount amount={summary.totalRevenue} /></p>
               </div>
             </div>
           </CardContent>
@@ -597,7 +610,7 @@ export default function OptimizedClientsTab() {
               <Building className="w-5 h-5 text-orange-500" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">CA moyen</p>
-                <p className="text-xl font-bold">{summary.averageRevenue.toFixed(2)} €</p>
+                <p className="text-xl font-bold"><CurrencyAmount amount={summary.averageRevenue} /></p>
               </div>
             </div>
           </CardContent>

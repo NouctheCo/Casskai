@@ -39,6 +39,7 @@ const LazyTaxPage = React.lazy(() => import('@/pages/TaxPage'));
 const LazyHumanResourcesPage = React.lazy(() => import('@/pages/HumanResourcesPage'));
 const LazySalesCrmPage = React.lazy(() => import('@/pages/SalesCrmPage'));
 const LazyBillingPage = React.lazy(() => import('@/pages/BillingPage'));
+const LazyCurrencyManagementPage = React.lazy(() => import('@/pages/CurrencyManagementPage'));
 const LazyPrivacyPolicyPage = React.lazy(() => import('@/pages/PrivacyPolicyPage'));
 const LazyTermsOfServicePage = React.lazy(() => import('@/pages/TermsOfServicePage'));
 const LazyTermsOfSalePage = React.lazy(() => import('@/pages/TermsOfSalePage'));
@@ -326,6 +327,13 @@ const AppRouter: React.FC = () => {
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
                   <LazyComplianceDashboard />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="currency" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyCurrencyManagementPage />
                 </Suspense>
               </ProtectedRoute>
             } />
