@@ -96,6 +96,14 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
 
     syncWithModules: _syncWithModules,
 
+    downloadDeclarationPdf,
+
+    downloadDeclarationEdiDraft,
+
+    downloadDeclarationRegulatoryPdf,
+
+    downloadDeclarationRegulatoryXmlDraft,
+
     isCompliant,
 
     clearError
@@ -250,6 +258,102 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
 
 
 
+  const handleDownloadDeclarationPdf = async (declarationId: string) => {
+
+    try {
+
+      await downloadDeclarationPdf(declarationId);
+
+      toast({
+
+        title: 'Export PDF',
+
+        description: 'Déclaration exportée en PDF (brouillon).',
+
+      });
+
+    } catch (_error) {
+
+      // Error is already handled by the hook
+
+    }
+
+  };
+
+
+
+  const handleDownloadDeclarationEdiDraft = async (declarationId: string) => {
+
+    try {
+
+      await downloadDeclarationEdiDraft(declarationId);
+
+      toast({
+
+        title: 'Export EDI (draft)',
+
+        description: 'Déclaration exportée en JSON (format brouillon).',
+
+      });
+
+    } catch (_error) {
+
+      // Error is already handled by the hook
+
+    }
+
+  };
+
+
+
+  const handleDownloadDeclarationRegulatoryPdf = async (declarationId: string) => {
+
+    try {
+
+      await downloadDeclarationRegulatoryPdf(declarationId);
+
+      toast({
+
+        title: 'Export PDF réglementaire',
+
+        description: 'PDF généré via templates réglementaires (document de travail).',
+
+      });
+
+    } catch (_error) {
+
+      // Error is already handled by the hook
+
+    }
+
+  };
+
+
+
+  const handleDownloadDeclarationRegulatoryXmlDraft = async (declarationId: string) => {
+
+    try {
+
+      await downloadDeclarationRegulatoryXmlDraft(declarationId);
+
+      toast({
+
+        title: 'Export XML (draft)',
+
+        description: 'XML généré (format brouillon / non dépôt).',
+
+      });
+
+    } catch (_error) {
+
+      // Error is already handled by the hook
+
+    }
+
+  };
+
+
+
   const getStatusColor = (status: string) => {
 
     switch (status) {
@@ -342,7 +446,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
 
                 <p className="text-blue-700 mt-1 dark:text-blue-400">
 
-                  Système certifié conforme aux obligations fiscales françaises
+                  Outils conçus pour respecter les obligations fiscales françaises
 
                 </p>
 
@@ -410,7 +514,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
 
                     <CheckCircle className="h-4 w-4 text-green-500" />
 
-                    <span className="text-green-700 dark:text-green-400">TVA: Calculs certifiés conformes</span>
+                    <span className="text-green-700 dark:text-green-400">TVA: Calculs conformes</span>
 
                   </div>
 
@@ -1136,7 +1240,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
 
                   <h4 className="font-semibold text-blue-900 mb-2 dark:text-blue-100">
 
-                    Format FEC Certifié Conforme
+                    Format FEC conforme aux spécifications DGFiP
 
                   </h4>
 
@@ -1149,6 +1253,8 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                     <li>• Validation automatique de la cohérence</li>
 
                     <li>• Contrôles d'intégrité intégrés</li>
+
+                    <li>• Validation recommandée via Test Compta Demat</li>
 
                   </ul>
 
@@ -1249,6 +1355,86 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                       </Badge>
 
                     )}
+
+
+
+                    <Button
+
+                      variant="outline"
+
+                      size="sm"
+
+                      disabled={loading || !(['CA3', 'CA12'].includes(declaration.type) || declaration.type.startsWith('LIASSE_'))}
+
+                      onClick={() => handleDownloadDeclarationPdf(declaration.id)}
+
+                    >
+
+                      <FileText className="h-4 w-4 mr-2" />
+
+                      PDF (brouillon)
+
+                    </Button>
+
+
+
+                    <Button
+
+                      variant="outline"
+
+                      size="sm"
+
+                      disabled={loading || !(['CA3', 'CA12'].includes(declaration.type) || declaration.type.startsWith('LIASSE_'))}
+
+                      onClick={() => handleDownloadDeclarationRegulatoryPdf(declaration.id)}
+
+                    >
+
+                      <FileText className="h-4 w-4 mr-2" />
+
+                      PDF (réglementaire)
+
+                    </Button>
+
+
+
+                    <Button
+
+                      variant="outline"
+
+                      size="sm"
+
+                      disabled={loading}
+
+                      onClick={() => handleDownloadDeclarationEdiDraft(declaration.id)}
+
+                    >
+
+                      <Download className="h-4 w-4 mr-2" />
+
+                      EDI (draft)
+
+                    </Button>
+
+
+
+                    <Button
+
+                      variant="outline"
+
+                      size="sm"
+
+                      disabled={loading}
+
+                      onClick={() => handleDownloadDeclarationRegulatoryXmlDraft(declaration.id)}
+
+                    >
+
+                      <Download className="h-4 w-4 mr-2" />
+
+                      XML (draft)
+
+                    </Button>
 
                   </div>
 

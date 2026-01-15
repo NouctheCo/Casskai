@@ -1222,8 +1222,14 @@ export const FRANCE_TEMPLATE_CREATORS = {
 };
 
 /**
- * Génère tous les templates France
+ * DEPRECATED: ce fichier est un ancien générateur.
+ * Utiliser plutôt `src/constants/templates/allFranceTemplates.ts`.
  */
-export function generateAllFranceTemplates(): Array<Omit<RegulatoryTemplate, 'id' | 'createdAt' | 'updatedAt'>> {
+export function generateAllFranceTemplatesLegacy(): Array<Omit<RegulatoryTemplate, 'id' | 'createdAt' | 'updatedAt'>> {
   return Object.values(FRANCE_TEMPLATE_CREATORS).map(creator => creator());
 }
+
+// Export canonique (évite d'avoir 2 implémentations divergentes)
+import { generateAllFranceTemplates as generateAllFranceTemplatesCanonical } from './allFranceTemplates';
+
+export const generateAllFranceTemplates = generateAllFranceTemplatesCanonical;

@@ -104,6 +104,10 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
 
     exportTaxData,
 
+    downloadDeclarationRegulatoryPdf,
+
+    downloadDeclarationRegulatoryXmlDraft,
+
     validateCompliance: _validateCompliance,
 
     syncWithModules,
@@ -243,6 +247,70 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
     } catch (_error) {
 
       // Error is already handled by the hook
+
+    }
+
+  };
+
+
+
+  const handleDownloadDeclarationRegulatoryPdf = async (declarationId: string) => {
+
+    try {
+
+      await downloadDeclarationRegulatoryPdf(declarationId);
+
+      toast({
+
+        title: 'Export réglementaire',
+
+        description: 'PDF réglementaire téléchargé',
+
+      });
+
+    } catch (err) {
+
+      toast({
+
+        title: 'Export réglementaire',
+
+        description: err instanceof Error ? err.message : 'Erreur lors de l\'export',
+
+        variant: 'destructive'
+
+      });
+
+    }
+
+  };
+
+
+
+  const handleDownloadDeclarationRegulatoryXml = async (declarationId: string) => {
+
+    try {
+
+      await downloadDeclarationRegulatoryXmlDraft(declarationId);
+
+      toast({
+
+        title: 'Export réglementaire',
+
+        description: 'XML draft téléchargé',
+
+      });
+
+    } catch (err) {
+
+      toast({
+
+        title: 'Export réglementaire',
+
+        description: err instanceof Error ? err.message : 'Erreur lors de l\'export',
+
+        variant: 'destructive'
+
+      });
 
     }
 
@@ -1069,6 +1137,50 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
                       </Badge>
 
                     )}
+
+                    <Button
+
+                      size="sm"
+
+                      variant="outline"
+
+                      onClick={() => handleDownloadDeclarationRegulatoryPdf(declaration.id)}
+
+                      disabled={loading}
+
+                      className="h-7 px-2"
+
+                      title="Télécharger PDF réglementaire (brouillon)"
+
+                    >
+
+                      <Download className="h-3 w-3 mr-1" />
+
+                      PDF
+
+                    </Button>
+
+                    <Button
+
+                      size="sm"
+
+                      variant="outline"
+
+                      onClick={() => handleDownloadDeclarationRegulatoryXml(declaration.id)}
+
+                      disabled={loading}
+
+                      className="h-7 px-2"
+
+                      title="Télécharger XML draft"
+
+                    >
+
+                      <Download className="h-3 w-3 mr-1" />
+
+                      XML
+
+                    </Button>
 
                   </div>
 

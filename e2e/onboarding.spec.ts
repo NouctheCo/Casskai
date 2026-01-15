@@ -1,20 +1,44 @@
 import { test, expect } from '@playwright/test';
 
+import { dismissOverlays } from './testUtils/dismissOverlays';
+
+const RUN_AUTHED_E2E =
+  process.env.PLAYWRIGHT_RUN_AUTHED_E2E === '1' || process.env.PLAYWRIGHT_RUN_AUTHED_E2E === 'true';
+
 /**
  * E2E Tests - Onboarding Flow
  * Critical user journey: Signup → Company Setup → First Dashboard View
  */
 
 test.describe('Onboarding', () => {
+  test.beforeEach(async ({}, testInfo) => {
+    const baseURL = String(testInfo.project.use.baseURL || '');
+    test.skip(
+      /casskai\.app/i.test(baseURL) && !process.env.PLAYWRIGHT_ALLOW_PROD,
+      'Refusing to run E2E against production without PLAYWRIGHT_ALLOW_PROD=1'
+    );
+
+    test.skip(
+      !RUN_AUTHED_E2E,
+      'Authenticated E2E disabled by default; set PLAYWRIGHT_RUN_AUTHED_E2E=1'
+    );
+
+    test.skip(
+      !process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY,
+      'Supabase env not configured for E2E (.env.test.local)'
+    );
+  });
+
   test('should complete signup flow', async ({ page }) => {
     await page.goto('/signup');
+    await dismissOverlays(page);
 
     // Generate unique email for test
     const testEmail = `test-${Date.now()}@casskai.test`;
 
     // Fill signup form
     await page.getByLabel(/email/i).fill(testEmail);
-    await page.getByLabel(/password/i).first().fill('TestPassword123!');
+    await page.getByLabel(/mot de passe|password/i).first().fill('TestPassword123!');
 
     // Confirm password field (if exists)
     const confirmPassword = page.getByLabel(/confirm|confirmer/i);
@@ -38,6 +62,7 @@ test.describe('Onboarding', () => {
   test('should display onboarding wizard', async ({ page }) => {
     // Note: This assumes user is logged in but hasn't completed onboarding
     await page.goto('/onboarding');
+    await dismissOverlays(page);
 
     // Check wizard is visible
     await expect(page.getByText(/welcome|bienvenue|setup|configuration/i)).toBeVisible();
@@ -51,6 +76,7 @@ test.describe('Onboarding', () => {
 
   test('should complete company setup step', async ({ page }) => {
     await page.goto('/onboarding');
+    await dismissOverlays(page);
 
     // Fill company information
     const companyName = `Test Company ${Date.now()}`;
@@ -78,6 +104,7 @@ test.describe('Onboarding', () => {
 
   test('should select business plan', async ({ page }) => {
     await page.goto('/onboarding');
+    await dismissOverlays(page);
 
     // Navigate through steps if needed
     const nextButton = page.getByRole('button', { name: /next|suivant/i });
@@ -173,10 +200,10 @@ test.describe('Onboarding', () => {
     const testEmail = process.env.TEST_USER_EMAIL || 'test@casskai.app';
     const testPassword = process.env.TEST_USER_PASSWORD || 'TestPassword123!';
 
-    await page.goto('/');
+    await page.goto('/login');
     await page.getByLabel(/email/i).fill(testEmail);
-    await page.getByLabel(/password/i).fill(testPassword);
-    await page.getByRole('button', { name: /connexion|login/i }).click();
+    await page.getByLabel(/mot de passe|password/i).fill(testPassword);
+    await page.getByRole('button', { name: /se connecter|connexion|login/i }).click();
 
     // Should redirect directly to dashboard (not onboarding)
     await expect(page).toHaveURL(/dashboard|accueil/i, { timeout: 10000 });

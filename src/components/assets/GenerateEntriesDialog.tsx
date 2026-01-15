@@ -6,9 +6,7 @@
 import React, { useState } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Dialog,
   DialogContent,
@@ -17,23 +15,14 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Label } from '@/components/ui/label';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '@/components/ui/input';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent } from '@/components/ui/card';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { toast } from 'sonner';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import assetsService from '@/services/assetsService';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface GenerateEntriesDialogProps {
   open: boolean;
   onClose: () => void;

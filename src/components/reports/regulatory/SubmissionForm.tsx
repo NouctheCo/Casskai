@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { TaxAuthorityService } from '@/services/taxAuthorityService';
 import { SubmissionValidator, FormatterUtils } from '@/utils/taxAuthorityUtils';
 import { TAX_AUTHORITIES } from '@/constants/taxAuthorities';
-import { COUNTRY_DOCUMENTS, getCountryDocuments } from '@/constants/countryDocuments';
+import { SUPPORTED_COUNTRIES } from '@/constants/templates';
 
 interface SubmissionFormProps {
   companyId: string;
@@ -53,24 +53,6 @@ export function SubmissionForm({ companyId, onClose, onSuccess }: SubmissionForm
       const countryAuthorities = TAX_AUTHORITIES[country] || [];
       setAuthorities(countryAuthorities);
     }
-  };
-
-  // Obtenir les documents d'un pays pour les propositions
-  const getAvailableDocuments = () => {
-    const countryData = getCountryDocuments(formData.country);
-    if (!countryData) return [];
-
-    const docs: any[] = [];
-    Object.entries(countryData.documents).forEach(([category, categoryData]) => {
-      categoryData.documents.forEach((doc: any) => {
-        docs.push({
-          id: doc.id,
-          name: `[${categoryData.category}] ${doc.name}`,
-          frequency: doc.frequency,
-        });
-      });
-    });
-    return docs;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -138,6 +120,7 @@ export function SubmissionForm({ companyId, onClose, onSuccess }: SubmissionForm
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            aria-label="Fermer"
           >
             <X className="w-6 h-6" />
           </button>
@@ -154,23 +137,24 @@ export function SubmissionForm({ companyId, onClose, onSuccess }: SubmissionForm
 
           {/* Pays */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="submission-country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Pays
             </label>
             <select
+              id="submission-country"
               value={formData.country}
               onChange={e => handleCountryChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="">Sélectionner un pays</option>
-              {Object.keys(COUNTRY_DOCUMENTS).map(country => {
-                const countryData = COUNTRY_DOCUMENTS[country as keyof typeof COUNTRY_DOCUMENTS];
-                return (
-                  <option key={country} value={country}>
-                    {countryData.flag} {countryData.name} ({countryData.standard})
+              {SUPPORTED_COUNTRIES
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(country => (
+                  <option key={country.code} value={country.code}>
+                    {country.name} ({country.code}) - {country.standard}
                   </option>
-                );
-              })}
+                ))}
             </select>
             {errors.country && <p className="text-sm text-red-600 mt-1">{errors.country}</p>}
           </div>
@@ -178,10 +162,11 @@ export function SubmissionForm({ companyId, onClose, onSuccess }: SubmissionForm
           {/* Document */}
           {documents.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="submission-document" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Document
               </label>
               <select
+                id="submission-document"
                 value={formData.documentId}
                 onChange={e => setFormData({ ...formData, documentId: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -200,10 +185,11 @@ export function SubmissionForm({ companyId, onClose, onSuccess }: SubmissionForm
           {/* Autorité */}
           {authorities.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="submission-authority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Autorité fiscale
               </label>
               <select
+                id="submission-authority"
                 value={formData.authorityId}
                 onChange={e => setFormData({ ...formData, authorityId: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"

@@ -16,6 +16,7 @@ export default [
       '.next/**/*',
       'build/**/*',
       'public/**/*',
+      'scripts/**/*',
       '**/*.d.ts',
       'supabase/functions/**/*',
       'tests/e2e/test-results/**/*',

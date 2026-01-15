@@ -146,7 +146,7 @@ export function CompanyDeletionDialog({
                 <div className="font-semibold mb-2">⚠️ Conséquences:</div>
                 <ul className="text-sm space-y-1">
                   <li>• Période de grâce: 30 jours (annulable)</li>
-                  <li>• Export FEC automatique avant suppression</li>
+                  <li>• Export FEC automatique (spécifications DGFiP) avant suppression</li>
                   <li>• Tous les utilisateurs perdront accès</li>
                   <li>• Données comptables: anonymisation légale</li>
                 </ul>
@@ -221,7 +221,7 @@ export function CompanyDeletionDialog({
               <div>
                 <strong>Export FEC:</strong> Avant suppression
                 <div className="text-xs text-gray-600 dark:text-gray-400">
-                  Conservé selon la loi
+                  Conforme aux spécifications DGFiP (validation recommandée via Test Compta Demat)
                 </div>
               </div>
             </div>

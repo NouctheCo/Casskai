@@ -13,15 +13,52 @@
  */
 
 import { config } from 'dotenv';
+import { existsSync } from 'fs';
 import { createClient } from '@supabase/supabase-js';
 import { generateAllRegulatoryTemplates, TEMPLATE_STATS } from '../src/constants/templates';
 
-// Charger les variables d'environnement
-config();
+// Charger les variables d'environnement (.env.local prioritaire)
+if (existsSync('.env.local')) {
+  config({ path: '.env.local' });
+}
+if (existsSync('.env')) {
+  config({ path: '.env' });
+}
+
+type SeedOptions = {
+  wipe: boolean;
+  countries?: string[];
+};
+
+function parseArgs(argv: string[]): SeedOptions {
+  const options: SeedOptions = { wipe: false };
+
+  for (const arg of argv) {
+    if (arg === '--wipe') {
+      options.wipe = true;
+      continue;
+    }
+
+    if (arg.startsWith('--countries=')) {
+      const raw = arg.slice('--countries='.length);
+      const countries = raw
+        .split(',')
+        .map(s => s.trim().toUpperCase())
+        .filter(Boolean);
+      options.countries = countries.length ? countries : undefined;
+      continue;
+    }
+  }
+
+  return options;
+}
+
+const options = parseArgs(process.argv.slice(2));
 
 // Configuration Supabase
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_KEY = SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error('❌ Erreur: Variables d\'environnement manquantes');
@@ -46,7 +83,10 @@ async function seedRegulatoryTemplates() {
 
   // Générer tous les templates
   console.log('⚙️  Génération des templates...');
-  const templates = generateAllRegulatoryTemplates();
+  let templates = generateAllRegulatoryTemplates();
+  if (options.countries?.length) {
+    templates = templates.filter(t => options.countries?.includes(t.countryCode));
+  }
   console.log(`✓ ${templates.length} templates générés\n`);
 
   // Vérifier la connexion Supabase
@@ -63,54 +103,71 @@ async function seedRegulatoryTemplates() {
   console.log('✓ Connexion établie\n');
 
   // Nettoyer les templates existants (optionnel)
-  console.log('🧹 Nettoyage des templates existants...');
-  const { error: deleteError } = await supabase
-    .from('regulatory_templates')
-    .delete()
-    .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+  if (options.wipe) {
+    if (!SUPABASE_SERVICE_KEY) {
+      console.error('❌ Refus de wipe: SUPABASE_SERVICE_KEY manquant.');
+      console.error('   Le wipe est destructif et nécessite la service key.');
+      process.exit(1);
+    }
 
-  if (deleteError) {
-    console.warn('⚠️  Avertissement lors du nettoyage:', deleteError.message);
+    console.log('🧹 Nettoyage des templates existants (wipe)...');
+    let deleteQuery = supabase.from('regulatory_templates').delete();
+    if (options.countries?.length) {
+      deleteQuery = deleteQuery.in('country_code', options.countries);
+    } else {
+      deleteQuery = deleteQuery.neq('id', '00000000-0000-0000-0000-000000000000');
+    }
+
+    const { error: deleteError } = await deleteQuery;
+
+    if (deleteError) {
+      console.warn('⚠️  Avertissement lors du nettoyage:', deleteError.message);
+    } else {
+      console.log('✓ Templates existants supprimés\n');
+    }
   } else {
-    console.log('✓ Templates existants supprimés\n');
+    console.log('ℹ️  Mode non-destructif: upsert uniquement (pas de wipe).');
+    console.log('   Astuce: ajoutez --wipe (service key requise) si vous voulez repartir à zéro.\n');
   }
 
-  // Insertion des templates par batch
-  console.log('📝 Insertion des templates...\n');
+  // Upsert des templates par batch
+  console.log('📝 Upsert des templates...\n');
 
-  const BATCH_SIZE = 10;
+  const BATCH_SIZE = 50;
   let successCount = 0;
   let errorCount = 0;
-  const errors: Array<{ template: string; error: string }> = [];
+  const errors: Array<{ batchStart: number; error: string }> = [];
 
-  for (let i = 0; i < templates.length; i += BATCH_SIZE) {
-    const batch = templates.slice(i, i + BATCH_SIZE);
+  const records = templates.map(template => ({
+    country_code: template.countryCode,
+    accounting_standard: template.accountingStandard,
+    document_type: template.documentType,
+    name: template.name,
+    description: template.description,
+    category: template.category,
+    frequency: template.frequency ?? 'ANNUAL',
+    is_mandatory: template.isMandatory ?? true,
+    form_schema: template.formSchema,
+    account_mappings: template.accountMappings ?? null,
+    validation_rules: template.validationRules ?? null,
+    calculation_rules: template.calculationRules ?? null,
+    version: template.version ?? '1.0',
+    is_active: template.isActive ?? true
+  }));
 
-    for (const template of batch) {
-      const { error } = await supabase
-        .from('regulatory_templates')
-        .insert({
-          country_code: template.countryCode,
-          accounting_standard: template.accountingStandard,
-          document_type: template.documentType,
-          name: template.name,
-          description: template.description,
-          category: template.category,
-          frequency: template.frequency,
-          is_mandatory: template.isMandatory,
-          form_schema: template.formSchema,
-          account_mappings: template.accountMappings,
-          validation_rules: template.validationRules
-        });
+  for (let i = 0; i < records.length; i += BATCH_SIZE) {
+    const batch = records.slice(i, i + BATCH_SIZE);
+    const { error } = await supabase
+      .from('regulatory_templates')
+      .upsert(batch, { onConflict: 'document_type,country_code,accounting_standard,version' });
 
-      if (error) {
-        errorCount++;
-        errors.push({ template: template.documentType, error: error.message });
-        console.error(`   ❌ ${template.documentType}: ${error.message}`);
-      } else {
-        successCount++;
-        console.log(`   ✓ ${template.documentType.padEnd(25)} - ${template.name}`);
-      }
+    if (error) {
+      errorCount += batch.length;
+      errors.push({ batchStart: i, error: error.message });
+      console.error(`   ❌ Batch ${i}-${i + batch.length - 1}: ${error.message}`);
+    } else {
+      successCount += batch.length;
+      console.log(`   ✓ Batch ${i}-${i + batch.length - 1} OK`);
     }
   }
 
@@ -123,8 +180,8 @@ async function seedRegulatoryTemplates() {
 
   if (errors.length > 0) {
     console.log('\n⚠️  DÉTAILS DES ERREURS:');
-    errors.forEach(({ template, error }) => {
-      console.log(`   - ${template}: ${error}`);
+    errors.forEach(({ batchStart, error }) => {
+      console.log(`   - Batch starting at ${batchStart}: ${error}`);
     });
   }
 

@@ -2,6 +2,40 @@
 
 ## 📋 Liste des Scripts
 
+### `seed-regulatory-templates.ts`
+
+**Description:** Seed (upsert) des templates réglementaires dans Supabase (`regulatory_templates`).
+
+**Usage:**
+```bash
+# Mode recommandé (non destructif): upsert uniquement
+npm run seed:templates
+
+# Option destructrice (nécessite SUPABASE_SERVICE_KEY)
+npm run seed:templates:wipe
+
+# Cibler des pays précis
+npx tsx scripts/seed-regulatory-templates.ts --countries=FR,SN
+```
+
+**Variables d'env requises:**
+- `VITE_SUPABASE_URL`
+- `SUPABASE_SERVICE_KEY` (recommandé) ou `VITE_SUPABASE_ANON_KEY`
+
+---
+
+### `verify-regulatory-templates.ts`
+
+**Description:** Vérifie que la DB contient tous les templates attendus (par rapport à `src/constants/templates`).
+
+**Usage:**
+```bash
+npm run verify:templates
+
+# Cibler des pays précis
+npx tsx scripts/verify-regulatory-templates.ts --countries=FR,DZ,MA
+```
+
 ### `validate-db-columns.cjs`
 
 **Description:** Script de validation automatique des colonnes de base de données Supabase.

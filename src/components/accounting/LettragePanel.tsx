@@ -8,13 +8,9 @@
 import React, { useState, useEffect } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card } from '@/components/ui/card';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '@/components/ui/badge';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '@/hooks/useToast';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   getUnlettragedLines,
   findLettrageMatches,
@@ -26,11 +22,8 @@ import {
   type LettrageMatch,
 } from '@/services/accounting/lettrageService';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Check, X, Zap, Trash2, AlertCircle } from 'lucide-react';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface LettragePanelProps {
   companyId: string;
   accountType: 'clients' | 'fournisseurs' | 'banque';

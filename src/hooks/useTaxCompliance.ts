@@ -14,6 +14,8 @@ import { useState, useCallback, useEffect } from 'react';
 
 import { multiCountryTaxService, CountryTaxConfig, TaxDeclaration } from '@/services/fiscal/MultiCountryTaxService';
 
+import { blobToObjectUrl, downloadObjectUrl } from '@/services/fiscal/franceTaxExportService';
+
 import { taxIntegrationService } from '@/services/fiscal/TaxIntegrationService';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -286,6 +288,106 @@ export const useTaxCompliance = (companyId: string, countryCode?: string) => {
 
 
 
+  const downloadDeclarationRegulatoryPdf = useCallback(async (declarationId: string) => {
+
+    if (!companyId || !countryCode) return;
+
+
+
+    const declaration = state.declarations.find(d => d.id === declarationId);
+
+    if (!declaration) return;
+
+
+
+    if (!multiCountryTaxService.isSupportedForRegulatoryExport(countryCode, declaration.type)) {
+
+      throw new Error(`Export réglementaire non supporté pour ${declaration.type}`);
+
+    }
+
+
+
+    const { blob, filename } = await multiCountryTaxService.exportDeclarationRegulatoryPdf(
+
+      companyId,
+
+      countryCode,
+
+      declaration.type,
+
+      declaration.period
+
+    );
+
+
+
+    const url = blobToObjectUrl(blob);
+
+    try {
+
+      downloadObjectUrl(url, filename);
+
+    } finally {
+
+      URL.revokeObjectURL(url);
+
+    }
+
+  }, [companyId, countryCode, state.declarations]);
+
+
+
+  const downloadDeclarationRegulatoryXmlDraft = useCallback(async (declarationId: string) => {
+
+    if (!companyId || !countryCode) return;
+
+
+
+    const declaration = state.declarations.find(d => d.id === declarationId);
+
+    if (!declaration) return;
+
+
+
+    if (!multiCountryTaxService.isSupportedForRegulatoryExport(countryCode, declaration.type)) {
+
+      throw new Error(`Export réglementaire non supporté pour ${declaration.type}`);
+
+    }
+
+
+
+    const { blob, filename } = await multiCountryTaxService.exportDeclarationRegulatoryXmlDraft(
+
+      companyId,
+
+      countryCode,
+
+      declaration.type,
+
+      declaration.period
+
+    );
+
+
+
+    const url = blobToObjectUrl(blob);
+
+    try {
+
+      downloadObjectUrl(url, filename);
+
+    } finally {
+
+      URL.revokeObjectURL(url);
+
+    }
+
+  }, [companyId, countryCode, state.declarations]);
+
+
+
   // Valider la conformité
 
   const validateCompliance = useCallback(async (period: string) => {
@@ -541,6 +643,10 @@ export const useTaxCompliance = (companyId: string, countryCode?: string) => {
     calculateCorporateTax,
 
     exportTaxData,
+
+    downloadDeclarationRegulatoryPdf,
+
+    downloadDeclarationRegulatoryXmlDraft,
 
     validateCompliance,
 

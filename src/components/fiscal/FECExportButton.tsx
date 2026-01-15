@@ -1,29 +1,19 @@
 /**
  * Bouton pour générer et télécharger l'export FEC (Fichier des Écritures Comptables)
- * Conforme à la réglementation DGFiP française
+ * Conforme aux spécifications DGFiP (validation recommandée via Test Compta Demat)
  */
 import React, { useState } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '../ui/button';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '../ui/dialog';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '../ui/input';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Label } from '../ui/label';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '../ui/badge';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '../ui/use-toast';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { downloadFECFile, previewFECExport } from '../../services/fecExportService';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { FileDown, Loader2, CheckCircle, AlertTriangle, FileText, Download } from 'lucide-react';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card } from '../ui/card';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface FECExportButtonProps {
   companyId: string;
   companyName?: string;
@@ -114,7 +104,7 @@ export const FECExportButton: React.FC<FECExportButtonProps> = ({
               Export FEC (Fichier des Écritures Comptables)
             </DialogTitle>
             <DialogDescription>
-              Génère un fichier FEC conforme à la réglementation DGFiP pour contrôle fiscal
+              Génère un fichier FEC conforme aux spécifications DGFiP. Validation recommandée via « Test Compta Demat ».
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6">

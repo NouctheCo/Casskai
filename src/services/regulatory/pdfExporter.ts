@@ -13,6 +13,58 @@ import type {
   FormSection,
   FormField
 } from '@/types/regulatory';
+
+function normalizeRegulatoryTemplateRow(row: any): RegulatoryTemplate {
+  return {
+    id: row.id,
+    documentType: row.documentType ?? row.document_type,
+    countryCode: row.countryCode ?? row.country_code,
+    accountingStandard: row.accountingStandard ?? row.accounting_standard,
+    name: row.name,
+    description: row.description,
+    category: row.category,
+    formSchema: row.formSchema ?? row.form_schema,
+    accountMappings: row.accountMappings ?? row.account_mappings,
+    validationRules: row.validationRules ?? row.validation_rules,
+    calculationRules: row.calculationRules ?? row.calculation_rules,
+    frequency: row.frequency,
+    isMandatory: row.isMandatory ?? row.is_mandatory,
+    version: row.version,
+    isActive: row.isActive ?? row.is_active,
+    effectiveFrom: row.effectiveFrom ?? row.effective_from,
+    effectiveTo: row.effectiveTo ?? row.effective_to,
+    createdAt: row.createdAt ?? row.created_at,
+    updatedAt: row.updatedAt ?? row.updated_at,
+  } as RegulatoryTemplate;
+}
+
+function normalizeRegulatoryDocumentRow(row: any): RegulatoryDocument {
+  return {
+    id: row.id,
+    companyId: row.companyId ?? row.company_id,
+    documentType: row.documentType ?? row.document_type,
+    category: row.category,
+    fiscalYear: row.fiscalYear ?? row.fiscal_year,
+    fiscalPeriod: row.fiscalPeriod ?? row.fiscal_period,
+    countryCode: row.countryCode ?? row.country_code,
+    accountingStandard: row.accountingStandard ?? row.accounting_standard,
+    data: row.data ?? {},
+    status: row.status,
+    version: row.version,
+    pdfUrl: row.pdfUrl ?? row.pdf_url,
+    xmlUrl: row.xmlUrl ?? row.xml_url,
+    notes: row.notes,
+    internalComments: row.internalComments ?? row.internal_comments,
+    createdAt: row.createdAt ?? row.created_at,
+    updatedAt: row.updatedAt ?? row.updated_at,
+    createdBy: row.createdBy ?? row.created_by,
+    updatedBy: row.updatedBy ?? row.updated_by,
+    submittedAt: row.submittedAt ?? row.submitted_at,
+    submittedBy: row.submittedBy ?? row.submitted_by,
+    validatedAt: row.validatedAt ?? row.validated_at,
+    validatedBy: row.validatedBy ?? row.validated_by,
+  } as RegulatoryDocument;
+}
 /**
  * Génère un PDF pour un document réglementaire
  */
@@ -367,10 +419,49 @@ export async function exportRegulatoryDocumentToPdf(documentId: string): Promise
     if (templateError || !template) {
       throw new Error('Template not found');
     }
+    const normalizedDocument = normalizeRegulatoryDocumentRow(document);
+    const normalizedTemplate = normalizeRegulatoryTemplateRow(template);
     // Générer le PDF
-    return await exportToPdf(document as any, template as any);
+    return await exportToPdf(normalizedDocument, normalizedTemplate);
   } catch (error) {
     logger.error('PdfExporter', 'Error exporting document to PDF:', error);
+    throw error;
+  }
+}
+
+/**
+ * Exporte un document réglementaire en PDF (fonction wrapper, avec options)
+ */
+export async function exportRegulatoryDocumentToPdfWithOptions(
+  documentId: string,
+  options: Partial<PdfExportOptions> = {}
+): Promise<Blob> {
+  try {
+    const { supabase } = await import('@/lib/supabase');
+
+    const { data: document, error: docError } = await supabase
+      .from('regulatory_documents')
+      .select('*')
+      .eq('id', documentId)
+      .single();
+    if (docError || !document) {
+      throw new Error('Document not found');
+    }
+
+    const { data: template, error: templateError } = await supabase
+      .from('regulatory_templates')
+      .select('*')
+      .eq('id', (document as any).template_id)
+      .single();
+    if (templateError || !template) {
+      throw new Error('Template not found');
+    }
+
+    const normalizedDocument = normalizeRegulatoryDocumentRow(document);
+    const normalizedTemplate = normalizeRegulatoryTemplateRow(template);
+    return await exportToPdf(normalizedDocument, normalizedTemplate, options);
+  } catch (error) {
+    logger.error('PdfExporter', 'Error exporting document to PDF with options:', error);
     throw error;
   }
 }

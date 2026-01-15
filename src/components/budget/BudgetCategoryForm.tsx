@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Calculator,
   AlertTriangle,
@@ -19,9 +16,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface Account {
   id: string;
   account_number: string;

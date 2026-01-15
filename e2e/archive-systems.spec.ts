@@ -4,15 +4,41 @@
  */
 
 import { test, expect, Page } from '@playwright/test';
+import type { TestInfo } from '@playwright/test';
+
+import { dismissOverlays } from './testUtils/dismissOverlays';
 
 // Configuration
-const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:5173';
+// Use Playwright's configured baseURL (from playwright.config.ts). Leaving this empty ensures
+// `${BASE_URL}/path` resolves to `/path`.
+const BASE_URL = '';
+const RUN_AUTHED_E2E =
+  process.env.PLAYWRIGHT_RUN_AUTHED_E2E === '1' || process.env.PLAYWRIGHT_RUN_AUTHED_E2E === 'true';
 const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL || 'test@casskai.com';
 const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD || 'TestPassword123!';
+
+async function ensureAuthedE2EEnabled(testInfo: TestInfo) {
+  const baseURL = String(testInfo.project.use.baseURL || '');
+  test.skip(
+    /casskai\.app/i.test(baseURL) && !process.env.PLAYWRIGHT_ALLOW_PROD,
+    'Refusing to run E2E against production without PLAYWRIGHT_ALLOW_PROD=1'
+  );
+
+  test.skip(
+    !RUN_AUTHED_E2E,
+    'Authenticated E2E disabled by default; set PLAYWRIGHT_RUN_AUTHED_E2E=1'
+  );
+
+  test.skip(
+    !process.env.TEST_USER_EMAIL || !process.env.TEST_USER_PASSWORD,
+    'Missing TEST_USER_EMAIL / TEST_USER_PASSWORD in .env.test.local'
+  );
+}
 
 // Helper: Login
 async function login(page: Page) {
   await page.goto(`${BASE_URL}/login`, { timeout: 60000 });
+  await dismissOverlays(page);
   await page.fill('input[type="email"]', TEST_USER_EMAIL, { timeout: 30000 });
   await page.fill('input[type="password"]', TEST_USER_PASSWORD, { timeout: 30000 });
   await page.click('button[type="submit"]', { timeout: 30000 });
@@ -31,7 +57,8 @@ async function waitForToast(page: Page, message: string) {
 }
 
 test.describe('Archive Systems - Reports Module', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await ensureAuthedE2EEnabled(testInfo);
     await login(page);
     await navigateToReports(page);
   });
@@ -245,7 +272,8 @@ test.describe('Archive Systems - Reports Module', () => {
 });
 
 test.describe('Archive Systems - Database Integration', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await ensureAuthedE2EEnabled(testInfo);
     await login(page);
   });
 
@@ -338,7 +366,8 @@ test.describe('Archive Systems - Database Integration', () => {
 });
 
 test.describe('Archive Systems - Performance & Security', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await ensureAuthedE2EEnabled(testInfo);
     await login(page);
   });
 
@@ -408,7 +437,8 @@ test.describe('Archive Systems - Performance & Security', () => {
 });
 
 test.describe('Archive Systems - Advanced Features', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await ensureAuthedE2EEnabled(testInfo);
     await login(page);
   });
 
@@ -458,7 +488,8 @@ test.describe('Archive Systems - Advanced Features', () => {
 });
 
 test.describe('Archive Systems - UI/UX', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await ensureAuthedE2EEnabled(testInfo);
     await login(page);
   });
 

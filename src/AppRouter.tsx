@@ -50,7 +50,7 @@ const LazyFAQPage = React.lazy(() => import('@/pages/FAQPage'));
 const LazyGDPRPage = React.lazy(() => import('@/pages/GDPRPage'));
 const LazyDiagnosticPage = React.lazy(() => import('@/pages/DiagnosticPage'));
 const LazyDocumentationArticlePage = React.lazy(() => import('@/pages/DocumentationArticlePage'));
-const LazyDocumentationCategoryPage = React.lazy(() => import('@/pages/DocumentationCategoryPage'));
+const LazyDocumentationSlugPage = React.lazy(() => import('@/pages/DocumentationSlugPage'));
 const LazyAccountingImportPage = React.lazy(() => import('@/pages/AccountingImportPage'));
 const LazyPricingPage = React.lazy(() => import('@/pages/PricingPage'));
 const LazyForgotPasswordPage = React.lazy(() => import('@/pages/auth/ForgotPasswordPage'));
@@ -74,7 +74,6 @@ const LazyTeamManagementGuide = React.lazy(() => import('@/pages/docs/TeamManage
 // Nouveaux outils financiers
 const LazyTaxSimulator = React.lazy(() => import('@/pages/Reports/TaxSimulator'));
 const LazyLoanSimulator = React.lazy(() => import('@/pages/Reports/LoanSimulator'));
-const LazyRegulatoryDocuments = React.lazy(() => import('@/pages/Reports/regulatory/RegulatoryDocuments'));
 const LazyComplianceDashboard = React.lazy(() => import('@/pages/Reports/regulatory/ComplianceDashboard'));
 const LazyRegulatoryDocumentsPage = React.lazy(() => import('@/pages/RegulatoryDocumentsPage'));
 
@@ -194,14 +193,9 @@ const AppRouter: React.FC = () => {
                 <LazyDocumentationPage />
               </Suspense>
             } />
-            <Route path="docs/:articleId" element={
+            <Route path="docs/guide/team-management" element={
               <Suspense fallback={<LoadingFallback />}>
-                <LazyDocumentationArticlePage />
-              </Suspense>
-            } />
-            <Route path="docs/:category" element={
-              <Suspense fallback={<LoadingFallback />}>
-                <LazyDocumentationCategoryPage />
+                <LazyTeamManagementGuide />
               </Suspense>
             } />
             <Route path="docs/:category/:article" element={
@@ -209,9 +203,9 @@ const AppRouter: React.FC = () => {
                 <LazyDocumentationArticlePage />
               </Suspense>
             } />
-            <Route path="docs/guide/team-management" element={
+            <Route path="docs/:slug" element={
               <Suspense fallback={<LoadingFallback />}>
-                <LazyTeamManagementGuide />
+                <LazyDocumentationSlugPage />
               </Suspense>
             } />
             <Route path="tutorials" element={
@@ -489,10 +483,24 @@ const AppRouter: React.FC = () => {
                 </Suspense>
               </ProtectedRoute>
             } />
-            <Route path="docs/:slug" element={
+            <Route path="docs" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyDocumentationPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="docs/:category/:article" element={
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
                   <LazyDocumentationArticlePage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="docs/:slug" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyDocumentationSlugPage />
                 </Suspense>
               </ProtectedRoute>
             } />

@@ -97,9 +97,11 @@ describe('ConfigMigration', () => {
       const result = await testMigration.migrateFromHardcodedConfig();
 
       expect(result).toBe(false);
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Aucune configuration existante trouvée')
-      );
+      const warnCallsJoined = consoleWarnSpy.mock.calls
+        .flat()
+        .map(v => (typeof v === 'string' ? v : JSON.stringify(v)))
+        .join(' ');
+      expect(warnCallsJoined).toContain('Aucune configuration existante trouvée');
       consoleWarnSpy.mockRestore();
     });
 

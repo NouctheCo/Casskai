@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Select,
   SelectContent,
@@ -16,9 +12,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Progress } from '@/components/ui/progress';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   TrendingUp,
   TrendingDown,
@@ -27,9 +21,7 @@ import {
   Clock
 } from 'lucide-react';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface AgingBucket {
   label: string;
   min: number;

@@ -152,11 +152,16 @@ export function getAutoFillFields(template: RegulatoryTemplate): Array<{
     sections.forEach((section) => {
       if (section.fields) {
         section.fields.forEach((field: any) => {
-          if (field.autoFill && field.accountMapping) {
+          if (field.autoFill) {
+            const accountMappings = (template as any).account_mappings || template.accountMappings || {};
+            const mappingFromTemplate = accountMappings?.[field.id];
+            const mappingFromField = field.accountMapping;
+            const accountMapping = mappingFromTemplate || mappingFromField;
+            if (!accountMapping) return;
             autoFillFields.push({
               fieldId: field.id,
               label: field.label,
-              accountMapping: field.accountMapping,
+              accountMapping,
             });
           }
         });
@@ -188,19 +193,22 @@ export function getComputedFields(template: RegulatoryTemplate): Array<{
     dependsOn: string[];
   }> = [];
   function extractFieldIds(formula: string): string[] {
-    const matches = formula.match(/=([a-zA-Z_][a-zA-Z0-9_]*)/g);
-    return (matches || []).map((m) => m.substring(1));
+    const tokens = formula.match(/[a-zA-Z_][a-zA-Z0-9_]*/g) || [];
+    const excluded = new Set(['SUM', 'ABS', 'IF', 'MAX', 'MIN', 'ROUND', 'CEIL', 'FLOOR']);
+    return Array.from(new Set(tokens.filter((t) => !excluded.has(t))));
   }
   function traverseSections(sections: any[]): void {
     sections.forEach((section) => {
       if (section.fields) {
         section.fields.forEach((field: any) => {
-          if (field.computed && field.computationFormula) {
+          const formula = field.calculationFormula || field.computationFormula || field.formula;
+          const isComputed = !!(field.calculated || field.computed);
+          if (isComputed && typeof formula === 'string' && formula.length > 0) {
             computedFields.push({
               fieldId: field.id,
               label: field.label,
-              formula: field.computationFormula,
-              dependsOn: extractFieldIds(field.computationFormula),
+              formula,
+              dependsOn: extractFieldIds(formula),
             });
           }
         });
@@ -327,4 +335,4 @@ export default {
   getTemplateStatistics,
   exportTemplatesToJSON,
   exportTemplatesToCSV,
-};
+};

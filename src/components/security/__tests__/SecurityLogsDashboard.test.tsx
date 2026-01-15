@@ -19,6 +19,13 @@ vi.mock('@/services/securityLogService', () => ({
   })),
 }));
 
+// Mock auditService (SecurityLogsDashboard now reads from audit_logs)
+vi.mock('@/services/auditService', () => ({
+  auditService: {
+    getCompanyLogs: vi.fn(() => Promise.resolve([])),
+  },
+}));
+
 // Mock useToast
 vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({

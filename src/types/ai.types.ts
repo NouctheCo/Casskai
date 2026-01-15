@@ -183,6 +183,14 @@ export interface AIAssistantMessage {
   timestamp: string;
   isLoading?: boolean;
   error?: string;
+  sources?: string[];
+  suggestions?: string[];
+  actions?: Array<{
+    type: 'navigate' | 'create' | 'search' | 'explain' | string;
+    label: string;
+    payload?: any;
+  }>;
+  confidence?: number;
 }
 
 export interface ReportNarrative {

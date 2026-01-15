@@ -684,7 +684,8 @@ export function CompanySettings() {
                 </h3>
                 <p className="text-sm text-red-700 dark:text-red-400">
                   Suppression définitive de l'entreprise avec consensus des propriétaires.
-                  Inclut l'export FEC et l'archivage légal des données.
+                  Inclut l'export FEC (spécifications DGFiP) et l'archivage légal des données.
+                  Validation recommandée via Test Compta Demat.
                 </p>
               </div>
               <Button

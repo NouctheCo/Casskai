@@ -1,8 +1,26 @@
 import { defineConfig, devices } from '@playwright/test';
 import * as dotenv from 'dotenv';
 
-// Charger les variables d'environnement depuis .env.test
+// Charger les variables d'environnement pour les tests E2E.
+// (Les secrets ne doivent pas être commités; voir .env.example)
+dotenv.config({ path: '.env.test.local' });
 dotenv.config({ path: '.env.test' });
+dotenv.config({ path: '.env.local' });
+dotenv.config();
+
+const LOCAL_BASE_URL = process.env.PLAYWRIGHT_LOCAL_BASE_URL || 'http://localhost:5173';
+
+// Allow overriding the baseURL (e.g. CI running against a deployed environment), but require an explicit opt-in
+// when a developer has a remote URL in their local env file.
+const REMOTE_BASE_URL = process.env.PLAYWRIGHT_BASE_URL || process.env.PLAYWRIGHT_TEST_BASE_URL;
+const USE_REMOTE_BASE_URL =
+  !!REMOTE_BASE_URL &&
+  (process.env.CI === 'true' ||
+    process.env.CI === '1' ||
+    process.env.PLAYWRIGHT_USE_REMOTE === 'true' ||
+    process.env.PLAYWRIGHT_USE_REMOTE === '1');
+
+const BASE_URL = USE_REMOTE_BASE_URL ? REMOTE_BASE_URL! : LOCAL_BASE_URL;
 
 /**
  * Playwright E2E Testing Configuration
@@ -33,7 +51,9 @@ export default defineConfig({
 
   /* Reporter to use */
   reporter: [
-    ['html'],
+    // Avoid keeping a local HTML report server running (which can hang local/CI runs).
+    // Developers can still open the report manually via `npx playwright show-report`.
+    ['html', { open: 'never' }],
     ['list'],
     ...(process.env.CI ? [['github'] as const] : []),
   ],
@@ -41,7 +61,7 @@ export default defineConfig({
   /* Shared settings for all the projects below */
   use: {
     /* Base URL for testing */
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'https://casskai.app',
+    baseURL: BASE_URL,
 
     /* Collect trace when retrying the failed test */
     trace: 'on-first-retry',
@@ -95,12 +115,14 @@ export default defineConfig({
   ],
 
   /* Run local dev server before starting tests */
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 180 * 1000, // 3 minutes pour démarrer le serveur (au lieu de 2)
-    stdout: 'pipe', // Afficher les logs du serveur
-    stderr: 'pipe',
-  },
+  webServer: USE_REMOTE_BASE_URL
+    ? undefined
+    : {
+        command: 'npm run dev',
+        url: LOCAL_BASE_URL,
+        reuseExistingServer: !process.env.CI,
+        timeout: 180 * 1000, // 3 minutes pour démarrer le serveur (au lieu de 2)
+        stdout: 'pipe', // Afficher les logs du serveur
+        stderr: 'pipe',
+      },
 });

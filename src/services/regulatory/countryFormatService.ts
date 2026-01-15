@@ -73,11 +73,11 @@ export class CountryFormatService {
         decimals: 2,
       },
       date: {
-        format: formats.dateFormat || 'DD/MM/YYYY',
+        format: (formats as any).dateFormat || 'DD/MM/YYYY',
         separator: '/',
       },
       currency: currencyCodes[country] || 'EUR',
-      language: formats.language || 'EN',
+      language: (formats as any).language || 'EN',
     };
   }
 

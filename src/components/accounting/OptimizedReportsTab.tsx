@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '@/components/ui/badge';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '@/hooks/useToast';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   TrendingUp,
   Download,
@@ -35,17 +28,11 @@ import {
   Package
 } from 'lucide-react';
 import { reportGenerationService } from '@/services/reportGenerationService';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { DEFAULT_REPORT_TEMPLATES } from '@/data/reportTemplates';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import type { FinancialReport, ReportFormData } from '@/types/reports.types';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { dashboardStatsService, type DashboardStats } from '@/services/dashboardStatsService';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import ReportsFinancialDashboard from './ReportsFinancialDashboard';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 // Type union strict pour les types de rapports
 type ReportType =
   | 'balance_sheet'

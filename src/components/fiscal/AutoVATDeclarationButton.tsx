@@ -4,25 +4,15 @@
 import React, { useState } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '../ui/button';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '../ui/dialog';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Input } from '../ui/input';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Label } from '../ui/label';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '../ui/badge';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useToast } from '../ui/use-toast';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { createVATDeclaration, previewVATAmount } from '../../services/vatDeclarationService';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Sparkles, Loader2, CheckCircle, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card } from '../ui/card';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface AutoVATDeclarationButtonProps {
   companyId: string;
   onSuccess?: () => void;

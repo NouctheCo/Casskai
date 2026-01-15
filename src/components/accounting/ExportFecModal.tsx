@@ -234,7 +234,7 @@ export const ExportFecModal: React.FC<ExportFecModalProps> = ({ open, onClose })
                         Format FEC (Fichier des Écritures Comptables)
                       </p>
                       <p className="text-blue-700 dark:text-blue-300">
-                        Format officiel DGFiP • 18 colonnes • Séparateur: | • Décimale: ,
+                        Spécifications DGFiP • 18 colonnes • Séparateur: TAB • Décimale: ,
                       </p>
                       <p className="text-xs text-blue-600 dark:text-blue-400">
                         Nom: SIRENFEC{endDate.replace(/-/g, '')}.txt

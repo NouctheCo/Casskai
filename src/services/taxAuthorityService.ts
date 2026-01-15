@@ -337,7 +337,7 @@ export class TaxAuthorityService {
     hasError: boolean,
     errorMessage?: string
   ): Promise<void> {
-    await supabase.from('tax_authority_communication_logs').insert([
+    const { error } = await supabase.from('tax_authority_communication_logs').insert([
       {
         submission_id: submissionId,
         authority_id: authorityId,
@@ -353,6 +353,10 @@ export class TaxAuthorityService {
         is_retry: false,
       },
     ]);
+
+    if (error) {
+      logger.warn('TaxAuthority', 'Impossible d\'écrire tax_authority_communication_logs (RLS/permissions?):', error);
+    }
   }
   /**
    * Enregistre les identifiants chiffrés
@@ -400,4 +404,4 @@ export class TaxAuthorityService {
     }
     return data;
   }
-}
+}

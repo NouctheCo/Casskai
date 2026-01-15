@@ -2591,7 +2591,7 @@
       },
       "q8": {
         "question": "Is the tax return generated automatically?",
-        "answer": "Yes, CassKai automatically generates the French tax return (forms 2050-2059), the DSF for OHADA countries, as well as VAT and corporate tax declarations adapted to each country. Documents are exportable as PDF ready for filing."
+        "answer": "CassKai pre-fills (drafts) the French tax return (forms 2050–2059) and the SYSCOHADA DSF (balance sheet, income statement, TAFIRE) from your accounting data. VAT and corporate tax calculations are available depending on country configuration. “Ready-for-filing” PDF exports for tax declarations are in progress; today they are primarily available as data (JSON/CSV) with checks and warnings."
       }
     }
   },

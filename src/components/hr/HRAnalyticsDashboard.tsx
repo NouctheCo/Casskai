@@ -5,9 +5,7 @@
 import { useState, useEffect } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Progress } from '@/components/ui/progress';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Users,
   DollarSign,
@@ -21,9 +19,7 @@ import {
   Percent
 } from 'lucide-react';
 import { hrPerformanceService } from '@/services/hrPerformanceService';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { hrTrainingService } from '@/services/hrTrainingService';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 
 interface HRAnalyticsDashboardProps {
   companyId: string;

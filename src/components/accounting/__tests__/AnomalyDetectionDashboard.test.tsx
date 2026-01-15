@@ -34,7 +34,7 @@ vi.mock('@/hooks/useCompany', () => ({
 
 vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({
-    toast: vi.fn(),
+    showToast: vi.fn(),
   }),
 }));
 

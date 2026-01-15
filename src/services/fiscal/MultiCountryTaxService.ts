@@ -11,8 +11,16 @@
  */
 // Service fiscal multi-pays pour CassKai
 import { frenchTaxComplianceService } from './FrenchTaxComplianceService';
+import { FiscalServiceFactory } from './FiscalServiceFactory';
+import {
+  exportDeclarationToRegulatoryPdf,
+  exportDeclarationToRegulatoryXmlDraft,
+  mapDeclarationTypeToRegulatoryDocumentType
+} from './multiCountryRegulatoryExportService';
 import { getTaxConfiguration } from '../../data/taxConfigurations';
 import { logger } from '@/lib/logger';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 export interface CountryTaxConfig {
   country: string;
   countryName: string;
@@ -587,7 +595,7 @@ type CorporateTaxCalculation = {
   taxableIncome: number;
   corporateTax: number;
 };
-type ExportResult = { content: string; filename: string; mimeType: string };
+type ExportResult = { content: BlobPart; filename: string; mimeType: string };
 type AutoObligationsResult = {
   countryCode: string;
   obligations: TaxDeclarationType[];
@@ -689,25 +697,151 @@ export class MultiCountryTaxService {
   /**
    * Calcule la TVA pour une période donnée
    */
-  async calculateVAT(_companyId: string, countryCode: string, period: string): Promise<VATCalculation> {
+  async calculateVAT(companyId: string, countryCode: string, period: string): Promise<VATCalculation> {
     const config = this.getTaxConfig(countryCode);
+    const monthlyPeriod = this.normalizeMonthlyPeriod(period);
+
+    // France: CA3 calc from FrenchTaxComplianceService
+    if (countryCode === 'FR') {
+      const ca3 = await frenchTaxComplianceService.generateCA3Declaration(companyId, monthlyPeriod);
+      const d = ca3.data as any;
+
+      const totalVAT =
+        (d.ventes_france_taux_normal || 0) +
+        (d.ventes_france_taux_intermediaire || 0) +
+        (d.ventes_france_taux_reduit || 0) +
+        (d.ventes_france_taux_particulier || 0) +
+        (d.autres_operations_imposables || 0) +
+        (d.regularisations_tva_collectee || 0);
+
+      const deductibleVAT =
+        (d.achats_tva_deductible || 0) +
+        (d.immobilisations_tva_deductible || 0) +
+        (d.autres_biens_services_tva_deductible || 0) +
+        (d.regularisations_tva_deductible || 0);
+
+      return {
+        period: monthlyPeriod,
+        countryCode,
+        vatRate: config.vatRates.standard,
+        totalVAT,
+        deductibleVAT,
+        netVAT: totalVAT - deductibleVAT,
+        calculations: [
+          {
+            source: 'CA3',
+            tva_nette_due: d.tva_nette_due,
+            tva_a_payer: d.tva_a_payer,
+            credit_a_reporter: d.credit_a_reporter
+          }
+        ]
+      };
+    }
+
+    // Supported countries: use specialized services
+    if (FiscalServiceFactory.isCountrySupported(countryCode)) {
+      const service = FiscalServiceFactory.getServiceForCountry(countryCode);
+      const vatDeclaration = await service.generateVATDeclaration(companyId, monthlyPeriod, countryCode);
+      const vatData: any = vatDeclaration.data;
+
+      // SYSCOHADA/SCF shape
+      if (vatData && typeof vatData === 'object' && 'tvaCollectee' in vatData) {
+        const totalVAT = Number(vatData.tvaCollectee || 0);
+        const deductibleVAT = Number(vatData.tvaDeductible?.total || 0);
+        return {
+          period: monthlyPeriod,
+          countryCode,
+          vatRate: config.vatRates.standard,
+          totalVAT,
+          deductibleVAT,
+          netVAT: Number(vatData.tvaNette ?? (totalVAT - deductibleVAT)),
+          calculations: [vatData]
+        };
+      }
+
+      // IFRS shape
+      if (vatData && typeof vatData === 'object' && 'outputVAT' in vatData) {
+        const totalVAT = Number(vatData.outputVAT || 0);
+        const deductibleVAT = Number(vatData.inputVAT?.total || 0);
+        return {
+          period: monthlyPeriod,
+          countryCode,
+          vatRate: config.vatRates.standard,
+          totalVAT,
+          deductibleVAT,
+          netVAT: Number(vatData.netVAT ?? (totalVAT - deductibleVAT)),
+          calculations: [vatData]
+        };
+      }
+    }
+
+    // Fallback: still return a valid structure
     return {
-      period,
+      period: monthlyPeriod,
       countryCode,
       vatRate: config.vatRates.standard,
       totalVAT: 0,
       deductibleVAT: 0,
       netVAT: 0,
-      calculations: []
+      calculations: [{ warning: 'VAT calculation not implemented for this country yet.' }]
     };
   }
   /**
    * Calcule l'impôt sur les sociétés
    */
-  async calculateCorporateTax(_companyId: string, countryCode: string, period: string): Promise<CorporateTaxCalculation> {
+  async calculateCorporateTax(companyId: string, countryCode: string, period: string): Promise<CorporateTaxCalculation> {
     const config = this.getTaxConfig(countryCode);
+    const fiscalYear = this.normalizeAnnualPeriod(period);
+
+    // France: use 2058 (resultat_fiscal) from liasse generation
+    if (countryCode === 'FR') {
+      const liasse = await frenchTaxComplianceService.generateLiasseFiscale(companyId, fiscalYear);
+      const decl2058 = liasse.find(d => d.type === 'LIASSE_2058');
+      const taxableIncome = Number((decl2058?.data as any)?.resultat_fiscal ?? 0);
+      const corporateTax = taxableIncome > 0 ? taxableIncome * (config.corporateTaxRate / 100) : 0;
+      return {
+        period: fiscalYear,
+        countryCode,
+        corporateTaxRate: config.corporateTaxRate,
+        taxableIncome,
+        corporateTax
+      };
+    }
+
+    if (FiscalServiceFactory.isCountrySupported(countryCode)) {
+      const service = FiscalServiceFactory.getServiceForCountry(countryCode);
+      const corporateDecl = await service.generateCorporateTaxDeclaration(companyId, fiscalYear, countryCode);
+      const corporateData: any = corporateDecl.data;
+
+      // SYSCOHADA/SCF shape
+      if (corporateData && typeof corporateData === 'object' && 'resultatFiscal' in corporateData) {
+        const taxableIncome = Number(corporateData.resultatFiscal || 0);
+        const corporateTax = Number(corporateData.impotCalcule ?? corporateData.impotAPayer ?? 0);
+        return {
+          period: fiscalYear,
+          countryCode,
+          corporateTaxRate: config.corporateTaxRate,
+          taxableIncome,
+          corporateTax
+        };
+      }
+
+      // IFRS shape
+      if (corporateData && typeof corporateData === 'object' && 'taxableIncome' in corporateData) {
+        const taxableIncome = Number(corporateData.taxableIncome || 0);
+        const corporateTax = Number(corporateData.taxComputed ?? corporateData.taxPayable ?? 0);
+        return {
+          period: fiscalYear,
+          countryCode,
+          corporateTaxRate: config.corporateTaxRate,
+          taxableIncome,
+          corporateTax
+        };
+      }
+    }
+
     return {
-      period,
+      period: fiscalYear,
       countryCode,
       corporateTaxRate: config.corporateTaxRate,
       taxableIncome: 0,
@@ -733,13 +867,140 @@ export class MultiCountryTaxService {
         mimeType: 'text/plain'
       };
     }
-    // Export générique pour les autres pays/formats
-    const exportContent = `Export fiscal ${config.countryName} - ${period}\nFormat: ${format}`;
+
+    const normalizedMonthly = this.normalizeMonthlyPeriod(period);
+    const normalizedAnnual = this.normalizeAnnualPeriod(period);
+
+    if (format === 'pdf') {
+      const vat = await this.calculateVAT(companyId, countryCode, normalizedMonthly);
+      const corporateTax = await this.calculateCorporateTax(companyId, countryCode, normalizedAnnual);
+
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const marginX = 40;
+      let y = 50;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('Export fiscal (brouillon)', marginX, y);
+
+      y += 18;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`Pays: ${config.countryName} (${countryCode})`, marginX, y);
+      y += 14;
+      doc.text(`Période: ${period}`, marginX, y);
+      y += 14;
+      doc.text('Note: export de synthèse (non-dépôt).', marginX, y);
+      y += 18;
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('TVA', marginX, y);
+      y += 10;
+      doc.setFont('helvetica', 'normal');
+
+      autoTable(doc, {
+        startY: y,
+        head: [['Indicateur', 'Valeur']],
+        body: [
+          ['Taux standard', `${vat.vatRate}%`],
+          ['TVA collectée', String(vat.totalVAT)],
+          ['TVA déductible', String(vat.deductibleVAT)],
+          ['TVA nette', String(vat.netVAT)]
+        ],
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [59, 130, 246] }
+      });
+
+      // @ts-expect-error jspdf-autotable adds lastAutoTable
+      y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 18 : y + 80;
+
+      doc.setFont('helvetica', 'bold');
+      doc.text("Impôt sur les sociétés", marginX, y);
+      y += 10;
+      doc.setFont('helvetica', 'normal');
+
+      autoTable(doc, {
+        startY: y,
+        head: [['Indicateur', 'Valeur']],
+        body: [
+          ['Taux', `${corporateTax.corporateTaxRate}%`],
+          ['Résultat fiscal / base imposable', String(corporateTax.taxableIncome)],
+          ['IS calculé', String(corporateTax.corporateTax)]
+        ],
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [34, 197, 94] }
+      });
+
+      const pdfBytes = doc.output('arraybuffer');
+      return {
+        content: pdfBytes,
+        filename: `tax_export_${countryCode}_${period}.pdf`,
+        mimeType: 'application/pdf'
+      };
+    }
+
+    // CSV: synthèse simple
+    if (format === 'csv' || format === 'excel') {
+      const vat = await this.calculateVAT(companyId, countryCode, normalizedMonthly);
+      const corporateTax = await this.calculateCorporateTax(companyId, countryCode, normalizedAnnual);
+
+      const lines = [
+        'metric,value',
+        `country,${countryCode}`,
+        `period,${period}`,
+        `vat_rate,${vat.vatRate}`,
+        `vat_total,${vat.totalVAT}`,
+        `vat_deductible,${vat.deductibleVAT}`,
+        `vat_net,${vat.netVAT}`,
+        `corporate_tax_rate,${corporateTax.corporateTaxRate}`,
+        `taxable_income,${corporateTax.taxableIncome}`,
+        `corporate_tax,${corporateTax.corporateTax}`
+      ];
+
+      return {
+        content: lines.join('\n'),
+        filename: `tax_export_${countryCode}_${period}.csv`,
+        mimeType: 'text/csv'
+      };
+    }
+
+    // Default fallback
     return {
-      content: exportContent,
-      filename: `tax_export_${countryCode}_${period}.${format === 'pdf' ? 'pdf' : format === 'excel' ? 'xlsx' : 'csv'}`,
-      mimeType: format === 'pdf' ? 'application/pdf' : format === 'excel' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'text/csv'
+      content: `Export fiscal ${config.countryName} - ${period}\nFormat: ${format}`,
+      filename: `tax_export_${countryCode}_${period}.txt`,
+      mimeType: 'text/plain'
     };
+  }
+
+  /**
+   * Exporte une déclaration au format réglementaire PDF (brouillon, via templates).
+   */
+  async exportDeclarationRegulatoryPdf(
+    companyId: string,
+    countryCode: string,
+    declarationType: string,
+    period: string
+  ): Promise<{ blob: Blob; filename: string; mimeType: string }> {
+    return exportDeclarationToRegulatoryPdf({ companyId, countryCode, declarationType, period });
+  }
+
+  /**
+   * Exporte une déclaration au format XML draft (brouillon, via templates).
+   */
+  async exportDeclarationRegulatoryXmlDraft(
+    companyId: string,
+    countryCode: string,
+    declarationType: string,
+    period: string
+  ): Promise<{ blob: Blob; filename: string; mimeType: string }> {
+    return exportDeclarationToRegulatoryXmlDraft({ companyId, countryCode, declarationType, period });
+  }
+
+  /**
+   * Indique si un type de déclaration a un mapping vers un template réglementaire.
+   */
+  isSupportedForRegulatoryExport(countryCode: string, declarationType: string): boolean {
+    return mapDeclarationTypeToRegulatoryDocumentType(countryCode, declarationType) !== null;
   }
   /**
    * Configuration automatique des obligations fiscales
@@ -814,13 +1075,60 @@ export class MultiCountryTaxService {
     companyId: string,
     period: string
   ) {
+    // If we have a supported fiscal service, generate a real declaration
+    if (FiscalServiceFactory.isCountrySupported(countryCode)) {
+      const service = FiscalServiceFactory.getServiceForCountry(countryCode);
+      const kind = this.inferDeclarationKind(declarationType);
+
+      try {
+        switch (kind) {
+          case 'vat':
+            return await service.generateVATDeclaration(companyId, this.normalizeMonthlyPeriod(period), countryCode);
+          case 'corporate_tax':
+            return await service.generateCorporateTaxDeclaration(companyId, this.normalizeAnnualPeriod(period), countryCode);
+          case 'balance_sheet':
+            return await service.generateBalanceSheet(companyId, this.normalizeAnnualPeriod(period), countryCode);
+          case 'income_statement':
+            return await service.generateIncomeStatement(companyId, this.normalizeAnnualPeriod(period), countryCode);
+          default:
+            break;
+        }
+
+        // Special cases by country/standard
+        const upper = declarationType.toUpperCase();
+        const anyService = service as any;
+
+        // OHADA DSF
+        if (upper.includes('DSF') && typeof anyService.generateDSF === 'function') {
+          return await anyService.generateDSF(companyId, this.normalizeAnnualPeriod(period), countryCode);
+        }
+
+        // Algeria G50 / IBS (SCF)
+        if (countryCode === 'DZ') {
+          if (upper.includes('G50') && typeof anyService.generateG50Algeria === 'function') {
+            return await anyService.generateG50Algeria(companyId, this.normalizeMonthlyPeriod(period));
+          }
+          if (upper.includes('IBS') && typeof anyService.generateIBSAlgeria === 'function') {
+            return await anyService.generateIBSAlgeria(companyId, this.normalizeAnnualPeriod(period));
+          }
+        }
+      } catch (error) {
+        logger.warn('MultiCountryTax', `Erreur génération déclaration ${declarationType} pour ${countryCode}`, {
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+
+    // Fallback stub so UI remains functional
     return {
       id: `${declarationType.toLowerCase()}-${companyId}-${period}`,
       type: declarationType,
       country: countryCode,
       period,
       status: 'draft',
-      data: {},
+      data: {
+        warning: 'Declaration generated as draft placeholder for unsupported country/type.'
+      },
       generatedAt: new Date().toISOString()
     };
   }
@@ -833,8 +1141,15 @@ export class MultiCountryTaxService {
     const allowedStatuses: ReadonlyArray<TaxDeclaration['status']> = ['draft', 'ready', 'filed', 'accepted', 'rejected'];
     const statusRaw = rec.status as string | undefined;
     const status: TaxDeclaration['status'] = (allowedStatuses.find(s => s === statusRaw) ?? 'draft');
-    const dueDate = (rec.dueDate as Date) || new Date();
-    const amount = (rec.amount as number) ?? 0;
+    const dueDateRaw = rec.dueDate as unknown;
+    const dueDate =
+      dueDateRaw instanceof Date
+        ? dueDateRaw
+        : typeof dueDateRaw === 'string'
+          ? new Date(dueDateRaw)
+          : new Date();
+
+    const amount = this.inferAmount(type, rec);
     const validationErrors = (rec.validationErrors as string[]) || [];
     const warnings = (rec.warnings as string[]) || [];
     return {
@@ -848,6 +1163,84 @@ export class MultiCountryTaxService {
       warnings,
       data: rec
     };
+  }
+
+  private inferAmount(declarationType: string, rec: Record<string, unknown>): number {
+    const directAmount = rec.amount as number | undefined;
+    if (typeof directAmount === 'number' && Number.isFinite(directAmount)) return directAmount;
+
+    const data = rec.data as any;
+    if (!data || typeof data !== 'object') return 0;
+
+    // Common payable fields (independent from declaration type)
+    const payableCandidates: unknown[] = [
+      data.totalAPayer,
+      data.total_a_payer,
+      data.tva_a_payer,
+      data.tvaAPayer,
+      data.vatPayable,
+      data.netVATPayable,
+      data.soldeAPayer,
+      data.impotAPayer,
+      data.taxPayable,
+      data.taxComputed
+    ];
+
+    for (const candidate of payableCandidates) {
+      if (typeof candidate === 'number' && Number.isFinite(candidate)) return candidate;
+    }
+
+    const upper = declarationType.toUpperCase();
+    if (upper.includes('TVA') || upper.includes('VAT')) {
+      // FR
+      if (typeof data.tva_a_payer === 'number') return data.tva_a_payer;
+      // SYSCOHADA / SCF
+      if (typeof data.tvaAPayer === 'number') return data.tvaAPayer;
+      // IFRS
+      if (typeof data.vatPayable === 'number') return data.vatPayable;
+      return 0;
+    }
+
+    if (upper.includes('IS') || upper.includes('IBS') || upper.includes('IMPOT') || upper.includes('TAX')) {
+      // SYSCOHADA/SCF
+      if (typeof data.impotAPayer === 'number') return data.impotAPayer;
+      if (typeof data.impotCalcule === 'number') return data.impotCalcule;
+      if (typeof data.soldeAPayer === 'number') return data.soldeAPayer;
+      // IFRS
+      if (typeof data.taxPayable === 'number') return data.taxPayable;
+      if (typeof data.taxComputed === 'number') return data.taxComputed;
+      return 0;
+    }
+
+    return 0;
+  }
+
+  private inferDeclarationKind(declarationType: string): 'vat' | 'corporate_tax' | 'balance_sheet' | 'income_statement' | null {
+    const t = declarationType.toUpperCase();
+    if (t.includes('TVA') || t.includes('VAT')) return 'vat';
+    if (t.includes('IS') || t.includes('IBS') || t.includes('CORPORATE')) return 'corporate_tax';
+    if (t.includes('BILAN') || t.includes('BALANCE_SHEET') || t.includes('BALANCE SHEET')) return 'balance_sheet';
+    if (t.includes('RESULTAT') || t.includes('INCOME_STATEMENT') || t.includes('INCOME STATEMENT')) return 'income_statement';
+    return null;
+  }
+
+  private normalizeMonthlyPeriod(period: string): string {
+    // Expected: YYYY-MM. If YYYY only, default to current month.
+    if (/^\d{4}-\d{2}$/.test(period)) return period;
+    if (/^\d{4}$/.test(period)) {
+      const month = String(new Date().getMonth() + 1).padStart(2, '0');
+      return `${period}-${month}`;
+    }
+    // Best-effort: if starts with YYYY-..., keep first 7 chars
+    if (/^\d{4}-\d{2}/.test(period)) return period.slice(0, 7);
+    return `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  private normalizeAnnualPeriod(period: string): string {
+    // Expected: YYYY. If YYYY-MM, take year.
+    if (/^\d{4}$/.test(period)) return period;
+    const match = period.match(/^(\d{4})/);
+    return match?.[1] ?? String(new Date().getFullYear());
   }
   private async validateInternationalCompliance(countryCode: string, _companyId: string, _period: string): Promise<ComplianceResult> {
     const config = this.getTaxConfig(countryCode);

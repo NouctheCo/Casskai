@@ -10,41 +10,24 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 import React, { useState, useEffect } from 'react';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { motion, AnimatePresence as _AnimatePresence } from 'framer-motion';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription as _CardDescription } from '@/components/ui/card';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge as _Badge } from '@/components/ui/badge';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Progress } from '@/components/ui/progress';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { toastSuccess } from '@/lib/toast-helpers';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { PageContainer } from '@/components/ui/PageContainer';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useSubscription } from '@/contexts/SubscriptionContext';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useNavigate } from 'react-router-dom';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { invoicingService } from '@/services/invoicingService';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { toast } from 'sonner';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { 
   FileText,
   Receipt,
@@ -75,19 +58,12 @@ import {
 } from 'lucide-react';
 // Import optimized tab components
 import OptimizedInvoicesTab from '@/components/invoicing/OptimizedInvoicesTab';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import OptimizedClientsTab from '@/components/invoicing/OptimizedClientsTab';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import OptimizedQuotesTab from '@/components/invoicing/OptimizedQuotesTab';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import OptimizedPaymentsTab from '@/components/invoicing/OptimizedPaymentsTab';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { LateFeeCalculator } from '@/components/invoicing/LateFeeCalculator';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { InvoiceComplianceSettings } from '@/components/invoicing/InvoiceComplianceSettings';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 // Invoicing KPI Card Component
 const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }: {
   title: string;

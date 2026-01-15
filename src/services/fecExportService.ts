@@ -106,7 +106,7 @@ export async function generateFECExport(
   }
 }
 /**
- * Générer et télécharger le fichier FEC au format CSV (pipe-separated)
+ * Générer et télécharger le fichier FEC au format texte (séparateur TAB)
  */
 export async function downloadFECFile(
   companyId: string,

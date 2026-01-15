@@ -13,6 +13,17 @@
 import { useState, useCallback, useEffect } from 'react';
 import { frenchTaxComplianceService, FrenchTaxDeclaration } from '@/services/fiscal/FrenchTaxComplianceService';
 import { taxIntegrationService } from '@/services/fiscal/TaxIntegrationService';
+import {
+  blobToObjectUrl,
+  downloadObjectUrl,
+  exportFrenchTaxDeclarationToEdiDraft,
+  exportFrenchTaxDeclarationToPdf
+} from '@/services/fiscal/franceTaxExportService';
+import {
+  exportFrenchDeclarationToRegulatoryPdf,
+  exportFrenchDeclarationToRegulatoryXmlDraft,
+  isSupportedForRegulatoryExport,
+} from '@/services/fiscal/franceRegulatoryExportService';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface TaxComplianceState {
@@ -235,6 +246,84 @@ export const useFrenchTaxCompliance = (companyId: string) => {
     }
   }, [companyId]);
 
+  const downloadDeclarationPdf = useCallback(async (declarationId: string) => {
+    const declaration = state.declarations.find(d => d.id === declarationId);
+    if (!declaration) return;
+
+    const safePeriod = declaration.period.replace(/[^a-zA-Z0-9._-]/g, '-');
+    const safeType = declaration.type.replace(/[^a-zA-Z0-9._-]/g, '-');
+
+    const blob = await exportFrenchTaxDeclarationToPdf(declaration);
+    const url = blobToObjectUrl(blob);
+    try {
+      downloadObjectUrl(url, `${safeType}_${safePeriod}_${companyId}.pdf`);
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }, [companyId, state.declarations]);
+
+  const downloadDeclarationEdiDraft = useCallback((declarationId: string) => {
+    const declaration = state.declarations.find(d => d.id === declarationId);
+    if (!declaration) return;
+
+    const safePeriod = declaration.period.replace(/[^a-zA-Z0-9._-]/g, '-');
+    const safeType = declaration.type.replace(/[^a-zA-Z0-9._-]/g, '-');
+
+    const blob = exportFrenchTaxDeclarationToEdiDraft(declaration);
+    const url = blobToObjectUrl(blob);
+    try {
+      downloadObjectUrl(url, `${safeType}_${safePeriod}_${companyId}.json`);
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }, [companyId, state.declarations]);
+
+  const downloadDeclarationRegulatoryPdf = useCallback(async (declarationId: string) => {
+    const declaration = state.declarations.find(d => d.id === declarationId);
+    if (!declaration) return;
+    if (!isSupportedForRegulatoryExport(declaration.type)) {
+      throw new Error(`Export réglementaire non supporté pour ${declaration.type}`);
+    }
+
+    const { fiscalPeriod } = ((): { fiscalYear: number; fiscalPeriod: string } => {
+      if (/^\d{4}$/.test(declaration.period)) return { fiscalYear: Number(declaration.period), fiscalPeriod: 'ANNUAL' };
+      const m = declaration.period.match(/^(\d{4})-(\d{2})$/);
+      if (m) return { fiscalYear: Number(m[1]), fiscalPeriod: `M${m[2]}` };
+      return { fiscalYear: new Date().getFullYear(), fiscalPeriod: 'ANNUAL' };
+    })();
+
+    const safePeriod = declaration.period.replace(/[^a-zA-Z0-9._-]/g, '-');
+    const safeType = declaration.type.replace(/[^a-zA-Z0-9._-]/g, '-');
+
+    const blob = await exportFrenchDeclarationToRegulatoryPdf(companyId, declaration);
+    const url = blobToObjectUrl(blob);
+    try {
+      downloadObjectUrl(url, `${safeType}_${safePeriod}_${fiscalPeriod}_${companyId}_regulatory.pdf`);
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }, [companyId, state.declarations]);
+
+  const downloadDeclarationRegulatoryXmlDraft = useCallback(async (declarationId: string) => {
+    const declaration = state.declarations.find(d => d.id === declarationId);
+    if (!declaration) return;
+    if (!isSupportedForRegulatoryExport(declaration.type)) {
+      throw new Error(`Export réglementaire non supporté pour ${declaration.type}`);
+    }
+
+    const safePeriod = declaration.period.replace(/[^a-zA-Z0-9._-]/g, '-');
+    const safeType = declaration.type.replace(/[^a-zA-Z0-9._-]/g, '-');
+
+    const { blob, filename } = await exportFrenchDeclarationToRegulatoryXmlDraft(companyId, declaration);
+    const url = blobToObjectUrl(blob);
+    try {
+      // Keep the service filename but make it predictable for the user too.
+      downloadObjectUrl(url, filename || `${safeType}_${safePeriod}_${companyId}.xml`);
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }, [companyId, state.declarations]);
+
   // Effacer l'erreur
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));
@@ -263,6 +352,10 @@ export const useFrenchTaxCompliance = (companyId: string) => {
     syncWithModules,
     autoConfigureObligations,
     generateIntegratedReport,
+    downloadDeclarationPdf,
+    downloadDeclarationEdiDraft,
+    downloadDeclarationRegulatoryPdf,
+    downloadDeclarationRegulatoryXmlDraft,
     clearError,
 
     // Utilitaires

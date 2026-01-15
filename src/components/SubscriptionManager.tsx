@@ -1,25 +1,15 @@
 import React, { useState } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useEnterprisePlan } from '@/hooks/useEnterprisePlan';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { SUBSCRIPTION_PLANS, stripeSubscriptionService } from '@/services/stripeSubscriptionService';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Button } from '@/components/ui/button';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Badge } from '@/components/ui/badge';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Check, Crown, Zap, Calendar } from 'lucide-react';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { cn } from '@/lib/utils';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useAuth } from '@/contexts/AuthContext';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 interface SubscriptionManagerProps {
   enterpriseId?: string;
   className?: string;

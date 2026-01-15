@@ -776,7 +776,8 @@ export const categoriesData = {
 
 const DocumentationCategoryPage = () => {
 
-  const { category: categoryId } = useParams();
+  const { category: categoryParam, slug } = useParams();
+  const categoryId = categoryParam ?? slug;
 
   const navigate = useNavigate();
 
@@ -790,7 +791,7 @@ const DocumentationCategoryPage = () => {
 
 
 
-  const category = categoriesData[categoryId];
+  const category = categoryId ? categoriesData[categoryId] : undefined;
 
 
 

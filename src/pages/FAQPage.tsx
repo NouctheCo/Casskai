@@ -36,7 +36,7 @@ const faqData: FAQItem[] = [
     id: 'g2',
     category: 'general',
     question: 'CassKai remplace-t-il mon expert-comptable ?',
-    answer: 'Non, CassKai est un complément à votre expert-comptable, pas un remplacement. La plateforme vous permet de gérer votre comptabilité au quotidien et de gagner du temps, puis d\'exporter un FEC conforme pour transmettre à votre EC. Vous gardez la maîtrise de vos données tout en bénéficiant de l\'expertise d\'un professionnel pour la clôture annuelle et les conseils fiscaux.',
+    answer: 'Non, CassKai est un complément à votre expert-comptable, pas un remplacement. La plateforme vous permet de gérer votre comptabilité au quotidien et de gagner du temps, puis d\'exporter un FEC conforme aux spécifications DGFiP pour transmettre à votre EC. Une validation via « Test Compta Demat » est recommandée. Vous gardez la maîtrise de vos données tout en bénéficiant de l\'expertise d\'un professionnel pour la clôture annuelle et les conseils fiscaux.',
     keywords: ['expert-comptable', 'ec', 'comptable', 'remplacer', 'complément']
   },
   {
@@ -96,7 +96,7 @@ const faqData: FAQItem[] = [
     id: 'co3',
     category: 'comptabilite',
     question: 'Comment exporter mon FEC pour mon expert-comptable ?',
-    answer: 'Dans Rapports > Export FEC, sélectionnez l\'exercice comptable, choisissez le format (TXT ou XML), cliquez sur "Générer FEC". Le fichier est conforme DGFiP et téléchargeable immédiatement. Vous pouvez aussi programmer un export automatique mensuel.',
+    answer: 'Dans Rapports > Export FEC, sélectionnez l\'exercice comptable, choisissez le format (TXT ou XML), cliquez sur "Générer FEC". Le fichier est conforme aux spécifications DGFiP et téléchargeable immédiatement. Une validation via « Test Compta Demat » est recommandée. Vous pouvez aussi programmer un export automatique mensuel.',
     keywords: ['fec', 'export', 'expert-comptable', 'dgfip', 'fichier']
   },
   {

@@ -1,0 +1,30 @@
+{
+  "include": [
+    "*.md",
+    "docs/**/*.md"
+  ],
+  "exclude": [
+    "node_modules/**",
+    "dist/**",
+    "supabase/**",
+    "**/*.sql",
+    "**/*.env*",
+    "**/deploy-*.ps1",
+    "**/deploy-*.sh",
+    "**/Dockerfile*",
+    "**/docker-compose*.yml",
+    "**/DEBUG_*",
+    "**/AUDIT_*",
+    "**/*SECURITY*",
+    "**/*DEPLOYMENT*",
+    "**/*DEPLOY*"
+  ],
+  "chunk": {
+    "maxChars": 2200,
+    "minChars": 200
+  },
+  "defaults": {
+    "visibility": "public",
+    "sensitivity": "public"
+  }
+}

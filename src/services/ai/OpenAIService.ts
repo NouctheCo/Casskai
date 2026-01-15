@@ -24,6 +24,29 @@ interface ChatRequest {
   context_type?: 'dashboard' | 'accounting' | 'invoicing' | 'reports' | 'general';
   company_id: string;
 }
+
+type EdgeChatMessage = { role: 'user' | 'assistant' | 'system'; content: string };
+
+interface ChatWithMessagesRequest {
+  messages: EdgeChatMessage[];
+  systemMessage?: string;
+  context?: {
+    companyId?: string;
+    contextType?: 'dashboard' | 'accounting' | 'invoicing' | 'reports' | 'general';
+    [key: string]: unknown;
+  };
+}
+
+type AIAssistantEdgeResponse = {
+  response?: string;
+  message?: string;
+  suggestions?: string[];
+  actions?: any[];
+  confidence?: number;
+  sources?: string[];
+  sourceItems?: Array<{ label: string; ref: string }>;
+  timestamp?: string;
+};
 interface _AnalysisRequest {
   type: 'financial_health' | 'cash_flow' | 'anomaly_detection' | 'tax_optimization';
   company_id: string;
@@ -84,6 +107,46 @@ export class OpenAIService {
       };
     } catch (error) {
       logger.error('OpenAI', 'OpenAI Chat Error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erreur de communication avec l\'IA'
+      };
+    }
+  }
+
+  // 🤖 Assistant conversationnel (multi-tours)
+  async chatWithMessages(
+    request: ChatWithMessagesRequest
+  ): Promise<AIServiceResponse<AIAssistantEdgeResponse>> {
+    const startTime = performance.now();
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return { success: false, error: 'Authentication required' };
+      }
+
+      const response = await fetch(`${this.baseUrl}/ai-assistant`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: AIAssistantEdgeResponse = await response.json();
+      const processingTime = performance.now() - startTime;
+      return {
+        success: true,
+        data,
+        processingTime,
+      };
+    } catch (error) {
+      logger.error('OpenAI', 'OpenAI ChatWithMessages Error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur de communication avec l\'IA'

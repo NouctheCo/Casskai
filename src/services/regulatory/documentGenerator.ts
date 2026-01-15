@@ -157,10 +157,11 @@ async function fetchAccountingData(
   }
   logger.debug('DocumentGenerator', '🔵 Found total journal entries:', entries?.length || 0);
   if (!entries || entries.length === 0) {
-    logger.warn('DocumentGenerator', '⚠️ WARNING: No journal entries found for this company and period!');
-    logger.warn('DocumentGenerator', '   - Company ID:', companyId);
-    logger.warn('DocumentGenerator', '   - Date range:', startDate, 'to', endDate);
-    logger.warn('DocumentGenerator', '   - Check if journal entries exist in the database for this period.');
+    logger.warn('DocumentGenerator', '⚠️ WARNING: No journal entries found for this company and period!', {
+      companyId,
+      startDate,
+      endDate,
+    });
     return {};
   }
   // Log status breakdown
@@ -272,7 +273,8 @@ function calculateFields(
             result[field.name] = safeEval(formulaExpression, result);
           }
         } catch (error) {
-          logger.error('documentGenerator', `Error calculating field ${field.name}:`, error, {
+          logger.error('DocumentGenerator', `Error calculating field ${field.name}`, {
+            error,
             formula: formulaExpression,
             availableData: Object.keys(result),
           });

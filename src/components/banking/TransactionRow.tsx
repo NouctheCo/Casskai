@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Check, X, ChevronDown, Sparkles, Zap } from 'lucide-react';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { useTranslation } from 'react-i18next';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 
 interface BankTransaction {
   id: string;

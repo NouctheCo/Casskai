@@ -3073,7 +3073,7 @@ const FAQSection = () => {
     },
     {
       question: t('landing.faq.q8.question', 'La liasse fiscale est-elle générée automatiquement ?'),
-      answer: t('landing.faq.q8.answer', 'Oui, CassKai génère automatiquement la liasse fiscale française (formulaires 2050-2059), la DSF pour les pays OHADA, ainsi que les déclarations de TVA et d\'IS adaptées à chaque pays. Les documents sont exportables en PDF prêts pour le dépôt.')
+      answer: t('landing.faq.q8.answer', 'CassKai pré-remplit (brouillons) la liasse fiscale française (2050–2059) et la DSF SYSCOHADA (bilan, compte de résultat, TAFIRE) à partir de la comptabilité. Les calculs de TVA et d\'IS sont disponibles selon la configuration pays. L\'export « PDF prêt pour dépôt » des déclarations fiscales est en cours : actuellement, elles sont surtout disponibles en données (JSON/CSV) avec contrôles et avertissements.')
     }
   ];
 

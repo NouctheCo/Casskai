@@ -268,7 +268,8 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
             <div>
               <h3 className="font-medium text-blue-900 dark:text-blue-100">Export FEC inclus</h3>
               <p className="text-sm text-blue-700 dark:text-blue-400">
-                • Fichier des Écritures Comptables conforme DGFiP<br/>
+                • Fichier des Écritures Comptables conforme aux spécifications DGFiP<br/>
+                • Validation recommandée via Test Compta Demat<br/>
                 • Toutes vos données comptables<br/>
                 • Documents justificatifs<br/>
                 • Archive légale complète

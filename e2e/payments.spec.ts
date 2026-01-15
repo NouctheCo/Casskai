@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
 
+import { dismissOverlays } from './testUtils/dismissOverlays';
+
+const RUN_AUTHED_E2E =
+  process.env.PLAYWRIGHT_RUN_AUTHED_E2E === '1' || process.env.PLAYWRIGHT_RUN_AUTHED_E2E === 'true';
+
 /**
  * E2E Tests - Payment Recording
  * Critical user journey: Record Payment → Link to Invoice → View Payment History
@@ -10,15 +15,32 @@ async function login(page: any) {
   const testEmail = process.env.TEST_USER_EMAIL || 'test@casskai.app';
   const testPassword = process.env.TEST_USER_PASSWORD || 'TestPassword123!';
 
-  await page.goto('/');
+  await page.goto('/login');
+  await dismissOverlays(page);
   await page.getByLabel(/email/i).fill(testEmail);
-  await page.getByLabel(/password/i).fill(testPassword);
-  await page.getByRole('button', { name: /connexion|login/i }).click();
+  await page.getByLabel(/mot de passe|password/i).fill(testPassword);
+  await page.getByRole('button', { name: /se connecter|connexion|login/i }).click();
   await page.waitForURL(/dashboard|accueil/i, { timeout: 10000 });
 }
 
 test.describe('Payments', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    const baseURL = String(testInfo.project.use.baseURL || '');
+    test.skip(
+      /casskai\.app/i.test(baseURL) && !process.env.PLAYWRIGHT_ALLOW_PROD,
+      'Refusing to run E2E against production without PLAYWRIGHT_ALLOW_PROD=1'
+    );
+
+    test.skip(
+      !RUN_AUTHED_E2E,
+      'Authenticated E2E disabled by default; set PLAYWRIGHT_RUN_AUTHED_E2E=1'
+    );
+
+    test.skip(
+      !process.env.TEST_USER_EMAIL || !process.env.TEST_USER_PASSWORD,
+      'Missing TEST_USER_EMAIL / TEST_USER_PASSWORD in .env.test.local'
+    );
+
     await login(page);
     // Navigate to invoicing/payments
     await page.goto('/invoicing');

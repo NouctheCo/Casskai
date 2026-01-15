@@ -24,8 +24,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 // import { Alert, AlertDescription } from '../ui/alert';
 import { cn } from '../../lib/utils';
 import { aiAnalyticsService } from '../../services/aiAnalyticsService';
-import { aiAssistantService } from '../../services/aiAssistantService';
 import { aiVisualizationService } from '../../services/aiVisualizationService';
+import { openAIService } from '@/services/ai/OpenAIService';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Transaction,
   AnomalyDetection,
@@ -38,7 +39,7 @@ import {
 import { AnomalyDetectionWidget } from './widgets/AnomalyDetectionWidget';
 import { HealthScoreWidget } from './widgets/HealthScoreWidget';
 import { CashFlowPredictionWidget } from './widgets/CashFlowPredictionWidget';
-import { AIAssistantChat } from './widgets/AIAssistantChat';
+import { AIAssistant } from './AIAssistant';
 import { SmartAlertsWidget } from './widgets/SmartAlertsWidget';
 import { TaxOptimizationWidget } from './widgets/TaxOptimizationWidget';
 import { logger } from '@/lib/logger';
@@ -54,6 +55,9 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
   onTransactionUpdate: _onTransactionUpdate,
   className
 }) => {
+  const { currentCompany } = useAuth();
+  const companyId = currentCompany?.id;
+
   // États pour les analyses IA
   const [anomalies, setAnomalies] = useState<AnomalyDetection[]>([]);
   const [healthScore, setHealthScore] = useState<FinancialHealthScore | null>(null);
@@ -86,7 +90,6 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
       setIsLoading(true);
       // Initialisation des services
       await aiAnalyticsService.initialize();
-      await aiAssistantService.initialize();
       aiVisualizationService.initialize();
       logger.warn('AIInsightsDashboard', 'AI services initialized successfully');
     } catch (error) {
@@ -110,7 +113,9 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
           transactions.map(t => ({ date: new Date(t.date), value: t.amount }))
         ) : Promise.resolve({ success: true, data: [] }),
         // Optimisations fiscales
-        aiConfig.taxOptimization ? aiAssistantService.generateTaxOptimizations(transactions) : Promise.resolve({ success: true, data: [] })
+        (aiConfig.taxOptimization && companyId)
+          ? openAIService.getTaxOptimizations(companyId)
+          : Promise.resolve({ success: true, data: [] })
       ]);
       // Traitement des résultats
       results.forEach((result, index) => {
@@ -255,7 +260,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <Shield className="w-8 h-8 text-green-500" />
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Score santé</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+                <p className="text-xl font-bold text-gray-900 dark:text-white">
                   {healthScore?.overall || 0}/100
                 </p>
               </div>
@@ -267,7 +272,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <AlertTriangle className="w-8 h-8 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Anomalies</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+                <p className="text-xl font-bold text-gray-900 dark:text-white">
                   {anomalies.length}
                 </p>
               </div>
@@ -279,7 +284,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <TrendingUp className="w-8 h-8 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Prédictions</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+                <p className="text-xl font-bold text-gray-900 dark:text-white">
                   {cashFlowPredictions.length}j
                 </p>
               </div>
@@ -291,7 +296,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <DollarSign className="w-8 h-8 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Économies pot.</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+                <p className="text-xl font-bold text-gray-900 dark:text-white">
                   {taxOptimizations.reduce((sum, opt) => sum + opt.potentialSavings, 0).toLocaleString('fr-FR')}€
                 </p>
               </div>
@@ -387,13 +392,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               />
             </TabsContent>
             <TabsContent value="assistant" className="space-y-6 mt-6">
-              <AIAssistantChat 
-                transactions={transactions}
-                currentBalance={currentBalance}
-                onQueryProcessed={(query, response) => {
-                  logger.warn('AIInsightsDashboard', 'AI query processed:', query, response);
-                }}
-              />
+              <AIAssistant variant="embedded" contextType="dashboard" />
             </TabsContent>
           </motion.div>
         </AnimatePresence>
