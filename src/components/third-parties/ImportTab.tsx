@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslation } from 'react-i18next';
+import Papa from 'papaparse';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,9 +16,17 @@ import {
   XCircle,
   Loader2
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { logger } from '@/lib/logger';
+
+// ExcelJS import conditionnel pour éviter les problèmes de build
+let ExcelJS: typeof import('exceljs') | null = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  ExcelJS = require('exceljs');
+} catch (_error) {
+  logger.warn('ImportTab', 'ExcelJS not available in browser environment');
+}
 interface ImportRow {
   name: string;
   type: string;
@@ -82,24 +91,138 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
         vat_number: 'FR11122233301'
       }
     ];
-    const ws = XLSX.utils.json_to_sheet(template);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Tiers');
-    // Largeur des colonnes
-    ws['!cols'] = [
-      { wch: 25 }, // name
-      { wch: 12 }, // type
-      { wch: 25 }, // email
-      { wch: 18 }, // phone
-      { wch: 30 }, // address
-      { wch: 15 }, // city
-      { wch: 12 }, // postal_code
-      { wch: 8 },  // country
-      { wch: 18 }, // siret
-      { wch: 18 }  // vat_number
+
+    if (!ExcelJS) {
+      toastError('Export Excel indisponible dans cet environnement');
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Tiers');
+
+    worksheet.columns = [
+      { header: 'name', key: 'name', width: 25 },
+      { header: 'type', key: 'type', width: 12 },
+      { header: 'email', key: 'email', width: 25 },
+      { header: 'phone', key: 'phone', width: 18 },
+      { header: 'address', key: 'address', width: 30 },
+      { header: 'city', key: 'city', width: 15 },
+      { header: 'postal_code', key: 'postal_code', width: 12 },
+      { header: 'country', key: 'country', width: 8 },
+      { header: 'siret', key: 'siret', width: 18 },
+      { header: 'vat_number', key: 'vat_number', width: 18 }
     ];
-    XLSX.writeFile(wb, 'template_import_tiers.xlsx');
-    toastSuccess('Modèle téléchargé');
+
+    template.forEach((row) => worksheet.addRow(row));
+
+    // Style header
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2980B9' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    workbook.xlsx
+      .writeBuffer()
+      .then((buffer) => {
+        const blob = new Blob([buffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'template_import_tiers.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toastSuccess('Modèle téléchargé');
+      })
+      .catch((error) => {
+        logger.error('ImportTab', 'Erreur génération template:', error);
+        toastError('Impossible de générer le modèle Excel');
+      });
+  };
+
+  const parseRowsToImportData = (jsonData: Array<Record<string, unknown>>): ImportRow[] => {
+    return jsonData.map((row) => {
+      const errors: string[] = [];
+      const name = row.name?.toString().trim() || '';
+      const type = row.type?.toString().toLowerCase().trim() || '';
+      const email = row.email?.toString().trim() || '';
+
+      if (!name) {
+        errors.push('Nom obligatoire');
+      }
+      if (!['customer', 'supplier', 'both', 'prospect'].includes(type)) {
+        errors.push('Type invalide (customer/supplier/both/prospect)');
+      }
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push('Email invalide');
+      }
+
+      return {
+        name,
+        type,
+        email: (row.email as string) || undefined,
+        phone: (row.phone as string) || undefined,
+        address: (row.address as string) || undefined,
+        city: (row.city as string) || undefined,
+        postal_code: (row.postal_code as string) || undefined,
+        country: (row.country as string) || 'FR',
+        siret: (row.siret as string) || undefined,
+        vat_number: (row.vat_number as string) || undefined,
+        isValid: errors.length === 0,
+        errors
+      };
+    });
+  };
+
+  const worksheetToJson = (worksheet: import('exceljs').Worksheet): Array<Record<string, unknown>> => {
+    const headerRow = worksheet.getRow(1);
+    const headers: string[] = [];
+
+    headerRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+      headers[colNumber - 1] = String(normalizeCellValue(cell.value) ?? '').trim();
+    });
+
+    const rows: Array<Record<string, unknown>> = [];
+    worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+      if (rowNumber === 1) return;
+      const record: Record<string, unknown> = {};
+      let hasAnyValue = false;
+
+      headers.forEach((header, index) => {
+        if (!header) return;
+        const value = normalizeCellValue(row.getCell(index + 1).value);
+        record[header] = value;
+        if (value !== null && value !== undefined && String(value).trim() !== '') {
+          hasAnyValue = true;
+        }
+      });
+
+      if (hasAnyValue) {
+        rows.push(record);
+      }
+    });
+
+    return rows;
+  };
+
+  const normalizeCellValue = (value: unknown): unknown => {
+    if (value && typeof value === 'object') {
+      if ('result' in (value as any)) {
+        return (value as any).result;
+      }
+      if ('richText' in (value as any) && Array.isArray((value as any).richText)) {
+        return (value as any).richText.map((t: any) => t?.text ?? '').join('');
+      }
+      if ('text' in (value as any)) {
+        return (value as any).text;
+      }
+    }
+    return value;
   };
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,41 +230,36 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
     setSelectedFile(file);
     setImportComplete(false);
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json<any>(sheet);
-      const rows: ImportRow[] = jsonData.map((row, _index) => {
-        const errors: string[] = [];
-        const name = row.name?.toString().trim() || '';
-        const type = row.type?.toString().toLowerCase().trim() || '';
-        const email = row.email?.toString().trim() || '';
-        // Validation
-        if (!name) {
-          errors.push('Nom obligatoire');
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      let jsonData: Array<Record<string, unknown>> = [];
+
+      if (extension === 'csv') {
+        const text = await file.text();
+        const result = Papa.parse<Record<string, unknown>>(text, {
+          header: true,
+          skipEmptyLines: true
+        });
+        if (result.errors?.length) {
+          logger.warn('ImportTab', 'CSV parse warnings:', result.errors);
         }
-        if (!['customer', 'supplier', 'both', 'prospect'].includes(type)) {
-          errors.push('Type invalide (customer/supplier/both/prospect)');
+        jsonData = (result.data || []).filter((row) => Object.keys(row).length > 0);
+      } else if (extension === 'xls') {
+        throw new Error('Le format .xls n\'est pas supporté. Veuillez enregistrer le fichier en .xlsx');
+      } else {
+        if (!ExcelJS) {
+          throw new Error('ExcelJS n\'est pas disponible dans cet environnement.');
         }
-        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          errors.push('Email invalide');
+        const data = await file.arrayBuffer();
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(data);
+        const worksheet = workbook.getWorksheet(1);
+        if (!worksheet) {
+          throw new Error('Aucune feuille trouvée dans le fichier Excel');
         }
-        return {
-          name,
-          type,
-          email: row.email || undefined,
-          phone: row.phone || undefined,
-          address: row.address || undefined,
-          city: row.city || undefined,
-          postal_code: row.postal_code || undefined,
-          country: row.country || 'FR',
-          siret: row.siret || undefined,
-          vat_number: row.vat_number || undefined,
-          isValid: errors.length === 0,
-          errors
-        };
-      });
+        jsonData = worksheetToJson(worksheet);
+      }
+
+      const rows: ImportRow[] = parseRowsToImportData(jsonData);
       setImportData(rows);
       toastSuccess(`${rows.length} ligne(s) chargée(s)`);
     } catch (error) {

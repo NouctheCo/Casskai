@@ -16,7 +16,6 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
-import { IFRS_ACCOUNTS } from '@/data/ifrs';
 export type AccountingStandard = 'PCG' | 'SYSCOHADA' | 'IFRS' | 'SCF';
 export interface StandardMapping {
   revenueClasses: string[];

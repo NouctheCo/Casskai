@@ -5,7 +5,7 @@
  * et permet de créer/éditer/visualiser des documents.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   FileText,
@@ -61,7 +61,7 @@ export function RegulatoryDocumentsList({
   onDeleteDocument,
   onChangeStatus,
   onExportDocument,
-  isLoading = false
+  isLoading: _isLoading = false
 }: RegulatoryDocumentsListProps) {
   const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -90,21 +90,6 @@ export function RegulatoryDocumentsList({
     const template = templates.find((t) => t.id === (doc as any).template_id || t.documentType === doc.documentType);
     return template?.category || 'other';
   };
-
-  // Grouper les templates par pays puis par catégorie
-  const templatesByCountry = templates.reduce((acc, template) => {
-    const country = template.countryCode || 'XX';
-    if (!acc[country]) {
-      acc[country] = {};
-    }
-
-    const category = template.category || 'other';
-    if (!acc[country][category]) {
-      acc[country][category] = [];
-    }
-    acc[country][category].push(template);
-    return acc;
-  }, {} as Record<string, Record<string, RegulatoryTemplate[]>>);
 
   // Pour le dropdown, on aplatit par catégorie uniquement
   const templatesByCategory = templates.reduce((acc, template) => {

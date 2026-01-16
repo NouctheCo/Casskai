@@ -5,7 +5,8 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,7 +14,6 @@ import { supabase } from '@/lib/supabase';
 import { getFiscalYears } from '@/utils/fiscalYearUtils';
 import type {
   RegulatoryTemplate,
-  AccountingStandard,
   FiscalPeriod
 } from '@/types/regulatory';
 import { generateDocument } from '@/services/regulatory/documentGenerator';
@@ -71,11 +71,11 @@ export function NewDocumentModal({ open, onClose, onDocumentCreated }: NewDocume
       if (result.success && result.documentId) {
         onDocumentCreated(result.documentId);
       } else {
-        alert(t('reports.regulatory.messages.createError'));
+        toast.error(t('reports.regulatory.messages.createError'));
       }
     } catch (error) {
       logger.error('NewDocumentModal', 'Error creating document:', error);
-      alert(t('reports.regulatory.messages.createError'));
+      toast.error(t('reports.regulatory.messages.createError'));
     } finally {
       setLoading(false);
     }
@@ -189,4 +189,4 @@ export function NewDocumentModal({ open, onClose, onDocumentCreated }: NewDocume
       </DialogContent>
     </Dialog>
   );
-}
+}

@@ -3,7 +3,7 @@
  * Handles loading, caching, and operations on regulatory templates
  */
 import { supabase } from '@/lib/supabase';
-import type { RegulatoryTemplate, FormSchema, AccountMapping } from '@/types/regulatory';
+import type { RegulatoryTemplate } from '@/types/regulatory';
 import { logger } from '@/lib/logger';
 // In-memory template cache
 const templateCache = new Map<string, RegulatoryTemplate>();

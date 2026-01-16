@@ -2,9 +2,16 @@
  * CassKai - Safe Formula Evaluation
  * Remplacement sécurisé de eval() pour les calculs de formules
  */
-import { Parser } from 'expr-eval';
+import { parse, type MathNode } from 'mathjs';
 import { logger } from '@/lib/logger';
-const parser = new Parser();
+
+function ensureNoAssignments(ast: MathNode): void {
+  ast.traverse((node: MathNode) => {
+    if (node.type === 'AssignmentNode' || node.type === 'FunctionAssignmentNode') {
+      throw new Error('Assignments are not allowed');
+    }
+  });
+}
 /**
  * Évalue une formule mathématique de manière sécurisée
  * @param formula - Formule à évaluer (ex: "total_revenue - total_expenses")
@@ -16,8 +23,9 @@ export function safeEval(formula: string, variables: Record<string, number>): nu
     // Nettoyer la formule (enlever = au début si présent)
     const cleanFormula = formula.trim().replace(/^=/, '');
     // Parser et évaluer
-    const expr = parser.parse(cleanFormula);
-    const result = expr.evaluate(variables);
+    const ast = parse(cleanFormula);
+    ensureNoAssignments(ast);
+    const result = ast.compile().evaluate(variables);
     return Number(result) || 0;
   } catch (error) {
     logger.error('SafeEval', 'Error evaluating formula:', formula, error);
@@ -32,8 +40,9 @@ export function safeEval(formula: string, variables: Record<string, number>): nu
  */
 export function safeEvalCondition(condition: string, variables: Record<string, any>): boolean {
   try {
-    const expr = parser.parse(condition);
-    const result = expr.evaluate(variables);
+    const ast = parse(condition);
+    ensureNoAssignments(ast);
+    const result = ast.compile().evaluate(variables);
     return Boolean(result);
   } catch (error) {
     logger.error('SafeEval', 'Error evaluating condition:', condition, error);
@@ -48,7 +57,8 @@ export function safeEvalCondition(condition: string, variables: Record<string, a
 export function validateFormula(formula: string): boolean {
   try {
     const cleanFormula = formula.trim().replace(/^=/, '');
-    parser.parse(cleanFormula);
+    const ast = parse(cleanFormula);
+    ensureNoAssignments(ast);
     return true;
   } catch {
     return false;

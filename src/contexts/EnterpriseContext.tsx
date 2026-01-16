@@ -156,7 +156,9 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           }
           
           setLoading(false);
+          // eslint-disable-next-line require-atomic-updates
           hasLoadedOnce.current = true;
+          // eslint-disable-next-line require-atomic-updates
           isLoadingRef.current = false;
           devLogger.info('✅ Enterprises loaded from Supabase');
           return;
@@ -203,7 +205,9 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
     
     setLoading(false);
+    // eslint-disable-next-line require-atomic-updates
     hasLoadedOnce.current = true;
+    // eslint-disable-next-line require-atomic-updates
     isLoadingRef.current = false;
     devLogger.info('✅ Enterprises loaded from localStorage');
   };
@@ -224,7 +228,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return () => {
       window.removeEventListener('enterpriseContextRefresh', handleRefresh);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []); // Empty deps - only run once on mount
 
   const currentEnterprise = enterprises.find(e => e.id === currentEnterpriseId) || null;

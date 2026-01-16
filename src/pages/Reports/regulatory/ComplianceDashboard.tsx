@@ -3,19 +3,16 @@
  * Real-time compliance monitoring and filing deadlines
  */
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   getUpcomingDeadlines,
   getDocumentStatistics,
   getFilingStatusSummary,
-  generateComplianceReport,
   checkCompliance,
 } from '@/services/regulatory/complianceService';
 import type {
   UpcomingDeadline,
   DocumentStatistics,
-  RegulatoryDocument,
 } from '@/types/regulatory';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
@@ -26,8 +23,6 @@ import {
   TrendingUp,
   Calendar,
   FileText,
-  Download,
-  Eye,
 } from 'lucide-react';
 interface ComplianceAlert {
   type: 'success' | 'warning' | 'error';
@@ -35,7 +30,6 @@ interface ComplianceAlert {
   timestamp: string;
 }
 export default function ComplianceDashboard() {
-  const { t } = useTranslation();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [statistics, setStatistics] = useState<DocumentStatistics | null>(null);
@@ -342,4 +336,4 @@ export default function ComplianceDashboard() {
       </div>
     </div>
   );
-}
+}

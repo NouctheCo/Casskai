@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import useCompanyCurrency from '@/hooks/useCompanyCurrency';
 import { useTranslation } from 'react-i18next';
 import {
   Calculator,
@@ -136,6 +137,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
 }) => {
   const { currentCompany } = useAuth();
   const { t } = useTranslation();
+  const { formatAmount } = useCompanyCurrency();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
   const [formData, setFormData] = useState<BudgetCategory>({
@@ -439,7 +441,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
                 key={index}
                 className="flex-1 bg-primary/60 hover:bg-primary rounded-t transition-all"
                 style={{ height: `${height}%` }}
-                title={`${MONTHS[index]}: $<CurrencyAmount amount={value} />`}
+                title={`${MONTHS[index]}: ${formatAmount(value)}`}
               />
             );
           })}

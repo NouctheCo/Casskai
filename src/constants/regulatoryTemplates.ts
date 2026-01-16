@@ -12,7 +12,7 @@
  * Generated: 2026-01-02
  */
 
-import type { RegulatoryTemplate, FormSchema, AccountMapping, ValidationRules } from '@/types/regulatory';
+import type { RegulatoryTemplate } from '@/types/regulatory';
 
 // ============================================================================
 // ACCOUNT MAPPINGS BY STANDARD
@@ -114,6 +114,22 @@ const PCM_ACCOUNT_MAPPINGS = {
     { accountRange: '6', description: 'Charges', type: 'expense' },
   ],
 };
+
+function getAccountMappingsByStandard(standard: string) {
+  switch (standard) {
+    case 'SYSCOHADA':
+      return SYSCOHADA_ACCOUNT_MAPPINGS;
+    case 'IFRS':
+      return IFRS_ACCOUNT_MAPPINGS;
+    case 'SCF':
+      return SCF_ACCOUNT_MAPPINGS;
+    case 'PCM':
+      return PCM_ACCOUNT_MAPPINGS;
+    case 'PCG':
+    default:
+      return PCG_ACCOUNT_MAPPINGS;
+  }
+}
 
 // ============================================================================
 // TEMPLATE FACTORY - Generates Complete Templates with Schemas and Mappings
@@ -227,7 +243,7 @@ function createBalanceSheetTemplate(standard: string, country: string): Regulato
         tolerance: 0.01,
       }],
     },
-    accountMappings: PCG_ACCOUNT_MAPPINGS as any,
+    accountMappings: getAccountMappingsByStandard(standard) as any,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -382,7 +398,7 @@ function createIncomeStatementTemplate(standard: string, country: string): Regul
       required: ['sales_revenue', 'total_revenue', 'total_expenses', 'net_income_after_tax'],
       numeric: ['sales_revenue', 'cost_of_goods'],
     },
-    accountMappings: PCG_ACCOUNT_MAPPINGS as any,
+    accountMappings: getAccountMappingsByStandard(standard) as any,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -526,7 +542,7 @@ function createCashFlowTemplate(standard: string, country: string): RegulatoryTe
       required: ['net_income', 'capex'],
       numeric: [],
     },
-    accountMappings: PCG_ACCOUNT_MAPPINGS as any,
+    accountMappings: getAccountMappingsByStandard(standard) as any,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

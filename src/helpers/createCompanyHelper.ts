@@ -8,7 +8,7 @@ import { devLogger } from '@/utils/devLogger';
 
 export async function createCompanyDirectly(
   userId: string,
-  companyData: Record<string, any>
+  companyData: Record<string, unknown>
 ): Promise<{ success: boolean; companyId?: string; error?: string }> {
   try {
     devLogger.debug('🔧 Creating company via direct insert...');
@@ -73,11 +73,11 @@ export async function createCompanyDirectly(
       success: true,
       companyId: createdCompany.id
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     devLogger.error('❌ Company creation failed:', error);
     return {
       success: false,
-      error: error.message || 'Failed to create company'
+      error: error instanceof Error ? error.message : 'Failed to create company'
     };
   }
 }

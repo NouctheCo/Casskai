@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Button } from '@/components/ui/button';
-import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Badge } from '@/components/ui/badge';
-import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Switch } from '@/components/ui/switch';
-import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { Progress } from '@/components/ui/progress';
-import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { logger } from '@/lib/logger';
-import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import {
   Package, 
   Download, 
@@ -65,6 +58,8 @@ interface ActivationStatus {
   error?: string;
 }
 const ModuleManager: React.FC = () => {
+  const { formatAmount } = useCompanyCurrency();
+
   const [modules, setModules] = useState<ModuleInfo[]>([]);
   const [activationStatuses, setActivationStatuses] = useState<Map<string, ActivationStatus>>(new Map());
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

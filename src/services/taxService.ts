@@ -312,6 +312,26 @@ export const taxService = {
     }
   },
   /**
+   * Delete an existing tax declaration
+   */
+  async deleteTaxDeclaration(id: string): Promise<{ success: boolean; error: Error | null }> {
+    try {
+      const { error } = await supabase
+        .from('company_tax_declarations')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      return { success: true, error: null };
+    } catch (error) {
+      logger.error('Tax', 'Error deleting tax declaration:', error);
+      const errorInfo = handleSupabaseError(error, 'Deleting tax declaration');
+      return {
+        success: false,
+        error: new Error(errorInfo.message)
+      };
+    }
+  },
+  /**
    * Mark a tax declaration as submitted
    */
   async markDeclarationAsSubmitted(id: string): Promise<{ success: boolean; error: Error | null }> {

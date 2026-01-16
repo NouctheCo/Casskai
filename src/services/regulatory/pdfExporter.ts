@@ -112,6 +112,8 @@ export async function exportToPdf(
   if (finalOptions.watermark) {
     addWatermark(pdf, finalOptions.watermark, pageWidth, pageHeight);
   }
+
+  void currentY;
   return pdf.output('blob');
 }
 /**

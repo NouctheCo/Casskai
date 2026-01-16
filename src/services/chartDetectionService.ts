@@ -27,7 +27,6 @@
 import { SYSCOHADA_PLAN, SYSCOHADA_ACCOUNTS } from '@/data/syscohada';
 import PCG_FRANCE from '@/data/pcg';
 import type { AccountPlan } from '@/types/accounting';
-import { logger } from '@/lib/logger';
 // ========================================
 // CONSTANTES GÉOGRAPHIQUES
 // ========================================

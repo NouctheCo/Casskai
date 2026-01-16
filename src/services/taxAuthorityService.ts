@@ -14,7 +14,6 @@ import {
   ComplianceStatus,
   SubmissionStats,
 } from '@/types/taxAuthority';
-import { TAX_AUTHORITIES, getAuthorityByCountryAndType } from '@/constants/taxAuthorities';
 import { logger } from '@/lib/logger';
 export class TaxAuthorityService {
   /**
@@ -308,22 +307,13 @@ export class TaxAuthorityService {
   /**
    * Appelle l'API de vérification des identifiants
    */
-  private static async callVerificationAPI(authority: any, credentials: any): Promise<VerifyCredentialsResponse> {
-    try {
-      // Vérification simulée pour l'instant
-      return {
-        success: true,
-        is_valid: true,
-        message: 'Identifiants valides',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        is_valid: false,
-        message: 'Erreur lors de la vérification',
-        error: error instanceof Error ? error.message : 'Erreur inconnue',
-      };
-    }
+  private static async callVerificationAPI(_authority: any, _credentials: any): Promise<VerifyCredentialsResponse> {
+    // Vérification simulée pour l'instant
+    return {
+      success: true,
+      is_valid: true,
+      message: 'Identifiants valides',
+    };
   }
   /**
    * Enregistre un log de communication

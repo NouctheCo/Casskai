@@ -23,18 +23,13 @@ import {
   Activity,
   Download,
   Search,
-  Filter,
   RefreshCw,
   Eye,
   Lock,
-  Unlock,
   FileText,
-  User,
-  Calendar
+  User
 } from 'lucide-react';
 import {
-  searchSecurityLogs,
-  getSecurityStats,
   type SecurityLog,
   type SecurityStats
 } from '@/services/securityLogService';
@@ -95,7 +90,7 @@ export function SecurityLogsDashboard({ companyId }: SecurityLogsDashboardProps)
   const [startDate, setStartDate] = useState(
     new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   );
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [endDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedLog, setSelectedLog] = useState<SecurityLog | null>(null);
   // Load data
   useEffect(() => {
@@ -209,7 +204,7 @@ export function SecurityLogsDashboard({ companyId }: SecurityLogsDashboardProps)
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       showToast('Export réussi', 'success');
-    } catch (error) {
+    } catch (_error) {
       showToast('Erreur lors de l\'export', 'error');
     }
   };

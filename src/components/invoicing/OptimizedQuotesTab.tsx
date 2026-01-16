@@ -411,7 +411,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
         clientName: quote.third_party?.name || 'Client inconnu',
         date: quote.issue_date,
         validUntil: quote.valid_until,
-        total: quote.total_incl_tax || quote.total_amount, // ✅ Use total_incl_tax (TTC), fallback to total_amount
+        total: quote.total_amount,
         status: quote.status,
         description: quote.notes || '',
         notes: quote.notes || '',

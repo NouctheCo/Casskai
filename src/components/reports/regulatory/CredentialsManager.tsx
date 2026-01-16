@@ -3,16 +3,19 @@
  */
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import { TaxAuthorityCredentials } from '@/types/taxAuthority';
 import { supabase } from '@/lib/supabase';
 import { TAX_AUTHORITIES } from '@/constants/taxAuthorities';
 import { TaxAuthorityService } from '@/services/taxAuthorityService';
 import { FormatterUtils } from '@/utils/taxAuthorityUtils';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { logger } from '@/lib/logger';
 interface CredentialsManagerProps {
   companyId: string;
 }
 export function CredentialsManager({ companyId }: CredentialsManagerProps) {
+  const { confirm, ConfirmDialog } = useConfirmDialog();
   const [credentials, setCredentials] = useState<TaxAuthorityCredentials[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -43,14 +46,14 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
   };
   const handleAddCredentials = async () => {
     if (!formData.countryCode || !formData.taxId) {
-      alert('Veuillez remplir tous les champs obligatoires');
+      toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
     try {
       // Récupérer la première autorité du pays
       const authorities = TAX_AUTHORITIES[formData.countryCode];
       if (!authorities || authorities.length === 0) {
-        alert('Autorité fiscale non configurée pour ce pays');
+        toast.error('Autorité fiscale non configurée pour ce pays');
         return;
       }
       const authority = authorities[0];
@@ -68,7 +71,7 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
       }
     } catch (error) {
       logger.error('CredentialsManager', 'Erreur lors de la sauvegarde:', error);
-      alert('Erreur lors de la sauvegarde des identifiants');
+      toast.error('Erreur lors de la sauvegarde des identifiants');
     }
   };
   const handleVerifyCredentials = async (credentialId: string) => {
@@ -81,20 +84,27 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
         credentials_id: credentialId,
       });
       if (response.success) {
-        alert('Identifiants valides !');
+        toast.success('Identifiants valides !');
         await loadCredentials();
       } else {
-        alert(`Erreur de vérification: ${  response.error}`);
+        toast.error(`Erreur de vérification: ${response.error}`);
       }
     } catch (error) {
       logger.error('CredentialsManager', 'Erreur lors de la vérification:', error);
-      alert('Erreur lors de la vérification');
+      toast.error('Erreur lors de la vérification');
     } finally {
       setVerifying(null);
     }
   };
   const handleDeleteCredentials = async (credentialId: string) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ces identifiants ?')) {
+    const confirmed = await confirm({
+      title: 'Confirmer la suppression',
+      description: 'Êtes-vous sûr de vouloir supprimer ces identifiants ? Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+    if (!confirmed) {
       return;
     }
     try {
@@ -105,7 +115,7 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
       if (!error) {
         await loadCredentials();
       } else {
-        alert('Erreur lors de la suppression');
+        toast.error('Erreur lors de la suppression');
       }
     } catch (error) {
       logger.error('CredentialsManager', 'Erreur lors de la suppression:', error);
@@ -129,6 +139,7 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
   }
   return (
     <div className="space-y-4">
+      <ConfirmDialog />
       <div className="flex justify-end mb-4">
         <button
           onClick={() => setShowForm(!showForm)}
@@ -259,4 +270,4 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
       )}
     </div>
   );
-}
+}

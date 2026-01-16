@@ -8,7 +8,7 @@ import type { RegulatoryTemplate, FormSection, FormField } from '@/types/regulat
 /**
  * Configuration compacte d'un champ
  */
-interface FieldConfig {
+export interface FieldConfig {
   id: string;
   label: string;
   type?: 'currency' | 'text' | 'number' | 'date' | 'percentage';
@@ -23,7 +23,7 @@ interface FieldConfig {
 /**
  * Configuration compacte d'une section
  */
-interface SectionConfig {
+export interface SectionConfig {
   id: string;
   title: string;
   fields: FieldConfig[];
@@ -123,12 +123,15 @@ export function createTemplateFromConfig(
 
   // Ajouter les balance checks si présents
   if (config.balanceChecks && config.balanceChecks.length > 0) {
-    template.validationRules!.balanceChecks = config.balanceChecks.map(check => ({
-      leftFields: check.left,
-      rightFields: check.right,
-      message: `Balance check failed`,
-      tolerance: check.tolerance || 1.0
-    }));
+    template.validationRules = {
+      ...template.validationRules,
+      balanceChecks: config.balanceChecks.map(check => ({
+        leftFields: check.left,
+        rightFields: check.right,
+        message: 'Balance check failed',
+        tolerance: check.tolerance || 1.0
+      }))
+    };
   }
 
   // Générer accountMappings depuis les champs avec accounts

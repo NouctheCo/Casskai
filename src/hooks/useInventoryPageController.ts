@@ -170,7 +170,7 @@ export function useInventoryPageController(): InventoryPageControllerResult {
     } finally {
       setSuppliersLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []); // Empty deps - toast is stable in practice
 
   useEffect(() => {
@@ -187,7 +187,7 @@ export function useInventoryPageController(): InventoryPageControllerResult {
     } finally {
       setProductionLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []); // Empty deps - toast is stable in practice
 
   useEffect(() => {

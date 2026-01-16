@@ -12,7 +12,7 @@
 // Service de génération de rapports financiers avec calculs avancés
 import { supabase } from '@/lib/supabase';
 import { reportExportService, TableData, ExportOptions } from './ReportExportService';
-import { format, startOfYear, endOfYear } from 'date-fns';
+import { format, startOfYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { AccountingStandardAdapter } from './accountingStandardAdapter';
 import { financialRatiosService } from './financialRatiosService';

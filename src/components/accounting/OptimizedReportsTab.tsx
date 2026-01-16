@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -70,6 +71,7 @@ const isReportAvailable = (reportType: string): boolean => {
 };
 export default function OptimizedReportsTab() {
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const { currentCompany } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState('current-month');
   const [customStartDate, setCustomStartDate] = useState('');
@@ -704,7 +706,7 @@ export default function OptimizedReportsTab() {
                   </div>
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {stat.isPercentage ? `${stat.value}%` : `$<CurrencyAmount amount={stat.value} />`}
+                  {stat.isPercentage ? `${stat.value}%` : <CurrencyAmount amount={stat.value} />}
                 </p>
               </div>
             </CardContent>
@@ -971,11 +973,21 @@ export default function OptimizedReportsTab() {
                 et les normes IFRS internationales. Les données proviennent directement de vos écritures comptables.
               </p>
               <div className="flex items-center space-x-4">
-                <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-blue-400">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-blue-400"
+                  onClick={() => navigate('/docs/comptabilite/rapports-financiers')}
+                >
                   <FileText className="w-4 h-4 mr-2" />
                   Documentation
                 </Button>
-                <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-blue-400">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-blue-400"
+                  onClick={() => setShowTemplatesModal(true)}
+                >
                   <Settings className="w-4 h-4 mr-2" />
                   Configuration
                 </Button>

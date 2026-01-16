@@ -3,7 +3,6 @@
  * Journal Entry Attachments Component
  */
 import React, { useEffect, useState, useCallback } from 'react';
-import { useLocale } from '@/contexts/LocaleContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +29,7 @@ import {
   X
 } from 'lucide-react';
 import { journalEntryAttachmentService, JournalEntryAttachment } from '@/services/journalEntryAttachmentService';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { logger } from '@/lib/logger';
 interface JournalEntryAttachmentsProps {
   journalEntryId: string;
@@ -41,8 +41,8 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
   companyId,
   readOnly = false
 }) => {
-  const { t } = useLocale();
   const { toast } = useToast();
+  const { confirm, ConfirmDialog } = useConfirmDialog();
   const [attachments, setAttachments] = useState<JournalEntryAttachment[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -123,7 +123,14 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
   }, []);
   // Handle delete
   const handleDelete = async (attachment: JournalEntryAttachment) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette pièce jointe ?')) {
+    const confirmed = await confirm({
+      title: 'Confirmer la suppression',
+      description: 'Êtes-vous sûr de vouloir supprimer cette pièce jointe ? Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+    if (!confirmed) {
       return;
     }
     try {
@@ -186,10 +193,11 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+    return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100  } ${  sizes[i]}`;
   };
   return (
     <>
+      <ConfirmDialog />
       <Card className="mt-6">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -380,4 +388,4 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
     </>
   );
 };
-export default JournalEntryAttachments;
+export default JournalEntryAttachments;

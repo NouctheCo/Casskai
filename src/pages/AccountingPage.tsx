@@ -29,7 +29,6 @@ import { supabase } from '@/lib/supabase';
 import {
   Calculator,
   FileText,
-  BookOpen,
   TrendingUp,
   BarChart3,
   DollarSign,
@@ -37,7 +36,6 @@ import {
   ArrowDownRight,
   Activity,
   Plus,
-  Eye,
   RefreshCw,
   Download,
   Upload,
@@ -46,7 +44,6 @@ import {
   AlertCircle,
   Users,
   ShoppingCart,
-  AlertTriangle,
   type LucideIcon
 } from 'lucide-react';
 import OptimizedJournalEntriesTab from '@/components/accounting/OptimizedJournalEntriesTab';

@@ -54,7 +54,7 @@ export class CountryValidationService {
     documentData: FinancialData,
     documentType: string,
     country: string,
-    accountingStandard: string
+    _accountingStandard: string
   ): ValidationResult {
     const result: ValidationResult = {
       isValid: true,

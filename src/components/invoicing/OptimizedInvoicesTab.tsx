@@ -15,13 +15,11 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { invoicingService } from '@/services/invoicingService';
-import { thirdPartiesService } from '@/services/thirdPartiesService';
 import CompanySettingsService from '@/services/companySettingsService';
 import { useAutoAccounting } from '@/hooks/useAutoAccounting';
 import { useInvoiceEmail } from '@/hooks/useInvoiceEmail';
 import { InvoicePdfService } from '@/services/invoicePdfService';
-import { articlesService } from '@/services/articlesService';
-import type { ArticleWithRelations } from '@/services/articlesService';
+import { articlesService, type ArticleWithRelations } from '@/services/articlesService';
 import NewArticleModal from '@/components/inventory/NewArticleModal';
 import ClientSelector from '@/components/invoicing/ClientSelector';
 import type { InvoiceWithDetails } from '@/types/database/invoices.types';
@@ -41,7 +39,6 @@ import {
   Loader2,
   RefreshCw,
   Copy,
-  Receipt,
   MoreHorizontal,
   Mail,
   FileX
@@ -76,8 +73,6 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
   const [invoices, setInvoices] = useState<InvoiceWithDetails[]>([]);
   const [clients, setClients] = useState<ThirdParty[]>([]);
   const [articles, setArticles] = useState<ArticleWithRelations[]>([]);
-  const [suppliers, setSuppliers] = useState<Array<{id: string; name: string}>>([]);
-  const [warehouses, setWarehouses] = useState<Array<{id: string; name: string}>>([]);
   const [companySettings, setCompanySettings] = useState<CompanySettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -151,13 +146,11 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
     try {
       logger.info('OptimizedInvoicesTab', '🔄 Loading data for company:', currentCompany?.id);
 
-      const [invoicesData, clientsData, settingsData, articlesData, suppliersData, warehousesData] = await Promise.all([
+      const [invoicesData, clientsData, settingsData, articlesData] = await Promise.all([
         invoicingService.getInvoices(),
         supabase.from('customers').select('*').eq('company_id', currentCompany!.id).order('name'),
         loadCompanySettings(),
-        articlesService.getArticles(currentCompany!.id, { is_active: true }),
-        supabase.from('suppliers').select('*').eq('company_id', currentCompany!.id).order('name'),
-        supabase.from('warehouses').select('id, name').eq('company_id', currentCompany!.id)
+        articlesService.getArticles(currentCompany!.id, { is_active: true })
       ]);
 
       logger.info('OptimizedInvoicesTab', '✅ Articles loaded:', articlesData.length);
@@ -166,8 +159,6 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
       setClients((clientsData.data || []) as ThirdParty[]);
       setCompanySettings(settingsData);
       setArticles(articlesData || []);
-      setSuppliers((suppliersData.data || []).map((s: any) => ({ id: s.id, name: s.name || s.company_name || 'Sans nom' })));
-      setWarehouses(warehousesData.data || []);
     } catch (error) {
       // Logger l'erreur en console mais ne pas alerter l'utilisateur
       // Une base vide n'est pas une erreur, c'est un état normal pour un nouveau compte
@@ -677,7 +668,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
                           <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                           <span>
                             {invoice.invoice_date
-                              ? new Date(invoice.invoice_date).toLocaleDateString('fr-FR')
+                              ? new Date(String(invoice.invoice_date)).toLocaleDateString('fr-FR')
                               : '-'
                             }
                           </span>
@@ -811,8 +802,6 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
           setShowArticleModal(false);
         }}
         onSuccess={handleArticleCreated}
-        suppliers={suppliers}
-        warehouses={warehouses}
       />
     </div>
   );
@@ -1019,14 +1008,14 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
             await generateFromInvoice({
               id: createdInvoice.id as string,
               company_id: currentCompany.id,
-              customer_id: formData.clientId,
-              customer_name: client?.name || client?.company_name || 'Client',
+              third_party_id: formData.clientId,
+              third_party_name: client?.name || 'Client',
               invoice_number: formData.invoiceNumber,
               type: 'sale',
               invoice_date: formData.issueDate,
-              subtotal_excl_tax: totals.totalHT,
-              total_tax_amount: totals.totalTVA,
-              total_incl_tax: totals.totalTTC,
+              subtotal_excl_tax: _totals.totalHT,
+              total_tax_amount: _totals.totalTVA,
+              total_incl_tax: _totals.totalTTC,
               lines: formData.items.map(item => ({
                 account_id: undefined, // Sera mappé automatiquement selon le type
                 description: item.description,

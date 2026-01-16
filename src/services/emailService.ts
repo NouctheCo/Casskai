@@ -11,7 +11,7 @@ import { logger } from '@/lib/logger';
 export interface EmailConfiguration {
   id: string;
   company_id: string;
-  provider: 'smtp' | 'sendgrid' | 'mailgun' | 'aws_ses' | 'custom_api' | 'gmail_oauth';
+  provider: 'smtp' | 'sendgrid' | 'mailgun' | 'aws_ses' | 'custom_api' | 'gmail_oauth' | 'outlook_oauth';
   is_active: boolean;
   is_verified: boolean;
   // SMTP
@@ -546,8 +546,8 @@ class EmailService {
         body: JSON.stringify({
           provider: 'smtp',
           config: {
-            host: host,  // ✅ "smtp.gmail.com" (without port)
-            port: port,  // ✅ 587 (as number)
+            host,  // ✅ "smtp.gmail.com" (without port)
+            port,  // ✅ 587 (as number)
             secure: config.smtp_secure,
             username: config.smtp_username,
             password: config.smtp_password,

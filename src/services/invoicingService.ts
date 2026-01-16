@@ -342,7 +342,17 @@ class InvoicingService {
       // 5. Générer automatiquement l'écriture comptable (fire-and-forget)
       // Ne bloque pas la création de la facture si l'écriture échoue
       try {
-        await generateInvoiceJournalEntry(createdInvoice as any, createdInvoice.invoice_items || []);
+        const journalLines = (createdInvoice.invoice_items || []).map(item => ({
+          id: item.id,
+          invoice_id: item.invoice_id,
+          description: item.description || item.name || '',
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          discount_percent: (item as any).discount_percent ?? (item as any).discount_rate,
+          tax_rate: item.tax_rate,
+          line_total: (item as any).line_total ?? (item.quantity * item.unit_price)
+        }));
+        await generateInvoiceJournalEntry(createdInvoice as any, journalLines as any);
         logger.info(`InvoicingService: Journal entry created for invoice ${invoice_number}`);
       } catch (journalError) {
         // Log l'erreur mais ne bloque pas la création
@@ -406,7 +416,17 @@ class InvoicingService {
       if (shouldGenerateEntry) {
         logger.info('InvoicingService', '>>> ATTEMPTING TO CREATE JOURNAL ENTRY NOW <<<');
         try {
-          await generateInvoiceJournalEntry(updatedInvoice as any, updatedInvoice.invoice_items || []);
+          const journalLines = (updatedInvoice.invoice_items || []).map(item => ({
+            id: item.id,
+            invoice_id: item.invoice_id,
+            description: item.description || item.name || '',
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            discount_percent: (item as any).discount_percent ?? (item as any).discount_rate,
+            tax_rate: item.tax_rate,
+            line_total: (item as any).line_total ?? (item.quantity * item.unit_price)
+          }));
+          await generateInvoiceJournalEntry(updatedInvoice as any, journalLines as any);
           logger.info('InvoicingService', `✅ Journal entry created successfully for invoice ${updatedInvoice.invoice_number}`);
         } catch (journalError) {
           logger.error('InvoicingService', '❌ FAILED to generate journal entry on status update', journalError);
@@ -537,35 +557,6 @@ class InvoicingService {
       return await this.createInvoice(newInvoiceData, newLines);
     } catch (error) {
       logger.error('Invoicing', 'Error duplicating invoice:', error);
-      throw error;
-    }
-  }
-  async createCreditNote(originalInvoiceId: string): Promise<InvoiceWithDetails> {
-    try {
-      const originalInvoice = await this.getInvoiceById(originalInvoiceId);
-      if (!originalInvoice) {
-        throw new Error('Original invoice not found');
-      }
-      const creditNoteData: CreateInvoiceData = {
-        third_party_id: originalInvoice.third_party_id,
-        invoice_type: 'credit_note',
-        invoice_date: new Date().toISOString().split('T')[0],
-        due_date: new Date().toISOString().split('T')[0],
-        currency: originalInvoice.currency,
-        notes: `Avoir pour facture ${originalInvoice.invoice_number}`
-      };
-      // Create credit note items with negative quantities
-      const creditLines: CreateInvoiceLineData[] = (originalInvoice.invoice_items || []).map(item => ({
-        description: `Avoir: ${item.name || item.description}`,
-        quantity: -item.quantity,
-        unit_price: item.unit_price,
-        discount_percent: item.discount_rate,
-        tax_rate: item.tax_rate,
-        line_order: item.line_order
-      }));
-      return await this.createInvoice(creditNoteData, creditLines);
-    } catch (error) {
-      logger.error('Invoicing', 'Error creating credit note:', error);
       throw error;
     }
   }
@@ -744,7 +735,7 @@ class InvoicingService {
   /**
    * Crée un avoir (credit note) pour annuler une facture
    */
-  async createCreditNote(originalInvoiceId: string): Promise<Invoice> {
+  async createCreditNote(originalInvoiceId: string): Promise<InvoiceWithDetails> {
     try {
       // 1. Récupérer la facture originale avec ses items
       const { data: original, error: fetchError } = await supabase
@@ -852,7 +843,11 @@ class InvoicingService {
 
       logger.info('InvoicingService', `Credit note ${creditNoteNumber} created for invoice ${original.invoice_number}`);
 
-      return creditNote as Invoice;
+      const full = await this.getInvoiceById(creditNote.id);
+      if (!full) {
+        throw new Error('Avoir créé mais impossible à recharger');
+      }
+      return full;
     } catch (error) {
       logger.error('InvoicingService', 'Error in createCreditNote:', error);
       throw error;

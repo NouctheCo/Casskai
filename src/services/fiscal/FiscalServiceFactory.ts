@@ -187,13 +187,16 @@ export async function generateFiscalDeclaration(
 export async function listCompanyDeclarations(
   companyId: string,
   country: string,
-  filters?: {
+  _filters?: {
     type?: string;
     status?: string;
     year?: number;
   }
 ) {
   const service = FiscalServiceFactory.getServiceForCountry(country);
+
+  void companyId;
+  void service;
 
   // Utiliser la méthode protégée via une méthode publique
   // Note: Il faudrait ajouter une méthode publique dans BaseFiscalService

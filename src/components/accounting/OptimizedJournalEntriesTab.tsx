@@ -375,7 +375,7 @@ const EntryFormDialog: React.FC<EntryFormDialogProps> = ({ open, onClose, entry 
     for (const file of uploadFailures) {
       try {
         await journalEntryAttachmentService.uploadAttachment(persistedEntryId, companyId, file);
-      } catch (e) {
+      } catch (_error) {
         remaining.push(file);
       }
     }
@@ -831,15 +831,13 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
   );
 };
 // Entry Row Component
-const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate, onDuplicate, companyId, onRefresh }: { entry: any; onEdit: (entry: any) => void; onDelete: (entry: any) => void; onView: (entry: any) => void; onValidate: (entry: any) => void; onDuplicate: (entry: any) => void; companyId: string; onRefresh: () => void }) => {
+const EntryRow = ({ entry, onEdit, onDelete, onView, onDuplicate, companyId, onRefresh }: { entry: any; onEdit: (entry: any) => void; onDelete: (entry: any) => void; onView: (entry: any) => void; onDuplicate: (entry: any) => void; companyId: string; onRefresh: () => void }) => {
   const [expanded, setExpanded] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isValidating, setIsValidating] = useState(false);
   // Simuler un contrôle RBAC (à remplacer par vrai hook/context)
   const userCanEdit = true; // TODO: remplacer par vrai contrôle
   const userCanDelete = true;
   const userCanView = true;
-  const userCanValidate = true; // Nouveau: autorisation de validation
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'validated':
@@ -1211,42 +1209,6 @@ export default function OptimizedJournalEntriesTab() {
       });
     }
   };
-  const handleValidateEntry = async (entry: any) => {
-    if (!currentCompany?.id) {
-      toast({
-        title: "Erreur",
-        description: "Aucune entreprise sélectionnée",
-        variant: "destructive"
-      });
-      return;
-    }
-    try {
-      logger.debug('OptimizedJournalEntriesTab', '✅ Validation écriture:', entry.id);
-      const result = await journalEntriesService.updateJournalEntryStatus(
-        entry.id,
-        'posted',
-        currentCompany.id
-      );
-      if (result.success) {
-        toast({
-          title: "Écriture validée",
-          description: "L'écriture a été validée avec succès et est maintenant visible dans les rapports."
-        });
-        // Recharger la liste depuis la base
-        await loadEntries();
-        logger.debug('OptimizedJournalEntriesTab', '✅ Écriture validée et liste rechargée');
-      } else {
-        throw new Error('error' in result ? result.error : 'Échec de la validation');
-      }
-    } catch (error) {
-      logger.error('OptimizedJournalEntriesTab', '❌ Erreur validation:', error);
-      toast({
-        title: "Erreur de validation",
-        description: error instanceof Error ? error.message : "Impossible de valider l'écriture",
-        variant: "destructive"
-      });
-    }
-  };
   const handleViewEntry = (entry: any) => {
     setPreviewEntry(entry);
   };
@@ -1372,7 +1334,6 @@ export default function OptimizedJournalEntriesTab() {
                     onEdit={handleEditEntry}
                     onDelete={handleDeleteEntry}
                     onView={handleViewEntry}
-                    onValidate={handleValidateEntry}
                     onDuplicate={handleDuplicateEntry}
                     companyId={currentCompany?.id || ''}
                     onRefresh={loadEntries}

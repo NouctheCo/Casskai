@@ -29,7 +29,7 @@ vi.mock('@/services/accountingService', () => ({
 }));
 
 describe('AccountingImportDialog', () => {
-  const mockOnClose = vi.fn();
+  const mockOnOpenChange = vi.fn();
   const mockOnImportComplete = vi.fn();
 
   beforeEach(() => {
@@ -40,7 +40,7 @@ describe('AccountingImportDialog', () => {
     const { container } = render(
       <AccountingImportDialog
         open={true}
-        onClose={mockOnClose}
+        onOpenChange={mockOnOpenChange}
         companyId="company-123"
         onImportComplete={mockOnImportComplete}
       />
@@ -52,7 +52,7 @@ describe('AccountingImportDialog', () => {
     const { container } = render(
       <AccountingImportDialog
         open={false}
-        onClose={mockOnClose}
+        onOpenChange={mockOnOpenChange}
         companyId="company-123"
         onImportComplete={mockOnImportComplete}
       />

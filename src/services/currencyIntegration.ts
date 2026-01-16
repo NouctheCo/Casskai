@@ -14,7 +14,6 @@ import ConfigService from './configService';
 import { CurrencyService } from './currencyService';
 import { SUPPORTED_CURRENCIES } from '../utils/constants';
 import { supabase } from '../lib/supabase';
-import type { DatabaseFunctions } from '../types/supabase-rpc.types';
 import { logger } from '@/lib/logger';
 export class CurrencyIntegration {
   private static instance: CurrencyIntegration;

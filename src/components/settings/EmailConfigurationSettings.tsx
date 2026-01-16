@@ -191,25 +191,6 @@ export function EmailConfigurationSettings() {
     }
   };
 
-  const checkGmailConnection = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('email_oauth_tokens')
-        .select('email, is_active')
-        .eq('company_id', currentCompany!.id)
-        .eq('provider', 'gmail')
-        .eq('is_active', true)
-        .single();
-
-      if (!error && data) {
-        setGmailConnected(true);
-        setGmailEmail(data.email);
-      }
-    } catch (error) {
-      logger.error('EmailConfigurationSettings', 'Error checking Gmail connection:', error);
-    }
-  };
-
   const handleConnectGmail = async () => {
     setGmailConnecting(true);
     try {
@@ -241,7 +222,7 @@ export function EmailConfigurationSettings() {
         },
         body: JSON.stringify({
           companyId: currentCompany!.id,
-          redirectUrl: window.location.origin + '/settings'
+          redirectUrl: `${window.location.origin  }/settings`
         })
       });
 
@@ -252,7 +233,7 @@ export function EmailConfigurationSettings() {
       const { authUrl } = await response.json();
 
       // Redirect to Google OAuth
-      window.location.href = authUrl;
+      window.location.assign(authUrl);
     } catch (error: any) {
       toast.error('❌ Erreur lors de la connexion Gmail');
       logger.error('EmailConfigurationSettings', 'Error connecting Gmail:', error);
@@ -276,25 +257,6 @@ export function EmailConfigurationSettings() {
     } catch (error: any) {
       toast.error('❌ Erreur lors de la déconnexion');
       logger.error('EmailConfigurationSettings', 'Error disconnecting Gmail:', error);
-    }
-  };
-
-  const checkOutlookConnection = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('email_oauth_tokens')
-        .select('email, is_active')
-        .eq('company_id', currentCompany!.id)
-        .eq('provider', 'outlook')
-        .eq('is_active', true)
-        .single();
-
-      if (!error && data) {
-        setOutlookConnected(true);
-        setOutlookEmail(data.email);
-      }
-    } catch (error) {
-      logger.error('EmailConfigurationSettings', 'Error checking Outlook connection:', error);
     }
   };
 
@@ -329,7 +291,7 @@ export function EmailConfigurationSettings() {
         },
         body: JSON.stringify({
           companyId: currentCompany!.id,
-          redirectUrl: window.location.origin + '/settings'
+          redirectUrl: `${window.location.origin  }/settings`
         })
       });
 
@@ -340,7 +302,7 @@ export function EmailConfigurationSettings() {
       const { authUrl } = await response.json();
 
       // Redirect to Microsoft OAuth
-      window.location.href = authUrl;
+      window.location.assign(authUrl);
     } catch (error: any) {
       toast.error('❌ Erreur lors de la connexion Outlook');
       logger.error('EmailConfigurationSettings', 'Error connecting Outlook:', error);
@@ -1262,4 +1224,4 @@ function MailgunConfigForm({ formData, setFormData }: any) {
       </div>
     </div>
   );
-}
+}

@@ -6,7 +6,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { RegulatoryDocumentsList } from '@/components/regulatory/RegulatoryDocumentsList';
 import { RegulatoryDocumentForm } from '@/components/regulatory/RegulatoryDocumentForm';
@@ -18,13 +18,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { generateDocument } from '@/services/regulatory/documentGenerator';
 import { exportRegulatoryDocumentToPdf } from '@/services/regulatory/pdfExporter';
 import { getFiscalYears } from '@/utils/fiscalYearUtils';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import type { RegulatoryDocument, RegulatoryTemplate } from '@/types/regulatory';
 import { logger } from '@/lib/logger';
 export function RegulatoryDocumentsPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { currentCompany } = useAuth();
+  const { confirm, ConfirmDialog } = useConfirmDialog();
   const [documents, setDocuments] = useState<RegulatoryDocument[]>([]);
   const [templates, setTemplates] = useState<RegulatoryTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<RegulatoryTemplate | null>(null);
@@ -157,6 +158,11 @@ export function RegulatoryDocumentsPage() {
         toast.error(t('regulatory.templateNotFound'));
         return;
       }
+      const companyId = currentCompany?.id;
+      if (!companyId) {
+        toast.error(t('regulatory.errorCreatingDocument'));
+        return;
+      }
       // Recharger le template pour s'assurer d'avoir toutes les données
       const { data: freshTemplate, error: templateError } = await supabase
         .from('regulatory_templates')
@@ -179,7 +185,7 @@ export function RegulatoryDocumentsPage() {
         currentYear: new Date().getFullYear()
       });
       const result = await generateDocument(
-        currentCompany?.id!,
+        companyId,
         pendingTemplateId,
         selectedYear,
         selectedPeriod
@@ -281,7 +287,14 @@ export function RegulatoryDocumentsPage() {
    * Supprime un document
    */
   const handleDeleteDocument = async (documentId: string) => {
-    if (!confirm(t('regulatory.confirmDelete'))) return;
+    const confirmed = await confirm({
+      title: 'Confirmer la suppression',
+      description: t('regulatory.confirmDelete'),
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+    if (!confirmed) return;
     try {
       const { error } = await supabase
         .from('regulatory_documents')
@@ -369,6 +382,7 @@ export function RegulatoryDocumentsPage() {
   }
   return (
     <div className="container mx-auto p-6">
+      <ConfirmDialog />
       <RegulatoryDocumentsList
         documents={documents}
         templates={templates}

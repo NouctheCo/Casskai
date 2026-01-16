@@ -4,7 +4,8 @@
  */
 
 import React, { useState } from 'react';
-import { ReportGenerationService, ReportConfig, ReportTemplate } from '@/services/reporting/reportGenerationService';
+import { ReportGenerationService, ReportConfig } from '@/services/reporting/reportGenerationService';
+import { toast } from 'sonner';
 
 interface ReportBuilderState {
   selectedTemplate: string;
@@ -135,14 +136,14 @@ export const ReportBuilder: React.FC = () => {
           break;
         case 'excel':
           // Note: In production, use xlsx library for proper Excel export
-          alert('Excel export requires additional library (xlsx). Using JSON for now.');
+          toast.info('Excel export nécessite une bibliothèque supplémentaire (xlsx). Export JSON utilisé pour le moment.');
           exportResult = ReportGenerationService.exportToJSON(report);
           downloadFile(exportResult, `${state.reportTitle}.json`, 'application/json');
           break;
       }
 
       setState(prev => ({ ...prev, isGenerating: false }));
-    } catch (error) {
+    } catch (_error) {
       setState(prev => ({
         ...prev,
         isGenerating: false,

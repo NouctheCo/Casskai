@@ -13,13 +13,40 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabase';
-import { invoicingService } from '@/services/invoicingService';
+import { invoicingService, type InvoiceWithDetails as ServiceInvoiceWithDetails } from '@/services/invoicingService';
 import { InvoicePdfService } from '@/services/invoicePdfService';
 import CompanySettingsService from '@/services/companySettingsService';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import type { InvoiceWithDetails } from '@/types/database/invoices.types';
 import type { CompanySettings } from '@/types/company-settings.types';
+
+function normalizeInvoiceForEmail(raw: ServiceInvoiceWithDetails): InvoiceWithDetails {
+  const client = raw.third_party
+    ? ({
+        id: raw.third_party.id,
+        name: raw.third_party.name,
+        email: raw.third_party.email,
+        phone: raw.third_party.phone,
+        address_street: (raw.third_party as any).address_street ?? raw.third_party.address_line1,
+        address_city: (raw.third_party as any).address_city ?? raw.third_party.city,
+        address_postal_code: (raw.third_party as any).address_postal_code ?? raw.third_party.postal_code,
+        country: raw.third_party.country
+      } as any)
+    : undefined;
+
+  return {
+    ...(raw as any),
+    client,
+    invoice_items: (raw.invoice_items as any) ?? [],
+    invoice_lines: (raw as any).invoice_lines ?? (raw.invoice_items as any) ?? [],
+    total_ht: Number((raw as any).total_ht ?? raw.subtotal_excl_tax ?? 0),
+    total_tva: Number((raw as any).total_tva ?? raw.total_tax_amount ?? 0),
+    total_ttc: Number((raw as any).total_ttc ?? raw.total_incl_tax ?? 0),
+    paid_amount: Number((raw as any).paid_amount ?? raw.paid_amount ?? 0),
+    remaining_amount: Number((raw as any).remaining_amount ?? raw.remaining_amount ?? 0)
+  };
+}
 
 interface EmailAttachment {
   content: string;
@@ -319,8 +346,8 @@ ${companyName}
 
     try {
       // 1. Récupérer la facture complète avec les relations
-      const invoice = await invoicingService.getInvoiceById(invoiceId);
-      if (!invoice) {
+      const rawInvoice = await invoicingService.getInvoiceById(invoiceId);
+      if (!rawInvoice) {
         toast({
           title: 'Erreur',
           description: 'Facture introuvable',
@@ -329,8 +356,10 @@ ${companyName}
         return false;
       }
 
+      const invoice = normalizeInvoiceForEmail(rawInvoice);
+
       // 2. Vérifier que l'email du client existe
-      const clientEmail = invoice.client?.email;
+      const clientEmail = typeof (invoice.client as any)?.email === 'string' ? (invoice.client as any).email : '';
       if (!clientEmail) {
         toast({
           title: 'Erreur',

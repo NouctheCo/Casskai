@@ -149,7 +149,7 @@ export async function generateSaleJournalEntryWithVAT(
     total_incl_tax: number;
   },
   invoiceLines: InvoiceLineWithVAT[],
-  companyId: string
+  _companyId: string
 ): Promise<any[]> {
   const vatBreakdown = calculateVATBreakdown(invoiceLines, 'sale');
   const journalEntryLines = [];
@@ -205,7 +205,7 @@ export async function generatePurchaseJournalEntryWithVAT(
     total_incl_tax: number;
   },
   invoiceLines: InvoiceLineWithVAT[],
-  companyId: string
+  _companyId: string
 ): Promise<any[]> {
   const vatBreakdown = calculateVATBreakdown(invoiceLines, 'purchase');
   const journalEntryLines = [];

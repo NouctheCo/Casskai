@@ -371,14 +371,20 @@ const ThirdPartiesPage: React.FC = () => {
       // Convert to CSV
       const headers = ['Type', 'Code', 'Nom', 'Email', 'Téléphone', 'Ville', 'Pays', 'Statut'];
       const rows = filteredThirdParties.map(tp => [
-        tp.type === 'customer' ? 'Client' : 'Fournisseur',
+        tp.type === 'supplier'
+          ? 'Fournisseur'
+          : tp.type === 'partner'
+            ? 'Partenaire'
+            : tp.type === 'both'
+              ? 'Client/Fournisseur'
+              : 'Client',
         tp.code || '',
         tp.name,
         tp.primary_email || '',
         tp.primary_phone || '',
         tp.billing_address?.city || '',
         tp.billing_address?.country || '',
-        tp.is_active ? 'Actif' : 'Inactif'
+        tp.status === 'active' ? 'Actif' : 'Inactif'
       ]);
 
       const csvContent = [
@@ -428,7 +434,7 @@ const ThirdPartiesPage: React.FC = () => {
     try {
       logger.debug('ThirdPartiesPage', `🗑️ Deleting ${thirdParty.type}: ${thirdParty.name}`);
 
-      if (thirdParty.type === 'customer' || (thirdParty.type as any) === 'client') {
+      if (thirdParty.type === 'client' || (thirdParty.type as any) === 'customer') {
         const { error } = await supabase
           .from('customers')
           .delete()

@@ -2,9 +2,8 @@
  * Composant principal pour gérer les intégrations avec les autorités fiscales
  */
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { FileText, Plus, AlertCircle, CheckCircle, Clock, XCircle, Settings, RefreshCw } from 'lucide-react';
-import { TaxAuthoritySubmission, TaxAuthorityDeadline, ComplianceStatus } from '@/types/taxAuthority';
+import { FileText, Plus, Clock, Settings, RefreshCw } from 'lucide-react';
+import { TaxAuthorityDeadline, ComplianceStatus } from '@/types/taxAuthority';
 import { TaxAuthorityService } from '@/services/taxAuthorityService';
 import { SubmissionsList } from './SubmissionsList';
 import { DeadlinesList } from './DeadlinesList';
@@ -15,9 +14,7 @@ interface TaxAuthorityIntegrationProps {
   companyId: string;
 }
 export function TaxAuthorityIntegration({ companyId }: TaxAuthorityIntegrationProps) {
-  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'submissions' | 'deadlines' | 'credentials'>('submissions');
-  const [submissions, setSubmissions] = useState<TaxAuthoritySubmission[]>([]);
   const [deadlines, setDeadlines] = useState<TaxAuthorityDeadline[]>([]);
   const [complianceStatus, setComplianceStatus] = useState<ComplianceStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,18 +42,6 @@ export function TaxAuthorityIntegration({ companyId }: TaxAuthorityIntegrationPr
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
-  };
-  const getComplianceColor = (status: ComplianceStatus | null) => {
-    if (!status) return 'gray';
-    if (status.overdue > 0) return 'red';
-    if (status.pending > 0) return 'yellow';
-    return 'green';
-  };
-  const getComplianceIcon = (status: ComplianceStatus | null) => {
-    if (!status) return <Clock className="w-6 h-6" />;
-    if (status.overdue > 0) return <XCircle className="w-6 h-6" />;
-    if (status.pending > 0) return <AlertCircle className="w-6 h-6" />;
-    return <CheckCircle className="w-6 h-6" />;
   };
   return (
     <div className="space-y-6 p-6">
@@ -178,4 +163,4 @@ export function TaxAuthorityIntegration({ companyId }: TaxAuthorityIntegrationPr
       )}
     </div>
   );
-}
+}

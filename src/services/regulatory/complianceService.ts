@@ -7,7 +7,6 @@ import type {
   RegulatorySubmission,
   UpcomingDeadline,
   DocumentStatistics,
-  RegulatoryDocument,
 } from '@/types/regulatory';
 import { COUNTRIES } from '@/constants/regulatoryCountries';
 import { logger } from '@/lib/logger';
@@ -386,4 +385,4 @@ export default {
   generateComplianceReport,
   checkCompliance,
   exportSubmissionsToCSV,
-};
+};

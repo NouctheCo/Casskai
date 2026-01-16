@@ -12,6 +12,16 @@ export interface ContractData {
   contract_name: string;
   contract_type: ContractType;
   discount_config: DiscountConfig;
+  // RFA avancée (groupes de produits)
+  rfa_base_type?: 'total_client' | 'product_groups';
+  rfa_base_product_groups?: string[];
+  rfa_application_type?: 'same_as_base' | 'specific_groups' | 'total_client';
+  rfa_application_product_groups?: string[];
+  rfa_period_type?: 'contract_period' | 'calendar_year' | 'custom';
+  rfa_custom_period_start?: string | null;
+  rfa_custom_period_end?: string | null;
+  rfa_projection_method?: 'linear' | 'weighted_average' | 'seasonal';
+  rfa_notes?: string | null;
   start_date: string;
   end_date?: string;
   status: ContractStatus;
@@ -180,6 +190,16 @@ export interface ContractFormData {
   contract_name: string;
   contract_type: ContractType;
   discount_config: DiscountConfig;
+  // RFA avancée
+  rfa_base_type?: 'total_client' | 'product_groups';
+  rfa_base_product_groups?: string[];
+  rfa_application_type?: 'same_as_base' | 'specific_groups' | 'total_client';
+  rfa_application_product_groups?: string[];
+  rfa_period_type?: 'contract_period' | 'calendar_year' | 'custom';
+  rfa_custom_period_start?: string | null;
+  rfa_custom_period_end?: string | null;
+  rfa_projection_method?: 'linear' | 'weighted_average' | 'seasonal';
+  rfa_notes?: string | null;
   start_date: string;
   end_date?: string;
   currency: string;

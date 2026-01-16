@@ -49,62 +49,10 @@ export {
 
 import type { RegulatoryTemplate } from '@/types/regulatory';
 
-import { generateAllFranceTemplates } from './allFranceTemplates';
-import { generateAllOhadaTemplates } from './ohadaTemplates';
-import { generateAllIfrsTemplates } from './ifrsTemplates';
-import { generateAllMaghrebTemplates } from './maghrebTemplates';
-
-/**
- * Génère TOUS les templates (79 documents)
- */
-export function generateAllRegulatoryTemplates(): Array<Omit<RegulatoryTemplate, 'id' | 'createdAt' | 'updatedAt'>> {
-  return [
-    ...generateAllFranceTemplates(),
-    ...generateAllOhadaTemplates(),
-    ...generateAllIfrsTemplates(),
-    ...generateAllMaghrebTemplates()
-  ];
-}
-
-/**
- * Statistiques des templates
- */
-export const TEMPLATE_STATS = {
-  france: {
-    count: 25,
-    standard: 'PCG',
-    countries: 1,
-    countryCodes: ['FR']
-  },
-  ohada: {
-    count: 16, // 4 états financiers + 12 déclarations fiscales (3 pays)
-    standard: 'SYSCOHADA',
-    countries: 17, // Tous les pays OHADA partagent les mêmes états financiers
-    countriesWithTax: 3, // Seulement 3 pays ont les déclarations fiscales complètes
-    countryCodesWithTax: ['SN', 'CI', 'CM'],
-    allCountryCodes: ['BJ', 'BF', 'CM', 'CF', 'KM', 'CG', 'CD', 'CI', 'GA', 'GN', 'GW', 'GQ', 'ML', 'NE', 'SN', 'TD', 'TG']
-  },
-  ifrs: {
-    count: 21,
-    standard: 'IFRS',
-    countries: 4,
-    countryCodes: ['KE', 'NG', 'GH', 'ZA']
-  },
-  maghreb: {
-    count: 17,
-    standard: 'SCF/PCM',
-    countries: 3,
-    countryCodes: ['DZ', 'TN', 'MA']
-  },
-  total: 79, // 25 FR + 16 OHADA + 21 IFRS + 17 Maghreb
-  totalCountries: 25, // 1 FR + 17 OHADA + 4 IFRS + 3 Maghreb
-  countriesWithCompleteTaxForms: 11 // FR, SN, CI, CM, KE, NG, GH, ZA, DZ, TN, MA
-};
-
-import { FRANCE_TEMPLATES_CONFIG } from './allFranceTemplates';
-import { getOhadaTemplatesByCountry } from './ohadaTemplates';
-import { getIfrsTemplatesByCountry } from './ifrsTemplates';
-import { getMaghrebTemplatesByCountry } from './maghrebTemplates';
+import { FRANCE_TEMPLATES_CONFIG, generateAllFranceTemplates } from './allFranceTemplates';
+import { generateAllOhadaTemplates, getOhadaTemplatesByCountry } from './ohadaTemplates';
+import { generateAllIfrsTemplates, getIfrsTemplatesByCountry } from './ifrsTemplates';
+import { generateAllMaghrebTemplates, getMaghrebTemplatesByCountry } from './maghrebTemplates';
 import { createTemplatesFromConfigs } from './templateFactory';
 
 /**

@@ -50,8 +50,8 @@ export default function CurrencyManagementPage() {
     try {
       const data = await exchangeRateService.getCurrencyGainLoss(currentEnterprise.id);
       setGainLoss(data);
-    } catch (error) {
-      console.error('Erreur chargement gains/pertes:', error);
+    } catch (_error) {
+      console.error('Erreur chargement gains/pertes');
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ export default function CurrencyManagementPage() {
       });
 
       await loadGainLoss();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Erreur',
         description: 'Impossible de calculer les gains/pertes',

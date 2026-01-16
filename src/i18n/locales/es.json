@@ -596,7 +596,105 @@
     "tabs": {
       "calculations": "Calculs RFA",
       "contracts": "Contrats",
-      "dashboard": "Panel de Control"
+      "dashboard": "Panel de Control",
+      "advanced": "RFA avanzada"
+    },
+    "rfaAdvanced": {
+      "tabTitle": "RFA avanzada",
+      "selectCompanyHint": "Selecciona una empresa para acceder a importaciones y grupos.",
+      "tabs": {
+        "groups": "Grupos",
+        "imports": "Importaciones"
+      },
+      "imports": {
+        "title": "Importaciones RFA (CSV)",
+        "importTypeLabel": "Tipo de importación",
+        "fileLabel": "Archivo CSV",
+        "choosePlaceholder": "Elegir",
+        "downloadTemplate": "Descargar plantilla",
+        "runImport": "Ejecutar importación",
+        "running": "Importación en curso…",
+        "selectFileError": "Selecciona un archivo CSV antes de ejecutar la importación.",
+        "failedTitle": "Importación fallida",
+        "finishedTitle": "Importación completada",
+        "summary": "Éxitos: {{success}} — Errores: {{errors}} — Avisos: {{warnings}} — Omitidos: {{skipped}}",
+        "importId": "ID de importación: {{id}}",
+        "types": {
+          "product_groups": "Grupos de productos",
+          "product_group_items": "Productos → Grupos",
+          "turnover_data": "Facturación importada (ventas)"
+        }
+      },
+      "groups": {
+        "title": "Grupos de productos RFA",
+        "new": "Nuevo",
+        "loading": "Cargando…",
+        "empty": "No hay grupos todavía. Crea uno o importa desde la pestaña Importaciones.",
+        "edit": "Editar",
+        "confirmDelete": "¿Eliminar este grupo?",
+        "deleteDialog": {
+          "title": "¿Eliminar el grupo?",
+          "description": "Esta acción no se puede deshacer.",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        },
+        "dialog": {
+          "createTitle": "Nuevo grupo",
+          "editTitle": "Editar grupo"
+        },
+        "fields": {
+          "code": "Código",
+          "color": "Color",
+          "name": "Nombre",
+          "description": "Descripción"
+        },
+        "actions": {
+          "cancel": "Cancelar",
+          "save": "Guardar",
+          "delete": "Eliminar"
+        },
+        "placeholders": {
+          "code": "ALIM",
+          "color": "#3B82F6",
+          "name": "Alimentación",
+          "description": "Opcional"
+        }
+      },
+      "contractForm": {
+        "sectionTitle": "RFA avanzada (grupos / período)",
+        "choosePlaceholder": "Elegir",
+        "baseTypeLabel": "Base de cálculo de tramos",
+        "baseType": {
+          "total_client": "Facturación total del cliente",
+          "product_groups": "Facturación de grupos"
+        },
+        "applicationTypeLabel": "Aplicar la RFA sobre",
+        "applicationType": {
+          "same_as_base": "Mismo alcance que la base",
+          "specific_groups": "Grupos específicos",
+          "total_client": "Facturación total del cliente"
+        },
+        "groupsBaseLabel": "Grupos (base)",
+        "groupsBasePlaceholder": "Seleccionar grupos base",
+        "groupsApplicationLabel": "Grupos (aplicación)",
+        "groupsApplicationPlaceholder": "Seleccionar grupos de aplicación",
+        "periodTypeLabel": "Período RFA",
+        "periodType": {
+          "contract_period": "Período del contrato",
+          "calendar_year": "Año natural",
+          "custom": "Personalizado"
+        },
+        "projectionMethodLabel": "Método de proyección",
+        "projectionMethod": {
+          "linear": "Lineal",
+          "weighted_average": "Promedio ponderado",
+          "seasonal": "Estacional"
+        },
+        "customPeriodStart": "Inicio del período",
+        "customPeriodEnd": "Fin del período",
+        "notesLabel": "Notas RFA",
+        "notesPlaceholder": "Condiciones, exclusiones, etc."
+      }
     },
     "title": "Contrats & RFA",
     "top_clients": "Top clients RFA",
@@ -5220,5 +5318,70 @@
     "errorDeletingDocument": "Error al eliminar el documento",
     "errorExportingDocument": "Error al exportar el documento",
     "submissionError": "Error al enviar el formulario"
+  },
+  "invoicing": {
+    "title": "Facturación y Presupuestos",
+    "subtitle": "Gestión profesional de facturas y presupuestos",
+    "newInvoice": "Nueva factura",
+    "periods": {
+      "currentMonth": "Mes actual",
+      "currentQuarter": "Trimestre actual",
+      "currentYear": "Año actual",
+      "lastMonth": "Mes anterior",
+      "lastYear": "Año N-1",
+      "custom": "Período personalizado"
+    },
+    "tabs": {
+      "overview": "Resumen",
+      "invoices": "Facturas",
+      "quotes": "Presupuestos",
+      "clients": "Clientes",
+      "payments": "Pagos",
+      "late_fees": "Penalizaciones",
+      "settings": "Configuración"
+    },
+    "kpis": {
+      "revenue": "Facturación",
+      "revenueDesc": "Facturación total este mes",
+      "paidInvoices": "Facturas pagadas",
+      "paidInvoicesDesc": "Pagos recibidos",
+      "pendingInvoices": "Pendiente",
+      "pendingInvoicesDesc": "Facturas pendientes",
+      "overdueInvoices": "Atrasadas",
+      "overdueInvoicesDesc": "Facturas atrasadas"
+    },
+    "quickActions": {
+      "newInvoice": "Nueva factura",
+      "newInvoiceDesc": "Crear una factura de cliente",
+      "newQuote": "Nuevo presupuesto",
+      "newQuoteDesc": "Crear un presupuesto",
+      "newPayment": "Nuevo pago",
+      "newPaymentDesc": "Registrar un pago",
+      "viewClients": "Gestionar clientes",
+      "viewClientsDesc": "Ver la lista de clientes"
+    },
+    "recentActivity": {
+      "title": "Actividad reciente",
+      "noActivity": "No hay actividad reciente",
+      "items": {
+        "invoice": "Factura {{number}} - {{customer}} ({{amount}})",
+        "quote": "Presupuesto {{number}} ({{amount}})"
+      }
+    },
+    "revenueBreakdown": {
+      "title": "Distribución de ingresos",
+      "paidInvoices": "Facturas pagadas",
+      "pendingInvoices": "Pendiente de pago",
+      "overdueInvoices": "Facturas vencidas",
+      "noData": "No hay datos de ingresos disponibles para el período seleccionado"
+    },
+    "stats": {
+      "invoicesCreated": "Facturas creadas",
+      "thisMonth": "Este mes",
+      "activeClients": "Clientes activos",
+      "total": "Total",
+      "averageValue": "Valor promedio",
+      "perInvoice": "Por factura"
+    }
   }
 }

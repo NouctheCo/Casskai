@@ -96,7 +96,8 @@ export function CompanySettings() {
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.currentTarget;
+    const file = input.files?.[0];
     if (!file || !currentCompany?.id) return;
 
     // Vérifier que c'est une image
@@ -166,7 +167,7 @@ export function CompanySettings() {
     } finally {
       setIsUploadingLogo(false);
       // Réinitialiser l'input pour permettre de réuploader le même fichier
-      e.target.value = '';
+      input.value = '';
     }
   };
 

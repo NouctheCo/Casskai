@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Plus, Filter, Download, Upload, Calendar, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { FileText, Plus, Filter, Upload, CheckCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -118,7 +118,7 @@ export function RegulatoryDocuments() {
   const handleNewDocument = () => {
     setShowNewDocumentModal(true);
   };
-  const handleDocumentCreated = (documentId: string) => {
+  const handleDocumentCreated = (_documentId: string) => {
     setShowNewDocumentModal(false);
     loadDocuments();
     loadStatistics();
@@ -191,6 +191,8 @@ export function RegulatoryDocuments() {
         <div className="flex items-center gap-4">
           <Filter className="w-5 h-5 text-gray-400" />
           <select
+            title={t('reports.regulatory.fields.fiscalYear')}
+            aria-label={t('reports.regulatory.fields.fiscalYear')}
             value={filters.fiscalYear || ''}
             onChange={(e) => setFilters({ ...filters, fiscalYear: e.target.value ? parseInt(e.target.value) : undefined })}
             className="input bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
@@ -201,6 +203,8 @@ export function RegulatoryDocuments() {
             ))}
           </select>
           <select
+            title={t('reports.regulatory.filters.status')}
+            aria-label={t('reports.regulatory.filters.status')}
             value={filters.status || ''}
             onChange={(e) => setFilters({ ...filters, status: e.target.value as DocumentStatus || undefined })}
             className="input bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
@@ -213,6 +217,8 @@ export function RegulatoryDocuments() {
             <option value="rejected">{t('reports.regulatory.status.rejected')}</option>
           </select>
           <select
+            title={t('reports.regulatory.filters.accountingStandard')}
+            aria-label={t('reports.regulatory.filters.accountingStandard')}
             value={filters.accountingStandard || ''}
             onChange={(e) => setFilters({ ...filters, accountingStandard: e.target.value as AccountingStandard || undefined })}
             className="input bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
@@ -240,11 +246,11 @@ export function RegulatoryDocuments() {
         documents={documents}
         loading={loading}
         onEdit={handleEditDocument}
-        onRefresh={loadDocuments}
       />
       {/* Modal nouveau document */}
       {showNewDocumentModal && (
         <NewDocumentModal
+          open={showNewDocumentModal}
           onClose={() => setShowNewDocumentModal(false)}
           onDocumentCreated={handleDocumentCreated}
         />
@@ -280,4 +286,4 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
     </div>
   );
 }
-export default RegulatoryDocuments;
+export default RegulatoryDocuments;

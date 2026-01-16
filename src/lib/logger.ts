@@ -75,6 +75,58 @@ function log(
   }
 }
 
+type LoggerMethod = {
+  (context: string, message: string, data?: unknown): void;
+  (message: string, data?: unknown): void;
+  (...args: unknown[]): void;
+};
+
+function createLoggerMethod(level: LogLevel): LoggerMethod {
+  return ((...args: unknown[]) => {
+    if (args.length === 0) return;
+
+    // Preferred structured form: (context: string, message: string, data?: unknown)
+    if (typeof args[0] === 'string' && typeof args[1] === 'string') {
+      const context = args[0];
+      const message = args[1];
+      const tail = args.slice(2);
+
+      if (tail.length === 0) {
+        log(level, context, message);
+        return;
+      }
+
+      if (tail.length === 1) {
+        log(level, context, message, tail[0]);
+        return;
+      }
+
+      // Allow legacy multi-arg calls by packing the tail
+      log(level, context, message, tail);
+      return;
+    }
+
+    // Convenience forms: (message: string, data?: unknown)
+    if (typeof args[0] === 'string') {
+      const message = args[0];
+      const tail = args.slice(1);
+      if (tail.length === 0) {
+        log(level, 'App', message);
+        return;
+      }
+      if (tail.length === 1) {
+        log(level, 'App', message, tail[0]);
+        return;
+      }
+      log(level, 'App', message, tail);
+      return;
+    }
+
+    // Fallback: stringify unknown first arg
+    log(level, 'App', String(args[0]), args.length > 1 ? args.slice(1) : undefined);
+  }) as LoggerMethod;
+}
+
 /**
  * CassKai Logger
  *
@@ -88,30 +140,22 @@ export const logger = {
   /**
    * Debug logs - only shown in development
    */
-  debug: (context: string, message: string, data?: unknown) => {
-    log('debug', context, message, data);
-  },
+  debug: createLoggerMethod('debug'),
 
   /**
    * Info logs - only shown in development
    */
-  info: (context: string, message: string, data?: unknown) => {
-    log('info', context, message, data);
-  },
+  info: createLoggerMethod('info'),
 
   /**
    * Warning logs - shown in all environments
    */
-  warn: (context: string, message: string, data?: unknown) => {
-    log('warn', context, message, data);
-  },
+  warn: createLoggerMethod('warn'),
 
   /**
    * Error logs - shown in all environments
    */
-  error: (context: string, message: string, data?: unknown) => {
-    log('error', context, message, data);
-  },
+  error: createLoggerMethod('error'),
 
   /**
    * Check if logging is enabled for a specific level

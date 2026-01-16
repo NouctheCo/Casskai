@@ -431,7 +431,7 @@ export function calculatePeriodDates(
   period: FiscalPeriod
 ): { startDate: string; endDate: string } {
   let startMonth = 0;
-  let startDay = 1;
+  const startDay = 1;
   let endMonth = 11;
   let endDay = 31;
   if (period === 'ANNUAL') {

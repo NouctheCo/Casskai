@@ -216,10 +216,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       }
 
-    } catch (error) {
+    } catch (_error) {
 
       // IMPORTANT: Ne pas throw l'erreur, juste la logger (PROBLÈME 3)
-      logger.warn('Auth', '⚠️ Erreur lors de la vérification/création de l\'abonnement (non bloquant):', error);
+      logger.warn('Auth', '⚠️ Erreur lors de la vérification/création de l\'abonnement (non bloquant):', _error);
 
     }
 
@@ -257,7 +257,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       }
 
-    } catch (error) {
+    } catch (_error) {
 
       
 
@@ -464,7 +464,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             // eslint-disable-next-line require-atomic-updates
             hasCompletedInitialCheck.current = true;
 
-          } catch (switchError) {
+          } catch (_switchError) {
 
             
 
@@ -634,9 +634,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // If this is an email confirmation, mark for onboarding redirect
 
       if (isEmailConfirmation && session?.user) {
-
-        
-
+        // Email confirmation: no-op (handled elsewhere)
       }
 
       

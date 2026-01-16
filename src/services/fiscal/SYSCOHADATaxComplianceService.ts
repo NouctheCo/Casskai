@@ -696,8 +696,8 @@ export class SYSCOHADATaxComplianceService extends BaseFiscalService {
   ): Promise<FiscalDeclaration> {
     // Le TAFIRE nécessite de comparer deux exercices (N et N-1)
     const [year] = period.split('-');
-    const currentYearEnd = new Date(`${year}-12-31`);
-    const previousYearEnd = new Date(`${parseInt(year) - 1}-12-31`);
+    void new Date(`${year}-12-31`);
+    void new Date(`${parseInt(year) - 1}-12-31`);
 
     // Pour simplifier, on génère un TAFIRE basique
     // Une implémentation complète nécessiterait de récupérer les bilans N et N-1
@@ -761,7 +761,7 @@ export class SYSCOHADATaxComplianceService extends BaseFiscalService {
   ): Promise<FiscalDeclaration> {
     const [year, month] = period.split('-');
     const startDate = new Date(`${year}-${month}-01`);
-    const endDate = new Date(year, parseInt(month), 0); // Dernier jour du mois
+    const endDate = new Date(parseInt(year, 10), parseInt(month, 10), 0); // Dernier jour du mois
 
     // Récupérer les comptes de TVA (classe 44)
     const vatAccounts: string[] = [];
@@ -792,7 +792,7 @@ export class SYSCOHADATaxComplianceService extends BaseFiscalService {
     const tvaAPayer = tvaNette > 0 ? tvaNette : 0;
     const creditTVA = tvaNette < 0 ? Math.abs(tvaNette) : 0;
 
-    const dueDate = new Date(year, parseInt(month), 20); // 20 du mois suivant
+    const dueDate = new Date(parseInt(year, 10), parseInt(month, 10), 20); // 20 du mois suivant
 
     const tvaData = {
       periode: period,

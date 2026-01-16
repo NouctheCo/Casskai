@@ -58,7 +58,7 @@ export const logger = {
     logger.debug(`DB ${operation} on ${table}`, context);
   },
   group(title: string) {
-    if (config.isDevelopment) console.group('=== ' + title + ' ===');
+    if (config.isDevelopment) console.group(`=== ${  title  } ===`);
   },
   groupEnd() {
     if (config.isDevelopment) console.groupEnd();

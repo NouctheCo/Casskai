@@ -606,7 +606,105 @@
     "tabs": {
       "calculations": "Calculs RFA",
       "contracts": "Contrats",
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "advanced": "Advanced RFA"
+    },
+    "rfaAdvanced": {
+      "tabTitle": "Advanced RFA",
+      "selectCompanyHint": "Select a company to access imports and groups.",
+      "tabs": {
+        "groups": "Groups",
+        "imports": "Imports"
+      },
+      "imports": {
+        "title": "RFA Imports (CSV)",
+        "importTypeLabel": "Import type",
+        "fileLabel": "CSV file",
+        "choosePlaceholder": "Choose",
+        "downloadTemplate": "Download template",
+        "runImport": "Run import",
+        "running": "Import in progress…",
+        "selectFileError": "Select a CSV file before running the import.",
+        "failedTitle": "Import failed",
+        "finishedTitle": "Import completed",
+        "summary": "Success: {{success}} — Errors: {{errors}} — Warnings: {{warnings}} — Skipped: {{skipped}}",
+        "importId": "Import ID: {{id}}",
+        "types": {
+          "product_groups": "Product groups",
+          "product_group_items": "Products → Groups",
+          "turnover_data": "Imported turnover (sales)"
+        }
+      },
+      "groups": {
+        "title": "RFA product groups",
+        "new": "New",
+        "loading": "Loading…",
+        "empty": "No groups yet. Create one or import from the Imports tab.",
+        "edit": "Edit",
+        "confirmDelete": "Delete this group?",
+        "deleteDialog": {
+          "title": "Delete group?",
+          "description": "This action cannot be undone.",
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        },
+        "dialog": {
+          "createTitle": "New group",
+          "editTitle": "Edit group"
+        },
+        "fields": {
+          "code": "Code",
+          "color": "Color",
+          "name": "Name",
+          "description": "Description"
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "save": "Save",
+          "delete": "Delete"
+        },
+        "placeholders": {
+          "code": "FOOD",
+          "color": "#3B82F6",
+          "name": "Groceries",
+          "description": "Optional"
+        }
+      },
+      "contractForm": {
+        "sectionTitle": "Advanced RFA (groups / period)",
+        "choosePlaceholder": "Choose",
+        "baseTypeLabel": "Tier calculation base",
+        "baseType": {
+          "total_client": "Total customer turnover",
+          "product_groups": "Turnover from groups"
+        },
+        "applicationTypeLabel": "Apply RFA on",
+        "applicationType": {
+          "same_as_base": "Same scope as base",
+          "specific_groups": "Specific groups",
+          "total_client": "Total customer turnover"
+        },
+        "groupsBaseLabel": "Groups (base)",
+        "groupsBasePlaceholder": "Select base groups",
+        "groupsApplicationLabel": "Groups (application)",
+        "groupsApplicationPlaceholder": "Select application groups",
+        "periodTypeLabel": "RFA period",
+        "periodType": {
+          "contract_period": "Contract period",
+          "calendar_year": "Calendar year",
+          "custom": "Custom"
+        },
+        "projectionMethodLabel": "Projection method",
+        "projectionMethod": {
+          "linear": "Linear",
+          "weighted_average": "Weighted average",
+          "seasonal": "Seasonal"
+        },
+        "customPeriodStart": "Period start",
+        "customPeriodEnd": "Period end",
+        "notesLabel": "RFA notes",
+        "notesPlaceholder": "Terms, exclusions, etc."
+      }
     },
     "title": "Contrats & RFA",
     "top_clients": "Top clients RFA",
@@ -5270,5 +5368,70 @@
     "errorDeletingDocument": "Error deleting document",
     "errorExportingDocument": "Error exporting document",
     "submissionError": "Form submission error"
+  },
+  "invoicing": {
+    "title": "Invoicing & Quotes",
+    "subtitle": "Professional invoicing and quote management",
+    "newInvoice": "New invoice",
+    "periods": {
+      "currentMonth": "Current month",
+      "currentQuarter": "Current quarter",
+      "currentYear": "Current year",
+      "lastMonth": "Last month",
+      "lastYear": "Year N-1",
+      "custom": "Custom period"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "invoices": "Invoices",
+      "quotes": "Quotes",
+      "clients": "Clients",
+      "payments": "Payments",
+      "late_fees": "Late fees",
+      "settings": "Settings"
+    },
+    "kpis": {
+      "revenue": "Revenue",
+      "revenueDesc": "Total revenue this month",
+      "paidInvoices": "Paid invoices",
+      "paidInvoicesDesc": "Payments received",
+      "pendingInvoices": "Pending",
+      "pendingInvoicesDesc": "Invoices pending",
+      "overdueInvoices": "Overdue",
+      "overdueInvoicesDesc": "Overdue invoices"
+    },
+    "quickActions": {
+      "newInvoice": "New invoice",
+      "newInvoiceDesc": "Create a customer invoice",
+      "newQuote": "New quote",
+      "newQuoteDesc": "Create a quote",
+      "newPayment": "New payment",
+      "newPaymentDesc": "Record a payment",
+      "viewClients": "Manage clients",
+      "viewClientsDesc": "View client list"
+    },
+    "recentActivity": {
+      "title": "Recent activity",
+      "noActivity": "No recent activity",
+      "items": {
+        "invoice": "Invoice {{number}} - {{customer}} ({{amount}})",
+        "quote": "Quote {{number}} ({{amount}})"
+      }
+    },
+    "revenueBreakdown": {
+      "title": "Revenue breakdown",
+      "paidInvoices": "Paid invoices",
+      "pendingInvoices": "Pending payment",
+      "overdueInvoices": "Overdue invoices",
+      "noData": "No revenue data available for the selected period"
+    },
+    "stats": {
+      "invoicesCreated": "Invoices created",
+      "thisMonth": "This month",
+      "activeClients": "Active clients",
+      "total": "Total",
+      "averageValue": "Average value",
+      "perInvoice": "Per invoice"
+    }
   }
 }

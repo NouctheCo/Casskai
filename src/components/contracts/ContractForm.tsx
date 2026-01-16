@@ -2,7 +2,7 @@
  * Formulaire de création/édition de contrats
  * Utilise react-hook-form et les composants UI existants
  */
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, useFieldArray, ControllerRenderProps } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -18,6 +18,8 @@ import { useCurrency } from '../../hooks/useCurrency';
 import { ContractData, ContractFormData, ContractType } from '../../types/contracts.types';
 import { Plus, X, DollarSign, Percent, TrendingUp } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { rfaProductGroupsService } from '@/services/rfa/rfaProductGroupsService';
 // Schéma de validation Zod
 const contractSchema = z.object({
   client_id: z.string().min(1, 'Veuillez sélectionner un client'),
@@ -27,6 +29,15 @@ const contractSchema = z.object({
   end_date: z.string().optional(),
   currency: z.string().min(1, 'La devise est requise'),
   conditions: z.string().optional(),
+  rfa_base_type: z.enum(['total_client', 'product_groups']).optional(),
+  rfa_base_product_groups: z.array(z.string()).optional(),
+  rfa_application_type: z.enum(['same_as_base', 'specific_groups', 'total_client']).optional(),
+  rfa_application_product_groups: z.array(z.string()).optional(),
+  rfa_period_type: z.enum(['contract_period', 'calendar_year', 'custom']).optional(),
+  rfa_custom_period_start: z.string().nullable().optional(),
+  rfa_custom_period_end: z.string().nullable().optional(),
+  rfa_projection_method: z.enum(['linear', 'weighted_average', 'seasonal']).optional(),
+  rfa_notes: z.string().nullable().optional(),
   // Configuration des remises selon le type
   fixed_rate: z.number().min(0).max(1).optional(),
   fixed_amount: z.number().min(0).optional(),
@@ -43,6 +54,7 @@ interface ClientOption {
 }
 interface ContractFormProps {
   contract?: ContractData;
+  enterpriseId?: string;
   onSubmit: (data: ContractFormData) => Promise<boolean>;
   onCancel: () => void;
   loading?: boolean;
@@ -51,6 +63,7 @@ interface ContractFormProps {
 }
 export const ContractForm: React.FC<ContractFormProps> = ({
   contract,
+  enterpriseId,
   onSubmit,
   onCancel,
   loading = false,
@@ -60,6 +73,28 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const { currencies } = useCurrency();
+
+  const [productGroups, setProductGroups] = useState<Array<{ id: string; name: string; code: string | null }>>([]);
+  useEffect(() => {
+    const run = async () => {
+      if (!enterpriseId) return;
+      try {
+        const groups = await rfaProductGroupsService.listGroups(enterpriseId);
+        setProductGroups(groups.map(g => ({ id: g.id, name: g.name, code: g.code })));
+      } catch {
+        setProductGroups([]);
+      }
+    };
+    run();
+  }, [enterpriseId]);
+
+  const groupOptions = useMemo(() => {
+    return productGroups.map(g => ({
+      value: g.id,
+      label: g.code ? `${g.name} (${g.code})` : g.name
+    }));
+  }, [productGroups]);
+
   const form = useForm({
     resolver: zodResolver(contractSchema),
     defaultValues: {
@@ -70,6 +105,15 @@ export const ContractForm: React.FC<ContractFormProps> = ({
       end_date: contract?.end_date || '',
       currency: contract?.currency || 'EUR',
       conditions: '',
+      rfa_base_type: (contract as any)?.rfa_base_type || 'total_client',
+      rfa_base_product_groups: (contract as any)?.rfa_base_product_groups || [],
+      rfa_application_type: (contract as any)?.rfa_application_type || 'same_as_base',
+      rfa_application_product_groups: (contract as any)?.rfa_application_product_groups || [],
+      rfa_period_type: (contract as any)?.rfa_period_type || 'contract_period',
+      rfa_custom_period_start: (contract as any)?.rfa_custom_period_start || null,
+      rfa_custom_period_end: (contract as any)?.rfa_custom_period_end || null,
+      rfa_projection_method: (contract as any)?.rfa_projection_method || 'linear',
+      rfa_notes: (contract as any)?.rfa_notes || null,
       fixed_rate: contract?.discount_config.type === 'fixed_percent' ? contract.discount_config.rate : 0.01,
       fixed_amount: contract?.discount_config.type === 'fixed_amount' ? contract.discount_config.amount : 10000,
       tiers: contract?.discount_config.type === 'progressive' ? contract.discount_config.tiers : [
@@ -134,6 +178,15 @@ export const ContractForm: React.FC<ContractFormProps> = ({
         contract_name: data.contract_name,
         contract_type: data.contract_type,
         discount_config,
+        rfa_base_type: data.rfa_base_type,
+        rfa_base_product_groups: data.rfa_base_product_groups || [],
+        rfa_application_type: data.rfa_application_type,
+        rfa_application_product_groups: data.rfa_application_product_groups || [],
+        rfa_period_type: data.rfa_period_type,
+        rfa_custom_period_start: data.rfa_custom_period_start || null,
+        rfa_custom_period_end: data.rfa_custom_period_end || null,
+        rfa_projection_method: data.rfa_projection_method,
+        rfa_notes: data.rfa_notes || null,
         start_date: data.start_date,
         end_date: data.end_date,
         currency: data.currency,
@@ -482,6 +535,203 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   )}
                 />
               )}
+            </CardContent>
+          </Card>
+
+          {/* RFA avancée */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <TrendingUp className="h-5 w-5 mr-2" />
+                {t('contracts.rfaAdvanced.contractForm.sectionTitle', 'RFA avancée (groupes / période)')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="rfa_base_type"
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
+                    <FormItem>
+                      <FormLabel>{t('contracts.rfaAdvanced.contractForm.baseTypeLabel', 'Base de calcul des paliers')}</FormLabel>
+                      <FormControl>
+                        <Select value={field.value || 'total_client'} onValueChange={field.onChange}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('contracts.rfaAdvanced.contractForm.choosePlaceholder', t('contracts.rfaAdvanced.imports.choosePlaceholder', 'Choisir'))} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="total_client">{t('contracts.rfaAdvanced.contractForm.baseType.total_client', 'CA total client')}</SelectItem>
+                            <SelectItem value="product_groups">{t('contracts.rfaAdvanced.contractForm.baseType.product_groups', 'CA de groupes')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="rfa_application_type"
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
+                    <FormItem>
+                      <FormLabel>{t('contracts.rfaAdvanced.contractForm.applicationTypeLabel', 'Application de la RFA')}</FormLabel>
+                      <FormControl>
+                        <Select value={field.value || 'same_as_base'} onValueChange={field.onChange}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('contracts.rfaAdvanced.contractForm.choosePlaceholder', t('contracts.rfaAdvanced.imports.choosePlaceholder', 'Choisir'))} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="same_as_base">{t('contracts.rfaAdvanced.contractForm.applicationType.same_as_base', 'Même périmètre que la base')}</SelectItem>
+                            <SelectItem value="specific_groups">{t('contracts.rfaAdvanced.contractForm.applicationType.specific_groups', 'Groupes spécifiques')}</SelectItem>
+                            <SelectItem value="total_client">{t('contracts.rfaAdvanced.contractForm.applicationType.total_client', 'CA total client')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {form.watch('rfa_base_type') === 'product_groups' && (
+                <FormField
+                  control={form.control}
+                  name="rfa_base_product_groups"
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
+                    <FormItem>
+                      <FormLabel>{t('contracts.rfaAdvanced.contractForm.groupsBaseLabel', 'Groupes (base)')}</FormLabel>
+                      <FormControl>
+                        <MultiSelect
+                          options={groupOptions}
+                          value={field.value || []}
+                          onChange={field.onChange}
+                          placeholder={t('contracts.rfaAdvanced.contractForm.groupsBasePlaceholder', 'Sélectionner les groupes de base')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {form.watch('rfa_application_type') === 'specific_groups' && (
+                <FormField
+                  control={form.control}
+                  name="rfa_application_product_groups"
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
+                    <FormItem>
+                      <FormLabel>{t('contracts.rfaAdvanced.contractForm.groupsApplicationLabel', 'Groupes (application)')}</FormLabel>
+                      <FormControl>
+                        <MultiSelect
+                          options={groupOptions}
+                          value={field.value || []}
+                          onChange={field.onChange}
+                          placeholder={t('contracts.rfaAdvanced.contractForm.groupsApplicationPlaceholder', 'Sélectionner les groupes d’application')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="rfa_period_type"
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
+                    <FormItem>
+                      <FormLabel>{t('contracts.rfaAdvanced.contractForm.periodTypeLabel', 'Période RFA')}</FormLabel>
+                      <FormControl>
+                        <Select value={field.value || 'contract_period'} onValueChange={field.onChange}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('contracts.rfaAdvanced.contractForm.choosePlaceholder', t('contracts.rfaAdvanced.imports.choosePlaceholder', 'Choisir'))} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="contract_period">{t('contracts.rfaAdvanced.contractForm.periodType.contract_period', 'Période du contrat')}</SelectItem>
+                            <SelectItem value="calendar_year">{t('contracts.rfaAdvanced.contractForm.periodType.calendar_year', 'Année civile')}</SelectItem>
+                            <SelectItem value="custom">{t('contracts.rfaAdvanced.contractForm.periodType.custom', 'Personnalisée')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="rfa_projection_method"
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
+                    <FormItem>
+                      <FormLabel>{t('contracts.rfaAdvanced.contractForm.projectionMethodLabel', 'Méthode de projection')}</FormLabel>
+                      <FormControl>
+                        <Select value={field.value || 'linear'} onValueChange={field.onChange}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('contracts.rfaAdvanced.contractForm.choosePlaceholder', t('contracts.rfaAdvanced.imports.choosePlaceholder', 'Choisir'))} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="linear">{t('contracts.rfaAdvanced.contractForm.projectionMethod.linear', 'Linéaire')}</SelectItem>
+                            <SelectItem value="weighted_average">{t('contracts.rfaAdvanced.contractForm.projectionMethod.weighted_average', 'Moyenne pondérée')}</SelectItem>
+                            <SelectItem value="seasonal">{t('contracts.rfaAdvanced.contractForm.projectionMethod.seasonal', 'Saisonnier')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {form.watch('rfa_period_type') === 'custom' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="rfa_custom_period_start"
+                    render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
+                      <FormItem>
+                        <FormLabel>{t('contracts.rfaAdvanced.contractForm.customPeriodStart', 'Début période')}</FormLabel>
+                        <FormControl>
+                          <Input type="date" value={field.value || ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="rfa_custom_period_end"
+                    render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
+                      <FormItem>
+                        <FormLabel>{t('contracts.rfaAdvanced.contractForm.customPeriodEnd', 'Fin période')}</FormLabel>
+                        <FormControl>
+                          <Input type="date" value={field.value || ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+              <FormField
+                control={form.control}
+                name="rfa_notes"
+                render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
+                  <FormItem>
+                    <FormLabel>{t('contracts.rfaAdvanced.contractForm.notesLabel', 'Notes RFA')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                        placeholder={t('contracts.rfaAdvanced.contractForm.notesPlaceholder', 'Conditions, exclusions, etc.')}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </CardContent>
           </Card>
           {/* Actions */}

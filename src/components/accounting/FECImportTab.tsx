@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from '@/components/ui/use-toast';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import {
   Upload,
   FileArchive,
@@ -993,13 +994,13 @@ export default function FECImportTab() {
 
                             <TableCell className="text-right font-mono">
 
-                              {entry.debit > 0 ? `$<CurrencyAmount amount={entry.debit.toFixed(2)} />` : ''}
+                              {entry.debit > 0 ? <CurrencyAmount amount={entry.debit} /> : null}
 
                             </TableCell>
 
                             <TableCell className="text-right font-mono">
 
-                              {entry.credit > 0 ? `$<CurrencyAmount amount={entry.credit.toFixed(2)} />` : ''}
+                              {entry.credit > 0 ? <CurrencyAmount amount={entry.credit} /> : null}
 
                             </TableCell>
 

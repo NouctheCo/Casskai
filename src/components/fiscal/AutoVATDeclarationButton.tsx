@@ -70,7 +70,11 @@ export const AutoVATDeclarationButton: React.FC<AutoVATDeclarationButtonProps> =
       );
       toast({
         title: '✓ Déclaration TVA créée',
-        description: `Montant à payer: $<CurrencyAmount amount={result.data.vat_to_pay} />`,
+        description: (
+          <span>
+            Montant à payer: <CurrencyAmount amount={result.data.vat_to_pay} />
+          </span>
+        ),
       });
       setOpen(false);
       onSuccess?.();

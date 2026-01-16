@@ -348,7 +348,7 @@ const TaxPage: React.FC = () => {
     if (!selectedDeclaration) return;
 
     try {
-      const result = await taxService.updateDeclaration(selectedDeclaration.id, updates);
+      const result = await taxService.updateTaxDeclaration(selectedDeclaration.id, updates);
       if (result.error) {
         throw result.error;
       }
@@ -368,7 +368,7 @@ const TaxPage: React.FC = () => {
       return;
     }
     try {
-      const result = await taxService.deleteDeclaration(declarationId);
+      const result = await taxService.deleteTaxDeclaration(declarationId);
       if (result.error) {
         throw result.error;
       }

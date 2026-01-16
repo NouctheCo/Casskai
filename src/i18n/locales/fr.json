@@ -813,7 +813,105 @@
     "tabs": {
       "calculations": "Calculs RFA",
       "contracts": "Contrats",
-      "dashboard": "Tableau de bord"
+      "dashboard": "Tableau de bord",
+      "advanced": "RFA avancée"
+    },
+    "rfaAdvanced": {
+      "tabTitle": "RFA avancée",
+      "selectCompanyHint": "Sélectionne une entreprise pour accéder aux imports et groupes.",
+      "tabs": {
+        "groups": "Groupes",
+        "imports": "Imports"
+      },
+      "imports": {
+        "title": "Imports RFA (CSV)",
+        "importTypeLabel": "Type d’import",
+        "fileLabel": "Fichier CSV",
+        "choosePlaceholder": "Choisir",
+        "downloadTemplate": "Télécharger le template",
+        "runImport": "Lancer l’import",
+        "running": "Import en cours…",
+        "selectFileError": "Sélectionne un fichier CSV avant de lancer l’import.",
+        "failedTitle": "Import échoué",
+        "finishedTitle": "Import terminé",
+        "summary": "Succès: {{success}} — Erreurs: {{errors}} — Warnings: {{warnings}} — Skipped: {{skipped}}",
+        "importId": "Import ID: {{id}}",
+        "types": {
+          "product_groups": "Groupes produits",
+          "product_group_items": "Produits → Groupes",
+          "turnover_data": "CA (turnover) importé"
+        }
+      },
+      "groups": {
+        "title": "Groupes produits RFA",
+        "new": "Nouveau",
+        "loading": "Chargement…",
+        "empty": "Aucun groupe. Crée-en un ou importe via l’onglet Imports.",
+        "edit": "Modifier",
+        "confirmDelete": "Supprimer ce groupe ?",
+        "deleteDialog": {
+          "title": "Supprimer le groupe ?",
+          "description": "Cette action est irréversible.",
+          "confirm": "Supprimer",
+          "cancel": "Annuler"
+        },
+        "dialog": {
+          "createTitle": "Nouveau groupe",
+          "editTitle": "Modifier le groupe"
+        },
+        "fields": {
+          "code": "Code",
+          "color": "Couleur",
+          "name": "Nom",
+          "description": "Description"
+        },
+        "actions": {
+          "cancel": "Annuler",
+          "save": "Enregistrer",
+          "delete": "Supprimer"
+        },
+        "placeholders": {
+          "code": "ALIM",
+          "color": "#3B82F6",
+          "name": "Alimentation",
+          "description": "Optionnel"
+        }
+      },
+      "contractForm": {
+        "sectionTitle": "RFA avancée (groupes / période)",
+        "choosePlaceholder": "Choisir",
+        "baseTypeLabel": "Base de calcul des paliers",
+        "baseType": {
+          "total_client": "CA total client",
+          "product_groups": "CA de groupes"
+        },
+        "applicationTypeLabel": "Application de la RFA",
+        "applicationType": {
+          "same_as_base": "Même périmètre que la base",
+          "specific_groups": "Groupes spécifiques",
+          "total_client": "CA total client"
+        },
+        "groupsBaseLabel": "Groupes (base)",
+        "groupsBasePlaceholder": "Sélectionner les groupes de base",
+        "groupsApplicationLabel": "Groupes (application)",
+        "groupsApplicationPlaceholder": "Sélectionner les groupes d’application",
+        "periodTypeLabel": "Période RFA",
+        "periodType": {
+          "contract_period": "Période du contrat",
+          "calendar_year": "Année civile",
+          "custom": "Personnalisée"
+        },
+        "projectionMethodLabel": "Méthode de projection",
+        "projectionMethod": {
+          "linear": "Linéaire",
+          "weighted_average": "Moyenne pondérée",
+          "seasonal": "Saisonnier"
+        },
+        "customPeriodStart": "Début période",
+        "customPeriodEnd": "Fin période",
+        "notesLabel": "Notes RFA",
+        "notesPlaceholder": "Conditions, exclusions, etc."
+      }
     },
     "title": "Contrats & RFA",
     "top_clients": "Top clients RFA",
@@ -5279,5 +5377,70 @@
     "errorDeletingDocument": "Erreur lors de la suppression du document",
     "errorExportingDocument": "Erreur lors de l'export du document",
     "submissionError": "Erreur lors de la soumission du formulaire"
+  },
+  "invoicing": {
+    "title": "Facturation & Devis",
+    "subtitle": "Gestion professionnelle des factures et devis",
+    "newInvoice": "Nouvelle facture",
+    "periods": {
+      "currentMonth": "Mois en cours",
+      "currentQuarter": "Trimestre en cours",
+      "currentYear": "Année en cours",
+      "lastMonth": "Mois dernier",
+      "lastYear": "Année N-1",
+      "custom": "Période personnalisée"
+    },
+    "tabs": {
+      "overview": "Vue d'ensemble",
+      "invoices": "Factures",
+      "quotes": "Devis",
+      "clients": "Clients",
+      "payments": "Paiements",
+      "late_fees": "Pénalités",
+      "settings": "Configuration"
+    },
+    "kpis": {
+      "revenue": "Chiffre d'affaires",
+      "revenueDesc": "CA total ce mois",
+      "paidInvoices": "Factures payées",
+      "paidInvoicesDesc": "Paiements reçus",
+      "pendingInvoices": "En attente",
+      "pendingInvoicesDesc": "Factures en attente",
+      "overdueInvoices": "En retard",
+      "overdueInvoicesDesc": "Factures en retard"
+    },
+    "quickActions": {
+      "newInvoice": "Nouvelle facture",
+      "newInvoiceDesc": "Créer une facture client",
+      "newQuote": "Nouveau devis",
+      "newQuoteDesc": "Créer un devis",
+      "newPayment": "Nouveau paiement",
+      "newPaymentDesc": "Enregistrer un paiement",
+      "viewClients": "Gérer les clients",
+      "viewClientsDesc": "Voir la liste des clients"
+    },
+    "recentActivity": {
+      "title": "Activité récente",
+      "noActivity": "Aucune activité récente",
+      "items": {
+        "invoice": "Facture {{number}} - {{customer}} ({{amount}})",
+        "quote": "Devis {{number}} ({{amount}})"
+      }
+    },
+    "revenueBreakdown": {
+      "title": "Répartition des revenus",
+      "paidInvoices": "Factures payées",
+      "pendingInvoices": "En attente de paiement",
+      "overdueInvoices": "Factures en retard",
+      "noData": "Aucune donnée de revenus disponible pour la période sélectionnée"
+    },
+    "stats": {
+      "invoicesCreated": "Factures créées",
+      "thisMonth": "Ce mois",
+      "activeClients": "Clients actifs",
+      "total": "Total",
+      "averageValue": "Valeur moyenne",
+      "perInvoice": "Par facture"
+    }
   }
 }

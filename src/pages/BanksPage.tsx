@@ -20,6 +20,7 @@ import { TransactionCategorization } from '@/components/banking/TransactionCateg
 import { useTranslation } from 'react-i18next';
 import { useAutoAccounting } from '@/hooks/useAutoAccounting';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
   Upload,
   RefreshCw,
@@ -42,6 +43,7 @@ const BanksPageNew: React.FC = () => {
   const { user, currentCompany } = useAuth();
   const { t } = useTranslation();
   const { generateFromBankTransaction } = useAutoAccounting();
+  const { confirm: confirmDialog, ConfirmDialog } = useConfirmDialog();
   // State
   const [bankAccounts, setBankAccounts] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<BankStorageTransaction[]>([]);
@@ -220,8 +222,14 @@ const BanksPageNew: React.FC = () => {
   // Purge history for selected account
   const handlePurgeHistory = async () => {
     if (!currentCompany?.id) return;
-    const confirm = window.confirm('Confirmez-vous la purge de l\'historique pour ce compte ? Cette action est irréversible.');
-    if (!confirm) return;
+    const confirmed = await confirmDialog({
+      title: 'Confirmer la purge',
+      description: "Confirmez-vous la purge de l'historique pour ce compte ? Cette action est irréversible.",
+      confirmText: 'Purger',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+    if (!confirmed) return;
     try {
       let query = supabase
         .from('bank_transactions')
@@ -251,6 +259,7 @@ const BanksPageNew: React.FC = () => {
   }
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <ConfirmDialog />
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">{t('banking.title')}</h1>

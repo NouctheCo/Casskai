@@ -264,7 +264,7 @@ export class VisualizationService {
    */
   static formatGaugeChartData(
     data: GaugeChartData,
-    config: Partial<ChartConfig> = {}
+    _config: Partial<ChartConfig> = {}
   ): FormattedChartData {
     const percentage = ((data.value - data.min) / (data.max - data.min)) * 100;
     const color = data.thresholds.find(
@@ -489,7 +489,7 @@ export class VisualizationService {
         {
           label: lineData.label,
           type: 'line' as const,
-          data: barData.points.map(p => 0), // Align with bar data
+          data: barData.points.map(() => 0), // Align with bar data
           borderColor: config.colors?.[0] || '#007bff',
           backgroundColor: 'transparent',
           tension: 0.4,
@@ -645,7 +645,7 @@ export class VisualizationService {
    */
   static formatTreemapData(
     data: HierarchicalData,
-    config: Partial<ChartConfig> = {}
+    _config: Partial<ChartConfig> = {}
   ): HierarchicalData {
     return data;
   }
@@ -653,13 +653,12 @@ export class VisualizationService {
   /**
    * Generate color palette
    */
-  static generateColorPalette(count: number, baseColor?: string): string[] {
+  static generateColorPalette(count: number, _baseColor?: string): string[] {
     if (count <= this.DEFAULT_COLORS.length) {
       return this.DEFAULT_COLORS.slice(0, count);
     }
 
     const colors = [...this.DEFAULT_COLORS];
-    const base = baseColor ? parseInt(baseColor.slice(1), 16) : 0x007bff;
 
     for (let i = this.DEFAULT_COLORS.length; i < count; i++) {
       const hue = (i * 360) / count;

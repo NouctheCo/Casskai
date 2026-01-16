@@ -3,8 +3,6 @@
  * Advanced financial analytics, trend analysis, and forecasting
  */
 
-import type { ValidationResult } from '@/services/regulatory/countryValidationService';
-
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
@@ -463,8 +461,6 @@ export class AnalyticsService {
     entities: { name: string; value: number }[]
   ): ComparisonMetrics {
     const sorted = [...entities].sort((a, b) => b.value - a.value);
-    const max = sorted[0].value;
-    const min = sorted[sorted.length - 1].value;
     const average = entities.reduce((a, b) => a + b.value, 0) / entities.length;
 
     const withStatus = sorted.map(entity => ({

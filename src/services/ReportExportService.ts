@@ -12,11 +12,19 @@
 // Service d'export de rapports avec génération PDF et Excel
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { chartGenerationService } from './chartGenerationService';
 import { logger } from '@/lib/logger';
+
+// ExcelJS import conditionnel pour éviter les problèmes de build
+let ExcelJS: typeof import('exceljs') | null = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  ExcelJS = require('exceljs');
+} catch (_error) {
+  logger.warn('ReportExport', 'ExcelJS not available in browser environment');
+}
 export interface ExportOptions {
   format: 'pdf' | 'excel' | 'csv';
   orientation?: 'portrait' | 'landscape';
@@ -191,76 +199,66 @@ export class ReportExportService {
     options: ExportOptions = { format: 'excel' }
   ): Promise<string> {
     try {
-      const workbook = XLSX.utils.book_new();
+      if (!ExcelJS) {
+        throw new Error('ExcelJS n\'est pas disponible dans cet environnement.');
+      }
+
+      const workbook = new ExcelJS.Workbook();
       const tables = Array.isArray(data) ? data : [data];
+
       for (let i = 0; i < tables.length; i++) {
         const table = tables[i];
         const sheetName = table.title || `Feuille ${i + 1}`;
-        // Créer les données avec en-têtes
-        const worksheetData = [
-          table.headers,
-          ...table.rows
-        ];
-        // Créer la feuille
-        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-        // Formatage des colonnes
-        const range = XLSX.utils.decode_range(worksheet['!ref']!);
+
+        const worksheet = workbook.addWorksheet(sheetName);
+
         // Largeurs de colonnes automatiques
-        const colWidths = table.headers.map(header => ({
-          wch: Math.max(header.length, 15)
+        worksheet.columns = table.headers.map((header) => ({
+          header,
+          width: Math.max(String(header).length, 15)
         }));
-        worksheet['!cols'] = colWidths;
+
+        // Ajouter les lignes
+        table.rows.forEach((row) => worksheet.addRow(row));
+
         // Style des en-têtes
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-          if (!worksheet[cellAddress]) continue;
-          worksheet[cellAddress].s = {
-            font: { bold: true, color: { rgb: "FFFFFF" } },
-            fill: { fgColor: { rgb: "2980B9" } },
-            border: {
-              top: { style: "thin" },
-              bottom: { style: "thin" },
-              left: { style: "thin" },
-              right: { style: "thin" }
-            }
+        const headerRow = worksheet.getRow(1);
+        headerRow.eachCell((cell) => {
+          cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2980B9' } };
+          cell.border = {
+            top: { style: 'thin' },
+            bottom: { style: 'thin' },
+            left: { style: 'thin' },
+            right: { style: 'thin' }
           };
-        }
+        });
+
         // Bordures pour toutes les cellules
-        for (let row = range.s.r; row <= range.e.r; row++) {
-          for (let col = range.s.c; col <= range.e.c; col++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-            if (!worksheet[cellAddress]) continue;
-            if (!worksheet[cellAddress].s) {
-              worksheet[cellAddress].s = {};
-            }
-            worksheet[cellAddress].s.border = {
-              top: { style: "thin" },
-              bottom: { style: "thin" },
-              left: { style: "thin" },
-              right: { style: "thin" }
+        worksheet.eachRow({ includeEmpty: false }, (row) => {
+          row.eachCell({ includeEmpty: true }, (cell) => {
+            cell.border = {
+              top: { style: 'thin' },
+              bottom: { style: 'thin' },
+              left: { style: 'thin' },
+              right: { style: 'thin' }
             };
-          }
-        }
-        // Ajouter la feuille au classeur
-        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+          });
+        });
+
         // Ajouter une feuille de résumé si disponible
         if (table.summary) {
           this.addExcelSummarySheet(workbook, table.summary, `${sheetName} - Résumé`);
         }
       }
       // Métadonnées du fichier
-      workbook.Props = {
-        Title: options.title || 'Rapport Financier',
-        Subject: options.subtitle || 'Rapport généré automatiquement',
-        Author: options.companyInfo?.name || 'CassKai',
-        CreatedDate: new Date()
-      };
+
+      workbook.creator = options.companyInfo?.name || 'CassKai';
+      workbook.created = new Date();
+
       // Générer le fichier Excel
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: 'xlsx',
-        type: 'array',
-        bookSST: true
-      });
+
+      const excelBuffer = await workbook.xlsx.writeBuffer();
       const excelBlob = new Blob([excelBuffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
@@ -400,7 +398,7 @@ export class ReportExportService {
       yPos += 5;
     });
   }
-  private addPDFWatermark(pdf: any, text: string) {
+  private addPDFWatermark(pdf: any, _text: string) {
     // ANCIEN CODE: Watermark au milieu SUPPRIMÉ
     // Maintenant on ajoute un footer discret "Généré par CassKai" sur chaque page
     const pageCount = pdf.internal.getNumberOfPages();
@@ -417,20 +415,28 @@ export class ReportExportService {
       });
     }
   }
-  private addExcelSummarySheet(workbook: any, summary: Record<string, any>, sheetName: string) {
-    const summaryData = [
-      ['Élément', 'Valeur'],
-      ...Object.entries(summary)
+  private addExcelSummarySheet(workbook: import('exceljs').Workbook, summary: Record<string, any>, sheetName: string) {
+    const worksheet = workbook.addWorksheet(sheetName);
+    worksheet.columns = [
+      { header: 'Élément', width: 30 },
+      { header: 'Valeur', width: 40 }
     ];
-    const worksheet = XLSX.utils.aoa_to_sheet(summaryData);
-    // Style des en-têtes du résumé
-    const headerStyle = {
-      font: { bold: true, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "2980B9" } }
-    };
-    worksheet['A1'].s = headerStyle;
-    worksheet['B1'].s = headerStyle;
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+    Object.entries(summary).forEach(([key, value]) => {
+      worksheet.addRow([key, value]);
+    });
+
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2980B9' } };
+      cell.border = {
+        top: { style: 'thin' },
+        bottom: { style: 'thin' },
+        left: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
   }
   /**
    * Export PDF avec tables ET graphiques intégrés

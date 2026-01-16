@@ -23,6 +23,7 @@ import { PageContainer } from '@/components/ui/PageContainer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { invoicingService } from '@/services/invoicingService';
@@ -67,7 +68,7 @@ import { logger } from '@/lib/logger';
 // Invoicing KPI Card Component
 const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }: {
   title: string;
-  value: string | number;
+  value: React.ReactNode;
   icon: any;
   trend?: number;
   color?: string;
@@ -188,6 +189,7 @@ const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewC
 // Recent Invoicing Activities Component
 const RecentInvoicingActivities = ({ t }: { t: any }) => {
   const { currentCompany } = useAuth();
+  const { formatAmount } = useCompanyCurrency();
   type ActivityItem = {
     icon: React.ComponentType<{ className?: string }>;
     color: 'blue' | 'green' | 'purple' | 'orange';
@@ -221,14 +223,24 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
         // Ajouter les factures récentes
         if (recentInvoices) {
           for (const invoice of recentInvoices) {
-            const customerName = invoice.customer?.name || 'Client inconnu';
+            const customer = Array.isArray(invoice.customer) ? invoice.customer[0] : invoice.customer;
+            const customerName = (customer as any)?.name || 'Client inconnu';
             const amount = invoice.total_incl_tax || 0;
+            const formattedAmount = formatAmount(amount);
             const timeAgo = getTimeAgo(invoice.created_at);
 
             activityItems.push({
               icon: FileText,
               color: invoice.status === 'paid' ? 'green' : 'blue',
-              description: `Facture ${invoice.invoice_number} - ${customerName} ($<CurrencyAmount amount={amount} />)`,
+              description: t(
+                'invoicing.recentActivity.items.invoice',
+                'Facture {{number}} - {{customer}} ({{amount}})',
+                {
+                  number: invoice.invoice_number,
+                  customer: customerName,
+                  amount: formattedAmount
+                }
+              ),
               time: timeAgo
             });
           }
@@ -238,12 +250,20 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
         if (recentQuotes) {
           for (const quote of recentQuotes) {
             const amount = quote.total_incl_tax || 0;
+            const formattedAmount = formatAmount(amount);
             const timeAgo = getTimeAgo(quote.created_at);
 
             activityItems.push({
               icon: Receipt,
               color: 'purple',
-              description: `Devis ${quote.quote_number} ($<CurrencyAmount amount={amount} />)`,
+              description: t(
+                'invoicing.recentActivity.items.quote',
+                'Devis {{number}} ({{amount}})',
+                {
+                  number: quote.quote_number,
+                  amount: formattedAmount
+                }
+              ),
               time: timeAgo
             });
           }
@@ -585,7 +605,7 @@ export default function InvoicingPageOptimized() {
         >
           <InvoicingKPICard
             title={t('invoicing.kpis.revenue', 'Chiffre d\'affaires')}
-            value={`$<CurrencyAmount amount={invoicingData.totalRevenue} />`}
+            value={<CurrencyAmount amount={invoicingData.totalRevenue} />}
             icon={Euro}
             color="blue"
             trend={invoicingData.totalRevenueTrend}
@@ -594,7 +614,7 @@ export default function InvoicingPageOptimized() {
           />
           <InvoicingKPICard
             title={t('invoicing.kpis.paidInvoices', 'Factures payées')}
-            value={`$<CurrencyAmount amount={invoicingData.paidInvoices} />`}
+            value={<CurrencyAmount amount={invoicingData.paidInvoices} />}
             icon={CheckCircle}
             color="green"
             trend={invoicingData.paidInvoicesTrend}
@@ -603,7 +623,7 @@ export default function InvoicingPageOptimized() {
           />
           <InvoicingKPICard
             title={t('invoicing.kpis.pendingInvoices', 'En attente')}
-            value={`$<CurrencyAmount amount={invoicingData.pendingInvoices} />`}
+            value={<CurrencyAmount amount={invoicingData.pendingInvoices} />}
             icon={Clock}
             color="orange"
             trend={invoicingData.pendingInvoicesTrend}
@@ -612,7 +632,7 @@ export default function InvoicingPageOptimized() {
           />
           <InvoicingKPICard
             title={t('invoicing.kpis.overdueInvoices', 'En retard')}
-            value={`$<CurrencyAmount amount={invoicingData.overdueInvoices} />`}
+            value={<CurrencyAmount amount={invoicingData.overdueInvoices} />}
             icon={AlertTriangle}
             color="red"
             trend={invoicingData.overdueInvoicesTrend}
@@ -671,7 +691,7 @@ export default function InvoicingPageOptimized() {
                 className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <FileText className="h-4 w-4" />
-                Configuration
+                {t('invoicing.tabs.settings', 'Configuration')}
               </TabsTrigger>
             </TabsList>
           </div>

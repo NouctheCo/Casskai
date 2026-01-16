@@ -516,7 +516,6 @@ export class AutomaticCalculationService {
     fieldId: string,
     documentType: string
   ): CalculatedField | null {
-    const calculations: CalculatedField[] = [];
     const dummyData = {};
     const dummyContext: CalculationContext = {
       documentType,

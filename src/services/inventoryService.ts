@@ -184,18 +184,26 @@ export interface NewInventoryItemInput {
   locationId?: string | null;
   name: string;
   reference?: string;
+  // Backwards-compatible aliases (used by some article-based flows)
+  productCode?: string;
+  productName?: string;
   description?: string;
   category?: string;
   unit?: string;
   purchasePrice?: number;
   unitCost?: number;
   sellingPrice?: number;
+  salePrice?: number;
+  taxRate?: number;
+  barcode?: string;
   currentStock?: number;
+  initialQuantity?: number;
   minStock?: number;
   maxStock?: number;
   reorderPoint?: number;
   reorderQuantity?: number;
   supplierId?: string;
+  supplierReference?: string;
 }
 export interface NewStockMovementInput {
   item_id?: string;
@@ -648,28 +656,33 @@ export class InventoryService {
     payload: NewInventoryItemInput | CreateInventoryItemInput,
     companyId: string
   ): CreateInventoryItemInput {
-    if ('productName' in payload) {
-      return { ...payload, companyId };
+    const isNewInventoryItemPayload = (
+      value: NewInventoryItemInput | CreateInventoryItemInput
+    ): value is NewInventoryItemInput => typeof (value as any).name === 'string';
+
+    if (isNewInventoryItemPayload(payload)) {
+      return {
+        companyId,
+        productId: payload.productId,
+        productVariantId: payload.productVariantId ?? null,
+        warehouseId: payload.warehouseId,
+        locationId: payload.locationId ?? null,
+        productName: payload.name,
+        productCode: payload.reference ?? payload.name,
+        description: payload.description,
+        quantity: payload.currentStock,
+        reorderPoint: payload.reorderPoint ?? payload.minStock,
+        reorderQuantity: payload.reorderQuantity ?? payload.minStock,
+        unit: payload.unit,
+        unitCost: payload.unitCost ?? payload.purchasePrice,
+        sellingPrice: payload.sellingPrice,
+        category: payload.category,
+        maxStock: payload.maxStock ?? null,
+        supplierId: payload.supplierId
+      } satisfies CreateInventoryItemInput;
     }
-    return {
-      companyId,
-      productId: payload.productId,
-      productVariantId: payload.productVariantId ?? null,
-      warehouseId: payload.warehouseId,
-      locationId: payload.locationId ?? null,
-      productName: payload.name,
-      productCode: payload.reference ?? payload.name,
-      description: payload.description,
-      quantity: payload.currentStock,
-      reorderPoint: payload.reorderPoint ?? payload.minStock,
-      reorderQuantity: payload.reorderQuantity ?? payload.minStock,
-      unit: payload.unit,
-      unitCost: payload.unitCost ?? payload.purchasePrice,
-      sellingPrice: payload.sellingPrice,
-      category: payload.category,
-      maxStock: payload.maxStock ?? null,
-      supplierId: payload.supplierId
-    } satisfies CreateInventoryItemInput;
+
+    return { ...payload, companyId };
   }
   private static normalizeUpdateInventoryInput(updates: Partial<InventoryItem>): Partial<CreateInventoryItemInput> {
     return {

@@ -3,7 +3,7 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Validateurs pour documents réglementaires
  */
-import { safeEval, safeEvalCondition } from '@/utils/safeEval';
+import { safeEvalCondition } from '@/utils/safeEval';
 import { logger } from '@/lib/logger';
 import type {
   RegulatoryDocument,
@@ -183,7 +183,7 @@ function validateTextField(
   field: FormField,
   value: any,
   errors: ValidationError[],
-  warnings: ValidationWarning[]
+  _warnings: ValidationWarning[]
 ): void {
   const strValue = String(value);
   // Validation de pattern (regex)
@@ -223,7 +223,7 @@ function validateDateField(
   field: FormField,
   value: any,
   errors: ValidationError[],
-  warnings: ValidationWarning[]
+  _warnings: ValidationWarning[]
 ): void {
   const date = new Date(value);
   if (isNaN(date.getTime())) {
@@ -403,7 +403,7 @@ function validateFrenchDocument(
   document: RegulatoryDocument,
   template: RegulatoryTemplate,
   errors: ValidationError[],
-  warnings: ValidationWarning[]
+  _warnings: ValidationWarning[]
 ): void {
   // Exemple: vérifier SIREN pour les documents fiscaux
   if (template.category === 'tax_returns') {
@@ -422,10 +422,10 @@ function validateFrenchDocument(
  * Validations spécifiques aux documents OHADA
  */
 function validateOhadaDocument(
-  document: RegulatoryDocument,
-  template: RegulatoryTemplate,
-  errors: ValidationError[],
-  warnings: ValidationWarning[]
+  _document: RegulatoryDocument,
+  _template: RegulatoryTemplate,
+  _errors: ValidationError[],
+  _warnings: ValidationWarning[]
 ): void {
   // Validations SYSCOHADA
   // TODO: Ajouter validations spécifiques OHADA
@@ -434,10 +434,10 @@ function validateOhadaDocument(
  * Validations spécifiques aux documents IFRS
  */
 function validateIfrsDocument(
-  document: RegulatoryDocument,
-  template: RegulatoryTemplate,
-  errors: ValidationError[],
-  warnings: ValidationWarning[]
+  _document: RegulatoryDocument,
+  _template: RegulatoryTemplate,
+  _errors: ValidationError[],
+  _warnings: ValidationWarning[]
 ): void {
   // Validations IFRS for SMEs
   // TODO: Ajouter validations spécifiques IFRS
@@ -446,10 +446,10 @@ function validateIfrsDocument(
  * Validations spécifiques aux documents Maghreb (SCF/PCM)
  */
 function validateMaghrebDocument(
-  document: RegulatoryDocument,
-  template: RegulatoryTemplate,
-  errors: ValidationError[],
-  warnings: ValidationWarning[]
+  _document: RegulatoryDocument,
+  _template: RegulatoryTemplate,
+  _errors: ValidationError[],
+  _warnings: ValidationWarning[]
 ): void {
   // Validations SCF/PCM
   // TODO: Ajouter validations spécifiques Maghreb

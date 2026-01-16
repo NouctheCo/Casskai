@@ -78,7 +78,12 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
 
   const formatAmount = (amount: number, type: string) => {
     const sign = type === 'credit' ? '+' : '-';
-    return `${sign}$<CurrencyAmount amount={amount} />`;
+    return (
+      <span className="inline-flex items-center">
+        <span className="mr-1">{sign}</span>
+        <CurrencyAmount amount={amount} />
+      </span>
+    );
   };
 
   return (

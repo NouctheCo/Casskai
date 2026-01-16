@@ -179,7 +179,7 @@ export function getWorkflowState(
   status: JournalEntryStatus,
   isLocked: boolean,
   requiresValidation: boolean,
-  userRole?: string
+  _userRole?: string
 ): WorkflowState {
   const state: WorkflowState = {
     current_status: status,

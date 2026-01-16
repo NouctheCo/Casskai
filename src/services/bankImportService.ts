@@ -272,8 +272,8 @@ class BankImportService {
         case 'U': // Amount (alternative)
           try {
             const isParenNegative = /^\(.*\)$/.test(value);
-            const numeric = value.replace(/\(|\)/g, '').replace(/[^\d.,\-]/g, '').replace(',', '.');
-            let amount = parseFloat(numeric);
+            const numeric = value.replace(/\(|\)/g, '').replace(/[^\d.,-]/g, '').replace(',', '.');
+            const amount = parseFloat(numeric);
             if (!isNaN(amount)) {
               currentTransaction.amount = isParenNegative ? -Math.abs(amount) : amount;
             }
@@ -548,9 +548,9 @@ class BankImportService {
     // Format avec slashes: MM/DD/YYYY ou DD/MM/YYYY ou DD/MM/YY
     const parts = trimmed.split('/');
     if (parts.length === 3) {
-      let first = parseInt(parts[0], 10);
-      let second = parseInt(parts[1], 10);
-      let yearPart = parts[2];
+      const first = parseInt(parts[0], 10);
+      const second = parseInt(parts[1], 10);
+      const yearPart = parts[2];
       // Déterminer format: si le premier nombre > 12, c'est obligatoirement DD
       // Sinon, on assume DD/MM (format EU par défaut)
       let day: number;

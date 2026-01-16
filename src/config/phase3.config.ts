@@ -323,7 +323,7 @@ export function getCountryLanguage(countryCode: string): string | null {
 /**
  * Helper function to get supported format by country
  */
-export function getSupportedFormatsForCountry(countryCode: string) {
+export function getSupportedFormatsForCountry(_countryCode: string) {
   // Some countries might have specific format requirements
   // This can be extended for country-specific formats
   return PHASE3_CONFIG.FORMAT.SUPPORTED_FORMATS;
@@ -332,7 +332,7 @@ export function getSupportedFormatsForCountry(countryCode: string) {
 /**
  * Helper function to get validation rules for country
  */
-export function getValidationRulesForCountry(countryCode: string, documentType: string) {
+export function getValidationRulesForCountry(_countryCode: string, documentType: string) {
   // This would typically fetch from database or constants
   // Placeholder for now
   return PHASE3_CONFIG.VALIDATION[documentType as keyof typeof PHASE3_CONFIG.VALIDATION];
@@ -346,15 +346,25 @@ export function isFeatureEnabled(feature: keyof typeof PHASE3_CONFIG): boolean {
   return value === true || (typeof value === 'object' && value !== null);
 }
 
+type UnknownRecord = Record<string, unknown>;
+
+const isRecord = (value: unknown): value is UnknownRecord =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /**
  * Helper function to update configuration at runtime
  */
-export function updateConfig(key: string, value: any) {
+export function updateConfig(key: string, value: unknown) {
   const keys = key.split('.');
-  let obj = PHASE3_CONFIG as any;
+  let obj: UnknownRecord = PHASE3_CONFIG as unknown as UnknownRecord;
   
   for (let i = 0; i < keys.length - 1; i++) {
-    obj = obj[keys[i]];
+    const k = keys[i];
+    const next = obj[k];
+    if (!isRecord(next)) {
+      obj[k] = {};
+    }
+    obj = obj[k] as UnknownRecord;
   }
   
   obj[keys[keys.length - 1]] = value;
@@ -363,12 +373,12 @@ export function updateConfig(key: string, value: any) {
 /**
  * Helper function to get configuration value
  */
-export function getConfigValue(key: string, defaultValue?: any): any {
+export function getConfigValue(key: string, defaultValue?: unknown): unknown {
   const keys = key.split('.');
-  let obj = PHASE3_CONFIG as any;
+  let obj: unknown = PHASE3_CONFIG;
   
   for (const k of keys) {
-    if (obj && typeof obj === 'object' && k in obj) {
+    if (isRecord(obj) && k in obj) {
       obj = obj[k];
     } else {
       return defaultValue;

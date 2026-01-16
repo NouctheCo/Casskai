@@ -86,6 +86,13 @@ const faqData: FAQItem[] = [
     keywords: ['import', 'écritures', 'fec', 'csv', 'excel', 'migration']
   },
   {
+    id: 'co1b',
+    category: 'comptabilite',
+    question: 'Puis-je migrer mes données depuis un autre logiciel ?',
+    answer: 'Oui. CassKai permet d\'importer vos données via des fichiers CSV ou le format FEC (Fichier des Écritures Comptables). Pour démarrer, allez dans Comptabilité > Import/Export, puis sélectionnez l\'onglet FEC et importez votre fichier. En cas d\'impossibilité ou d\'erreur, contactez beug@casskai.app en joignant votre fichier FEC (en pièce jointe si le fichier n\'est pas trop lourd, sinon via un lien), ainsi que votre adresse email client : nous nous en occupons sous 24h maximum.',
+    keywords: ['migration', 'import', 'fec', 'csv', 'sage', 'quickbooks', 'support', 'import/export']
+  },
+  {
     id: 'co2',
     category: 'comptabilite',
     question: 'Le plan comptable est-il personnalisable ?',

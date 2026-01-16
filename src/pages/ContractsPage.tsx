@@ -26,7 +26,9 @@ import { useEnterprise } from '../contexts/EnterpriseContext';
 import { useCurrency } from '../hooks/useCurrency';
 import { useContracts } from '../hooks/useContracts';
 import { ContractForm } from '../components/contracts/ContractForm';
+import { RFACalculator } from '../components/contracts/RFACalculator';
 import { RFACalculationsPanel } from '../components/contracts/RFACalculationsPanel';
+import { RFAAdvancedPanel } from '@/components/contracts/rfa/RFAAdvancedPanel';
 import { AmountDisplay } from '../components/currency/AmountDisplay';
 import {
   ContractData,
@@ -102,7 +104,7 @@ const ContractsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedContract, setSelectedContract] = useState<ContractData | null>(null);
   const [showContractForm, setShowContractForm] = useState(false);
-  const [_showRFACalculator, setShowRFACalculator] = useState(false);
+  const [showRFACalculator, setShowRFACalculator] = useState(false);
   const [customerOptions, setCustomerOptions] = useState<ContractClientOption[]>([]);
   const [customersLoading, setCustomersLoading] = useState(false);
   const [contractFormLoading, setContractFormLoading] = useState(false);
@@ -137,6 +139,10 @@ const ContractsPage: React.FC = () => {
   const handleEditContract = useCallback((contract: ContractData) => {
     setSelectedContract(contract);
     setShowContractForm(true);
+  }, []);
+
+  const handleCloseRFACalculator = useCallback(() => {
+    setShowRFACalculator(false);
   }, []);
   const handleCloseContractForm = useCallback(() => {
     setShowContractForm(false);
@@ -577,7 +583,7 @@ const ContractsPage: React.FC = () => {
       {/* Navigation par onglets */}
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="dashboard" className="flex items-center">
             <BarChart3 className="h-4 w-4 mr-2" />
             {t('contracts.tabs.dashboard', 'Dashboard')}
@@ -589,6 +595,10 @@ const ContractsPage: React.FC = () => {
           <TabsTrigger value="calculations" className="flex items-center">
             <Calculator className="h-4 w-4 mr-2" />
             {t('contracts.tabs.calculations', 'Calculs RFA')}
+          </TabsTrigger>
+          <TabsTrigger value="advanced" className="flex items-center">
+            <Sparkles className="h-4 w-4 mr-2" />
+            {t('contracts.tabs.advanced', 'RFA avancée')}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard" className="mt-6">
@@ -605,6 +615,18 @@ const ContractsPage: React.FC = () => {
         </TabsContent>
         <TabsContent value="calculations" className="mt-6">
           <RFACalculationsPanel />
+        </TabsContent>
+
+        <TabsContent value="advanced" className="mt-6">
+          {currentEnterpriseId ? (
+            <RFAAdvancedPanel companyId={currentEnterpriseId} />
+          ) : (
+            <Card>
+              <CardContent className="p-6 text-sm text-muted-foreground">
+                {t('contracts.rfaAdvanced.selectCompanyHint', 'Sélectionne une entreprise pour accéder aux imports et groupes.')}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
       </motion.div>
@@ -631,12 +653,38 @@ const ContractsPage: React.FC = () => {
           </DialogHeader>
           <ContractForm
             contract={selectedContract || undefined}
+            enterpriseId={currentEnterpriseId || undefined}
             onSubmit={handleSubmitContract}
             onCancel={handleCloseContractForm}
             loading={contractFormLoading}
             clients={customerOptions}
             clientsLoading={customersLoading}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={showRFACalculator && Boolean(selectedContract)}
+        onOpenChange={(open) => {
+          if (!open) handleCloseRFACalculator();
+        }}
+      >
+        <DialogContent className="max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('contracts.rfa_calculator', 'Simulateur RFA')}</DialogTitle>
+            <DialogDescription>
+              {selectedContract
+                ? `${selectedContract.contract_name} • ${selectedContract.client_name}`
+                : t('contracts.rfa_calculator_description', 'Simulez le montant de RFA selon différents scénarios.')}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedContract && (
+            <RFACalculator
+              contract={selectedContract}
+              onClose={handleCloseRFACalculator}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </motion.div>

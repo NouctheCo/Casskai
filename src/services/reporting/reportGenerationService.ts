@@ -119,7 +119,7 @@ export class ReportGenerationService {
   /**
    * Generate metrics section
    */
-  private static generateMetricsSection(config: ReportConfig): ReportSection {
+  private static generateMetricsSection(_config: ReportConfig): ReportSection {
     return {
       title: 'Financial Metrics',
       description: 'Key financial metrics for the selected period',
@@ -156,7 +156,7 @@ export class ReportGenerationService {
   /**
    * Generate financial ratios section
    */
-  private static generateRatiosSection(config: ReportConfig): ReportSection {
+  private static generateRatiosSection(_config: ReportConfig): ReportSection {
     return {
       title: 'Financial Ratios Analysis',
       description: '15+ financial ratios with status and interpretations',
@@ -211,7 +211,7 @@ export class ReportGenerationService {
   /**
    * Generate trends section
    */
-  private static generateTrendsSection(config: ReportConfig): ReportSection {
+  private static generateTrendsSection(_config: ReportConfig): ReportSection {
     return {
       title: 'Financial Trends',
       description: 'Revenue, profit, and key metrics trends over time',
@@ -250,7 +250,7 @@ export class ReportGenerationService {
   /**
    * Generate forecast section
    */
-  private static generateForecastSection(config: ReportConfig): ReportSection {
+  private static generateForecastSection(_config: ReportConfig): ReportSection {
     return {
       title: 'Financial Forecasts',
       description: 'Projected financial performance for next 4 quarters',
@@ -318,7 +318,7 @@ include asset turnover efficiency and debt optimization. Overall financial posit
   /**
    * Generate recommendations based on report data
    */
-  private static generateRecommendations(report: ReportData): string[] {
+  private static generateRecommendations(_report: ReportData): string[] {
     return [
       'Continue focusing on revenue growth which is showing consistent upward trend',
       'Optimize asset utilization to improve asset turnover ratio',
@@ -474,7 +474,7 @@ include asset turnover efficiency and debt optimization. Overall financial posit
     });
 
     // Data sheets for each section
-    report.sections.forEach((section, idx) => {
+    report.sections.forEach((section) => {
       const sheetName = section.title.substring(0, 31); // Excel sheet name limit
       const sheetData: any[] = [
         [sheetName],
