@@ -150,6 +150,22 @@ export default [
     },
   },
 
+  // Large constant template definitions: don't fail lint on size-related rules
+  {
+    files: ['src/constants/templates/**/*.{ts,tsx}'],
+    rules: {
+      'max-lines-per-function': 'off',
+    },
+  },
+
+  // Some constant data builders are intentionally deeply nested
+  {
+    files: ['src/constants/taxCalendars.ts'],
+    rules: {
+      'max-depth': 'off',
+    },
+  },
+
   // Generated / schema-heavy types: lint should not be blocked by file size/complexity
   {
     files: ['src/types/**/*.{ts,tsx}'],
