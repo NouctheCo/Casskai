@@ -27,6 +27,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { useContracts } from '../hooks/useContracts';
 import { ContractForm } from '../components/contracts/ContractForm';
 import { RFACalculationsPanel } from '../components/contracts/RFACalculationsPanel';
+import { ContractImportTab } from '../components/contracts/ContractImportTab';
 import { AmountDisplay } from '../components/currency/AmountDisplay';
 import {
   ContractData,
@@ -40,6 +41,7 @@ import {
   Search,
   Filter,
   Download,
+  Upload,
   Calculator,
   TrendingUp,
   TrendingDown,
@@ -577,7 +579,7 @@ const ContractsPage: React.FC = () => {
       {/* Navigation par onglets */}
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="dashboard" className="flex items-center">
             <BarChart3 className="h-4 w-4 mr-2" />
             {t('contracts.tabs.dashboard', 'Dashboard')}
@@ -589,6 +591,10 @@ const ContractsPage: React.FC = () => {
           <TabsTrigger value="calculations" className="flex items-center">
             <Calculator className="h-4 w-4 mr-2" />
             {t('contracts.tabs.calculations', 'Calculs RFA')}
+          </TabsTrigger>
+          <TabsTrigger value="import" className="flex items-center">
+            <Upload className="h-4 w-4 mr-2" />
+            {t('contracts.tabs.import', 'Import')}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard" className="mt-6">
@@ -605,6 +611,26 @@ const ContractsPage: React.FC = () => {
         </TabsContent>
         <TabsContent value="calculations" className="mt-6">
           <RFACalculationsPanel />
+        </TabsContent>
+        <TabsContent value="import" className="mt-6">
+          {currentEnterpriseId ? (
+            <ContractImportTab
+              companyId={currentEnterpriseId}
+              contracts={contracts.map(c => ({
+                id: c.id,
+                contract_name: c.contract_name,
+                client_name: c.client_name
+              }))}
+              onImportComplete={() => {
+                // Rafraîchir les données après import
+                // Le hook useContracts gère automatiquement le rechargement
+              }}
+            />
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              {t('contracts.import.select_company', 'Veuillez sélectionner une entreprise pour importer des données.')}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
       </motion.div>
