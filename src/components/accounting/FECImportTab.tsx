@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -993,13 +994,13 @@ export default function FECImportTab() {
 
                             <TableCell className="text-right font-mono">
 
-                              {entry.debit > 0 ? `$<CurrencyAmount amount={entry.debit.toFixed(2)} />` : ''}
+                              {entry.debit > 0 ? <CurrencyAmount amount={entry.debit} /> : ''}
 
                             </TableCell>
 
                             <TableCell className="text-right font-mono">
 
-                              {entry.credit > 0 ? `$<CurrencyAmount amount={entry.credit.toFixed(2)} />` : ''}
+                              {entry.credit > 0 ? <CurrencyAmount amount={entry.credit} /> : ''}
 
                             </TableCell>
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -703,7 +704,7 @@ export default function OptimizedReportsTab() {
                   </div>
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {stat.isPercentage ? `${stat.value}%` : `$<CurrencyAmount amount={stat.value} />`}
+                  {stat.isPercentage ? `${stat.value}%` : <CurrencyAmount amount={stat.value} />}
                 </p>
               </div>
             </CardContent>

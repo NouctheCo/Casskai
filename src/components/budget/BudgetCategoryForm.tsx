@@ -439,7 +439,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
                 key={index}
                 className="flex-1 bg-primary/60 hover:bg-primary rounded-t transition-all"
                 style={{ height: `${height}%` }}
-                title={`${MONTHS[index]}: $<CurrencyAmount amount={value} />`}
+                title={`${MONTHS[index]}: ${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value)}`}
               />
             );
           })}

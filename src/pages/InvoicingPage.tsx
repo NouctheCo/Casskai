@@ -67,7 +67,7 @@ import { logger } from '@/lib/logger';
 // Invoicing KPI Card Component
 const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }: {
   title: string;
-  value: string | number;
+  value: React.ReactNode;
   icon: any;
   trend?: number;
   color?: string;
@@ -588,7 +588,7 @@ export default function InvoicingPageOptimized() {
         >
           <InvoicingKPICard
             title={t('invoicing.kpis.revenue', 'Chiffre d\'affaires')}
-            value={`$<CurrencyAmount amount={invoicingData.totalRevenue} />`}
+            value={<CurrencyAmount amount={invoicingData.totalRevenue} />}
             icon={Euro}
             color="blue"
             trend={invoicingData.totalRevenueTrend}
@@ -597,7 +597,7 @@ export default function InvoicingPageOptimized() {
           />
           <InvoicingKPICard
             title={t('invoicing.kpis.paidInvoices', 'Factures payées')}
-            value={`$<CurrencyAmount amount={invoicingData.paidInvoices} />`}
+            value={<CurrencyAmount amount={invoicingData.paidInvoices} />}
             icon={CheckCircle}
             color="green"
             trend={invoicingData.paidInvoicesTrend}
@@ -606,7 +606,7 @@ export default function InvoicingPageOptimized() {
           />
           <InvoicingKPICard
             title={t('invoicing.kpis.pendingInvoices', 'En attente')}
-            value={`$<CurrencyAmount amount={invoicingData.pendingInvoices} />`}
+            value={<CurrencyAmount amount={invoicingData.pendingInvoices} />}
             icon={Clock}
             color="orange"
             trend={invoicingData.pendingInvoicesTrend}
@@ -615,7 +615,7 @@ export default function InvoicingPageOptimized() {
           />
           <InvoicingKPICard
             title={t('invoicing.kpis.overdueInvoices', 'En retard')}
-            value={`$<CurrencyAmount amount={invoicingData.overdueInvoices} />`}
+            value={<CurrencyAmount amount={invoicingData.overdueInvoices} />}
             icon={AlertTriangle}
             color="red"
             trend={invoicingData.overdueInvoicesTrend}
