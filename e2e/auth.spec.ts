@@ -27,10 +27,15 @@ test.describe('Authentication', () => {
     // Check title
     await expect(page).toHaveTitle(/CassKai/);
 
-    // Check login form elements
-    await expect(page.getByLabel(/email/i)).toBeVisible();
-    await expect(page.getByLabel(/mot de passe|password/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /se connecter|connexion|login/i })).toBeVisible();
+    // Wait for form to be loaded - use multiple selectors for robustness
+    const emailInput = page.locator('[data-testid="email-input"], input[type="email"], [aria-label*="email" i]').first();
+    const passwordInput = page.locator('[data-testid="password-input"], input[type="password"], [aria-label*="mot de passe" i], [aria-label*="password" i]').first();
+    const submitButton = page.getByRole('button', { name: /se connecter|connexion|login/i });
+
+    // Check login form elements are visible
+    await expect(emailInput).toBeVisible({ timeout: 15000 });
+    await expect(passwordInput).toBeVisible();
+    await expect(submitButton).toBeVisible();
   });
 
   test('should show error for invalid credentials', async ({ page }) => {
@@ -39,10 +44,13 @@ test.describe('Authentication', () => {
       'Supabase env not configured for E2E (.env.test.local)'
     );
 
-    // Fill invalid credentials
+    // Fill invalid credentials using robust selectors
     await dismissOverlays(page);
-    await page.getByLabel(/email/i).fill('invalid@example.com');
-    await page.getByLabel(/mot de passe|password/i).fill('wrongpassword');
+    const emailInput = page.locator('[data-testid="email-input"], input[type="email"]').first();
+    const passwordInput = page.locator('[data-testid="password-input"], input[type="password"]').first();
+    
+    await emailInput.fill('invalid@example.com');
+    await passwordInput.fill('wrongpassword');
 
     // Submit form
     await page.getByRole('button', { name: /se connecter|connexion|login/i }).click();
@@ -66,10 +74,13 @@ test.describe('Authentication', () => {
       'Missing TEST_USER_EMAIL / TEST_USER_PASSWORD in .env.test.local'
     );
 
-    // Fill credentials
+    // Fill credentials using robust selectors
     await dismissOverlays(page);
-    await page.getByLabel(/email/i).fill(testEmail);
-    await page.getByLabel(/mot de passe|password/i).fill(testPassword);
+    const emailInput = page.locator('[data-testid="email-input"], input[type="email"]').first();
+    const passwordInput = page.locator('[data-testid="password-input"], input[type="password"]').first();
+    
+    await emailInput.fill(testEmail);
+    await passwordInput.fill(testPassword);
 
     // Submit form
     await page.getByRole('button', { name: /se connecter|connexion|login/i }).click();
@@ -93,8 +104,9 @@ test.describe('Authentication', () => {
 
     await resetLink.click();
 
-    // Check password reset form
-    await expect(page.getByLabel(/email/i)).toBeVisible();
+    // Check password reset form using robust selectors
+    const emailInput = page.locator('input[type="email"], [aria-label*="email" i]').first();
+    await expect(emailInput).toBeVisible();
     await expect(page.getByRole('button', { name: /reset|réinitialiser/i })).toBeVisible();
   });
 
@@ -113,10 +125,13 @@ test.describe('Authentication', () => {
       'Missing TEST_USER_EMAIL / TEST_USER_PASSWORD in .env.test.local'
     );
 
-    // Login first
+    // Login first using robust selectors
     await dismissOverlays(page);
-    await page.getByLabel(/email/i).fill(testEmail);
-    await page.getByLabel(/mot de passe|password/i).fill(testPassword);
+    const emailInput = page.locator('[data-testid="email-input"], input[type="email"]').first();
+    const passwordInput = page.locator('[data-testid="password-input"], input[type="password"]').first();
+    
+    await emailInput.fill(testEmail);
+    await passwordInput.fill(testPassword);
     await page.getByRole('button', { name: /se connecter|connexion|login/i }).click();
     await page.waitForURL(/dashboard|accueil/i, { timeout: 10000 });
 

@@ -196,7 +196,7 @@ export const AuthForm: React.FC = () => {
 
                   <Label htmlFor="email-signin">Email</Label>
 
-                  <Input id="email-signin" type="email" placeholder="m@example.com" required value={signInForm.email} onChange={(e) => setSignInForm({...signInForm, email: e.target.value})} data-testid="email-input" autoComplete="email" />
+                  <Input id="email-signin" type="email" placeholder="m@example.com" required value={signInForm.email} onChange={(e) => setSignInForm({...signInForm, email: e.target.value})} data-testid="email-input" autoComplete="email" aria-label="Email" />
 
                 </div>
 
@@ -204,7 +204,7 @@ export const AuthForm: React.FC = () => {
 
                   <Label htmlFor="password-signin">Mot de passe</Label>
 
-                  <Input id="password-signin" type="password" required value={signInForm.password} onChange={(e) => setSignInForm({...signInForm, password: e.target.value})} data-testid="password-input" autoComplete="current-password" />
+                  <Input id="password-signin" type="password" required value={signInForm.password} onChange={(e) => setSignInForm({...signInForm, password: e.target.value})} data-testid="password-input" autoComplete="current-password" aria-label="Mot de passe" />
 
                 </div>
 
