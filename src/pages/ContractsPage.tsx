@@ -27,6 +27,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { useContracts } from '../hooks/useContracts';
 import { ContractForm } from '../components/contracts/ContractForm';
 import { RFACalculationsPanel } from '../components/contracts/RFACalculationsPanel';
+import { RFACommunicationsPanel } from '../components/contracts/RFACommunicationsPanel';
 import { ContractImportTab } from '../components/contracts/ContractImportTab';
 import { AmountDisplay } from '../components/currency/AmountDisplay';
 import {
@@ -54,7 +55,8 @@ import {
   Eye,
   Edit,
   Activity,
-  Sparkles
+  Sparkles,
+  Mail
 } from 'lucide-react';
 type ContractClientOption = {
   id: string;
@@ -579,7 +581,7 @@ const ContractsPage: React.FC = () => {
       {/* Navigation par onglets */}
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="dashboard" className="flex items-center">
             <BarChart3 className="h-4 w-4 mr-2" />
             {t('contracts.tabs.dashboard', 'Dashboard')}
@@ -591,6 +593,10 @@ const ContractsPage: React.FC = () => {
           <TabsTrigger value="calculations" className="flex items-center">
             <Calculator className="h-4 w-4 mr-2" />
             {t('contracts.tabs.calculations', 'Calculs RFA')}
+          </TabsTrigger>
+          <TabsTrigger value="communications" className="flex items-center">
+            <Mail className="h-4 w-4 mr-2" />
+            {t('contracts.tabs.communications', 'Communications')}
           </TabsTrigger>
           <TabsTrigger value="import" className="flex items-center">
             <Upload className="h-4 w-4 mr-2" />
@@ -611,6 +617,22 @@ const ContractsPage: React.FC = () => {
         </TabsContent>
         <TabsContent value="calculations" className="mt-6">
           <RFACalculationsPanel />
+        </TabsContent>
+        <TabsContent value="communications" className="mt-6">
+          {currentEnterpriseId ? (
+            <RFACommunicationsPanel
+              companyId={currentEnterpriseId}
+              contracts={contracts.map(c => ({
+                id: c.id,
+                contract_name: c.contract_name,
+                third_party_id: c.client_id
+              }))}
+            />
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              {t('contracts.communications.select_company', 'Veuillez sélectionner une entreprise.')}
+            </div>
+          )}
         </TabsContent>
         <TabsContent value="import" className="mt-6">
           {currentEnterpriseId ? (
