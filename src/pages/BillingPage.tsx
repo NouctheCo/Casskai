@@ -17,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toastError, toastSuccess, toastWarning } from '@/lib/toast-helpers';
+import { toastError, toastSuccess } from '@/lib/toast-helpers';
 import { 
   CreditCard,
   Download,
@@ -28,13 +28,13 @@ import {
   Settings,
   FileText,
   RefreshCw,
-  ArrowUpCircle,
-  Filter
+  ArrowUpCircle
 } from 'lucide-react';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice } from '@/types/subscription.types';
 import SubscriptionStatus from '@/components/subscription/SubscriptionStatus';
+import PlanSelector from '@/components/subscription/PlanSelector';
 import { TrialStatusCard, TrialActionsCard } from '@/components/TrialComponents';
 import { logger } from '@/lib/logger';
 const BillingPage: React.FC = () => {
@@ -223,12 +223,11 @@ const BillingPage: React.FC = () => {
             <RefreshCw className="w-4 h-4 mr-2" />
             {t('billingPage.refresh')}
           </Button>
+          <Button onClick={handleOpenBillingPortal}>
+            <ExternalLink className="w-4 h-4 mr-2" />
+            {t('billingPage.manageOnStripe')}
+          </Button>
         </div>
-      </div>
-      {/* Trial Status Section */}
-      <div className="space-y-6">
-        <TrialStatusCard />
-        <TrialActionsCard />
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {/* Cleaner, responsive tab bar */}
@@ -250,6 +249,11 @@ const BillingPage: React.FC = () => {
         </div>
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
+          {/* Trial Status - only show in overview */}
+          <div className="space-y-4">
+            <TrialStatusCard />
+            <TrialActionsCard />
+          </div>
           <SubscriptionStatus />
           {/* Quick actions */}
           <div className="grid md:grid-cols-3 gap-4">
@@ -290,54 +294,22 @@ const BillingPage: React.FC = () => {
         </TabsContent>
         {/* Plans Tab */}
         <TabsContent value="plans" className="space-y-6">
-          <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-900">
-            <CardHeader>
-              <CardTitle className="text-2xl text-blue-900 dark:text-blue-100">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {t('billingPage.plans.title')}
-              </CardTitle>
-              <CardDescription>
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
                 {t('billingPage.plans.subtitle')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {subscription && (
-                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('billingPage.plans.currentPlan')}</p>
-                      <p className="text-xl font-bold text-gray-900 dark:text-white">
-                        {plan?.name || subscription.planId}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {t('billingPage.plans.status')}: <Badge variant={subscription.status === 'active' ? 'default' : 'secondary'}>
-                          {subscription.status === 'active' ? t('billingPage.plans.active') : subscription.status}
-                        </Badge>
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={handleOpenBillingPortal}
-                    >
-                      {t('billingPage.plans.manageInStripe')}
-                    </Button>
-                  </div>
-                </div>
-              )}
-              <div className="pt-4">
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  {t('billingPage.plans.seeAllPlansDescription')}
-                </p>
-                <Button
-                  onClick={() => navigate('/pricing')}
-                  className="w-full"
-                  size="lg"
-                >
-                  <ArrowUpCircle className="w-5 h-5 mr-2" />
-                  {t('billingPage.plans.seeAllPlans')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </p>
+            </div>
+            {subscription && (
+              <Badge variant="outline" className="text-sm py-1 px-3">
+                {t('billingPage.plans.currentPlan')}: <span className="font-semibold ml-1">{plan?.name || subscription.planId}</span>
+              </Badge>
+            )}
+          </div>
+          <PlanSelector onPlanSelected={() => refreshSubscription()} />
         </TabsContent>
         {/* Payment Tab */}
         <TabsContent value="payment" className="space-y-6">
@@ -431,16 +403,23 @@ const BillingPage: React.FC = () => {
         {/* Invoices Tab */}
         <TabsContent value="invoices" className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {t('billingPage.invoices.title')}
-            </h2>
-            <Button
-              variant="outline"
-              onClick={() => toastWarning('Filtrage des factures : bientôt disponible')}
-            >
-              <Filter className="w-4 h-4 mr-2" />
-              {t('billingPage.invoices.filter')}
-            </Button>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {t('billingPage.invoices.title')}
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {invoices.length} facture{invoices.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+            {invoices.length > 0 && (
+              <Button
+                variant="outline"
+                onClick={handleOpenBillingPortal}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                {t('billingPage.invoices.downloadAll')}
+              </Button>
+            )}
           </div>
           {invoices.length > 0 ? (
             <Card>

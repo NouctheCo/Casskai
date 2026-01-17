@@ -3291,6 +3291,7 @@
     "title": "Facturation & Abonnements",
     "subtitle": "Gérez votre abonnement, vos paiements et vos factures",
     "refresh": "Actualiser",
+    "manageOnStripe": "Portail Stripe",
     "tabs": {
       "overview": "Vue d'ensemble",
       "plans": "Formules",
@@ -3312,14 +3313,30 @@
       }
     },
     "plans": {
-      "title": "Votre formule actuelle",
-      "subtitle": "Gérez votre plan d'abonnement",
+      "title": "Changer de formule",
+      "subtitle": "Choisissez la formule adaptée à vos besoins",
       "currentPlan": "Formule actuelle",
       "status": "Statut",
       "active": "Actif",
       "manageInStripe": "Gérer dans Stripe",
       "seeAllPlansDescription": "Découvrez toutes nos formules et fonctionnalités",
-      "seeAllPlans": "Voir toutes les formules"
+      "seeAllPlans": "Voir les détails complets",
+      "billingPeriod": {
+        "monthly": "Mensuel",
+        "yearly": "Annuel"
+      },
+      "yearlyDiscount": "-20%",
+      "perMonth": "/mois",
+      "perYear": "/an",
+      "choosePlan": "Choisir",
+      "currentPlanBadge": "Plan actuel",
+      "popular": "Populaire",
+      "features": {
+        "free": ["Accès de base", "Jusqu'à 10 clients", "Support communautaire"],
+        "starter": ["Facturation illimitée", "Jusqu'à 100 clients", "Comptabilité de base", "Support email"],
+        "pro": ["Tout du plan Starter", "Clients illimités", "CRM complet", "Support prioritaire"],
+        "enterprise": ["Tout du plan Pro", "Utilisateurs illimités", "Support dédié 24/7", "Formation incluse"]
+      }
     },
     "payment": {
       "title": "Moyens de paiement",
@@ -3337,6 +3354,7 @@
     "invoices": {
       "title": "Historique des factures",
       "filter": "Filtrer par statut",
+      "downloadAll": "Tout télécharger",
       "status": {
         "paid": "Payée",
         "open": "En attente",

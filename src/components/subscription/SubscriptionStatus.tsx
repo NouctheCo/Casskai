@@ -323,11 +323,21 @@ const SubscriptionStatus: React.FC = () => {
               <span>Gérer l'abonnement</span>
               <ExternalLink className="w-3 h-3" />
             </Button>
-            <Button variant="outline">
-              Changer de plan
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/pricing')}
+              className="flex items-center space-x-2"
+            >
+              <TrendingUp className="w-4 h-4" />
+              <span>Changer de plan</span>
             </Button>
-            <Button variant="outline">
-              Télécharger les factures
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/billing?tab=invoices')}
+              className="flex items-center space-x-2"
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Voir les factures</span>
             </Button>
           </div>
         </CardContent>
