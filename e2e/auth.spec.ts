@@ -27,15 +27,27 @@ test.describe('Authentication', () => {
     // Check title
     await expect(page).toHaveTitle(/CassKai/);
 
+    // Wait for page to fully load
+    await page.waitForLoadState('networkidle');
+    
+    // Dismiss any overlays that might be blocking
+    await dismissOverlays(page);
+
+    // Ensure the "Connexion" tab is active (it should be by default, but click to be safe)
+    const signinTab = page.getByRole('tab', { name: /connexion/i });
+    if (await signinTab.isVisible().catch(() => false)) {
+      await signinTab.click();
+    }
+
     // Wait for form to be loaded - use multiple selectors for robustness
     const emailInput = page.locator('[data-testid="email-input"], input[type="email"], [aria-label*="email" i]').first();
     const passwordInput = page.locator('[data-testid="password-input"], input[type="password"], [aria-label*="mot de passe" i], [aria-label*="password" i]').first();
     const submitButton = page.getByRole('button', { name: /se connecter|connexion|login/i });
 
-    // Check login form elements are visible
-    await expect(emailInput).toBeVisible({ timeout: 15000 });
-    await expect(passwordInput).toBeVisible();
-    await expect(submitButton).toBeVisible();
+    // Check login form elements are visible with increased timeout for CI
+    await expect(emailInput).toBeVisible({ timeout: 30000 });
+    await expect(passwordInput).toBeVisible({ timeout: 10000 });
+    await expect(submitButton).toBeVisible({ timeout: 10000 });
   });
 
   test('should show error for invalid credentials', async ({ page }) => {
@@ -44,8 +56,17 @@ test.describe('Authentication', () => {
       'Supabase env not configured for E2E (.env.test.local)'
     );
 
-    // Fill invalid credentials using robust selectors
+    // Wait for page to fully load and dismiss overlays
+    await page.waitForLoadState('networkidle');
     await dismissOverlays(page);
+
+    // Ensure the "Connexion" tab is active
+    const signinTab = page.getByRole('tab', { name: /connexion/i });
+    if (await signinTab.isVisible().catch(() => false)) {
+      await signinTab.click();
+    }
+
+    // Fill invalid credentials using robust selectors
     const emailInput = page.locator('[data-testid="email-input"], input[type="email"]').first();
     const passwordInput = page.locator('[data-testid="password-input"], input[type="password"]').first();
     
@@ -74,8 +95,17 @@ test.describe('Authentication', () => {
       'Missing TEST_USER_EMAIL / TEST_USER_PASSWORD in .env.test.local'
     );
 
-    // Fill credentials using robust selectors
+    // Wait for page to fully load and dismiss overlays
+    await page.waitForLoadState('networkidle');
     await dismissOverlays(page);
+
+    // Ensure the "Connexion" tab is active
+    const signinTab = page.getByRole('tab', { name: /connexion/i });
+    if (await signinTab.isVisible().catch(() => false)) {
+      await signinTab.click();
+    }
+
+    // Fill credentials using robust selectors
     const emailInput = page.locator('[data-testid="email-input"], input[type="email"]').first();
     const passwordInput = page.locator('[data-testid="password-input"], input[type="password"]').first();
     
@@ -125,8 +155,17 @@ test.describe('Authentication', () => {
       'Missing TEST_USER_EMAIL / TEST_USER_PASSWORD in .env.test.local'
     );
 
-    // Login first using robust selectors
+    // Wait for page to fully load and dismiss overlays
+    await page.waitForLoadState('networkidle');
     await dismissOverlays(page);
+
+    // Ensure the "Connexion" tab is active
+    const signinTab = page.getByRole('tab', { name: /connexion/i });
+    if (await signinTab.isVisible().catch(() => false)) {
+      await signinTab.click();
+    }
+
+    // Login first using robust selectors
     const emailInput = page.locator('[data-testid="email-input"], input[type="email"]').first();
     const passwordInput = page.locator('[data-testid="password-input"], input[type="password"]').first();
     

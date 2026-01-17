@@ -128,6 +128,7 @@ class RFACommunicationsService {
 
   /**
    * Récupère les communications pour une entreprise
+   * Note: Les relations sont chargées séparément car third_parties est une vue
    */
   async getCommunications(
     companyId: string,
@@ -139,14 +140,10 @@ class RFACommunicationsService {
       offset?: number;
     }
   ): Promise<{ data: RFACommunicationWithRelations[]; count: number }> {
+    // Requête simple sans joins (third_parties est une vue, pas de FK possible)
     let query = supabase
       .from('rfa_communications')
-      .select(`
-        *,
-        third_parties:third_party_id (id, name, email),
-        contracts:contract_id (id, name),
-        rfa_calculations:rfa_calculation_id (id, calculation_period, rfa_amount)
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('company_id', companyId)
       .order('created_at', { ascending: false });
 
@@ -173,13 +170,15 @@ class RFACommunicationsService {
       throw error;
     }
 
-    // Parse les pièces jointes JSON
+    // Parse les pièces jointes JSON et retourne les données sans enrichissement
+    // Les infos third_party sont déjà stockées dans recipient_name/recipient_email
     const parsedData = (data || []).map(comm => ({
       ...comm,
-      attachments: comm.attachments ? JSON.parse(comm.attachments as unknown as string) : [],
-      third_party: comm.third_parties,
-      contract: comm.contracts,
-      rfa_calculation: comm.rfa_calculations
+      attachments: comm.attachments ? (typeof comm.attachments === 'string' ? JSON.parse(comm.attachments) : comm.attachments) : [],
+      // Les relations seront undefined - on utilise recipient_name/recipient_email à la place
+      third_party: undefined,
+      contract: undefined,
+      rfa_calculation: undefined
     })) as RFACommunicationWithRelations[];
 
     return { data: parsedData, count: count || 0 };
@@ -191,12 +190,7 @@ class RFACommunicationsService {
   async getCommunicationById(id: string): Promise<RFACommunicationWithRelations | null> {
     const { data, error } = await supabase
       .from('rfa_communications')
-      .select(`
-        *,
-        third_parties:third_party_id (id, name, email),
-        contracts:contract_id (id, name),
-        rfa_calculations:rfa_calculation_id (id, calculation_period, rfa_amount)
-      `)
+      .select('*')
       .eq('id', id)
       .single();
 
@@ -207,10 +201,10 @@ class RFACommunicationsService {
 
     return {
       ...data,
-      attachments: data.attachments ? JSON.parse(data.attachments as unknown as string) : [],
-      third_party: data.third_parties,
-      contract: data.contracts,
-      rfa_calculation: data.rfa_calculations
+      attachments: data.attachments ? (typeof data.attachments === 'string' ? JSON.parse(data.attachments) : data.attachments) : [],
+      third_party: undefined,
+      contract: undefined,
+      rfa_calculation: undefined
     } as RFACommunicationWithRelations;
   }
 

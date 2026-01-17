@@ -155,6 +155,7 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
               <select
                 value={formData.countryCode}
                 onChange={e => setFormData({ ...formData, countryCode: e.target.value })}
+                aria-label="Sélectionner un pays"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">Sélectionner un pays</option>
@@ -244,6 +245,8 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
                   <button
                     onClick={() => handleVerifyCredentials(credential.id)}
                     disabled={verifying === credential.id}
+                    title="Vérifier les identifiants"
+                    aria-label="Vérifier les identifiants"
                     className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
                   >
                     <RefreshCw
@@ -252,6 +255,8 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
                   </button>
                   <button
                     onClick={() => handleDeleteCredentials(credential.id)}
+                    title="Supprimer les identifiants"
+                    aria-label="Supprimer les identifiants"
                     className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors text-red-600"
                   >
                     <Trash2 className="w-5 h-5" />
