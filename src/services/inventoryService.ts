@@ -183,6 +183,9 @@ export interface NewInventoryItemInput {
   warehouseId?: string;
   locationId?: string | null;
   name: string;
+  // Legacy/alias fields used by older UI flows
+  productCode?: string;
+  productName?: string;
   reference?: string;
   description?: string;
   category?: string;
@@ -190,12 +193,17 @@ export interface NewInventoryItemInput {
   purchasePrice?: number;
   unitCost?: number;
   sellingPrice?: number;
+  salePrice?: number;
+  taxRate?: number;
+  barcode?: string;
+  initialQuantity?: number;
   currentStock?: number;
   minStock?: number;
   maxStock?: number;
   reorderPoint?: number;
   reorderQuantity?: number;
   supplierId?: string;
+  supplierReference?: string;
 }
 export interface NewStockMovementInput {
   item_id?: string;
@@ -648,17 +656,26 @@ export class InventoryService {
     payload: NewInventoryItemInput | CreateInventoryItemInput,
     companyId: string
   ): CreateInventoryItemInput {
-    if ('productName' in payload) {
-      return { ...payload, companyId };
+    // CreateInventoryItemInput does not have a 'name' field.
+    if (!('name' in payload)) {
+      const productName = String(payload.productName ?? '').trim();
+      return {
+        ...payload,
+        companyId,
+        productName,
+      };
     }
+
+    const productName = String(payload.productName ?? payload.name ?? '').trim();
+    const productCode = payload.productCode ?? payload.reference ?? payload.name;
     return {
       companyId,
       productId: payload.productId,
       productVariantId: payload.productVariantId ?? null,
       warehouseId: payload.warehouseId,
       locationId: payload.locationId ?? null,
-      productName: payload.name,
-      productCode: payload.reference ?? payload.name,
+      productName,
+      productCode,
       description: payload.description,
       quantity: payload.currentStock,
       reorderPoint: payload.reorderPoint ?? payload.minStock,

@@ -183,7 +183,7 @@ const SubscriptionWidget: React.FC = () => {
               variant="outline" 
               size="sm" 
               className="flex-1"
-              onClick={() => navigate('/settings/billing')}
+              onClick={() => navigate('/billing')}
             >
               <Settings className="w-4 h-4 mr-2" />
               Gérer

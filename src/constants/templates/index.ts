@@ -3,56 +3,71 @@
  * Exportations centralisées pour tous les templates
  */
 
-// Import France
-export {
+import type { RegulatoryTemplate } from '@/types/regulatory';
+
+import {
   FRANCE_TEMPLATES_CONFIG,
   generateAllFranceTemplates,
   getFranceTemplateConfig,
-  FRANCE_DOCUMENT_TYPES
+  FRANCE_DOCUMENT_TYPES,
 } from './allFranceTemplates';
 
-// Import OHADA
-export {
+import {
   OHADA_TEMPLATES_CONFIG,
   generateAllOhadaTemplates,
   getOhadaTemplateConfig,
   OHADA_DOCUMENT_TYPES,
-  getOhadaTemplatesByCountry
+  getOhadaTemplatesByCountry,
 } from './ohadaTemplates';
 
-// Import IFRS
-export {
+import {
   IFRS_TEMPLATES_CONFIG,
   generateAllIfrsTemplates,
   getIfrsTemplateConfig,
   IFRS_DOCUMENT_TYPES,
-  getIfrsTemplatesByCountry
+  getIfrsTemplatesByCountry,
 } from './ifrsTemplates';
 
-// Import Maghreb
-export {
+import {
   MAGHREB_TEMPLATES_CONFIG,
   generateAllMaghrebTemplates,
   getMaghrebTemplateConfig,
   MAGHREB_DOCUMENT_TYPES,
-  getMaghrebTemplatesByCountry
+  getMaghrebTemplatesByCountry,
 } from './maghrebTemplates';
 
-// Import Factory
-export {
+import {
   createTemplateFromConfig,
   createTemplatesFromConfigs,
   type TemplateConfig,
   type SectionConfig,
-  type FieldConfig
+  type FieldConfig,
 } from './templateFactory';
 
-import type { RegulatoryTemplate } from '@/types/regulatory';
-
-import { generateAllFranceTemplates } from './allFranceTemplates';
-import { generateAllOhadaTemplates } from './ohadaTemplates';
-import { generateAllIfrsTemplates } from './ifrsTemplates';
-import { generateAllMaghrebTemplates } from './maghrebTemplates';
+export {
+  FRANCE_TEMPLATES_CONFIG,
+  generateAllFranceTemplates,
+  getFranceTemplateConfig,
+  FRANCE_DOCUMENT_TYPES,
+  OHADA_TEMPLATES_CONFIG,
+  generateAllOhadaTemplates,
+  getOhadaTemplateConfig,
+  OHADA_DOCUMENT_TYPES,
+  getOhadaTemplatesByCountry,
+  IFRS_TEMPLATES_CONFIG,
+  generateAllIfrsTemplates,
+  getIfrsTemplateConfig,
+  IFRS_DOCUMENT_TYPES,
+  getIfrsTemplatesByCountry,
+  MAGHREB_TEMPLATES_CONFIG,
+  generateAllMaghrebTemplates,
+  getMaghrebTemplateConfig,
+  MAGHREB_DOCUMENT_TYPES,
+  getMaghrebTemplatesByCountry,
+  createTemplateFromConfig,
+  createTemplatesFromConfigs,
+};
+export type { TemplateConfig, SectionConfig, FieldConfig };
 
 /**
  * Génère TOUS les templates (79 documents)
@@ -100,12 +115,6 @@ export const TEMPLATE_STATS = {
   totalCountries: 25, // 1 FR + 17 OHADA + 4 IFRS + 3 Maghreb
   countriesWithCompleteTaxForms: 11 // FR, SN, CI, CM, KE, NG, GH, ZA, DZ, TN, MA
 };
-
-import { FRANCE_TEMPLATES_CONFIG } from './allFranceTemplates';
-import { getOhadaTemplatesByCountry } from './ohadaTemplates';
-import { getIfrsTemplatesByCountry } from './ifrsTemplates';
-import { getMaghrebTemplatesByCountry } from './maghrebTemplates';
-import { createTemplatesFromConfigs } from './templateFactory';
 
 /**
  * Récupère les templates par pays

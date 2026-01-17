@@ -471,7 +471,7 @@ export class IFRSTaxComplianceService extends BaseFiscalService {
   ): Promise<FiscalDeclaration> {
     const [year, month] = period.split('-');
     const startDate = new Date(`${year}-${month}-01`);
-    const endDate = new Date(year, parseInt(month), 0);
+    const endDate = new Date(parseInt(year), parseInt(month), 0);
 
     // Récupérer les comptes de VAT (classe 53)
     const vatAccounts: string[] = [];
@@ -503,7 +503,7 @@ export class IFRSTaxComplianceService extends BaseFiscalService {
     const vatRefund = netVAT < 0 ? Math.abs(netVAT) : 0;
 
     // Deadline: 15th of next month for most countries
-    const dueDate = new Date(year, parseInt(month), 15);
+    const dueDate = new Date(parseInt(year), parseInt(month), 15);
 
     const vatData = {
       period,
@@ -554,7 +554,7 @@ export class IFRSTaxComplianceService extends BaseFiscalService {
   ): Promise<FiscalDeclaration> {
     const [year, month] = period.split('-');
     const startDate = new Date(`${year}-${month}-01`);
-    const endDate = new Date(year, parseInt(month), 0);
+    const endDate = new Date(parseInt(year), parseInt(month), 0);
 
     // Récupérer les comptes de charges sociales (classe 54)
     const payeAccounts: string[] = [];
@@ -581,7 +581,7 @@ export class IFRSTaxComplianceService extends BaseFiscalService {
     const totalPayable = payeWithheld + employerContributions + employeeContributions;
 
     // Deadline: 9th of next month for most countries
-    const dueDate = new Date(year, parseInt(month), 9);
+    const dueDate = new Date(parseInt(year), parseInt(month), 9);
 
     const payeData = {
       period,

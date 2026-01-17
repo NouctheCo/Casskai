@@ -375,7 +375,7 @@ const EntryFormDialog: React.FC<EntryFormDialogProps> = ({ open, onClose, entry 
     for (const file of uploadFailures) {
       try {
         await journalEntryAttachmentService.uploadAttachment(persistedEntryId, companyId, file);
-      } catch (e) {
+      } catch (_error) {
         remaining.push(file);
       }
     }
@@ -831,15 +831,13 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
   );
 };
 // Entry Row Component
-const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate, onDuplicate, companyId, onRefresh }: { entry: any; onEdit: (entry: any) => void; onDelete: (entry: any) => void; onView: (entry: any) => void; onValidate: (entry: any) => void; onDuplicate: (entry: any) => void; companyId: string; onRefresh: () => void }) => {
+const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate: _onValidate, onDuplicate, companyId, onRefresh }: { entry: any; onEdit: (entry: any) => void; onDelete: (entry: any) => void; onView: (entry: any) => void; onValidate: (entry: any) => void; onDuplicate: (entry: any) => void; companyId: string; onRefresh: () => void }) => {
   const [expanded, setExpanded] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isValidating, setIsValidating] = useState(false);
   // Simuler un contrôle RBAC (à remplacer par vrai hook/context)
   const userCanEdit = true; // TODO: remplacer par vrai contrôle
   const userCanDelete = true;
   const userCanView = true;
-  const userCanValidate = true; // Nouveau: autorisation de validation
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'validated':

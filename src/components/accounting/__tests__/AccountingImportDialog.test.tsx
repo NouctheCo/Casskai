@@ -22,10 +22,10 @@ vi.mock('@/hooks/useToast', () => ({
   }),
 }));
 
-// Mock accountingService
-vi.mock('@/services/accountingService', () => ({
-  importJournalEntries: vi.fn(() => Promise.resolve({ success: true, imported: 0, errors: [] })),
-  importChartOfAccounts: vi.fn(() => Promise.resolve({ success: true, imported: 0, errors: [] })),
+// Mock accountingImportService
+vi.mock('@/services/accounting/accountingImportService', () => ({
+  importJournalEntries: vi.fn(() => Promise.resolve({ success: true, imported: 0, failed: 0, errors: [], warnings: [], total_rows: 0 })),
+  importChartOfAccounts: vi.fn(() => Promise.resolve({ success: true, imported: 0, failed: 0, errors: [], warnings: [], total_rows: 0 })),
 }));
 
 describe('AccountingImportDialog', () => {
@@ -40,7 +40,7 @@ describe('AccountingImportDialog', () => {
     const { container } = render(
       <AccountingImportDialog
         open={true}
-        onClose={mockOnClose}
+        onOpenChange={mockOnClose}
         companyId="company-123"
         onImportComplete={mockOnImportComplete}
       />
@@ -52,7 +52,7 @@ describe('AccountingImportDialog', () => {
     const { container } = render(
       <AccountingImportDialog
         open={false}
-        onClose={mockOnClose}
+        onOpenChange={mockOnClose}
         companyId="company-123"
         onImportComplete={mockOnImportComplete}
       />

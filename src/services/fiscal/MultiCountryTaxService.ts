@@ -911,8 +911,7 @@ export class MultiCountryTaxService {
         headStyles: { fillColor: [59, 130, 246] }
       });
 
-      // @ts-expect-error jspdf-autotable adds lastAutoTable
-      y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 18 : y + 80;
+      y = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 18 : y + 80;
 
       doc.setFont('helvetica', 'bold');
       doc.text("Impôt sur les sociétés", marginX, y);

@@ -74,7 +74,7 @@ export const CurrencyConverter: React.FC<CurrencyConverterProps> = ({
       if (onConvert) {
         onConvert(amount, result.amount, fromCurrency, toCurrency, result.rate);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Erreur de conversion',
         description: 'Impossible de récupérer le taux de change',

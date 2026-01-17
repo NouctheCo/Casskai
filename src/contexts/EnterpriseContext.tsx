@@ -224,7 +224,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return () => {
       window.removeEventListener('enterpriseContextRefresh', handleRefresh);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []); // Empty deps - only run once on mount
 
   const currentEnterprise = enterprises.find(e => e.id === currentEnterpriseId) || null;

@@ -1,11 +1,7 @@
 import React from 'react';
 import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
-
 import { motion } from 'framer-motion';
-import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table';
-import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
 
 
 
@@ -57,6 +53,8 @@ const DataTable: React.FC<DataTableProps> = ({
 
 }) => {
 
+  const { formatAmount } = useCompanyCurrency();
+
   // Données d'exemple si aucune donnée fournie
 
   const defaultData = [
@@ -75,7 +73,7 @@ const DataTable: React.FC<DataTableProps> = ({
 
     { key: 'name', title: 'Nom' },
 
-    { key: 'amount', title: 'Montant', render: (value: number) => {formatAmount(value)} },
+    { key: 'amount', title: 'Montant', render: (value: number) => formatAmount(value) },
 
     { key: 'status', title: 'Statut' },
 

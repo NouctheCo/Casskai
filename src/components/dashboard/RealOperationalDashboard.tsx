@@ -60,16 +60,6 @@ const formatUnit = (unit: string) => {
   }
 };
 
-// Helper to format month names
-const getMonthName = (monthNumber: string | number): string => {
-  const monthNames = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-  ];
-  const index = typeof monthNumber === 'string' ? parseInt(monthNumber) - 1 : monthNumber - 1;
-  return monthNames[index] || `Mois ${monthNumber}`;
-};
-
 export const RealOperationalDashboard: React.FC = () => {
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
@@ -105,7 +95,7 @@ export const RealOperationalDashboard: React.FC = () => {
         setLastUpdate(new Date());
         // Recharger aussi l'analyse IA avec les nouvelles données
         await loadAIAnalysis(data);
-      } catch (error) {
+      } catch (_error) {
         // swallow errors silently in UI; handled by services
       }
     }
@@ -129,7 +119,7 @@ export const RealOperationalDashboard: React.FC = () => {
       setLastUpdate(new Date());
       // Charger l'analyse IA en parallèle
       loadAIAnalysis(data);
-    } catch (error) {
+    } catch (_error) {
       // swallow errors silently in UI; handled by services
     } finally {
       setLoading(false);
@@ -170,7 +160,7 @@ export const RealOperationalDashboard: React.FC = () => {
         clearTimeout(reloadTimeoutRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [currentCompany?.id]);
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);

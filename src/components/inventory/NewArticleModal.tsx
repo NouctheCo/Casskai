@@ -32,7 +32,7 @@ import { logger } from '@/lib/logger';
 export interface NewArticleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (articleId: string) => void;
+  onSuccess: (articleId: string) => void | Promise<void>;
 }
 
 interface Account {

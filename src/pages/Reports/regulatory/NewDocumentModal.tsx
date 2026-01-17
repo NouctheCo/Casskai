@@ -5,15 +5,15 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/useToast';
 import { supabase } from '@/lib/supabase';
 import { getFiscalYears } from '@/utils/fiscalYearUtils';
 import type {
   RegulatoryTemplate,
-  AccountingStandard,
   FiscalPeriod
 } from '@/types/regulatory';
 import { generateDocument } from '@/services/regulatory/documentGenerator';
@@ -25,6 +25,7 @@ interface NewDocumentModalProps {
 }
 export function NewDocumentModal({ open, onClose, onDocumentCreated }: NewDocumentModalProps) {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const { currentCompany } = useAuth();
   const [templates, setTemplates] = useState<RegulatoryTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
@@ -71,11 +72,11 @@ export function NewDocumentModal({ open, onClose, onDocumentCreated }: NewDocume
       if (result.success && result.documentId) {
         onDocumentCreated(result.documentId);
       } else {
-        alert(t('reports.regulatory.messages.createError'));
+        showToast(t('reports.regulatory.messages.createError'), 'error');
       }
     } catch (error) {
       logger.error('NewDocumentModal', 'Error creating document:', error);
-      alert(t('reports.regulatory.messages.createError'));
+      showToast(t('reports.regulatory.messages.createError'), 'error');
     } finally {
       setLoading(false);
     }
@@ -189,4 +190,4 @@ export function NewDocumentModal({ open, onClose, onDocumentCreated }: NewDocume
       </DialogContent>
     </Dialog>
   );
-}
+}

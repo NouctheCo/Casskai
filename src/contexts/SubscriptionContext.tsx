@@ -38,7 +38,6 @@ interface SubscriptionContextType {
   isTrialing: boolean;
   daysUntilRenewal: number | null;
   subscriptionPlan: string | null;
-  setSubscriptionPlan: (plan: string) => Promise<void>;
   refreshSubscription: () => Promise<void>;
   isLoading: boolean;
   canAccessFeature: (featureName: string) => Promise<boolean>;
@@ -72,7 +71,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     fetchSubscription();
   }, [user]);
   const fetchInvoicesAndPaymentMethods = async () => {
-    if (!user || !subscription) return;
+    if (!user) return;
     try {
       // Charger les factures
       const invoicesResult = await billingService.getInvoices({ limit: 50 });
@@ -91,28 +90,28 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const fetchSubscription = async () => {
     if (!user) return;
     try {
-      // Récupérer d'abord les subscriptions sans join pour éviter l'erreur 400
+      // Récupérer la dernière subscription (quel que soit le status) pour éviter
+      // de traiter un utilisateur expiré comme "free".
       const { data: subscriptionData, error: subscriptionError } = await supabase
         .from('subscriptions')
         .select('*')
         .eq('user_id', user.id)
-        .in('status', ['active', 'trialing']);
+        .order('created_at', { ascending: false })
+        .limit(1);
+
       if (subscriptionError) {
-        // Ne pas logger comme erreur si c'est juste "no rows found"
         if (subscriptionError.code !== 'PGRST116') {
           logger.error('Subscription', 'Error fetching subscription:', subscriptionError);
         }
-        // Pas d'abonnement actif - utiliser plan gratuit
         setSubscriptionPlanState('free');
         setSubscription(null);
         setPlan(null);
       } else if (subscriptionData && subscriptionData.length > 0) {
-        // Prendre le premier abonnement trouvé
         const rawSubscription = subscriptionData[0] as RawSubscription;
         const normalized = normalizeSubscription(rawSubscription);
         setSubscriptionPlanState(normalized.planId);
         setSubscription(normalized);
-        // Récupérer le plan séparément si on a un plan_id
+
         if (normalized.planId) {
           const { data: planData, error: planError } = await supabase
             .from('subscription_plans')
@@ -128,34 +127,34 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
           setPlan(null);
         }
       } else {
-      // Aucun abonnement trouvé - créer automatiquement un abonnement gratuit
-      const freeSubscription = {
-        id: 'free-plan',
-        userId: user.id,
-        planId: 'free',
-        stripeSubscriptionId: '',
-        stripeCustomerId: '',
-        status: 'active' as const,
-        currentPeriodStart: new Date(),
-        currentPeriodEnd: new Date(2099, 11, 31), // Date très lointaine pour un plan gratuit permanent
-        cancelAtPeriodEnd: false,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      setSubscriptionPlanState('free');
-      setSubscription(freeSubscription);
-      setPlan({
-        id: 'free',
-        name: 'Gratuit',
-        description: 'Plan gratuit avec fonctionnalités de base',
-        price: 0,
-        currency: 'EUR',
-        interval: 'month',
-        features: ['Accès de base', 'Jusqu\'à 10 clients', 'Support communautaire'],
-        stripePriceId: 'free',
-        stripeProductId: 'free',
-        supportLevel: 'basic'
-      });
+        // Aucun abonnement trouvé - utiliser plan gratuit local (sans écrire en DB)
+        const freeSubscription = {
+          id: 'free-plan',
+          userId: user.id,
+          planId: 'free',
+          stripeSubscriptionId: '',
+          stripeCustomerId: '',
+          status: 'active' as const,
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: new Date(2099, 11, 31),
+          cancelAtPeriodEnd: false,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        setSubscriptionPlanState('free');
+        setSubscription(freeSubscription);
+        setPlan({
+          id: 'free',
+          name: 'Gratuit',
+          description: 'Plan gratuit avec fonctionnalités de base',
+          price: 0,
+          currency: 'EUR',
+          interval: 'month',
+          features: ['Accès de base', 'Jusqu\'à 10 clients', 'Support communautaire'],
+          stripePriceId: 'free',
+          stripeProductId: 'free',
+          supportLevel: 'basic'
+        });
       }
     } catch (error) {
       logger.error('Subscription', 'Unexpected error in fetchSubscription:', error);
@@ -174,17 +173,6 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     await fetchSubscription();
     // fetchSubscription appelle déjà fetchInvoicesAndPaymentMethods
   };
-  useEffect(() => {
-    if (!user) {
-      // Utilisateur non connecté - considérer comme plan gratuit
-      setSubscriptionPlanState('free');
-      setSubscription(null);
-      setPlan(null);
-      setIsLoading(false);
-      return;
-    }
-    fetchSubscription();
-  }, [user]);
   // Écouter les changements en temps réel pour les webhooks Stripe
   useEffect(() => {
     if (!user) return;
@@ -225,62 +213,6 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, [user]);
-  const setSubscriptionPlan = async (planId: string) => {
-    if (!user) return;
-    setIsLoading(true);
-    try {
-      // D'abord, essayer de mettre à jour un abonnement existant (essai ou actif)
-      const { data: existingSubscription } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .in('status', ['trialing', 'active'])
-        .single();
-      if (existingSubscription) {
-        // Mettre à jour l'abonnement existant
-        logger.warn('Subscription', `🔄 Updating existing subscription from ${existingSubscription.plan_id} to ${planId}`);
-        const { error: updateError } = await supabase
-          .from('subscriptions')
-          .update({
-            plan_id: planId,
-            status: 'active',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', existingSubscription.id);
-        if (updateError) {
-          logger.error('Subscription', 'Error updating subscription:', updateError);
-        } else {
-          setSubscriptionPlanState(planId);
-          // Recharger les données complètes
-          await fetchSubscription();
-        }
-      } else {
-        // Créer un nouvel abonnement si aucun n'existe
-        logger.warn('Subscription', `🆕 Creating new subscription with plan ${planId}`);
-        const { data: _data, error } = await supabase
-          .from('subscriptions')
-          .insert({
-            user_id: user.id,
-            plan_id: planId,
-            status: 'active',
-            stripe_customer_id: 'cus_simulated',
-            stripe_subscription_id: 'sub_simulated',
-            current_period_start: new Date().toISOString(),
-            current_period_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
-          });
-        if (error) {
-          logger.error('Subscription', 'Error creating subscription:', error);
-        } else {
-          setSubscriptionPlanState(planId);
-          await fetchSubscription();
-        }
-      }
-    } catch (error) {
-      logger.error('Subscription', 'Error in setSubscriptionPlan:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
   const canAccessFeature = async (_featureName: string): Promise<boolean> => {
     // Implementation would check feature access based on plan
     return true; // Placeholder
@@ -336,7 +268,6 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     isTrialing,
     daysUntilRenewal,
     subscriptionPlan,
-    setSubscriptionPlan,
     refreshSubscription,
     isLoading,
     canAccessFeature,

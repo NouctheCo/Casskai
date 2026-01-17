@@ -11,8 +11,63 @@
  */
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { InvoiceWithDetails } from '@/types/database/invoices.types';
 import { logger } from '@/lib/logger';
+
+type InvoicePdfClient = {
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  // DB-style
+  address_street?: string | null;
+  address_city?: string | null;
+  address_postal_code?: string | null;
+  // Service-style
+  address_line1?: string | null;
+  city?: string | null;
+  postal_code?: string | null;
+};
+
+type InvoicePdfItem = {
+  description?: string | null;
+  name?: string | null;
+  quantity: number;
+  unit_price: number;
+  tax_rate?: number | null;
+  line_total_ttc?: number | null;
+};
+
+export type InvoicePdfInput = {
+  // Support multiple invoice models (DB-style, service-style)
+  invoice_number?: string | null;
+  invoice_date?: string | null;
+  // Common aliases
+  invoiceNumber?: string | null;
+  issueDate?: string | null;
+  number?: string | null;
+  date?: string | null;
+  due_date?: string | null;
+  service_date?: string | null;
+  delivery_date?: string | null;
+  currency?: string | null;
+  notes?: string | null;
+  terms?: string | null;
+  vat_exemption_reason?: string | null;
+  paid_amount?: number | null;
+  remaining_amount?: number | null;
+  // Totals - DB naming
+  total_ht?: number | null;
+  total_tva?: number | null;
+  total_ttc?: number | null;
+  // Totals - service naming
+  subtotal_excl_tax?: number | null;
+  total_tax_amount?: number | null;
+  total_incl_tax?: number | null;
+  total_amount?: number | null;
+  client?: InvoicePdfClient | null;
+  third_party?: InvoicePdfClient | null;
+  invoice_items?: InvoicePdfItem[] | null;
+  invoice_lines?: InvoicePdfItem[] | null;
+};
 
 // Extension for autoTable - lastAutoTable is added by jspdf-autotable after calling autoTable()
 declare module 'jspdf' {
@@ -48,10 +103,31 @@ export interface CompanyInfo {
   logo?: string;
 }
 export class InvoicePdfService {
+  private static getInvoiceNumber(invoice: InvoicePdfInput): string {
+    const raw =
+      invoice.invoice_number ??
+      invoice.invoiceNumber ??
+      invoice.number ??
+      '';
+    return String(raw || '').trim() || 'N/A';
+  }
+
+  private static getInvoiceDate(invoice: InvoicePdfInput): Date | null {
+    const raw =
+      invoice.invoice_date ??
+      invoice.issueDate ??
+      invoice.date ??
+      null;
+
+    if (!raw) return null;
+    const parsed = new Date(String(raw));
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
   /**
    * Génère un PDF pour une facture
    */
-  static generateInvoicePDF(invoice: InvoiceWithDetails, companyData?: CompanyInfo): jsPDF {
+  static generateInvoicePDF(invoice: InvoicePdfInput, companyData?: CompanyInfo): jsPDF {
     const doc = new jsPDF();
     const currency = invoice.currency || companyData?.currency || 'EUR';
     // Configuration des couleurs
@@ -130,7 +206,7 @@ export class InvoicePdfService {
   /**
    * Ajoute les informations de facturation et client
    */
-  private static addInvoiceAndClientInfo(doc: jsPDF, invoice: InvoiceWithDetails) {
+  private static addInvoiceAndClientInfo(doc: jsPDF, invoice: InvoicePdfInput) {
     doc.setTextColor(0);
     doc.setFontSize(10);
     // Informations facture (colonne droite)
@@ -139,12 +215,13 @@ export class InvoicePdfService {
     doc.setFont('helvetica', 'bold');
     doc.text('FACTURE N°:', invoiceInfoX, yPos);
     doc.setFont('helvetica', 'normal');
-    doc.text(invoice.invoice_number as string, invoiceInfoX + 30, yPos);
+    doc.text(this.getInvoiceNumber(invoice), invoiceInfoX + 30, yPos);
     yPos += 6;
     doc.setFont('helvetica', 'bold');
     doc.text('Date:', invoiceInfoX, yPos);
     doc.setFont('helvetica', 'normal');
-    doc.text(new Date(invoice.invoice_date as string).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
+    const invoiceDate = this.getInvoiceDate(invoice);
+    doc.text(invoiceDate ? invoiceDate.toLocaleDateString('fr-FR') : 'N/A', invoiceInfoX + 30, yPos);
     yPos += 6;
     const serviceDate = (invoice.service_date as string) || (invoice.delivery_date as string);
     if (serviceDate) {
@@ -162,7 +239,8 @@ export class InvoicePdfService {
       yPos += 6;
     }
     // Informations client (colonne gauche)
-    if (invoice.client) {
+    const resolvedClient = invoice.client || invoice.third_party;
+    if (resolvedClient) {
       yPos = 75;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
@@ -170,25 +248,28 @@ export class InvoicePdfService {
       yPos += 8;
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
-      doc.text(invoice.client.name as string, 20, yPos);
+      doc.text((resolvedClient.name as string) || 'Client', 20, yPos);
       yPos += 6;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
-      if (invoice.client.address_street) {
-        doc.text(invoice.client.address_street as string, 20, yPos);
+      const street = resolvedClient.address_street || resolvedClient.address_line1;
+      if (street) {
+        doc.text(street as string, 20, yPos);
         yPos += 5;
       }
-      if (invoice.client.address_city) {
-        const address = `${invoice.client.address_postal_code || ''} ${invoice.client.address_city}`.trim();
+      const city = resolvedClient.address_city || resolvedClient.city;
+      const postalCode = resolvedClient.address_postal_code || resolvedClient.postal_code;
+      if (city) {
+        const address = `${postalCode || ''} ${city}`.trim();
         doc.text(address, 20, yPos);
         yPos += 5;
       }
-      if (invoice.client.email) {
-        doc.text(`Email: ${invoice.client.email}`, 20, yPos);
+      if (resolvedClient.email) {
+        doc.text(`Email: ${resolvedClient.email}`, 20, yPos);
         yPos += 5;
       }
-      if (invoice.client.phone) {
-        doc.text(`Tél: ${invoice.client.phone}`, 20, yPos);
+      if (resolvedClient.phone) {
+        doc.text(`Tél: ${resolvedClient.phone}`, 20, yPos);
         yPos += 5;
       }
     }
@@ -196,14 +277,15 @@ export class InvoicePdfService {
   /**
    * Ajoute le tableau des articles
    */
-  private static addItemsTable(doc: jsPDF, invoice: InvoiceWithDetails, currency: string) {
-    const tableData = invoice.invoice_items?.map(item => [
+  private static addItemsTable(doc: jsPDF, invoice: InvoicePdfInput, currency: string) {
+    const items = invoice.invoice_items || invoice.invoice_lines || [];
+    const tableData = items.map(item => [
       item.description || item.name || '',
       item.quantity.toString(),
       this.formatCurrency(item.unit_price, currency),
       `${item.tax_rate || 0}%`,
       this.formatCurrency(item.line_total_ttc || (item.quantity * item.unit_price), currency)
-    ]) || [];
+    ]);
     autoTable(doc, {
       startY: 120,
       head: [['Description', 'Qté', 'Prix HT', 'TVA', 'Total TTC']],
@@ -236,7 +318,7 @@ export class InvoicePdfService {
   /**
    * Ajoute les totaux
    */
-  private static addTotals(doc: jsPDF, invoice: InvoiceWithDetails, currency: string): number {
+  private static addTotals(doc: jsPDF, invoice: InvoicePdfInput, currency: string): number {
     const startY = doc.lastAutoTable.finalY + 10;
     const rightX = 190;
     const labelX = 140;
@@ -244,10 +326,10 @@ export class InvoicePdfService {
     doc.setTextColor(0);
 
     // Calculer les totaux depuis les items si les totaux de la facture sont invalides
-    const items = invoice.invoice_items || [];
-    let totalHT = invoice.total_ht || 0;
-    let totalTVA = invoice.total_tva || 0;
-    let totalTTC = invoice.total_ttc || 0;
+    const items = invoice.invoice_items || invoice.invoice_lines || [];
+    let totalHT = Number(invoice.total_ht ?? invoice.subtotal_excl_tax ?? 0);
+    let totalTVA = Number(invoice.total_tva ?? invoice.total_tax_amount ?? 0);
+    let totalTTC = Number(invoice.total_ttc ?? invoice.total_incl_tax ?? invoice.total_amount ?? 0);
 
     // Si les totaux sont NaN ou 0, recalculer depuis les items
     if (!totalHT || isNaN(totalHT) || totalHT === 0) {
@@ -348,7 +430,7 @@ export class InvoicePdfService {
    */
   private static addNotesAndTerms(
     doc: jsPDF,
-    invoice: InvoiceWithDetails,
+    invoice: InvoicePdfInput,
     companyData: CompanyInfo | undefined,
     _currency: string,
     minStartY?: number
@@ -475,22 +557,22 @@ export class InvoicePdfService {
   /**
    * Télécharge le PDF
    */
-  static downloadInvoicePDF(invoice: InvoiceWithDetails, companyData?: CompanyInfo): void {
+  static downloadInvoicePDF(invoice: InvoicePdfInput, companyData?: CompanyInfo): void {
     const doc = this.generateInvoicePDF(invoice, companyData);
-    const fileName = `facture-${invoice.invoice_number}.pdf`;
+    const fileName = `facture-${this.getInvoiceNumber(invoice)}.pdf`;
     doc.save(fileName);
   }
   /**
    * Génère un blob PDF pour envoi par email ou affichage
    */
-  static generateInvoicePDFBlob(invoice: InvoiceWithDetails, companyData?: CompanyInfo): Blob {
+  static generateInvoicePDFBlob(invoice: InvoicePdfInput, companyData?: CompanyInfo): Blob {
     const doc = this.generateInvoicePDF(invoice, companyData);
     return doc.output('blob');
   }
   /**
    * Génère une URL de données PDF pour prévisualisation
    */
-  static generateInvoicePDFDataUrl(invoice: InvoiceWithDetails, companyData?: CompanyInfo): string {
+  static generateInvoicePDFDataUrl(invoice: InvoicePdfInput, companyData?: CompanyInfo): string {
     const doc = this.generateInvoicePDF(invoice, companyData);
     return doc.output('datauristring');
   }

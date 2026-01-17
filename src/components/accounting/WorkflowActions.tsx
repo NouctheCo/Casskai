@@ -24,7 +24,6 @@ import {
   XCircle,
   Send,
   Lock,
-  Unlock,
   FileCheck,
   AlertCircle
 } from 'lucide-react';

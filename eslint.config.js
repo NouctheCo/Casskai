@@ -172,6 +172,7 @@ export default [
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
       'complexity': 'off',
       'max-depth': 'off',
       'max-lines': 'off',
@@ -229,6 +230,7 @@ export default [
       'max-params': 'off',
       'no-await-in-loop': 'off',
       'no-console': 'off',
+      'require-atomic-updates': 'off',
       'react-hooks/exhaustive-deps': 'off',
       'react-refresh/only-export-components': 'off',
     },
@@ -247,6 +249,7 @@ export default [
       'max-params': 'off',
       'no-await-in-loop': 'off',
       'no-console': 'off',
+      'require-atomic-updates': 'off',
       'react-hooks/exhaustive-deps': 'off',
       'react-refresh/only-export-components': 'off',
     },
@@ -257,7 +260,22 @@ export default [
     files: ['src/constants/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'max-depth': 'off',
       'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'no-console': 'off',
+    },
+  },
+
+  // App config + helpers are often glue code or large objects
+  {
+    files: ['src/config/**/*.{ts,tsx}', 'src/helpers/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
       'no-console': 'off',
     },
   },

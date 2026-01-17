@@ -154,7 +154,7 @@ function validateJournalEntryRow(
   // Apply mapping
   const mappedRow: Partial<JournalEntryImportRow> = {};
   for (const [sourceCol, targetField] of Object.entries(mapping)) {
-    mappedRow[targetField as keyof JournalEntryImportRow] = row[sourceCol];
+    (mappedRow as any)[targetField] = row[sourceCol];
   }
   // Required fields
   if (!mappedRow.entry_date) {
@@ -240,7 +240,7 @@ function validateChartOfAccountRow(
   const errors: ImportValidationError[] = [];
   const mappedRow: Partial<ChartOfAccountImportRow> = {};
   for (const [sourceCol, targetField] of Object.entries(mapping)) {
-    mappedRow[targetField as keyof ChartOfAccountImportRow] = row[sourceCol];
+    (mappedRow as any)[targetField] = row[sourceCol];
   }
   if (!mappedRow.account_number) {
     errors.push({

@@ -71,7 +71,7 @@ export default function CurrencyManagementPage() {
       });
 
       await loadGainLoss();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Erreur',
         description: 'Impossible de calculer les gains/pertes',

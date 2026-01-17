@@ -744,7 +744,7 @@ class InvoicingService {
   /**
    * Crée un avoir (credit note) pour annuler une facture
    */
-  async createCreditNote(originalInvoiceId: string): Promise<Invoice> {
+  async createCreditNoteLegacy(originalInvoiceId: string): Promise<Invoice> {
     try {
       // 1. Récupérer la facture originale avec ses items
       const { data: original, error: fetchError } = await supabase

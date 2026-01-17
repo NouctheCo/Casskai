@@ -207,9 +207,9 @@ export function useCompanyCurrency() {
       let formattedNumber: string;
 
       if (compact && Math.abs(value) >= 1000000) {
-        formattedNumber = (value / 1000000).toFixed(1) + 'M';
+        formattedNumber = `${(value / 1000000).toFixed(1)  }M`;
       } else if (compact && Math.abs(value) >= 1000) {
-        formattedNumber = (value / 1000).toFixed(1) + 'k';
+        formattedNumber = `${(value / 1000).toFixed(1)  }k`;
       } else {
         formattedNumber = value.toLocaleString(currencyInfo.locale, {
           minimumFractionDigits: decimals,
@@ -284,9 +284,9 @@ export function formatCurrency(
   let formattedNumber: string;
 
   if (compact && Math.abs(amount) >= 1000000) {
-    formattedNumber = (amount / 1000000).toFixed(1) + 'M';
+    formattedNumber = `${(amount / 1000000).toFixed(1)  }M`;
   } else if (compact && Math.abs(amount) >= 1000) {
-    formattedNumber = (amount / 1000).toFixed(1) + 'k';
+    formattedNumber = `${(amount / 1000).toFixed(1)  }k`;
   } else {
     formattedNumber = amount.toLocaleString(config.locale, {
       minimumFractionDigits: config.decimals,

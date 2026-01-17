@@ -27,4 +27,7 @@ interface Window {
     captureException: (error: Error) => void;
     captureMessage: (message: string) => void;
   };
+
+  // Debug/maintenance helpers
+  fixUnaccentExtension?: () => Promise<unknown>;
 }

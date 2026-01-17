@@ -6,9 +6,10 @@ import { useState } from 'react';
 import { X, Upload, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { TaxAuthorityService } from '@/services/taxAuthorityService';
-import { SubmissionValidator, FormatterUtils } from '@/utils/taxAuthorityUtils';
+import { FormatterUtils } from '@/utils/taxAuthorityUtils';
 import { TAX_AUTHORITIES } from '@/constants/taxAuthorities';
 import { SUPPORTED_COUNTRIES } from '@/constants/templates';
+import { useToast } from '@/hooks/useToast';
 
 interface SubmissionFormProps {
   companyId: string;
@@ -17,6 +18,7 @@ interface SubmissionFormProps {
 }
 
 export function SubmissionForm({ companyId, onClose, onSuccess }: SubmissionFormProps) {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState<{
     documentId: string;
     authorityId: string;
@@ -97,7 +99,7 @@ export function SubmissionForm({ companyId, onClose, onSuccess }: SubmissionForm
       });
 
       if (response.success) {
-        alert('Document soumis avec succès !');
+        showToast('Document soumis avec succès !', 'success');
         onSuccess();
       } else {
         setErrors(prev => ({ ...prev, form: response.error || response.message }));

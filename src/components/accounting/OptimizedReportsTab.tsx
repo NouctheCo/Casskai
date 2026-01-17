@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { logger } from '@/lib/logger';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

@@ -44,6 +44,7 @@ export interface JournalEntryPayload {
 }
 
 export type JournalEntryWithItems = JournalEntryRow & {
+  is_locked?: boolean | null;
   journal_entry_lines?: (JournalEntryLineRow & {
     chart_of_accounts?: {
       id: string;

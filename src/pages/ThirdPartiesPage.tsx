@@ -27,7 +27,6 @@ import { TransactionsTab } from '@/components/third-parties/TransactionsTab';
 import { ImportTab } from '@/components/third-parties/ImportTab';
 import { AgingAnalysisTab } from '@/components/third-parties/AgingAnalysisTab';
 import {
-  ThirdParty,
   ThirdPartyFilters,
   ThirdPartyDashboardData
 } from '../types/third-parties.types';
@@ -53,17 +52,51 @@ import {
   Clock,
   Sparkles
 } from 'lucide-react';
+
+type ThirdPartyListItem = {
+  id: string;
+  type: 'customer' | 'supplier';
+  code?: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  primary_email: string;
+  primary_phone: string;
+  company_name?: string;
+  tax_number?: string;
+  billing_address: {
+    street: string;
+    city: string;
+    postal_code: string;
+    country: string;
+  };
+  payment_terms: number;
+  currency: string;
+  credit_limit?: number;
+  is_active: boolean;
+  notes?: string;
+  current_balance: number;
+  total_receivables: number;
+  total_payables: number;
+  has_overdue?: boolean;
+  last_interaction?: string;
+  status: 'active' | 'inactive';
+  category?: 'company' | 'individual';
+  tags?: string[];
+  created_at?: string;
+  updated_at?: string;
+};
 const ThirdPartiesPage: React.FC = () => {
   const { t: _t } = useTranslation();
   const { currentEnterprise } = useEnterprise();
   // State management
   const [dashboardData, setDashboardData] = useState<ThirdPartyDashboardData | null>(null);
-  const [thirdParties, setThirdParties] = useState<ThirdParty[]>([]);
-  const [filteredThirdParties, setFilteredThirdParties] = useState<ThirdParty[]>([]);
+  const [thirdParties, setThirdParties] = useState<ThirdPartyListItem[]>([]);
+  const [filteredThirdParties, setFilteredThirdParties] = useState<ThirdPartyListItem[]>([]);
   const [_agingReport, setAgingReport] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [_selectedThirdParty, setSelectedThirdParty] = useState<ThirdParty | null>(null);
+  const [_selectedThirdParty, setSelectedThirdParty] = useState<ThirdPartyListItem | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   // Animation variants
@@ -237,8 +270,9 @@ const ThirdPartiesPage: React.FC = () => {
       });
 
       // Mapper les clients avec les vraies balances
-      const combinedCustomers = (customers || []).map(c => {
+      const combinedCustomers: ThirdPartyListItem[] = (customers || []).map((c): ThirdPartyListItem => {
         const balanceData = customerBalances.get(c.id) || { balance: 0, receivables: 0, hasOverdue: false };
+        const isActive = Boolean(c.is_active);
         return {
           id: c.id,
           type: 'customer' as const,
@@ -259,13 +293,14 @@ const ThirdPartiesPage: React.FC = () => {
           payment_terms: c.payment_terms || 30,
           currency: c.currency || 'EUR',
           credit_limit: c.credit_limit,
-          is_active: c.is_active,
+          is_active: isActive,
           notes: c.notes,
           current_balance: balanceData.balance,
           total_receivables: balanceData.receivables,
           total_payables: 0,
           has_overdue: balanceData.hasOverdue,
-          status: c.is_active ? 'active' : 'inactive',
+          last_interaction: c.last_interaction,
+          status: isActive ? 'active' : 'inactive',
           category: 'company',
           tags: [],
           created_at: c.created_at,
@@ -274,8 +309,9 @@ const ThirdPartiesPage: React.FC = () => {
       });
 
       // Mapper les fournisseurs avec les vraies balances
-      const combinedSuppliers = (suppliers || []).map(s => {
+      const combinedSuppliers: ThirdPartyListItem[] = (suppliers || []).map((s): ThirdPartyListItem => {
         const balanceData = supplierBalances.get(s.id) || { balance: 0, payables: 0, hasOverdue: false };
+        const isActive = Boolean(s.is_active);
         return {
           id: s.id,
           type: 'supplier' as const,
@@ -296,13 +332,14 @@ const ThirdPartiesPage: React.FC = () => {
           payment_terms: s.payment_terms || 30,
           currency: s.currency || 'EUR',
           credit_limit: undefined,
-          is_active: s.is_active,
+          is_active: isActive,
           notes: s.notes,
           current_balance: balanceData.balance,
           total_receivables: 0,
           total_payables: balanceData.payables,
           has_overdue: balanceData.hasOverdue,
-          status: s.is_active ? 'active' : 'inactive',
+          last_interaction: s.last_interaction,
+          status: isActive ? 'active' : 'inactive',
           category: 'company',
           tags: [],
           created_at: s.created_at,
@@ -313,7 +350,7 @@ const ThirdPartiesPage: React.FC = () => {
       const combined = [...combinedCustomers, ...combinedSuppliers];
       logger.debug('ThirdPartiesPage', `✅ Loaded ${combined.length} third parties with balances`);
 
-      setThirdParties(combined as unknown as ThirdParty[]);
+      setThirdParties(combined);
       setLoading(false);
     } catch (error) {
       logger.error('ThirdParties', 'Error loading third parties:', error);
@@ -410,17 +447,17 @@ const ThirdPartiesPage: React.FC = () => {
       currency: 'EUR'
     }).format(amount);
   };
-  const handleViewThirdParty = (thirdParty: ThirdParty) => {
+  const handleViewThirdParty = (thirdParty: ThirdPartyListItem) => {
     setSelectedThirdParty(thirdParty);
     toastSuccess(`Affichage des détails de ${thirdParty.name}`);
     // TODO: Open modal or navigate to detail view
   };
-  const handleEditThirdParty = (thirdParty: ThirdParty) => {
+  const handleEditThirdParty = (thirdParty: ThirdPartyListItem) => {
     setSelectedThirdParty(thirdParty);
     toastUpdated(`Édition de ${thirdParty.name}`);
     // TODO: Open edit modal or navigate to edit form
   };
-  const handleDeleteThirdParty = async (thirdParty: ThirdParty) => {
+  const handleDeleteThirdParty = async (thirdParty: ThirdPartyListItem) => {
     // eslint-disable-next-line no-alert
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce tiers ?')) {
       return;
@@ -428,7 +465,7 @@ const ThirdPartiesPage: React.FC = () => {
     try {
       logger.debug('ThirdPartiesPage', `🗑️ Deleting ${thirdParty.type}: ${thirdParty.name}`);
 
-      if (thirdParty.type === 'customer' || (thirdParty.type as any) === 'client') {
+      if (thirdParty.type === 'customer') {
         const { error } = await supabase
           .from('customers')
           .delete()

@@ -8,7 +8,6 @@ import { CountryValidationService } from '@/services/regulatory/countryValidatio
 import { CountryFormatService } from '@/services/regulatory/countryFormatService';
 import { AutomaticCalculationService } from '@/services/regulatory/automaticCalculationService';
 import { TaxCalendarService } from '@/constants/taxCalendars';
-import { COUNTRY_WORKFLOWS } from '@/constants/countryWorkflows';
 import { logger } from '@/lib/logger';
 interface CountryWorkflowsProps {
   documentData: any;
@@ -349,7 +348,7 @@ export const CountryWorkflows: React.FC<CountryWorkflowsProps> = ({
 /**
  * Helper function to download exported document
  */
-function downloadExport(formatted: any, country: string) {
+function downloadExport(formatted: any, _country: string) {
   const download = CountryFormatService.getDownloadContent(formatted);
   const element = document.createElement('a');
   element.setAttribute('href', `data:${download.mimeType};charset=utf-8,${encodeURIComponent(String(download.content))}`);
@@ -359,4 +358,4 @@ function downloadExport(formatted: any, country: string) {
   element.click();
   document.body.removeChild(element);
 }
-export default CountryWorkflows;
+export default CountryWorkflows;

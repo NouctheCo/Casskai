@@ -8,7 +8,7 @@ import type { RegulatoryTemplate, FormSection, FormField } from '@/types/regulat
 /**
  * Configuration compacte d'un champ
  */
-interface FieldConfig {
+export interface FieldConfig {
   id: string;
   label: string;
   type?: 'currency' | 'text' | 'number' | 'date' | 'percentage';
@@ -23,7 +23,7 @@ interface FieldConfig {
 /**
  * Configuration compacte d'une section
  */
-interface SectionConfig {
+export interface SectionConfig {
   id: string;
   title: string;
   fields: FieldConfig[];

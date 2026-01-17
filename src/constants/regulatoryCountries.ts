@@ -6,10 +6,7 @@
 
 import type {
   CountryConfig,
-  AccountingStandard,
   DocumentTypeConfig,
-  AuthorityConfig,
-  TaxDeadline
 } from '@/types/regulatory';
 
 // ============================================================================

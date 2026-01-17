@@ -358,7 +358,7 @@ export const UsageQuotaWidget: React.FC<UsageQuotaWidgetProps> = ({
 
                   <div className="flex items-center justify-between mb-1">
 
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white truncate">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
 
                       {getFeatureDisplayName(limit.feature_name)}
 
@@ -416,7 +416,7 @@ export const UsageQuotaWidget: React.FC<UsageQuotaWidgetProps> = ({
 
                 size="sm" 
 
-                onClick={() => navigate('/settings/billing')}
+                onClick={() => navigate('/billing')}
 
                 className="text-xs"
 
@@ -429,7 +429,6 @@ export const UsageQuotaWidget: React.FC<UsageQuotaWidgetProps> = ({
               </Button>
 
             </div>
-
           )}
 
 

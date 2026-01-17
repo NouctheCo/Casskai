@@ -26,6 +26,7 @@ import NewArticleModal from '@/components/inventory/NewArticleModal';
 import { ThirdPartyFormDialog } from '@/components/third-parties/ThirdPartyFormDialog';
 import { useInventoryPageController } from '@/hooks/useInventoryPageController';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 
 export default function InventoryPage() {
   const { t } = useTranslation();

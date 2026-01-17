@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { CalendarDays, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { logger } from '@/lib/logger';
+import { useNavigate } from 'react-router-dom';
 export const TrialStatusCard: React.FC = () => {
   const {
     trialInfo,
@@ -167,24 +168,11 @@ export const TrialStatusCard: React.FC = () => {
   );
 };
 export const TrialActionsCard: React.FC = () => {
-  const { trialInfo, convertTrialToPaid, cancelTrial, isActive } = useTrial();
+  const navigate = useNavigate();
+  const { trialInfo, cancelTrial, isActive } = useTrial();
   const handleConvertToPaid = async () => {
-    // TODO: Ouvrir un modal de sélection de plan
-    const result = await convertTrialToPaid('starter_monthly');
-    if (!result.success) {
-      logger.error('TrialComponents', 'Erreur lors de la conversion:', result.error);
-      toast({
-        title: "Erreur",
-        description: result.error || 'Erreur lors de la conversion vers un abonnement payant',
-        variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Succès",
-        description: "Conversion vers un abonnement payant réussie",
-        variant: "default"
-      });
-    }
+    // Rediriger vers la page Pricing pour choisir un plan et passer par Stripe Checkout.
+    navigate('/pricing');
   };
   const handleCancelTrial = async () => {
     const result = await cancelTrial('Annulé par l\'utilisateur');

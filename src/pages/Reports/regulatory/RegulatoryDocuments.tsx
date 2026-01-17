@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Plus, Filter, Download, Upload, Calendar, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { FileText, Plus, Filter, Upload, CheckCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -118,7 +118,7 @@ export function RegulatoryDocuments() {
   const handleNewDocument = () => {
     setShowNewDocumentModal(true);
   };
-  const handleDocumentCreated = (documentId: string) => {
+  const handleDocumentCreated = (_documentId: string) => {
     setShowNewDocumentModal(false);
     loadDocuments();
     loadStatistics();
@@ -245,6 +245,7 @@ export function RegulatoryDocuments() {
       {/* Modal nouveau document */}
       {showNewDocumentModal && (
         <NewDocumentModal
+          open={showNewDocumentModal}
           onClose={() => setShowNewDocumentModal(false)}
           onDocumentCreated={handleDocumentCreated}
         />
@@ -280,4 +281,4 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
     </div>
   );
 }
-export default RegulatoryDocuments;
+export default RegulatoryDocuments;

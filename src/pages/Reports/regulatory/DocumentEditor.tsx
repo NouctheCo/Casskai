@@ -3,10 +3,11 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Éditeur de document réglementaire
  */
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Save, Download, FileText, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Save, Download, FileText, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/useToast';
 import { supabase } from '@/lib/supabase';
 import type {
   RegulatoryDocument,
@@ -26,7 +27,8 @@ interface DocumentEditorProps {
 }
 export function DocumentEditor({ document: initialDocument, onClose }: DocumentEditorProps) {
   const { t } = useTranslation();
-  const [document, setDocument] = useState<RegulatoryDocument>(initialDocument);
+  const { showToast } = useToast();
+  const [document] = useState<RegulatoryDocument>(initialDocument);
   const [template, setTemplate] = useState<RegulatoryTemplate | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>(initialDocument.data);
   const [errors, setErrors] = useState<ValidationError[]>([]);
@@ -78,11 +80,11 @@ export function DocumentEditor({ document: initialDocument, onClose }: DocumentE
         })
         .eq('id', document.id);
       if (error) throw error;
-      alert(t('reports.regulatory.messages.saveSuccess'));
+      showToast(t('reports.regulatory.messages.saveSuccess'), 'success');
       onClose();
     } catch (error) {
       logger.error('DocumentEditor', 'Error saving document:', error);
-      alert(t('reports.regulatory.messages.saveError'));
+      showToast(t('reports.regulatory.messages.saveError'), 'error');
     } finally {
       setSaving(false);
     }
@@ -107,10 +109,10 @@ export function DocumentEditor({ document: initialDocument, onClose }: DocumentE
           .update({ pdf_url: pdfUrl })
           .eq('id', document.id);
       }
-      alert(t('reports.regulatory.messages.exportSuccess'));
+      showToast(t('reports.regulatory.messages.exportSuccess'), 'success');
     } catch (error) {
       logger.error('DocumentEditor', 'Error exporting PDF:', error);
-      alert(t('reports.regulatory.messages.exportError'));
+      showToast(t('reports.regulatory.messages.exportError'), 'error');
     } finally {
       setExporting(false);
     }
@@ -123,13 +125,13 @@ export function DocumentEditor({ document: initialDocument, onClose }: DocumentE
         setFormData(result.data);
         setErrors(result.errors || []);
         setWarnings(result.warnings || []);
-        alert(t('reports.regulatory.messages.recalculateSuccess'));
+        showToast(t('reports.regulatory.messages.recalculateSuccess'), 'success');
       } else {
-        alert(t('reports.regulatory.messages.recalculateError'));
+        showToast(t('reports.regulatory.messages.recalculateError'), 'error');
       }
     } catch (error) {
       logger.error('DocumentEditor', 'Error recalculating:', error);
-      alert(t('reports.regulatory.messages.recalculateError'));
+      showToast(t('reports.regulatory.messages.recalculateError'), 'error');
     } finally {
       setRecalculating(false);
     }
@@ -141,7 +143,7 @@ export function DocumentEditor({ document: initialDocument, onClose }: DocumentE
       </div>
     );
   }
-  const schema = template.schema as any;
+  const schema = template.formSchema as any;
   return (
     <div className="space-y-6">
       {/* En-tête */}
@@ -340,4 +342,4 @@ function renderInput(
     default:
       return <input {...commonProps} type="text" />;
   }
-}
+}

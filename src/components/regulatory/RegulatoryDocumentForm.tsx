@@ -14,7 +14,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Loader2, Save, FileText, AlertCircle, CheckCircle } from 'lucide-react';
+import { Loader2, Save, FileText, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -113,7 +113,7 @@ export function RegulatoryDocumentForm({
     setIsAutoFilling(false);
   }, [initialData, setValue, autoFillEnabled]);
   // Rendu d'un champ selon son type
-  const renderField = (field: FormField, sectionId: string) => {
+  const renderField = (field: FormField, _sectionId: string) => {
     const fieldId = field.id;
     const fieldValue = formValues[fieldId];
     const isCalculated = !!field.formula;
@@ -208,7 +208,7 @@ export function RegulatoryDocumentForm({
               </SelectTrigger>
               <SelectContent>
                 {field.options?.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={String(option.value)} value={String(option.value)}>
                     {option.label}
                   </SelectItem>
                 ))}

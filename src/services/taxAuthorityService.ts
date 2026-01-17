@@ -309,21 +309,12 @@ export class TaxAuthorityService {
    * Appelle l'API de vérification des identifiants
    */
   private static async callVerificationAPI(authority: any, credentials: any): Promise<VerifyCredentialsResponse> {
-    try {
-      // Vérification simulée pour l'instant
-      return {
-        success: true,
-        is_valid: true,
-        message: 'Identifiants valides',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        is_valid: false,
-        message: 'Erreur lors de la vérification',
-        error: error instanceof Error ? error.message : 'Erreur inconnue',
-      };
-    }
+    // Vérification simulée pour l'instant
+    return {
+      success: true,
+      is_valid: true,
+      message: 'Identifiants valides',
+    };
   }
   /**
    * Enregistre un log de communication

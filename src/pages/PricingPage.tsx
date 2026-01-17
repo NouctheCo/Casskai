@@ -50,8 +50,15 @@ export default function PricingPage() {
       toastError('Vous devez être connecté pour choisir un plan');
       return;
     }
+    if (!currentPricing) {
+      toastError('Le pricing n\'est pas encore chargé. Veuillez réessayer dans un instant.');
+      return;
+    }
     setIsLoading(true);
     try {
+      const interval = billingPeriod === 'year' ? 'yearly' : 'monthly';
+      const checkoutPlanId = planId.includes('_') || planId.includes('-') ? planId : `${planId}_${interval}`;
+
       // Gestion spéciale pour le plan gratuit
       if (planId === 'free') {
         toastSuccess('Plan gratuit activé ! Vous pouvez maintenant utiliser CassKai.');
@@ -59,10 +66,12 @@ export default function PricingPage() {
         return;
       }
       // Pour les autres plans, utiliser Stripe via Edge Functions
-      logger.warn('Pricing', '🛒 [PricingPage] Starting checkout for plan:', planId);
+      logger.warn('Pricing', '🛒 [PricingPage] Starting checkout for plan:', { planId, checkoutPlanId, interval });
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {
-          planId,
+          planId: checkoutPlanId,
+          interval,
+          currency: currentPricing.currency,
           userId: user.id,
           metadata: {
             source: 'pricing-page',
@@ -72,7 +81,33 @@ export default function PricingPage() {
       });
       logger.warn('Pricing', '🛒 [PricingPage] Edge function response:', { data, error });
       if (error) {
-        toastError(`Erreur lors de la création de la session: ${(error instanceof Error ? error.message : 'Une erreur est survenue') || 'Erreur inconnue'}`);
+        const fallbackMessage = (error instanceof Error ? error.message : 'Une erreur est survenue') || 'Erreur inconnue';
+        let extraDetails: unknown = null;
+
+        try {
+          const context = (error as { context?: unknown } | null)?.context as { json?: () => Promise<unknown>; status?: number } | undefined;
+          if (context && typeof context.json === 'function') {
+            extraDetails = await context.json();
+          }
+        } catch (parseError: unknown) {
+          logger.warn('Pricing', '🛒 [PricingPage] Failed to parse function error context:', parseError);
+        }
+
+        logger.error('Pricing', '🛒 [PricingPage] Checkout session creation failed:', { error, extraDetails });
+
+        if (extraDetails && typeof extraDetails === 'object') {
+          const detailsObj = extraDetails as { error?: string; availablePlans?: unknown; missingSecrets?: unknown };
+          const apiMessage = typeof detailsObj.error === 'string' ? detailsObj.error : null;
+          const availablePlans = Array.isArray(detailsObj.availablePlans) ? detailsObj.availablePlans.filter((p) => typeof p === 'string') as string[] : [];
+
+          toastError(apiMessage ? `Paiement: ${apiMessage}` : `Erreur lors de la création de la session: ${fallbackMessage}`);
+
+          if (availablePlans.length > 0) {
+            toastWarning(`Plans attendus par le backend: ${availablePlans.join(', ')}`);
+          }
+        } else {
+          toastError(`Erreur lors de la création de la session: ${fallbackMessage}`);
+        }
         return;
       }
       if (!data || !data.sessionId) {

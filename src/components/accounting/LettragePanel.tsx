@@ -16,13 +16,12 @@ import {
   findLettrageMatches,
   applyLettrage,
   autoLettrage,
-  deleteLettrage,
   getLettrageStats,
   type JournalEntryLine,
   type LettrageMatch,
 } from '@/services/accounting/lettrageService';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Check, X, Zap, Trash2, AlertCircle } from 'lucide-react';
+import { Check, Zap, AlertCircle } from 'lucide-react';
 import { logger } from '@/lib/logger';
 interface LettragePanelProps {
   companyId: string;

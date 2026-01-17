@@ -32,6 +32,8 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
           .from('subscriptions')
           .select('*')
           .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle();
         if (error) {
           logger.error('UseSubscriptionStatus', 'Error fetching subscription:', error);

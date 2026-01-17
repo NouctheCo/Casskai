@@ -41,7 +41,7 @@ export interface CountryInfo {
   currency: string;
   timezone: string;
   fiscalYearStart: string;
-  accountingStandard: 'PCG' | 'SYSCOHADA' | 'BELGIAN' | 'BASIC';
+  accountingStandard: 'PCG' | 'SYSCOHADA' | 'BELGIAN' | 'BASIC' | 'IFRS' | 'SCF';
   taxRates: TaxRate[];
 }
 

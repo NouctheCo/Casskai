@@ -22,21 +22,11 @@ export default function StripeSuccessPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const { refreshSubscription, setSubscriptionPlan } = useSubscription();
+  const { refreshSubscription } = useSubscription();
   const [isProcessing, setIsProcessing] = useState(true);
   useEffect(() => {
     const handleSuccess = async () => {
       try {
-        const sessionId = searchParams.get('session_id');
-        if (sessionId && process.env.NODE_ENV === 'development') {
-          // En développement, simuler la mise à jour d'abonnement
-          logger.warn('StripeSuccess', '🔄 Mode développement: simulation de mise à jour d\'abonnement...');
-          // Essayer de détecter le plan depuis l'URL ou utiliser une valeur par défaut
-          const planFromUrl = searchParams.get('plan');
-          const targetPlan = planFromUrl || 'starter_monthly'; // Plan par défaut
-          logger.warn('StripeSuccess', `🔄 Mode développement: mise à jour locale vers plan ${targetPlan}`);
-          await setSubscriptionPlan(targetPlan);
-        }
         // Attendre un court instant (réduit en développement)
         const delay = process.env.NODE_ENV === 'development' ? 500 : 3000;
         await new Promise(resolve => setTimeout(resolve, delay));
@@ -56,7 +46,7 @@ export default function StripeSuccessPage() {
     } else {
       setIsProcessing(false);
     }
-  }, [user, refreshSubscription, setSubscriptionPlan, searchParams]);
+  }, [user, refreshSubscription, searchParams]);
   const handleContinue = () => {
     navigate('/dashboard');
   };
