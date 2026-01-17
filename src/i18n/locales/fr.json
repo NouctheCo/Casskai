@@ -854,15 +854,27 @@
       "errors": {
         "contract_ref_required": "Référence contrat obligatoire",
         "contract_not_found": "Contrat non trouvé",
+        "contract_name_required": "Nom du contrat obligatoire",
         "turnover_positive": "CA doit être positif",
         "period_start_required": "Date début obligatoire",
         "period_end_required": "Date fin obligatoire",
         "product_code_required": "Code produit obligatoire",
         "product_name_required": "Nom produit obligatoire",
         "price_positive": "Prix doit être >= 0",
-        "rfa_rate_range": "Taux RFA doit être entre 0 et 1",
-        "rfa_amount_positive": "Montant RFA doit être >= 0"
-      }
+        "rfa_rate_range": "Taux RFA doit être entre 0 et 100",
+        "rfa_amount_positive": "Montant RFA doit être >= 0",
+        "third_party_required": "Nom du tiers obligatoire",
+        "third_party_not_found": "Tiers non trouvé",
+        "product_group_not_found": "Groupe produit non trouvé",
+        "amount_positive": "Montant HT doit être >= 0",
+        "group_code_required": "Code groupe obligatoire",
+        "group_name_required": "Nom groupe obligatoire",
+        "product_ref_required": "Référence produit obligatoire",
+        "calc_period_required": "Période de calcul obligatoire",
+        "invalid_calc_method": "Méthode de calcul invalide (progressive/fixed/custom)"
+      },
+      "available_third_parties": "Tiers disponibles",
+      "available_product_groups": "Groupes produits"
     },
     "title": "Contrats & RFA",
     "top_clients": "Top clients RFA",

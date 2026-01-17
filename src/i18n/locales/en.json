@@ -647,15 +647,27 @@
       "errors": {
         "contract_ref_required": "Contract reference required",
         "contract_not_found": "Contract not found",
+        "contract_name_required": "Contract name required",
         "turnover_positive": "Revenue must be positive",
         "period_start_required": "Start date required",
         "period_end_required": "End date required",
         "product_code_required": "Product code required",
         "product_name_required": "Product name required",
         "price_positive": "Price must be >= 0",
-        "rfa_rate_range": "RFA rate must be between 0 and 1",
-        "rfa_amount_positive": "RFA amount must be >= 0"
-      }
+        "rfa_rate_range": "RFA rate must be between 0 and 100",
+        "rfa_amount_positive": "RFA amount must be >= 0",
+        "third_party_required": "Third party name required",
+        "third_party_not_found": "Third party not found",
+        "product_group_not_found": "Product group not found",
+        "amount_positive": "Amount excl. tax must be >= 0",
+        "group_code_required": "Group code required",
+        "group_name_required": "Group name required",
+        "product_ref_required": "Product reference required",
+        "calc_period_required": "Calculation period required",
+        "invalid_calc_method": "Invalid calculation method (progressive/fixed/custom)"
+      },
+      "available_third_parties": "Available third parties",
+      "available_product_groups": "Product groups"
     },
     "title": "Contrats & RFA",
     "top_clients": "Top clients RFA",
