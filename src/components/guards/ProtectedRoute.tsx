@@ -97,12 +97,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Vérification de l'abonnement : rediriger vers /billing si expiré
   // SAUF si l'utilisateur est déjà sur la page de billing
-  const billingPaths = ['/settings/billing', '/billing', '/pricing'];
+  const billingPaths = ['/billing', '/pricing'];
   const isOnBillingPage = billingPaths.some(path => location.pathname.startsWith(path));
 
   if (user && isExpired && !isOnBillingPage) {
     logger.warn('Router', 'Subscription expired - redirecting to billing');
-    return <Navigate to="/settings/billing" state={{ from: location }} replace />;
+    return <Navigate to="/billing" state={{ from: location }} replace />;
   }
 
   // Si l'utilisateur est connecté et que les requirements sont satisfaits,

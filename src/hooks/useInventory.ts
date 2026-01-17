@@ -180,24 +180,34 @@ export function useInventory(): UseInventoryReturn {
 
         return {
           id: article.id,
-          name: article.name || '',
+          productId: (article.product_id as string) || article.id,
+          productVariantId: (article.product_variant_id as string) || undefined,
+          warehouseId: (article.warehouse_id as string) || '',
           reference: article.reference || '',
-          category: article.category,
+          name: article.name || '',
+          description: article.description || undefined,
+          category: article.category || undefined,
           unit: article.unit || 'pièce',
           purchasePrice: article.purchase_price || 0,
-          salePrice: article.selling_price || 0,
+          sellingPrice: article.selling_price || 0,
+          unitCost: article.purchase_price || 0,
+          avgCost: article.purchase_price || 0,
           currentStock,
+          reservedStock: 0,
+          availableStock: currentStock,
           minStock,
           maxStock,
           status,
+          lastMovement: undefined,
+          lastCountDate: undefined,
           totalValue: currentStock * (article.purchase_price || 0),
-          avgCost: article.purchase_price || 0,
-          location: article.warehouse_id || '',
-          warehouseId: article.warehouse_id,
-          supplierId: article.supplier_id,
-          supplierName: '', // Sera chargé via join si nécessaire
-          barcode: article.barcode,
-          description: article.description
+          location: (article.warehouse_id as string) || undefined,
+          supplierId: (article.supplier_id as string) || undefined,
+          supplierName: undefined,
+          barcode: article.barcode || undefined,
+          company_id: article.company_id || currentCompany.id,
+          created_at: article.created_at || new Date().toISOString(),
+          updated_at: article.updated_at || new Date().toISOString(),
         };
       });
 
@@ -377,7 +387,7 @@ export function useInventory(): UseInventoryReturn {
       if (updates.category) articleUpdates.category = updates.category;
       if (updates.unit) articleUpdates.unit = updates.unit;
       if (updates.purchasePrice !== undefined) articleUpdates.purchase_price = updates.purchasePrice;
-      if (updates.salePrice !== undefined) articleUpdates.selling_price = updates.salePrice;
+      if (updates.sellingPrice !== undefined) articleUpdates.selling_price = updates.sellingPrice;
       if (updates.currentStock !== undefined) articleUpdates.stock_quantity = updates.currentStock;
       if (updates.minStock !== undefined) articleUpdates.stock_min = updates.minStock;
       if (updates.maxStock !== undefined) articleUpdates.stock_max = updates.maxStock;

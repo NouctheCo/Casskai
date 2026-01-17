@@ -31,7 +31,7 @@ export const SubscriptionBanner: React.FC = () => {
               Choisissez un plan pour continuer à utiliser CassKai
             </span>
           </div>
-          <Link to="/settings/billing">
+          <Link to="/pricing">
             <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">
               <CreditCard className="w-4 h-4 mr-2" />
               {isTrialExpired ? 'Choisir un plan' : 'Renouveler maintenant'}
@@ -67,7 +67,7 @@ export const SubscriptionBanner: React.FC = () => {
               Choisissez un plan pour continuer sans interruption
             </span>
           </div>
-          <Link to="/settings/billing">
+          <Link to="/pricing">
             <Button size="sm" className={`${buttonClass} text-white`}>
               <CreditCard className="w-4 h-4 mr-2" />
               Voir les plans
@@ -92,7 +92,7 @@ export const SubscriptionBanner: React.FC = () => {
               Il vous reste {daysLeft} jours d'essai gratuit
             </span>
           </div>
-          <Link to="/settings/billing">
+          <Link to="/pricing">
             <Button size="sm" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
               <CreditCard className="w-4 h-4 mr-2" />
               Voir les plans

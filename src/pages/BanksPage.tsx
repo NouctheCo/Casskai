@@ -220,6 +220,7 @@ const BanksPageNew: React.FC = () => {
   // Purge history for selected account
   const handlePurgeHistory = async () => {
     if (!currentCompany?.id) return;
+    // eslint-disable-next-line no-alert
     const confirm = window.confirm('Confirmez-vous la purge de l\'historique pour ce compte ? Cette action est irréversible.');
     if (!confirm) return;
     try {

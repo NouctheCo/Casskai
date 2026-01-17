@@ -12,7 +12,7 @@
  * Generated: 2026-01-02
  */
 
-import type { RegulatoryTemplate, FormSchema, AccountMapping, ValidationRules } from '@/types/regulatory';
+import type { RegulatoryTemplate } from '@/types/regulatory';
 
 // ============================================================================
 // ACCOUNT MAPPINGS BY STANDARD
@@ -43,7 +43,7 @@ const PCG_ACCOUNT_MAPPINGS = {
 };
 
 // SYSCOHADA Account Mappings (Comptabilité OHADA)
-const SYSCOHADA_ACCOUNT_MAPPINGS = {
+const _SYSCOHADA_ACCOUNT_MAPPINGS = {
   assets: [
     { accountRange: '10-19', description: 'Assets immobilisés', type: 'fixed_asset' },
     { accountRange: '20-35', description: 'Actif circulant', type: 'current_asset' },
@@ -61,7 +61,7 @@ const SYSCOHADA_ACCOUNT_MAPPINGS = {
 };
 
 // IFRS for SMEs Account Mappings
-const IFRS_ACCOUNT_MAPPINGS = {
+const _IFRS_ACCOUNT_MAPPINGS = {
   assets: [
     { accountRange: '1100-1500', description: 'Non-current assets', type: 'fixed_asset' },
     { accountRange: '1600-1800', description: 'Current assets', type: 'current_asset' },
@@ -80,7 +80,7 @@ const IFRS_ACCOUNT_MAPPINGS = {
 };
 
 // SCF Account Mappings (Système Comptable Financier - Algeria/Tunisia)
-const SCF_ACCOUNT_MAPPINGS = {
+const _SCF_ACCOUNT_MAPPINGS = {
   assets: [
     { accountRange: '10-39', description: 'Actifs non courants', type: 'fixed_asset' },
     { accountRange: '40-58', description: 'Actifs courants', type: 'current_asset' },
@@ -98,7 +98,7 @@ const SCF_ACCOUNT_MAPPINGS = {
 };
 
 // PCM Account Mappings (Plan Comptable Marocain)
-const PCM_ACCOUNT_MAPPINGS = {
+const _PCM_ACCOUNT_MAPPINGS = {
   assets: [
     { accountRange: '2-3', description: 'Immobilisations', type: 'fixed_asset' },
     { accountRange: '4-5', description: 'Circulant', type: 'current_asset' },

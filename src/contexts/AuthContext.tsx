@@ -164,18 +164,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Vérifier d'abord si un abonnement existe déjà (évite l'erreur duplicate key)
       logger.debug('Auth', '🔍 Vérification de l\'abonnement existant pour user:', userId);
 
-      const { data: existingSubscription, error: checkError } = await supabase
+      const { data: existingSubscriptions, error: checkError } = await supabase
         .from('subscriptions')
         .select('id, status, current_period_end, plan_id')
         .eq('user_id', userId)
-        .maybeSingle();
+        .limit(1);
 
-      if (checkError && checkError.code !== 'PGRST116') {
+      if (checkError) {
         logger.error('Auth', 'Erreur lors de la vérification de l\'abonnement existant:', checkError);
+        // En cas d'erreur, ne pas tenter de créer un essai automatiquement.
+        return;
       }
 
+      const existingSubscription = Array.isArray(existingSubscriptions) ? existingSubscriptions[0] : null;
+
       if (existingSubscription) {
-        logger.info('Auth', '✅ Abonnement existant trouvé:', existingSubscription.id, 'Status:', existingSubscription.status);
+        logger.info('Auth', '✅ Abonnement existant trouvé', {
+          id: existingSubscription.id,
+          status: existingSubscription.status,
+        });
         // Ne pas recréer, utiliser l'existant
         return;
       }
@@ -217,9 +224,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
     } catch (error) {
-
       // IMPORTANT: Ne pas throw l'erreur, juste la logger (PROBLÈME 3)
-      logger.warn('Auth', '⚠️ Erreur lors de la vérification/création de l\'abonnement (non bloquant):', error);
+      logger.warn('Auth', "⚠️ Erreur lors de la vérification/création de l'abonnement (non bloquant)", error);
 
     }
 
@@ -257,12 +263,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       }
 
-    } catch (error) {
-
-      
-
+    } catch (_error) {
       // Ne pas lancer une erreur fatale, juste logger
-
       setCurrentCompany(null);
 
     }
@@ -284,10 +286,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setSession(null);
 
       setCurrentCompany(null);
-
-      setUserCompanies([]);
-
-      setIsAuthenticated(false);
 
       setOnboardingCompleted(false);
 
@@ -461,12 +459,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             
 
             // Marquer le check initial comme complété après succès
-            // eslint-disable-next-line require-atomic-updates
             hasCompletedInitialCheck.current = true;
 
           } catch (switchError) {
-
-            
+            logger.warn('Auth', "Échec du chargement de l'entreprise sélectionnée", switchError);
 
             // Essayer avec la première entreprise si celle sélectionnée échoue
 
@@ -479,11 +475,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 
 
                 // Marquer le check initial comme complété après succès du fallback
-                // eslint-disable-next-line require-atomic-updates
                 hasCompletedInitialCheck.current = true;
 
               } catch (fallbackError) {
-
                 logger.error('Auth', 'Échec du fallback vers la première entreprise', fallbackError);
 
                 setCurrentCompany(null);
@@ -599,7 +593,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
 
-    const isEmailConfirmation = handleAuthFromUrl();
+    handleAuthFromUrl();
 
 
 
@@ -630,14 +624,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setSession(session);
 
       
-
-      // If this is an email confirmation, mark for onboarding redirect
-
-      if (isEmailConfirmation && session?.user) {
-
-        
-
-      }
 
       
 

@@ -323,7 +323,7 @@ export function getCountryLanguage(countryCode: string): string | null {
 /**
  * Helper function to get supported format by country
  */
-export function getSupportedFormatsForCountry(countryCode: string) {
+export function getSupportedFormatsForCountry(_countryCode: string) {
   // Some countries might have specific format requirements
   // This can be extended for country-specific formats
   return PHASE3_CONFIG.FORMAT.SUPPORTED_FORMATS;

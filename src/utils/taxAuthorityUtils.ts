@@ -13,6 +13,7 @@ export class CredentialEncryption {
   static encrypt(plaintext: string, key?: string): string {
     // Pour la démo, on utilise juste base64
     // En production: utiliser AES-256-GCM ou similaire
+    void key;
     return btoa(plaintext);
   }
   /**
@@ -20,8 +21,9 @@ export class CredentialEncryption {
    */
   static decrypt(ciphertext: string, key?: string): string {
     try {
+      void key;
       return atob(ciphertext);
-    } catch (error) {
+    } catch (_error) {
       throw new Error('Erreur lors du déchiffrement');
     }
   }
@@ -206,4 +208,4 @@ export class ErrorFormatter {
       context,
     };
   }
-}
+}

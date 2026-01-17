@@ -356,9 +356,14 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   }, [selectedAccount, selectedPeriod]);
   // Formatage des montants
   const formatAmount = (amount: number) => {
-    const abs = Math.abs(amount);
+    const absAmount = Math.abs(amount);
     const sign = amount >= 0 ? '+' : '-';
-    return `${sign}$<CurrencyAmount amount={abs} />`;
+    return (
+      <span className="inline-flex items-center">
+        <span className="mr-1">{sign}</span>
+        <CurrencyAmount amount={absAmount} />
+      </span>
+    );
   };
   // Couleur selon le statut
   const getStatusColor = (reconciled: boolean, hasMatches = false) => {

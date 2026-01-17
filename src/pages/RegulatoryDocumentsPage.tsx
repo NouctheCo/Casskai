@@ -6,7 +6,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { RegulatoryDocumentsList } from '@/components/regulatory/RegulatoryDocumentsList';
 import { RegulatoryDocumentForm } from '@/components/regulatory/RegulatoryDocumentForm';
@@ -22,7 +22,6 @@ import type { RegulatoryDocument, RegulatoryTemplate } from '@/types/regulatory'
 import { logger } from '@/lib/logger';
 export function RegulatoryDocumentsPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { currentCompany } = useAuth();
   const [documents, setDocuments] = useState<RegulatoryDocument[]>([]);
@@ -178,8 +177,13 @@ export function RegulatoryDocumentsPage() {
         selectedPeriod,
         currentYear: new Date().getFullYear()
       });
+      const companyId = currentCompany?.id;
+      if (!companyId) {
+        toast.error(t('common.error'));
+        return;
+      }
       const result = await generateDocument(
-        currentCompany?.id!,
+        companyId,
         pendingTemplateId,
         selectedYear,
         selectedPeriod
@@ -281,6 +285,7 @@ export function RegulatoryDocumentsPage() {
    * Supprime un document
    */
   const handleDeleteDocument = async (documentId: string) => {
+    // eslint-disable-next-line no-alert
     if (!confirm(t('regulatory.confirmDelete'))) return;
     try {
       const { error } = await supabase

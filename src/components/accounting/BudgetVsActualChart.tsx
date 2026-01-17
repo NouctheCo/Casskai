@@ -103,8 +103,8 @@ const BudgetVsActualChart: React.FC<BudgetVsActualChartProps> = ({ companyId }) 
               category: category.category,
               budget: budgetAmount,
               actual: Math.abs(actualAmount), // Valeur absolue pour l'affichage
-              variance: variance,
-              variancePercent: variancePercent
+              variance,
+              variancePercent
             };
           })
         );

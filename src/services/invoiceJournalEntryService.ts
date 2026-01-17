@@ -25,13 +25,15 @@ interface InvoiceLine {
   id: string;
   invoice_id: string;
   account_id?: string;
-  description: string;
+  description?: string;
+  name?: string;
   quantity: number;
   unit_price: number;
   discount_percent?: number;
+  discount_rate?: number;
   tax_rate?: number;
   subtotal_excl_tax?: number;
-  line_total: number;
+  line_total?: number;
 }
 /**
  * Génère automatiquement l'écriture comptable pour une facture
@@ -84,7 +86,8 @@ export async function generateInvoiceJournalEntry(
 
       // Calculer le total HT de toutes les lignes
       const totalHT = lines.reduce((sum, line) => {
-        const lineHT = (line.quantity * line.unit_price) * (1 - ((line.discount_rate || 0) / 100));
+        const discount = (line.discount_percent ?? line.discount_rate ?? 0) / 100;
+        const lineHT = (line.quantity * line.unit_price) * (1 - discount);
         return sum + lineHT;
       }, 0);
 
@@ -118,7 +121,8 @@ export async function generateInvoiceJournalEntry(
 
       // Calculer le total HT de toutes les lignes
       const totalHT = lines.reduce((sum, line) => {
-        const lineHT = (line.quantity * line.unit_price) * (1 - ((line.discount_rate || 0) / 100));
+        const discount = (line.discount_percent ?? line.discount_rate ?? 0) / 100;
+        const lineHT = (line.quantity * line.unit_price) * (1 - discount);
         return sum + lineHT;
       }, 0);
 
@@ -182,7 +186,7 @@ export async function generateInvoiceJournalEntry(
       metadata: {
         invoice_id: invoice.id,
         invoice_number: invoice.invoice_number,
-        type: type, // ✅ Utilise la variable 'type' au lieu de invoice.type
+        type, // ✅ Utilise la variable 'type' au lieu de invoice.type
         total_incl_tax: invoice.total_incl_tax,
       },
     });
@@ -339,7 +343,7 @@ async function getOrCreateDefaultSalesAccount(
 ): Promise<{ id: string; account_number: string } | null> {
   try {
     // Chercher le compte existant
-    let { data: account } = await supabase
+    const { data: account } = await supabase
       .from('chart_of_accounts')
       .select('id, account_number')
       .eq('company_id', companyId)
@@ -383,7 +387,7 @@ async function getOrCreateDefaultExpenseAccount(
 ): Promise<{ id: string; account_number: string } | null> {
   try {
     // Chercher le compte existant
-    let { data: account } = await supabase
+    const { data: account } = await supabase
       .from('chart_of_accounts')
       .select('id, account_number')
       .eq('company_id', companyId)
@@ -429,7 +433,7 @@ async function getOrCreateVATAccount(
 ): Promise<{ id: string; account_number: string } | null> {
   try {
     // Chercher le compte existant
-    let { data: account } = await supabase
+    const { data: account } = await supabase
       .from('chart_of_accounts')
       .select('id, account_number')
       .eq('company_id', companyId)
@@ -505,7 +509,7 @@ async function getJournalByType(
         company_id: companyId,
         code: config.code,
         name: config.name,
-        type: type,
+        type,
         is_active: true
       })
       .select('id, code, name')

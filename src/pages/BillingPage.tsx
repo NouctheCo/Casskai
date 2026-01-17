@@ -17,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toastError, toastSuccess } from '@/lib/toast-helpers';
+import { toastError, toastSuccess, toastWarning } from '@/lib/toast-helpers';
 import { 
   CreditCard,
   Download,
@@ -55,6 +55,18 @@ const BillingPage: React.FC = () => {
     openBillingPortal
   } = useSubscription();
   const [activeTab, setActiveTab] = useState<string>('overview');
+
+  const handleOpenBillingPortal = async () => {
+    try {
+      const result = await openBillingPortal();
+      if (!result.success) {
+        toastError(result.error || t('billingPage.toasts.portalError'));
+      }
+    } catch (error) {
+      logger.error('Billing', 'Error opening billing portal:', error instanceof Error ? error.message : String(error));
+      toastError(t('billingPage.toasts.unexpectedError'));
+    }
+  };
   // Handle tab parameter from URL
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -71,11 +83,11 @@ const BillingPage: React.FC = () => {
       // Refresh subscription data
       refreshSubscription();
       // Clean URL
-      navigate('/settings/billing', { replace: true });
+      navigate('/billing', { replace: true });
     } else if (canceled === 'true') {
       toastError(t('billingPage.toasts.paymentCanceled'));
       // Clean URL
-      navigate('/settings/billing', { replace: true });
+      navigate('/billing', { replace: true });
     }
   }, [searchParams, navigate, refreshSubscription]);
   const handleAddPaymentMethod = async () => {
@@ -202,7 +214,7 @@ const BillingPage: React.FC = () => {
             <CreditCard className="w-8 h-8 text-blue-500" />
             <span>{t('billingPage.title')}</span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mt-2">
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
             {t('billingPage.subtitle')}
           </p>
         </div>
@@ -304,7 +316,7 @@ const BillingPage: React.FC = () => {
                     </div>
                     <Button
                       variant="outline"
-                      onClick={() => openBillingPortal()}
+                      onClick={handleOpenBillingPortal}
                     >
                       {t('billingPage.plans.manageInStripe')}
                     </Button>
@@ -384,7 +396,7 @@ const BillingPage: React.FC = () => {
                 <Card className="border-dashed border-2">
                   <CardContent className="p-6 text-center">
                     <CreditCard className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4 text-sm">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
                       {t('billingPage.payment.addNew')}
                     </p>
                     <Button 
@@ -405,7 +417,7 @@ const BillingPage: React.FC = () => {
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                     {t('billingPage.payment.noMethods.title')}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-6">
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">
                     {t('billingPage.payment.noMethods.description')}
                   </p>
                   <Button onClick={() => handleAddPaymentMethod()}>
@@ -422,7 +434,10 @@ const BillingPage: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               {t('billingPage.invoices.title')}
             </h2>
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              onClick={() => toastWarning('Filtrage des factures : bientôt disponible')}
+            >
               <Filter className="w-4 h-4 mr-2" />
               {t('billingPage.invoices.filter')}
             </Button>
@@ -434,19 +449,19 @@ const BillingPage: React.FC = () => {
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-800/50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                           {t('billingPage.invoices.table.invoice')}
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                           {t('billingPage.invoices.table.status')}
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                           {t('billingPage.invoices.table.amount')}
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                           {t('billingPage.invoices.table.date')}
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                           {t('billingPage.invoices.table.actions')}
                         </th>
                       </tr>

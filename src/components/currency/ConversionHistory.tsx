@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { exchangeRateService, type ConversionHistory } from '@/services/exchangeRateService';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { History, Search, Download, Calendar, ArrowRightLeft } from 'lucide-react';
 import { formatCurrency, type CurrencyCode } from '@/hooks/useCompanyCurrency';
 

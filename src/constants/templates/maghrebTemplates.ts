@@ -4,6 +4,7 @@
  */
 
 import { createTemplatesFromConfigs, type TemplateConfig } from './templateFactory';
+import type { RegulatoryTemplate } from '@/types/regulatory';
 
 /**
  * TEMPLATES MAGHREB - SCF/PCM

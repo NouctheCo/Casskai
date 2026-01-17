@@ -3,16 +3,18 @@
  */
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
-import { TaxAuthorityCredentials } from '@/types/taxAuthority';
+import type { TaxAuthorityCredentials } from '@/types/taxAuthority';
 import { supabase } from '@/lib/supabase';
 import { TAX_AUTHORITIES } from '@/constants/taxAuthorities';
 import { TaxAuthorityService } from '@/services/taxAuthorityService';
 import { FormatterUtils } from '@/utils/taxAuthorityUtils';
 import { logger } from '@/lib/logger';
+import { useToast } from '@/hooks/useToast';
 interface CredentialsManagerProps {
   companyId: string;
 }
 export function CredentialsManager({ companyId }: CredentialsManagerProps) {
+  const { showToast } = useToast();
   const [credentials, setCredentials] = useState<TaxAuthorityCredentials[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -43,14 +45,14 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
   };
   const handleAddCredentials = async () => {
     if (!formData.countryCode || !formData.taxId) {
-      alert('Veuillez remplir tous les champs obligatoires');
+      showToast('Veuillez remplir tous les champs obligatoires', 'warning');
       return;
     }
     try {
       // Récupérer la première autorité du pays
       const authorities = TAX_AUTHORITIES[formData.countryCode];
       if (!authorities || authorities.length === 0) {
-        alert('Autorité fiscale non configurée pour ce pays');
+        showToast('Autorité fiscale non configurée pour ce pays', 'error');
         return;
       }
       const authority = authorities[0];
@@ -65,10 +67,11 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
         setFormData({ countryCode: '', taxId: '', apiKey: '' });
         setShowForm(false);
         await loadCredentials();
+        showToast('Identifiants enregistrés', 'success');
       }
     } catch (error) {
       logger.error('CredentialsManager', 'Erreur lors de la sauvegarde:', error);
-      alert('Erreur lors de la sauvegarde des identifiants');
+      showToast('Erreur lors de la sauvegarde des identifiants', 'error');
     }
   };
   const handleVerifyCredentials = async (credentialId: string) => {
@@ -81,19 +84,20 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
         credentials_id: credentialId,
       });
       if (response.success) {
-        alert('Identifiants valides !');
+        showToast('Identifiants valides !', 'success');
         await loadCredentials();
       } else {
-        alert(`Erreur de vérification: ${  response.error}`);
+        showToast(`Erreur de vérification: ${response.error}`, 'error');
       }
     } catch (error) {
       logger.error('CredentialsManager', 'Erreur lors de la vérification:', error);
-      alert('Erreur lors de la vérification');
+      showToast('Erreur lors de la vérification', 'error');
     } finally {
       setVerifying(null);
     }
   };
   const handleDeleteCredentials = async (credentialId: string) => {
+    // eslint-disable-next-line no-alert
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ces identifiants ?')) {
       return;
     }
@@ -105,10 +109,11 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
       if (!error) {
         await loadCredentials();
       } else {
-        alert('Erreur lors de la suppression');
+        showToast('Erreur lors de la suppression', 'error');
       }
     } catch (error) {
       logger.error('CredentialsManager', 'Erreur lors de la suppression:', error);
+      showToast('Erreur lors de la suppression', 'error');
     }
   };
   const getAuthorityName = (authorityId: string) => {
@@ -259,4 +264,4 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
       )}
     </div>
   );
-}
+}

@@ -11,6 +11,7 @@
  */
 import { subscriptionService } from './subscriptionService';
 import { logger } from '@/lib/logger';
+import { trialService } from './trialService';
 /**
  * Service pour gérer l'expiration des périodes d'essai
  */
@@ -80,20 +81,25 @@ class TrialExpirationService {
     try {
       const status = await subscriptionService.getUserSubscriptionStatus(userId);
       if (!status) {
-        // Pas d'abonnement trouvé, créer un essai
-        const trialResult = await subscriptionService.createTrialSubscription(userId);
-        if (trialResult.success) {
-          return {
-            isExpired: false,
-            canAccess: true,
-            planId: 'trial',
-            daysRemaining: 30
-          };
+        // Aucun statut retourné peut signifier "pas d'abonnement" OU "erreur côté backend".
+        // On ne crée jamais un essai sans vérifier l'éligibilité, et on évite de bloquer l'accès en cas d'incertitude.
+        const canCreate = await trialService.canCreateTrial(userId);
+        if (canCreate) {
+          const trialResult = await subscriptionService.createTrialSubscription(userId);
+          if (trialResult.success) {
+            return {
+              isExpired: false,
+              canAccess: true,
+              planId: 'trial',
+              daysRemaining: 30
+            };
+          }
         }
-        // Échec de création d'essai, accès refusé
+
+        // En cas d'échec/indisponibilité, on échoue "open" (pas de blocage), l'app redirigera vers /pricing si nécessaire.
         return {
-          isExpired: true,
-          canAccess: false,
+          isExpired: false,
+          canAccess: true,
           planId: null,
           daysRemaining: 0
         };

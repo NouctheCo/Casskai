@@ -118,7 +118,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [localJournals, setLocalJournals] = useState<MinimalJournal[]>([]);
   const [localAccounts, setLocalAccounts] = useState<MinimalAccount[]>([]);
-  const [createdEntryId, setCreatedEntryId] = useState<string | null>(null);
+  const [createdEntryId] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const isSupabaseConfigured = useMemo(() => {
     const url = import.meta.env.VITE_SUPABASE_URL;

@@ -588,8 +588,8 @@ export class FrenchTaxComplianceService {
       companyId,
       data: {
         immobilisations_incorporelles: immobilisationsIncorporelles,
-        terrains: terrains,
-        constructions: constructions,
+        terrains,
+        constructions,
         installations_techniques: installationsTechniques,
         materiel_outillage: materielOutillage,
         autres_immobilisations: autresImmobilisations,
@@ -636,10 +636,10 @@ export class FrenchTaxComplianceService {
       status: 'draft',
       companyId,
       data: {
-        stocks: stocks,
+        stocks,
         creances_clients: creancesClients,
         autres_creances: autresCreances,
-        tresorerie: tresorerie,
+        tresorerie,
         total_actif_circulant: totalActifCirculant
       },
       validationErrors: [],
@@ -685,9 +685,9 @@ export class FrenchTaxComplianceService {
       status: 'draft',
       companyId,
       data: {
-        capital: capital,
-        reserves: reserves,
-        resultat: resultat,
+        capital,
+        reserves,
+        resultat,
         capitaux_propres: capitauxPropres,
         dettes_financieres: dettesFinancieres,
         dettes_fournisseurs: dettesFournisseurs,
@@ -742,7 +742,7 @@ export class FrenchTaxComplianceService {
       status: 'draft',
       companyId,
       data: {
-        achats: achats,
+        achats,
         charges_externes: chargesExternes,
         impots_taxes: impotsTaxes,
         charges_personnel: chargesPersonnel,
@@ -809,7 +809,7 @@ export class FrenchTaxComplianceService {
         subventions_exploitation: subventionsExploitation,
         autres_produits: autresProduits,
         total_produits: totalProduits,
-        resultat: resultat
+        resultat
       },
       validationErrors: [],
       warnings,
@@ -994,8 +994,8 @@ export class FrenchTaxComplianceService {
       companyId,
       data: {
         resultat_comptable: resultatComptable,
-        reintegrations: reintegrations,
-        deductions: deductions,
+        reintegrations,
+        deductions,
         resultat_fiscal: resultatFiscal
       },
       validationErrors: [],

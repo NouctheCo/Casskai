@@ -221,14 +221,16 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
         // Ajouter les factures récentes
         if (recentInvoices) {
           for (const invoice of recentInvoices) {
-            const customerName = invoice.customer?.name || 'Client inconnu';
+            const customer = Array.isArray(invoice.customer) ? invoice.customer[0] : invoice.customer;
+            const customerName = customer?.name || 'Client inconnu';
             const amount = invoice.total_incl_tax || 0;
+            const formattedAmount = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
             const timeAgo = getTimeAgo(invoice.created_at);
 
             activityItems.push({
               icon: FileText,
               color: invoice.status === 'paid' ? 'green' : 'blue',
-              description: `Facture ${invoice.invoice_number} - ${customerName} ($<CurrencyAmount amount={amount} />)`,
+              description: `Facture ${invoice.invoice_number} - ${customerName} (${formattedAmount})`,
               time: timeAgo
             });
           }
@@ -238,12 +240,13 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
         if (recentQuotes) {
           for (const quote of recentQuotes) {
             const amount = quote.total_incl_tax || 0;
+            const formattedAmount = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
             const timeAgo = getTimeAgo(quote.created_at);
 
             activityItems.push({
               icon: Receipt,
               color: 'purple',
-              description: `Devis ${quote.quote_number} ($<CurrencyAmount amount={amount} />)`,
+              description: `Devis ${quote.quote_number} (${formattedAmount})`,
               time: timeAgo
             });
           }
@@ -434,7 +437,7 @@ export default function InvoicingPageOptimized() {
     // Check if subscription is expired
     if (isExpired) {
       toast.error('Abonnement expiré. Veuillez choisir un plan pour continuer.');
-      navigate('/settings/billing');
+      navigate('/billing');
       return;
     }
     if (!canAccessFeature('unlimited_invoices')) {
@@ -456,7 +459,7 @@ export default function InvoicingPageOptimized() {
     // Check if subscription is expired
     if (isExpired) {
       toast.error('Abonnement expiré. Veuillez choisir un plan pour continuer.');
-      navigate('/settings/billing');
+      navigate('/billing');
       return;
     }
     setShouldCreateNew('quote');
@@ -466,7 +469,7 @@ export default function InvoicingPageOptimized() {
     // Check if subscription is expired
     if (isExpired) {
       toast.error('Abonnement expiré. Veuillez choisir un plan pour continuer.');
-      navigate('/settings/billing');
+      navigate('/billing');
       return;
     }
     setShouldCreateNew('payment');

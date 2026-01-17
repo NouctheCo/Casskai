@@ -3,9 +3,7 @@
  * Interactive charts for financial trends and time-series analysis
  */
 
-import React, { useState, useEffect } from 'react';
-import { AnalyticsService } from '@/services/analytics/analyticsService';
-import { VisualizationService } from '@/services/visualization/visualizationService';
+import React, { useState } from 'react';
 
 interface TrendData {
   period: string;

@@ -15,13 +15,11 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { invoicingService } from '@/services/invoicingService';
-import { thirdPartiesService } from '@/services/thirdPartiesService';
 import CompanySettingsService from '@/services/companySettingsService';
 import { useAutoAccounting } from '@/hooks/useAutoAccounting';
 import { useInvoiceEmail } from '@/hooks/useInvoiceEmail';
 import { InvoicePdfService } from '@/services/invoicePdfService';
-import { articlesService } from '@/services/articlesService';
-import type { ArticleWithRelations } from '@/services/articlesService';
+import { articlesService, type ArticleWithRelations } from '@/services/articlesService';
 import NewArticleModal from '@/components/inventory/NewArticleModal';
 import ClientSelector from '@/components/invoicing/ClientSelector';
 import type { InvoiceWithDetails } from '@/types/database/invoices.types';
@@ -41,7 +39,6 @@ import {
   Loader2,
   RefreshCw,
   Copy,
-  Receipt,
   MoreHorizontal,
   Mail,
   FileX
@@ -76,8 +73,8 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
   const [invoices, setInvoices] = useState<InvoiceWithDetails[]>([]);
   const [clients, setClients] = useState<ThirdParty[]>([]);
   const [articles, setArticles] = useState<ArticleWithRelations[]>([]);
-  const [suppliers, setSuppliers] = useState<Array<{id: string; name: string}>>([]);
-  const [warehouses, setWarehouses] = useState<Array<{id: string; name: string}>>([]);
+  const [, setSuppliers] = useState<Array<{id: string; name: string}>>([]);
+  const [, setWarehouses] = useState<Array<{id: string; name: string}>>([]);
   const [companySettings, setCompanySettings] = useState<CompanySettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -677,7 +674,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
                           <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                           <span>
                             {invoice.invoice_date
-                              ? new Date(invoice.invoice_date).toLocaleDateString('fr-FR')
+                              ? new Date(String(invoice.invoice_date)).toLocaleDateString('fr-FR')
                               : '-'
                             }
                           </span>
@@ -811,8 +808,6 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
           setShowArticleModal(false);
         }}
         onSuccess={handleArticleCreated}
-        suppliers={suppliers}
-        warehouses={warehouses}
       />
     </div>
   );
@@ -984,7 +979,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
     }
     setLoading(true);
     try {
-      const _totals = calculateTotals();
+      const computedTotals = calculateTotals();
       const invoiceData = {
         customer_id: formData.clientId,
         invoice_number: formData.invoiceNumber,
@@ -1019,14 +1014,14 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
             await generateFromInvoice({
               id: createdInvoice.id as string,
               company_id: currentCompany.id,
-              customer_id: formData.clientId,
-              customer_name: client?.name || client?.company_name || 'Client',
+              third_party_id: formData.clientId,
+              third_party_name: client?.name || 'Client',
               invoice_number: formData.invoiceNumber,
               type: 'sale',
               invoice_date: formData.issueDate,
-              subtotal_excl_tax: totals.totalHT,
-              total_tax_amount: totals.totalTVA,
-              total_incl_tax: totals.totalTTC,
+              subtotal_excl_tax: computedTotals.totalHT,
+              total_tax_amount: computedTotals.totalTVA,
+              total_incl_tax: computedTotals.totalTTC,
               lines: formData.items.map(item => ({
                 account_id: undefined, // Sera mappé automatiquement selon le type
                 description: item.description,

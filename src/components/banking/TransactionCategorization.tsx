@@ -45,7 +45,7 @@ interface TransactionCategorizationProps {
 }
 export const TransactionCategorization: React.FC<TransactionCategorizationProps> = ({
   bankAccountId,
-  bankAccountNumber,
+  bankAccountNumber: _bankAccountNumber,
   onRefresh,
 }) => {
   const { currentCompany } = useAuth();
@@ -60,7 +60,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
   const [selectedTransactions, setSelectedTransactions] = useState<Set<string>>(new Set());
   const [bulkAccount, setBulkAccount] = useState<string>('');
   const [showRuleModal, setShowRuleModal] = useState(false);
-  const [bankingAccount, setBankingAccount] = useState<Account | null>(null);
+  const [, setBankingAccount] = useState<Account | null>(null);
   const [bankingAccountOptions, setBankingAccountOptions] = useState<Account[]>([]);
   const [selectedBankingAccount, setSelectedBankingAccount] = useState<string>('');
   useEffect(() => {
@@ -171,7 +171,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
     if (!account) return;
     try {
       // 1. Récupérer ou créer le journal de banque
-      let { data: bankJournals } = await supabase
+      const { data: bankJournals } = await supabase
         .from('journals')
         .select('id')
         .eq('company_id', currentCompany.id)
@@ -306,18 +306,6 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       logger.error('TransactionCategorization', '❌ Erreur catégorisation:', error);
       toast.error(error?.message || t('errors.categorization', 'Erreur lors de la catégorisation'));
     }
-  };
-  const getAccountIdByNumber = async (accountNumber: string): Promise<string | null> => {
-    const account = accounts.find((a) => a.account_number === accountNumber);
-    if (account) return account.id;
-    // Chercher en base si pas trouvé localement
-    const { data } = await supabase
-      .from('chart_of_accounts')
-      .select('id')
-      .eq('company_id', currentCompany?.id)
-      .eq('account_number', accountNumber)
-      .limit(1);
-    return (data && data.length > 0) ? data[0].id : null;
   };
   // Catégorisation en masse
   const bulkCategorize = async () => {

@@ -3,18 +3,12 @@
  * Integration of regulatory documents in the main reports page
  */
 
-import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
   FileText,
   CheckCircle,
-  AlertCircle,
   TrendingUp,
-  Clock,
-  MapPin,
   Globe,
-  Download,
 } from 'lucide-react';
 
 interface RegulatoryModule {
@@ -31,8 +25,6 @@ interface RegulatoryModule {
 }
 
 export function RegulatoryDocumentsOverview() {
-  const { t } = useTranslation();
-
   const modules: RegulatoryModule[] = [
     {
       id: 'documents',

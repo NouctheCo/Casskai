@@ -4,7 +4,8 @@
  */
 
 import React, { useState } from 'react';
-import { ReportGenerationService, ReportConfig, ReportTemplate } from '@/services/reporting/reportGenerationService';
+import { ReportGenerationService, ReportConfig } from '@/services/reporting/reportGenerationService';
+import { useToast } from '@/hooks/useToast';
 
 interface ReportBuilderState {
   selectedTemplate: string;
@@ -51,6 +52,7 @@ const AVAILABLE_COUNTRIES = [
 ];
 
 export const ReportBuilder: React.FC = () => {
+  const { showToast } = useToast();
   const [state, setState] = useState<ReportBuilderState>({
     selectedTemplate: 'template_financial_overview',
     reportTitle: 'Financial Overview Report',
@@ -135,14 +137,14 @@ export const ReportBuilder: React.FC = () => {
           break;
         case 'excel':
           // Note: In production, use xlsx library for proper Excel export
-          alert('Excel export requires additional library (xlsx). Using JSON for now.');
+          showToast('Export Excel requiert la librairie xlsx. Export JSON appliqué.', 'warning');
           exportResult = ReportGenerationService.exportToJSON(report);
           downloadFile(exportResult, `${state.reportTitle}.json`, 'application/json');
           break;
       }
 
       setState(prev => ({ ...prev, isGenerating: false }));
-    } catch (error) {
+    } catch (_error) {
       setState(prev => ({
         ...prev,
         isGenerating: false,

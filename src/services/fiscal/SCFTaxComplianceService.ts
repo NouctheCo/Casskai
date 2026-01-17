@@ -146,33 +146,30 @@ export class SCFTaxComplianceService extends BaseFiscalService {
       startDate,
       endDate
     );
-
-    // ACTIF - Structure SCF/PCM
-
     // ACTIF NON COURANT - Structure SCF détaillée
     const ecartAcquisition = this.getClassBalance('207', balances);
     const immobilisationsIncorporelles = this.sumAccountRange('201', '208', balances);
 
     const terrains = this.getClassBalance('211', balances);
     const batiments = this.getClassBalance('213', balances);
-    const autresImmobCorporelles = this.sumAccountPrefix(balances, '215') + this.sumAccountPrefix(balances, '218');
+    const autresImmobCorporelles = this.sumAccountPrefix('215', balances) + this.sumAccountPrefix('218', balances);
     const immobilisationsEnConcession = this.getClassBalance('22', balances);
     const immobilisationsEnCours = this.getClassBalance('23', balances);
     const immobilisationsCorporelles = terrains + batiments + autresImmobCorporelles +
       immobilisationsEnConcession + immobilisationsEnCours;
 
-    const titresMisEquivalence = this.sumAccountPrefix(balances, '261');
-    const autresParticipations = this.sumAccountPrefix(balances, '262') + this.sumAccountPrefix(balances, '265');
-    const autresTitresImmobilises = this.sumAccountPrefix(balances, '271') + this.sumAccountPrefix(balances, '272');
-    const pretsActifsFinanciers = this.sumAccountPrefix(balances, '274') + this.sumAccountPrefix(balances, '275');
+    const titresMisEquivalence = this.sumAccountPrefix('261', balances);
+    const autresParticipations = this.sumAccountPrefix('262', balances) + this.sumAccountPrefix('265', balances);
+    const autresTitresImmobilises = this.sumAccountPrefix('271', balances) + this.sumAccountPrefix('272', balances);
+    const pretsActifsFinanciers = this.sumAccountPrefix('274', balances) + this.sumAccountPrefix('275', balances);
     const immobilisationsFinancieres = titresMisEquivalence + autresParticipations +
       autresTitresImmobilises + pretsActifsFinanciers;
 
     const impotsDifferes = this.getClassBalance('133', balances);
 
     // Déduire amortissements et dépréciations
-    const amortissements = this.sumAccountPrefix(balances, '28', false);
-    const depreciationsImmo = this.sumAccountPrefix(balances, '29', false);
+    const amortissements = this.sumAccountPrefix('28', balances, false);
+    const depreciationsImmo = this.sumAccountPrefix('29', balances, false);
 
     const totalActifNonCourant = ecartAcquisition + immobilisationsIncorporelles +
       immobilisationsCorporelles + immobilisationsFinancieres + impotsDifferes -
@@ -222,7 +219,7 @@ export class SCFTaxComplianceService extends BaseFiscalService {
     // PASSIF NON COURANT
     const empruntsEtDettesFinancieres = this.getClassBalance('16', balances) + this.getClassBalance('17', balances);
     const impotsDifferesPassif = this.getClassBalance('13', balances, false);
-    const autresDetteNonCourantes = this.getClassBalance('18', balances);
+    const autresDetteNonCourantes = this.getClassBalance('18', balances, false);
     const provisions = this.getClassBalance('15', balances);
 
     const totalPassifNonCourant =
@@ -555,7 +552,7 @@ export class SCFTaxComplianceService extends BaseFiscalService {
   ): Promise<FiscalDeclaration> {
     const [year, month] = period.split('-');
     const startDate = new Date(`${year}-${month}-01`);
-    const endDate = new Date(year, parseInt(month), 0);
+    const endDate = new Date(parseInt(year), parseInt(month), 0);
 
     // Récupérer les comptes de TVA (classe 44)
     const vatAccounts: string[] = [];
@@ -588,7 +585,7 @@ export class SCFTaxComplianceService extends BaseFiscalService {
 
     // Deadline varies by country (20-25 of next month)
     const dueDay = country === 'TN' ? 25 : country === 'MA' ? 20 : 20;
-    const dueDate = new Date(year, parseInt(month), dueDay);
+    const dueDate = new Date(parseInt(year), parseInt(month), dueDay);
 
     const tvaData = {
       periode: period,
@@ -703,7 +700,7 @@ export class SCFTaxComplianceService extends BaseFiscalService {
     const balances = await this.getAccountBalances(companyId, [], startDate, endDate);
 
     // Chiffre d'affaires
-    const caTotal = this.sumAccountPrefix(balances, '70', false);
+    const caTotal = this.sumAccountPrefix('70', balances, false);
     const caTauxNormal = caTotal * 0.85; // Estimation 85% taux normal
     const caTauxReduit = caTotal * 0.10;
     const caExonere = caTotal * 0.05;
@@ -714,9 +711,9 @@ export class SCFTaxComplianceService extends BaseFiscalService {
     const totalTvaCollectee = tvaCollectee19 + tvaCollectee9;
 
     // TVA déductible
-    const tvaDeductibleBiens = this.sumAccountPrefix(balances, '4456');
-    const tvaDeductibleServices = this.sumAccountPrefix(balances, '4457');
-    const tvaDeductibleImmobilisations = this.sumAccountPrefix(balances, '4458');
+    const tvaDeductibleBiens = this.sumAccountPrefix('4456', balances);
+    const tvaDeductibleServices = this.sumAccountPrefix('4457', balances);
+    const tvaDeductibleImmobilisations = this.sumAccountPrefix('4458', balances);
     const totalTvaDeductible = tvaDeductibleBiens + tvaDeductibleServices + tvaDeductibleImmobilisations;
 
     // TVA nette
@@ -977,7 +974,7 @@ export class SCFTaxComplianceService extends BaseFiscalService {
     const balances = await this.getAccountBalances(companyId, [], startDate, endDate);
 
     // Chiffre d'affaires
-    const caTotal = this.sumAccountPrefix(balances, '70', false);
+    const caTotal = this.sumAccountPrefix('70', balances, false);
     const caTaux19 = caTotal * 0.75;
     const caTaux13 = caTotal * 0.15;
     const caTaux7 = caTotal * 0.05;
@@ -990,7 +987,7 @@ export class SCFTaxComplianceService extends BaseFiscalService {
     const totalTvaCollectee = tva19 + tva13 + tva7;
 
     // TVA déductible
-    const tvaDeductible = this.sumAccountPrefix(balances, '4366');
+    const tvaDeductible = this.sumAccountPrefix('4366', balances);
 
     // TVA nette
     const tvaNette = totalTvaCollectee - tvaDeductible;

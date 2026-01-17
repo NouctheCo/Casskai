@@ -148,7 +148,7 @@ async function detectSuspiciousAmounts(
         detected_at: new Date().toISOString(),
         journal_entry_id: entry.journal_entry_id,
         account_number: entry.account_number,
-        amount: amount,
+        amount,
         details: {
           entry_date: (entry.journal_entries as any).entry_date,
           entry_number: (entry.journal_entries as any).entry_number,
@@ -168,7 +168,7 @@ async function detectSuspiciousAmounts(
         detected_at: new Date().toISOString(),
         journal_entry_id: entry.journal_entry_id,
         account_number: entry.account_number,
-        amount: amount,
+        amount,
         details: {
           entry_date: (entry.journal_entries as any).entry_date,
         },
@@ -258,7 +258,7 @@ async function detectInactiveAccountMovements(
         detected_at: new Date().toISOString(),
         journal_entry_id: movement.journal_entry_id,
         account_number: movement.account_number,
-        amount: amount,
+        amount,
         details: {
           inactive_since_days: config.inactive_days_threshold,
           entry_date: (movement.journal_entries as any).entry_date,
@@ -329,7 +329,7 @@ async function detectOverdueLettrage(
       detected_at: new Date().toISOString(),
       journal_entry_id: line.journal_entry_id,
       account_number: line.account_number,
-      amount: amount,
+      amount,
       details: {
         days_overdue: daysOverdue,
         entry_date: (line.journal_entries as any).entry_date,

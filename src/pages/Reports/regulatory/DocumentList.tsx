@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Edit, Download, Eye, Trash2, MoreVertical, Calendar } from 'lucide-react';
+import { FileText, Edit, Download, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { RegulatoryDocument } from '@/types/regulatory';
 
@@ -17,7 +17,7 @@ interface DocumentListProps {
   onRefresh: () => void;
 }
 
-export function DocumentList({ documents, loading, onEdit, onRefresh }: DocumentListProps) {
+export function DocumentList({ documents, loading, onEdit, onRefresh: _onRefresh }: DocumentListProps) {
   const { t } = useTranslation();
 
   if (loading) {

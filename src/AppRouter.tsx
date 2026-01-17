@@ -422,6 +422,13 @@ const AppRouter: React.FC = () => {
                 </Suspense>
               </ProtectedRoute>
             } />
+            <Route path="pricing" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyPricingPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
             <Route path="automation" element={
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>

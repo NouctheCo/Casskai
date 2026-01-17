@@ -311,6 +311,42 @@ export const taxService = {
       };
     }
   },
+
+  /**
+   * Backward-compatible alias (older UI)
+   */
+  async updateDeclaration(id: string, updates: Partial<TaxDeclaration>): Promise<{ success: boolean; error: Error | null }> {
+    return this.updateTaxDeclaration(id, updates);
+  },
+
+  /**
+   * Delete a tax declaration
+   */
+  async deleteTaxDeclaration(id: string): Promise<{ success: boolean; error: Error | null }> {
+    try {
+      const { error } = await supabase
+        .from('company_tax_declarations')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return { success: true, error: null };
+    } catch (error) {
+      logger.error('Tax', 'Error deleting tax declaration:', error);
+      const errorInfo = handleSupabaseError(error, 'Deleting tax declaration');
+      return {
+        success: false,
+        error: new Error(errorInfo.message)
+      };
+    }
+  },
+
+  /**
+   * Backward-compatible alias (older UI)
+   */
+  async deleteDeclaration(id: string): Promise<{ success: boolean; error: Error | null }> {
+    return this.deleteTaxDeclaration(id);
+  },
   /**
    * Mark a tax declaration as submitted
    */

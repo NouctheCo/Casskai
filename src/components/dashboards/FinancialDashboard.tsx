@@ -4,8 +4,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { AnalyticsService } from '@/services/analytics/analyticsService';
-import { VisualizationService } from '@/services/visualization/visualizationService';
 
 interface FinancialMetric {
   label: string;
@@ -89,7 +87,7 @@ export const FinancialDashboard: React.FC = () => {
         metrics,
         loading: false,
       }));
-    } catch (error) {
+    } catch (_error) {
       setDashboardState(prev => ({
         ...prev,
         error: 'Failed to load dashboard data',

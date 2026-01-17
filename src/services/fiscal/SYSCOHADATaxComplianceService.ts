@@ -761,7 +761,7 @@ export class SYSCOHADATaxComplianceService extends BaseFiscalService {
   ): Promise<FiscalDeclaration> {
     const [year, month] = period.split('-');
     const startDate = new Date(`${year}-${month}-01`);
-    const endDate = new Date(year, parseInt(month), 0); // Dernier jour du mois
+    const endDate = new Date(parseInt(year), parseInt(month), 0); // Dernier jour du mois
 
     // Récupérer les comptes de TVA (classe 44)
     const vatAccounts: string[] = [];
@@ -792,7 +792,7 @@ export class SYSCOHADATaxComplianceService extends BaseFiscalService {
     const tvaAPayer = tvaNette > 0 ? tvaNette : 0;
     const creditTVA = tvaNette < 0 ? Math.abs(tvaNette) : 0;
 
-    const dueDate = new Date(year, parseInt(month), 20); // 20 du mois suivant
+    const dueDate = new Date(parseInt(year), parseInt(month), 20); // 20 du mois suivant
 
     const tvaData = {
       periode: period,

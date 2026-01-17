@@ -52,6 +52,8 @@ export function EmailConfigurationSettings() {
     if (currentCompany?.id) {
       loadConfigurations();
       checkActiveProvider();
+      checkGmailConnection();
+      checkOutlookConnection();
 
       // Check URL params for OAuth callback
       const params = new URLSearchParams(window.location.search);
@@ -241,7 +243,7 @@ export function EmailConfigurationSettings() {
         },
         body: JSON.stringify({
           companyId: currentCompany!.id,
-          redirectUrl: window.location.origin + '/settings'
+          redirectUrl: `${window.location.origin  }/settings`
         })
       });
 
@@ -329,7 +331,7 @@ export function EmailConfigurationSettings() {
         },
         body: JSON.stringify({
           companyId: currentCompany!.id,
-          redirectUrl: window.location.origin + '/settings'
+          redirectUrl: `${window.location.origin  }/settings`
         })
       });
 
@@ -1262,4 +1264,4 @@ function MailgunConfigForm({ formData, setFormData }: any) {
       </div>
     </div>
   );
-}
+}

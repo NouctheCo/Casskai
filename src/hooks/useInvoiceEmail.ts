@@ -13,12 +13,11 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabase';
-import { invoicingService } from '@/services/invoicingService';
+import { invoicingService, type InvoiceWithDetails } from '@/services/invoicingService';
 import { InvoicePdfService } from '@/services/invoicePdfService';
 import CompanySettingsService from '@/services/companySettingsService';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
-import type { InvoiceWithDetails } from '@/types/database/invoices.types';
 import type { CompanySettings } from '@/types/company-settings.types';
 
 interface EmailAttachment {
@@ -116,14 +115,13 @@ export function useInvoiceEmail() {
     const bic = companySettings?.accounting?.mainBank?.bic || '';
     const bankName = companySettings?.accounting?.mainBank?.name || '';
 
-    const clientName = invoice.client?.name || 'Cher client';
+    const clientName = invoice.third_party?.name || 'Cher client';
     const invoiceNumber = invoice.invoice_number;
     const issueDate = new Date(invoice.invoice_date as string).toLocaleDateString('fr-FR');
     const dueDate = invoice.due_date
       ? new Date(invoice.due_date as string).toLocaleDateString('fr-FR')
       : 'Non spécifiée';
-    // ✅ Fix: Utiliser total_incl_tax en priorité, puis total_ttc, sinon 0
-    const totalTtc = Number(invoice.total_incl_tax || invoice.total_ttc || invoice.total_amount || 0);
+    const totalTtc = Number(invoice.total_incl_tax ?? 0);
     const currency = invoice.currency || 'EUR';
 
     const formatCurrency = (amount: number) => {
@@ -265,14 +263,13 @@ export function useInvoiceEmail() {
     companySettings: CompanySettings | null
   ): string => {
     const companyName = companySettings?.generalInfo?.name || 'Votre Entreprise';
-    const clientName = invoice.client?.name || 'Cher client';
+    const clientName = invoice.third_party?.name || 'Cher client';
     const invoiceNumber = invoice.invoice_number;
     const issueDate = new Date(invoice.invoice_date as string).toLocaleDateString('fr-FR');
     const dueDate = invoice.due_date
       ? new Date(invoice.due_date as string).toLocaleDateString('fr-FR')
       : 'Non spécifiée';
-    // ✅ Fix: Utiliser total_incl_tax en priorité, puis total_ttc, sinon 0
-    const totalTtc = Number(invoice.total_incl_tax || invoice.total_ttc || invoice.total_amount || 0);
+    const totalTtc = Number(invoice.total_incl_tax ?? 0);
     const currency = invoice.currency || 'EUR';
 
     const formatCurrency = (amount: number) => {
@@ -330,7 +327,7 @@ ${companyName}
       }
 
       // 2. Vérifier que l'email du client existe
-      const clientEmail = invoice.client?.email;
+      const clientEmail = invoice.third_party?.email;
       if (!clientEmail) {
         toast({
           title: 'Erreur',
