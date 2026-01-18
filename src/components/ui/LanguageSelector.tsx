@@ -26,9 +26,14 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const { locale: currentLanguage, setLocale } = useLocale();
   const handleLanguageChange = async (languageCode: string) => {
     try {
-      // Mettre à jour à la fois i18n et le LocaleContext
+      // Mettre à jour le LocaleContext qui gérera le changement i18n
       setLocale(languageCode);
+      // Changer aussi directement i18n pour une mise à jour immédiate
       await changeLanguageAndDetectCountry(languageCode);
+      // Forcer le rechargement pour s'assurer que tout est synchronisé
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } catch (error) {
       logger.error('LanguageSelector', 'Failed to change language:', error instanceof Error ? error.message : String(error));
     }
@@ -127,6 +132,10 @@ export const useCurrentLocale = () => {
     try {
       setLocale(languageCode);
       await changeLanguageAndDetectCountry(languageCode);
+      // Forcer le rechargement pour synchronisation complète
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } catch (error) {
       logger.error('LanguageSelector', 'Failed to change language:', error instanceof Error ? error.message : String(error));
     }
@@ -166,9 +175,14 @@ export const RegionalLanguageSelector: React.FC<LanguageSelectorProps> = ({
   const { locale: currentLanguage, setLocale } = useLocale();
   const handleLanguageChange = async (languageCode: string) => {
     try {
-      // Mettre à jour à la fois i18n et le LocaleContext
+      // Mettre à jour le LocaleContext qui gérera le changement i18n
       setLocale(languageCode);
+      // Changer aussi directement i18n pour une mise à jour immédiate
       await changeLanguageAndDetectCountry(languageCode);
+      // Forcer le rechargement pour s'assurer que tout est synchronisé
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } catch (error) {
       logger.error('LanguageSelector', 'Failed to change language:', error instanceof Error ? error.message : String(error));
     }

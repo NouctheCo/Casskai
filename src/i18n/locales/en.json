@@ -1,20 +1,20 @@
 {
   "accountClasses": {
-    "1": "Classe 1 - Comptes de capitaux",
-    "2": "Classe 2 - Comptes d'immobilisations",
-    "3": "Classe 3 - Comptes de stocks",
-    "4": "Classe 4 - Comptes de tiers",
-    "5": "Classe 5 - Comptes financiers",
-    "6": "Classe 6 - Comptes de charges",
-    "7": "Classe 7 - Comptes de produits",
-    "8": "Classe 8 - Comptes spÃ©ciaux",
-    "9": "Classe 9 - Accounting analytique"
+    "1": "Class 1 - Capital accounts",
+    "2": "Class 2 - Fixed asset accounts",
+    "3": "Class 3 - Inventory accounts",
+    "4": "Class 4 - Third-party accounts",
+    "5": "Class 5 - Financial accounts",
+    "6": "Class 6 - Expense accounts",
+    "7": "Class 7 - Revenue accounts",
+    "8": "Class 8 - Special accounts",
+    "9": "Class 9 - Analytical accounting"
   },
   "accountCreatedSuccess": "Account created successfully",
-  "accountDescriptionPlaceholder": "Description du compte",
-  "accountName": "Name du compte",
-  "accountNumber": "NumÃ©ro de compte",
-  "accountNumberUniqueError": "Ce numÃ©ro de compte existe dÃ©jÃ ",
+  "accountDescriptionPlaceholder": "Account description",
+  "accountName": "Account name",
+  "accountNumber": "Account number",
+  "accountNumberUniqueError": "This account number already exists",
   "accountTypes": {
     "ASSET": "Asset",
     "COST_OF_GOODS_SOLD": "Cost of Goods Sold",
@@ -28,7 +28,7 @@
     "liability": "Liability",
     "revenue": "Revenue"
   },
-  "accountUpdatedSuccess": "Compte mis Ã  jour avec succÃ¨s",
+  "accountUpdatedSuccess": "Account updated successfully",
   "Accounting": {
     "JournalTypes": {
       "Purchases": "Purchases",
@@ -41,16 +41,16 @@
   },
   "accounting": {
     "chartDetection": {
-      "alternativeNote": "Peut Ãªtre utilisÃ© pour les multinationales ou cas spÃ©cifiques",
-      "alternatives": "Plans alternatifs",
+      "alternativeNote": "May be used for multinationals or specific cases",
+      "alternatives": "Alternative charts",
       "confidence": {
-        "high": "RecommandÃ©",
-        "low": "Par dÃ©faut",
-        "medium": "SuggÃ©rÃ©"
+        "high": "Recommended",
+        "low": "Default",
+        "medium": "Suggested"
       },
-      "mandatory": "Obligatoire",
-      "title": "Plan comptable dÃ©tectÃ©",
-      "useRecommended": "Utiliser ce plan"
+      "mandatory": "Mandatory",
+      "title": "Detected chart of accounts",
+      "useRecommended": "Use this chart"
     },
     "journalTypes": {
       "bank": "Bank",
@@ -63,7 +63,7 @@
       "sale": "Sales"
     },
     "pcg": {
-      "fullName": "Plan Comptable GÃ©nÃ©ral"
+      "fullName": "General Chart of Accounts"
     },
     "setup": {
       "annual": "Annual",
@@ -104,11 +104,11 @@
     },
     "syscohada": {
       "alert": {
-        "description": "Le SYSCOHADA rÃ©visÃ© 2017 est le plan comptable lÃ©gal dans les 17 pays membres de l'Organisation pour l'Harmonisation en Afrique du Droit des Affaires (OHADA).",
-        "title": "Country membre de l'OHADA"
+        "description": "The revised SYSCOHADA 2017 is the legal chart of accounts in the 17 member countries of the Organization for the Harmonization of Business Law in Africa (OHADA).",
+        "title": "OHADA member country"
       },
-      "fullName": "SystÃ¨me Comptable OHADA",
-      "memberCountries": "View tous les pays membres de l'OHADA"
+      "fullName": "OHADA Accounting System",
+      "memberCountries": "View all OHADA member countries"
     },
     "title": "Accounting & Finance",
     "subtitle": "Manage your accounting entries and financial analyses",
@@ -186,7 +186,8 @@
       "chartOfAccounts": "Chart of Accounts",
       "importFEC": "Import FEC",
       "reports": "Reports",
-      "anomalies": "Anomalies"
+      "anomalies": "Anomalies",
+      "closure": "Closing"
     },
     "recentActivity": {
       "title": "Recent activity",
@@ -333,19 +334,19 @@
       "totalVariance": "Total variance"
     }
   },
-  "accountingEntries": "Ã‰critures comptables",
-  "accountingEntriesList": "Liste des entries",
+  "accountingEntries": "Accounting entries",
+  "accountingEntriesList": "List of entries",
   "accountingPage": {
-    "balanceError": "Le dÃ©bit et le crÃ©dit doivent Ãªtre Ã©quilibrÃ©s.",
-    "description": "GÃ©rez your entries, plan comptable et journaux.",
+    "balanceError": "Debit and credit must be balanced.",
+    "description": "Manage your entries, chart of accounts, and journals.",
     "noCompanySelected": {
-      "message": "Veuillez sÃ©lectionner une entreprise pour gÃ©rer la comptabilitÃ©",
-      "title": "Aucune entreprise sÃ©lectionnÃ©e"
+      "message": "Please select a company to manage accounting",
+      "title": "No company selected"
     },
-    "saveErrorTitle": "Error d'enregistrement",
-    "saveSuccessMessage": "L'Ã©criture comptable a Ã©tÃ© enregistrÃ©e avec succÃ¨s.",
-    "saveSuccessTitle": "Ã‰criture enregistrÃ©e",
-    "title": "Gestion Comptable"
+    "saveErrorTitle": "Save error",
+    "saveSuccessMessage": "The accounting entry was saved successfully.",
+    "saveSuccessTitle": "Entry saved",
+    "title": "Accounting Management"
   },
   "accountingPageTitle": "Accounting",
   "accounting_standards": {
@@ -1186,37 +1187,32 @@
   "currencies_extended": {
     "CAD": {
       "format": "{{amount}} CAD",
-      "name": "Dollar canadien",
-      "symbol": "CAD"
-    },
-    "EUR": {
-      "format": "{{amount}} â‚¬",
-      "name": "Euro",
-      "symbol": "â‚¬"
-    },
-    "USD": {
-      "format": "${{amount}}",
-      "name": "Dollar amÃ©ricain",
-      "symbol": "$"
-    },
-    "XAF": {
-      "format": "{{amount}} FCFA",
-      "name": "Franc CFA BEAC",
-      "symbol": "FCFA"
-    },
-    "XOF": {
-      "format": "{{amount}} CFA",
-      "name": "Franc CFA BCEAO",
-      "symbol": "CFA"
+      "name": "Canadian Dollar"
     }
   },
-  "currency": {
-    "formats": {
-      "annual_revenue": "Revenue annuel ({currency})",
-      "capital_social": "Capital social ({currency})",
-      "estimation_hint": "Estimation ou exercice prÃ©cÃ©dent â€¢ Currency : {currency} ({country})"
-    }
-  },
+  "dark": "Dark",
+    "activeClientsDescription": "Number of clients with recent activity",
+    "cashBalance": "Cash balance",
+    "cashflow": "Cash flow",
+    "cashflowDescription": "Evolution of cash inflows and outflows",
+    "comparedToPreviousPeriod": "Compared to previous period",
+    "dashboardWelcomeMessage": "Welcome, {userName}!",
+    "expensesDescription": "Expenses for the period",
+    "financialSummary": "Financial summary",
+    "financialSummaryDescription": "Overview of your financial situation",
+    "netProfit": "Net profit",
+    "netProfitDescription": "Profit after expenses",
+    "newInvoice": "New invoice",
+    "newOpportunity": "New opportunity",
+    "noUpcomingDeadlines": "No upcoming deadlines",
+    "totalExpenses": "Total expenses",
+    "totalExpensesDescription": "Expenses and charges for the period",
+    "totalRevenue": "Total revenue",
+    "totalRevenueDescription": "Revenue for the current period",
+    "upcomingDeadlines": "Upcoming deadlines",
+    "upcomingDeadlinesDescription": "Upcoming deadlines and obligations",
+    "shortcutsDescription": "Quick access to main features",
+    "shortcutsTitle": "Quick access",
   "currentPlan": "Plan actuel",
   "dark": "Sombre",
   "dashboard": {
@@ -2068,44 +2064,44 @@
     "ajouter_larticle": "Add item",
     "ajoutez_un_nouvel_article_votre_stock": "Add a new item to your inventory",
     "annuler": "Cancel",
-    "articles_en_stock": "Articles en stock",
+    "articles_en_stock": "Items in stock",
     "bureau": "Bureau",
-    "catgorie": "CatÃ©gorie",
+    "catgorie": "Category",
     "description": "Description",
-    "emplacement": "Emplacement",
+    "emplacement": "Location",
     "entrept_alle_3": "Warehouse Aisle 3",
-    "entrept_principal": "EntrepÃ´t principal",
-    "entrept_secondaire": "EntrepÃ´t secondaire",
-    "fournitures": "Fournitures",
+    "entrept_principal": "Main warehouse",
+    "entrept_secondaire": "Secondary warehouse",
+    "fournitures": "Supplies",
     "fournitures_bureau": "Office Supplies",
-    "grez_vos_stocks_de_marchandises_et_suivi_de_production": "GÃ©rez your stocks de marchandises et suivi de production",
-    "heures": "Heures",
+    "grez_vos_stocks_de_marchandises_et_suivi_de_production": "Manage your goods inventory and production tracking",
+    "heures": "Hours",
     "kg": "Kg",
     "litre": "Liter",
     "litres": "Litres",
-    "magasin": "Magasin",
+    "magasin": "Store",
     "marchandises": "Goods",
-    "matires_premires": "MatiÃ¨res first",
+    "matires_premires": "Raw materials",
     "matriel_informatique": "IT Equipment",
     "mtre": "Meter",
-    "mtres": "MÃ¨tres",
-    "nom_de_larticle": "Name de l'article",
-    "nouvel_article": "Nouvel article",
+    "mtres": "Meters",
+    "nom_de_larticle": "Item name",
+    "nouvel_article": "New item",
     "ordinateur_portable_dell": "Dell Laptop",
     "pice": "Piece",
-    "pices": "PiÃ¨ces",
-    "prix_dachat_": "Prix d'achat (â‚¬)",
-    "prix_de_vente_": "Prix de vente (â‚¬)",
+    "pices": "Pieces",
+    "prix_dachat_": "Purchase price (€)",
+    "prix_de_vente_": "Sale price (€)",
     "produits": "Products",
     "mouvements": "Movements",
-    "produits_finis": "Produits finis",
+    "produits_finis": "Finished products",
     "ref001": "REF001",
-    "rfrence": "RÃ©fÃ©rence",
+    "rfrence": "Reference",
     "services": "Services",
-    "stock_initial": "Stock initial",
-    "stock_minimum": "Stock minimum",
-    "unit": "UnitÃ©",
-    "unit_": "UnitÃ©",
+    "stock_initial": "Initial stock",
+    "stock_minimum": "Minimum stock",
+    "unit": "Unit",
+    "unit_": "Unit",
     "articleModal": {
       "title": "New Article",
       "description": "Description",
@@ -2997,23 +2993,23 @@
       "api_access": "AccÃ¨s API",
       "bank_sync": "Synchronisation bancaire",
       "companies": "Entreprises",
-      "custom_reports": "Reports personnalisÃ©s",
+      "custom_reports": "Custom reports",
       "mobile_money": "Mobile Money",
-      "multi_currency": "Multi-devises",
-      "storage": "Stockage",
+      "multi_currency": "Multi-currency",
+      "storage": "Storage",
       "support": "Support",
       "transactions": "Transactions/mois",
-      "users": "Utilisateurs"
+      "users": "Users"
     },
     "plans": {
       "enterprise": {
-        "name": "Entreprise",
+        "name": "Enterprise",
         "price_cad": "129$ CAD/mois",
         "price_eur": "99â‚¬/mois",
         "price_xof": "65K FCFA/mois"
       },
       "professional": {
-        "name": "Professionnel",
+        "name": "Professional",
         "price_cad": "65$ CAD/mois",
         "price_eur": "49â‚¬/mois",
         "price_xof": "32K FCFA/mois"
@@ -3331,12 +3327,12 @@
     "amount": "Amount",
     "date": "Date"
   },
-  "reconcileTransactions": "Rapprocher les transactions",
-  "reference": "RÃ©fÃ©rence",
+  "reconcileTransactions": "Reconcile transactions",
+  "reference": "Reference",
   "regions_detailed": {
     "central_africa": {
       "accounting_standard": "SYSCOHADA",
-      "central_bank": "Banking des Ã‰tats de l'Afrique Centrale",
+      "central_bank": "Central Bank of Central African States",
       "countries": [
         "Cameroun",
         "RÃ©publique centrafricaine",
@@ -3346,12 +3342,12 @@
         "Gabon"
       ],
       "currency": "Franc CFA BEAC (XAF)",
-      "description": "Zone Ã©conomique et monÃ©taire d'Afrique centrale",
-      "name": "Afrique Centrale"
+      "description": "Central African Economic and Monetary Zone",
+      "name": "Central Africa"
     },
     "west_africa": {
       "accounting_standard": "SYSCOHADA",
-      "central_bank": "Banking Centrale des Ã‰tats de l'Afrique de l'Ouest",
+      "central_bank": "Central Bank of West African States",
       "countries": [
         "BÃ©nin",
         "Burkina Faso",
@@ -3363,31 +3359,31 @@
         "GuinÃ©e-Bissau"
       ],
       "currency": "Franc CFA BCEAO (XOF)",
-      "description": "Zone Ã©conomique et monÃ©taire ouest-africaine",
-      "name": "Afrique de l'Ouest"
+      "description": "West African Economic and Monetary Zone",
+      "name": "West Africa"
     }
   },
-  "renewsOn": "Renouvellement le",
+  "renewsOn": "Renews on",
   "reports": {
-    "accountName": "LibellÃ©",
-    "accountNumber": "NÂ° Compte",
-    "assets": "ACTIF",
+    "accountName": "Account name",
+    "accountNumber": "Account number",
+    "assets": "ASSETS",
     "balance": "Solde",
-    "balanceSheet": "Bilan",
-    "balanceSheetDesc": "Situation patrimoniale Ã  une date donnÃ©e",
-    "balanced": "Bilan Ã©quilibrÃ©",
-    "balancesRecalculated": "Soldes des accounts recalculÃ©s avec succÃ¨s",
-    "balancesRecalculationError": "Error lors du recalcul des soldes des accounts",
-    "cash": "TrÃ©sorerie",
-    "cashFlowDesc": "Mouvements de trÃ©sorerie",
+    "balanceSheet": "Balance sheet",
+    "balanceSheetDesc": "Financial position at a given date",
+    "balanced": "Balanced sheet",
+    "balancesRecalculated": "Account balances recalculated successfully",
+    "balancesRecalculationError": "Error recalculating account balances",
+    "cash": "Cash",
+    "cashFlowDesc": "Cash flow movements",
     "cashFlowStatement": "Flux de trÃ©sorerie",
-    "close": "Fermer",
-    "comingSoon": "BientÃ´t disponible",
-    "credit": "CrÃ©dit",
-    "currentMonth": "Mois en cours",
-    "currentYear": "AnnÃ©e en cours",
-    "customAnalysis": "Analyses PersonnalisÃ©es",
-    "customAnalysisDesc": "CrÃ©ez des analyses sur mesure selon your besoins",
+    "close": "Close",
+    "comingSoon": "Coming soon",
+    "credit": "Credit",
+    "currentMonth": "Current month",
+    "currentYear": "Current year",
+    "customAnalysis": "Custom analyses",
+    "customAnalysisDesc": "Create custom analyses according to your needs",
     "dashboard": {
       "revenue": "Revenue",
       "expenses": "Expenses",
@@ -3401,50 +3397,50 @@
       "periodLabel": "Period",
       "last6Months": "Last 6 rolling months"
     },
-    "dataLoadError": "Error lors du chargement des data comptables",
-    "debit": "DÃ©bit",
-    "expenses": "CHARGES",
+    "dataLoadError": "Error loading accounting data",
+    "debit": "Debit",
+    "expenses": "EXPENSES",
     "exportExcel": "Export Excel",
     "exportMessage": "Export {format} en cours de prÃ©paration...",
     "exportPdf": "Export PDF",
     "exportStarted": "Export dÃ©marrÃ©",
-    "externalExpenses": "Services extÃ©rieurs",
-    "financialReports": "Reports Financiers",
-    "financialRevenues": "Produits financiers",
-    "fixedAssets": "Immobilisations",
-    "generateAndAnalyze": "GÃ©nÃ©rez et analysez your rapports comptables",
-    "generateReport": "GÃ©nÃ©rer le rapport",
-    "generationError": "Error lors de la gÃ©nÃ©ration du rapport",
-    "incomeStatement": "Compte de rÃ©sultat",
-    "incomeStatementDesc": "Performance financiÃ¨re sur une pÃ©riode",
-    "inventory": "Stocks",
-    "lastMonth": "Mois prÃ©cÃ©dent",
-    "lastYear": "AnnÃ©e prÃ©cÃ©dente",
-    "liabilities": "PASSIF",
-    "netResult": "RÃ‰SULTAT NET",
-    "noCompanySelected": "Aucune entreprise sÃ©lectionnÃ©e",
-    "otherExpenses": "Autres charges",
-    "otherRevenues": "Autres produits",
-    "payables": "Dettes",
-    "periodLabel": "PÃ©riode",
-    "personnelExpenses": "Charges de personnel",
+    "externalExpenses": "External services",
+    "financialReports": "Financial reports",
+    "financialRevenues": "Financial income",
+    "fixedAssets": "Fixed assets",
+    "generateAndAnalyze": "Generate and analyze your accounting reports",
+    "generateReport": "Generate report",
+    "generationError": "Error generating report",
+    "incomeStatement": "Income statement",
+    "incomeStatementDesc": "Financial performance over a period",
+    "inventory": "Inventory",
+    "lastMonth": "Previous month",
+    "lastYear": "Previous year",
+    "liabilities": "LIABILITIES",
+    "netResult": "NET RESULT",
+    "noCompanySelected": "No company selected",
+    "otherExpenses": "Other expenses",
+    "otherRevenues": "Other income",
+    "payables": "Payables",
+    "periodLabel": "Period",
+    "personnelExpenses": "Personnel expenses",
     "purchases": "Purchases",
     "recalculateBalances": "Recalculer les soldes",
-    "receivables": "CrÃ©ances",
+    "receivables": "Receivables",
     "requestDemo": "Demander une dÃ©mo",
-    "revenues": "PRODUITS",
+    "revenues": "REVENUES",
     "salesRevenue": "Revenue",
-    "selectCompanyPrompt": "SÃ©lectionnez une entreprise pour gÃ©nÃ©rer des rapports",
-    "showingFirstAccounts": "Affichage des 10 firsts accounts sur {total}",
-    "subtotal": "Sous-total",
+    "selectCompanyPrompt": "Select a company to generate reports",
+    "showingFirstAccounts": "Showing the first 10 accounts out of {total}",
+    "subtotal": "Subtotal",
     "total": "TOTAL",
-    "totalAssets": "TOTAL ACTIF",
-    "totalExpenses": "TOTAL CHARGES",
-    "totalLiabilities": "TOTAL PASSIF",
-    "totalRevenues": "TOTAL PRODUITS",
-    "trialBalance": "Balance gÃ©nÃ©rale",
-    "trialBalanceDesc": "Soldes de tous les accounts",
-    "unbalanced": "Bilan dÃ©sÃ©quilibrÃ©",
+    "totalAssets": "TOTAL ASSETS",
+    "totalExpenses": "TOTAL EXPENSES",
+    "totalLiabilities": "TOTAL LIABILITIES",
+    "totalRevenues": "TOTAL REVENUES",
+    "trialBalance": "Trial balance",
+    "trialBalanceDesc": "Balances of all accounts",
+    "unbalanced": "Unbalanced sheet",
     "regulatory": {
       "title": "Regulatory Documents",
       "subtitle": "Tax returns, financial statements and compliance documents",
@@ -3998,15 +3994,15 @@
       },
       "detected": "MarchÃ© dÃ©tectÃ© automatiquement : {{market}}",
       "regions": {
-        "africa": "ðŸŒ Afrique",
-        "americas": "ðŸŒŽ AmÃ©riques",
-        "europe": "ðŸ‡ªðŸ‡º Europe"
+        "africa": "🌍 Africa",
+        "americas": "🌎 Americas",
+        "europe": "🇪🇺 Europe"
       },
-      "select": "SÃ©lectionnez your marchÃ© principal",
-      "selected": "SÃ©lectionnÃ©"
+      "select": "Select your main market",
+      "selected": "Selected"
     },
     "mobile_money": {
-      "description": "Configurez les moyens de paiement mobile populaires dans your rÃ©gion.",
+      "description": "Set up popular mobile payment methods in your region.",
       "not_applicable": "Mobile Money non applicable",
       "not_applicable_description": "Cette fonctionnalitÃ© est spÃ©cifique aux marchÃ©s africains.",
       "note_description": "L'intÃ©gration Mobile Money nÃ©cessite des partenariats avec les opÃ©rateurs. Ces options seront disponibles dans une version future de CassKai.",
@@ -4039,14 +4035,14 @@
           "tmoney": "T-Money"
         }
       },
-      "providers_label": "Moyens de paiement mobile Ã  activer",
+      "providers_label": "Mobile payment methods to enable",
       "title": "Mobile Money"
     },
     "navigation": {
-      "finish": "Finaliser l'installation",
-      "next": "Suivant",
-      "previous": "PrÃ©cÃ©dent",
-      "step_of": "Step {{current}} sur {{total}}"
+      "finish": "Finish installation",
+      "next": "Next",
+      "previous": "Previous",
+      "step_of": "Step {{current}} of {{total}}"
     },
     "standards": {
       "gaap": "GAAP (Canada)",
@@ -4056,40 +4052,40 @@
       "syscohada": "SYSCOHADA (Afrique de l'Ouest)"
     },
     "supabase": {
-      "error": "Error de connexion. VÃ©rifiez your paramÃ¨tres Supabase.",
-      "info": "Vous devez crÃ©er un projet Supabase gratuit sur supabase.com",
-      "info_description": "Vous devez avoir crÃ©Ã© un projet Supabase avant de continuer. Les clÃ©s sont disponibles dans les paramÃ¨tres de your projet.",
-      "info_title": "Information importante",
-      "key_label": "ClÃ© API Supabase (anon)",
+      "error": "Connection error. Check your Supabase settings.",
+      "info": "You must create a free Supabase project on supabase.com",
+      "info_description": "You must have created a Supabase project before continuing. The keys are available in your project settings.",
+      "info_title": "Important information",
+      "key_label": "Supabase API Key (anon)",
       "key_placeholder": "eyJhbGciOiJIUzI1NiIsInR5cCI...",
-      "required": "Ce champ est obligatoire",
-      "success": "Connexion Supabase rÃ©ussie ! Configuration automatique en cours...",
-      "test_connection": "Tester la connexion",
-      "testing": "Test en cours...",
-      "url_label": "URL du projet Supabase",
-      "url_placeholder": "https://your-projet.supabase.co"
+      "required": "This field is required",
+      "success": "Supabase connection successful! Automatic configuration in progress...",
+      "test_connection": "Test connection",
+      "testing": "Testing...",
+      "url_label": "Supabase project URL",
+      "url_placeholder": "https://your-project.supabase.co"
     },
     "validation": {
-      "company_name_required": "Le nom de l'entreprise est requis",
-      "email_invalid": "Address email invalide",
-      "password_min": "Le mot de passe doit contenir au moins 8 caractÃ¨res",
-      "required": "Ce champ est obligatoire",
-      "supabase_connection_required": "La connexion Supabase doit Ãªtre testÃ©e"
+      "company_name_required": "Company name is required",
+      "email_invalid": "Invalid email address",
+      "password_min": "Password must be at least 8 characters",
+      "required": "This field is required",
+      "supabase_connection_required": "Supabase connection must be tested"
     },
     "wizard": {
       "steps": {
-        "admin": "Compte Administrateur",
-        "company": "Informations Entreprise",
-        "market": "MarchÃ© & Localisation",
+        "admin": "Admin Account",
+        "company": "Company Information",
+        "market": "Market & Location",
         "mobile_money": "Mobile Money",
-        "supabase": "Configuration Supabase"
+        "supabase": "Supabase Setup"
       },
-      "subtitle": "Solution de gestion financiÃ¨re multi-marchÃ©s",
-      "title": "Configuration Casskai",
-      "welcome": "Bienvenue dans l'assistant de configuration"
+      "subtitle": "Multi-market financial management solution",
+      "title": "Casskai Setup",
+      "welcome": "Welcome to the setup assistant"
     }
   },
-  "setupAssistant": "Assistant de configuration",
+  "setupAssistant": "Setup assistant",
   "sidebar": {
     "accounting": "Accounting",
     "accountingImport": "Accounting Import/Export",
@@ -4133,47 +4129,47 @@
     "tiers": "Third Parties"
   },
   "signup": {
-    "accountCreatedMessage": "Un email de confirmation a Ã©tÃ© envoyÃ© Ã  your adresse. Veuillez vÃ©rifier your boÃ®te de rÃ©ception.",
-    "accountCreatedNoConfirm": "Votre compte a Ã©tÃ© crÃ©Ã© avec succÃ¨s. Vous pouvez maintenant vous connecter.",
-    "accountCreatedTitle": "Account created successfully !",
-    "allRightsReserved": "Tous droits rÃ©servÃ©s",
-    "alreadyHaveAccount": "Vous avez dÃ©jÃ  un compte ?",
-    "and": "et notre",
+    "accountCreatedMessage": "A confirmation email has been sent to your address. Please check your inbox.",
+    "accountCreatedNoConfirm": "Your account has been created successfully. You can now log in.",
+    "accountCreatedTitle": "Account created successfully!",
+    "allRightsReserved": "All rights reserved",
+    "alreadyHaveAccount": "Already have an account?",
+    "and": "and our",
     "appName": "CassKai",
-    "companyName": "Name de l'entreprise",
-    "companyNameOptional": "Name de l'entreprise (optionnel)",
-    "confirmPassword": "Confirmer le mot de passe",
-    "createAccount": "Create mon compte",
-    "createAccountDescription": "Rejoignez CassKai pour gÃ©rer your comptabilitÃ©",
-    "createAccountTitle": "Create un compte",
-    "creatingAccount": "CrÃ©ation en cours...",
-    "emailAddress": "Address email",
-    "emailAlreadyExists": "Cette adresse email est dÃ©jÃ  utilisÃ©e",
-    "emailPlaceholder": "exemple@email.com",
-    "fillAllFields": "Veuillez remplir tous les champs obligatoires",
+    "companyName": "Company name",
+    "companyNameOptional": "Company name (optional)",
+    "confirmPassword": "Confirm password",
+    "createAccount": "Create my account",
+    "createAccountDescription": "Join CassKai to manage your accounting",
+    "createAccountTitle": "Create an account",
+    "creatingAccount": "Creating...",
+    "emailAddress": "Email address",
+    "emailAlreadyExists": "This email address is already in use",
+    "emailPlaceholder": "example@email.com",
+    "fillAllFields": "Please fill in all required fields",
     "firstName": "First Name",
-    "hidePassword": "Masquer le mot de passe",
-    "invalidEmail": "Address email invalide",
-    "lastName": "Name de famille",
+    "hidePassword": "Hide password",
+    "invalidEmail": "Invalid email address",
+    "lastName": "Last name",
     "loading": "Loading...",
-    "loginButton": "Se connecter",
-    "password": "Mot de passe",
-    "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractÃ¨res",
-    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
-    "showPassword": "Afficher le mot de passe",
-    "signupError": "Error lors de la crÃ©ation du compte",
-    "signupFailed": "Ã‰chec de la crÃ©ation du compte. Veuillez rÃ©essayer.",
-    "termsAgreement": "En crÃ©ant un compte, vous acceptez nos",
-    "termsOfService": "Conditions d'utilisation",
-    "unexpectedError": "Une erreur inattendue s'est produite",
-    "weakPassword": "Le mot de passe est trop faible"
+    "loginButton": "Log in",
+    "password": "Password",
+    "passwordRequirements": "Password must be at least 8 characters",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "showPassword": "Show password",
+    "signupError": "Error creating account",
+    "signupFailed": "Account creation failed. Please try again.",
+    "termsAgreement": "By creating an account, you accept our",
+    "termsOfService": "Terms of Service",
+    "unexpectedError": "An unexpected error occurred",
+    "weakPassword": "The password is too weak"
   },
-  "startByCreatingAccountOrImport": "Commencez par crÃ©er un compte ou importez un plan comptable standard",
+  "startByCreatingAccountOrImport": "Start by creating an account or importing a standard chart of accounts",
   "status": "Status",
   "stripePortalInfo": "Gestion via portail Stripe sÃ©curisÃ©",
-  "subscribeNowButton": "S'abonner maintenant",
-  "subscriptionManagement": "Gestion Abonnement",
-  "subscriptionManagementDesc": "GÃ©rez your abonnement et facturation",
+  "subscribeNowButton": "Subscribe now",
+  "subscriptionManagement": "Subscription management",
+  "subscriptionManagementDesc": "Manage your subscription and billing",
   "subscription_active": "Active",
   "subscription_inactive": "Inactive",
   "subscription_past_due": "Overdue",
@@ -4188,8 +4184,8 @@
     "ruleDeleted": "Rule deleted successfully",
     "ruleUpdated": "Rule updated successfully"
   },
-  "supplier": "Fournisseur",
-  "system": "SystÃ¨me",
+  "supplier": "Supplier",
+  "system": "System",
   "tax": {
     "title": "Tax & Compliance",
     "subtitle": "Tax declaration management and regulatory compliance",
@@ -4567,7 +4563,7 @@
     "subtitle": "General Terms and Conditions of Use",
     "title": "Terms of Service"
   },
-  "theme": "ThÃ¨me",
+  "theme": "Theme",
   "thirdParties": {
     "active": "Active",
     "address": "Address",
@@ -4781,11 +4777,11 @@
       "title": "Welcome to CassKai !"
     }
   },
-  "transactionCategorization": "CatÃ©gorisation des transactions",
+  "transactionCategorization": "Transaction categorization",
   "translation": {
-    "dark": "Sombre",
-    "light": "Clair",
-    "system": "SystÃ¨me"
+    "dark": "Dark",
+    "light": "Light",
+    "system": "System"
   },
   "type": "Type",
   "unknownPlan": "Plan inconnu",
@@ -4833,7 +4829,7 @@
     "userNameHeader": "Utilisateur",
     "userNotAvailable": "Utilisateur non disponible"
   },
-  "userProfile": "Profil Utilisateur",
+  "userProfile": "User profile",
   "validation": {
     "asyncError": "Validation error",
     "customFormat": "Invalid format",
@@ -5398,5 +5394,408 @@
     "errorDeletingDocument": "Error deleting document",
     "errorExportingDocument": "Error exporting document",
     "submissionError": "Form submission error"
+  },
+  "landing": {
+    "navbar": {
+      "product": "Product",
+      "pricing": "Pricing",
+      "resources": "Resources",
+      "roadmap": "Roadmap",
+      "login": "Login",
+      "freeTrial": "Free Trial",
+      "features": {
+        "ai": "Artificial Intelligence",
+        "aiDesc": "Financial AI Assistant",
+        "treasury": "Cash Management",
+        "treasuryDesc": "Cash flow management",
+        "compliance": "Compliance",
+        "complianceDesc": "Regulatory declarations",
+        "hr": "Payroll & HR",
+        "hrDesc": "Staff management",
+        "dashboards": "Dashboards",
+        "dashboardsDesc": "Real-time KPIs",
+        "multiCountry": "Multi-country",
+        "multiCountryDesc": "PCG, SYSCOHADA, IFRS"
+      },
+      "resourcesMenu": {
+        "documentation": "Documentation",
+        "documentationDesc": "Guides and tutorials",
+        "faq": "FAQ",
+        "faqDesc": "Frequently asked questions",
+        "blog": "Blog",
+        "blogDesc": "News and tips"
+      }
+    },
+    "hero": {
+      "badge": "Business management software",
+      "title": "Run your business",
+      "titleHighlight": "with Artificial Intelligence",
+      "subtitle": "Accounting, invoicing, cash management, financial analysis —",
+      "subtitleHighlight": "one tool to manage everything.",
+      "subtitleLine2": "Ask your questions, the AI answers instantly.",
+      "features": {
+        "dashboard": "Dashboard",
+        "invoicing": "Invoicing",
+        "treasury": "Cash Management",
+        "accounting": "Accounting",
+        "analytics": "Analytics",
+        "reports": "Reports"
+      },
+      "chat": {
+        "assistantName": "CassKai Assistant",
+        "online": "Online - Ready to help",
+        "welcome": "Hello! I'm your financial assistant. Ask me about your business: cash flow, invoices, revenue...",
+        "placeholder": "Ask your question...",
+        "suggestions": "Try these questions:",
+        "demoQuestions": {
+          "treasury": "How is my cash flow?",
+          "invoices": "My overdue invoices?",
+          "revenue": "My revenue this month?",
+          "expenses": "My main expenses?"
+        }
+      },
+      "cta": {
+        "tryFree": "Try for free",
+        "discover": "Discover features"
+      },
+      "stats": {
+        "countries": "Supported countries",
+        "standards": "Accounting standards",
+        "availability": "Availability",
+        "support": "AI Support"
+      }
+    },
+    "worldMap": {
+      "title": "Global coverage",
+      "subtitle": "CassKai is available in over 25 countries",
+      "controls": {
+        "play": "Autoplay",
+        "pause": "Pause",
+        "resume": "▶️ Resume"
+      }
+    },
+    "timeline": {
+      "badge": "Before/After",
+      "title": "The transformation in",
+      "titleHighlight": "real time",
+      "subtitle": "Discover how CassKai transforms every stage of your financial management.",
+      "days": {
+        "day1": "Day 1",
+        "day15": "Day 15",
+        "endMonth": "End of month",
+        "quarter": "Quarter",
+        "year": "Year"
+      },
+      "before": {
+        "label": "BEFORE CassKai",
+        "manualEntry": {
+          "title": "Manual entry",
+          "desc": "Excel, papers, double entry. 2h of daily work.",
+          "time": "2h/day"
+        },
+        "reconciliation": {
+          "title": "Bank reconciliation",
+          "desc": "Line-by-line comparison. Searching for discrepancies.",
+          "time": "4h"
+        },
+        "urgentClose": {
+          "title": "Urgent closing",
+          "desc": "All-nighter, stress, last-minute errors.",
+          "time": "All-nighter"
+        },
+        "accountant": {
+          "title": "Accountant",
+          "desc": "Sending documents, back-and-forth, corrections.",
+          "time": "$2000"
+        },
+        "annualReport": {
+          "title": "Annual report",
+          "desc": "Weeks of preparation, tax stress.",
+          "time": "3 weeks"
+        }
+      },
+      "after": {
+        "label": "WITH CassKai",
+        "autoImport": {
+          "title": "Automatic import",
+          "desc": "Bank connection, OCR invoices. Zero entry.",
+          "time": "0 min"
+        },
+        "reconciled": {
+          "title": "Already reconciled",
+          "desc": "AI matched 98% of transactions automatically.",
+          "time": "Automatic"
+        },
+        "oneClick": {
+          "title": "1-click closing",
+          "desc": "Report generated, ready for validation.",
+          "time": "5 min"
+        },
+        "realtime": {
+          "title": "Real-time collaboration",
+          "desc": "Your accountant accesses live. Instant validation.",
+          "time": "Included"
+        },
+        "autoTaxReturn": {
+          "title": "Auto tax return",
+          "desc": "Pre-filled, compliant documents, ready to file.",
+          "time": "1 day"
+        }
+      },
+      "controls": {
+        "pause": "Pause",
+        "autoPlay": "Autoplay"
+      },
+      "stats": {
+        "timeSaved": "Time saved",
+        "noErrors": "Entry errors",
+        "compliance": "Compliance",
+        "access": "Data access"
+      }
+    },
+    "features": {
+      "badge": "Powerful Features",
+      "title": "Everything you need",
+      "titleHighlight": "in one platform",
+      "subtitle": "CassKai combines artificial intelligence, automation and compliance to transform your financial management",
+      "ai": {
+        "title": "Artificial Intelligence",
+        "desc": "Our AI understands your accounting and assists you daily. Ask your questions in your language, get instant answers.",
+        "benefits": {
+          "auto": "Automatic transaction categorization",
+          "suggestions": "Accounting entry suggestions",
+          "detection": "Proactive anomaly detection",
+          "assistant": "24/7 conversational assistant"
+        }
+      },
+      "treasury": {
+        "title": "Cash Management",
+        "desc": "Visualize your cash flows in real-time, anticipate your needs and optimize your cash. Multi-bank, multi-currency.",
+        "benefits": {
+          "sync": "Automatic bank synchronization",
+          "forecast": "12-month forecasts",
+          "alerts": "Custom threshold alerts",
+          "reconciliation": "Intelligent bank reconciliation"
+        }
+      },
+      "regulatory": {
+        "title": "Regulatory Compliance",
+        "desc": "Generate your tax and social declarations in a few clicks. VAT, DSN, tax returns, SYSCOHADA statements.",
+        "benefits": {
+          "taxReturns": "Automated tax returns",
+          "vat": "Pre-filled VAT declarations",
+          "fec": "Certified FEC export",
+          "payroll": "DSN and payslips"
+        }
+      },
+      "hr": {
+        "title": "Payroll & HR",
+        "desc": "Manage your employees from A to Z: contracts, payslips, leave, expense reports. Automated and compliant.",
+        "benefits": {
+          "payslips": "Automatic payslips",
+          "leave": "Leave and absence management",
+          "expenses": "Simplified expense reports",
+          "compliance": "Guaranteed social compliance"
+        }
+      },
+      "analytics": {
+        "title": "Dashboards",
+        "desc": "Real-time financial KPIs, interactive charts and customizable reports to manage your business.",
+        "benefits": {
+          "custom": "Customizable dashboard",
+          "realtime": "Real-time financial KPIs",
+          "comparison": "Year-over-year comparisons",
+          "export": "PDF and Excel export"
+        }
+      },
+      "multi": {
+        "title": "Multi-Country & Standards",
+        "desc": "French PCG, SYSCOHADA, IFRS, Maghreb SCF: CassKai adapts to your accounting framework and country.",
+        "benefits": {
+          "pcg": "PCG 2025 (France)",
+          "syscohada": "Revised SYSCOHADA (Africa)",
+          "ifrs": "IFRS for SMEs",
+          "scf": "SCF/PCM (Maghreb)"
+        }
+      },
+      "tryFree": "Try for free",
+      "bottomStats": {
+        "gdpr": "GDPR compliant",
+        "responseTime": "AI response time",
+        "countries": "Supported countries",
+        "availability": "Availability"
+      }
+    },
+    "calculator": {
+      "badge": "ROI Calculator",
+      "title": "How much will you",
+      "titleHighlight": "save?",
+      "subtitle": "Customize the parameters according to your business and discover your return on investment.",
+      "inputs": {
+        "title": "Your business",
+        "country": "Country",
+        "employees": "Number of employees",
+        "revenue": "Monthly revenue",
+        "transactions": "Transactions/month",
+        "note": "These estimates are based on industry averages. Your actual savings may vary."
+      },
+      "results": {
+        "roiTitle": "ESTIMATED ANNUAL ROI",
+        "savingsAfter": "net savings after CassKai subscription",
+        "breakdown": "Savings breakdown",
+        "timeSaved": "Time saved",
+        "hoursPerMonth": "{{hours}}h/month",
+        "errorsAvoided": "Errors avoided",
+        "guaranteedCompliance": "Guaranteed compliance",
+        "accountant": "Accountant",
+        "optimizedCollab": "Optimized collaboration",
+        "totalSavings": "Total savings",
+        "recommendedPlan": "Recommended plan",
+        "perMonth": "/month",
+        "tryFree": "Start my free trial",
+        "trialInfo": "30 days free • No credit card required"
+      }
+    },
+    "testimonials": {
+      "badge": "Testimonials from our Beta Testers",
+      "title": "They tested CassKai",
+      "titleHighlight": "before everyone else",
+      "subtitle": "Discover feedback from our first users in France and French-speaking Africa",
+      "betaBadge": "Beta Tester",
+      "metrics": {
+        "timeSaved": "Time saved",
+        "errorsReduced": "Errors reduced",
+        "satisfaction": "Satisfaction"
+      },
+      "autoPlay": "Autoplay",
+      "globalStats": {
+        "testers": "Beta testers",
+        "countries": "Countries represented",
+        "rating": "Average rating",
+        "recommend": "Recommend CassKai"
+      }
+    },
+    "cta": {
+      "badge": "Launch offer available",
+      "title": "Ready to transform",
+      "titleHighlight": "your financial management?",
+      "subtitle": "Join the companies that have chosen the future of accounting. Start for free and discover the power of financial AI.",
+      "benefits": {
+        "trial": "30-day free trial",
+        "noCard": "No credit card required",
+        "support": "Support included",
+        "cancel": "Cancel anytime"
+      },
+      "buttons": {
+        "start": "Start for free",
+        "demo": "Book a demo"
+      },
+      "pricing": {
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "yearlyDiscount": "-20%",
+        "priceIn": "Price in {{currency}} ({{symbol}}) - Standard {{standard}}",
+        "perMonth": "/month",
+        "perYear": "/year",
+        "plans": {
+          "starter": {
+            "name": "Starter",
+            "desc": "For small businesses and self-employed",
+            "features": {
+              "users": "Up to 5 users",
+              "accounting": "Basic accounting",
+              "invoicing": "Unlimited invoicing"
+            },
+            "cta": "Choose Starter"
+          },
+          "professional": {
+            "name": "Professional",
+            "badge": "POPULAR",
+            "desc": "For growing SMEs",
+            "features": {
+              "users": "Unlimited users",
+              "starter": "All Starter features",
+              "ai": "Advanced AI + Forecasting",
+              "multi": "Multi-currency & Multi-company"
+            },
+            "cta": "Choose Professional"
+          },
+          "enterprise": {
+            "name": "Enterprise",
+            "desc": "For large groups",
+            "features": {
+              "all": "All Professional +",
+              "sso": "SSO & Advanced integrations",
+              "support": "Priority support 24/7",
+              "manager": "Dedicated Account Manager"
+            },
+            "cta": "Choose Enterprise"
+          }
+        }
+      }
+    },
+    "footer": {
+      "sections": {
+        "product": {
+          "title": "Product",
+          "features": "Features",
+          "pricing": "Pricing",
+          "roadmap": "Roadmap",
+          "status": "System status"
+        },
+        "solutions": {
+          "title": "Solutions",
+          "sme": "SME / Small Business",
+          "accountants": "Accounting firms",
+          "ohada": "OHADA Zone",
+          "europe": "France & Europe"
+        },
+        "resources": {
+          "title": "Resources",
+          "documentation": "Documentation",
+          "tutorials": "Tutorials",
+          "faq": "FAQ"
+        },
+        "company": {
+          "title": "Company",
+          "about": "About",
+          "legal": "Legal notice",
+          "contact": "Contact"
+        }
+      },
+      "contact": {
+        "title": "Contact",
+        "phone": {
+          "europe": "🇫🇷 +33 7 52 02 71 98 (Europe)",
+          "africaCI": "🇨🇮 +225 74 58 83 83 (Africa)",
+          "africaBJ": "🇧🇯 +229 01 69 18 76 03 (Africa)"
+        },
+        "location": "Paris, France"
+      },
+      "social": {
+        "title": "Follow us",
+        "twitter": "X (Twitter)",
+        "linkedin": "LinkedIn",
+        "youtube": "YouTube"
+      },
+      "copyright": "© {{year}} NOUTCHE CONSEIL. All rights reserved.",
+      "allRightsReserved": "All rights reserved"
+    },
+    "aiChat": {
+      "needHelp": "Need help?",
+      "title": "CassKai Assistant",
+      "status": "Online",
+      "close": "Close",
+      "minimize": "Minimize",
+      "placeholder": "Ask your question...",
+      "welcome": "Hello! How can I help you today?",
+      "suggestions": {
+        "pricing": "What are your prices?",
+        "howItWorks": "How does it work?",
+        "africa": "Do you support Africa?"
+      },
+      "typing": "Typing...",
+      "poweredBy": "Powered by CassKai AI"
+    }
   }
 }

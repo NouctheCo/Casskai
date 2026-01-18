@@ -16,7 +16,8 @@ import {
   AlertTriangle,
   ChevronDown,
   Menu,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 interface NavItem {
   id: string;
@@ -47,6 +48,7 @@ interface AccountingNavigationProps {
     importFEC: string;
     reports: string;
     anomalies: string;
+    closure: string;
   };
 }
 export function AccountingNavigation({
@@ -120,6 +122,13 @@ export function AccountingNavigation({
       value: 'anomalies',
       type: 'link',
       badge: anomaliesCount
+    },
+    {
+      id: 'closure',
+      icon: <Lock className="w-4 h-4" />,
+      label: t.closure,
+      value: 'closure',
+      type: 'link'
     }
   ];
   // Fermer le dropdown au clic extérieur

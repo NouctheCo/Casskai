@@ -188,9 +188,41 @@ export class BridgeProvider extends BankingProvider {
       return this.handleError(error);
     }
   }
-  async updateConnection(_connectionId: string, _updates: Partial<BankConnection>): Promise<OpenBankingResponse<BankConnection>> {
-    // En production, mettre à jour en base et synchroniser avec Bridge si nécessaire
-    throw new Error('Method not implemented.');
+  async updateConnection(connectionId: string, updates: Partial<BankConnection>): Promise<OpenBankingResponse<BankConnection>> {
+    this.validateConnectionId(connectionId);
+    try {
+      // Récupérer la connexion existante
+      const existingResult = await this.getConnection(connectionId);
+      if (!existingResult.success || !existingResult.data) {
+        return this.createErrorResponse('CONNECTION_NOT_FOUND', `Connection ${connectionId} not found`);
+      }
+
+      const existingConnection = existingResult.data;
+      const itemId = existingConnection.metadata?.itemId as string || existingConnection.consentId;
+
+      // Si un refresh des tokens est demandé, synchroniser avec Bridge
+      if (updates.accessToken || updates.refreshToken) {
+        await this.makeRequest('POST', `/v2/connect/items/${itemId}/refresh`);
+      }
+
+      // Construire la connexion mise à jour
+      const updatedConnection: BankConnection = {
+        ...existingConnection,
+        ...updates,
+        updatedAt: new Date(),
+        // Préserver les champs critiques qui ne doivent pas être écrasés
+        id: connectionId,
+        providerId: this.providerId,
+        providerName: this.providerName,
+      };
+
+      // Note: En production, persister les modifications en base de données ici
+      // await supabase.from('bank_connections').update(updatedConnection).eq('id', connectionId);
+
+      return this.createResponse(updatedConnection);
+    } catch (error) {
+      return this.handleError(error);
+    }
   }
   async deleteConnection(connectionId: string): Promise<OpenBankingResponse<void>> {
     this.validateConnectionId(connectionId);

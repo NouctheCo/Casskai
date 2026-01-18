@@ -35,7 +35,7 @@ export const SEO: React.FC<SEOProps> = ({
   const location = useLocation();
 
   const fullTitle = title ? `${title} | CassKai` : 'CassKai - Gestion Financière pour PME';
-  const baseUrl = 'https://casskai.fr';
+  const baseUrl = 'https://casskai.app';
   const currentUrl = canonical || `${baseUrl}${location.pathname}`;
 
   useEffect(() => {
@@ -69,8 +69,10 @@ export const SEO: React.FC<SEOProps> = ({
     updateMetaTag('og:site_name', 'CassKai');
     updateMetaTag('og:locale', 'fr_FR');
 
-    // Twitter Card tags
+    // X (Twitter) Card tags
     updateMetaTag('twitter:card', 'summary_large_image', false);
+    updateMetaTag('twitter:site', '@casskai', false);
+    updateMetaTag('twitter:creator', '@casskai', false);
     updateMetaTag('twitter:title', fullTitle, false);
     updateMetaTag('twitter:description', description, false);
     updateMetaTag('twitter:image', `${baseUrl}${ogImage}`, false);

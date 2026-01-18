@@ -9,11 +9,12 @@
 /**
  * Configuration des services IA
  *
- * IMPORTANT: En production, les clés API OpenAI sont utilisées
- * UNIQUEMENT depuis les Supabase Edge Functions (sécurisé), jamais depuis le frontend.
+ * IMPORTANT: Les clés API OpenAI sont utilisées UNIQUEMENT depuis:
+ * - Le backend Node.js (/api/openai/chat)
+ * - Les Supabase Edge Functions (sécurisé)
  *
- * En développement, les services peuvent appeler OpenAI directement si VITE_OPENAI_API_KEY
- * est configurée (pour faciliter le développement).
+ * Les appels directs depuis le frontend sont INTERDITS pour des raisons de sécurité.
+ * Tous les services AI ont été migrés pour utiliser l'API backend.
  */
 
 export const AI_CONFIG = {

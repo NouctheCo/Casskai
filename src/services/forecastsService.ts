@@ -30,9 +30,10 @@ class ForecastsService {
   async getScenarios(): Promise<ForecastServiceResponse<ForecastScenario[]>> {
     return ForecastImpl.getScenarios();
   }
-  async createScenario(formData: ScenarioFormData): Promise<ForecastServiceResponse<ForecastScenario>> {
-    // Get enterpriseId from context or default
-    const enterpriseId = 'company-1'; // TODO: Get from auth context
+  async createScenario(enterpriseId: string, formData: ScenarioFormData): Promise<ForecastServiceResponse<ForecastScenario>> {
+    if (!enterpriseId) {
+      return { data: null, error: 'Enterprise ID is required' };
+    }
     return ForecastImpl.createScenario(enterpriseId, formData);
   }
   // Periods

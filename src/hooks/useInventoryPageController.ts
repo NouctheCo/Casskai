@@ -325,7 +325,6 @@ export function useInventoryPageController(): InventoryPageControllerResult {
   const [newArticleModalOpen, setNewArticleModalOpen] = useState(false);
 
   const handleNewArticle = useCallback(() => {
-    console.log('🆕 [useInventoryPageController] Opening NewArticleModal');
     setNewArticleModalOpen(true);
   }, []);
 

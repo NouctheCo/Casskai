@@ -96,14 +96,26 @@ export async function generateInvoiceJournalEntry(
         description: `Client ${invoice.third_party_name || ''} - ${invoice.invoice_number}`,
       });
       // Crédit 707 Ventes (HT) - une ligne par ligne de facture
+      // Si account_id absent, fallback sur compte de vente par défaut
+      let defaultSalesAccount = null;
       for (const line of invoice.lines) {
-        if (line.account_id && line.subtotal_excl_tax > 0) {
-          lines.push({
-            accountId: line.account_id,
-            debitAmount: 0,
-            creditAmount: line.subtotal_excl_tax,
-            description: line.description,
-          });
+        if (line.subtotal_excl_tax > 0) {
+          let accId = line.account_id;
+          if (!accId) {
+            if (!defaultSalesAccount) {
+              const acc = await AccountMappingService.findAccountByType(company_id, UniversalAccountType.SALES);
+              defaultSalesAccount = acc?.id;
+            }
+            accId = defaultSalesAccount;
+          }
+          if (accId) {
+            lines.push({
+              accountId: accId,
+              debitAmount: 0,
+              creditAmount: line.subtotal_excl_tax,
+              description: line.description,
+            });
+          }
         }
       }
       // Crédit TVA collectée (44571 PCG, 4433 SYSCOHADA, VAT Payable IFRS)
@@ -125,14 +137,26 @@ export async function generateInvoiceJournalEntry(
     } else {
       // === FACTURE D'ACHAT ===
       // Débit 607 Achats (HT)
+      // Si account_id absent, fallback sur compte d'achat par défaut
+      let defaultPurchaseAccount = null;
       for (const line of invoice.lines) {
-        if (line.account_id && line.subtotal_excl_tax > 0) {
-          lines.push({
-            accountId: line.account_id,
-            debitAmount: line.subtotal_excl_tax,
-            creditAmount: 0,
-            description: line.description,
-          });
+        if (line.subtotal_excl_tax > 0) {
+          let accId = line.account_id;
+          if (!accId) {
+            if (!defaultPurchaseAccount) {
+              const acc = await AccountMappingService.findAccountByType(company_id, UniversalAccountType.PURCHASES);
+              defaultPurchaseAccount = acc?.id;
+            }
+            accId = defaultPurchaseAccount;
+          }
+          if (accId) {
+            lines.push({
+              accountId: accId,
+              debitAmount: line.subtotal_excl_tax,
+              creditAmount: 0,
+              description: line.description,
+            });
+          }
         }
       }
       // Débit TVA déductible (44566 PCG, 4431 SYSCOHADA, VAT Receivable IFRS)
@@ -222,7 +246,7 @@ export async function generateBankTransactionEntry(
   transaction: BankTransactionData
 ): Promise<{ success: boolean; entryId?: string; error?: string }> {
   try {
-    const { company_id, bank_account_id, transaction_date, amount, type, counterpart_account_id, description, reference } = transaction;
+    const { company_id, bank_account_id, transaction_date, amount, type, counterpart_account_id, description, reference, third_party_id } = transaction;
     // Récupérer le journal banque
     const journal = await getJournalByType(company_id, JournalType.BANK);
     if (!journal) {
@@ -232,6 +256,23 @@ export async function generateBankTransactionEntry(
     const bankAccount = await getAccountById(company_id, bank_account_id);
     if (!bankAccount) {
       return { success: false, error: 'Compte bancaire non trouvé' };
+    }
+    // Déterminer le compte de contrepartie si non fourni
+    let mappedCounterpartId = counterpart_account_id;
+    if (!mappedCounterpartId) {
+      if (type === 'credit') {
+        // Encaissement : contrepartie = client
+        if (third_party_id) {
+          const clientAccount = await AccountMappingService.findAccountByType(company_id, UniversalAccountType.CUSTOMERS);
+          mappedCounterpartId = clientAccount?.id;
+        }
+      } else {
+        // Décaissement : contrepartie = fournisseur
+        if (third_party_id) {
+          const supplierAccount = await AccountMappingService.findAccountByType(company_id, UniversalAccountType.SUPPLIERS);
+          mappedCounterpartId = supplierAccount?.id;
+        }
+      }
     }
     // Construire les lignes
     const lines = [];
@@ -243,9 +284,9 @@ export async function generateBankTransactionEntry(
         creditAmount: 0,
         description,
       });
-      if (counterpart_account_id) {
+      if (mappedCounterpartId) {
         lines.push({
-          accountId: counterpart_account_id,
+          accountId: mappedCounterpartId,
           debitAmount: 0,
           creditAmount: amount,
           description,
@@ -253,9 +294,9 @@ export async function generateBankTransactionEntry(
       }
     } else {
       // DÉCAISSEMENT (sortie d'argent du compte)
-      if (counterpart_account_id) {
+      if (mappedCounterpartId) {
         lines.push({
-          accountId: counterpart_account_id,
+          accountId: mappedCounterpartId,
           debitAmount: amount,
           creditAmount: 0,
           description,

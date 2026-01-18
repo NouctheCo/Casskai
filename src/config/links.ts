@@ -17,8 +17,8 @@ export const EXTERNAL_LINKS = {
   tutorials: '/tutorials',
 
   // Social & Communauté
-  youtubeChannel: 'https://youtube.com/@casskai',
-  community: 'https://community.casskai.fr',
+  youtubeChannel: 'https://youtube.com/@casskai_app',
+  community: 'https://community.casskai.app',
   betaForm: 'https://docs.google.com/forms/d/e/1FAIpQLSeP1H29iZLZ7CgEnJz-Mey9wZDWij0NVZ42EK-mqmbjb5vqzg/viewform',
 
   // Légal

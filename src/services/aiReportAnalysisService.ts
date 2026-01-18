@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-import type OpenAI from 'openai';
 import { supabase } from '@/lib/supabase';
 import { shouldUseEdgeFunction, getEdgeFunctionName, AI_CONFIG, isAIServiceEnabled } from '@/config/ai.config';
 import { logger } from '@/lib/logger';
@@ -103,31 +102,7 @@ export interface InventoryData {
  */
 class AIReportAnalysisService {
   private static instance: AIReportAnalysisService;
-  private openai: OpenAI | null = null;
-  private clientPromise: Promise<OpenAI | null> | null = null;
   private constructor() {
-  }
-  private async getClient(): Promise<OpenAI | null> {
-    if (this.openai) return this.openai;
-    if (this.clientPromise) return this.clientPromise;
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (!apiKey || apiKey === 'sk-your-openai-api-key') {
-      logger.warn('AiReportAnalysis', 'OpenAI API key not configured. Report AI analysis disabled.');
-      return null;
-    }
-    this.clientPromise = import('openai')
-      .then(({ default: OpenAIImport }) => {
-        this.openai = new OpenAIImport({
-          apiKey,
-          dangerouslyAllowBrowser: true
-        });
-        return this.openai;
-      })
-      .catch((error) => {
-        logger.error('AiReportAnalysis', 'Failed to load OpenAI client:', error);
-        return null;
-      });
-    return this.clientPromise;
   }
   static getInstance(): AIReportAnalysisService {
     if (!this.instance) {
@@ -158,34 +133,40 @@ class AIReportAnalysisService {
         return '';
       }
     }
-    // En développement, utiliser client OpenAI si clé dispo
+    // Utiliser l'API backend sécurisée
     if (!isAIServiceEnabled('reportAnalysis')) {
       logger.warn('AiReportAnalysis', 'AI Report Analysis disabled.');
       return '';
     }
-    const client = await this.getClient();
-    if (!client) return '';
     try {
-      const completion = await client.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `Tu es un expert-comptable et analyste financier senior avec 20 ans d'expérience.
+      const response = await fetch('/api/openai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: `Tu es un expert-comptable et analyste financier senior avec 20 ans d'expérience.
 Tu analyses les ${reportType} d'une entreprise et fournis des recommandations stratégiques claires et actionnables.
 Tes analyses sont professionnelles, précises, et adaptées au contexte français (PCG).
 Tu te concentres sur les aspects critiques et fournis des conseils pratiques.
 IMPORTANT: Réponds UNIQUEMENT avec le format structuré demandé, sans texte supplémentaire.`
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: AI_CONFIG.openai.temperature,
-        max_tokens: AI_CONFIG.openai.maxTokens
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          model: 'gpt-4o-mini',
+          temperature: AI_CONFIG.openai.temperature,
+          max_tokens: AI_CONFIG.openai.maxTokens
+        })
       });
-      return completion.choices[0]?.message?.content || '';
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      const data = await response.json();
+      return data.content || '';
     } catch (error) {
       logger.error('AiReportAnalysis', `Erreur lors de l'analyse IA (${reportType}):`, error);
       return '';

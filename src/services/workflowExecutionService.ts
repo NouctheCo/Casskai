@@ -6,6 +6,7 @@
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/logger';
 import { auditService } from './auditService';
+import { emailService } from './emailService';
 import type {
   Workflow,
   WorkflowExecution,
@@ -112,7 +113,7 @@ async function executeSendEmail(
 ): Promise<any> {
   const to = Array.isArray(action.to) ? action.to : [action.to];
   const subject = replaceVariables(action.subject, data);
-  const _body = replaceVariables(action.body, data);
+  const body = replaceVariables(action.body, data);
 
   logger.info('WorkflowExecution: Sending email', {
     to,
@@ -120,16 +121,27 @@ async function executeSendEmail(
     companyId
   });
 
-  // En mode production, envoyer via service email (Resend, SendGrid, etc.)
-  // Pour l'instant, on log
-  // TODO: Intégrer service d'envoi d'emails
+  try {
+    // Envoyer via le service d'email configuré
+    const success = await emailService.sendEmail(companyId, {
+      to,
+      subject,
+      html: body,
+      text: body.replace(/<[^>]*>/g, ''), // Strip HTML for plain text version
+      workflow_id: data.workflow_id,
+      workflow_execution_id: data.execution_id
+    });
 
-  return {
-    sent: true,
-    recipients: to,
-    subject,
-    timestamp: new Date().toISOString()
-  };
+    return {
+      sent: success,
+      recipients: to,
+      subject,
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    logger.error('WorkflowExecution: Email send failed', error, { companyId, to });
+    throw error;
+  }
 }
 
 /**
@@ -354,7 +366,7 @@ async function executeSendPaymentReminder(
     }
   };
 
-  const _template = tones[action.tone];
+  const template = tones[action.tone];
   const clientEmail = (invoice.third_parties as any)?.email;
 
   logger.info('WorkflowExecution: Sending payment reminder', {
@@ -363,8 +375,29 @@ async function executeSendPaymentReminder(
     clientEmail
   });
 
-  // Envoyer l'email (via le service d'email)
-  // TODO: Intégrer service d'envoi d'emails
+  // Envoyer l'email via le service d'email configuré
+  if (clientEmail) {
+    try {
+      await emailService.sendEmail(companyId, {
+        to: clientEmail,
+        subject: template.subject,
+        html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
+          ${template.body.split('\n').map(line => `<p>${line}</p>`).join('')}
+        </div>`,
+        text: template.body,
+        workflow_id: data.workflow_id,
+        workflow_execution_id: data.execution_id
+      });
+    } catch (emailError) {
+      logger.error('WorkflowExecution: Payment reminder email failed', emailError, {
+        invoiceId,
+        clientEmail
+      });
+      // Continue execution even if email fails - we still want to log the reminder
+    }
+  } else {
+    logger.warn('WorkflowExecution: No client email for payment reminder', { invoiceId });
+  }
 
   // Enregistrer la relance
   const { error: logError } = await supabase

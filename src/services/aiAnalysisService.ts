@@ -9,7 +9,6 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-import type OpenAI from 'openai';
 import { isAIServiceEnabled, shouldUseEdgeFunction, getEdgeFunctionName } from '@/config/ai.config';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
@@ -40,31 +39,7 @@ interface AIAnalysisResult {
 }
 class AIAnalysisService {
   private static instance: AIAnalysisService;
-  private openai: OpenAI | null = null;
-  private clientPromise: Promise<OpenAI | null> | null = null;
   private constructor() {
-  }
-  private async getClient(): Promise<OpenAI | null> {
-    if (this.openai) return this.openai;
-    if (this.clientPromise) return this.clientPromise;
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (!apiKey || apiKey === 'sk-your-openai-api-key') {
-      logger.warn('AiAnalysis', 'OpenAI API key not configured. Financial KPI AI analysis disabled.');
-      return null;
-    }
-    this.clientPromise = import('openai')
-      .then(({ default: OpenAIImport }) => {
-        this.openai = new OpenAIImport({
-          apiKey,
-          dangerouslyAllowBrowser: true // Note: En production, appeler depuis le backend
-        });
-        return this.openai;
-      })
-      .catch((error) => {
-        logger.error('AiAnalysis', 'Failed to load OpenAI client:', error);
-        return null;
-      });
-    return this.clientPromise;
   }
   static getInstance(): AIAnalysisService {
     if (!this.instance) {
@@ -85,36 +60,43 @@ class AIAnalysisService {
     if (shouldUseEdgeFunction('kpiAnalysis')) {
       return this.analyzeViaEdgeFunction(kpis, periodStart, periodEnd, companyId);
     }
-    // En développement, utiliser OpenAI directement
-    const client = await this.getClient();
-    if (!client) {
+    // Utiliser l'API backend sécurisée
+    if (!isAIServiceEnabled('kpiAnalysis')) {
+      logger.warn('AiAnalysis', 'AI KPI Analysis disabled.');
       return this.generateDefaultAnalysis(kpis);
     }
     try {
       const prompt = this.buildAnalysisPrompt(kpis, periodStart, periodEnd);
-      const completion = await client.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `Tu es un expert-comptable et analyste financier senior avec 20 ans d'expérience.
+      const response = await fetch('/api/openai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: `Tu es un expert-comptable et analyste financier senior avec 20 ans d'expérience.
 Tu analyses les indicateurs financiers d'une entreprise et fournis des recommandations stratégiques claires et actionnables.
 Tes analyses sont professionnelles, précises, et adaptées au contexte français (PCG).
 Tu te concentres sur les aspects critiques et fournis des conseils pratiques.`
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1500
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          model: 'gpt-4o-mini',
+          temperature: 0.7,
+          max_tokens: 1500
+        })
       });
-      const response = completion.choices[0]?.message?.content;
-      if (!response) {
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      const data = await response.json();
+      if (!data.content) {
         return this.generateDefaultAnalysis(kpis);
       }
-      return this.parseAIResponse(response, kpis);
+      return this.parseAIResponse(data.content, kpis);
     } catch (error) {
       logger.error('AiAnalysis', 'Erreur lors de l\'analyse IA:', error);
       return this.generateDefaultAnalysis(kpis);

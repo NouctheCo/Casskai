@@ -56,6 +56,7 @@ import ExportFecModal from '@/components/accounting/ExportFecModal';
 import JournalDistributionChart from '@/components/accounting/JournalDistributionChart';
 import { AnomalyDetectionDashboard } from '@/components/accounting/AnomalyDetectionDashboard';
 import { AccountingImportDialog } from '@/components/accounting/AccountingImportDialog';
+import { PeriodClosurePanel } from '@/components/accounting/PeriodClosurePanel';
 import { logger } from '@/lib/logger';
 // Types
 interface AccountingKPICardProps {
@@ -743,7 +744,8 @@ export default function AccountingPageOptimized() {
             chartOfAccounts: t('accounting.nav.chartOfAccounts', 'Plan comptable'),
             importFEC: t('accounting.nav.importFEC', 'Import FEC'),
             reports: t('accounting.nav.reports', 'Rapports'),
-            anomalies: t('accounting.nav.anomalies', 'Anomalies')
+            anomalies: t('accounting.nav.anomalies', 'Anomalies'),
+            closure: t('accounting.nav.closure', 'Clôture')
           }}
         />
         <TabsContent value="overview" className="space-y-6">
@@ -802,6 +804,12 @@ export default function AccountingPageOptimized() {
             companyId={currentCompanyId || ''}
             periodId={selectedPeriod || 'current-month'}
           />
+        </TabsContent>
+
+        <TabsContent value="closure">
+          {currentCompanyId && (
+            <PeriodClosurePanel companyId={currentCompanyId} />
+          )}
         </TabsContent>
       </Tabs>
       {/* Modal d'export FEC */}

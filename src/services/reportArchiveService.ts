@@ -16,6 +16,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { emailService } from './emailService';
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -812,15 +813,50 @@ class ReportArchiveService {
         };
       }
       const report = reportResult.data;
-      // TODO: Implémenter l'envoi via service email (SendGrid, Mailgun, etc.)
-      // Pour l'instant, on retourne un succès simulé
-      logger.debug('ReportArchive', 'Email would be sent to:', recipients);
-      logger.debug('ReportArchive', 'Report:', report.report_name);
-      logger.debug('ReportArchive', 'Subject:', subject || `Rapport: ${report.report_name}`);
-      logger.debug('ReportArchive', 'Message:', message || 'Veuillez trouver ci-joint le rapport demandé.');
-      return {
-        success: true
-      };
+
+      // Construire le contenu HTML de l'email
+      const emailSubject = subject || `Rapport: ${report.report_name}`;
+      const emailMessage = message || 'Veuillez trouver ci-joint le rapport demandé.';
+
+      const htmlContent = `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #2563eb;">📊 ${report.report_name}</h2>
+          <p>${emailMessage}</p>
+          <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Détails du rapport:</strong></p>
+            <ul>
+              <li>Type: ${report.report_type}</li>
+              <li>Période: ${report.period_start} au ${report.period_end}</li>
+              <li>Format: ${report.report_format}</li>
+              ${report.fiscal_year ? `<li>Exercice fiscal: ${report.fiscal_year}</li>` : ''}
+            </ul>
+          </div>
+          <p style="color: #666; font-size: 0.9em;">
+            Ce rapport a été généré automatiquement par CassKai.
+          </p>
+        </div>
+      `;
+
+      // Envoyer via le service email configuré
+      try {
+        await emailService.sendEmail(report.company_id, {
+          to: recipients,
+          subject: emailSubject,
+          html: htmlContent,
+          text: `${report.report_name}\n\n${emailMessage}\n\nType: ${report.report_type}\nPériode: ${report.period_start} au ${report.period_end}`
+        });
+
+        logger.info('ReportArchive', `Email sent successfully to ${recipients.length} recipients for report ${report.report_name}`);
+        return {
+          success: true
+        };
+      } catch (emailError) {
+        logger.error('ReportArchive', 'Email send failed:', emailError);
+        return {
+          success: false,
+          error: emailError instanceof Error ? emailError.message : 'Erreur lors de l\'envoi de l\'email'
+        };
+      }
     } catch (error) {
       logger.error('ReportArchive', 'Error sending report by email:', error);
       return {

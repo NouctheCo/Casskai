@@ -306,7 +306,7 @@ Dépend de votre plan:
 | 📞 **Téléphone** | ❌ | ❌ | ❌ | ✅ Dédié |
 | 🎥 **Visio** | ❌ | ❌ | ❌ | ✅ Sur RDV |
 
-**Email**: support@casskai.app
+**Email**: support@casskai_app.app
 **Téléphone** (Entreprise): +221 XX XXX XXXX
 
 ### Y a-t-il une formation disponible?
@@ -443,9 +443,9 @@ Actuellement:
 
 **Solutions**:
 1. Vérifiez vos **spams/courrier indésirable**
-2. Ajoutez `noreply@casskai.app` à vos contacts
+2. Ajoutez `noreply@casskai_app.app` à vos contacts
 3. Renvoyez l'email: Page de connexion → **"Renvoyer l'email"**
-4. Si échec: Contactez support@casskai.app
+4. Si échec: Contactez support@casskai_app.app
 
 ### J'ai oublié mon mot de passe
 
@@ -476,7 +476,7 @@ Actuellement:
 2. Consentement expiré? (renouveler tous les 90 jours)
 3. Changement mot de passe bancaire? (Reconnectez le compte)
 
-Si problème persiste: support@casskai.app avec capture d'écran.
+Si problème persiste: support@casskai_app.app avec capture d'écran.
 
 ---
 
@@ -485,12 +485,12 @@ Si problème persiste: support@casskai.app avec capture d'écran.
 ### Ressources
 
 - 📚 **Documentation complète**: [docs.casskai.app](https://docs.casskai.app)
-- 🎬 **Vidéos**: [youtube.com/@casskai](https://youtube.com/@casskai)
+- 🎬 **Vidéos**: [youtube.com/@casskai_app](https://youtube.com/@casskai_app)
 - 💬 **Forum communautaire**: [community.casskai.app](https://community.casskai.app)
 
 ### Contact
 
-- 📧 **Email**: support@casskai.app
+- 📧 **Email**: support@casskai_app.app
 - 💬 **Chat** (plan Pro+): Bulle en bas à droite
 - 📞 **Téléphone** (Entreprise): +221 XX XXX XXXX
 

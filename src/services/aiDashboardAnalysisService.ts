@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  */
-import type OpenAI from 'openai';
 import type { RealKPIData } from './realDashboardKpiService';
 import { supabase } from '@/lib/supabase';
 import { isAIServiceEnabled, shouldUseEdgeFunction, getEdgeFunctionName, AI_CONFIG } from '@/config/ai.config';
@@ -21,33 +20,9 @@ export interface AIAnalysisResult {
   }[];
 }
 /**
- * Service d'analyse IA du dashboard avec OpenAI
+ * Service d'analyse IA du dashboard avec API backend
  */
 export class AIDashboardAnalysisService {
-  private openai: OpenAI | null = null;
-  private clientPromise: Promise<OpenAI | null> | null = null;
-  private async getClient(): Promise<OpenAI | null> {
-    if (this.openai) return this.openai;
-    if (this.clientPromise) return this.clientPromise;
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (!apiKey) {
-      logger.warn('AiDashboardAnalysis', 'OpenAI API key not configured. AI analysis will be disabled.');
-      return null;
-    }
-    this.clientPromise = import('openai')
-      .then(({ default: OpenAIImport }) => {
-        this.openai = new OpenAIImport({
-          apiKey,
-          dangerouslyAllowBrowser: true, // Pour utilisation côté client
-        });
-        return this.openai;
-      })
-      .catch((error) => {
-        logger.error('AiDashboardAnalysis', 'Failed to load OpenAI client:', error);
-        return null;
-      });
-    return this.clientPromise;
-  }
   /**
    * Génère une analyse IA complète des KPIs
    */
@@ -76,43 +51,45 @@ export class AIDashboardAnalysisService {
         return this.getFallbackAnalysis(kpiData);
       }
     }
-    // En développement, utiliser client OpenAI si clé dispo
+    // Utiliser l'API backend sécurisée
     if (!isAIServiceEnabled('dashboardAnalysis')) {
       logger.warn('AiDashboardAnalysis', 'AI Dashboard Analysis disabled.');
       return this.getFallbackAnalysis(kpiData);
     }
-    const client = await this.getClient();
-    if (!client) {
-      return this.getFallbackAnalysis(kpiData);
-    }
     try {
       const prompt = this.buildAnalysisPrompt(kpiData, companyName, industryType);
-      const completion = await client.chat.completions.create({
-        model: AI_CONFIG.openai.model,
-        messages: [
-          {
-            role: 'system',
-            content: `Tu es un expert en contrôle de gestion et analyse financière.
+      const response = await fetch('/api/openai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: `Tu es un expert en contrôle de gestion et analyse financière.
 Tu analyses les données financières d'entreprises françaises et fournis des recommandations stratégiques précises et actionnables.
 Tu dois répondre en français et structurer ta réponse au format JSON selon le schéma fourni.`,
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: AI_CONFIG.openai.temperature,
-        max_tokens: AI_CONFIG.openai.maxTokens,
-        response_format: { type: 'json_object' },
+            },
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          model: AI_CONFIG.openai.model,
+          temperature: AI_CONFIG.openai.temperature,
+          max_tokens: AI_CONFIG.openai.maxTokens,
+        })
       });
-      const response = completion.choices[0]?.message?.content;
-      if (!response) {
-        throw new Error('Empty response from OpenAI');
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
       }
-      const analysis = JSON.parse(response) as AIAnalysisResult;
+      const data = await response.json();
+      if (!data.content) {
+        throw new Error('Empty response from API');
+      }
+      const analysis = JSON.parse(data.content) as AIAnalysisResult;
       return analysis;
     } catch (error) {
-      logger.error('AiDashboardAnalysis', 'Error analyzing KPIs with OpenAI:', error);
+      logger.error('AiDashboardAnalysis', 'Error analyzing KPIs with API:', error);
       return this.getFallbackAnalysis(kpiData);
     }
   }
@@ -254,10 +231,10 @@ Concentre-toi sur:
     }).format(amount);
   }
   /**
-   * Vérifie si OpenAI est configuré
+   * Vérifie si l'API backend est configurée
    */
   isConfigured(): boolean {
-    return this.openai !== null;
+    return isAIServiceEnabled('dashboardAnalysis');
   }
 }
 // Export singleton instance

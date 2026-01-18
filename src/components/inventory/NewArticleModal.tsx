@@ -270,35 +270,25 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log('=== 📝 SUBMIT ARTICLE FORM ===');
-    console.log('Form data (raw):', formData);
-    console.log('Current company:', currentCompany);
-
     if (!currentCompany) {
-      console.error('❌ No company selected');
       setError(t('inventory.articleModal.errorNoCompany', 'Aucune entreprise sélectionnée'));
       return;
     }
 
     if (!formData.name.trim()) {
-      console.error('❌ Article name is required');
       setError(t('inventory.articleModal.errorNameRequired', 'Le nom de l\'article est requis'));
       return;
     }
 
     if (!formData.reference.trim()) {
-      console.error('❌ Article reference is required');
       setError(t('inventory.articleModal.errorReferenceRequired', 'La référence est requise'));
       return;
     }
 
     if (!formData.warehouse_id) {
-      console.error('❌ Warehouse is required');
       setError(t('inventory.articleModal.errorWarehouseRequired', 'L\'entrepôt est requis'));
       return;
     }
-
-    console.log('✅ Validation passed');
 
     setLoading(true);
     setError(null);
@@ -324,24 +314,17 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
         barcode: formData.barcode || undefined
       };
 
-      console.log('📦 Article data to create:', articleInput);
-      console.log('🏢 Company ID:', currentCompany.id);
-
       const article = await articlesService.createArticle(currentCompany.id, articleInput);
-
-      console.log('✅ Article created successfully:', article);
 
       setFormData(INITIAL_FORM_DATA);
       onSuccess(article.id);
       onClose();
     } catch (err) {
-      console.error('❌ Error creating article:', err);
-      console.error('❌ Error details:', err instanceof Error ? err.message : String(err));
+      logger.error('NewArticleModal', 'Error creating article:', err);
       const errorMessage = err instanceof Error ? err.message : t('inventory.articleModal.errorCreating', 'Erreur lors de la création de l\'article');
       setError(errorMessage);
     } finally {
       setLoading(false);
-      console.log('=== END SUBMIT ===');
     }
   };
 

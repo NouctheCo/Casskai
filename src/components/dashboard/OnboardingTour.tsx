@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import { useLocation } from 'react-router-dom';
 interface OnboardingTourProps {
   isNewAccount: boolean;
   companyName: string;
@@ -314,32 +315,48 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
 export function OnboardingTour({ isNewAccount, companyName }: OnboardingTourProps) {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const location = useLocation();
   const [run, setRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const storageKey = useMemo(() => `onboarding_tour_completed_${user?.id ?? 'anonymous'}`, [user?.id]);
   const steps = useMemo(() => buildTourSteps(t, companyName), [t, companyName]);
+
+  // Écouter les changements de location pour détecter tour=start
   useEffect(() => {
     // Vérifier si le tour est déjà complété
     const hasCompletedTour = localStorage.getItem(storageKey);
     // Vérifier si l'URL demande explicitement le tour (pour relancer)
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(location.search);
     const forceTour = urlParams.get('tour') === 'start' || urlParams.get('tour') === 'true';
+
+    logger.debug('OnboardingTour', '[OnboardingTour] Init:', {
+      forceTour,
+      hasCompletedTour,
+      isNewAccount,
+      url: window.location.href
+    });
+
     if (forceTour) {
       // Forcer le redémarrage du tour
+      logger.info('OnboardingTour', '[OnboardingTour] Force restart tour from URL parameter');
       localStorage.removeItem(storageKey);
       setStepIndex(0);
-      const timeoutId = window.setTimeout(() => setRun(true), 500);
-      // Nettoyer l'URL après avoir lancé le tour
-      window.history.replaceState({}, '', window.location.pathname);
+      setRun(false); // Reset d'abord
+      const timeoutId = window.setTimeout(() => {
+        setRun(true);
+        // Nettoyer l'URL après avoir lancé le tour
+        window.history.replaceState({}, '', window.location.pathname);
+      }, 500);
       return () => window.clearTimeout(timeoutId);
     }
     if (isNewAccount && !hasCompletedTour) {
       // Nouveau compte et tour pas encore fait
+      logger.info('OnboardingTour', '[OnboardingTour] Starting tour for new account');
       const timeoutId = window.setTimeout(() => setRun(true), 1000);
       return () => window.clearTimeout(timeoutId);
     }
     return undefined;
-  }, [isNewAccount, storageKey]);
+  }, [isNewAccount, storageKey, location.search]);
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status, type, index } = data;
     logger.debug('OnboardingTour', '[OnboardingTour] Callback:', { status, type, index });

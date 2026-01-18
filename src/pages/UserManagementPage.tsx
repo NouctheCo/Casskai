@@ -9,7 +9,7 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -36,6 +36,8 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
+import { useSubscriptionQuotas } from '@/hooks/useSubscriptionQuotas';
+import { UpgradeLicenseModal } from '@/components/subscription/UpgradeLicenseModal';
 // TypeScript interfaces
 interface Role {
   id: string;
@@ -90,6 +92,10 @@ interface Activity {
 const UserManagementPage = () => {
   const { user: currentUser } = useAuth();
   const { t } = useLocale();
+
+  // Hook pour les quotas d'abonnement
+  const { getQuotaStatus, incrementUsageWithCheck } = useSubscriptionQuotas();
+
   // States
   const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState<User[]>([]);
@@ -105,6 +111,7 @@ const UserManagementPage = () => {
   const [_showRoleDialog, _setShowRoleDialog] = useState(false);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [_selectedRole, _setSelectedRole] = useState<Role | null>(null);
   // Form states
@@ -140,8 +147,28 @@ const UserManagementPage = () => {
     const matchesRole = roleFilter === 'all' || user.role.id === roleFilter;
     return matchesSearch && matchesStatus && matchesRole;
   });
+  // Vérifier les quotas avant d'ajouter un utilisateur
+  const checkUserQuota = useCallback((): boolean => {
+    const quotaStatus = getQuotaStatus('users');
+    if (quotaStatus && !quotaStatus.canAccess) {
+      // Limite atteinte, afficher la modale d'upgrade
+      setShowUpgradeModal(true);
+      return false;
+    }
+    return true;
+  }, [getQuotaStatus]);
+
+  // Obtenir les infos de quota pour la modale
+  const getUserQuotaInfo = useCallback(() => {
+    const quotaStatus = getQuotaStatus('users');
+    return {
+      current: quotaStatus?.current || users.length,
+      max: quotaStatus?.limit || 1
+    };
+  }, [getQuotaStatus, users.length]);
+
   // Event handlers
-  const handleUserSubmit = (e: React.FormEvent) => {
+  const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isEditing = !!selectedUser;
     if (isEditing) {
@@ -152,6 +179,14 @@ const UserManagementPage = () => {
       ));
       toastUpdated('Informations de l\'utilisateur');
     } else {
+      // Vérifier le quota avant d'ajouter
+      const canAdd = await incrementUsageWithCheck('users', 1, false);
+      if (!canAdd) {
+        // Afficher la modale d'upgrade au lieu d'un simple toast
+        setShowUpgradeModal(true);
+        return;
+      }
+
       const foundRole = roles.find(r => r.id === userForm.roleId);
       if (!foundRole) {
         logger.error('UserManagement', 'Role not found');
@@ -174,8 +209,17 @@ const UserManagementPage = () => {
     setSelectedUser(null);
     resetUserForm();
   };
-  const handleInviteSubmit = (e: React.FormEvent) => {
+  const handleInviteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Vérifier le quota avant d'inviter
+    const canInvite = await incrementUsageWithCheck('users', 1, false);
+    if (!canInvite) {
+      // Afficher la modale d'upgrade
+      setShowUpgradeModal(true);
+      return;
+    }
+
     const foundRole = roles.find(r => r.id === inviteForm.roleId);
     const foundInvitedBy = currentUser?.id;
     if (!foundRole || !foundInvitedBy) {
@@ -829,6 +873,15 @@ const UserManagementPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal d'upgrade pour les licences */}
+      <UpgradeLicenseModal
+        open={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        currentUsers={getUserQuotaInfo().current}
+        maxUsers={getUserQuotaInfo().max}
+        featureName="utilisateurs"
+      />
     </motion.div>
   );
 };

@@ -198,7 +198,7 @@ export function MainLayout() {
 
     return (
 
-      <AnalyticsProvider domain="app.casskai.fr" showConsentBanner={true}>
+      <AnalyticsProvider domain="casskai.app" showConsentBanner={true}>
 
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
 
@@ -220,7 +220,7 @@ export function MainLayout() {
 
   // Layout principal avec nouvelle sidebar flottante
   return (
-    <AnalyticsProvider domain="app.casskai.fr" showConsentBanner={true}>
+    <AnalyticsProvider domain="casskai.app" showConsentBanner={true}>
       <NotificationProvider>
         <div className="flex h-screen bg-gradient-to-br from-slate-100 to-slate-200 dark:from-gray-900 dark:to-gray-950" data-module={currentModule}>
           {/* Sidebar Floating Cards - Desktop uniquement */}

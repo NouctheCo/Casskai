@@ -75,8 +75,23 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     try {
       // Charger les factures
       const invoicesResult = await billingService.getInvoices({ limit: 50 });
-      if (invoicesResult.success) {
-        setInvoices(invoicesResult.invoices || []);
+      if (invoicesResult.success && invoicesResult.invoices) {
+        // Transformer les factures Stripe au format attendu par le frontend
+        const formattedInvoices = invoicesResult.invoices.map((inv: any) => ({
+          id: inv.id,
+          stripeInvoiceId: inv.id || inv.number || '',
+          amount: (inv.amount_due || inv.total || 0) / 100, // Stripe utilise les centimes
+          currency: (inv.currency || 'eur').toUpperCase(),
+          status: inv.status || 'unknown',
+          pdfUrl: inv.invoice_pdf || null,
+          invoiceUrl: inv.hosted_invoice_url || null,
+          createdAt: new Date((inv.created || 0) * 1000),
+          dueDate: new Date((inv.due_date || inv.created || 0) * 1000),
+          paidAt: inv.paid_at ? new Date(inv.paid_at * 1000) : null,
+        }));
+        setInvoices(formattedInvoices);
+      } else {
+        setInvoices([]);
       }
     } catch (error) {
       logger.error('Subscription', 'Error fetching invoices:', error);

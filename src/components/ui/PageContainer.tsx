@@ -7,13 +7,13 @@ interface PageContainerProps {
   className?: string;
 }
 
-export const PageContainer: React.FC<PageContainerProps> = ({ 
-  children, 
+export const PageContainer: React.FC<PageContainerProps> = ({
+  children,
   variant = 'default',
-  className 
+  className
 }) => {
-  const baseClasses = 'min-h-screen';
-  
+  const baseClasses = 'min-h-screen w-full max-w-full overflow-x-hidden';
+
   const variants = {
     default: 'bg-gray-50 dark:bg-gray-900',
     auth: 'bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800',

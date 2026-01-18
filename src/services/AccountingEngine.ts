@@ -25,6 +25,7 @@ import { AdvancedBusinessValidationService } from './AdvancedBusinessValidationS
 // import { AccountingNotificationService } from './AccountingNotificationService';
 
 import { supabase } from '../lib/supabase';
+import { periodClosureService } from './accounting/periodClosureService';
 
 /**
  * Moteur Comptable Central - Point d'entrée unifié pour toutes les opérations comptables
@@ -190,6 +191,13 @@ export class AccountingEngine {
    */
   getTemplatesService(): EntryTemplatesService {
     return this.templatesService;
+  }
+
+  /**
+   * Accès au service de clôture de période
+   */
+  getPeriodClosureService() {
+    return periodClosureService;
   }
 
   // NOTE: Méthodes désactivées - services non implémentés

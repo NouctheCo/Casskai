@@ -247,7 +247,7 @@ const HelpCenterPage = () => {
     logger.debug('HelpCenter', 'Guide PDF download initiated');
   };
   const handleJoinCommunity = () => {
-    window.open('https://community.casskai.fr', '_blank');
+    window.open('https://community.casskai.app', '_blank');
   };
   const handleContactSupport = () => {
     navigate('/support/contact');

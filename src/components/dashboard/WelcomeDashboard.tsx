@@ -72,7 +72,7 @@ const QUICK_START_STEP_CONFIGS: QuickStartStepConfig[] = [
 const HELP_LINKS = [
   { id: 'documentation', icon: '📚', url: '/help' },
   { id: 'support', icon: '💬', url: 'mailto:support@casskai.app' },
-  { id: 'tutorials', icon: '🎥', url: 'https://youtube.com/@casskai' }
+  { id: 'tutorials', icon: '🎥', url: 'https://youtube.com/@casskai_app' }
 ] as const;
 
 const PLACEHOLDER_STATS = [

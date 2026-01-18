@@ -262,6 +262,9 @@ export const disposeAsset = async (
   assetId: string,
   disposalData: AssetDisposalFormData
 ): Promise<Asset> => {
+  // Récupérer l'immobilisation avant mise à jour pour calculer plus/moins-value
+  const asset = await getAssetById(assetId);
+
   const { data, error } = await supabase
     .from('assets')
     .update({
@@ -277,9 +280,137 @@ export const disposeAsset = async (
 
   if (error) throw error;
 
-  // TODO: Générer l'écriture de cession (plus-value/moins-value)
+  // Générer l'écriture de cession (plus-value/moins-value)
+  await generateDisposalJournalEntry(asset, disposalData);
 
   return data;
+};
+
+/**
+ * Générer l'écriture comptable de cession d'immobilisation
+ * Comptabilisation selon PCG français:
+ * - Sortie de l'immobilisation (crédit compte 2xx)
+ * - Sortie des amortissements cumulés (débit compte 28x)
+ * - Produit de cession si vente (crédit compte 775)
+ * - Plus-value (crédit 775) ou moins-value (débit 675)
+ */
+const generateDisposalJournalEntry = async (
+  asset: Asset,
+  disposalData: AssetDisposalFormData
+): Promise<void> => {
+  const disposalValue = disposalData.disposal_value || 0;
+  const netBookValue = asset.net_book_value || 0;
+  const acquisitionValue = asset.acquisition_value;
+  const totalDepreciation = asset.total_depreciation || 0;
+
+  // Calculer plus-value ou moins-value
+  const gainOrLoss = disposalValue - netBookValue;
+  const isGain = gainOrLoss >= 0;
+
+  // Déterminer les comptes selon la catégorie ou valeurs par défaut
+  const accountAsset = asset.account_asset || (asset.category as any)?.account_asset || '21';
+  const accountDepreciation = asset.account_depreciation || (asset.category as any)?.account_depreciation || '28';
+  const accountGain = '775'; // Produits des cessions d'éléments d'actif
+  const accountLoss = '675'; // Valeur comptable des éléments d'actif cédés
+  const accountProceeds = '462'; // Créances sur cessions d'immobilisations (si vente)
+  const accountScrap = '675'; // Valeur comptable des éléments d'actif cédés (si mise au rebut)
+
+  const lines: Array<{
+    account_number: string;
+    label: string;
+    debit: number;
+    credit: number;
+  }> = [];
+
+  // 1. Sortie des amortissements cumulés (débit 28x)
+  if (totalDepreciation > 0) {
+    lines.push({
+      account_number: accountDepreciation,
+      label: `Annulation amortissements - ${asset.name}`,
+      debit: totalDepreciation,
+      credit: 0,
+    });
+  }
+
+  if (disposalData.disposal_method === 'sale' && disposalValue > 0) {
+    // CAS VENTE
+
+    // 2. Créance sur cession (débit 462)
+    lines.push({
+      account_number: accountProceeds,
+      label: `Cession immobilisation - ${asset.name}`,
+      debit: disposalValue,
+      credit: 0,
+    });
+
+    // 3. Sortie de l'immobilisation (crédit 2xx)
+    lines.push({
+      account_number: accountAsset,
+      label: `Sortie immobilisation - ${asset.name}`,
+      debit: 0,
+      credit: acquisitionValue,
+    });
+
+    // 4. Plus-value ou moins-value
+    if (isGain) {
+      // Plus-value de cession (crédit 775)
+      lines.push({
+        account_number: accountGain,
+        label: `Plus-value cession - ${asset.name}`,
+        debit: 0,
+        credit: gainOrLoss,
+      });
+    } else {
+      // Moins-value de cession (débit 675)
+      lines.push({
+        account_number: accountLoss,
+        label: `Moins-value cession - ${asset.name}`,
+        debit: Math.abs(gainOrLoss),
+        credit: 0,
+      });
+    }
+
+  } else {
+    // CAS MISE AU REBUT (disposal_method === 'scrapped' ou 'lost')
+
+    // 2. Valeur comptable nette passée en charges (débit 675)
+    if (netBookValue > 0) {
+      lines.push({
+        account_number: accountScrap,
+        label: `Valeur nette sortie - ${asset.name}`,
+        debit: netBookValue,
+        credit: 0,
+      });
+    }
+
+    // 3. Sortie de l'immobilisation (crédit 2xx)
+    lines.push({
+      account_number: accountAsset,
+      label: `Sortie immobilisation - ${asset.name}`,
+      debit: 0,
+      credit: acquisitionValue,
+    });
+  }
+
+  // Créer l'écriture de journal
+  const { error: entryError } = await supabase
+    .from('journal_entries')
+    .insert({
+      company_id: asset.company_id,
+      entry_date: disposalData.disposal_date,
+      journal_code: 'OD', // Opérations Diverses
+      reference: `CESS-${asset.asset_number || asset.id.slice(0, 8)}`,
+      description: disposalData.disposal_method === 'sale'
+        ? `Cession immobilisation - ${asset.name}`
+        : `Mise au rebut immobilisation - ${asset.name}`,
+      lines,
+      status: 'draft',
+    });
+
+  if (entryError) {
+    console.error('Erreur création écriture cession:', entryError);
+    throw entryError;
+  }
 };
 
 /**

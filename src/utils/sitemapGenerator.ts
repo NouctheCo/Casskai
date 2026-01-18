@@ -29,7 +29,7 @@ export class SitemapGenerator {
   private config: SitemapConfig;
   constructor(config: Partial<SitemapConfig> = {}) {
     this.config = {
-      baseUrl: 'https://app.casskai.fr',
+      baseUrl: 'https://casskai.app',
       routes: DEFAULT_ROUTES,
       includeImages: true,
       excludePatterns: ['/api/*', '/admin/*', '/**/private/*'],
@@ -258,7 +258,7 @@ export class ServerSitemapService {
 // Utilitaire pour générer automatiquement le sitemap au build
 export const generateBuildSitemap = async () => {
   if (typeof window === 'undefined') {
-    const service = new ServerSitemapService('https://app.casskai.fr');
+    const service = new ServerSitemapService('https://casskai.app');
     try {
       await service.saveSitemap();
       await service.saveRobotsTxt();

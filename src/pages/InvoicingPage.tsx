@@ -624,9 +624,9 @@ export default function InvoicingPageOptimized() {
           />
         </motion.div>
         {/* Navigation par onglets */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-2">
-            <TabsList className="flex w-full flex-nowrap overflow-x-auto gap-2 py-1 px-1">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 w-full">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-2">
+            <TabsList className="w-full flex-nowrap justify-start gap-1 bg-gray-100 dark:bg-gray-700/50 p-1 rounded-xl">
               <TabsTrigger 
                 value="overview" 
                 className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"

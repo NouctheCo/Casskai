@@ -133,51 +133,22 @@ export class HRPayrollService {
    */
   async createPayrollJournalEntry(
     companyId: string,
-    payroll: PayrollCalculation,
-    journalId: string = 'journal-paie'
+    payroll: PayrollCalculation
   ): Promise<{ success: boolean; error?: string; entryId?: string }> {
     try {
-      const entries = await this.generatePayrollJournalEntries(payroll, companyId);
-      // Créer l'écriture principale dans journal_entries
-      const { data: journalEntry, error: journalError } = await supabase
-        .from('journal_entries')
-        .insert({
-          company_id: companyId,
-          journal_id: journalId,
-          entry_date: payroll.period_end,
-          reference: `PAIE-${payroll.employee_id}-${payroll.period_start}`,
-          description: `Paie ${payroll.employee_name} - ${payroll.period_start}`,
-          status: 'draft'
-        })
-        .select()
-        .single();
-      if (journalError) {
-        throw journalError;
+      // Utilise la fonction RPC Supabase pour générer l'écriture de paie
+      const { data, error } = await supabase.rpc('generate_payroll_journal_entry', {
+        p_payroll_slip_id: payroll.id
+      });
+      if (error) {
+        throw error;
       }
-      // Créer les lignes d'écriture
-      const lines = entries.map(entry => ({
-        journal_entry_id: journalEntry.id,
-        company_id: companyId,
-        account_number: entry.account_number,
-        account_name: entry.account_name,
-        debit: entry.debit,
-        credit: entry.credit,
-        description: entry.description
-      }));
-      const { error: linesError } = await supabase
-        .from('journal_entry_lines')
-        .insert(lines);
-      if (linesError) {
-        // Rollback: supprimer l'écriture principale
-        await supabase
-          .from('journal_entries')
-          .delete()
-          .eq('id', journalEntry.id);
-        throw linesError;
+      if (!data.success) {
+        throw new Error(data.error || 'Erreur génération écriture paie');
       }
       return {
         success: true,
-        entryId: journalEntry.id
+        entryId: data.journal_entry_id
       };
     } catch (error) {
       logger.error('HrPayroll', 'Error creating payroll journal entry:', error);

@@ -23,7 +23,8 @@ import { OnboardingProvider } from '@/contexts';
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
 
 // Lazy load pages for better performance
-const LazyLandingPage = React.lazy(() => import('@/pages/LandingPage'));
+const LazyLandingPage = React.lazy(() => import('@/pages/LandingPageV2'));
+const LazyLandingPageClassic = React.lazy(() => import('@/pages/LandingPage'));
 const LazyDashboardPage = React.lazy(() => import('@/pages/DashboardPage'));
 const LazyAccountingPage = React.lazy(() => import('@/pages/AccountingPage'));
 const LazyAssetsPage = React.lazy(() => import('@/pages/AssetsPage'));
@@ -70,6 +71,7 @@ const LazyHelpCenterPage = React.lazy(() => import('@/pages/HelpCenterPage'));
 const LazyTeamPage = React.lazy(() => import('@/pages/TeamPage'));
 const LazyAcceptInvitationPage = React.lazy(() => import('@/pages/AcceptInvitationPage'));
 const LazyTeamManagementGuide = React.lazy(() => import('@/pages/docs/TeamManagementGuide'));
+const LazyAboutPage = React.lazy(() => import('@/pages/AboutPage'));
 
 // Nouveaux outils financiers
 const LazyTaxSimulator = React.lazy(() => import('@/pages/Reports/TaxSimulator'));
@@ -221,6 +223,11 @@ const AppRouter: React.FC = () => {
             <Route path="invitation" element={
               <Suspense fallback={<LoadingFallback />}>
                 <LazyAcceptInvitationPage />
+              </Suspense>
+            } />
+            <Route path="about" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyAboutPage />
               </Suspense>
             } />
             <Route path="*" element={<Navigate to="/" replace />} />

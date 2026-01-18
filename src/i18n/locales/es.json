@@ -1,20 +1,20 @@
 {
   "accountClasses": {
-    "1": "Classe 1 - Comptes de capitaux",
-    "2": "Classe 2 - Comptes d'immobilisations",
-    "3": "Classe 3 - Comptes de stocks",
-    "4": "Classe 4 - Comptes de tiers",
-    "5": "Classe 5 - Comptes financiers",
-    "6": "Classe 6 - Comptes de charges",
-    "7": "Classe 7 - Comptes de produits",
-    "8": "Classe 8 - Comptes spéciaux",
-    "9": "Classe 9 - Contabilidad analytique"
+    "1": "Clase 1 - Cuentas de capital",
+    "2": "Clase 2 - Cuentas de inmovilizado",
+    "3": "Clase 3 - Cuentas de inventario",
+    "4": "Clase 4 - Cuentas de terceros",
+    "5": "Clase 5 - Cuentas financieras",
+    "6": "Clase 6 - Cuentas de gastos",
+    "7": "Clase 7 - Cuentas de ingresos",
+    "8": "Clase 8 - Cuentas especiales",
+    "9": "Clase 9 - Contabilidad analítica"
   },
   "accountCreatedSuccess": "Cuenta creada con éxito",
-  "accountDescriptionPlaceholder": "Descripción du compte",
-  "accountName": "Nombre du compte",
-  "accountNumber": "Numéro de compte",
-  "accountNumberUniqueError": "Ce numéro de compte existe déjà",
+  "accountDescriptionPlaceholder": "Descripción de la cuenta",
+  "accountName": "Nombre de la cuenta",
+  "accountNumber": "Número de cuenta",
+  "accountNumberUniqueError": "Este número de cuenta ya existe",
   "accountTypes": {
     "ASSET": "Activo",
     "COST_OF_GOODS_SOLD": "Costo de bienes vendidos",
@@ -28,19 +28,19 @@
     "liability": "Pasivo",
     "revenue": "Ingresos"
   },
-  "accountUpdatedSuccess": "Compte mis à jour avec succès",
+  "accountUpdatedSuccess": "Cuenta actualizada con éxito",
   "accounting": {
     "chartDetection": {
-      "alternativeNote": "Peut être utilisé pour les multinationales ou cas spécifiques",
-      "alternatives": "Plans alternatifs",
+      "alternativeNote": "Puede ser utilizado para multinacionales o casos específicos",
+      "alternatives": "Planes alternativos",
       "confidence": {
-        "high": "Recommandé",
-        "low": "Par défaut",
-        "medium": "Suggéré"
+        "high": "Recomendado",
+        "low": "Por defecto",
+        "medium": "Sugerido"
       },
-      "mandatory": "Obligatoire",
-      "title": "Plan comptable détecté",
-      "useRecommended": "Utiliser ce plan"
+      "mandatory": "Obligatorio",
+      "title": "Plan contable detectado",
+      "useRecommended": "Usar este plan"
     },
     "journalTypes": {
       "bank": "Banco",
@@ -53,7 +53,7 @@
       "sale": "Ventas"
     },
     "pcg": {
-      "fullName": "Plan Comptable Général"
+      "fullName": "Plan General Contable"
     },
     "setup": {
       "annual": "Anual",
@@ -94,11 +94,11 @@
     },
     "syscohada": {
       "alert": {
-        "description": "Le SYSCOHADA révisé 2017 est le plan comptable légal dans les 17 pays membres de l'Organisation pour l'Harmonisation en Afrique du Droit des Affaires (OHADA).",
-        "title": "País membre de l'OHADA"
+        "description": "El SYSCOHADA revisado 2017 es el plan contable legal en los 17 países miembros de la Organización para la Armonización en África del Derecho Mercantil (OHADA).",
+        "title": "País miembro de la OHADA"
       },
-      "fullName": "Système Comptable OHADA",
-      "memberCountries": "Ver tous les pays membres de l'OHADA"
+      "fullName": "Sistema Contable OHADA",
+      "memberCountries": "Ver todos los países miembros de la OHADA"
     },
     "title": "Contabilidad & Finanzas",
     "subtitle": "Gestione sus asientos contables y análisis financieros",
@@ -176,7 +176,8 @@
       "chartOfAccounts": "Plan contable",
       "importFEC": "Importar FEC",
       "reports": "Informes",
-      "anomalies": "Anomalías"
+      "anomalies": "Anomalías",
+      "closure": "Cierre"
     },
     "recentActivity": {
       "title": "Actividad reciente",
@@ -323,19 +324,19 @@
       "totalVariance": "Desviación total"
     }
   },
-  "accountingEntries": "Écritures comptables",
-  "accountingEntriesList": "Liste des asientos",
+  "accountingEntries": "Asientos contables",
+  "accountingEntriesList": "Lista de asientos",
   "accountingPage": {
-    "balanceError": "Le débit et le crédit doivent être équilibrés.",
-    "description": "Gérez sus asientos, plan comptable et journaux.",
+    "balanceError": "El debe y el haber deben estar equilibrados.",
+    "description": "Gestione sus asientos, plan contable y diarios.",
     "noCompanySelected": {
-      "message": "Veuillez sélectionner une entreprise pour gérer la comptabilité",
-      "title": "Aucune entreprise sélectionnée"
+      "message": "Por favor seleccione una empresa para gestionar la contabilidad",
+      "title": "Ninguna empresa seleccionada"
     },
-    "saveErrorTitle": "Error d'enregistrement",
-    "saveSuccessMessage": "L'écriture comptable a été enregistrée avec succès.",
-    "saveSuccessTitle": "Écriture enregistrée",
-    "title": "Gestion Comptable"
+    "saveErrorTitle": "Error al guardar",
+    "saveSuccessMessage": "El asiento contable se ha guardado con éxito.",
+    "saveSuccessTitle": "Asiento guardado",
+    "title": "Gestión Contable"
   },
   "accountingPageTitle": "Contabilidad",
   "accounting_standards": {
@@ -348,63 +349,63 @@
   "active": "Activo",
   "addInvoice": "Añadir factura",
   "aiCategorization": "Catégorisation IA",
-  "allAccounts": "Tous les cuentas",
-  "allClasses": "Toutes les classes",
-  "allEntriesDeletedSuccess": "Toutes les asientos ont été supprimées avec succès.",
-  "allJournals": "Tous les journaux",
+  "allAccounts": "Todas las cuentas",
+  "allClasses": "Todas las clases",
+  "allEntriesDeletedSuccess": "Todos los asientos han sido eliminados con éxito.",
+  "allJournals": "Todos los diarios",
   "allStatuses": "Todos los estados",
-  "allTypes": "Tous les types",
-  "applyFilters": "Appliquer les Filtros",
+  "allTypes": "Todos los tipos",
+  "applyFilters": "Aplicar filtros",
   "auth": {
-    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
     "backToLogin": "Volver al inicio de sesión",
-    "createYourAccount": "Créez su compte",
+    "createYourAccount": "Crea tu cuenta",
     "emailAddress": "Dirección de correo",
     "emailPlaceholder": "tu@email.com",
     "firstName": "Nombre",
-    "firstNamePlaceholder": "Votre prénom",
+    "firstNamePlaceholder": "Tu nombre",
     "lastName": "Nombre",
-    "lastNamePlaceholder": "Votre nom",
-    "register": "S'inscrire",
+    "lastNamePlaceholder": "Tu apellido",
+    "register": "Registrarse",
     "sendResetEmail": "Enviar correo de restablecimiento",
     "sending": "Enviando..."
   },
-  "backupAndExport": "Sauvegarde et Export",
-  "backupData": "Sauvegarder datos",
+  "backupAndExport": "Copia de seguridad y exportación",
+  "backupData": "Guardar datos",
   "balance": "Solde",
   "bankConnections": "Bancos",
-  "bankReconciliation": "Rapprochement bancaire",
+  "bankReconciliation": "Conciliación bancaria",
   "business_sectors": {
     "african": {
-      "agriculture": "Agriculture et élevage",
-      "btp": "BTP et construction",
-      "commerce": "Commerce et distribution",
-      "education": "Éducation et formation",
-      "energie": "Énergie et mines",
-      "finance": "Services financiers",
-      "food_processing": "Agroalimentaire",
-      "industrie": "Industrie et manufacturing",
-      "mining": "Mines et extraction",
-      "sante": "Santé",
-      "services": "Services",
-      "telecom": "Télécommunications",
-      "textiles": "Textile et confection",
-      "tourisme": "Tourisme et hôtellerie",
-      "transport": "Transport et logistique"
+      "agriculture": "Agricultura y ganadería",
+      "btp": "Construcción y obras públicas",
+      "commerce": "Comercio y distribución",
+      "education": "Educación y formación",
+      "energie": "Energía y minas",
+      "finance": "Servicios financieros",
+      "food_processing": "Agroalimentación",
+      "industrie": "Industria y manufactura",
+      "mining": "Minería y extracción",
+      "sante": "Salud",
+      "services": "Servicios",
+      "telecom": "Telecomunicaciones",
+      "textiles": "Textil y confección",
+      "tourisme": "Turismo y hostelería",
+      "transport": "Transporte y logística"
     },
     "european": {
-      "btp": "BTP",
-      "commerce": "Commerce",
-      "consulting": "Conseil",
-      "education": "Éducation",
-      "finance": "Finance",
-      "healthcare": "Santé",
-      "hospitality": "Hôtellerie-restauration",
-      "industrie": "Industrie",
-      "it": "Informatique",
-      "media": "Médias et communication",
-      "real_estate": "Immobilier",
-      "services": "Services"
+      "btp": "Construcción",
+      "commerce": "Comercio",
+      "consulting": "Consultoría",
+      "education": "Educación",
+      "finance": "Finanzas",
+      "healthcare": "Salud",
+      "hospitality": "Hostelería y restauración",
+      "industrie": "Industria",
+      "it": "Informática",
+      "media": "Medios y comunicación",
+      "real_estate": "Bienes raíces",
+      "services": "Servicios"
     }
   },
   "cancel": "Cancelar",
@@ -1176,7 +1177,7 @@
   "currencies_extended": {
     "CAD": {
       "format": "{{amount}} CAD",
-      "name": "Dollar canadien",
+      "name": "Dólar canadiense",
       "symbol": "CAD"
     },
     "EUR": {
@@ -1186,64 +1187,64 @@
     },
     "USD": {
       "format": "${{amount}}",
-      "name": "Dollar américain",
+      "name": "Dólar estadounidense",
       "symbol": "$"
     },
     "XAF": {
       "format": "{{amount}} FCFA",
-      "name": "Franc CFA BEAC",
+      "name": "Franco CFA BEAC",
       "symbol": "FCFA"
     },
     "XOF": {
       "format": "{{amount}} CFA",
-      "name": "Franc CFA BCEAO",
+      "name": "Franco CFA BCEAO",
       "symbol": "CFA"
     }
   },
   "currency": {
     "formats": {
-      "annual_revenue": "Facturación annuel ({currency})",
+      "annual_revenue": "Facturación anual ({currency})",
       "capital_social": "Capital social ({currency})",
-      "estimation_hint": "Estimation ou exercice précédent • Moneda : {currency} ({country})"
+      "estimation_hint": "Estimación o ejercicio anterior • Moneda: {currency} ({country})"
     }
   },
-  "currentPlan": "Plan actuel",
-  "dark": "Sombre",
+  "currentPlan": "Plan actual",
+  "dark": "Oscuro",
   "dashboard": {
     "activeClients": "Clientes actifs",
-    "activeClientsDescription": "Nombrebre de clients avec activité récente",
+    "activeClientsDescription": "Número de clientes con actividad reciente",
     "cashBalance": "Solde de trésorerie",
-    "cashflow": "Flux de trésorerie",
-    "cashflowDescription": "Évolution des entrées et sorties de trésorerie",
+    "cashflow": "Flujo de caja",
+    "cashflowDescription": "Evolución de las entradas y salidas de caja",
     "clients": "Clientes",
-    "comparedToPreviousPeriod": "Par rapport à la période précédente",
+    "comparedToPreviousPeriod": "En comparación con el período anterior",
     "dashboardWelcomeMessage": "Bienvenue, {userName}!",
     "expenses": "Gastos",
     "expensesDescription": "Gastos de la période",
-    "financialSummary": "Résumé financier",
-    "financialSummaryDescription": "Aperçu de su situation financière",
-    "netProfit": "Bénéfice net",
-    "netProfitDescription": "Bénéfice après déduction des charges",
-    "newInvoice": "Nouvelle factura",
-    "newOpportunity": "Nouvelle opportunité",
+    "financialSummary": "Resumen financiero",
+    "financialSummaryDescription": "Resumen de su situación financiera",
+    "netProfit": "Beneficio neto",
+    "netProfitDescription": "Beneficio después de deducir los gastos",
+    "newInvoice": "Nueva factura",
+    "newOpportunity": "Nueva oportunidad",
     "newPurchaseOrder": "Nueva compra",
-    "noUpcomingDeadlines": "Aucune Vencimiento à venir",
+    "noUpcomingDeadlines": "Ningún vencimiento próximo",
     "overdueInvoices": "Facturas atrasadas",
     "pendingInvoices": "Facturas en attente",
-    "profit": "Bénéfice",
+    "profit": "Beneficio",
     "revenue": "Facturación",
     "revenueDescription": "Revenus de la période",
-    "revenueExpenseTrend": "Tendance Revenus/Gastos",
-    "revenueExpenseTrendDescription": "Évolution des revenus et dépenses",
-    "shortcutsDescription": "Accédez rapidement aux fonctionnalités principales",
-    "shortcutsTitle": "Accès rapides",
+    "revenueExpenseTrend": "Tendencia Ingresos/Gastos",
+    "revenueExpenseTrendDescription": "Evolución de los ingresos y gastos",
+    "shortcutsDescription": "Acceda rápidamente a las funciones principales",
+    "shortcutsTitle": "Accesos rápidos",
     "suppliers": "Proveedores",
-    "totalExpenses": "Total des dépenses",
-    "totalExpensesDescription": "Gastos et charges de la période",
+    "totalExpenses": "Gastos totales",
+    "totalExpensesDescription": "Gastos y cargos del período",
     "totalRevenue": "Facturación total",
-    "totalRevenueDescription": "Revenus de la période actuelle",
-    "upcomingDeadlines": "Vencimientos à venir",
-    "upcomingDeadlinesDescription": "Vencimientos et obligations à venir",
+    "totalRevenueDescription": "Ingresos del período actual",
+    "upcomingDeadlines": "Vencimientos próximos",
+    "upcomingDeadlinesDescription": "Vencimientos y obligaciones próximas",
     "welcome": {
       "accountReady": "Cuenta creada con éxito",
       "companyReady": "{{companyName}} está listo para comenzar.",
@@ -5348,5 +5349,408 @@
     "errorDeletingDocument": "Error al eliminar el documento",
     "errorExportingDocument": "Error al exportar el documento",
     "submissionError": "Error al enviar el formulario"
+  },
+  "landing": {
+    "navbar": {
+      "product": "Producto",
+      "pricing": "Precios",
+      "resources": "Recursos",
+      "roadmap": "Hoja de ruta",
+      "login": "Iniciar sesión",
+      "freeTrial": "Prueba gratuita",
+      "features": {
+        "ai": "Inteligencia Artificial",
+        "aiDesc": "Asistente IA financiero",
+        "treasury": "Tesorería",
+        "treasuryDesc": "Gestión de efectivo",
+        "compliance": "Cumplimiento",
+        "complianceDesc": "Declaraciones regulatorias",
+        "hr": "Nómina y RRHH",
+        "hrDesc": "Gestión de personal",
+        "dashboards": "Cuadros de mando",
+        "dashboardsDesc": "KPIs en tiempo real",
+        "multiCountry": "Multi-país",
+        "multiCountryDesc": "PGC, SYSCOHADA, IFRS"
+      },
+      "resourcesMenu": {
+        "documentation": "Documentación",
+        "documentationDesc": "Guías y tutoriales",
+        "faq": "Preguntas frecuentes",
+        "faqDesc": "Preguntas más frecuentes",
+        "blog": "Blog",
+        "blogDesc": "Noticias y consejos"
+      }
+    },
+    "hero": {
+      "badge": "Software de gestión empresarial",
+      "title": "Gestione su empresa",
+      "titleHighlight": "con Inteligencia Artificial",
+      "subtitle": "Contabilidad, facturación, tesorería, análisis financiero —",
+      "subtitleHighlight": "una sola herramienta para gestionarlo todo.",
+      "subtitleLine2": "Haga sus preguntas, la IA responde al instante.",
+      "features": {
+        "dashboard": "Cuadro de mando",
+        "invoicing": "Facturación",
+        "treasury": "Tesorería",
+        "accounting": "Contabilidad",
+        "analytics": "Análisis",
+        "reports": "Informes"
+      },
+      "chat": {
+        "assistantName": "Asistente CassKai",
+        "online": "En línea - Listo para ayudar",
+        "welcome": "¡Hola! Soy su asistente financiero. Pregúnteme sobre su empresa: tesorería, facturas, ingresos...",
+        "placeholder": "Haga su pregunta...",
+        "suggestions": "Pruebe estas preguntas:",
+        "demoQuestions": {
+          "treasury": "¿Cómo va mi tesorería?",
+          "invoices": "¿Mis facturas vencidas?",
+          "revenue": "¿Mis ingresos del mes?",
+          "expenses": "¿Mis principales gastos?"
+        }
+      },
+      "cta": {
+        "tryFree": "Prueba gratuita",
+        "discover": "Descubrir funcionalidades"
+      },
+      "stats": {
+        "countries": "Países soportados",
+        "standards": "Normas contables",
+        "availability": "Disponibilidad",
+        "support": "Soporte IA"
+      }
+    },
+    "worldMap": {
+      "title": "Cobertura mundial",
+      "subtitle": "CassKai está disponible en más de 25 países",
+      "controls": {
+        "play": "Reproducción automática",
+        "pause": "Pausa",
+        "resume": "▶️ Reanudar"
+      }
+    },
+    "timeline": {
+      "badge": "Antes/Después",
+      "title": "La transformación en",
+      "titleHighlight": "tiempo real",
+      "subtitle": "Descubra cómo CassKai transforma cada etapa de su gestión financiera.",
+      "days": {
+        "day1": "Día 1",
+        "day15": "Día 15",
+        "endMonth": "Fin de mes",
+        "quarter": "Trimestre",
+        "year": "Año"
+      },
+      "before": {
+        "label": "ANTES de CassKai",
+        "manualEntry": {
+          "title": "Entrada manual",
+          "desc": "Excel, papeles, doble entrada. 2h de trabajo diario.",
+          "time": "2h/día"
+        },
+        "reconciliation": {
+          "title": "Conciliación bancaria",
+          "desc": "Comparación línea por línea. Búsqueda de diferencias.",
+          "time": "4h"
+        },
+        "urgentClose": {
+          "title": "Cierre urgente",
+          "desc": "Noche en blanco, estrés, errores de última hora.",
+          "time": "Noche en blanco"
+        },
+        "accountant": {
+          "title": "Contador",
+          "desc": "Envío de documentos, idas y vueltas, correcciones.",
+          "time": "2000€"
+        },
+        "annualReport": {
+          "title": "Balance anual",
+          "desc": "Semanas de preparación, estrés fiscal.",
+          "time": "3 semanas"
+        }
+      },
+      "after": {
+        "label": "CON CassKai",
+        "autoImport": {
+          "title": "Importación automática",
+          "desc": "Conexión bancaria, OCR de facturas. Cero entrada.",
+          "time": "0 min"
+        },
+        "reconciled": {
+          "title": "Ya conciliado",
+          "desc": "La IA coincidió el 98% de las transacciones automáticamente.",
+          "time": "Automático"
+        },
+        "oneClick": {
+          "title": "Cierre en 1 clic",
+          "desc": "Informe generado, listo para validación.",
+          "time": "5 min"
+        },
+        "realtime": {
+          "title": "Colaboración en tiempo real",
+          "desc": "Su contador accede en directo. Validación instantánea.",
+          "time": "Incluido"
+        },
+        "autoTaxReturn": {
+          "title": "Declaración fiscal automática",
+          "desc": "Documentos pre-rellenados, conformes, listos para presentar.",
+          "time": "1 día"
+        }
+      },
+      "controls": {
+        "pause": "Pausa",
+        "autoPlay": "Reproducción automática"
+      },
+      "stats": {
+        "timeSaved": "Tiempo ahorrado",
+        "noErrors": "Errores de entrada",
+        "compliance": "Cumplimiento",
+        "access": "Acceso a datos"
+      }
+    },
+    "features": {
+      "badge": "Funcionalidades Potentes",
+      "title": "Todo lo que necesita",
+      "titleHighlight": "en una sola plataforma",
+      "subtitle": "CassKai combina inteligencia artificial, automatización y cumplimiento para transformar su gestión financiera",
+      "ai": {
+        "title": "Inteligencia Artificial",
+        "desc": "Nuestra IA comprende su contabilidad y le asiste diariamente. Haga sus preguntas en su idioma, obtenga respuestas instantáneas.",
+        "benefits": {
+          "auto": "Categorización automática de transacciones",
+          "suggestions": "Sugerencias de asientos contables",
+          "detection": "Detección proactiva de anomalías",
+          "assistant": "Asistente conversacional 24/7"
+        }
+      },
+      "treasury": {
+        "title": "Gestión de Tesorería",
+        "desc": "Visualice sus flujos en tiempo real, anticipe sus necesidades y optimice su efectivo. Multi-banco, multi-divisa.",
+        "benefits": {
+          "sync": "Sincronización bancaria automática",
+          "forecast": "Previsiones a 12 meses",
+          "alerts": "Alertas de umbral personalizadas",
+          "reconciliation": "Conciliación bancaria inteligente"
+        }
+      },
+      "regulatory": {
+        "title": "Cumplimiento Normativo",
+        "desc": "Genere sus declaraciones fiscales y sociales en pocos clics. IVA, DSN, declaraciones fiscales, estados SYSCOHADA.",
+        "benefits": {
+          "taxReturns": "Declaraciones fiscales automatizadas",
+          "vat": "Declaraciones de IVA pre-rellenadas",
+          "fec": "Exportación FEC certificada",
+          "payroll": "DSN y nóminas"
+        }
+      },
+      "hr": {
+        "title": "Nómina y RRHH",
+        "desc": "Gestione a sus colaboradores de la A a la Z: contratos, nóminas, vacaciones, notas de gastos. Automatizado y conforme.",
+        "benefits": {
+          "payslips": "Nóminas automáticas",
+          "leave": "Gestión de vacaciones y ausencias",
+          "expenses": "Notas de gastos simplificadas",
+          "compliance": "Cumplimiento social garantizado"
+        }
+      },
+      "analytics": {
+        "title": "Cuadros de Mando",
+        "desc": "KPIs financieros en tiempo real, gráficos interactivos e informes personalizables para gestionar su actividad.",
+        "benefits": {
+          "custom": "Cuadro de mando personalizable",
+          "realtime": "KPIs financieros en tiempo real",
+          "comparison": "Comparaciones interanuales",
+          "export": "Exportación PDF y Excel"
+        }
+      },
+      "multi": {
+        "title": "Multi-País y Normas",
+        "desc": "PGC francés, SYSCOHADA, IFRS, SCF Magreb: CassKai se adapta a su marco contable y país.",
+        "benefits": {
+          "pcg": "PGC 2025 (Francia)",
+          "syscohada": "SYSCOHADA revisado (África)",
+          "ifrs": "IFRS para PYMES",
+          "scf": "SCF/PCM (Magreb)"
+        }
+      },
+      "tryFree": "Prueba gratuita",
+      "bottomStats": {
+        "gdpr": "Conforme RGPD",
+        "responseTime": "Tiempo de respuesta IA",
+        "countries": "Países soportados",
+        "availability": "Disponibilidad"
+      }
+    },
+    "calculator": {
+      "badge": "Calculadora de ROI",
+      "title": "¿Cuánto va a",
+      "titleHighlight": "ahorrar?",
+      "subtitle": "Personalice los parámetros según su empresa y descubra su retorno de inversión.",
+      "inputs": {
+        "title": "Su empresa",
+        "country": "País",
+        "employees": "Número de empleados",
+        "revenue": "Ingresos mensuales",
+        "transactions": "Transacciones/mes",
+        "note": "Estas estimaciones se basan en promedios sectoriales. Sus ahorros reales pueden variar."
+      },
+      "results": {
+        "roiTitle": "ROI ANUAL ESTIMADO",
+        "savingsAfter": "de ahorros netos después de la suscripción a CassKai",
+        "breakdown": "Desglose de ahorros",
+        "timeSaved": "Tiempo ahorrado",
+        "hoursPerMonth": "{{hours}}h/mes",
+        "errorsAvoided": "Errores evitados",
+        "guaranteedCompliance": "Cumplimiento garantizado",
+        "accountant": "Contador",
+        "optimizedCollab": "Colaboración optimizada",
+        "totalSavings": "Ahorros totales",
+        "recommendedPlan": "Plan recomendado",
+        "perMonth": "/mes",
+        "tryFree": "Comenzar mi prueba gratuita",
+        "trialInfo": "30 días gratis • Sin tarjeta de crédito"
+      }
+    },
+    "testimonials": {
+      "badge": "Testimonios de nuestros Beta Testers",
+      "title": "Probaron CassKai",
+      "titleHighlight": "antes que nadie",
+      "subtitle": "Descubra los comentarios de nuestros primeros usuarios en Francia y África francófona",
+      "betaBadge": "Beta Tester",
+      "metrics": {
+        "timeSaved": "Tiempo ahorrado",
+        "errorsReduced": "Errores reducidos",
+        "satisfaction": "Satisfacción"
+      },
+      "autoPlay": "Reproducción automática",
+      "globalStats": {
+        "testers": "Beta testers",
+        "countries": "Países representados",
+        "rating": "Calificación promedio",
+        "recommend": "Recomiendan CassKai"
+      }
+    },
+    "cta": {
+      "badge": "Oferta de lanzamiento disponible",
+      "title": "¿Listo para transformar",
+      "titleHighlight": "su gestión financiera?",
+      "subtitle": "Únase a las empresas que han elegido el futuro de la contabilidad. Comience gratis y descubra el poder de la IA financiera.",
+      "benefits": {
+        "trial": "Prueba gratuita de 30 días",
+        "noCard": "Sin tarjeta de crédito requerida",
+        "support": "Soporte incluido",
+        "cancel": "Cancelación en cualquier momento"
+      },
+      "buttons": {
+        "start": "Comenzar gratis",
+        "demo": "Reservar una demo"
+      },
+      "pricing": {
+        "monthly": "Mensual",
+        "yearly": "Anual",
+        "yearlyDiscount": "-20%",
+        "priceIn": "Precio en {{currency}} ({{symbol}}) - Norma {{standard}}",
+        "perMonth": "/mes",
+        "perYear": "/año",
+        "plans": {
+          "starter": {
+            "name": "Starter",
+            "desc": "Para pequeñas empresas y autónomos",
+            "features": {
+              "users": "Hasta 5 usuarios",
+              "accounting": "Contabilidad básica",
+              "invoicing": "Facturación ilimitada"
+            },
+            "cta": "Elegir Starter"
+          },
+          "professional": {
+            "name": "Professional",
+            "badge": "POPULAR",
+            "desc": "Para PYMES en crecimiento",
+            "features": {
+              "users": "Usuarios ilimitados",
+              "starter": "Todas las funcionalidades Starter",
+              "ai": "IA avanzada + Previsiones",
+              "multi": "Multi-divisas y Multi-empresa"
+            },
+            "cta": "Elegir Professional"
+          },
+          "enterprise": {
+            "name": "Enterprise",
+            "desc": "Para grandes grupos",
+            "features": {
+              "all": "Todo Professional +",
+              "sso": "SSO e integraciones avanzadas",
+              "support": "Soporte prioritario 24/7",
+              "manager": "Account Manager dedicado"
+            },
+            "cta": "Elegir Enterprise"
+          }
+        }
+      }
+    },
+    "footer": {
+      "sections": {
+        "product": {
+          "title": "Producto",
+          "features": "Funcionalidades",
+          "pricing": "Precios",
+          "roadmap": "Hoja de ruta",
+          "status": "Estado del sistema"
+        },
+        "solutions": {
+          "title": "Soluciones",
+          "sme": "PYMES",
+          "accountants": "Despachos contables",
+          "ohada": "Zona OHADA",
+          "europe": "Francia y Europa"
+        },
+        "resources": {
+          "title": "Recursos",
+          "documentation": "Documentación",
+          "tutorials": "Tutoriales",
+          "faq": "Preguntas frecuentes"
+        },
+        "company": {
+          "title": "Empresa",
+          "about": "Acerca de",
+          "legal": "Aviso legal",
+          "contact": "Contacto"
+        }
+      },
+      "contact": {
+        "title": "Contacto",
+        "phone": {
+          "europe": "🇫🇷 +33 7 52 02 71 98 (Europa)",
+          "africaCI": "🇨🇮 +225 74 58 83 83 (África)",
+          "africaBJ": "🇧🇯 +229 01 69 18 76 03 (África)"
+        },
+        "location": "París, Francia"
+      },
+      "social": {
+        "title": "Síguenos",
+        "twitter": "X (Twitter)",
+        "linkedin": "LinkedIn",
+        "youtube": "YouTube"
+      },
+      "copyright": "© {{year}} NOUTCHE CONSEIL. Todos los derechos reservados.",
+      "allRightsReserved": "Todos los derechos reservados"
+    },
+    "aiChat": {
+      "needHelp": "¿Necesita ayuda?",
+      "title": "Asistente CassKai",
+      "status": "En línea",
+      "close": "Cerrar",
+      "minimize": "Minimizar",
+      "placeholder": "Haga su pregunta...",
+      "welcome": "¡Hola! ¿Cómo puedo ayudarle hoy?",
+      "suggestions": {
+        "pricing": "¿Cuáles son sus precios?",
+        "howItWorks": "¿Cómo funciona?",
+        "africa": "¿Apoyan África?"
+      },
+      "typing": "Escribiendo...",
+      "poweredBy": "Impulsado por IA CassKai"
+    }
   }
 }
