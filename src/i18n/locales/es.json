@@ -645,7 +645,13 @@
       "content": "Contenido",
       "send": "Enviar",
       "recipient": "Destinatario",
-      "status": "Estado",
+      "status": {
+        "draft": "Borrador",
+        "pending": "Pendiente",
+        "sent": "Enviado",
+        "failed": "Fallido",
+        "cancelled": "Cancelado"
+      },
       "search": "Buscar...",
       "no_data": "Sin comunicaciones",
       "period": "Período",
@@ -658,13 +664,6 @@
         "rfa_summary": "Resumen RFA",
         "rfa_statement": "Extracto RFA",
         "custom": "Personalizado"
-      },
-      "status": {
-        "draft": "Borrador",
-        "pending": "Pendiente",
-        "sent": "Enviado",
-        "failed": "Fallido",
-        "cancelled": "Cancelado"
       }
     },
     "import": {
@@ -2044,9 +2043,9 @@
     },
     "tvaRates": {
       "0": "0% - Exento",
-      "5.5": "5,5% - Tipo Reducido",
       "10": "10% - Tipo Intermedio",
-      "20": "20% - Tipo Normal"
+      "20": "20% - Tipo Normal",
+      "5.5": "5,5% - Tipo Reducido"
     }
   },
   "inventorypage": {
@@ -2166,9 +2165,9 @@
     },
     "tvaRates": {
       "0": "0% - Exento",
-      "5.5": "5,5% - Tipo Reducido",
       "10": "10% - Tipo Intermedio",
-      "20": "20% - Tipo Normal"
+      "20": "20% - Tipo Normal",
+      "5.5": "5,5% - Tipo Reducido"
     }
   },
   "invoicing": {
@@ -2362,311 +2361,488 @@
     "viewEntries": "Ver asientos"
   },
   "landing": {
-    "contact": {
-      "badge": "Nous contacter",
-      "chat": {
-        "content": "Soporte instantané",
-        "description": "Disponible 24/7",
-        "title": "Chat en direct"
+    "navbar": {
+      "product": "Producto",
+      "pricing": "Precios",
+      "resources": "Recursos",
+      "roadmap": "Hoja de ruta",
+      "login": "Iniciar sesión",
+      "freeTrial": "Prueba gratuita",
+      "features": {
+        "ai": "Inteligencia Artificial",
+        "aiDesc": "Asistente IA financiero",
+        "treasury": "Tesorería",
+        "treasuryDesc": "Gestión de efectivo",
+        "compliance": "Cumplimiento",
+        "complianceDesc": "Declaraciones regulatorias",
+        "hr": "Nómina y RRHH",
+        "hrDesc": "Gestión de personal",
+        "dashboards": "Cuadros de mando",
+        "dashboardsDesc": "KPIs en tiempo real",
+        "multiCountry": "Multi-país",
+        "multiCountryDesc": "PGC, SYSCOHADA, IFRS"
       },
-      "description": "Notre equipo d'experts est disponible pour répondre à toutes sus questions et vous accompagner dans su réussite.",
-      "email": {
-        "description": "Réponse sous 24h",
-        "title": "Correo"
-      },
-      "phone": {
-        "description": "Lun-Ven 9h-18h",
-        "title": "Teléfono"
-      },
-      "subtitle": "Nous sommes là pour vous",
-      "title": "Une question ?"
+      "resourcesMenu": {
+        "documentation": "Documentación",
+        "documentationDesc": "Guías y tutoriales",
+        "faq": "Preguntas frecuentes",
+        "faqDesc": "Preguntas más frecuentes",
+        "blog": "Blog",
+        "blogDesc": "Noticias y consejos"
+      }
     },
-    "coverage": {
-      "count": "33 países soportados • 4 estándares contables • Todas las monedas",
-      "subtitle": "CassKai se adapta automáticamente a sus estándares contables locales. Más de 30 países soportados.",
-      "title": "Una solución adaptada a su país"
+    "hero": {
+      "badge": "Software de gestión empresarial",
+      "title": "Gestione su empresa",
+      "titleHighlight": "con Inteligencia Artificial",
+      "subtitle": "Contabilidad, facturación, tesorería, análisis financiero —",
+      "subtitleHighlight": "una sola herramienta para gestionarlo todo.",
+      "subtitleLine2": "Haga sus preguntas, la IA responde al instante.",
+      "features": {
+        "dashboard": "Cuadro de mando",
+        "invoicing": "Facturación",
+        "treasury": "Tesorería",
+        "accounting": "Contabilidad",
+        "analytics": "Análisis",
+        "reports": "Informes"
+      },
+      "chat": {
+        "assistantName": "Asistente CassKai",
+        "online": "En línea - Listo para ayudar",
+        "welcome": "¡Hola! Soy su asistente financiero. Pregúnteme sobre su empresa: tesorería, facturas, ingresos...",
+        "placeholder": "Haga su pregunta...",
+        "suggestions": "Pruebe estas preguntas:",
+        "demoQuestions": {
+          "treasury": "¿Cómo va mi tesorería?",
+          "invoices": "¿Mis facturas vencidas?",
+          "revenue": "¿Mis ingresos del mes?",
+          "expenses": "¿Mis principales gastos?"
+        }
+      },
+      "cta": {
+        "tryFree": "Prueba gratuita",
+        "discover": "Descubrir funcionalidades"
+      },
+      "stats": {
+        "countries": "Países soportados",
+        "standards": "Normas contables",
+        "availability": "Disponibilidad",
+        "support": "Soporte IA"
+      }
+    },
+    "worldMap": {
+      "title": "Cobertura mundial",
+      "subtitle": "CassKai está disponible en más de 25 países",
+      "controls": {
+        "play": "Reproducción automática",
+        "pause": "Pausa",
+        "resume": "▶️ Reanudar"
+      },
+      "description": "Disponible en {{countries}} países con adaptación automática a las normas contables locales",
+      "titleHighlight": "en todo el mundo",
+      "accountingStandard": "Norma contable",
+      "localCurrency": "Moneda local",
+      "availableFeatures": "Funcionalidades disponibles",
+      "compliant": "Conforme a las normas locales",
+      "pause": "⏸️ Pausa",
+      "stats": {
+        "countries": "Países soportados",
+        "standards": "Normas contables",
+        "currencies": "Monedas",
+        "documents": "Documentos legales"
+      }
+    },
+    "timeline": {
+      "badge": "Antes/Después",
+      "title": "La transformación en",
+      "titleHighlight": "tiempo real",
+      "subtitle": "Descubra cómo CassKai transforma cada etapa de su gestión financiera.",
+      "days": {
+        "day1": "Día 1",
+        "day15": "Día 15",
+        "endMonth": "Fin de mes",
+        "quarter": "Trimestre",
+        "year": "Año"
+      },
+      "before": "Antes",
+      "after": "Después",
+      "controls": {
+        "pause": "Pausa",
+        "autoPlay": "Reproducción automática"
+      },
+      "stats": {
+        "timeSaved": "Tiempo ahorrado",
+        "noErrors": "Errores de entrada",
+        "compliance": "Cumplimiento",
+        "access": "Acceso a datos",
+        "errors": "Errores de entrada"
+      },
+      "beforeCasskai": "ANTES de CassKai",
+      "withCasskai": "CON CassKai",
+      "description": "Descubra cómo CassKai transforma su vida diaria paso a paso",
+      "play": "▶️ Reproducción auto",
+      "pause": "⏸️ Pausa",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "items": [
+        {
+          "day": "Día 1",
+          "before": {
+            "title": "Entrada manual",
+            "description": "Excel, papeles, doble entrada. 2h de trabajo diario.",
+            "time": "2h/día"
+          },
+          "after": {
+            "title": "Importación automática",
+            "description": "Conexión bancaria, OCR de facturas. Cero entrada.",
+            "time": "0 min"
+          }
+        },
+        {
+          "day": "Día 15",
+          "before": {
+            "title": "Conciliación bancaria",
+            "description": "Comparación línea por línea. Búsqueda de discrepancias.",
+            "time": "4h"
+          },
+          "after": {
+            "title": "Ya conciliado",
+            "description": "La IA coincidió el 98% de las transacciones automáticamente.",
+            "time": "Automático"
+          }
+        },
+        {
+          "day": "Fin de mes",
+          "before": {
+            "title": "Cierre urgente",
+            "description": "Noche en blanco, estrés, errores de último minuto.",
+            "time": "Noche en blanco"
+          },
+          "after": {
+            "title": "Cierre en 1 clic",
+            "description": "Informe generado, listo para validación.",
+            "time": "5 min"
+          }
+        },
+        {
+          "day": "Trimestre",
+          "before": {
+            "title": "Contador",
+            "description": "Envío de documentos, idas y vueltas, correcciones.",
+            "time": "2000€"
+          },
+          "after": {
+            "title": "Colaboración en tiempo real",
+            "description": "Su contador accede en vivo. Validación instantánea.",
+            "time": "Incluido"
+          }
+        },
+        {
+          "day": "Año",
+          "before": {
+            "title": "Informe anual",
+            "description": "Semanas de preparación, estrés fiscal.",
+            "time": "3 semanas"
+          },
+          "after": {
+            "title": "Declaración fiscal auto",
+            "description": "Documentos precargados, conformes, listos para presentar.",
+            "time": "1 día"
+          }
+        }
+      ]
     },
     "features": {
-      "access": {
-        "description": "Application web responsive accessible depuis tous sus appareils.",
-        "title": "Accès partout"
+      "badge": "Funcionalidades Potentes",
+      "title": "Todo lo que necesita",
+      "titleHighlight": "en una sola plataforma",
+      "subtitle": "CassKai combina inteligencia artificial, automatización y cumplimiento para transformar su gestión financiera",
+      "ai": {
+        "title": "Inteligencia Artificial",
+        "desc": "Nuestra IA comprende su contabilidad y le asiste diariamente. Haga sus preguntas en su idioma, obtenga respuestas instantáneas.",
+        "benefits": {
+          "auto": "Categorización automática de transacciones",
+          "suggestions": "Sugerencias de asientos contables",
+          "detection": "Detección proactiva de anomalías",
+          "assistant": "Asistente conversacional 24/7"
+        }
       },
-      "accounting": {
-        "description": "Gestion complète de su comptabilité avec asientos automatisées, plan comptable personnalisable et rapports financiers en temps réel.",
-        "title": "Contabilidad & Finances"
+      "treasury": {
+        "title": "Gestión de Tesorería",
+        "desc": "Visualice sus flujos en tiempo real, anticipe sus necesidades y optimice su efectivo. Multi-banco, multi-divisa.",
+        "benefits": {
+          "sync": "Sincronización bancaria automática",
+          "forecast": "Previsiones a 12 meses",
+          "alerts": "Alertas de umbral personalizadas",
+          "reconciliation": "Conciliación bancaria inteligente"
+        }
+      },
+      "regulatory": {
+        "title": "Cumplimiento Normativo",
+        "desc": "Genere sus declaraciones fiscales y sociales en pocos clics. IVA, DSN, declaraciones fiscales, estados SYSCOHADA.",
+        "benefits": {
+          "taxReturns": "Declaraciones fiscales automatizadas",
+          "vat": "Declaraciones de IVA pre-rellenadas",
+          "fec": "Exportación FEC certificada",
+          "payroll": "DSN y nóminas"
+        }
+      },
+      "hr": {
+        "title": "Nómina y RRHH",
+        "desc": "Gestione a sus colaboradores de la A a la Z: contratos, nóminas, vacaciones, notas de gastos. Automatizado y conforme.",
+        "benefits": {
+          "payslips": "Nóminas automáticas",
+          "leave": "Gestión de vacaciones y ausencias",
+          "expenses": "Notas de gastos simplificadas",
+          "compliance": "Cumplimiento social garantizado"
+        }
       },
       "analytics": {
-        "description": "Tableaux de bord interactifs, analyses prédictives et rapports personnalisables pour piloter su entreprise en toute connaissance.",
-        "title": "Analyses & Informes"
+        "title": "Cuadros de Mando",
+        "desc": "KPIs financieros en tiempo real, gráficos interactivos e informes personalizables para gestionar su actividad.",
+        "benefits": {
+          "custom": "Cuadro de mando personalizable",
+          "realtime": "KPIs financieros en tiempo real",
+          "comparison": "Comparaciones interanuales",
+          "export": "Exportación PDF y Excel"
+        }
       },
-      "automation": {
-        "description": "Workflows intelligents qui vous font gagner du temps au quotidien.",
-        "title": "Automatisation"
+      "multi": {
+        "title": "Multi-País y Normas",
+        "desc": "PGC francés, SYSCOHADA, IFRS, SCF Magreb: CassKai se adapta a su marco contable y país.",
+        "benefits": {
+          "pcg": "PGC 2025 (Francia)",
+          "syscohada": "SYSCOHADA revisado (África)",
+          "ifrs": "IFRS para PYMES",
+          "scf": "SCF/PCM (Magreb)"
+        }
       },
-      "badge": "Suite complète",
-      "banking": {
-        "description": "Connectez sus cuentas bancaires, automatisez les rapprochements et suivez su trésorerie en temps réel.",
-        "title": "Gestion Bancaire"
+      "tryFree": "Prueba gratuita",
+      "bottomStats": {
+        "gdpr": "Conforme RGPD",
+        "responseTime": "Tiempo de respuesta IA",
+        "countries": "Países soportados",
+        "availability": "Disponibilidad"
+      }
+    },
+    "calculator": {
+      "badge": "Calculadora de ROI",
+      "title": "¿Cuánto va a",
+      "titleHighlight": "ahorrar?",
+      "subtitle": "Personalice los parámetros según su empresa y descubra su retorno de inversión.",
+      "inputs": {
+        "title": "Su empresa",
+        "country": "País",
+        "employees": "Número de empleados",
+        "revenue": "Ingresos mensuales",
+        "transactions": "Transacciones/mes",
+        "note": "Estas estimaciones se basan en promedios sectoriales. Sus ahorros reales pueden variar."
       },
-      "description": "CassKai réunit tous les outils essentiels à la gestion de su entreprise dans une interface moderne et intuitive.",
-      "hr": {
-        "badge": "Beta - En développement actif",
-        "description": "Gestion complète de sus employés : paie, congés, absences, formations et déclarations sociales simplifiées.",
-        "title": "Recursos Humanos"
+      "results": {
+        "roiTitle": "ROI ANUAL ESTIMADO",
+        "savingsAfter": "de ahorros netos después de la suscripción a CassKai",
+        "breakdown": "Desglose de ahorros",
+        "timeSaved": "Tiempo ahorrado",
+        "hoursPerMonth": "{{hours}}h/mes",
+        "errorsAvoided": "Errores evitados",
+        "guaranteedCompliance": "Cumplimiento garantizado",
+        "accountant": "Contador",
+        "optimizedCollab": "Colaboración optimizada",
+        "totalSavings": "Ahorros totales",
+        "recommendedPlan": "Plan recomendado",
+        "perMonth": "/mes",
+        "tryFree": "Comenzar mi prueba gratuita",
+        "trialInfo": "30 días gratis • Sin tarjeta de crédito"
+      }
+    },
+    "testimonials": {
+      "badge": "Testimonios de nuestros Beta Testers",
+      "title": "Probaron CassKai",
+      "titleHighlight": "antes que nadie",
+      "subtitle": "Descubra los comentarios de nuestros primeros usuarios en Francia y África francófona",
+      "betaBadge": "Beta Tester",
+      "metrics": {
+        "timeSaved": "Tiempo ahorrado",
+        "errorsReduced": "Errores reducidos",
+        "satisfaction": "Satisfacción",
+        "errorReduction": "Reducción de errores"
       },
-      "invoicing": {
-        "description": "Créez et envoyez sus facturas en quelques clics. Gérez sus clients, suivez sus ventes et automatisez sus relances.",
-        "title": "Facturación & CRM"
+      "autoPlay": "Reproducción automática",
+      "globalStats": {
+        "testers": "Beta testers",
+        "countries": "Países representados",
+        "rating": "Calificación promedio",
+        "recommend": "Recomiendan CassKai"
       },
-      "projects": {
-        "description": "Planifiez, suivez et livrez sus projets à temps. Gestion d'equipos, budgets et Vencimientos dans une interface intuitive.",
-        "title": "Gestion de Proyectos"
+      "description": "Descubra los comentarios de nuestros primeros usuarios que probaron CassKai en vista previa",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "stats": {
+        "betaTesters": "Beta testers",
+        "countries": "Países representados",
+        "rating": "Calificación promedio",
+        "recommend": "Recomiendan CassKai"
       },
-      "security": {
-        "description": "Données chiffrées, sauvegardes automatiques et conformité RGPD.",
-        "title": "Sécurité maximale"
+      "items": [
+        {
+          "sector": "Firma de contabilidad",
+          "country": "Senegal",
+          "quote": "CassKai transformó nuestra firma. ¡No más horas de entrada manual! La generación automática de estados SYSCOHADA nos ahorra 3 días al mes.",
+          "tags": "SYSCOHADA, Ahorro de tiempo, Automatización"
+        },
+        {
+          "sector": "PYME - Distribución",
+          "country": "Francia",
+          "quote": "Interfaz intuitiva, conforme a PCG 2025. Mi contador adora poder acceder a los datos en tiempo real. ¡No más intercambios de correos!",
+          "tags": "PCG 2025, Colaboración, Interfaz"
+        },
+        {
+          "sector": "Importación-Exportación",
+          "country": "Costa de Marfil",
+          "quote": "La multi-moneda y el cumplimiento de SYSCOHADA son perfectos para nuestro negocio internacional. ¡Conciliación bancaria ultra rápida!",
+          "tags": "Multi-moneda, SYSCOHADA, Internacional"
+        },
+        {
+          "sector": "Startup Tech",
+          "country": "Francia",
+          "quote": "¡Exactamente lo que necesitábamos para comenzar sin arruinarnos! La IA nos ayuda a categorizar gastos, ¡ahorramos mucho tiempo!",
+          "tags": "IA, Startup, Categorización"
+        },
+        {
+          "sector": "Comercio minorista",
+          "country": "Mali",
+          "quote": "Simple, efectivo y adaptado a Mali. La conexión bancaria automática y los informes SYSCOHADA claros nos facilitan la vida diaria.",
+          "tags": "Simplicidad, SYSCOHADA, Informes"
+        },
+        {
+          "sector": "Consultoría",
+          "country": "Marruecos",
+          "quote": "Perfecto para nuestro bufete en Marruecos. La generación automática de declaraciones fiscales SCF/PCM nos ahorra horas de trabajo tedioso.",
+          "tags": "PCM/SCF, Magreb, Declaraciones fiscales"
+        }
+      ]
+    },
+    "cta": {
+      "badge": "Oferta de lanzamiento disponible",
+      "title": "¿Listo para transformar",
+      "titleHighlight": "su gestión financiera?",
+      "subtitle": "Únase a las empresas que han elegido el futuro de la contabilidad. Comience gratis y descubra el poder de la IA financiera.",
+      "benefits": {
+        "trial": "Prueba gratuita de 30 días",
+        "noCard": "Sin tarjeta de crédito requerida",
+        "support": "Soporte incluido",
+        "cancel": "Cancelación en cualquier momento"
       },
-      "subtitle": "dans une seule application",
-      "title": "Tout ce dont vous avez besoin",
-      "regulatory": {
-        "title": "Cumplimiento Legal",
-        "description": "Generación automática de 35+ documentos legales conformes con estándares PCG, SYSCOHADA, IFRS, SCF y PCM. Exportación PDF y XML para presentación electrónica."
+      "buttons": {
+        "start": "Comenzar gratis",
+        "demo": "Reservar una demo"
+      },
+      "pricing": {
+        "monthly": "Mensual",
+        "yearly": "Anual",
+        "yearlyDiscount": "-20%",
+        "priceIn": "Precio en {{currency}} ({{symbol}}) - Norma {{standard}}",
+        "perMonth": "/mes",
+        "perYear": "/año",
+        "plans": {
+          "starter": {
+            "name": "Starter",
+            "desc": "Para pequeñas empresas y autónomos",
+            "features": {
+              "users": "Hasta 5 usuarios",
+              "accounting": "Contabilidad básica",
+              "invoicing": "Facturación ilimitada"
+            },
+            "cta": "Elegir Starter"
+          },
+          "professional": {
+            "name": "Professional",
+            "badge": "POPULAR",
+            "desc": "Para PYMES en crecimiento",
+            "features": {
+              "users": "Usuarios ilimitados",
+              "starter": "Todas las funcionalidades Starter",
+              "ai": "IA avanzada + Previsiones",
+              "multi": "Multi-divisas y Multi-empresa"
+            },
+            "cta": "Elegir Professional"
+          },
+          "enterprise": {
+            "name": "Enterprise",
+            "desc": "Para grandes grupos",
+            "features": {
+              "all": "Todo Professional +",
+              "sso": "SSO e integraciones avanzadas",
+              "support": "Soporte prioritario 24/7",
+              "manager": "Account Manager dedicado"
+            },
+            "cta": "Elegir Enterprise"
+          }
+        }
       }
     },
     "footer": {
-      "company": {
-        "activity": "Activité: Conseil de gestion",
-        "capitalSocial": "Capital social: 1 500,00 €",
-        "nafCode": "Code NAF: 70.22Z",
-        "rcs": "RCS: 909 672 685 R.C.S. Evry",
-        "title": "Entreprise",
-        "tva": "TVA: FR85909672685"
-      },
-      "compliance": {
-        "gdpr": "Conforme RGPD",
-        "iso": "ISO 27001",
-        "ssl": "SSL/TLS Sécurisé",
-        "title": "Conformité"
-      },
-      "convention": {
-        "description1": "Bureaux d'études techniques",
-        "description2": "et sociétés de conseils",
-        "idcc": "IDCC 1486",
-        "title": "Convention"
-      },
-      "copyright": "Tous droits réservés.",
-      "coverage": "Disponible en Francia, Bélgica, Luxemburgo y en 30 países africanos",
-      "description": "La solution complète de gestion d'entreprise pour les PME et indépendants.",
-      "gdpr_compliant": "Conforme RGPD",
-      "legal": {
-        "cookies": "Cookies",
-        "gdpr": "RGPD",
-        "privacy": "Confidentialité",
-        "terms": "Conditions",
-        "title": "Légal"
-      },
-      "legalNotice": "Inscrit au RCS d'Evry le 27/01/2022 - Domaine d'activité: Conseil de gestion",
-      "product": {
-        "features": "Fonctionnalités",
-        "integrations": "Intégrations",
-        "pricing": "Tarifs",
-        "security": "Sécurité",
-        "title": "Produit"
-      },
-      "ssl": "SSL Sécurisé",
-      "support": {
-        "api": "API",
-        "documentation": "Documentación",
-        "help": "Centre d'aide",
-        "status": "Statut",
-        "title": "Soporte"
-      },
-      "version": "Version 2.0"
-    },
-    "hero": {
-      "badge": "🚀 Solución Profesional - Gestión empresarial moderna",
-      "badgeRegulatory": "🌍 Informes Legales Multi-País (10+ países)",
-      "cta": {
-        "beta": "Comenzar prueba gratuita",
-        "demo": "Ver la demostración",
-        "start": "Prueba gratis 30 días"
-      },
-      "description": "CassKai simplifica la gestión empresarial con una suite completa: contabilidad, facturación, CRM, proyectos, RRHH y más. Todo en uno, simple y potente.",
-      "stats": {
-        "companies": "Empresas",
-        "rating": "Satisfacción",
-        "support": "Soporte",
-        "uptime": "Disponibilidad"
-      },
-      "subtitle": "con simplicidad",
-      "title": "Gestione su empresa"
-    },
-    "regulatory": {
-      "badge": "Cumplimiento Legal",
-      "title": "Informes Legales Automatizados",
-      "subtitle": "Generación automática de sus documentos regulatorios en un clic",
-      "documentsTitle": "Estados Financieros",
-      "feature1Title": "Autocompletar Inteligente",
-      "feature1Desc": "Generación automática de 35+ documentos legales desde su libro mayor. Balance, cuenta de resultados, declaraciones fiscales...",
-      "feature2Title": "5 Estándares Contables",
-      "feature2Desc": "PCG (Francia), SYSCOHADA (OHADA), IFRS for SMEs, SCF (Argelia/Túnez), PCM (Marruecos). Cumplimiento garantizado.",
-      "feature3Title": "Validación Automática",
-      "feature3Desc": "Verificaciones contables automáticas (equilibrio balance, coherencia cuentas). Exportación PDF y XML para presentación electrónica."
-    },
-    "anomaly": {
-      "badge": "IA y Seguridad",
-      "title": "Detección Automática de Anomalías",
-      "subtitle": "Inteligencia artificial para detectar errores contables",
-      "description": "Detección Crítica y Alta",
-      "feature1": "Desequilibrios Débito/Crédito",
-      "feature1Desc": "Detección instantánea de asientos no equilibrados",
-      "feature2": "Cuentas Inconsistentes",
-      "feature2Desc": "Verificación automática de números de cuenta",
-      "feature3": "Montos Sospechosos",
-      "feature3Desc": "Alerta sobre montos inusuales o extremos"
-    },
-    "workflow": {
-      "badge": "Flujo Profesional",
-      "title": "Flujo de Validación Avanzado",
-      "subtitle": "Proceso de validación multinivel para sus asientos",
-      "description": "Borrador → Revisión → Validación → Contabilización Final",
-      "step1": "Borrador → Revisión",
-      "step1Desc": "Creación y envío para revisión",
-      "step2": "Revisión → Validación",
-      "step2Desc": "Aprobación o rechazo con comentarios",
-      "step3": "Validación → Contabilización",
-      "step3Desc": "Bloqueo definitivo en los libros contables"
-    },
-    "nav": {
-      "contact": "Contact",
-      "features": "Fonctionnalités",
-      "login": "Connexion",
-      "pricing": "Tarifs",
-      "signup": "Commencer",
-      "testimonials": "Témoignages"
-    },
-    "pricing": {
-      "annual": "Annuel",
-      "badge": "Tarifs transparents",
-      "cta": "Commencer l'essai gratuit",
-      "description": "Tous nos plans incluent un essai gratuit de 30 jours, sans engagement et sans carte bancaire.",
-      "enterprise": {
-        "description": "Solution complète sur mesure",
-        "features": {
-          "audit": "Piste d'audit complète",
-          "banking": "Import des fichiers bancaires",
-          "everything": "Tout du plan Professionnel",
-          "forecasting": "Prévisions financières",
-          "hr_advanced": "RH avancées",
-          "integrations": "Intégrations personnalisées",
-          "onboarding": "Formation incluse",
-          "storage": "Stockage illimité",
-          "support": "Soporte dédié 24/7",
-          "users": "Utilisateurs illimités",
-          "regulatory_auto": "Presentación electrónica automática",
-          "security_logs": "Registros de seguridad avanzados"
+      "sections": {
+        "product": {
+          "title": "Producto",
+          "features": "Funcionalidades",
+          "pricing": "Precios",
+          "roadmap": "Hoja de ruta",
+          "status": "Estado del sistema"
         },
-        "name": "Entreprise"
-      },
-      "guarantee": {
-        "security": {
-          "description": "Vos datos sont chiffrées et sauvegardées quotidiennement",
-          "title": "Sécurité garantie"
+        "solutions": {
+          "title": "Soluciones",
+          "sme": "PYMES",
+          "accountants": "Despachos contables",
+          "ohada": "Zona OHADA",
+          "europe": "Francia y Europa"
         },
-        "support": {
-          "description": "Notre equipo vous accompagne dans su réussite",
-          "title": "Soporte expert"
+        "resources": {
+          "title": "Recursos",
+          "documentation": "Documentación",
+          "tutorials": "Tutoriales",
+          "faq": "Preguntas frecuentes"
         },
-        "trial": {
-          "description": "Testez toutes les fonctionnalités sans engagement",
-          "title": "30 jours gratuits"
+        "company": {
+          "title": "Empresa",
+          "about": "Acerca de",
+          "legal": "Aviso legal",
+          "contact": "Contacto"
         }
       },
-      "monthly": "Mensuel",
-      "period": "/mois",
-      "period.annual": "/an",
-      "popular": "Plus populaire",
-      "pricesIn": "Prix affichés en",
-      "professional": {
-        "description": "Pour les entreprises en croissance",
-        "features": {
-          "advanced": "Contabilidad avancée",
-          "api": "API Access",
-          "clients": "Clientes illimités",
-          "crm": "CRM complet",
-          "everything": "Tout du plan Starter",
-          "hr": "RH de base",
-          "projects": "Gestion de projets",
-          "reports": "Informes illimités",
-          "storage": "50 GB de stockage",
-          "support": "Soporte prioritaire",
-          "ai_full": "🧠 Análisis IA ilimitados (7 informes)",
-          "regulatory_all": "35+ documentos legales + Exportación PDF",
-          "anomaly": "Detección de anomalías",
-          "workflow": "Flujo de validación",
-          "csv_import": "Importación CSV inteligente"
+      "contact": {
+        "title": "Contacto",
+        "phone": {
+          "europe": "🇫🇷 +33 7 52 02 71 98 (Europa)",
+          "africaCI": "🇨🇮 +225 74 58 83 83 (África)",
+          "africaBJ": "🇧🇯 +229 01 69 18 76 03 (África)"
         },
-        "name": "Professionnel"
+        "location": "París, Francia"
       },
-      "selectCountry": "Sélectionnez su pays",
-      "starter": {
-        "description": "Parfait pour débuter",
-        "features": {
-          "accounting": "Contabilidad de base",
-          "clients": "Jusqu'à 100 clients",
-          "invoicing": "Facturación illimitée",
-          "reports": "10 rapports standards",
-          "storage": "5 GB de stockage",
-          "support": "Soporte email",
-          "ai": "2 informes IA incluidos",
-          "regulatory": "5 documentos legales/mes"
-        },
-        "name": "Starter"
+      "social": {
+        "title": "Síguenos",
+        "twitter": "X (Twitter)",
+        "linkedin": "LinkedIn",
+        "youtube": "YouTube"
       },
-      "subtitle": "et démarrez aujourd'hui",
-      "title": "Choisissez su plan"
+      "copyright": "© {{year}} NOUTCHE CONSEIL. Todos los derechos reservados.",
+      "allRightsReserved": "Todos los derechos reservados"
     },
-    "roi": {
-      "accounting": {
-        "description": "vs expert-comptable traditionnel",
-        "title": "Économies comptabilité"
+    "aiChat": {
+      "needHelp": "¿Necesita ayuda?",
+      "title": "Asistente CassKai",
+      "status": "En línea",
+      "close": "Cerrar",
+      "minimize": "Minimizar",
+      "placeholder": "Haga su pregunta...",
+      "welcome": "¡Hola! ¿Cómo puedo ayudarle hoy?",
+      "suggestions": {
+        "pricing": "¿Cuáles son sus precios?",
+        "howItWorks": "¿Cómo funciona?",
+        "africa": "¿Apoyan África?"
       },
-      "badge": "Retour sur investissement",
-      "description": "Calculé sur la base de nos utilisateurs actuels, découvrez les économies réelles que vous pouvez réaliser.",
-      "productivity": {
-        "description": "amélioration globale",
-        "title": "Productivité"
-      },
-      "subtitle": "Le ROI est immédiat",
-      "time": {
-        "description": "sur les tâches administratives",
-        "title": "Temps gagné"
-      },
-      "title": "Pourquoi choisir CassKai ?"
-    },
-    "testimonials": {
-      "alex": {
-        "content": "En phase de test depuis 3 mois. L'import des relevés bancaires me fait gagner 2h par semaine. Interface claire, j'attends les prochaines fonctionnalités !"
-      },
-      "badge": "Premiers utilisateurs",
-      "description": "Retours honnêtes de nos primers utilisateurs et des professionnels qui testent CassKai.",
-      "fatou": {
-        "content": "Parfait pour mes clients PME au Sénégal. Le support du SYSCOHADA était indispensable. Facile à expliquer aux entrepreneurs."
-      },
-      "marie": {
-        "content": "CassKai a révolutionné notre gestion financière. L'interface est intuitive et nous fait gagner un temps précieux chaque jour."
-      },
-      "pierre": {
-        "content": "Excellent outil pour mes clients PME. Les rapports automatisés et la conformité fiscale sont parfaits."
-      },
-      "sophie": {
-        "content": "La gestion multi-entités et les tableaux de bord nous donnent une vision claire de nos performances."
-      },
-      "subtitle": "et beta-testeurs",
-      "thomas": {
-        "content": "J'ai testé la v1.0 pendant 2 mois. Quelques bugs mais l'equipo est réactive. Le module projets sera top quand il sera fini."
-      },
-      "title": "Premiers utilisateurs"
+      "typing": "Escribiendo...",
+      "poweredBy": "Impulsado por IA CassKai"
     }
   },
   "language": "Idioma",
@@ -5349,408 +5525,5 @@
     "errorDeletingDocument": "Error al eliminar el documento",
     "errorExportingDocument": "Error al exportar el documento",
     "submissionError": "Error al enviar el formulario"
-  },
-  "landing": {
-    "navbar": {
-      "product": "Producto",
-      "pricing": "Precios",
-      "resources": "Recursos",
-      "roadmap": "Hoja de ruta",
-      "login": "Iniciar sesión",
-      "freeTrial": "Prueba gratuita",
-      "features": {
-        "ai": "Inteligencia Artificial",
-        "aiDesc": "Asistente IA financiero",
-        "treasury": "Tesorería",
-        "treasuryDesc": "Gestión de efectivo",
-        "compliance": "Cumplimiento",
-        "complianceDesc": "Declaraciones regulatorias",
-        "hr": "Nómina y RRHH",
-        "hrDesc": "Gestión de personal",
-        "dashboards": "Cuadros de mando",
-        "dashboardsDesc": "KPIs en tiempo real",
-        "multiCountry": "Multi-país",
-        "multiCountryDesc": "PGC, SYSCOHADA, IFRS"
-      },
-      "resourcesMenu": {
-        "documentation": "Documentación",
-        "documentationDesc": "Guías y tutoriales",
-        "faq": "Preguntas frecuentes",
-        "faqDesc": "Preguntas más frecuentes",
-        "blog": "Blog",
-        "blogDesc": "Noticias y consejos"
-      }
-    },
-    "hero": {
-      "badge": "Software de gestión empresarial",
-      "title": "Gestione su empresa",
-      "titleHighlight": "con Inteligencia Artificial",
-      "subtitle": "Contabilidad, facturación, tesorería, análisis financiero —",
-      "subtitleHighlight": "una sola herramienta para gestionarlo todo.",
-      "subtitleLine2": "Haga sus preguntas, la IA responde al instante.",
-      "features": {
-        "dashboard": "Cuadro de mando",
-        "invoicing": "Facturación",
-        "treasury": "Tesorería",
-        "accounting": "Contabilidad",
-        "analytics": "Análisis",
-        "reports": "Informes"
-      },
-      "chat": {
-        "assistantName": "Asistente CassKai",
-        "online": "En línea - Listo para ayudar",
-        "welcome": "¡Hola! Soy su asistente financiero. Pregúnteme sobre su empresa: tesorería, facturas, ingresos...",
-        "placeholder": "Haga su pregunta...",
-        "suggestions": "Pruebe estas preguntas:",
-        "demoQuestions": {
-          "treasury": "¿Cómo va mi tesorería?",
-          "invoices": "¿Mis facturas vencidas?",
-          "revenue": "¿Mis ingresos del mes?",
-          "expenses": "¿Mis principales gastos?"
-        }
-      },
-      "cta": {
-        "tryFree": "Prueba gratuita",
-        "discover": "Descubrir funcionalidades"
-      },
-      "stats": {
-        "countries": "Países soportados",
-        "standards": "Normas contables",
-        "availability": "Disponibilidad",
-        "support": "Soporte IA"
-      }
-    },
-    "worldMap": {
-      "title": "Cobertura mundial",
-      "subtitle": "CassKai está disponible en más de 25 países",
-      "controls": {
-        "play": "Reproducción automática",
-        "pause": "Pausa",
-        "resume": "▶️ Reanudar"
-      }
-    },
-    "timeline": {
-      "badge": "Antes/Después",
-      "title": "La transformación en",
-      "titleHighlight": "tiempo real",
-      "subtitle": "Descubra cómo CassKai transforma cada etapa de su gestión financiera.",
-      "days": {
-        "day1": "Día 1",
-        "day15": "Día 15",
-        "endMonth": "Fin de mes",
-        "quarter": "Trimestre",
-        "year": "Año"
-      },
-      "before": {
-        "label": "ANTES de CassKai",
-        "manualEntry": {
-          "title": "Entrada manual",
-          "desc": "Excel, papeles, doble entrada. 2h de trabajo diario.",
-          "time": "2h/día"
-        },
-        "reconciliation": {
-          "title": "Conciliación bancaria",
-          "desc": "Comparación línea por línea. Búsqueda de diferencias.",
-          "time": "4h"
-        },
-        "urgentClose": {
-          "title": "Cierre urgente",
-          "desc": "Noche en blanco, estrés, errores de última hora.",
-          "time": "Noche en blanco"
-        },
-        "accountant": {
-          "title": "Contador",
-          "desc": "Envío de documentos, idas y vueltas, correcciones.",
-          "time": "2000€"
-        },
-        "annualReport": {
-          "title": "Balance anual",
-          "desc": "Semanas de preparación, estrés fiscal.",
-          "time": "3 semanas"
-        }
-      },
-      "after": {
-        "label": "CON CassKai",
-        "autoImport": {
-          "title": "Importación automática",
-          "desc": "Conexión bancaria, OCR de facturas. Cero entrada.",
-          "time": "0 min"
-        },
-        "reconciled": {
-          "title": "Ya conciliado",
-          "desc": "La IA coincidió el 98% de las transacciones automáticamente.",
-          "time": "Automático"
-        },
-        "oneClick": {
-          "title": "Cierre en 1 clic",
-          "desc": "Informe generado, listo para validación.",
-          "time": "5 min"
-        },
-        "realtime": {
-          "title": "Colaboración en tiempo real",
-          "desc": "Su contador accede en directo. Validación instantánea.",
-          "time": "Incluido"
-        },
-        "autoTaxReturn": {
-          "title": "Declaración fiscal automática",
-          "desc": "Documentos pre-rellenados, conformes, listos para presentar.",
-          "time": "1 día"
-        }
-      },
-      "controls": {
-        "pause": "Pausa",
-        "autoPlay": "Reproducción automática"
-      },
-      "stats": {
-        "timeSaved": "Tiempo ahorrado",
-        "noErrors": "Errores de entrada",
-        "compliance": "Cumplimiento",
-        "access": "Acceso a datos"
-      }
-    },
-    "features": {
-      "badge": "Funcionalidades Potentes",
-      "title": "Todo lo que necesita",
-      "titleHighlight": "en una sola plataforma",
-      "subtitle": "CassKai combina inteligencia artificial, automatización y cumplimiento para transformar su gestión financiera",
-      "ai": {
-        "title": "Inteligencia Artificial",
-        "desc": "Nuestra IA comprende su contabilidad y le asiste diariamente. Haga sus preguntas en su idioma, obtenga respuestas instantáneas.",
-        "benefits": {
-          "auto": "Categorización automática de transacciones",
-          "suggestions": "Sugerencias de asientos contables",
-          "detection": "Detección proactiva de anomalías",
-          "assistant": "Asistente conversacional 24/7"
-        }
-      },
-      "treasury": {
-        "title": "Gestión de Tesorería",
-        "desc": "Visualice sus flujos en tiempo real, anticipe sus necesidades y optimice su efectivo. Multi-banco, multi-divisa.",
-        "benefits": {
-          "sync": "Sincronización bancaria automática",
-          "forecast": "Previsiones a 12 meses",
-          "alerts": "Alertas de umbral personalizadas",
-          "reconciliation": "Conciliación bancaria inteligente"
-        }
-      },
-      "regulatory": {
-        "title": "Cumplimiento Normativo",
-        "desc": "Genere sus declaraciones fiscales y sociales en pocos clics. IVA, DSN, declaraciones fiscales, estados SYSCOHADA.",
-        "benefits": {
-          "taxReturns": "Declaraciones fiscales automatizadas",
-          "vat": "Declaraciones de IVA pre-rellenadas",
-          "fec": "Exportación FEC certificada",
-          "payroll": "DSN y nóminas"
-        }
-      },
-      "hr": {
-        "title": "Nómina y RRHH",
-        "desc": "Gestione a sus colaboradores de la A a la Z: contratos, nóminas, vacaciones, notas de gastos. Automatizado y conforme.",
-        "benefits": {
-          "payslips": "Nóminas automáticas",
-          "leave": "Gestión de vacaciones y ausencias",
-          "expenses": "Notas de gastos simplificadas",
-          "compliance": "Cumplimiento social garantizado"
-        }
-      },
-      "analytics": {
-        "title": "Cuadros de Mando",
-        "desc": "KPIs financieros en tiempo real, gráficos interactivos e informes personalizables para gestionar su actividad.",
-        "benefits": {
-          "custom": "Cuadro de mando personalizable",
-          "realtime": "KPIs financieros en tiempo real",
-          "comparison": "Comparaciones interanuales",
-          "export": "Exportación PDF y Excel"
-        }
-      },
-      "multi": {
-        "title": "Multi-País y Normas",
-        "desc": "PGC francés, SYSCOHADA, IFRS, SCF Magreb: CassKai se adapta a su marco contable y país.",
-        "benefits": {
-          "pcg": "PGC 2025 (Francia)",
-          "syscohada": "SYSCOHADA revisado (África)",
-          "ifrs": "IFRS para PYMES",
-          "scf": "SCF/PCM (Magreb)"
-        }
-      },
-      "tryFree": "Prueba gratuita",
-      "bottomStats": {
-        "gdpr": "Conforme RGPD",
-        "responseTime": "Tiempo de respuesta IA",
-        "countries": "Países soportados",
-        "availability": "Disponibilidad"
-      }
-    },
-    "calculator": {
-      "badge": "Calculadora de ROI",
-      "title": "¿Cuánto va a",
-      "titleHighlight": "ahorrar?",
-      "subtitle": "Personalice los parámetros según su empresa y descubra su retorno de inversión.",
-      "inputs": {
-        "title": "Su empresa",
-        "country": "País",
-        "employees": "Número de empleados",
-        "revenue": "Ingresos mensuales",
-        "transactions": "Transacciones/mes",
-        "note": "Estas estimaciones se basan en promedios sectoriales. Sus ahorros reales pueden variar."
-      },
-      "results": {
-        "roiTitle": "ROI ANUAL ESTIMADO",
-        "savingsAfter": "de ahorros netos después de la suscripción a CassKai",
-        "breakdown": "Desglose de ahorros",
-        "timeSaved": "Tiempo ahorrado",
-        "hoursPerMonth": "{{hours}}h/mes",
-        "errorsAvoided": "Errores evitados",
-        "guaranteedCompliance": "Cumplimiento garantizado",
-        "accountant": "Contador",
-        "optimizedCollab": "Colaboración optimizada",
-        "totalSavings": "Ahorros totales",
-        "recommendedPlan": "Plan recomendado",
-        "perMonth": "/mes",
-        "tryFree": "Comenzar mi prueba gratuita",
-        "trialInfo": "30 días gratis • Sin tarjeta de crédito"
-      }
-    },
-    "testimonials": {
-      "badge": "Testimonios de nuestros Beta Testers",
-      "title": "Probaron CassKai",
-      "titleHighlight": "antes que nadie",
-      "subtitle": "Descubra los comentarios de nuestros primeros usuarios en Francia y África francófona",
-      "betaBadge": "Beta Tester",
-      "metrics": {
-        "timeSaved": "Tiempo ahorrado",
-        "errorsReduced": "Errores reducidos",
-        "satisfaction": "Satisfacción"
-      },
-      "autoPlay": "Reproducción automática",
-      "globalStats": {
-        "testers": "Beta testers",
-        "countries": "Países representados",
-        "rating": "Calificación promedio",
-        "recommend": "Recomiendan CassKai"
-      }
-    },
-    "cta": {
-      "badge": "Oferta de lanzamiento disponible",
-      "title": "¿Listo para transformar",
-      "titleHighlight": "su gestión financiera?",
-      "subtitle": "Únase a las empresas que han elegido el futuro de la contabilidad. Comience gratis y descubra el poder de la IA financiera.",
-      "benefits": {
-        "trial": "Prueba gratuita de 30 días",
-        "noCard": "Sin tarjeta de crédito requerida",
-        "support": "Soporte incluido",
-        "cancel": "Cancelación en cualquier momento"
-      },
-      "buttons": {
-        "start": "Comenzar gratis",
-        "demo": "Reservar una demo"
-      },
-      "pricing": {
-        "monthly": "Mensual",
-        "yearly": "Anual",
-        "yearlyDiscount": "-20%",
-        "priceIn": "Precio en {{currency}} ({{symbol}}) - Norma {{standard}}",
-        "perMonth": "/mes",
-        "perYear": "/año",
-        "plans": {
-          "starter": {
-            "name": "Starter",
-            "desc": "Para pequeñas empresas y autónomos",
-            "features": {
-              "users": "Hasta 5 usuarios",
-              "accounting": "Contabilidad básica",
-              "invoicing": "Facturación ilimitada"
-            },
-            "cta": "Elegir Starter"
-          },
-          "professional": {
-            "name": "Professional",
-            "badge": "POPULAR",
-            "desc": "Para PYMES en crecimiento",
-            "features": {
-              "users": "Usuarios ilimitados",
-              "starter": "Todas las funcionalidades Starter",
-              "ai": "IA avanzada + Previsiones",
-              "multi": "Multi-divisas y Multi-empresa"
-            },
-            "cta": "Elegir Professional"
-          },
-          "enterprise": {
-            "name": "Enterprise",
-            "desc": "Para grandes grupos",
-            "features": {
-              "all": "Todo Professional +",
-              "sso": "SSO e integraciones avanzadas",
-              "support": "Soporte prioritario 24/7",
-              "manager": "Account Manager dedicado"
-            },
-            "cta": "Elegir Enterprise"
-          }
-        }
-      }
-    },
-    "footer": {
-      "sections": {
-        "product": {
-          "title": "Producto",
-          "features": "Funcionalidades",
-          "pricing": "Precios",
-          "roadmap": "Hoja de ruta",
-          "status": "Estado del sistema"
-        },
-        "solutions": {
-          "title": "Soluciones",
-          "sme": "PYMES",
-          "accountants": "Despachos contables",
-          "ohada": "Zona OHADA",
-          "europe": "Francia y Europa"
-        },
-        "resources": {
-          "title": "Recursos",
-          "documentation": "Documentación",
-          "tutorials": "Tutoriales",
-          "faq": "Preguntas frecuentes"
-        },
-        "company": {
-          "title": "Empresa",
-          "about": "Acerca de",
-          "legal": "Aviso legal",
-          "contact": "Contacto"
-        }
-      },
-      "contact": {
-        "title": "Contacto",
-        "phone": {
-          "europe": "🇫🇷 +33 7 52 02 71 98 (Europa)",
-          "africaCI": "🇨🇮 +225 74 58 83 83 (África)",
-          "africaBJ": "🇧🇯 +229 01 69 18 76 03 (África)"
-        },
-        "location": "París, Francia"
-      },
-      "social": {
-        "title": "Síguenos",
-        "twitter": "X (Twitter)",
-        "linkedin": "LinkedIn",
-        "youtube": "YouTube"
-      },
-      "copyright": "© {{year}} NOUTCHE CONSEIL. Todos los derechos reservados.",
-      "allRightsReserved": "Todos los derechos reservados"
-    },
-    "aiChat": {
-      "needHelp": "¿Necesita ayuda?",
-      "title": "Asistente CassKai",
-      "status": "En línea",
-      "close": "Cerrar",
-      "minimize": "Minimizar",
-      "placeholder": "Haga su pregunta...",
-      "welcome": "¡Hola! ¿Cómo puedo ayudarle hoy?",
-      "suggestions": {
-        "pricing": "¿Cuáles son sus precios?",
-        "howItWorks": "¿Cómo funciona?",
-        "africa": "¿Apoyan África?"
-      },
-      "typing": "Escribiendo...",
-      "poweredBy": "Impulsado por IA CassKai"
-    }
   }
 }
