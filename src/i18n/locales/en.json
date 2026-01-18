@@ -2568,8 +2568,10 @@
           "auto": "Automatic transaction categorization",
           "suggestions": "Accounting entry suggestions",
           "detection": "Proactive anomaly detection",
-          "assistant": "24/7 conversational assistant"
-        }
+          "assistant": "24/7 conversational assistant",
+          "categorization": "Automatic transaction categorization"
+        },
+        "description": "Our AI understands your accounting and assists you daily. Ask your questions in your language, get instant answers."
       },
       "treasury": {
         "title": "Cash Management",
@@ -2579,7 +2581,8 @@
           "forecast": "12-month forecasts",
           "alerts": "Custom threshold alerts",
           "reconciliation": "Intelligent bank reconciliation"
-        }
+        },
+        "description": "Visualize your flows in real time, anticipate your needs and optimize your cash. Multi-bank, multi-currency."
       },
       "regulatory": {
         "title": "Regulatory Compliance",
@@ -2588,8 +2591,10 @@
           "taxReturns": "Automated tax returns",
           "vat": "Pre-filled VAT declarations",
           "fec": "Certified FEC export",
-          "payroll": "DSN and payslips"
-        }
+          "payroll": "DSN and payslips",
+          "tax": "Automated tax returns"
+        },
+        "description": "Generate your tax and social declarations in a few clicks. VAT, payroll declarations, tax returns, SYSCOHADA statements."
       },
       "hr": {
         "title": "Payroll & HR",
@@ -2599,7 +2604,8 @@
           "leave": "Leave and absence management",
           "expenses": "Simplified expense reports",
           "compliance": "Guaranteed social compliance"
-        }
+        },
+        "description": "Manage your employees from A to Z: contracts, payslips, leave, expense reports. Automated and compliant."
       },
       "analytics": {
         "title": "Dashboards",
@@ -2608,8 +2614,10 @@
           "custom": "Customizable dashboard",
           "realtime": "Real-time financial KPIs",
           "comparison": "Year-over-year comparisons",
-          "export": "PDF and Excel export"
-        }
+          "export": "PDF and Excel export",
+          "customizable": "Customizable dashboard"
+        },
+        "description": "Real-time financial KPIs, interactive charts and customizable reports to manage your business."
       },
       "multi": {
         "title": "Multi-Country & Standards",
@@ -2619,12 +2627,21 @@
           "syscohada": "Revised SYSCOHADA (Africa)",
           "ifrs": "IFRS for SMEs",
           "scf": "SCF/PCM (Maghreb)"
-        }
+        },
+        "description": "French PCG, SYSCOHADA, IFRS, Maghreb SCF: CassKai adapts to your accounting standard and country."
       },
       "tryFree": "Try for free",
       "bottomStats": {
         "gdpr": "GDPR compliant",
         "responseTime": "AI response time",
+        "countries": "Supported countries",
+        "availability": "Availability"
+      },
+      "description": "CassKai combines artificial intelligence, automation and compliance to transform your financial management",
+      "cta": "Try for free",
+      "stats": {
+        "gdpr": "GDPR Compliant",
+        "aiResponse": "AI response time",
         "countries": "Supported countries",
         "availability": "Availability"
       }
@@ -2792,14 +2809,16 @@
           "features": "Features",
           "pricing": "Pricing",
           "roadmap": "Roadmap",
-          "status": "System status"
+          "status": "System status",
+          "systemStatus": "System status"
         },
         "solutions": {
           "title": "Solutions",
           "sme": "SME / Small Business",
           "accountants": "Accounting firms",
           "ohada": "OHADA Zone",
-          "europe": "France & Europe"
+          "europe": "France & Europe",
+          "accounting": "Accounting firms"
         },
         "resources": {
           "title": "Resources",
@@ -2830,7 +2849,8 @@
         "youtube": "YouTube"
       },
       "copyright": "© {{year}} NOUTCHE CONSEIL. All rights reserved.",
-      "allRightsReserved": "All rights reserved"
+      "allRightsReserved": "All rights reserved",
+      "description": "The complete business management solution for SMEs and freelancers."
     },
     "aiChat": {
       "needHelp": "Need help?",
@@ -2839,14 +2859,29 @@
       "close": "Close",
       "minimize": "Minimize",
       "placeholder": "Ask your question...",
-      "welcome": "Hello! How can I help you today?",
-      "suggestions": {
-        "pricing": "What are your prices?",
-        "howItWorks": "How does it work?",
-        "africa": "Do you support Africa?"
-      },
+      "welcome": "Hello! 👋 I'm the CassKai assistant. How can I help you today?",
+      "suggestions": [
+        "What are your features?",
+        "How much does it cost?",
+        "Do you support Africa?"
+      ],
       "typing": "Typing...",
-      "poweredBy": "Powered by CassKai AI"
+      "poweredBy": "Powered by CassKai AI",
+      "online": "Online",
+      "frequentQuestions": "Frequent questions",
+      "send": "Send",
+      "responses": {
+        "pricing": "💰 Our pricing starts from €29/month for the Starter plan. All our plans include a 30-day free trial without credit card. Discover our offers on the Pricing page!",
+        "features": "✨ CassKai offers a complete suite: Accounting & Finance, Invoicing & CRM, Banking, HR & Payroll, Project Management, and more. All with integrated AI and multi-country compliance (PCG, SYSCOHADA, IFRS, SCF).",
+        "africa": "🌍 Absolutely! CassKai is adapted to Africa with full support for revised SYSCOHADA 2017, local currencies (XOF, XAF, etc.) and over 17 OHADA countries. We also support Maghreb (SCF, PCM).",
+        "france": "🇫🇷 CassKai is 100% compliant with French standards: PCG 2025, electronic invoicing, FEC export, VAT declarations, automatic tax returns. GDPR compliance guaranteed.",
+        "ai": "🤖 Our AI helps you automatically categorize transactions, suggests accounting entries, detects anomalies in real time and answers your accounting questions 24/7.",
+        "security": "🔒 Maximum security: AES-256 encrypted data, ISO 27001 secure hosting, daily automatic backups, strict GDPR compliance. Your data is safe with us.",
+        "demo": "🎯 Start your 30-day free trial now! No credit card required. Immediate access to all features. Support included to assist you.",
+        "accountant": "👔 CassKai is perfect for accounting firms: real-time collaboration with your clients, multi-company, differentiated access, compliant exports, advanced validation workflow.",
+        "greeting": "Hello! 👋 Welcome to CassKai. I'm here to answer all your questions about our business management platform. Feel free to ask me anything you want to know!",
+        "default": "Great question! For a precise and personalized answer, I invite you to contact us directly via our contact form or start your free trial to chat with our support team. 📧"
+      }
     }
   },
   "language": "Language",

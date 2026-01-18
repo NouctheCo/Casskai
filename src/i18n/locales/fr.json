@@ -2817,8 +2817,10 @@
           "auto": "Catégorisation automatique des transactions",
           "suggestions": "Suggestions d'écritures comptables",
           "detection": "Détection proactive des anomalies",
-          "assistant": "Assistant conversationnel 24/7"
-        }
+          "assistant": "Assistant conversationnel 24/7",
+          "categorization": "Catégorisation automatique des transactions"
+        },
+        "description": "Notre IA comprend votre comptabilité et vous assiste au quotidien. Posez vos questions en français, obtenez des réponses instantanées."
       },
       "treasury": {
         "title": "Gestion de Trésorerie",
@@ -2828,7 +2830,8 @@
           "forecast": "Prévisions sur 12 mois",
           "alerts": "Alertes de seuil personnalisées",
           "reconciliation": "Rapprochement bancaire intelligent"
-        }
+        },
+        "description": "Visualisez vos flux en temps réel, anticipez vos besoins et optimisez votre cash. Multi-banques, multi-devises."
       },
       "regulatory": {
         "title": "Conformité Réglementaire",
@@ -2837,8 +2840,10 @@
           "taxReturns": "Liasses fiscales automatisées",
           "vat": "Déclarations TVA pré-remplies",
           "fec": "Export FEC certifié",
-          "payroll": "DSN et bulletins de paie"
-        }
+          "payroll": "DSN et bulletins de paie",
+          "tax": "Liasses fiscales automatisées"
+        },
+        "description": "Générez vos déclarations fiscales et sociales en quelques clics. TVA, DSN, liasses fiscales, états SYSCOHADA."
       },
       "hr": {
         "title": "Paie & RH",
@@ -2848,7 +2853,8 @@
           "leave": "Gestion des congés et absences",
           "expenses": "Notes de frais simplifiées",
           "compliance": "Conformité sociale garantie"
-        }
+        },
+        "description": "Gérez vos collaborateurs de A à Z : contrats, bulletins de paie, congés, notes de frais. Automatisé et conforme."
       },
       "analytics": {
         "title": "Tableaux de Bord",
@@ -2857,8 +2863,10 @@
           "custom": "Dashboard personnalisable",
           "realtime": "KPIs financiers en temps réel",
           "comparison": "Comparaisons N/N-1",
-          "export": "Export PDF et Excel"
-        }
+          "export": "Export PDF et Excel",
+          "customizable": "Dashboard personnalisable"
+        },
+        "description": "Des KPIs financiers en temps réel, des graphiques interactifs et des rapports personnalisables pour piloter votre activité."
       },
       "multi": {
         "title": "Multi-Pays & Normes",
@@ -2868,12 +2876,21 @@
           "syscohada": "SYSCOHADA révisé (Afrique)",
           "ifrs": "IFRS pour PME",
           "scf": "SCF/PCM (Maghreb)"
-        }
+        },
+        "description": "PCG français, SYSCOHADA, IFRS, SCF Maghreb : CassKai s'adapte à votre référentiel comptable et à votre pays."
       },
       "tryFree": "Essayer gratuitement",
       "bottomStats": {
         "gdpr": "Conforme RGPD",
         "responseTime": "Temps de réponse IA",
+        "countries": "Pays supportés",
+        "availability": "Disponibilité"
+      },
+      "description": "CassKai combine intelligence artificielle, automatisation et conformité pour transformer votre gestion financière",
+      "cta": "Essayer gratuitement",
+      "stats": {
+        "gdpr": "Conforme RGPD",
+        "aiResponse": "Temps de réponse IA",
         "countries": "Pays supportés",
         "availability": "Disponibilité"
       }
@@ -3041,14 +3058,16 @@
           "features": "Fonctionnalités",
           "pricing": "Tarifs",
           "roadmap": "Roadmap",
-          "status": "Statut système"
+          "status": "Statut système",
+          "systemStatus": "Statut système"
         },
         "solutions": {
           "title": "Solutions",
           "sme": "TPE / PME",
           "accountants": "Cabinets comptables",
           "ohada": "Zone OHADA",
-          "europe": "France & Europe"
+          "europe": "France & Europe",
+          "accounting": "Cabinets comptables"
         },
         "resources": {
           "title": "Ressources",
@@ -3079,7 +3098,8 @@
         "youtube": "YouTube"
       },
       "copyright": "© {{year}} NOUTCHE CONSEIL. Tous droits réservés.",
-      "allRightsReserved": "Tous droits réservés"
+      "allRightsReserved": "Tous droits réservés",
+      "description": "La solution complète de gestion d'entreprise pour les PME et indépendants."
     },
     "aiChat": {
       "needHelp": "Besoin d'aide ?",
@@ -3088,14 +3108,29 @@
       "close": "Fermer",
       "minimize": "Réduire",
       "placeholder": "Posez votre question...",
-      "welcome": "Bonjour ! Comment puis-je vous aider aujourd'hui ?",
-      "suggestions": {
-        "pricing": "Quels sont vos tarifs ?",
-        "howItWorks": "Comment ça marche ?",
-        "africa": "Supportez-vous l'Afrique ?"
-      },
+      "welcome": "Bonjour ! 👋 Je suis l'assistant CassKai. Comment puis-je vous aider aujourd'hui ?",
+      "suggestions": [
+        "Quelles sont vos fonctionnalités ?",
+        "Combien ça coûte ?",
+        "Supportez-vous l'Afrique ?"
+      ],
       "typing": "En train d'écrire...",
-      "poweredBy": "Propulsé par l'IA CassKai"
+      "poweredBy": "Propulsé par l'IA CassKai",
+      "online": "En ligne",
+      "frequentQuestions": "Questions fréquentes",
+      "send": "Envoyer",
+      "responses": {
+        "pricing": "💰 Nos tarifs démarrent à partir de 29€/mois pour le plan Starter. Tous nos plans incluent un essai gratuit de 30 jours sans carte bancaire. Découvrez nos offres sur la page Tarifs !",
+        "features": "✨ CassKai offre une suite complète : Comptabilité & Finances, Facturation & CRM, Gestion bancaire, RH & Paie, Gestion de projets, et bien plus. Le tout avec IA intégrée et conformité multi-pays (PCG, SYSCOHADA, IFRS, SCF).",
+        "africa": "🌍 Absolument ! CassKai est adapté à l'Afrique avec le support complet du SYSCOHADA révisé 2017, des devises locales (XOF, XAF, etc.) et plus de 17 pays OHADA. Nous supportons aussi le Maghreb (SCF, PCM).",
+        "france": "🇫🇷 CassKai est 100% conforme aux normes françaises : PCG 2025, facturation électronique, export FEC, déclarations TVA, liasses fiscales automatiques. Conformité RGPD garantie.",
+        "ai": "🤖 Notre IA vous aide à catégoriser automatiquement les transactions, suggère des écritures comptables, détecte les anomalies en temps réel et répond à vos questions sur votre comptabilité 24/7.",
+        "security": "🔒 Sécurité maximale : données chiffrées AES-256, hébergement sécurisé ISO 27001, sauvegardes automatiques quotidiennes, conformité RGPD stricte. Vos données sont en sécurité avec nous.",
+        "demo": "🎯 Démarrez votre essai gratuit de 30 jours dès maintenant ! Aucune carte bancaire requise. Accès immédiat à toutes les fonctionnalités. Support inclus pour vous accompagner.",
+        "accountant": "👔 CassKai est parfait pour les cabinets comptables : collaboration temps réel avec vos clients, multi-sociétés, accès différenciés, exports conformes, workflow de validation avancé.",
+        "greeting": "Bonjour ! 👋 Bienvenue chez CassKai. Je suis là pour répondre à toutes vos questions sur notre plateforme de gestion d'entreprise. N'hésitez pas à me demander ce que vous voulez savoir !",
+        "default": "Excellente question ! Pour une réponse précise et personnalisée, je vous invite à nous contacter directement via notre formulaire de contact ou à démarrer votre essai gratuit pour discuter avec notre équipe support. 📧"
+      }
     }
   },
   "language": "Langue",
