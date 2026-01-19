@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase';
 import { Employee } from './hrService';
 import { logger } from '@/lib/logger';
 export interface PayrollCalculation {
+  id?: string;
   employee_id: string;
   employee_name: string;
   gross_salary: number;

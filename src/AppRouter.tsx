@@ -24,7 +24,6 @@ import ProtectedRoute from '@/components/guards/ProtectedRoute';
 
 // Lazy load pages for better performance
 const LazyLandingPage = React.lazy(() => import('@/pages/LandingPageV2'));
-const LazyLandingPageClassic = React.lazy(() => import('@/pages/LandingPage'));
 const LazyDashboardPage = React.lazy(() => import('@/pages/DashboardPage'));
 const LazyAccountingPage = React.lazy(() => import('@/pages/AccountingPage'));
 const LazyAssetsPage = React.lazy(() => import('@/pages/AssetsPage'));

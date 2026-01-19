@@ -25,6 +25,7 @@ export default [
       '**/*.test.ts',
       '**/*.test.tsx',
       'src/tests/**/*',
+      'src/__tests__/**/*',
       // Fichier UI orphelin avec imports manquants
       'src/components/accounting/CreateAccountDialog.tsx',
       // Scripts de migration et utilitaires à la racine
