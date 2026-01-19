@@ -2850,7 +2850,13 @@
       },
       "copyright": "© {{year}} NOUTCHE CONSEIL. All rights reserved.",
       "allRightsReserved": "All rights reserved",
-      "description": "The complete business management solution for SMEs and freelancers."
+      "description": "The complete business management solution for SMEs and freelancers.",
+      "bottomLinks": {
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "legal": "Legal Notice",
+        "cookies": "Cookies Policy"
+      }
     },
     "aiChat": {
       "needHelp": "Need help?",

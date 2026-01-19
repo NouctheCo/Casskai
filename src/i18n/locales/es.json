@@ -2846,7 +2846,13 @@
       },
       "copyright": "© {{year}} NOUTCHE CONSEIL. Todos los derechos reservados.",
       "allRightsReserved": "Todos los derechos reservados",
-      "description": "La solución completa de gestión empresarial para PYMES y autónomos."
+      "description": "La solución completa de gestión empresarial para PYMES y autónomos.",
+      "bottomLinks": {
+        "privacy": "Política de privacidad",
+        "terms": "Términos de servicio",
+        "legal": "Aviso legal",
+        "cookies": "Política de cookies"
+      }
     },
     "aiChat": {
       "needHelp": "¿Necesita ayuda?",

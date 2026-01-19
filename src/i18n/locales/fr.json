@@ -3099,7 +3099,13 @@
       },
       "copyright": "© {{year}} NOUTCHE CONSEIL. Tous droits réservés.",
       "allRightsReserved": "Tous droits réservés",
-      "description": "La solution complète de gestion d'entreprise pour les PME et indépendants."
+      "description": "La solution complète de gestion d'entreprise pour les PME et indépendants.",
+      "bottomLinks": {
+        "privacy": "Politique de confidentialité",
+        "terms": "Conditions d'utilisation",
+        "legal": "Mentions légales",
+        "cookies": "Politique de cookies"
+      }
     },
     "aiChat": {
       "needHelp": "Besoin d'aide ?",
