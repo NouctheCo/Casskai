@@ -77,7 +77,7 @@ export interface ForecastData {
   break_even_point: number;
   
   // Metadata
-  status: 'draft' | 'review' | 'approved' | 'published';
+  status: 'draft' | 'published' | 'archived';
   created_by: string;
   approved_by?: string;
   created_at: string;

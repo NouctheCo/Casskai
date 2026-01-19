@@ -147,17 +147,6 @@ const UserManagementPage = () => {
     const matchesRole = roleFilter === 'all' || user.role.id === roleFilter;
     return matchesSearch && matchesStatus && matchesRole;
   });
-  // Vérifier les quotas avant d'ajouter un utilisateur
-  const checkUserQuota = useCallback((): boolean => {
-    const quotaStatus = getQuotaStatus('users');
-    if (quotaStatus && !quotaStatus.canAccess) {
-      // Limite atteinte, afficher la modale d'upgrade
-      setShowUpgradeModal(true);
-      return false;
-    }
-    return true;
-  }, [getQuotaStatus]);
-
   // Obtenir les infos de quota pour la modale
   const getUserQuotaInfo = useCallback(() => {
     const quotaStatus = getQuotaStatus('users');

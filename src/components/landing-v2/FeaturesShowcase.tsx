@@ -24,7 +24,7 @@ import { useLocale } from '@/contexts/LocaleContext';
 
 interface Feature {
   id: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   description: string;
   benefits: string[];
@@ -46,7 +46,7 @@ function FeatureCard({ feature, isActive, onClick }: {
       whileTap={{ scale: 0.98 }}
       className={`w-full text-left p-4 rounded-xl transition-all ${
         isActive
-          ? 'bg-gradient-to-r ' + feature.gradient + ' shadow-lg'
+          ? `bg-gradient-to-r ${feature.gradient} shadow-lg`
           : 'bg-gray-800/50 hover:bg-gray-800'
       }`}
     >

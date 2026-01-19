@@ -32,7 +32,7 @@ class ForecastsService {
   }
   async createScenario(enterpriseId: string, formData: ScenarioFormData): Promise<ForecastServiceResponse<ForecastScenario>> {
     if (!enterpriseId) {
-      return { data: null, error: 'Enterprise ID is required' };
+      return { data: null, error: { message: 'Enterprise ID is required' } };
     }
     return ForecastImpl.createScenario(enterpriseId, formData);
   }

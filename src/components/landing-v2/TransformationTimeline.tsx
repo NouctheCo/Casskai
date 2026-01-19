@@ -27,7 +27,7 @@ interface TimelineItem {
 }
 
 
-function TimelineCard({ item, side }: { item: TimelineItem['before'] | TimelineItem['after']; side: 'before' | 'after' }) {
+function TimelineCard({ item }: { item: TimelineItem['before'] | TimelineItem['after'] }) {
   const statusColors = {
     bad: 'bg-red-500/10 border-red-500/30 text-red-400',
     warning: 'bg-amber-500/10 border-amber-500/30 text-amber-400',
@@ -290,7 +290,7 @@ export function TransformationTimeline() {
                     </div>
                     <span className="text-red-400 font-semibold">{t('landing.timeline.beforeCasskai')}</span>
                   </div>
-                  <TimelineCard item={currentItem.before} side="before" />
+                  <TimelineCard item={currentItem.before} />
                 </div>
 
                 {/* Arrow for desktop */}
@@ -312,7 +312,7 @@ export function TransformationTimeline() {
                     </div>
                     <span className="text-green-400 font-semibold">{t('landing.timeline.withCasskai')}</span>
                   </div>
-                  <TimelineCard item={currentItem.after} side="after" />
+                  <TimelineCard item={currentItem.after} />
                 </div>
               </div>
             </motion.div>

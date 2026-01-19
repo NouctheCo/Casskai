@@ -495,12 +495,12 @@ export async function getDashboardData(
     const scenariosResult = await getScenarios(enterpriseId);
     const scenarios = scenariosResult.data || [];
 
-    // Calculate accuracy based on validated forecasts vs actual data
-    const validatedForecasts = forecasts.filter(f => f.status === 'validated');
+    // Calculate accuracy based on archived forecasts vs actual data
+    const archivedForecasts = forecasts.filter(f => f.status === 'archived');
     let avgAccuracy = 0;
-    if (validatedForecasts.length > 0) {
+    if (archivedForecasts.length > 0) {
       // Calculate accuracy for each forecast that has actual data
-      const accuracies = validatedForecasts.map(forecast => {
+      const accuracies = archivedForecasts.map(forecast => {
         const actualRevenue = (forecast as any).actual_revenue || 0;
         const forecastedRevenue = forecast.total_revenue || 0;
         if (forecastedRevenue > 0 && actualRevenue > 0) {
@@ -544,11 +544,11 @@ export async function getDashboardData(
     const scenarioPerformance = scenarios.map(scenario => {
       // Find forecasts for this scenario
       const scenarioForecasts = forecasts.filter(f => f.scenario_id === scenario.id);
-      const validatedScenarioForecasts = scenarioForecasts.filter(f => f.status === 'validated');
+      const archivedScenarioForecasts = scenarioForecasts.filter(f => f.status === 'archived');
 
       let accuracy = 85; // Default
-      if (validatedScenarioForecasts.length > 0) {
-        const accuracies = validatedScenarioForecasts.map(f => {
+      if (archivedScenarioForecasts.length > 0) {
+        const accuracies = archivedScenarioForecasts.map(f => {
           const actual = (f as any).actual_revenue || 0;
           const forecasted = f.total_revenue || 0;
           if (forecasted > 0 && actual > 0) {

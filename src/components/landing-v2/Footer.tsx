@@ -6,14 +6,12 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   Linkedin,
   Youtube,
   Mail,
   Phone,
-  MapPin,
-  ExternalLink
+  MapPin
 } from 'lucide-react';
 import { FaXTwitter } from 'react-icons/fa6';
 import { useLocale } from '@/contexts/LocaleContext';

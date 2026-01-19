@@ -117,7 +117,7 @@ function CountryPoint({ country, globeRadius, onHover, onLeave, isSelected }: {
 
 // Composant principal du globe
 function GlobeScene({ onCountryHover }: { onCountryHover: (country: typeof COUNTRIES_DATA[0] | null) => void }) {
-  const globeRef = useRef<THREE.Mesh>(null);
+  const globeRef = useRef<THREE.Group>(null);
   const [hoveredCountry, setHoveredCountry] = useState<typeof COUNTRIES_DATA[0] | null>(null);
   const globeRadius = 2;
 

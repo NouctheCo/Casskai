@@ -5,8 +5,8 @@
  */
 
 import { useRef, useState, useMemo, useEffect, Suspense } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Html, Text } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Html } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import * as THREE from 'three';
 
@@ -108,7 +108,7 @@ function ContinentOutlines() {
     <group>
       {Object.values(CONTINENT_PATHS).map((pathData, index) => {
         const points: THREE.Vector3[] = [];
-        const commands = pathData.match(/[MLZHV][^MLZHV]*/gi) || [];
+        const commands: string[] = pathData.match(/[MLZHV][^MLZHV]*/gi) || [];
 
         commands.forEach(cmd => {
           const type = cmd[0].toUpperCase();
@@ -127,9 +127,10 @@ function ContinentOutlines() {
         if (points.length < 2) return null;
 
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const lineObj = new THREE.Line(geometry, continentMaterial);
 
         return (
-          <line key={index} geometry={geometry} material={continentMaterial} />
+          <primitive key={index} object={lineObj} />
         );
       })}
     </group>
@@ -277,7 +278,8 @@ function ConnectionLines({ hoveredCountry }: { hoveredCountry: typeof SUPPORTED_
           opacity: 0.3
         });
 
-        return <line key={index} geometry={geometry} material={material} />;
+        const lineObj = new THREE.Line(geometry, material);
+        return <primitive key={index} object={lineObj} />;
       })}
     </group>
   );
@@ -372,15 +374,6 @@ export function WorldMap3D() {
       map[c.standard].countries.push(c.name);
     });
     return Object.entries(map).map(([name, data]) => ({ name, ...data }));
-  }, []);
-
-  // Statistiques par région
-  const regionStats = useMemo(() => {
-    const regions: Record<string, number> = {};
-    SUPPORTED_COUNTRIES.forEach(c => {
-      regions[c.region] = (regions[c.region] || 0) + 1;
-    });
-    return regions;
   }, []);
 
   return (

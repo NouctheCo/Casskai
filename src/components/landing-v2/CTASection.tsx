@@ -12,10 +12,7 @@ import {
   ArrowRight,
   Check,
   Sparkles,
-  Calendar,
-  Globe,
-  ToggleLeft,
-  ToggleRight
+  Globe
 } from 'lucide-react';
 import {
   generateCountryPricing,

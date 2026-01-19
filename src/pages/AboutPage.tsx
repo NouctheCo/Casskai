@@ -16,7 +16,7 @@
  * Présentation de CassKai et de Noutche Conseil
  */
 
-import { Building2, Globe2, Target, Heart, Shield, Sparkles, Users, MapPin, Mail, Phone, ExternalLink } from 'lucide-react';
+import { Building2, Globe2, Target, Heart, Shield, Sparkles, Users, MapPin, Mail, Phone } from 'lucide-react';
 import { FaXTwitter, FaLinkedin, FaYoutube } from 'react-icons/fa6';
 import { SEO } from '@/components/SEO/SEOHelmet';
 import { motion } from 'framer-motion';
