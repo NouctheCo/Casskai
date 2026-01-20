@@ -347,20 +347,126 @@ export class AccountingRulesService {
   }
   /**
    * Détermine automatiquement le journal approprié selon les comptes utilisés
+   * et le référentiel comptable de l'entreprise.
+   *
+   * RÈGLES PAR RÉFÉRENTIEL :
+   *
+   * PCG (France) / SCF (Maghreb) / SYSCOHADA (OHADA) :
+   * - Classe 6 (charges) → ACHATS
+   * - Classe 7 (produits) → VENTES
+   * - Classe 8 (HAO - SYSCOHADA uniquement) → OD
+   * - Compte 512 (banque) → BANQUE
+   * - Compte 53x (caisse) → CAISSE
+   * - Sinon → OD (Opérations Diverses)
+   *
+   * IFRS (International / Pays anglophones) :
+   * - Classe 6 (Revenue) → VENTES (inversé par rapport au PCG!)
+   * - Classe 7 (Expenses) → ACHATS (inversé par rapport au PCG!)
+   * - Comptes bancaires → BANQUE
+   * - Sinon → OD
+   *
+   * @param accountNumbers Liste des numéros de comptes utilisés dans l'écriture
+   * @param standard Référentiel comptable (PCG, SYSCOHADA, IFRS, SCF). Par défaut: PCG
    */
-  static suggestJournal(accountNumbers: string[]): JournalType {
+  static suggestJournal(accountNumbers: string[], standard: 'PCG' | 'SYSCOHADA' | 'IFRS' | 'SCF' = 'PCG'): JournalType {
+    // Détection des comptes spécifiques (communs à tous les référentiels)
+    const hasBank = accountNumbers.some(acc => acc.startsWith('512') || acc.startsWith('52')); // 512 ou 52x
+    const hasCash = accountNumbers.some(acc => acc.startsWith('53') || acc.startsWith('57')); // 53x ou 57x
+
+    // ========================================
+    // IFRS - Structure différente (classes inversées)
+    // ========================================
+    if (standard === 'IFRS') {
+      // IFRS: Class 6 = Revenue, Class 7 = Expenses
+      const hasRevenueIFRS = accountNumbers.some(acc => acc.startsWith('6'));
+      const hasExpenseIFRS = accountNumbers.some(acc => acc.startsWith('7'));
+      const hasReceivables = accountNumbers.some(acc => acc.startsWith('11') || acc.startsWith('12')); // Trade receivables
+      const hasPayables = accountNumbers.some(acc => acc.startsWith('21') || acc.startsWith('22')); // Trade payables
+
+      // Ventes IFRS: classe 6 (Revenue) ou créances clients
+      if (hasRevenueIFRS && !hasExpenseIFRS) return JournalType.SALE;
+      if (hasRevenueIFRS && hasReceivables) return JournalType.SALE;
+
+      // Achats IFRS: classe 7 (Expenses) ou dettes fournisseurs
+      if (hasExpenseIFRS && !hasRevenueIFRS) return JournalType.PURCHASE;
+      if (hasExpenseIFRS && hasPayables) return JournalType.PURCHASE;
+
+      // Banque
+      if (hasBank) return JournalType.BANK;
+      if (hasCash) return JournalType.CASH;
+
+      return JournalType.MISCELLANEOUS;
+    }
+
+    // ========================================
+    // PCG / SCF / SYSCOHADA - Structure classique
+    // ========================================
     const hasClient = accountNumbers.some(acc => acc.startsWith('411'));
     const hasSupplier = accountNumbers.some(acc => acc.startsWith('401'));
-    const hasBank = accountNumbers.some(acc => acc.startsWith('512'));
-    const hasCash = accountNumbers.some(acc => acc.startsWith('53'));
-    const hasSale = accountNumbers.some(acc => acc.startsWith('707'));
-    const hasPurchase = accountNumbers.some(acc => acc.startsWith('607'));
-    // Règles de détermination automatique
-    if (hasSale && hasClient) return JournalType.SALE;
-    if (hasPurchase && hasSupplier) return JournalType.PURCHASE;
+    const hasSale = accountNumbers.some(acc => acc.startsWith('70')); // 70x = Ventes
+    const hasPurchase = accountNumbers.some(acc => acc.startsWith('60')); // 60x = Achats
+    const hasExpenseAccount = accountNumbers.some(acc => acc.startsWith('6')); // Classe 6 = Charges
+    const hasIncomeAccount = accountNumbers.some(acc => acc.startsWith('7')); // Classe 7 = Produits
+
+    // SYSCOHADA: Classe 8 = HAO (Hors Activités Ordinaires) → toujours OD
+    if (standard === 'SYSCOHADA') {
+      const hasHAO = accountNumbers.some(acc => acc.startsWith('8'));
+      if (hasHAO) {
+        // Les comptes HAO vont toujours en OD
+        return JournalType.MISCELLANEOUS;
+      }
+    }
+
+    // Règles de détermination automatique (ordre de priorité)
+
+    // 1. Ventes : compte 70x (produits) OU client 411
+    if (hasSale || (hasIncomeAccount && hasClient)) return JournalType.SALE;
+    if (hasIncomeAccount && !hasExpenseAccount) return JournalType.SALE;
+
+    // 2. Achats : compte 60x (charges) OU fournisseur 401
+    if (hasPurchase || (hasExpenseAccount && hasSupplier)) return JournalType.PURCHASE;
+    if (hasExpenseAccount && !hasIncomeAccount) return JournalType.PURCHASE;
+
+    // 3. Banque : compte 512
     if (hasBank) return JournalType.BANK;
+
+    // 4. Caisse : compte 53x
     if (hasCash) return JournalType.CASH;
+
+    // 5. Par défaut : Opérations Diverses
     return JournalType.MISCELLANEOUS;
+  }
+
+  /**
+   * Retourne une description des règles d'attribution des journaux
+   * selon le référentiel comptable
+   */
+  static getJournalRulesDescription(standard: 'PCG' | 'SYSCOHADA' | 'IFRS' | 'SCF' = 'PCG'): Record<JournalType, string[]> {
+    if (standard === 'IFRS') {
+      return {
+        [JournalType.SALE]: ['Class 6 (Revenue)', 'Trade Receivables (11x, 12x)'],
+        [JournalType.PURCHASE]: ['Class 7 (Expenses)', 'Trade Payables (21x, 22x)'],
+        [JournalType.BANK]: ['Bank accounts (52x)'],
+        [JournalType.CASH]: ['Cash accounts (57x)'],
+        [JournalType.MISCELLANEOUS]: ['All other accounts', 'Mixed transactions'],
+      };
+    }
+
+    // PCG / SCF / SYSCOHADA (structure similaire)
+    const rules: Record<JournalType, string[]> = {
+      [JournalType.SALE]: ['Classe 7 (Produits)', 'Compte 411 (Clients)'],
+      [JournalType.PURCHASE]: ['Classe 6 (Charges)', 'Compte 401 (Fournisseurs)'],
+      [JournalType.BANK]: ['Compte 512 (Banque)'],
+      [JournalType.CASH]: ['Compte 53x (Caisse)'],
+      [JournalType.MISCELLANEOUS]: ['Classes 1-5 (Bilan)', 'Écritures mixtes'],
+    };
+
+    // Ajouter HAO pour SYSCOHADA
+    if (standard === 'SYSCOHADA') {
+      rules[JournalType.MISCELLANEOUS].push('Classe 8 (HAO - Hors Activités Ordinaires)');
+    }
+
+    return rules;
   }
   /**
    * Récupère le template d'écriture pour un type de journal

@@ -321,7 +321,45 @@
     "GAAP": "GAAP",
     "IFRS": "IFRS",
     "PCG": "Plan Comptable Général",
-    "SYSCOHADA": "SYSCOHADA"
+    "SYSCOHADA": "SYSCOHADA",
+    "SCF": "Système Comptable Financier"
+  },
+  "journalRules": {
+    "title": "Règles d'attribution des journaux",
+    "description": "Attribution automatique selon le référentiel comptable",
+    "PCG": {
+      "name": "PCG (France)",
+      "sale": "Classe 7 (Produits), Compte 411 (Clients)",
+      "purchase": "Classe 6 (Charges), Compte 401 (Fournisseurs)",
+      "bank": "Compte 512 (Banque)",
+      "cash": "Compte 53x (Caisse)",
+      "miscellaneous": "Classes 1-5 (Bilan), Écritures mixtes"
+    },
+    "SYSCOHADA": {
+      "name": "SYSCOHADA (OHADA)",
+      "sale": "Classe 7 (Produits), Compte 411 (Clients)",
+      "purchase": "Classe 6 (Charges), Compte 401 (Fournisseurs)",
+      "bank": "Compte 512 (Banque)",
+      "cash": "Compte 53x (Caisse)",
+      "miscellaneous": "Classes 1-5 (Bilan), Classe 8 (HAO)",
+      "hao": "Hors Activités Ordinaires"
+    },
+    "IFRS": {
+      "name": "IFRS (International)",
+      "sale": "Class 6 (Revenue), Trade Receivables (11x, 12x)",
+      "purchase": "Class 7 (Expenses), Trade Payables (21x, 22x)",
+      "bank": "Bank accounts (52x)",
+      "cash": "Cash accounts (57x)",
+      "miscellaneous": "All other accounts, Mixed transactions"
+    },
+    "SCF": {
+      "name": "SCF (Maghreb)",
+      "sale": "Classe 7 (Produits), Compte 411 (Clients)",
+      "purchase": "Classe 6 (Charges), Compte 401 (Fournisseurs)",
+      "bank": "Compte 512 (Banque)",
+      "cash": "Compte 53x (Caisse)",
+      "miscellaneous": "Classes 1-5 (Bilan), Écritures mixtes"
+    }
   },
   "accountingEntries": "Écritures comptables",
   "accountingEntriesList": "Liste des écritures",
@@ -570,6 +608,79 @@
       "created": "Création",
       "lastUpdate": "Dernière modification",
       "lastDepreciation": "Dernier amortissement"
+    },
+    "sync": {
+      "title": "Synchronisation Comptabilité",
+      "description": "Détecte automatiquement les acquisitions d'immobilisations dans vos écritures comptables",
+      "detectAcquisitions": "Détecter les acquisitions",
+      "detecting": "Analyse en cours...",
+      "noSuggestions": "Aucune acquisition d'immobilisation détectée",
+      "suggestions": "Acquisitions détectées",
+      "suggestionsCount": "{{count}} acquisition(s) potentielle(s)",
+      "createFromEntry": "Créer l'immobilisation",
+      "createAll": "Créer toutes les immobilisations",
+      "entryDate": "Date écriture",
+      "entryReference": "Référence",
+      "suggestedName": "Nom suggéré",
+      "account": "Compte",
+      "amount": "Montant",
+      "confidence": {
+        "high": "Confiance élevée",
+        "medium": "Confiance moyenne",
+        "low": "Confiance faible"
+      },
+      "createSuccess": "Immobilisation créée et liée à l'écriture comptable",
+      "createError": "Erreur lors de la création",
+      "reconcile": "Réconcilier",
+      "reconcileDescription": "Génère les écritures d'acquisition manquantes pour les immobilisations existantes",
+      "reconcileSuccess": "{{count}} immobilisation(s) réconciliée(s)",
+      "checkConsistency": "Vérifier la cohérence",
+      "consistent": "Données cohérentes",
+      "inconsistent": "Incohérences détectées",
+      "issues": "Problèmes",
+      "suggestions_fixes": "Suggestions de correction"
+    },
+    "import": {
+      "title": "Importer des immobilisations",
+      "description": "Importez vos immobilisations depuis un fichier CSV ou JSON",
+      "selectFile": "Sélectionner un fichier",
+      "dragDrop": "ou glissez-déposez le fichier ici",
+      "acceptedFormats": "Formats acceptés: CSV, JSON",
+      "downloadTemplate": "Télécharger le modèle",
+      "options": "Options d'import",
+      "updateExisting": "Mettre à jour les existantes",
+      "updateExistingHint": "Les immobilisations avec le même numéro d'inventaire seront mises à jour",
+      "createCategories": "Créer les catégories manquantes",
+      "createCategoriesHint": "Les catégories non trouvées seront créées automatiquement",
+      "generateSchedules": "Générer les plans d'amortissement",
+      "generateSchedulesHint": "Calcule automatiquement le plan d'amortissement pour chaque immobilisation",
+      "importing": "Import en cours...",
+      "success": "Import réussi",
+      "successMessage": "{{imported}} immobilisation(s) importée(s), {{updated}} mise(s) à jour, {{skipped}} ignorée(s)",
+      "errors": "Erreurs rencontrées",
+      "warnings": "Avertissements",
+      "row": "Ligne",
+      "field": "Champ",
+      "message": "Message"
+    },
+    "export": {
+      "title": "Exporter les immobilisations",
+      "description": "Exportez vos immobilisations au format souhaité",
+      "format": "Format",
+      "formats": {
+        "csv": "CSV (tableur)",
+        "xlsx": "Excel",
+        "json": "JSON (données brutes)"
+      },
+      "options": "Options d'export",
+      "includeSchedule": "Inclure les plans d'amortissement",
+      "includeDisposed": "Inclure les immobilisations cédées",
+      "filterByCategory": "Filtrer par catégorie",
+      "filterByDate": "Filtrer par date d'acquisition",
+      "exporting": "Export en cours...",
+      "success": "Export réussi",
+      "download": "Télécharger",
+      "exportSchedule": "Exporter le plan d'amortissement"
     }
   },
   "auth": {
@@ -2299,6 +2410,50 @@
       "10": "10% - Taux intermédiaire",
       "20": "20% - Taux normal",
       "5.5": "5,5% - Taux réduit"
+    },
+    "accounting": {
+      "title": "Comptabilisation des stocks",
+      "generateEntry": "Générer l'écriture comptable",
+      "generateAll": "Comptabiliser tous les mouvements",
+      "entryGenerated": "Écriture comptable générée avec succès",
+      "allEntriesGenerated": "{{count}} écriture(s) générée(s)",
+      "noEntryNeeded": "Ce mouvement a déjà une écriture comptable",
+      "viewEntry": "Voir l'écriture",
+      "pending": "En attente de comptabilisation",
+      "posted": "Comptabilisé",
+      "movementTypes": {
+        "entry": "Entrée en stock",
+        "exit": "Sortie de stock",
+        "adjustment": "Ajustement d'inventaire",
+        "transfer": "Transfert entre entrepôts"
+      },
+      "adjustmentEntry": {
+        "title": "Écriture d'ajustement d'inventaire",
+        "positive": "Augmentation de stock",
+        "negative": "Diminution de stock",
+        "reason": "Motif de l'ajustement"
+      },
+      "errors": {
+        "journalNotFound": "Journal des opérations diverses non trouvé",
+        "accountNotFound": "Compte de stock non trouvé",
+        "generationFailed": "Erreur lors de la génération de l'écriture",
+        "noValue": "Mouvement sans valeur à comptabiliser"
+      }
+    },
+    "movements": {
+      "title": "Mouvements de stock",
+      "entry": "Entrée",
+      "exit": "Sortie",
+      "adjustment": "Ajustement",
+      "transfer": "Transfert",
+      "reason": "Motif",
+      "reference": "Référence",
+      "quantity": "Quantité",
+      "unitPrice": "Prix unitaire",
+      "totalValue": "Valeur totale",
+      "date": "Date",
+      "warehouse": "Entrepôt",
+      "product": "Produit"
     }
   },
   "invoicing": {
@@ -3782,7 +3937,25 @@
     "add_purchase": "Ajouter un achat",
     "supplier": "Fournisseur",
     "amount": "Montant",
-    "date": "Date"
+    "date": "Date",
+    "accounting": {
+      "title": "Comptabilisation",
+      "generateEntry": "Générer l'écriture comptable",
+      "generatePaymentEntry": "Générer l'écriture de paiement",
+      "generateAll": "Comptabiliser tous les achats en attente",
+      "entryGenerated": "Écriture comptable générée avec succès",
+      "paymentEntryGenerated": "Écriture de paiement générée avec succès",
+      "allEntriesGenerated": "{{count}} écriture(s) générée(s)",
+      "noEntryNeeded": "Cet achat a déjà une écriture comptable",
+      "viewEntry": "Voir l'écriture",
+      "pending": "En attente de comptabilisation",
+      "posted": "Comptabilisé",
+      "errors": {
+        "journalNotFound": "Journal des achats non trouvé",
+        "accountNotFound": "Compte comptable non trouvé",
+        "generationFailed": "Erreur lors de la génération de l'écriture"
+      }
+    }
   },
   "reconcileTransactions": "Rapprocher les transactions",
   "reference": "Référence",

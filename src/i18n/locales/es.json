@@ -342,8 +342,46 @@
   "accounting_standards": {
     "GAAP": "GAAP",
     "IFRS": "IFRS",
-    "PCG": "Plan Comptable Général",
-    "SYSCOHADA": "SYSCOHADA"
+    "PCG": "Plan General de Contabilidad",
+    "SYSCOHADA": "SYSCOHADA",
+    "SCF": "Sistema Contable Financiero"
+  },
+  "journalRules": {
+    "title": "Reglas de asignación de diarios",
+    "description": "Asignación automática según el estándar contable",
+    "PCG": {
+      "name": "PCG (Francia)",
+      "sale": "Clase 7 (Ingresos), Cuenta 411 (Clientes)",
+      "purchase": "Clase 6 (Gastos), Cuenta 401 (Proveedores)",
+      "bank": "Cuenta 512 (Banco)",
+      "cash": "Cuenta 53x (Caja)",
+      "miscellaneous": "Clases 1-5 (Balance), Asientos mixtos"
+    },
+    "SYSCOHADA": {
+      "name": "SYSCOHADA (OHADA)",
+      "sale": "Clase 7 (Ingresos), Cuenta 411 (Clientes)",
+      "purchase": "Clase 6 (Gastos), Cuenta 401 (Proveedores)",
+      "bank": "Cuenta 512 (Banco)",
+      "cash": "Cuenta 53x (Caja)",
+      "miscellaneous": "Clases 1-5 (Balance), Clase 8 (HAO)",
+      "hao": "Fuera de Actividades Ordinarias"
+    },
+    "IFRS": {
+      "name": "IFRS (Internacional)",
+      "sale": "Clase 6 (Ingresos), Cuentas por cobrar (11x, 12x)",
+      "purchase": "Clase 7 (Gastos), Cuentas por pagar (21x, 22x)",
+      "bank": "Cuentas bancarias (52x)",
+      "cash": "Cuentas de efectivo (57x)",
+      "miscellaneous": "Todas las demás cuentas, Transacciones mixtas"
+    },
+    "SCF": {
+      "name": "SCF (Magreb)",
+      "sale": "Clase 7 (Ingresos), Cuenta 411 (Clientes)",
+      "purchase": "Clase 6 (Gastos), Cuenta 401 (Proveedores)",
+      "bank": "Cuenta 512 (Banco)",
+      "cash": "Cuenta 53x (Caja)",
+      "miscellaneous": "Clases 1-5 (Balance), Asientos mixtos"
+    }
   },
   "actions": "Actions",
   "active": "Activo",
@@ -2046,6 +2084,50 @@
       "10": "10% - Tipo Intermedio",
       "20": "20% - Tipo Normal",
       "5.5": "5,5% - Tipo Reducido"
+    },
+    "accounting": {
+      "title": "Contabilización de Inventario",
+      "generateEntry": "Generar asiento contable",
+      "generateAll": "Contabilizar todos los movimientos",
+      "entryGenerated": "Asiento contable generado con éxito",
+      "allEntriesGenerated": "{{count}} asiento(s) generado(s)",
+      "noEntryNeeded": "Este movimiento ya tiene un asiento contable",
+      "viewEntry": "Ver asiento",
+      "pending": "Pendiente de contabilización",
+      "posted": "Contabilizado",
+      "movementTypes": {
+        "entry": "Entrada de stock",
+        "exit": "Salida de stock",
+        "adjustment": "Ajuste de inventario",
+        "transfer": "Transferencia entre almacenes"
+      },
+      "adjustmentEntry": {
+        "title": "Asiento de ajuste de inventario",
+        "positive": "Aumento de stock",
+        "negative": "Disminución de stock",
+        "reason": "Motivo del ajuste"
+      },
+      "errors": {
+        "journalNotFound": "Diario de operaciones diversas no encontrado",
+        "accountNotFound": "Cuenta de stock no encontrada",
+        "generationFailed": "Error al generar el asiento contable",
+        "noValue": "Movimiento sin valor a contabilizar"
+      }
+    },
+    "movements": {
+      "title": "Movimientos de Stock",
+      "entry": "Entrada",
+      "exit": "Salida",
+      "adjustment": "Ajuste",
+      "transfer": "Transferencia",
+      "reason": "Motivo",
+      "reference": "Referencia",
+      "quantity": "Cantidad",
+      "unitPrice": "Precio unitario",
+      "totalValue": "Valor total",
+      "date": "Fecha",
+      "warehouse": "Almacén",
+      "product": "Producto"
     }
   },
   "inventorypage": {
@@ -3492,9 +3574,27 @@
     "add_purchase": "Añadir compra",
     "supplier": "Proveedor",
     "amount": "Monto",
-    "date": "Fecha"
+    "date": "Fecha",
+    "accounting": {
+      "title": "Contabilización",
+      "generateEntry": "Generar asiento contable",
+      "generatePaymentEntry": "Generar asiento de pago",
+      "generateAll": "Contabilizar todas las compras pendientes",
+      "entryGenerated": "Asiento contable generado con éxito",
+      "paymentEntryGenerated": "Asiento de pago generado con éxito",
+      "allEntriesGenerated": "{{count}} asiento(s) generado(s)",
+      "noEntryNeeded": "Esta compra ya tiene un asiento contable",
+      "viewEntry": "Ver asiento",
+      "pending": "Pendiente de contabilización",
+      "posted": "Contabilizado",
+      "errors": {
+        "journalNotFound": "Diario de compras no encontrado",
+        "accountNotFound": "Cuenta contable no encontrada",
+        "generationFailed": "Error al generar el asiento contable"
+      }
+    }
   },
-  "reconcileTransactions": "Rapprocher les transactions",
+  "reconcileTransactions": "Conciliar transacciones",
   "reference": "Référence",
   "regions_detailed": {
     "central_africa": {
@@ -5356,6 +5456,79 @@
       "deleteFailed": "Error al eliminar el activo",
       "generateFailed": "Error al generar asientos",
       "disposeFailed": "Error al dar de baja el activo"
+    },
+    "sync": {
+      "title": "Sincronización Contable",
+      "description": "Detecta automáticamente las adquisiciones de activos en sus asientos contables",
+      "detectAcquisitions": "Detectar Adquisiciones",
+      "detecting": "Analizando...",
+      "noSuggestions": "No se detectaron adquisiciones de activos",
+      "suggestions": "Adquisiciones Detectadas",
+      "suggestionsCount": "{{count}} adquisición(es) potencial(es)",
+      "createFromEntry": "Crear Activo",
+      "createAll": "Crear Todos los Activos",
+      "entryDate": "Fecha del Asiento",
+      "entryReference": "Referencia",
+      "suggestedName": "Nombre Sugerido",
+      "account": "Cuenta",
+      "amount": "Importe",
+      "confidence": {
+        "high": "Confianza Alta",
+        "medium": "Confianza Media",
+        "low": "Confianza Baja"
+      },
+      "createSuccess": "Activo creado y vinculado al asiento contable",
+      "createError": "Error al crear el activo",
+      "reconcile": "Conciliar",
+      "reconcileDescription": "Genera los asientos de adquisición faltantes para activos existentes",
+      "reconcileSuccess": "{{count}} activo(s) conciliado(s)",
+      "checkConsistency": "Verificar Consistencia",
+      "consistent": "Datos Consistentes",
+      "inconsistent": "Inconsistencias Detectadas",
+      "issues": "Problemas",
+      "suggestions_fixes": "Sugerencias de Corrección"
+    },
+    "import": {
+      "title": "Importar Activos",
+      "description": "Importe sus activos desde un archivo CSV o JSON",
+      "selectFile": "Seleccionar Archivo",
+      "dragDrop": "o arrastre y suelte el archivo aquí",
+      "acceptedFormats": "Formatos aceptados: CSV, JSON",
+      "downloadTemplate": "Descargar Plantilla",
+      "options": "Opciones de Importación",
+      "updateExisting": "Actualizar Existentes",
+      "updateExistingHint": "Los activos con el mismo número de inventario serán actualizados",
+      "createCategories": "Crear Categorías Faltantes",
+      "createCategoriesHint": "Las categorías no encontradas se crearán automáticamente",
+      "generateSchedules": "Generar Planes de Depreciación",
+      "generateSchedulesHint": "Calcula automáticamente el plan de depreciación para cada activo",
+      "importing": "Importando...",
+      "success": "Importación Exitosa",
+      "successMessage": "{{imported}} activo(s) importado(s), {{updated}} actualizado(s), {{skipped}} omitido(s)",
+      "errors": "Errores Encontrados",
+      "warnings": "Advertencias",
+      "row": "Fila",
+      "field": "Campo",
+      "message": "Mensaje"
+    },
+    "export": {
+      "title": "Exportar Activos",
+      "description": "Exporte sus activos en el formato deseado",
+      "format": "Formato",
+      "formats": {
+        "csv": "CSV (hoja de cálculo)",
+        "xlsx": "Excel",
+        "json": "JSON (datos crudos)"
+      },
+      "options": "Opciones de Exportación",
+      "includeSchedule": "Incluir Planes de Depreciación",
+      "includeDisposed": "Incluir Activos Dados de Baja",
+      "filterByCategory": "Filtrar por Categoría",
+      "filterByDate": "Filtrar por Fecha de Adquisición",
+      "exporting": "Exportando...",
+      "success": "Exportación Exitosa",
+      "download": "Descargar",
+      "exportSchedule": "Exportar Plan de Depreciación"
     }
   },
   "team": {

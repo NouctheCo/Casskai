@@ -352,8 +352,46 @@
   "accounting_standards": {
     "GAAP": "GAAP",
     "IFRS": "IFRS",
-    "PCG": "Plan Comptable GÃ©nÃ©ral",
-    "SYSCOHADA": "SYSCOHADA"
+    "PCG": "French General Chart of Accounts",
+    "SYSCOHADA": "SYSCOHADA",
+    "SCF": "Financial Accounting System"
+  },
+  "journalRules": {
+    "title": "Journal Assignment Rules",
+    "description": "Automatic assignment based on accounting standard",
+    "PCG": {
+      "name": "PCG (France)",
+      "sale": "Class 7 (Revenue), Account 411 (Customers)",
+      "purchase": "Class 6 (Expenses), Account 401 (Suppliers)",
+      "bank": "Account 512 (Bank)",
+      "cash": "Account 53x (Cash)",
+      "miscellaneous": "Classes 1-5 (Balance Sheet), Mixed entries"
+    },
+    "SYSCOHADA": {
+      "name": "SYSCOHADA (OHADA)",
+      "sale": "Class 7 (Revenue), Account 411 (Customers)",
+      "purchase": "Class 6 (Expenses), Account 401 (Suppliers)",
+      "bank": "Account 512 (Bank)",
+      "cash": "Account 53x (Cash)",
+      "miscellaneous": "Classes 1-5 (Balance Sheet), Class 8 (HAO)",
+      "hao": "Non-Ordinary Activities"
+    },
+    "IFRS": {
+      "name": "IFRS (International)",
+      "sale": "Class 6 (Revenue), Trade Receivables (11x, 12x)",
+      "purchase": "Class 7 (Expenses), Trade Payables (21x, 22x)",
+      "bank": "Bank accounts (52x)",
+      "cash": "Cash accounts (57x)",
+      "miscellaneous": "All other accounts, Mixed transactions"
+    },
+    "SCF": {
+      "name": "SCF (Maghreb)",
+      "sale": "Class 7 (Revenue), Account 411 (Customers)",
+      "purchase": "Class 6 (Expenses), Account 401 (Suppliers)",
+      "bank": "Account 512 (Bank)",
+      "cash": "Account 53x (Cash)",
+      "miscellaneous": "Classes 1-5 (Balance Sheet), Mixed entries"
+    }
   },
   "actions": "Actions",
   "active": "Active",
@@ -2050,6 +2088,50 @@
       "10": "10% - Intermediate Rate",
       "20": "20% - Standard Rate",
       "5.5": "5.5% - Reduced Rate"
+    },
+    "accounting": {
+      "title": "Inventory Accounting",
+      "generateEntry": "Generate Journal Entry",
+      "generateAll": "Post All Movements",
+      "entryGenerated": "Journal entry generated successfully",
+      "allEntriesGenerated": "{{count}} entry(ies) generated",
+      "noEntryNeeded": "This movement already has a journal entry",
+      "viewEntry": "View Entry",
+      "pending": "Pending Posting",
+      "posted": "Posted",
+      "movementTypes": {
+        "entry": "Stock Receipt",
+        "exit": "Stock Issue",
+        "adjustment": "Inventory Adjustment",
+        "transfer": "Warehouse Transfer"
+      },
+      "adjustmentEntry": {
+        "title": "Inventory Adjustment Entry",
+        "positive": "Stock Increase",
+        "negative": "Stock Decrease",
+        "reason": "Adjustment Reason"
+      },
+      "errors": {
+        "journalNotFound": "Miscellaneous operations journal not found",
+        "accountNotFound": "Stock account not found",
+        "generationFailed": "Error generating journal entry",
+        "noValue": "Movement has no value to post"
+      }
+    },
+    "movements": {
+      "title": "Stock Movements",
+      "entry": "Receipt",
+      "exit": "Issue",
+      "adjustment": "Adjustment",
+      "transfer": "Transfer",
+      "reason": "Reason",
+      "reference": "Reference",
+      "quantity": "Quantity",
+      "unitPrice": "Unit Price",
+      "totalValue": "Total Value",
+      "date": "Date",
+      "warehouse": "Warehouse",
+      "product": "Product"
     }
   },
   "inventorypage": {
@@ -3496,7 +3578,25 @@
     "add_purchase": "Add purchase",
     "supplier": "Supplier",
     "amount": "Amount",
-    "date": "Date"
+    "date": "Date",
+    "accounting": {
+      "title": "Accounting",
+      "generateEntry": "Generate Journal Entry",
+      "generatePaymentEntry": "Generate Payment Entry",
+      "generateAll": "Post All Pending Purchases",
+      "entryGenerated": "Journal entry generated successfully",
+      "paymentEntryGenerated": "Payment entry generated successfully",
+      "allEntriesGenerated": "{{count}} entry(ies) generated",
+      "noEntryNeeded": "This purchase already has a journal entry",
+      "viewEntry": "View Entry",
+      "pending": "Pending Posting",
+      "posted": "Posted",
+      "errors": {
+        "journalNotFound": "Purchase journal not found",
+        "accountNotFound": "Account not found",
+        "generationFailed": "Error generating journal entry"
+      }
+    }
   },
   "reconcileTransactions": "Reconcile transactions",
   "reference": "Reference",
@@ -5355,6 +5455,79 @@
       "deleteFailed": "Failed to delete asset",
       "generateFailed": "Failed to generate entries",
       "disposeFailed": "Failed to dispose asset"
+    },
+    "sync": {
+      "title": "Accounting Synchronization",
+      "description": "Automatically detects asset acquisitions in your accounting entries",
+      "detectAcquisitions": "Detect Acquisitions",
+      "detecting": "Analyzing...",
+      "noSuggestions": "No asset acquisitions detected",
+      "suggestions": "Detected Acquisitions",
+      "suggestionsCount": "{{count}} potential acquisition(s)",
+      "createFromEntry": "Create Asset",
+      "createAll": "Create All Assets",
+      "entryDate": "Entry Date",
+      "entryReference": "Reference",
+      "suggestedName": "Suggested Name",
+      "account": "Account",
+      "amount": "Amount",
+      "confidence": {
+        "high": "High Confidence",
+        "medium": "Medium Confidence",
+        "low": "Low Confidence"
+      },
+      "createSuccess": "Asset created and linked to accounting entry",
+      "createError": "Error creating asset",
+      "reconcile": "Reconcile",
+      "reconcileDescription": "Generates missing acquisition entries for existing assets",
+      "reconcileSuccess": "{{count}} asset(s) reconciled",
+      "checkConsistency": "Check Consistency",
+      "consistent": "Data Consistent",
+      "inconsistent": "Inconsistencies Detected",
+      "issues": "Issues",
+      "suggestions_fixes": "Suggested Fixes"
+    },
+    "import": {
+      "title": "Import Assets",
+      "description": "Import your assets from a CSV or JSON file",
+      "selectFile": "Select File",
+      "dragDrop": "or drag and drop file here",
+      "acceptedFormats": "Accepted formats: CSV, JSON",
+      "downloadTemplate": "Download Template",
+      "options": "Import Options",
+      "updateExisting": "Update Existing",
+      "updateExistingHint": "Assets with the same inventory number will be updated",
+      "createCategories": "Create Missing Categories",
+      "createCategoriesHint": "Categories not found will be created automatically",
+      "generateSchedules": "Generate Depreciation Schedules",
+      "generateSchedulesHint": "Automatically calculates depreciation schedule for each asset",
+      "importing": "Importing...",
+      "success": "Import Successful",
+      "successMessage": "{{imported}} asset(s) imported, {{updated}} updated, {{skipped}} skipped",
+      "errors": "Errors Encountered",
+      "warnings": "Warnings",
+      "row": "Row",
+      "field": "Field",
+      "message": "Message"
+    },
+    "export": {
+      "title": "Export Assets",
+      "description": "Export your assets in the desired format",
+      "format": "Format",
+      "formats": {
+        "csv": "CSV (spreadsheet)",
+        "xlsx": "Excel",
+        "json": "JSON (raw data)"
+      },
+      "options": "Export Options",
+      "includeSchedule": "Include Depreciation Schedules",
+      "includeDisposed": "Include Disposed Assets",
+      "filterByCategory": "Filter by Category",
+      "filterByDate": "Filter by Acquisition Date",
+      "exporting": "Exporting...",
+      "success": "Export Successful",
+      "download": "Download",
+      "exportSchedule": "Export Depreciation Schedule"
     }
   },
   "team": {

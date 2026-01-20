@@ -21,6 +21,7 @@ import type {
 } from '@/types/journalEntries.types';
 import { auditService } from './auditService';
 import AccountingRulesService from './accountingRulesService';
+import { AccountingStandardAdapter, type AccountingStandard } from './accountingStandardAdapter';
 import { kpiCacheService } from './kpiCacheService';
 import { logger } from '@/lib/logger';
 type JournalEntryInsert = Database['public']['Tables']['journal_entries']['Insert'];
@@ -77,36 +78,86 @@ class JournalEntriesService {
       logger.warn('JournalEntries', '🔍 [JournalEntriesService] Tentative récupération journal par défaut...');
       if (!journalId) {
         try {
-          logger.warn('JournalEntries', '🔍 Récupération journal par défaut pour company:', payload.companyId);
-          logger.warn('JournalEntries', '⚠️ ATTENTION: Aucun journal spécifié, utilisation du fallback');
-          // Récupérer le journal OD (Opérations Diverses) en priorité pour les écritures manuelles
-          const { data: defaultJournal, error: journalError } = await supabase
-            .from('journals')
-            .select('id, code, name, type')
-            .eq('company_id', payload.companyId)
-            .eq('is_active', true)
-            .eq('type', 'miscellaneous') // Priorité au journal OD
-            .limit(1)
-            .single();
-          logger.warn('JournalEntries', '🔍 Résultat query journals:', { data: defaultJournal, error: journalError });
-          if (journalError) {
-            logger.error('JournalEntries', '❌ Erreur récupération journal OD:', journalError);
-            // Si pas de journal OD, prendre le premier journal actif
-            const { data: anyJournal } = await supabase
+          logger.warn('JournalEntries', '🔍 Récupération journal automatique pour company:', payload.companyId);
+
+          // ✅ Récupérer le standard comptable de l'entreprise (PCG, SYSCOHADA, IFRS, SCF)
+          const accountingStandard = await AccountingStandardAdapter.getCompanyStandard(payload.companyId);
+          logger.info('JournalEntries', `📊 Standard comptable de l'entreprise: ${accountingStandard}`);
+
+          // ✅ Détection automatique du journal basée sur les comptes utilisés ET le référentiel
+          const accountIds = payload.items.map(item => item.accountId).filter(Boolean);
+          if (accountIds.length > 0) {
+            // Récupérer les numéros de comptes pour la suggestion
+            const { data: accounts } = await supabase
+              .from('chart_of_accounts')
+              .select('id, account_number')
+              .eq('company_id', payload.companyId)
+              .in('id', accountIds);
+
+            if (accounts && accounts.length > 0) {
+              const accountNumbers = accounts.map(acc => acc.account_number || '').filter(Boolean);
+              // ✅ Passer le standard comptable pour appliquer les bonnes règles
+              const suggestedJournalType = AccountingRulesService.suggestJournal(accountNumbers, accountingStandard);
+              logger.info('JournalEntries', `🎯 Journal suggéré (${accountingStandard}): ${suggestedJournalType}`, { accountNumbers });
+
+              // Mapper le type de journal vers le type en base
+              const journalTypeMap: Record<string, string> = {
+                'sale': 'sale',
+                'purchase': 'purchase',
+                'bank': 'bank',
+                'cash': 'cash',
+                'miscellaneous': 'miscellaneous',
+              };
+              const dbJournalType = journalTypeMap[suggestedJournalType] || 'miscellaneous';
+
+              // Chercher le journal correspondant
+              const { data: suggestedJournal, error: suggestError } = await supabase
+                .from('journals')
+                .select('id, code, name, type')
+                .eq('company_id', payload.companyId)
+                .eq('is_active', true)
+                .eq('type', dbJournalType)
+                .limit(1)
+                .single();
+
+              if (!suggestError && suggestedJournal) {
+                journalId = suggestedJournal.id;
+                logger.info('JournalEntries', `✅ Journal automatiquement sélectionné: ${suggestedJournal.code} - ${suggestedJournal.name} (type: ${suggestedJournal.type})`);
+              }
+            }
+          }
+
+          // Fallback: si aucun journal trouvé via suggestion, prendre OD
+          if (!journalId) {
+            logger.warn('JournalEntries', '⚠️ Pas de suggestion de journal, fallback vers OD');
+            const { data: defaultJournal, error: journalError } = await supabase
               .from('journals')
               .select('id, code, name, type')
               .eq('company_id', payload.companyId)
               .eq('is_active', true)
+              .eq('type', 'miscellaneous')
               .limit(1)
               .single();
-            if (!anyJournal) {
-              throw new Error('Aucun journal actif trouvé pour cette entreprise. Veuillez créer au moins un journal.');
+
+            if (journalError) {
+              logger.error('JournalEntries', '❌ Erreur récupération journal OD:', journalError);
+              // Si pas de journal OD, prendre le premier journal actif
+              const { data: anyJournal } = await supabase
+                .from('journals')
+                .select('id, code, name, type')
+                .eq('company_id', payload.companyId)
+                .eq('is_active', true)
+                .limit(1)
+                .single();
+              if (!anyJournal) {
+                throw new Error('Aucun journal actif trouvé pour cette entreprise. Veuillez créer au moins un journal.');
+              }
+              journalId = anyJournal.id;
+              logger.warn('JournalEntries', `⚠️ Journal de secours utilisé: ${anyJournal.code} - ${anyJournal.name} (type: ${anyJournal.type})`);
+            } else {
+              journalId = defaultJournal.id;
+              logger.warn('JournalEntries', '✅ Journal OD trouvé:', defaultJournal);
             }
-            journalId = anyJournal.id;
-            logger.warn('JournalEntries', `⚠️ Journal de secours utilisé: ${anyJournal.code} - ${anyJournal.name} (type: ${anyJournal.type})`);
-          } else {
-            journalId = defaultJournal.id;
-            logger.warn('JournalEntries', '✅ Journal OD trouvé:', defaultJournal);
           }
         } catch (error) {
           logger.error('JournalEntries', '💥 Exception récupération journal:', error);

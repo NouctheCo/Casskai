@@ -185,7 +185,7 @@ class DashboardStatsService {
         credit_amount,
         chart_of_accounts!inner (
           account_number,
-          name
+          account_name
         ),
         journal_entries!inner (
           company_id,
@@ -194,7 +194,7 @@ class DashboardStatsService {
         )
       `)
       .eq('journal_entries.company_id', companyId)
-      .in('journal_entries.status', ['posted', 'validated', 'imported'])
+      .in('journal_entries.status', ['posted', 'validated'])
       .gte('journal_entries.entry_date', startDate)
       .lte('journal_entries.entry_date', endDate);
     if (error || !lines) {
