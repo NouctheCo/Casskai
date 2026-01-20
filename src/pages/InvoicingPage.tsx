@@ -211,7 +211,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
 
         const { data: recentQuotes } = await supabase
           .from('quotes')
-          .select('id, quote_number, status, total_incl_tax, created_at')
+          .select('id, quote_number, status, total_amount, created_at')
           .eq('company_id', currentCompany.id)
           .order('created_at', { ascending: false })
           .limit(2);
@@ -239,7 +239,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
         // Ajouter les devis récents
         if (recentQuotes) {
           for (const quote of recentQuotes) {
-            const amount = quote.total_incl_tax || 0;
+            const amount = quote.total_amount || 0;
             const formattedAmount = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
             const timeAgo = getTimeAgo(quote.created_at);
 

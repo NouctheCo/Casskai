@@ -195,7 +195,7 @@ export function Navbar() {
 
             {/* Desktop CTA */}
             <div className="hidden md:flex items-center gap-3">
-              <LanguageSelector variant="dropdown" compact showFlag className="text-sm" />
+              <LanguageSelector variant="dropdown" compact showFlag className="text-sm border-gray-600 bg-gray-800/50 text-white hover:bg-gray-700 hover:text-white [&>button]:border-gray-600 [&>button]:bg-gray-800/50 [&>button]:text-white [&>button:hover]:bg-gray-700" />
               <Link
                 to="/auth"
                 className="px-4 py-2 text-gray-300 hover:text-white transition-colors text-sm font-medium"
