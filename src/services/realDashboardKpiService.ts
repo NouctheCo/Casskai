@@ -152,14 +152,14 @@ export class RealDashboardKpiService {
       // APPROCHE 1: Lire depuis la table purchases
       const { data: purchases, error: purchasesError } = await supabase
         .from('purchases')
-        .select('total_incl_tax, total_amount')
+        .select('total_amount')
         .eq('company_id', companyId)
         .gte('purchase_date', startDate)
         .lte('purchase_date', endDate);
 
       if (!purchasesError && purchases && purchases.length > 0) {
         const totalExpenses = purchases.reduce((sum, p) =>
-          sum + Number(p.total_incl_tax || p.total_amount || 0), 0);
+          sum + Number(p.total_amount || 0), 0);
         logger.debug('RealDashboardKpi', `[calculatePurchases] From purchases: ${totalExpenses} €`);
         return totalExpenses;
       }
@@ -402,7 +402,7 @@ export class RealDashboardKpiService {
       // Try purchases table first
       const { data: purchasesData, error: purchasesError } = await supabase
         .from('purchases')
-        .select('total_incl_tax, total_amount, description')
+        .select('total_amount, description')
         .eq('company_id', companyId)
         .gte('purchase_date', startDate)
         .lte('purchase_date', endDate);
@@ -412,7 +412,7 @@ export class RealDashboardKpiService {
         const categoryMap = new Map<string, number>();
         purchasesData.forEach((purchase: any) => {
           const category = purchase.description || 'Non catégorisé';
-          const amount = purchase.total_incl_tax || purchase.total_amount || 0; // ✅ Use total_incl_tax first
+          const amount = purchase.total_amount || 0;
           categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
         });
         // Convertir en tableau et trier
