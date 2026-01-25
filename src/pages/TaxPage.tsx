@@ -24,6 +24,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { toastError, toastSuccess, toastDeleted, toastUpdated } from '@/lib/toast-helpers';
+import { formatCurrency } from '@/lib/utils';
 import { useEnterprise } from '../contexts/EnterpriseContext';
 import { taxService } from '../services/taxService';
 import { TaxCompliancePanel } from '../components/fiscal/TaxCompliancePanel';
@@ -319,7 +320,7 @@ const TaxPage: React.FC = () => {
     try {
       const response = await (taxService as any).acknowledgeAlert(alertId);
       if (response.data) {
-        setAlerts(prev => prev.map(alert => 
+        setAlerts(prev => prev.map(alert =>
           alert.id === alertId ? response.data : alert
         ));
         toastSuccess(t('tax.success.alertAcknowledged'));
@@ -327,12 +328,6 @@ const TaxPage: React.FC = () => {
     } catch (_error) {
       toastError(t('tax.errors.acknowledgeAlert'));
     }
-  };
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amount);
   };
   const handleViewDeclaration = (declaration: TaxDeclaration) => {
     setSelectedDeclaration(declaration);
