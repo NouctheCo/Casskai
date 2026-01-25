@@ -12,7 +12,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Company, UserRole } from '@/types/database.types';
+import type { Company } from '@/types/database.types';
+import type { UserRole } from '@/types/types-fixes';
 import { logger } from '@/lib/logger';
 export interface CompanyWithRole extends Company {
   role: UserRole;

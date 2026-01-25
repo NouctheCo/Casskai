@@ -11,6 +11,7 @@
  */
 import { openBankingManager } from './openBanking/OpenBankingManager';
 import { logger } from '@/lib/logger';
+import { formatCurrency as formatCurrencyLib } from '@/lib/utils';
 import {
   BankConnection, 
   BankAccount,
@@ -362,8 +363,8 @@ export class BankingService {
     return colors[status] || 'gray';
   }
   private formatCurrency(amount: number, _currency: string = 'EUR'): string {
-    const formatted = new Intl.NumberFormat('fr-FR', {}).format(amount);
-    return formatted.replace(/\u00a0/g, ' ');
+    // Delegate to central utility which handles company fallback
+    return formatCurrencyLib(amount, _currency);
   }
   private formatLastSync(date: Date): string {
     const now = new Date();
