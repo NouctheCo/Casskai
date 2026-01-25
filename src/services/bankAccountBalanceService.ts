@@ -13,6 +13,7 @@
 import { supabase } from '@/lib/supabase';
 import { JournalType } from './accountingRulesService';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 export interface BankAccountBalanceUpdate {
   account_id: string;
   new_balance: number;
@@ -100,8 +101,8 @@ class BankAccountBalanceService {
         logger.error('BankAccountBalance', 'Erreur mise à jour solde:', updateError);
         return null;
       }
-      logger.debug('bankAccountBalance', 
-        `✅ Solde bancaire ${bankAccountId} mis à jour: ${previousBalance}€ → ${newBalance}€ (mouvement: ${movement}€)`
+      logger.debug('bankAccountBalance',
+        `✅ Solde bancaire ${bankAccountId} mis à jour: ${formatCurrency(previousBalance)} → ${formatCurrency(newBalance)} (mouvement: ${formatCurrency(movement)})`
       );
       return {
         account_id: bankAccountId,
@@ -263,13 +264,13 @@ class BankAccountBalanceService {
         return {
           success: true,
           newBalance: calculatedBalance,
-          message: `✅ Solde vérifié: ${calculatedBalance}€ (pas de changement)`
+          message: `✅ Solde vérifié: ${formatCurrency(calculatedBalance)} (pas de changement)`
         };
       } else {
         return {
           success: true,
           newBalance: calculatedBalance,
-          message: `✅ Solde recalculé: ${previousBalance}€ → ${calculatedBalance}€ (correction: ${difference > 0 ? '+' : ''}${difference}€)`
+          message: `✅ Solde recalculé: ${formatCurrency(previousBalance)} → ${formatCurrency(calculatedBalance)} (correction: ${difference > 0 ? '+' : ''}${formatCurrency(difference)})`
         };
       }
     } catch (error) {
