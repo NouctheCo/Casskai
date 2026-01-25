@@ -5,6 +5,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import type {
   CashFlowPrediction,
   DailyPrediction,
@@ -301,7 +302,7 @@ export async function generateCashFlowPrediction(
       company_id: companyId,
       generated_at: new Date().toISOString(),
       current_balance: currentBalance,
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       predictions,
       min_balance: minPrediction.predicted_balance,
       min_balance_date: minPrediction.date,

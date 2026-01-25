@@ -13,6 +13,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { fromBudgetLinesDB, type BudgetLineDB } from '@/utils/budgetMapping';
+import { formatCurrencyForPDF } from '@/lib/utils';
 
 // Types partagés avec le mapping
 export interface BudgetCategory {
@@ -148,9 +149,9 @@ export const businessPlanService = {
     pdf.setTextColor(0, 0, 0);
 
     const kpis = [
-      ['Chiffre d\'affaires prévisionnel', `${totalRevenue.toLocaleString('fr-FR')} EUR`],
-      ['Total des charges', `${totalExpenses.toLocaleString('fr-FR')} EUR`],
-      ['Résultat net prévisionnel', `${netResult.toLocaleString('fr-FR')} EUR`],
+      ['Chiffre d\'affaires prévisionnel', formatCurrencyForPDF(totalRevenue)],
+      ['Total des charges', formatCurrencyForPDF(totalExpenses)],
+      ['Résultat net prévisionnel', formatCurrencyForPDF(netResult)],
       ['Marge nette', `${margin.toFixed(1)}%`],
     ];
 
@@ -203,10 +204,10 @@ export const businessPlanService = {
       .map((c) => [
         c.account_number || '-',
         c.account_name || 'Revenu',
-        `${c.annual_amount.toLocaleString('fr-FR')} EUR`,
+        formatCurrencyForPDF(c.annual_amount),
       ]);
 
-    revenueRows.push(['', 'TOTAL PRODUITS', `${totalRevenue.toLocaleString('fr-FR')} EUR`]);
+    revenueRows.push(['', 'TOTAL PRODUITS', formatCurrencyForPDF(totalRevenue)]);
 
     autoTable(pdf, {
       startY: y,
@@ -233,10 +234,10 @@ export const businessPlanService = {
       .map((c) => [
         c.account_number || '-',
         c.account_name || 'Dépense',
-        `${c.annual_amount.toLocaleString('fr-FR')} EUR`,
+        formatCurrencyForPDF(c.annual_amount),
       ]);
 
-    expenseRows.push(['', 'TOTAL CHARGES', `${totalExpenses.toLocaleString('fr-FR')} EUR`]);
+    expenseRows.push(['', 'TOTAL CHARGES', formatCurrencyForPDF(totalExpenses)]);
 
     autoTable(pdf, {
       startY: y,

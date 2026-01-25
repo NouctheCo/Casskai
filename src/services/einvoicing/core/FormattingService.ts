@@ -113,8 +113,8 @@ export class FormattingService {
   ${this.generateUBLCustomerParty(invoice.buyer)}
   ${this.generateUBLPaymentMeans(invoice.payment_terms)}
   ${this.generateUBLTaxTotal(invoice)}
-  ${this.generateUBLMonetaryTotal(invoice.totals)}
-  ${invoice.lines.map((line, index) => this.generateUBLInvoiceLine(line, index + 1)).join('\n  ')}
+  ${this.generateUBLMonetaryTotal(invoice.totals, invoice.currency_code)}
+  ${invoice.lines.map((line, index) => this.generateUBLInvoiceLine(line, index + 1, invoice.currency_code)).join('\n  ')}
 </Invoice>`;
     return this.formatXml(xml);
   }
@@ -347,21 +347,21 @@ startxref
       </cac:TaxCategory>
     </cac:TaxSubtotal>`).join('\n    ');
   }
-  private generateUBLMonetaryTotal(totals: EN16931Invoice['totals']): string {
+  private generateUBLMonetaryTotal(totals: EN16931Invoice['totals'], currencyCode: string): string {
     return `<cac:LegalMonetaryTotal>
-    <cbc:LineExtensionAmount currencyID="EUR">${totals.sum_invoice_line_net_amount.toFixed(2)}</cbc:LineExtensionAmount>
-    <cbc:TaxExclusiveAmount currencyID="EUR">${totals.invoice_total_without_vat.toFixed(2)}</cbc:TaxExclusiveAmount>
-    <cbc:TaxInclusiveAmount currencyID="EUR">${totals.invoice_total_with_vat.toFixed(2)}</cbc:TaxInclusiveAmount>
-    ${totals.sum_allowances_on_document_level ? `<cbc:AllowanceTotalAmount currencyID="EUR">${totals.sum_allowances_on_document_level.toFixed(2)}</cbc:AllowanceTotalAmount>` : ''}
-    ${totals.sum_charges_on_document_level ? `<cbc:ChargeTotalAmount currencyID="EUR">${totals.sum_charges_on_document_level.toFixed(2)}</cbc:ChargeTotalAmount>` : ''}
-    <cbc:PayableAmount currencyID="EUR">${totals.amount_due_for_payment.toFixed(2)}</cbc:PayableAmount>
+    <cbc:LineExtensionAmount currencyID="${currencyCode}">${totals.sum_invoice_line_net_amount.toFixed(2)}</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="${currencyCode}">${totals.invoice_total_without_vat.toFixed(2)}</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="${currencyCode}">${totals.invoice_total_with_vat.toFixed(2)}</cbc:TaxInclusiveAmount>
+    ${totals.sum_allowances_on_document_level ? `<cbc:AllowanceTotalAmount currencyID="${currencyCode}">${totals.sum_allowances_on_document_level.toFixed(2)}</cbc:AllowanceTotalAmount>` : ''}
+    ${totals.sum_charges_on_document_level ? `<cbc:ChargeTotalAmount currencyID="${currencyCode}">${totals.sum_charges_on_document_level.toFixed(2)}</cbc:ChargeTotalAmount>` : ''}
+    <cbc:PayableAmount currencyID="${currencyCode}">${totals.amount_due_for_payment.toFixed(2)}</cbc:PayableAmount>
   </cac:LegalMonetaryTotal>`;
   }
-  private generateUBLInvoiceLine(line: EN16931Invoice['lines'][0], lineNumber: number): string {
+  private generateUBLInvoiceLine(line: EN16931Invoice['lines'][0], lineNumber: number, currencyCode: string): string {
     return `<cac:InvoiceLine>
     <cbc:ID>${lineNumber}</cbc:ID>
     <cbc:InvoicedQuantity unitCode="${line.unit_code}">${line.quantity}</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="EUR">${line.net_amount.toFixed(2)}</cbc:LineExtensionAmount>
+    <cbc:LineExtensionAmount currencyID="${currencyCode}">${line.net_amount.toFixed(2)}</cbc:LineExtensionAmount>
     <cac:Item>
       <cbc:Name>${this.escapeXml(line.name)}</cbc:Name>
       ${line.description ? `<cbc:Description>${this.escapeXml(line.description)}</cbc:Description>` : ''}
@@ -377,7 +377,7 @@ startxref
       </cac:ClassifiedTaxCategory>` : ''}
     </cac:Item>
     <cac:Price>
-      <cbc:PriceAmount currencyID="EUR">${line.net_price.toFixed(2)}</cbc:PriceAmount>
+      <cbc:PriceAmount currencyID="${currencyCode}">${line.net_price.toFixed(2)}</cbc:PriceAmount>
     </cac:Price>
   </cac:InvoiceLine>`;
   }
@@ -427,7 +427,7 @@ startxref
       <ram:InvoiceCurrencyCode>${invoice.currency_code}</ram:InvoiceCurrencyCode>
       ${this.generateCIIPaymentTerms(invoice.payment_terms)}
       ${this.generateCIITaxes(invoice)}
-      ${this.generateCIIMonetarySummation(invoice.totals)}
+      ${this.generateCIIMonetarySummation(invoice.totals, invoice.currency_code)}
       ${invoice.lines.map(line => this.generateCIITradeLineItem(line)).join('\n      ')}
     </ram:ApplicableHeaderTradeSettlement>`;
   }
@@ -468,11 +468,11 @@ startxref
       <ram:RateApplicablePercent>${tax.rate.toFixed(2)}</ram:RateApplicablePercent>
     </ram:ApplicableTradeTax>`).join('\n      ');
   }
-  private generateCIIMonetarySummation(totals: EN16931Invoice['totals']): string {
+  private generateCIIMonetarySummation(totals: EN16931Invoice['totals'], currencyCode: string): string {
     return `<ram:SpecifiedTradeSettlementHeaderMonetarySummation>
       <ram:LineTotalAmount>${totals.sum_invoice_line_net_amount.toFixed(2)}</ram:LineTotalAmount>
       <ram:TaxBasisTotalAmount>${totals.invoice_total_without_vat.toFixed(2)}</ram:TaxBasisTotalAmount>
-      <ram:TaxTotalAmount currencyID="EUR">${(totals.invoice_total_vat_amount || 0).toFixed(2)}</ram:TaxTotalAmount>
+      <ram:TaxTotalAmount currencyID="${currencyCode}">${(totals.invoice_total_vat_amount || 0).toFixed(2)}</ram:TaxTotalAmount>
       <ram:GrandTotalAmount>${totals.invoice_total_with_vat.toFixed(2)}</ram:GrandTotalAmount>
       <ram:DuePayableAmount>${totals.amount_due_for_payment.toFixed(2)}</ram:DuePayableAmount>
     </ram:SpecifiedTradeSettlementHeaderMonetarySummation>`;

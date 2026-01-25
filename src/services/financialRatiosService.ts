@@ -1,3 +1,4 @@
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 /**
  * CassKai - Plateforme de gestion financière
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
@@ -283,19 +284,21 @@ class FinancialRatiosService {
    */
   formatRatio(value: number, type: 'percentage' | 'ratio' | 'currency' = 'ratio'): string {
     if (!Number.isFinite(value)) return 'N/A';
-    switch (type) {
-      case 'percentage':
-        return `${value.toFixed(2)}%`;
-      case 'currency':
-        return new Intl.NumberFormat('fr-FR', {
-          style: 'currency',
-          currency: 'EUR',
-          minimumFractionDigits: 0
-        }).format(value);
-      case 'ratio':
-      default:
-        return value.toFixed(2);
+    const currency = getCurrentCompanyCurrency();
+    const isZero = currency === 'XOF' || currency === 'XAF';
+    if (type === 'percentage') {
+      return `${value.toFixed(2)}%`;
     }
+    if (type === 'currency') {
+      return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: isZero ? 0 : 0,
+        maximumFractionDigits: isZero ? 0 : 0
+      }).format(value);
+    }
+    // ratio or default
+    return value.toFixed(2);
   }
 }
 export const financialRatiosService = FinancialRatiosService.getInstance();

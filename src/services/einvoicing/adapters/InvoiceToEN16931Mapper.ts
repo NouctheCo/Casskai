@@ -14,6 +14,7 @@
  * Maps CassKai invoice structure to EN 16931 standard format
  */
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import {
   EN16931Invoice,
   EN16931Party,
@@ -295,12 +296,13 @@ export class InvoiceToEN16931Mapper {
     return '380'; // Commercial invoice
   }
   private mapCurrencyCode(currency: string): CurrencyCode {
-    const normalizedCurrency = currency?.toUpperCase() || 'EUR';
+    const normalizedCurrency = currency?.toUpperCase() || getCurrentCompanyCurrency();
     if (VALID_CURRENCIES.includes(normalizedCurrency as CurrencyCode)) {
       return normalizedCurrency as CurrencyCode;
     }
-    logger.warn('InvoiceToEN16931Mapper', `Unknown currency code: ${currency}, defaulting to EUR`);
-    return 'EUR';
+    const fallbackCurrency = getCurrentCompanyCurrency();
+    logger.warn('InvoiceToEN16931Mapper', `Unknown currency code: ${currency}, defaulting to ${fallbackCurrency}`);
+    return fallbackCurrency as CurrencyCode;
   }
   private mapCountryCode(country?: string): CountryCode {
     if (!country) return 'FR';

@@ -12,6 +12,7 @@
 import { supabase } from '@/lib/supabase';
 import { shouldUseEdgeFunction, getEdgeFunctionName, AI_CONFIG, isAIServiceEnabled } from '@/config/ai.config';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 // Types communs pour les analyses IA
 export interface AIAnalysisResult {
   executiveSummary: string;
@@ -527,10 +528,13 @@ Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation 
    * Formate un montant en devise
    */
   private formatCurrency(value: number): string {
+    const currency = getCurrentCompanyCurrency();
+    const isZero = currency === 'XOF' || currency === 'XAF';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0
+      currency,
+      minimumFractionDigits: isZero ? 0 : 0,
+      maximumFractionDigits: isZero ? 0 : 0
     }).format(value);
   }
 }
