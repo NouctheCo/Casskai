@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, PieChart } from 'lucide-react';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import type { Budget } from '@/types/budget.types';
 
 interface BudgetChartProps {
@@ -15,7 +16,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ budget }) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       minimumFractionDigits: 0
     }).format(amount);
   };

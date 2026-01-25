@@ -3,6 +3,7 @@ import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import {
   Calculator,
   AlertTriangle,
@@ -237,7 +238,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
       {/* Sélection compte comptable */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label htmlFor="budget-account-select" className="block text-sm font-medium mb-2">
             Compte comptable <span className="text-red-500">*</span>
           </label>
           {loadingAccounts ? (
@@ -247,6 +248,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
             </div>
           ) : (
             <select
+              id="budget-account-select"
               value={formData.account_id}
               onChange={(e) => handleAccountSelect(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
@@ -439,7 +441,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
                 key={index}
                 className="flex-1 bg-primary/60 hover:bg-primary rounded-t transition-all"
                 style={{ height: `${height}%` }}
-                title={`${MONTHS[index]}: ${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value)}`}
+                title={`${MONTHS[index]}: ${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: getCurrentCompanyCurrency() }).format(value)}`}
               />
             );
           })}
