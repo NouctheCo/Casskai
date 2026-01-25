@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { TrainingCatalog, TrainingCategory } from '@/types/hr-training.types';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 interface TrainingFormModalProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export function TrainingFormModal({
     category: 'technical' as TrainingCategory,
     duration_hours: '',
     cost_per_participant: '',
-    currency: 'EUR',
+    currency: getCurrentCompanyCurrency(),
     max_participants: '',
     prerequisites: '',
     objectives: '',
@@ -52,7 +53,7 @@ export function TrainingFormModal({
         category: training.category as TrainingCategory,
         duration_hours: training.duration_hours?.toString() || '',
         cost_per_participant: training.cost_per_participant?.toString() || '',
-        currency: training.currency || 'EUR',
+        currency: training.currency || getCurrentCompanyCurrency(),
         max_participants: training.max_participants?.toString() || '',
         prerequisites: training.prerequisites || '',
         objectives: Array.isArray(training.objectives) ? training.objectives.join(', ') : (training.objectives || ''),

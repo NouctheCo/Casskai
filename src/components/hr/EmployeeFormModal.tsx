@@ -10,6 +10,7 @@ import { Employee } from '@/services/hrService';
 import { employeeFormSchema } from '@/lib/validation-schemas';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 type EmployeeFormData = z.infer<typeof employeeFormSchema>;
 interface EmployeeFormModalProps {
   isOpen: boolean;
@@ -37,7 +38,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
       department: employee?.department || '',
       hire_date: employee?.hire_date || new Date().toISOString().split('T')[0],
       salary: employee?.salary?.toString() || '',
-      salary_currency: employee?.salary_currency || 'EUR',
+      salary_currency: employee?.salary_currency || getCurrentCompanyCurrency(),
       contract_type: employee?.contract_type || 'permanent',
       status: employee?.status || 'active',
       address: employee?.address || '',
@@ -60,7 +61,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
         department: employee.department || '',
         hire_date: employee.hire_date || new Date().toISOString().split('T')[0],
         salary: employee.salary?.toString() || '',
-        salary_currency: employee.salary_currency || 'EUR',
+        salary_currency: employee.salary_currency || getCurrentCompanyCurrency(),
         contract_type: employee.contract_type || 'permanent',
         status: employee.status || 'active',
         address: employee.address || '',

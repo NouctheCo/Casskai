@@ -12,6 +12,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 import { CheckCircle, AlertCircle, Database, Building2, Globe } from 'lucide-react';
 
+import { getCurrentCompanyCurrency } from '@/lib/utils';
+
 
 
 interface SupabaseConfig {
@@ -70,7 +72,7 @@ const SupabaseSetupWizard = () => {
 
     country: 'FR',
 
-    currency: 'EUR',
+    currency: getCurrentCompanyCurrency(),
 
     timezone: 'Europe/Paris'
 
@@ -224,9 +226,9 @@ const SupabaseSetupWizard = () => {
 
   const countries = [
 
-    { code: 'FR', name: 'France', currency: 'EUR', timezone: 'Europe/Paris' },
+    { code: 'FR', name: 'France', currency: getCurrentCompanyCurrency(), timezone: 'Europe/Paris' },
 
-    { code: 'BE', name: 'Belgique', currency: 'EUR', timezone: 'Europe/Brussels' },
+    { code: 'BE', name: 'Belgique', currency: getCurrentCompanyCurrency(), timezone: 'Europe/Brussels' },
 
     { code: 'BJ', name: 'Bénin', currency: 'XOF', timezone: 'Africa/Porto-Novo' },
 
