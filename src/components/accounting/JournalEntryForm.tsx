@@ -31,9 +31,9 @@ import type {
   MinimalJournal,
   MinimalAccount,
 } from '@/types/journalEntries.types';
-import { cn } from '@/lib/utils';
+import { cn, getCurrentCompanyCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
-const DEFAULT_CURRENCY = 'EUR';
+const DEFAULT_CURRENCY = getCurrentCompanyCurrency();
 const BALANCE_TOLERANCE = 0.01;
 const DEFAULT_LINE: JournalEntryLineForm = {
   accountId: '',

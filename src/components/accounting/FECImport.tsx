@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import FECImportDropzone from './FECImportDropzone';
 import type { ParseResult } from '@/utils/accountingFileParser';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface FECImportProps {
   currentEnterpriseId?: string;
   onImportSuccess?: () => void;
@@ -50,7 +51,7 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
       // Parser avec le parser universel
       const result = await import('@/utils/accountingFileParser').then(module =>
         module.parseAccountingFile(content, {
-          defaultCurrency: 'EUR'
+          defaultCurrency: getCurrentCompanyCurrency()
         })
       );
       setParseResult(result);
@@ -110,7 +111,7 @@ const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSucc
       }, 500);
       // Importer les données avec le nouveau service
       const result = await accountingImportService.parseAndImportFile(file, currentEnterpriseId, {
-        defaultCurrency: 'EUR'
+        defaultCurrency: getCurrentCompanyCurrency()
       });
       clearInterval(progressInterval);
       setImportProgress(100);
