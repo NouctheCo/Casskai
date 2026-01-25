@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import type { DashboardMetric, DashboardChart } from '@/types/enterprise-dashboard.types';
 import { kpiCacheService } from './kpiCacheService';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 export interface RealKPIData {
   revenue_ytd: number;
   revenue_growth: number;
@@ -114,7 +115,7 @@ export class RealDashboardKpiService {
       if (!invoicesError && invoices && invoices.length > 0) {
         const totalRevenue = invoices.reduce((sum, inv) =>
           sum + Number(inv.total_incl_tax || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculateRevenue] From invoices: ${totalRevenue} € (${invoices.length} factures)`);
+        logger.debug('RealDashboardKpi', `[calculateRevenue] From invoices: ${formatCurrency(totalRevenue)} (${invoices.length} factures)`);
         return totalRevenue;
       }
 
@@ -129,7 +130,7 @@ export class RealDashboardKpiService {
       if (!accountsError && accounts) {
         const totalRevenue = accounts.reduce((sum, account) =>
           sum + Math.abs(account.current_balance || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculateRevenue] From accounts: ${totalRevenue} €`);
+        logger.debug('RealDashboardKpi', `[calculateRevenue] From accounts: ${formatCurrency(totalRevenue)}`);
         return totalRevenue;
       }
 
@@ -160,7 +161,7 @@ export class RealDashboardKpiService {
       if (!purchasesError && purchases && purchases.length > 0) {
         const totalExpenses = purchases.reduce((sum, p) =>
           sum + Number(p.total_amount || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculatePurchases] From purchases: ${totalExpenses} €`);
+        logger.debug('RealDashboardKpi', `[calculatePurchases] From purchases: ${formatCurrency(totalExpenses)}`);
         return totalExpenses;
       }
 
@@ -177,7 +178,7 @@ export class RealDashboardKpiService {
       if (!invoicesError && invoices && invoices.length > 0) {
         const totalExpenses = invoices.reduce((sum, inv) =>
           sum + Number(inv.total_incl_tax || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculatePurchases] From invoices: ${totalExpenses} €`);
+        logger.debug('RealDashboardKpi', `[calculatePurchases] From invoices: ${formatCurrency(totalExpenses)}`);
         return totalExpenses;
       }
 
@@ -264,7 +265,7 @@ export class RealDashboardKpiService {
       if (!bankError && bankAccounts && bankAccounts.length > 0) {
         const totalCash = bankAccounts.reduce((sum, account) =>
           sum + Number(account.current_balance || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculateCashBalance] From bank_accounts: ${totalCash} €`);
+        logger.debug('RealDashboardKpi', `[calculateCashBalance] From bank_accounts: ${formatCurrency(totalCash)}`);
         return totalCash;
       }
 
@@ -425,7 +426,7 @@ export class RealDashboardKpiService {
       // Fallback: Use invoices with invoice_type='purchase'
       const { data: invoicesData, error: invoicesError } = await supabase
         .from('invoices')
-        .select('total_incl_tax, description, supplier:suppliers(name)')
+        .select('total_incl_tax, description, supplier_id')
         .eq('company_id', companyId)
         .eq('invoice_type', 'purchase')
         .in('status', ['sent', 'paid', 'partially_paid'])
@@ -437,10 +438,20 @@ export class RealDashboardKpiService {
         return [];
       }
 
-      // Agréger par fournisseur
+      // Récupérer les fournisseurs référencés (si présents) puis agréger
+      const supplierIds = Array.from(new Set((invoicesData as any[]).map(i => i.supplier_id).filter(Boolean)));
+      const suppliersMap: Map<string, string> = new Map();
+      if (supplierIds.length > 0) {
+        const { data: suppliersRows } = await supabase
+          .from('suppliers')
+          .select('id, name')
+          .in('id', supplierIds);
+        (suppliersRows || []).forEach((s: any) => suppliersMap.set(s.id, s.name));
+      }
+
       const categoryMap = new Map<string, number>();
-      invoicesData.forEach((invoice: any) => {
-        const category = invoice.supplier?.name || invoice.description || 'Non catégorisé';
+      (invoicesData as any[]).forEach((invoice: any) => {
+        const category = (invoice.supplier_id && suppliersMap.get(invoice.supplier_id)) || invoice.description || 'Non catégorisé';
         const amount = invoice.total_incl_tax || 0;
         categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
       });
