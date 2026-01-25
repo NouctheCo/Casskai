@@ -6,6 +6,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import type {
   RegulatoryDocument,
   RegulatoryTemplate,
@@ -261,9 +262,10 @@ function formatFieldValue(value: any, field: FormField): string {
   }
   switch (field.type) {
     case 'currency': {
+      const currency = getCurrentCompanyCurrency();
       const formatted = new Intl.NumberFormat('fr-FR', {
         style: 'currency',
-        currency: 'EUR'
+        currency
       }).format(Number(value));
       // Remplacer les espaces par des espaces insécables pour éviter les problèmes d'affichage
       return formatted.replace(/\s/g, '\u00A0');

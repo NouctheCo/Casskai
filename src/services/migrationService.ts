@@ -12,6 +12,7 @@
 // src/services/migrationService.ts
 import { supabase } from '../lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export interface MigrationResult {
   success: boolean;
   error?: string;
@@ -188,7 +189,7 @@ class MigrationService {
       .select('code');
     if (!existingCurrencies || existingCurrencies.length === 0) {
       // Insérer les devises par défaut
-      const defaultCurrencies = [
+        const defaultCurrencies = [
         { code: 'EUR', name: 'Euro', symbol: ' EUR', decimal_places: 2 },
         { code: 'USD', name: 'US Dollar', symbol: '$', decimal_places: 2 },
         { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$', decimal_places: 2 },

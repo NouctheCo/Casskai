@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import { supabase, normalizeData } from '../../lib/supabase';
 import { IReportRepository } from '../../domain/reports/repositories/IReportRepository';
 import { Report, ReportExecution, ReportParameters, ReportMetadata, ReportCategory, ReportFrequency, ReportStatus } from '../../domain/reports/entities/Report';
 import { logger } from '@/lib/logger';
@@ -10,7 +10,7 @@ export class SupabaseReportRepository implements IReportRepository {
       .eq('id', id)
       .eq('is_active', true)
       .single();
-    if (error || !data) {
+    if (error || !data || typeof data !== 'object') {
       logger.error('SupabaseReportRepository', 'Error fetching report template:', error);
       return null;
     }
@@ -38,17 +38,19 @@ export class SupabaseReportRepository implements IReportRepository {
       logger.error('SupabaseReportRepository', 'Error fetching reports by category:', error);
       throw error;
     }
-    return data.map(template => {
+    const rows = normalizeData<Record<string, unknown>>(data);
+    return rows.map(template => {
+      const t = template as any;
       const metadata: ReportMetadata = {
-        id: template.id,
-        name: template.name,
-        description: template.description || '',
-        category: template.category as ReportCategory,
-        frequency: template.frequency as ReportFrequency,
+        id: String(t.id),
+        name: String(t.name),
+        description: String(t.description || ''),
+        category: t.category as ReportCategory,
+        frequency: t.frequency as ReportFrequency,
         requiredPeriods: 1,
-        estimatedDuration: template.estimated_duration,
-        complexity: template.complexity as 'simple' | 'medium' | 'complex',
-        tags: template.tags || []
+        estimatedDuration: Number(t.estimated_duration) || 0,
+        complexity: t.complexity as 'simple' | 'medium' | 'complex',
+        tags: (t.tags || []) as string[]
       };
       return new Report(metadata);
     });
@@ -64,17 +66,19 @@ export class SupabaseReportRepository implements IReportRepository {
       logger.error('SupabaseReportRepository', 'Error fetching all reports:', error);
       throw error;
     }
-    return data.map(template => {
+    const rows = normalizeData<Record<string, unknown>>(data);
+    return rows.map(template => {
+      const t = template as any;
       const metadata: ReportMetadata = {
-        id: template.id,
-        name: template.name,
-        description: template.description || '',
-        category: template.category as ReportCategory,
-        frequency: template.frequency as ReportFrequency,
+        id: String(t.id),
+        name: String(t.name),
+        description: String(t.description || ''),
+        category: t.category as ReportCategory,
+        frequency: t.frequency as ReportFrequency,
         requiredPeriods: 1,
-        estimatedDuration: template.estimated_duration,
-        complexity: template.complexity as 'simple' | 'medium' | 'complex',
-        tags: template.tags || []
+        estimatedDuration: Number(t.estimated_duration) || 0,
+        complexity: t.complexity as 'simple' | 'medium' | 'complex',
+        tags: (t.tags || []) as string[]
       };
       return new Report(metadata);
     });
@@ -136,7 +140,8 @@ export class SupabaseReportRepository implements IReportRepository {
       logger.error('SupabaseReportRepository', 'Error fetching report execution:', error);
       return null;
     }
-    return this.mapExecutionFromDB(data);
+    if (!data || typeof data !== 'object') return null;
+    return this.mapExecutionFromDB(data as Record<string, unknown>);
   }
   async findExecutionsByReportId(reportId: string, limit = 10): Promise<ReportExecution[]> {
     const { data, error } = await supabase
@@ -152,7 +157,8 @@ export class SupabaseReportRepository implements IReportRepository {
     if (!data || data.length === 0) {
       return [];
     }
-    return data.map(this.mapExecutionFromDB);
+    const rows = normalizeData<Record<string, unknown>>(data);
+    return rows.map(this.mapExecutionFromDB.bind(this));
   }
   async getFinancialData(companyId: string, dateFrom: Date, dateTo: Date): Promise<Record<string, unknown>> {
     // Use the balance sheet function for complete financial data
@@ -166,7 +172,11 @@ export class SupabaseReportRepository implements IReportRepository {
       logger.error('SupabaseReportRepository', 'Error fetching financial data:', error);
       throw error;
     }
-    return data;
+    if (Array.isArray(data)) {
+      const rows = normalizeData<Record<string, unknown>>(data);
+      return rows[0] || {};
+    }
+    return (data as Record<string, unknown>) || {};
   }
   async getAccountingEntries(companyId: string, dateFrom: Date, dateTo: Date): Promise<Array<Record<string, unknown>>> {
     const { data, error } = await supabase
@@ -190,7 +200,7 @@ export class SupabaseReportRepository implements IReportRepository {
       logger.error('SupabaseReportRepository', 'Error fetching accounting entries:', error);
       throw error;
     }
-    return data || [];
+    return normalizeData<Record<string, unknown>>(data) || [];
   }
   async getInvoices(companyId: string, dateFrom: Date, dateTo: Date): Promise<Array<Record<string, unknown>>> {
     const { data, error } = await supabase
@@ -203,7 +213,7 @@ export class SupabaseReportRepository implements IReportRepository {
       logger.error('SupabaseReportRepository', 'Error fetching invoices:', error);
       throw error;
     }
-    return data || [];
+    return normalizeData<Record<string, unknown>>(data) || [];
   }
   async getExpenses(companyId: string, dateFrom: Date, dateTo: Date): Promise<Array<Record<string, unknown>>> {
     const { data, error } = await supabase
@@ -216,7 +226,7 @@ export class SupabaseReportRepository implements IReportRepository {
       logger.error('SupabaseReportRepository', 'Error fetching expenses:', error);
       throw error;
     }
-    return data || [];
+    return normalizeData<Record<string, unknown>>(data) || [];
   }
   async getCachedReportResult(reportId: string, parameters: ReportParameters): Promise<Record<string, unknown> | null> {
     const cacheKey = this.generateCacheKey(reportId, parameters);

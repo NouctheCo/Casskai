@@ -11,6 +11,7 @@
  */
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { UserSubscription, SubscriptionPlan } from '@/types/subscription.types';
 import { billingService } from '@/services/billingService';
@@ -163,7 +164,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
           name: 'Gratuit',
           description: 'Plan gratuit avec fonctionnalités de base',
           price: 0,
-          currency: 'EUR',
+          currency: getCurrentCompanyCurrency(),
           interval: 'month',
           features: ['Accès de base', 'Jusqu\'à 10 clients', 'Support communautaire'],
           stripePriceId: 'free',

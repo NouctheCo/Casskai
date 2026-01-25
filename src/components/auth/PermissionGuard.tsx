@@ -1,8 +1,10 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCompanies } from '@/hooks/useCompanies';
+import { useTranslation } from 'react-i18next';
 import type { UserRole } from '@/types/types-fixes';
 import { logger } from '@/lib/logger';
+import { AlertCircle } from 'lucide-react';
 interface PermissionGuardProps {
   children: React.ReactNode;
   roles?: UserRole[];
@@ -29,26 +31,49 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   showFallback = true,
 }) => {
   const { user } = useAuth();
-  const { currentCompany, hasPermission: _hasPermission, getUserRole } = useCompanies();
+  const { currentCompany, getUserRole } = useCompanies();
+  const { t } = useTranslation();
+
   // Use provided companyId or current company
   const targetCompanyId = companyId || currentCompany?.id;
+
+  // Default fallback component when access is denied
+  const defaultFallback = (
+    <div className="flex flex-col items-center justify-center p-8 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        {t('auth.accessDenied.title')}
+      </h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400 text-center max-w-md">
+        {t('auth.accessDenied.description')}
+      </p>
+    </div>
+  );
+
+  // Determine which fallback to use
+  const activeFallback = fallback || defaultFallback;
+
   // No access if user not authenticated or no company selected
   if (!user || !targetCompanyId) {
-    return showFallback ? <>{fallback}</> : null;
+    return showFallback ? <>{activeFallback}</> : null;
   }
+
   // Check role requirements
   if (roles.length > 0) {
     const userRole = getUserRole(targetCompanyId);
-    if (!userRole || !roles.includes(userRole as any)) {
-      return showFallback ? <>{fallback}</> : null;
+    if (!userRole || !roles.includes(userRole)) {
+      return showFallback ? <>{activeFallback}</> : null;
     }
   }
-  // Check permission requirements (using string-based permissions)
+
+  // Check permission requirements (string-based permissions)
+  // FAIL-CLOSED: Since string-based permissions are not yet implemented,
+  // deny access when permissions are requested to prevent security issues
   if (permissions && permissions.length > 0) {
-    // Pour l'instant, on ignore les permissions string car hasPermission attend UserRole[]
-    // Cette fonctionnalité nécessite une refactorisation du système de permissions
-    logger.warn('PermissionGuard', 'String-based permissions not implemented yet');
+    logger.warn('PermissionGuard', 'String-based permissions requested but not implemented - denying access for security');
+    return showFallback ? <>{activeFallback}</> : null;
   }
+
   // All checks passed, render children
   return <>{children}</>;
 };
@@ -78,22 +103,22 @@ export function usePermissions() {
     const targetCompanyId = companyId || currentCompany?.id;
     if (!targetCompanyId) return false;
     const userRole = getUserRole(targetCompanyId);
-    return userRole ? roles.includes(userRole as any) : false;
+    return userRole ? roles.includes(userRole) : false;
   };
   const hasPermission = (roles: UserRole[] | UserRole, companyId?: string): boolean => {
     if (!user) return false;
     const targetCompanyId = companyId || currentCompany?.id;
     if (!targetCompanyId) return false;
     if (Array.isArray(roles)) {
-      return _hasPermission(targetCompanyId, roles as any);
+      return _hasPermission(targetCompanyId, roles);
     }
-    return _hasPermission(targetCompanyId, [roles as any]);
+    return _hasPermission(targetCompanyId, [roles]);
   };
   const hasAnyPermission = (roles: UserRole[], companyId?: string): boolean => {
     if (!user) return false;
     const targetCompanyId = companyId || currentCompany?.id;
     if (!targetCompanyId) return false;
-    return roles.some(role => _hasPermission(targetCompanyId, [role as any]));
+    return roles.some(role => _hasPermission(targetCompanyId, [role]));
   };
   const canAccess = (
     roles: UserRole[] = [],
@@ -105,7 +130,10 @@ export function usePermissions() {
       return false;
     }
     // Check permissions (all must be granted)
-    if (permissions.length > 0 && !hasPermission(permissions as any, companyId)) {
+    // Note: permissions are string-based and not yet implemented
+    // This will return false when string permissions are passed
+    if (permissions.length > 0) {
+      logger.warn('usePermissions', 'String-based permissions not implemented - returning false');
       return false;
     }
     return true;
@@ -183,19 +211,23 @@ export const AdminButton: React.FC<{
 /**
  * Section that requires specific permissions
  */
-export const AccountingSection: React.FC<{ 
+export const AccountingSection: React.FC<{
   children: React.ReactNode;
   companyId?: string;
-}> = ({ children, companyId }) => (
-  <PermissionGuard 
-    permissions={[PERMISSIONS.VIEW_REPORTS]} 
-    companyId={companyId}
-    fallback={
-      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-        You don't have permission to view accounting data.
-      </div>
-    }
-  >
-    {children}
-  </PermissionGuard>
-);
+}> = ({ children, companyId }) => {
+  const { t } = useTranslation();
+
+  return (
+    <PermissionGuard
+      permissions={[PERMISSIONS.VIEW_REPORTS]}
+      companyId={companyId}
+      fallback={
+        <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+          {t('auth.accessDenied.accountingSection')}
+        </div>
+      }
+    >
+      {children}
+    </PermissionGuard>
+  );
+};

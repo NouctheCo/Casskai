@@ -7,6 +7,7 @@ import type { RealKPIData } from './realDashboardKpiService';
 import { supabase } from '@/lib/supabase';
 import { isAIServiceEnabled, shouldUseEdgeFunction, getEdgeFunctionName, AI_CONFIG } from '@/config/ai.config';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export interface AIAnalysisResult {
   executive_summary: string;
   key_insights: string[];
@@ -80,6 +81,11 @@ Tu dois répondre en français et structurer ta réponse au format JSON selon le
         })
       });
       if (!response.ok) {
+        // If backend API route missing (404) or other error, fallback silently to built-in analysis
+        if (response.status === 404) {
+          logger.warn('AiDashboardAnalysis', 'AI API route not found (404) — using fallback analysis');
+          return this.getFallbackAnalysis(kpiData);
+        }
         throw new Error(`API request failed with status ${response.status}`);
       }
       const data = await response.json();
@@ -225,9 +231,13 @@ Concentre-toi sur:
    * Formate un montant en euros
    */
   private formatCurrency(amount: number): string {
+    const currency = getCurrentCompanyCurrency();
+    const isZero = currency === 'XOF' || currency === 'XAF';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency,
+      minimumFractionDigits: isZero ? 0 : 2,
+      maximumFractionDigits: isZero ? 0 : 2
     }).format(amount);
   }
   /**

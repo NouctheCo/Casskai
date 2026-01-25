@@ -198,41 +198,51 @@ class AuditService {
           headers
         });
 
-        // Some environments may drop/override Authorization in invoke(); if so, retry with direct fetch
-        if (
-          response.error &&
-          (response.error as any)?.status === 401 &&
-          typeof (response.error as any)?.message === 'string' &&
-          (response.error as any).message.toLowerCase().includes('missing authorization header') &&
-          session?.access_token
-        ) {
-          const authValue = `Bearer ${session.access_token}`;
-          const fetchResponse = await fetch(`${SUPABASE_URL}/functions/v1/audit-log`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              apikey: SUPABASE_ANON_KEY,
-              Authorization: authValue,
-              authorization: authValue,
-              'x-application-name': 'CassKai',
-            },
-            body: JSON.stringify(enrichedEntry),
-          });
-
-          if (!fetchResponse.ok) {
-            logger.warn('AuditService: direct fetch to audit-log failed after missing-authorization invoke()', {
-              status: fetchResponse.status,
+        // If the function returned a 401 due to an invalid/expired JWT, retry the function call
+        // without an Authorization header (some Gateways accept apikey-only calls).
+        const respErr = (response && (response as any).error) as any;
+        if (respErr && (respErr.status === 401 || String(respErr.message || '').toLowerCase().includes('invalid jwt') || String(respErr.message || '').toLowerCase().includes('invalid token'))) {
+          logger.warn('AuditService: audit-log invoke returned 401/Invalid JWT — retrying without Authorization header');
+          try {
+            const fetchResponse = await fetch(`${SUPABASE_URL}/functions/v1/audit-log`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                apikey: SUPABASE_ANON_KEY,
+                'x-application-name': 'CassKai'
+              },
+              body: JSON.stringify(enrichedEntry),
             });
+            if (fetchResponse.ok) {
+              // success on retry
+              return;
+            }
+            logger.warn('AuditService: audit-log retry without Authorization failed', { status: fetchResponse.status });
+          } catch (retryErr) {
+            logger.warn('AuditService: Exception during retry without Authorization', retryErr);
           }
         }
 
-        if (response.error) {
-          // Fallback: tentative directe (si politique autorise) sinon log local
+        if (response && (response as any).error) {
+          // Final fallback: attempt direct insert (may be blocked by RLS)
           const { error } = await supabase
             .from('audit_logs')
             .insert(enrichedEntry);
           if (error) {
             logger.error('AuditService: Failed to log audit entry via function and direct insert', error, { enrichedEntry });
+            // Last resort: queue in localStorage for retry later (non-blocking)
+            try {
+              if (typeof window !== 'undefined' && window.localStorage) {
+                const key = 'pending_audit_logs';
+                const pendingRaw = window.localStorage.getItem(key) || '[]';
+                const pending = JSON.parse(pendingRaw);
+                pending.push(enrichedEntry);
+                window.localStorage.setItem(key, JSON.stringify(pending));
+                logger.warn('AuditService: Audit entry queued in localStorage for retry', { queued: true });
+              }
+            } catch (lsErr) {
+              logger.warn('AuditService: Unable to queue audit entry in localStorage', lsErr);
+            }
           }
         }
       } catch (fnErr) {

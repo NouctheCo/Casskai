@@ -11,6 +11,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import type { TaxRegime, EnterpriseSettings } from '@/types/enterprise.types';
 import { logger } from '@/lib/logger';
@@ -112,7 +113,7 @@ export function useEnterprise() {
           id: uc.companies.id,
           name: uc.companies.name,
           country: uc.companies.country,
-          currency: uc.companies.default_currency || 'EUR',
+          currency: uc.companies.default_currency || getCurrentCompanyCurrency(),
           locale: uc.companies.default_locale || 'fr-FR',
           timezone: uc.companies.timezone || 'Europe/Paris',
           isActive: uc.companies.is_active,
@@ -158,7 +159,7 @@ export function useEnterprise() {
         .insert({
           name: enterpriseData.name,
           country: enterpriseData.country,
-          default_currency: enterpriseData.default_currency || 'EUR',
+          default_currency: enterpriseData.default_currency || getCurrentCompanyCurrency(),
           default_locale: enterpriseData.default_locale || 'fr-FR',
           timezone: enterpriseData.timezone || 'Europe/Paris',
           address: enterpriseData.address,

@@ -21,6 +21,7 @@ function handleSupabaseError(error: unknown, context: string) {
   return { message: `[${context}] ${JSON.stringify(error)}` };
 }
 import { useToast } from '../components/ui/use-toast';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { useAuth } from '../contexts/AuthContext';
 import { format, isBefore } from 'date-fns';
 import { logger } from '@/lib/logger';
@@ -154,7 +155,7 @@ export function useEnterpriseTaxData() {
         status: decl.status,
         amount: decl.amount,
         description: decl.description || '',
-        currency: currentEnterprise.currency || 'EUR'
+        currency: currentEnterprise.currency || getCurrentCompanyCurrency()
       }));
       // Insérer dans la base de données
       const { data, error } = await supabase
@@ -457,7 +458,7 @@ export function useEnterpriseTaxData() {
         company_id: currentEnterpriseId,
         declaration_id: payment.declarationId,
         amount: payment.amount,
-        currency: payment.currency || currentEnterprise?.currency || 'EUR',
+        currency: payment.currency || currentEnterprise?.currency || getCurrentCompanyCurrency(),
         payment_date: payment.paymentDate.toISOString(),
         payment_method: payment.paymentMethod,
         reference: payment.reference,

@@ -11,7 +11,7 @@
  */
 import { openBankingManager } from './openBanking/OpenBankingManager';
 import { logger } from '@/lib/logger';
-import { formatCurrency as formatCurrencyLib } from '@/lib/utils';
+import { formatCurrency as formatCurrencyLib, getCurrentCompanyCurrency } from '@/lib/utils';
 import {
   BankConnection, 
   BankAccount,
@@ -362,7 +362,7 @@ export class BankingService {
     };
     return colors[status] || 'gray';
   }
-  private formatCurrency(amount: number, _currency: string = 'EUR'): string {
+  private formatCurrency(amount: number, _currency: string = getCurrentCompanyCurrency()): string {
     // Delegate to central utility which handles company fallback
     return formatCurrencyLib(amount, _currency);
   }

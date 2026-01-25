@@ -101,7 +101,7 @@ export const ThirdPartyListItem = ({
 
           <p><strong>{t('thirdParties.address')}:</strong> {`${thirdParty.address || ''} ${thirdParty.city || ''}`.trim() || 'N/A'}</p>
 
-          <p><strong>{t('thirdParties.balance')}:</strong> {formatCurrency(thirdParty.balance || 0, thirdParty.default_currency || 'EUR')}</p>
+          <p><strong>{t('thirdParties.balance')}:</strong> {formatCurrency(thirdParty.balance || 0, thirdParty.default_currency)}</p>
 
         </CardContent>
 
@@ -145,7 +145,7 @@ export const ThirdPartyListItem = ({
 
       <TableCell>{`${thirdParty.address || ''} ${thirdParty.city || ''}`.trim()}</TableCell>
 
-      <TableCell className="text-right">{formatCurrency(thirdParty.balance || 0, thirdParty.default_currency || 'EUR')}</TableCell>
+      <TableCell className="text-right">{formatCurrency(thirdParty.balance || 0, thirdParty.default_currency)}</TableCell>
 
       <TableCell>
 

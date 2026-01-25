@@ -11,6 +11,7 @@
  */
 
 import React from 'react';
+import { formatCurrency } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -88,7 +89,7 @@ export function ProjectList({ projects, onProjectSelect }: ProjectListProps) {
                     <Progress value={project.progress} className="w-20 h-2" />
                     <span className="text-sm font-medium">{project.progress}%</span>
                   </div>
-                  <p className="text-sm font-medium">€{project.budget.toLocaleString()}</p>
+                  <p className="text-sm font-medium">{formatCurrency(project.budget)}</p>
                   <p className="text-xs text-muted-foreground">Budget total</p>
                 </div>
                 <div className="flex items-center gap-3">

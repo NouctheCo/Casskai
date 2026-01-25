@@ -5,6 +5,7 @@ import { Report, ReportParameters, ReportResult } from '../../../domain/reports/
 import { IncomeStatementData } from '../../../domain/reports/entities/FinancialReport';
 
 import { IReportRepository } from '../../../domain/reports/repositories/IReportRepository';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 
 
@@ -234,7 +235,7 @@ export class IncomeStatementGenerator extends BaseReportGenerator {
 
       style: 'currency',
 
-      currency: 'EUR'
+      currency: getCurrentCompanyCurrency()
 
     }).format(amount);
 

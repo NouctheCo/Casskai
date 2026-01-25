@@ -684,6 +684,11 @@
     }
   },
   "auth": {
+    "accessDenied": {
+      "title": "Accès refusé",
+      "description": "Vous n'avez pas les permissions requises pour voir ce contenu. Veuillez contacter votre administrateur si vous pensez qu'il s'agit d'une erreur.",
+      "accountingSection": "Vous n'avez pas la permission de consulter les données comptables."
+    },
     "alreadyHaveAccount": "Vous avez déjà un compte ?",
     "backToLogin": "Retour à la connexion",
     "createYourAccount": "Créez votre compte",
@@ -2836,6 +2841,68 @@
         "standards": "Normes comptables",
         "availability": "Disponibilité",
         "support": "Support IA"
+      },
+      "newTitle": "Pilotez votre entreprise.",
+      "newTitleHighlight": "Maîtrisez votre trésorerie.",
+      "newSubtitle": "Comptabilité, facturation, trésorerie et analyse financière dans une plateforme intelligente.",
+      "newCta": {
+        "primary": "Démarrer - Essai gratuit 30 jours",
+        "secondary": "Voir les tarifs"
+      }
+    },
+    "earlyPricing": {
+      "badge": "Tarifs transparents",
+      "title": "Commencez aujourd'hui",
+      "subtitle": "Des tarifs simples et adaptés à toutes les tailles d'entreprise",
+      "reassurance": "Changez de plan à tout moment. Sans engagement.",
+      "trust": {
+        "trial": "Essai gratuit 30 jours",
+        "noCard": "Aucune carte bancaire",
+        "cancel": "Annulation à tout moment"
+      }
+    },
+    "platform": {
+      "badge": "Plateforme complète",
+      "title": "Bien plus qu'un logiciel de comptabilité.",
+      "subtitle": "CassKai centralise toute la gestion de votre entreprise dans une seule plateforme intelligente.",
+      "closing": "Tous les modules sont connectés. Une seule source de vérité.",
+      "blocks": {
+        "finance": {
+          "title": "Finance & Comptabilité",
+          "bullets": [
+            "Comptabilité générale et analytique",
+            "Gestion de trésorerie en temps réel",
+            "Facturation et recouvrement",
+            "Rapports financiers automatisés"
+          ]
+        },
+        "management": {
+          "title": "Pilotage & Décision",
+          "bullets": [
+            "Tableaux de bord personnalisables",
+            "Suivi des KPI métier",
+            "Rapports à la demande",
+            "IA d'analyse financière"
+          ]
+        },
+        "operations": {
+          "title": "Opérations & Gestion",
+          "bullets": [
+            "Gestion de projets et budgets",
+            "Suivi des contrats clients",
+            "Calculs de RFA automatiques",
+            "Automatisation des process"
+          ]
+        },
+        "hr": {
+          "title": "Organisation & RH",
+          "bullets": [
+            "Gestion des ressources humaines",
+            "Suivi des équipes et congés",
+            "Centralisation des données",
+            "Vision transverse de l'activité"
+          ]
+        }
       }
     },
     "worldMap": {
@@ -3152,6 +3219,9 @@
       "title": "Prêt à transformer",
       "titleHighlight": "votre gestion financière ?",
       "subtitle": "Rejoignez les entreprises qui ont choisi l'avenir de la comptabilité. Commencez gratuitement et découvrez la puissance de l'IA financière.",
+      "finalTitle": "Commencez aujourd'hui.",
+      "finalTitleHighlight": "Décidez mieux ce mois-ci.",
+      "finalSubtitle": "Essai gratuit 30 jours. Aucune carte bancaire requise.",
       "benefits": {
         "trial": "Essai gratuit 30 jours",
         "noCard": "Aucune carte bancaire requise",

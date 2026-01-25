@@ -23,6 +23,7 @@ import {
 import { ValidationService } from '../core/ValidationService';
 import xml2js from 'xml2js';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface ParsedInvoiceResult {
   success: boolean;
   invoice?: Partial<EN16931Invoice>;
@@ -524,7 +525,7 @@ export class InboundService {
         total_incl_tax: parsedInvoice.totals?.invoice_total_with_vat || 0,
         total_tax: parsedInvoice.totals?.invoice_total_vat_amount || 0,
         total_without_tax: parsedInvoice.totals?.invoice_total_without_vat || 0,
-        currency: parsedInvoice.currency_code || 'EUR',
+            currency: parsedInvoice.currency_code || getCurrentCompanyCurrency(),
         notes: `Imported from e-invoice (${format})`,
         // You would map other fields as needed
       };

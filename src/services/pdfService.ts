@@ -14,6 +14,7 @@
  * Utilise jsPDF pour créer des factures personnalisées côté client
  */
 import jsPDF from 'jspdf';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { Enterprise } from '@/types/enterprise.types';
 import { Invoice } from '@/types/subscription.types';
 import { logger } from '@/lib/logger';
@@ -105,7 +106,8 @@ export class PDFService {
       doc.text(`Échéance: ${invoiceData.dueDate.toLocaleDateString('fr-FR')}`, rightColumn, rightY);
       rightY += 6;
     }
-    doc.text(`Devise: ${invoiceData.currency || 'EUR'}`, rightColumn, rightY);
+    const _currencyForPdf = invoiceData.currency || getCurrentCompanyCurrency();
+    doc.text(`Devise: ${_currencyForPdf}`, rightColumn, rightY);
     y = Math.max(y, rightY) + 20;
     // Ligne de séparation
     doc.setDrawColor(...lightGray);
@@ -132,8 +134,8 @@ export class PDFService {
       }
       doc.text(item.description, margin + 2, y + 4);
       doc.text(item.quantity.toString(), rightColumn - 60, y + 4);
-      doc.text(`${item.unitPrice.toFixed(2)} EUR`, rightColumn - 40, y + 4);
-      doc.text(`${item.total.toFixed(2)} EUR`, rightColumn, y + 4);
+      doc.text(`${item.unitPrice.toFixed(2)} ${_currencyForPdf}`, rightColumn - 40, y + 4);
+      doc.text(`${item.total.toFixed(2)} ${_currencyForPdf}`, rightColumn, y + 4);
       y += 6;
     });
     y += 10;
@@ -141,10 +143,10 @@ export class PDFService {
     const totalsX = rightColumn - 20;
     doc.setFont('helvetica', 'normal');
     doc.text('Sous-total:', totalsX - 30, y);
-    doc.text(`${invoiceData.subtotal.toFixed(2)} EUR`, totalsX, y);
+    doc.text(`${invoiceData.subtotal.toFixed(2)} ${_currencyForPdf}`, totalsX, y);
     y += 6;
     doc.text('TVA:', totalsX - 30, y);
-    doc.text(`${invoiceData.taxAmount.toFixed(2)} EUR`, totalsX, y);
+    doc.text(`${invoiceData.taxAmount.toFixed(2)} ${_currencyForPdf}`, totalsX, y);
     y += 6;
     // Total avec style
     doc.setFont('helvetica', 'bold');
@@ -152,7 +154,7 @@ export class PDFService {
     doc.rect(totalsX - 35, y - 2, 50, 8, 'F');
     doc.setTextColor(255, 255, 255);
     doc.text('TOTAL:', totalsX - 30, y + 4);
-    doc.text(`${invoiceData.total.toFixed(2)} EUR`, totalsX, y + 4);
+    doc.text(`${invoiceData.total.toFixed(2)} ${_currencyForPdf}`, totalsX, y + 4);
     y += 20;
     doc.setTextColor(...textColor);
     doc.setFont('helvetica', 'normal');

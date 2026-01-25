@@ -5,6 +5,7 @@
 
 import { useMemo } from 'react';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 export type CurrencyCode = 'EUR' | 'XOF' | 'XAF' | 'USD' | 'MAD' | 'DZD' | 'TND' | 'NGN' | 'KES' | 'GHS' | 'ZAR' | 'EGP';
 
@@ -175,11 +176,11 @@ export function useCompanyCurrency() {
 
     // Priorité 2: Devise du pays de l'entreprise
     if (currentEnterprise?.countryCode) {
-      return COUNTRY_CURRENCY_MAP[currentEnterprise.countryCode] || 'EUR';
+      return (COUNTRY_CURRENCY_MAP[currentEnterprise.countryCode] || (getCurrentCompanyCurrency() as CurrencyCode));
     }
 
-    // Par défaut: EUR
-    return 'EUR' as CurrencyCode;
+    // Par défaut: currency stored in localStorage or EUR
+    return (getCurrentCompanyCurrency() as CurrencyCode);
   }, [currentEnterprise?.currency, currentEnterprise?.countryCode]);
 
   // Configuration de la devise
@@ -266,7 +267,7 @@ export function useCompanyCurrency() {
  * Hook utilitaire pour obtenir la devise d'un pays spécifique
  */
 export function getCurrencyForCountry(countryCode: string): CurrencyInfo {
-  const currencyCode = COUNTRY_CURRENCY_MAP[countryCode] || 'EUR';
+  const currencyCode = COUNTRY_CURRENCY_MAP[countryCode] || (getCurrentCompanyCurrency() as CurrencyCode);
   return CURRENCY_CONFIG[currencyCode] || CURRENCY_CONFIG.EUR;
 }
 

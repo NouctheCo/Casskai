@@ -11,6 +11,7 @@
  */
 // import { supabase } from '../lib/supabase'; // Commenté pour la compatibilité de build
 import { MARKET_CONFIGS } from '../data/markets';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import {
   OnboardingStep,
@@ -82,7 +83,7 @@ class OnboardingService {
         companyProfile: {},
         preferences: {
           language: 'fr',
-          currency: 'EUR',
+          currency: getCurrentCompanyCurrency(),
           timezone: 'Europe/Paris',
           dateFormat: 'DD/MM/YYYY',
           theme: 'system',
@@ -867,7 +868,7 @@ class OnboardingService {
         id: companyId,
         name: onboardingData.companyProfile.name || 'Mon Entreprise',
         country: onboardingData.companyProfile.country || 'FR',
-        currency: onboardingData.preferences.currency || 'EUR',
+        currency: onboardingData.preferences.currency || getCurrentCompanyCurrency(),
         language: onboardingData.preferences.language || 'fr',
         timezone: onboardingData.preferences.timezone || 'Europe/Paris',
         createdBy: userId,

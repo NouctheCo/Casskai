@@ -560,7 +560,7 @@ const updateStructuredData = (config: SEOConfig) => {
 
       price: '0',
 
-      priceCurrency: 'EUR',
+      priceCurrency: (typeof window !== 'undefined' ? (localStorage.getItem('casskai_current_company_currency') || 'EUR') : 'EUR'),
 
       availability: 'https://schema.org/OnlineOnly'
 

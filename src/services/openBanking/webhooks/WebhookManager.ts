@@ -17,6 +17,7 @@ import {
 } from '../../../types/openBanking.types';
 import { EncryptionService } from '../security/EncryptionService';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 // Gestionnaire de webhooks temps réel
 export class WebhookManager {
   private static instance: WebhookManager;
@@ -366,7 +367,7 @@ export class WebhookManager {
   const amountRaw = this.firstDefined(transactionData.amount, transactionData.value, '0');
   const amountStr = String(amountRaw);
     const amountNum = parseFloat(amountStr);
-  const currency = this.firstTruthy(transactionData.currency_code, transactionData.currency) ?? 'EUR';
+  const currency = this.firstTruthy(transactionData.currency_code, transactionData.currency) ?? getCurrentCompanyCurrency();
   const description = this.firstTruthy(transactionData.description, transactionData.wording) ?? '';
   const originalDescription = this.firstTruthy(transactionData.raw_description, transactionData.original_wording) ?? '';
     return {

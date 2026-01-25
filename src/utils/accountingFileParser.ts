@@ -4,6 +4,7 @@
  */
 // ============ TYPES ============
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 export type AccountingStandard = 'PCG' | 'SYSCOHADA' | 'IFRS' | 'SCF' | 'US_GAAP';
 export type FileFormat = 'FEC' | 'SYSCOHADA' | 'IFRS_CSV' | 'SCF' | 'QUICKBOOKS' | 'SAGE' | 'XERO' | 'GENERIC';
@@ -358,7 +359,7 @@ export const parseAccountingFile = (
   const errors: ParseError[] = [];
   const warnings: string[] = [];
   const lines: AccountingLine[] = [];
-  const defaultCurrency = options?.defaultCurrency || 'EUR';
+  const defaultCurrency = options?.defaultCurrency || getCurrentCompanyCurrency();
   // Normaliser les fins de ligne
   const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const rawLines = normalizedContent.split('\n').filter(line => line.trim() !== '');

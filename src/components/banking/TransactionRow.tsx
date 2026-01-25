@@ -128,6 +128,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
         <td className="px-4 py-3">
           {transaction.status === 'pending' ? (
             <select
+              aria-label="Sélectionner le compte comptable pour cette transaction"
               value={selectedAccount}
               onChange={(e) => setSelectedAccount(e.target.value)}
               className="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-primary"

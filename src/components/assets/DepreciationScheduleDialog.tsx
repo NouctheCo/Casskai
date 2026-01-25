@@ -156,7 +156,7 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-orange-600">
-                {formatCurrency(getTotalDepreciation(), 'EUR')}
+                {formatCurrency(getTotalDepreciation())}
               </div>
             </CardContent>
           </Card>
@@ -180,7 +180,7 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(asset.net_book_value, 'EUR')}
+                {formatCurrency(asset.net_book_value)}
               </div>
             </CardContent>
           </Card>
@@ -228,16 +228,16 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
                       })}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm">
-                      {formatCurrency(line.opening_net_book_value, 'EUR')}
+                      {formatCurrency(line.opening_net_book_value)}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm font-medium text-orange-600">
-                      {formatCurrency(line.depreciation_amount, 'EUR')}
+                      {formatCurrency(line.depreciation_amount)}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm">
-                      {formatCurrency(line.cumulative_depreciation, 'EUR')}
+                      {formatCurrency(line.cumulative_depreciation)}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm font-medium">
-                      {formatCurrency(line.closing_net_book_value, 'EUR')}
+                      {formatCurrency(line.closing_net_book_value)}
                     </TableCell>
                     <TableCell className="text-center">
                       {line.prorata_days ? (
@@ -269,13 +269,13 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
                     {t('assets.schedule.total')}
                   </TableCell>
                   <TableCell className="text-right font-mono text-orange-600">
-                    {formatCurrency(getTotalDepreciation(), 'EUR')}
+                    {formatCurrency(getTotalDepreciation())}
                   </TableCell>
                   <TableCell className="text-right font-mono">
-                    {formatCurrency(schedule[schedule.length - 1]?.cumulative_depreciation || 0, 'EUR')}
+                    {formatCurrency(schedule[schedule.length - 1]?.cumulative_depreciation || 0)}
                   </TableCell>
                   <TableCell className="text-right font-mono">
-                    {formatCurrency(schedule[schedule.length - 1]?.closing_net_book_value || 0, 'EUR')}
+                    {formatCurrency(schedule[schedule.length - 1]?.closing_net_book_value || 0)}
                   </TableCell>
                   <TableCell colSpan={2}></TableCell>
                 </TableRow>

@@ -107,13 +107,26 @@ export function generateId(length: number = 16): string {
   return result;
 }
 
-export function formatCurrencyForPDF(amount: number, currency = 'EUR'): string {
+export function formatCurrencyForPDF(amount: number, currency?: string): string {
+  const resolved = currency || getCurrentCompanyCurrency();
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    currency: resolved,
+    minimumFractionDigits: resolved === 'XOF' || resolved === 'XAF' ? 0 : 2,
+    maximumFractionDigits: resolved === 'XOF' || resolved === 'XAF' ? 0 : 2
   }).format(amount).replace(/\u00A0/g, ' ');
+}
+
+export function getCurrentCompanyCurrency(): string {
+  try {
+    if (typeof window !== 'undefined') {
+      const c = localStorage.getItem('casskai_current_company_currency');
+      if (c) return c;
+    }
+  } catch (_e) {
+    // ignore
+  }
+  return 'EUR';
 }
 
 export function formatNumberForPDF(value: number, decimals = 2): string {

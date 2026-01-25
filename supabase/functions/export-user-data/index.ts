@@ -201,7 +201,7 @@ serve(async (req) => {
 
         // Écritures comptables
         supabase.from('journal_entries')
-          .select('id, date, debit, credit, description, created_at')
+          .select('id, date, debit, credit, description, created_at, reference_number as reference')
           .eq('created_by', user.id)
           .limit(1000),
 

@@ -5,6 +5,7 @@
  */
 
 import { getTaxConfiguration, getCorporateTaxRate } from '@/data/taxConfigurations';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 // Types pour le simulateur IS/IR
 export interface TaxSimulationInput {
@@ -448,11 +449,13 @@ export class TaxSimulationService {
    * Formatte une valeur monétaire
    */
   private formatCurrency(amount: number): string {
+    const currency = getCurrentCompanyCurrency() || 'EUR';
+    const isZero = currency === 'XOF' || currency === 'XAF';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      currency,
+      minimumFractionDigits: isZero ? 0 : 2,
+      maximumFractionDigits: isZero ? 0 : 2
     }).format(amount);
   }
 }

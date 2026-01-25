@@ -1,0 +1,181 @@
+src/components/accounting/AccountingImportDialog.tsx(288,16): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/accounting/AccountingImportExport.tsx(277,16): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/accounting/AccountingImportExport.tsx(318,18): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/accounting/AccountingImportExport.tsx(325,18): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/accounting/AccountingImportExport.tsx(332,18): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/accounting/AccountingImportExport.tsx(489,18): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/accounting/AccountingImportExport.tsx(498,18): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/accounting/AccountingImportExport.tsx(507,18): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/accounting/FECImportDropzone.tsx(225,10): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/accounting/FECImportTab.tsx(510,20): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/assets/AssetDetailDialog.tsx(317,26): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/budget/BudgetForm.tsx(483,30): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/budget/BudgetForm.tsx(496,30): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/budget/BudgetForm.tsx(509,30): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/budget/BudgetManager.tsx(731,16): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/hr/ExpenseFormModal.tsx(234,20): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/purchases/PurchaseForm.tsx(308,22): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/reports/ReportsSection.tsx(151,12): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/reports/ReportsSection.tsx(161,12): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/reports/ReportsSection.tsx(171,12): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/settings/UserProfileSettings.tsx(267,18): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/third-parties/ThirdPartyListItem.tsx(120,12): error TS17008: JSX element 'AlertDialogTrigger' has no corresponding closing tag.
+src/components/third-parties/ThirdPartyListItem.tsx(150,5): error TS2657: JSX expressions must have one parent element.
+src/components/third-parties/ThirdPartyListItem.tsx(182,9): error TS17002: Expected corresponding JSX closing tag for 'TableRow'.
+src/components/third-parties/ThirdPartyListItem.tsx(204,5): error TS1005: ')' expected.
+src/components/third-parties/ThirdPartyListItem.tsx(206,3): error TS1109: Expression expected.
+src/components/third-parties/ThirdPartyListItem.tsx(208,1): error TS1128: Declaration or statement expected.
+src/components/ui/command.tsx(28,4): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/ui/command.tsx(40,17): error TS1003: Identifier expected.
+src/components/ui/command.tsx(41,24): error TS17008: JSX element 'HTMLDivElement' has no corresponding closing tag.
+src/components/ui/command.tsx(42,1): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/components/ui/command.tsx(42,17): error TS1109: Expression expected.
+src/components/ui/command.tsx(42,26): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/components/ui/command.tsx(42,35): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/components/ui/command.tsx(52,17): error TS1003: Identifier expected.
+src/components/ui/command.tsx(53,24): error TS17008: JSX element 'HTMLDivElement' has no corresponding closing tag.
+src/components/ui/command.tsx(54,1): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/components/ui/command.tsx(54,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/components/ui/command.tsx(64,17): error TS1003: Identifier expected.
+src/components/ui/command.tsx(65,24): error TS17008: JSX element 'HTMLDivElement' has no corresponding closing tag.
+src/components/ui/command.tsx(65,52): error TS1109: Expression expected.
+src/components/ui/command.tsx(66,1): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/components/ui/command.tsx(66,26): error TS1109: Expression expected.
+src/components/ui/command.tsx(66,35): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/components/ui/command.tsx(66,44): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/components/ui/command.tsx(79,17): error TS1003: Identifier expected.
+src/components/ui/command.tsx(80,24): error TS17008: JSX element 'HTMLDivElement' has no corresponding closing tag.
+src/components/ui/command.tsx(81,11): error TS1109: Expression expected.
+src/components/ui/command.tsx(81,19): error TS1005: '}' expected.
+src/components/ui/command.tsx(82,33): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/components/ui/command.tsx(83,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/components/ui/command.tsx(84,1): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/components/ui/command.tsx(84,34): error TS1109: Expression expected.
+src/components/ui/command.tsx(84,43): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/components/ui/command.tsx(84,52): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/components/ui/command.tsx(104,1): error TS1109: Expression expected.
+src/components/ui/command.tsx(105,1): error TS1005: '</' expected.
+src/components/ui/input.tsx(15,6): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/components/ui/input.tsx(35,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/components/ui/input.tsx(42,1): error TS1005: '</' expected.
+src/pages/onboarding/CompanyStep.tsx(183,4): error TS17008: JSX element 'motion.div' has no corresponding closing tag.
+src/pages/onboarding/CompanyStep.tsx(209,6): error TS17008: JSX element 'div' has no corresponding closing tag.
+src/pages/onboarding/CompanyStep.tsx(253,8): error TS17008: JSX element 'div' has no corresponding closing tag.
+src/pages/onboarding/CompanyStep.tsx(261,4): error TS17008: JSX element 'Select' has no corresponding closing tag.
+src/pages/onboarding/CompanyStep.tsx(300,13): error TS17002: Expected corresponding JSX closing tag for 'SelectTrigger'.
+src/pages/onboarding/CompanyStep.tsx(302,10): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(304,9): error TS17002: Expected corresponding JSX closing tag for 'Select'.
+src/pages/onboarding/CompanyStep.tsx(306,7): error TS17002: Expected corresponding JSX closing tag for 'SelectTrigger'.
+src/pages/onboarding/CompanyStep.tsx(360,5): error TS17002: Expected corresponding JSX closing tag for 'SelectTrigger'.
+src/pages/onboarding/CompanyStep.tsx(368,32): error TS1003: Identifier expected.
+src/pages/onboarding/CompanyStep.tsx(370,3): error TS1005: '...' expected.
+src/pages/onboarding/CompanyStep.tsx(370,14): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(372,57): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(374,24): error TS1003: Identifier expected.
+src/pages/onboarding/CompanyStep.tsx(374,32): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(382,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(382,2): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(382,68): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(382,86): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(382,90): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(410,6): error TS17008: JSX element 'div' has no corresponding closing tag.
+src/pages/onboarding/CompanyStep.tsx(496,12): error TS17008: JSX element 'Select' has no corresponding closing tag.
+src/pages/onboarding/CompanyStep.tsx(518,13): error TS17002: Expected corresponding JSX closing tag for 'SelectTrigger'.
+src/pages/onboarding/CompanyStep.tsx(532,11): error TS17002: Expected corresponding JSX closing tag for 'SelectTrigger'.
+src/pages/onboarding/CompanyStep.tsx(546,32): error TS1003: Identifier expected.
+src/pages/onboarding/CompanyStep.tsx(548,3): error TS1005: '...' expected.
+src/pages/onboarding/CompanyStep.tsx(548,14): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(550,57): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(552,24): error TS1003: Identifier expected.
+src/pages/onboarding/CompanyStep.tsx(552,32): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(554,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(554,2): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(554,46): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(710,28): error TS1003: Identifier expected.
+src/pages/onboarding/CompanyStep.tsx(712,3): error TS1005: '...' expected.
+src/pages/onboarding/CompanyStep.tsx(712,14): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(714,57): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(716,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(716,2): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(716,38): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(840,35): error TS1003: Identifier expected.
+src/pages/onboarding/CompanyStep.tsx(842,3): error TS1005: '...' expected.
+src/pages/onboarding/CompanyStep.tsx(842,14): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(844,57): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(846,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(846,2): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(846,38): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(848,3): error TS1109: Expression expected.
+src/pages/onboarding/CompanyStep.tsx(848,73): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(850,5): error TS1109: Expression expected.
+src/pages/onboarding/CompanyStep.tsx(870,7): error TS1109: Expression expected.
+src/pages/onboarding/CompanyStep.tsx(878,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(886,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1080,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1086,74): error TS1003: Identifier expected.
+src/pages/onboarding/CompanyStep.tsx(1086,82): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1086,85): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1088,3): error TS1109: Expression expected.
+src/pages/onboarding/CompanyStep.tsx(1088,30): error TS1003: Identifier expected.
+src/pages/onboarding/CompanyStep.tsx(1088,38): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1100,55): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1102,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1108,67): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1110,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1116,50): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1118,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1120,46): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1122,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1128,53): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1130,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1136,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1140,62): error TS1003: Identifier expected.
+src/pages/onboarding/CompanyStep.tsx(1140,70): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1140,99): error TS17008: JSX element 'React.SetStateAction' has no corresponding closing tag.
+src/pages/onboarding/CompanyStep.tsx(1140,147): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1142,3): error TS1109: Expression expected.
+src/pages/onboarding/CompanyStep.tsx(1152,7): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1154,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1156,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1162,65): error TS1109: Expression expected.
+src/pages/onboarding/CompanyStep.tsx(1162,78): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1162,89): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1210,41): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1210,65): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1210,74): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1254,3): error TS1109: Expression expected.
+src/pages/onboarding/CompanyStep.tsx(1258,40): error TS17008: JSX element 'Record' has no corresponding closing tag.
+src/pages/onboarding/CompanyStep.tsx(1274,15): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1278,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1282,17): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1282,52): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1286,64): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1288,45): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1298,41): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1300,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1302,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1308,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1310,5): error TS1109: Expression expected.
+src/pages/onboarding/CompanyStep.tsx(1312,7): error TS1109: Expression expected.
+src/pages/onboarding/CompanyStep.tsx(1316,17): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1320,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1322,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1324,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1328,26): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/onboarding/CompanyStep.tsx(1332,5): error TS1109: Expression expected.
+src/pages/onboarding/CompanyStep.tsx(1338,11): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1340,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1352,49): error TS1005: '}' expected.
+src/pages/onboarding/CompanyStep.tsx(1356,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1358,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1486,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/onboarding/CompanyStep.tsx(1487,1): error TS1005: '</' expected.
+src/pages/Reports/regulatory/DocumentEditor.tsx(323,10): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/pages/Reports/regulatory/DocumentEditor.tsx(330,15): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/pages/Reports/regulatory/DocumentEditor.tsx(343,15): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/pages/Reports/regulatory/DocumentEditor.tsx(344,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/Reports/regulatory/DocumentEditor.tsx(345,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/Reports/regulatory/DocumentEditor.tsx(346,1): error TS1005: '</' expected.
+src/pages/TaxPage.tsx(1118,26): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/pages/TaxPage.tsx(1128,26): error TS17008: JSX element 'input' has no corresponding closing tag.
+src/pages/TaxPage.tsx(1138,26): error TS17008: JSX element 'input' has no corresponding closing tag.

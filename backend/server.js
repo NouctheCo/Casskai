@@ -406,6 +406,94 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
 
+// -------------------------
+// Dev-only: recompute KPIs on-demand
+// -------------------------
+// server-side KPI cache (dev-only)
+if (process.env.VITE_DEV_MODE === 'true' || process.env.NODE_ENV !== 'production') {
+  const serverKpiCache = new Map();
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+  // Helper to compute KPIs (same logic as recompute)
+  async function computeKpisForCompany(companyId) {
+    const startOfYear = `${new Date().getFullYear()}-01-01`;
+    const endOfYear = `${new Date().getFullYear()}-12-31`;
+
+    // invoices revenue
+    const { data: invoices, error: invErr } = await supabase
+      .from('invoices')
+      .select('total_incl_tax, status, invoice_type, invoice_date')
+      .eq('company_id', companyId)
+      .eq('invoice_type', 'sale')
+      .in('status', ['sent', 'paid', 'partially_paid'])
+      .gte('invoice_date', startOfYear)
+      .lte('invoice_date', endOfYear);
+
+    let revenue = 0;
+    if (!invErr && invoices && invoices.length > 0) {
+      revenue = invoices.reduce((s, i) => s + Number(i.total_incl_tax || 0), 0);
+    } else {
+      const { data: accounts } = await supabase
+        .from('chart_of_accounts')
+        .select('current_balance')
+        .eq('company_id', companyId)
+        .eq('account_class', 7)
+        .eq('is_active', true);
+      if (accounts) revenue = accounts.reduce((s, a) => s + Math.abs(Number(a.current_balance || 0)), 0);
+    }
+
+    const { count: pendingCount } = await supabase
+      .from('invoices')
+      .select('*', { count: 'exact', head: true })
+      .eq('company_id', companyId)
+      .eq('invoice_type', 'sale')
+      .in('status', ['draft', 'sent', 'overdue'])
+      .neq('status', 'cancelled');
+
+    return { companyId, revenue, pendingInvoices: pendingCount || 0 };
+  }
+
+  // GET: return cached KPIs or compute and cache
+  app.get('/api/dev/kpis', async (req, res) => {
+    try {
+      const companyId = String(req.query.companyId || req.headers['x-company-id'] || '');
+      if (!companyId) return res.status(400).json({ error: 'companyId required (query or x-company-id header)' });
+
+      const cached = serverKpiCache.get(companyId);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL && cached.isValid) {
+        console.log('[dev/kpis] Returning cached KPIs for', companyId);
+        return res.json({ fromCache: true, ...cached.data });
+      }
+
+      console.log('[dev/kpis] Computing KPIs for', companyId);
+      const data = await computeKpisForCompany(companyId);
+      serverKpiCache.set(companyId, { data, timestamp: Date.now(), isValid: true });
+      return res.json({ fromCache: false, ...data });
+    } catch (err) {
+      console.error('[dev/kpis] Error:', err);
+      return res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // POST: clear cache for a company or all
+  app.post('/api/dev/kpis/clear', (req, res) => {
+    try {
+      const companyId = req.body?.companyId || req.query.companyId || req.headers['x-company-id'];
+      if (companyId) {
+        serverKpiCache.delete(String(companyId));
+        console.log('[dev/kpis/clear] Cleared cache for', companyId);
+        return res.json({ cleared: companyId });
+      }
+      serverKpiCache.clear();
+      console.log('[dev/kpis/clear] Cleared all KPI cache');
+      return res.json({ cleared: 'all' });
+    } catch (err) {
+      console.error('[dev/kpis/clear] Error:', err);
+      return res.status(500).json({ error: String(err) });
+    }
+  });
+}
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 CassKai Stripe Backend running on port ${PORT}`);

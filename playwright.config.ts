@@ -29,6 +29,9 @@ const BASE_URL = USE_REMOTE_BASE_URL ? REMOTE_BASE_URL! : LOCAL_BASE_URL;
 export default defineConfig({
   testDir: './e2e',
 
+  // Global setup script to pre-seed browser state (cookie consent) before tests run
+  globalSetup: './e2e/global-setup.ts',
+
   /* Timeout global pour chaque test - augmenté pour CI/CD */
   timeout: 120000, // 2 minutes par test (au lieu de 90s)
 

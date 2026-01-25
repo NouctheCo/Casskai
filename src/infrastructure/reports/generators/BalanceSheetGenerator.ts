@@ -5,6 +5,7 @@ import { Report, ReportParameters, ReportResult } from '../../../domain/reports/
 import { FinancialStatementData } from '../../../domain/reports/entities/FinancialReport';
 
 import { IReportRepository } from '../../../domain/reports/repositories/IReportRepository';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 
 
@@ -250,7 +251,7 @@ export class BalanceSheetGenerator extends BaseReportGenerator {
 
       style: 'currency',
 
-      currency: 'EUR'
+      currency: getCurrentCompanyCurrency()
 
     }).format(amount);
 

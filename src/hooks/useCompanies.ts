@@ -10,6 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 import { useState, useEffect, useCallback } from 'react';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Company } from '@/types/database.types';
@@ -97,7 +98,7 @@ export function useCompanies() {
           company_name: companyData.name,
           user_uuid: user.id,
           country_code: companyData.country || 'FR',
-          currency_code: companyData.currency || 'EUR',
+          currency_code: companyData.currency || getCurrentCompanyCurrency(),
           accounting_standard_param: (companyData as any).accountingStandard || null,
         }
       );

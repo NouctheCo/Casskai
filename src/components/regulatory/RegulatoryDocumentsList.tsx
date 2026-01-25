@@ -235,10 +235,11 @@ export function RegulatoryDocumentsList({
       <Card className="p-4">
         <div className="flex gap-4">
           <div className="flex-1">
-            <label className="text-sm font-medium mb-2 block text-gray-700 dark:text-gray-300">
+            <label htmlFor="category-filter" className="text-sm font-medium mb-2 block text-gray-700 dark:text-gray-300">
               {t('regulatory.filterByCategory')}
             </label>
             <select
+              id="category-filter"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -257,10 +258,11 @@ export function RegulatoryDocumentsList({
           </div>
 
           <div className="flex-1">
-            <label className="text-sm font-medium mb-2 block text-gray-700 dark:text-gray-300">
+            <label htmlFor="status-filter" className="text-sm font-medium mb-2 block text-gray-700 dark:text-gray-300">
               {t('regulatory.filterByStatus')}
             </label>
             <select
+              id="status-filter"
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"

@@ -430,8 +430,9 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         {/* Sélection du compte bancaire 512 */}
         {bankingAccountOptions.length > 1 && (
           <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Compte bancaire:</span>
+            <label htmlFor="banking-account-select" className="text-sm font-medium text-blue-700 dark:text-blue-300">Compte bancaire:</label>
             <select
+              id="banking-account-select"
               value={selectedBankingAccount}
               onChange={(e) => {
                 setSelectedBankingAccount(e.target.value);
@@ -503,6 +504,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
               {selectedTransactions.size} sélectionnée(s)
             </span>
             <select
+              aria-label={t('banking.bulkCategorization.selectAccount', 'Choisir un compte pour catégorisation en masse')}
               value={bulkAccount}
               onChange={(e) => setBulkAccount(e.target.value)}
               className="px-3 py-2 border rounded-lg"

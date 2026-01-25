@@ -20,6 +20,7 @@ import {
   BudgetInsightConfig,
   BankingProvider as OBProviderConfig,
 } from '../../../types/openBanking.types';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { BankingProvider, BankingProviderError, AuthenticationError, NetworkError } from '../base/BankingProvider';
 import { logger } from '@/lib/logger';
 // Provider spécialisé pour Budget Insight API
@@ -261,7 +262,7 @@ export class BudgetInsightProvider extends BankingProvider {
           name: account.name,
           displayName: account.name,
           type: this.mapBudgetInsightAccountType(account.type),
-          currency: account.currency?.code || 'EUR',
+          currency: account.currency?.code || getCurrentCompanyCurrency(),
           balance: parseFloat(account.balance),
           availableBalance: parseFloat(account.coming || account.balance),
           iban: account.iban,
@@ -305,7 +306,7 @@ export class BudgetInsightProvider extends BankingProvider {
         name: response.name,
         displayName: response.name,
         type: this.mapBudgetInsightAccountType(response.type),
-        currency: response.currency?.code || 'EUR',
+        currency: response.currency?.code || getCurrentCompanyCurrency(),
         balance: parseFloat(response.balance),
         availableBalance: parseFloat(response.coming || response.balance),
         iban: response.iban,
@@ -385,7 +386,7 @@ export class BudgetInsightProvider extends BankingProvider {
         date: new Date(tx.date),
         valueDate: new Date(tx.value_date || tx.date),
         amount: parseFloat(tx.value),
-        currency: tx.currency?.code || 'EUR',
+        currency: tx.currency?.code || getCurrentCompanyCurrency(),
         description: this.normalizeDescription(tx.simplified_wording || tx.wording),
   originalDescription: (tx as unknown as { original_wording?: string }).original_wording || tx.wording,
         category: tx.category ? this.mapBudgetInsightCategory(tx.category) : undefined,

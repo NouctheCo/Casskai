@@ -79,6 +79,8 @@ const LazyComplianceDashboard = React.lazy(() => import('@/pages/Reports/regulat
 const LazyRegulatoryDocumentsPage = React.lazy(() => import('@/pages/RegulatoryDocumentsPage'));
 
 const AppRouter: React.FC = () => {
+  const LazyKpiCacheDebug = React.lazy(() => import('@/pages/dev/KpiCacheDebug'));
+
   const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding, currentCompany, userCompanies } = useAuth();
 
   // Memoize the routing logic to prevent infinite re-renders
@@ -421,17 +423,19 @@ const AppRouter: React.FC = () => {
                 </Suspense>
               </ProtectedRoute>
             } />
+            {import.meta.env.VITE_DEV_MODE && (
+              <Route path="dev/kpi-cache" element={
+                <ProtectedRoute>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <LazyKpiCacheDebug />
+                  </Suspense>
+                </ProtectedRoute>
+              } />
+            )}
             <Route path="billing" element={
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
                   <LazyBillingPage />
-                </Suspense>
-              </ProtectedRoute>
-            } />
-            <Route path="pricing" element={
-              <ProtectedRoute>
-                <Suspense fallback={<LoadingFallback />}>
-                  <LazyPricingPage />
                 </Suspense>
               </ProtectedRoute>
             } />
@@ -486,13 +490,6 @@ const AppRouter: React.FC = () => {
               <ProtectedRoute requireOnboarding={false}>
                 <Suspense fallback={<LoadingFallback />}>
                   <LazyPricingPage />
-                </Suspense>
-              </ProtectedRoute>
-            } />
-            <Route path="diagnostic" element={
-              <ProtectedRoute>
-                <Suspense fallback={<LoadingFallback />}>
-                  <LazyDiagnosticPage />
                 </Suspense>
               </ProtectedRoute>
             } />

@@ -1,4 +1,5 @@
 import { Purchase } from '../../types/purchase.types';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 export const exportToCsv = (purchases: Purchase[], filename: string = 'achats') => {
   const headers = [
@@ -117,17 +118,17 @@ export const generatePdfReport = (purchases: Purchase[], filters: any) => {
           <p><strong>${reportData.summary.totalPurchases}</strong></p>
         </div>
         <div class="summary-item">
-          <h4>Montant total</h4>
-          <p><strong>${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(reportData.summary.totalAmount)}</strong></p>
-        </div>
-        <div class="summary-item">
-          <h4>Montant payé</h4>
-          <p><strong>${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(reportData.summary.paidAmount)}</strong></p>
-        </div>
-        <div class="summary-item">
-          <h4>Montant en attente</h4>
-          <p><strong>${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(reportData.summary.pendingAmount + reportData.summary.overdueAmount)}</strong></p>
-        </div>
+            <h4>Montant total</h4>
+            <p><strong>${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: getCurrentCompanyCurrency() }).format(reportData.summary.totalAmount)}</strong></p>
+          </div>
+          <div class="summary-item">
+            <h4>Montant payé</h4>
+            <p><strong>${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: getCurrentCompanyCurrency() }).format(reportData.summary.paidAmount)}</strong></p>
+          </div>
+          <div class="summary-item">
+            <h4>Montant en attente</h4>
+            <p><strong>${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: getCurrentCompanyCurrency() }).format(reportData.summary.pendingAmount + reportData.summary.overdueAmount)}</strong></p>
+          </div>
       </div>
       
       <table>
@@ -146,7 +147,7 @@ export const generatePdfReport = (purchases: Purchase[], filters: any) => {
               <td>${p.invoice_number}</td>
               <td>${p.date}</td>
               <td>${p.supplier}</td>
-              <td>${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(p.amount)}</td>
+              <td>${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: getCurrentCompanyCurrency() }).format(p.amount)}</td>
               <td class="status-${p.status}">${p.status}</td>
             </tr>
           `).join('')}

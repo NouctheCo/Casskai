@@ -17,6 +17,7 @@ import { devLogger } from '@/utils/devLogger';
 import { useTranslation } from 'react-i18next';
 
 import { motion } from 'framer-motion';
+import { formatCurrency } from '@/lib/utils';
 
 import { useCrm } from '../hooks/useCrm';
 
@@ -590,11 +591,11 @@ export default function SalesCrmPage() {
 
                   <CardContent>
 
-                    <div className="text-2xl font-bold">€{conversionMetrics.weighted_pipeline_value.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">{formatCurrency(conversionMetrics.weighted_pipeline_value)}</div>
 
                     <p className="text-xs text-muted-foreground">
 
-                      Total: €{conversionMetrics.total_pipeline_value.toLocaleString()}
+                      Total: {formatCurrency(conversionMetrics.total_pipeline_value)}
 
                     </p>
 
@@ -616,7 +617,7 @@ export default function SalesCrmPage() {
 
                   <CardContent>
 
-                    <div className="text-2xl font-bold">€{conversionMetrics.average_deal_size.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">{formatCurrency(conversionMetrics.average_deal_size)}</div>
 
                     <p className="text-xs text-muted-foreground">
 
@@ -754,7 +755,7 @@ export default function SalesCrmPage() {
 
                           <p className="text-sm text-muted-foreground">{t('crm.forecast.forecasted')}</p>
 
-                          <p className="font-bold">€{forecast.pipeline_revenue.toLocaleString()}</p>
+                          <p className="font-bold">{formatCurrency(forecast.pipeline_revenue)}</p>
 
                         </div>
 

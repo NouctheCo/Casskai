@@ -1,6 +1,7 @@
 // src/utils/migrationChecker.ts
 import { supabase } from '../lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export interface MigrationStatus {
   isConnected: boolean;
   hasRequiredTables: boolean;
@@ -207,7 +208,7 @@ export class MigrationChecker {
           p_user_id: dummyUuid, 
           p_company_name: 'test',
           p_country: 'FR',
-          p_currency: 'EUR',
+          p_currency: getCurrentCompanyCurrency(),
           p_accounting_standard: 'PCG'
         };
       default:

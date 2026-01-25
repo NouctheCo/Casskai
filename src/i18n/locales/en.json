@@ -405,6 +405,11 @@
   "allTypes": "Tous les types",
   "applyFilters": "Appliquer les Filters",
   "auth": {
+    "accessDenied": {
+      "title": "Access Denied",
+      "description": "You don't have the required permissions to view this content. Please contact your administrator if you believe this is an error.",
+      "accountingSection": "You don't have permission to view accounting data."
+    },
     "alreadyHaveAccount": "Vous avez dÃ©jÃ  un compte ?",
     "backToLogin": "Back to login",
     "createYourAccount": "CrÃ©ez your compte",
@@ -2514,6 +2519,68 @@
         "standards": "Accounting standards",
         "availability": "Availability",
         "support": "AI Support"
+      },
+      "newTitle": "Pilot your business.",
+      "newTitleHighlight": "Control your cash flow.",
+      "newSubtitle": "Accounting, invoicing, treasury and financial analysis in one intelligent platform.",
+      "newCta": {
+        "primary": "Start now – 30-day free trial",
+        "secondary": "See pricing"
+      }
+    },
+    "earlyPricing": {
+      "badge": "Transparent pricing",
+      "title": "Start today",
+      "subtitle": "Simple pricing adapted to all business sizes",
+      "reassurance": "Change plans anytime. No commitment.",
+      "trust": {
+        "trial": "30-day free trial",
+        "noCard": "No credit card required",
+        "cancel": "Cancel anytime"
+      }
+    },
+    "platform": {
+      "badge": "Complete platform",
+      "title": "Much more than accounting software.",
+      "subtitle": "CassKai centralizes all your business management in one intelligent platform.",
+      "closing": "All modules are connected. One single source of truth.",
+      "blocks": {
+        "finance": {
+          "title": "Finance & Accounting",
+          "bullets": [
+            "General and analytical accounting",
+            "Real-time cash management",
+            "Invoicing and collections",
+            "Automated financial reports"
+          ]
+        },
+        "management": {
+          "title": "Management & Decision",
+          "bullets": [
+            "Customizable dashboards",
+            "Business KPI tracking",
+            "On-demand reports",
+            "Financial analysis AI"
+          ]
+        },
+        "operations": {
+          "title": "Operations & Management",
+          "bullets": [
+            "Project and budget management",
+            "Client contract tracking",
+            "Automatic RFA calculations",
+            "Process automation"
+          ]
+        },
+        "hr": {
+          "title": "Organization & HR",
+          "bullets": [
+            "Human resources management",
+            "Team and leave tracking",
+            "Data centralization",
+            "Cross-functional visibility"
+          ]
+        }
       }
     },
     "worldMap": {
@@ -2830,6 +2897,9 @@
       "title": "Ready to transform",
       "titleHighlight": "your financial management?",
       "subtitle": "Join the companies that have chosen the future of accounting. Start for free and discover the power of financial AI.",
+      "finalTitle": "Start today.",
+      "finalTitleHighlight": "Decide better this month.",
+      "finalSubtitle": "30-day free trial. No credit card required.",
       "benefits": {
         "trial": "30-day free trial",
         "noCard": "No credit card required",

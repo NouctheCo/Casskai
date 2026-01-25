@@ -15,6 +15,7 @@
  */
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export interface BankTransaction {
   id?: string;
   bank_account_id: string;
@@ -63,6 +64,7 @@ class BankImportService {
    */
   async importCSV(file: File, accountId: string, companyId: string, mapping?: CSVMapping): Promise<ImportResult> {
     try {
+      const companyCurrency = await this.getCompanyCurrency(companyId);
       const text = await file.text();
       const lines = text.split('\n');
       if (lines.length < 2) {
@@ -86,7 +88,7 @@ class BankImportService {
         try {
           const values = this.parseCSVLine(dataLines[i]);
           if (values.length < headers.length / 2) continue; // Skip incomplete lines
-          const transaction = this.parseCSVTransaction(values, finalMapping, accountId, companyId);
+          const transaction = this.parseCSVTransaction(values, finalMapping, accountId, companyId, companyCurrency);
           if (transaction) {
             transactions.push(transaction);
           }
@@ -126,9 +128,10 @@ class BankImportService {
    */
   async importOFX(file: File, accountId: string, companyId: string): Promise<ImportResult> {
     try {
+      const companyCurrency = await this.getCompanyCurrency(companyId);
       const text = await file.text();
       // Parse OFX format
-      const transactions = await this.parseOFXTransactions(text, accountId, companyId);
+      const transactions = await this.parseOFXTransactions(text, accountId, companyId, companyCurrency);
       if (transactions.length === 0) {
         return {
           success: false,
@@ -166,8 +169,9 @@ class BankImportService {
    */
   async importQIF(file: File, accountId: string, companyId: string): Promise<ImportResult> {
     try {
+      const companyCurrency = await this.getCompanyCurrency(companyId);
       const text = await file.text();
-      const transactions = await this.parseQIFTransactions(text, accountId, companyId);
+      const transactions = await this.parseQIFTransactions(text, accountId, companyId, companyCurrency);
       if (transactions.length === 0) {
         return {
           success: false,
@@ -203,7 +207,7 @@ class BankImportService {
   /**
    * Parse les transactions OFX
    */
-  private async parseOFXTransactions(ofxContent: string, accountId: string, companyId: string): Promise<BankTransaction[]> {
+  private async parseOFXTransactions(ofxContent: string, accountId: string, companyId: string, companyCurrency: string): Promise<BankTransaction[]> {
     const transactions: BankTransaction[] = [];
     // Simple regex parsing pour OFX (version simplifiée)
     const stmtTrnPattern = /<STMTTRN>(.*?)<\/STMTTRN>/gs;
@@ -222,7 +226,7 @@ class BankImportService {
             company_id: companyId,
             transaction_date: this.parseOFXDate(dtPosted),
             amount: parseFloat(trnAmt),
-            currency: 'EUR',
+            currency: companyCurrency,
             description: memo.trim(),
             reference: fitId || undefined,
             is_reconciled: false,
@@ -237,7 +241,7 @@ class BankImportService {
     }
     return transactions;
   }
-  private async parseQIFTransactions(qifContent: string, accountId: string, companyId: string): Promise<BankTransaction[]> {
+  private async parseQIFTransactions(qifContent: string, accountId: string, companyId: string, companyCurrency: string): Promise<BankTransaction[]> {
     const transactions: BankTransaction[] = [];
     // Normaliser les fins de lignes (gérer CRLF Windows et CR Mac)
     const content = qifContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -306,7 +310,7 @@ class BankImportService {
               company_id: companyId,
               transaction_date: currentTransaction.transaction_date,
               amount: currentTransaction.amount!,
-              currency: 'EUR',
+              currency: companyCurrency,
               description: (currentTransaction.description || 'Transaction sans description').trim(),
               reference: currentTransaction.reference,
               is_reconciled: false,
@@ -327,7 +331,7 @@ class BankImportService {
         company_id: companyId,
         transaction_date: currentTransaction.transaction_date,
         amount: currentTransaction.amount!,
-        currency: 'EUR',
+        currency: companyCurrency,
         description: (currentTransaction.description || 'Transaction sans description').trim(),
         reference: currentTransaction.reference,
         is_reconciled: false,
@@ -469,7 +473,7 @@ class BankImportService {
     });
     return mapping;
   }
-  private parseCSVTransaction(values: string[], mapping: CSVMapping, accountId: string, companyId: string): BankTransaction | null {
+  private parseCSVTransaction(values: string[], mapping: CSVMapping, accountId: string, companyId: string, companyCurrency: string): BankTransaction | null {
     try {
       const dateStr = values[mapping.date]?.trim();
       const amountStr = values[mapping.amount]?.trim();
@@ -487,7 +491,7 @@ class BankImportService {
         company_id: companyId,
         transaction_date: date,
         amount,
-        currency: 'EUR',
+        currency: companyCurrency,
         description,
         reference,
         is_reconciled: false,
@@ -496,6 +500,19 @@ class BankImportService {
       };
     } catch (error: unknown) {
       throw new Error(`Erreur parsing transaction: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
+    }
+  }
+
+  private async getCompanyCurrency(companyId: string): Promise<string> {
+    try {
+      const { data } = await supabase
+        .from('companies')
+        .select('currency')
+        .eq('id', companyId)
+        .single();
+      return (data && (data as any).currency) ? (data as any).currency : getCurrentCompanyCurrency();
+    } catch (_err) {
+      return getCurrentCompanyCurrency();
     }
   }
   private parseDate(dateStr: string): string | null {

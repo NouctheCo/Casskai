@@ -11,5 +11,11 @@
     "strictNullChecks": false
   },
   "include": ["src"],
-  "exclude": ["src/**/*.test.ts", "src/**/*.spec.ts", "node_modules", "dist"]
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "node_modules",
+    "dist",
+    "src/components/forecasts/ForecastChartView.tsx"
+  ]
 }

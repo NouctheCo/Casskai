@@ -273,7 +273,7 @@ export const RealOperationalDashboard: React.FC = () => {
                   <YAxis />
                   <Tooltip
                     formatter={(value: number) =>
-                      formatCurrency(value, 'EUR')
+                      formatCurrency(value)
                     }
                   />
                   <Line
@@ -305,7 +305,7 @@ export const RealOperationalDashboard: React.FC = () => {
                   <YAxis />
                   <Tooltip
                     formatter={(value: number) =>
-                      formatCurrency(value, 'EUR')
+                      formatCurrency(value)
                     }
                   />
                   <Bar dataKey="value" fill={charts[1].color} />
@@ -341,7 +341,7 @@ export const RealOperationalDashboard: React.FC = () => {
                   </Pie>
                   <Tooltip
                     formatter={(value: number) =>
-                      formatCurrency(value, 'EUR')
+                      formatCurrency(value)
                     }
                   />
                   <Legend />

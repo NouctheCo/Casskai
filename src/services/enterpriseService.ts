@@ -12,6 +12,7 @@
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { Enterprise, TaxRegime, EnterpriseSettings } from '../types/enterprise.types';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 /**
  * Service for managing enterprise-related operations
  */
@@ -79,7 +80,7 @@ export const enterpriseService = {
             },
             fiscalYearStart: 1,
             fiscalYearEnd: 12,
-            currency: company.default_currency || 'EUR',
+            currency: company.default_currency || getCurrentCompanyCurrency(),
             createdAt: new Date(company.created_at),
             updatedAt: new Date(company.updated_at),
             isActive: company.is_active !== false, // Default to true if undefined
@@ -165,7 +166,7 @@ export const enterpriseService = {
         taxRegime: enterpriseData.taxRegime,
         fiscalYearStart: enterpriseData.fiscalYearStart,
         fiscalYearEnd: enterpriseData.fiscalYearEnd,
-        currency: newCompany.default_currency || 'EUR',
+        currency: newCompany.default_currency || getCurrentCompanyCurrency(),
         createdAt: new Date(newCompany.created_at),
         updatedAt: new Date(newCompany.updated_at),
         isActive: newCompany.is_active !== false,

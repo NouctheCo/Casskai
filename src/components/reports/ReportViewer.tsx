@@ -13,6 +13,7 @@ import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface ReportFilters {
   companyId: string;
   dateFrom: string;
@@ -61,7 +62,7 @@ export function ReportViewer() {
     period: 'monthly',
     includeSubAccounts: true,
     onlyActiveAccounts: false,
-    currency: 'EUR'
+    currency: currentCompany?.default_currency || getCurrentCompanyCurrency()
   });
   const handleFilterChange = (key: keyof ReportFilters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));

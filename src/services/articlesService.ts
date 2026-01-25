@@ -94,7 +94,7 @@ class ArticlesService {
       .select(`
         *,
         warehouses:warehouse_id (name),
-        supplier:suppliers(name),
+        supplier:suppliers!supplier_id(name),
         purchase_account:purchase_account_id (account_number),
         sales_account:sales_account_id (account_number)
       `)
@@ -143,7 +143,7 @@ class ArticlesService {
       .select(`
         *,
         warehouses:warehouse_id (name),
-        supplier:suppliers(name),
+        supplier:suppliers!supplier_id(name),
         purchase_account:purchase_account_id (account_number),
         sales_account:sales_account_id (account_number)
       `)
@@ -303,7 +303,7 @@ class ArticlesService {
       .select(`
         *,
         warehouses:warehouse_id (name),
-        supplier:suppliers(name)
+        supplier:suppliers!supplier_id(name)
       `)
       .eq('company_id', companyId)
       .eq('is_active', true)

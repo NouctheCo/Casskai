@@ -16,6 +16,7 @@
 import { supabase } from '@/lib/supabase';
 import { BankTransaction } from './bankImportService';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export interface AccountingEntry {
   id: string;
   company_id: string;
@@ -49,6 +50,7 @@ export interface ReconciliationSummary {
   reconciliation_rate: number;
   amount_matched: number;
   amount_unmatched: number;
+  currency?: string;
 }
 export interface ReconciliationRule {
   id?: string;
@@ -391,6 +393,7 @@ class BankReconciliationService {
       const unmatchedAmount = bankTransactions
         ?.filter(tx => !tx.is_reconciled)
         .reduce((sum, tx) => sum + Math.abs(tx.amount), 0) || 0;
+      const currency = await this.getCompanyCurrency(companyId);
       return {
         total_bank_transactions: totalBankTx,
         total_accounting_entries: totalAccountingEntries,
@@ -401,10 +404,24 @@ class BankReconciliationService {
         reconciliation_rate: totalBankTx > 0 ? (matchedTx / totalBankTx) * 100 : 0,
         amount_matched: matchedAmount,
         amount_unmatched: unmatchedAmount
+        , currency
       };
     } catch (error) {
       logger.error('BankReconciliation', 'Erreur calcul résumé réconciliation:', error instanceof Error ? error.message : String(error));
       throw error;
+    }
+  }
+
+  private async getCompanyCurrency(companyId: string): Promise<string> {
+    try {
+      const { data } = await supabase
+        .from('companies')
+        .select('currency')
+        .eq('id', companyId)
+        .single();
+      return (data && (data as any).currency) ? (data as any).currency : getCurrentCompanyCurrency();
+    } catch (_err) {
+      return getCurrentCompanyCurrency();
     }
   }
   /**

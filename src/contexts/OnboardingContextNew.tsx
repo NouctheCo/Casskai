@@ -17,6 +17,7 @@ import { createCompanyDirectly } from '@/helpers/createCompanyHelper';
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { useSupabase } from '@/hooks/useSupabase';
 import {
   OnboardingContextType,
@@ -57,7 +58,7 @@ const initialData: OnboardingData = {
 };
 
 export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, refreshUserCompanies } = useAuth();
   const [state, setState] = useState<OnboardingState>(initialState);
   const progressService = useMemo(() => new OnboardingProgressService(), []);
   const storageService = useMemo(() => new OnboardingStorageService(), []);
@@ -446,10 +447,16 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       devLogger.debug('🔍 Préparation création entreprise:', state.data.companyProfile.name?.trim());
 
+      // ============================================
+      // PART C: Only reuse companies that are NOT already completed
+      // Query for companies where owner_id = user.id AND onboarding_completed_at IS NULL
+      // This prevents onboarding from attaching to a random old company
+      // ============================================
       const { data: existingCompany, error: existingCompanyError } = await supabase
         .from('companies')
-        .select('id, status, owner_id')
+        .select('id, status, owner_id, onboarding_completed_at')
         .eq('owner_id', user.id)
+        .is('onboarding_completed_at', null)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -463,6 +470,12 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const existingCompanyId = existingCompany?.id ?? null;
       if (companyAlreadyExists && !existingCompanyId) {
         throw new Error('Entreprise existante détectée sans identifiant valide.');
+      }
+
+      if (companyAlreadyExists) {
+        devLogger.info('ℹ️ Found existing incomplete company (onboarding_completed_at IS NULL), will reuse:', existingCompanyId);
+      } else {
+        devLogger.info('ℹ️ No incomplete companies found, will create a new one');
       }
 
       const companyId = existingCompanyId
@@ -486,13 +499,13 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           id: companyId,
           name: state.data.companyProfile.name,
           country: state.data.companyProfile.country,
-          default_currency: state.data.companyProfile.currency || (
+            default_currency: state.data.companyProfile.currency || (
             state.data.companyProfile.country === 'FR' ? 'EUR' :
             ['SN', 'CI', 'ML', 'BF'].includes(state.data.companyProfile.country || '') ? 'XOF' :
             state.data.companyProfile.country === 'MA' ? 'MAD' :
             state.data.companyProfile.country === 'TN' ? 'TND' :
             state.data.companyProfile.country === 'CM' ? 'XAF' :
-            'EUR'
+            getCurrentCompanyCurrency()
           ),
 
           // ========== ADRESSE COMPLÈTE ==========
@@ -676,7 +689,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
               // Langue et formats (PreferencesStep)
               language: state.data.preferences.language || 'fr',
-              currency: state.data.preferences.currency || 'EUR',
+              currency: state.data.preferences.currency || getCurrentCompanyCurrency(),
               date_format: state.data.preferences.dateFormat || 'DD/MM/YYYY',
               number_format: state.data.preferences.numberFormat || 'FR',
               timezone: state.data.preferences.timezone || 'Europe/Paris',
@@ -816,7 +829,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       try {
         const userPreferences = {
           language: state.data.preferences?.language || 'fr',
-          currency: state.data.preferences?.currency || 'EUR',
+          currency: state.data.preferences?.currency || getCurrentCompanyCurrency(),
           timezone: state.data.preferences?.timezone || 'Europe/Paris',
           dateFormat: state.data.preferences?.dateFormat || 'DD/MM/YYYY',
           theme: state.data.preferences?.theme || 'system',
@@ -961,7 +974,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // NETTOYAGE COMPLET DU CACHE ONBOARDING
       // ============================================
       // Marquer dans localStorage pour éviter les reprises d'onboarding
-      localStorage.setItem('onboarding_just_completed', 'true');
+      // Note: AuthContext manages onboarding_completed_${userId} as source of truth
       localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
       localStorage.setItem(`onboarding_completed_at_${user.id}`, completionTimestamp);
 
@@ -972,6 +985,29 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       localStorage.removeItem('onboarding_modules');
 
       devLogger.info('✅ Onboarding terminé avec succès - État local mis à jour');
+
+      // ============================================
+      // REFRESH AUTHCONTEXT - CRITICAL FOR ROUTING
+      // ============================================
+      // After successful onboarding, refresh AuthContext to ensure userCompanies
+      // and currentCompany are up to date, preventing infinite redirect loops
+      try {
+        devLogger.info('🔄 Refreshing AuthContext after onboarding completion...');
+
+        // Refresh user companies list - this also handles setting currentCompany internally
+        const refreshedCompanies = await refreshUserCompanies(user.id);
+
+        devLogger.info('✅ AuthContext refreshed successfully:', {
+          companiesCount: refreshedCompanies.length,
+          currentCompanyId: companyId
+        });
+      } catch (refreshError) {
+        devLogger.error('❌ Error refreshing AuthContext after onboarding:', refreshError);
+        // Fallback: force page reload if refresh fails
+        devLogger.warn('⚠️ Falling back to page reload due to refresh error');
+        window.location.assign('/dashboard');
+        return { success: true };
+      }
 
       return { success: true };
     } catch (error) {
@@ -1086,8 +1122,9 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     },
     finalizeOnboarding,
     skipOnboarding: async () => {
-      // Implementation for skipping onboarding
-      return Promise.resolve();
+      // PART D: Onboarding skip is disabled to ensure proper company setup
+      // Skipping onboarding would leave the user in an inconsistent state
+      throw new Error('Onboarding cannot be skipped. Please complete all required steps to ensure proper account setup.');
     },
     getStepByIndex: (index) => state.steps[index] || null,
     getStepById: (stepId) => state.steps.find(s => s.id === stepId) || null,

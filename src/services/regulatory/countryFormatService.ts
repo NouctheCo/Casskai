@@ -10,6 +10,7 @@
  */
 
 import { COUNTRY_WORKFLOWS } from '@/constants/countryWorkflows';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 export interface FormattedDocument {
   format: 'xml' | 'pdf' | 'csv' | 'json';
@@ -68,7 +69,7 @@ export class CountryFormatService {
       number: {
         decimalSeparator: (formats as any).numberDecimalSeparator || '.',
         thousandsSeparator: (formats as any).numberThousandsSeparator || ',',
-        currencySymbol: currencyCodes[country] || 'EUR',
+        currencySymbol: currencyCodes[country] || getCurrentCompanyCurrency(),
         currencyPosition: 'after',
         decimals: 2,
       },
@@ -76,7 +77,7 @@ export class CountryFormatService {
         format: (formats as any).dateFormat || 'DD/MM/YYYY',
         separator: '/',
       },
-      currency: currencyCodes[country] || 'EUR',
+      currency: currencyCodes[country] || getCurrentCompanyCurrency(),
       language: (formats as any).language || 'EN',
     };
   }

@@ -11,6 +11,7 @@
  */
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n/i18n';
 import { logger } from '@/lib/logger';
@@ -126,7 +127,7 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
       ...options
     }).format(dateObj);
   };
-  const formatCurrency = (amount: number, currency: string = 'EUR'): string => {
+  const formatCurrency = (amount: number, currency: string = getCurrentCompanyCurrency()): string => {
     if (typeof amount !== 'number') return '';
     return new Intl.NumberFormat(locale, {
       style: 'currency',

@@ -58,6 +58,29 @@ export interface AccountBalance {
   closing_balance: number;
   balance_type: 'debit' | 'credit';
 }
+
+export interface ReceivablesAgingDetail {
+  invoice_id: string;
+  invoice_number: string;
+  client_name: string;
+  amount: number;
+  due_date: string;
+  days_overdue: number;
+  aging_bucket: string;
+}
+
+export interface ReceivablesAgingAnalysis {
+  aged_analysis: {
+    current: number;
+    days_1_30: number;
+    days_31_60: number;
+    days_61_90: number;
+    over_90: number;
+  };
+  total_receivables: number;
+  average_collection_period: number;
+  details?: ReceivablesAgingDetail[];
+}
 export class AccountingDataService {
   private static instance: AccountingDataService;
   static getInstance(): AccountingDataService {
@@ -602,7 +625,8 @@ export class AccountingDataService {
       // Build query - Include all active statuses (validated, posted, imported, draft)
       let query = supabase
         .from('journal_entries')
-        .select('journal_id, journals(code, name)')
+        // Use explicit relationship name to avoid ambiguous-relationship PGRST201 errors
+        .select('journal_id, journals!journal_entries_journal_id_fkey(code, name)')
         .eq('company_id', companyId)
         .in('status', ['validated', 'posted', 'imported', 'draft', 'pending']);
       // Apply period filters if provided

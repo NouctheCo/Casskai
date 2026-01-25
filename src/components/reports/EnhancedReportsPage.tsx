@@ -34,6 +34,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useReports } from '@/hooks/useReports';
 import { Report, ReportParameters } from '@/domain/reports/entities/Report';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface DateRange {
   from: Date;
   to: Date;
@@ -109,7 +110,7 @@ export const EnhancedReportsPage: React.FC = () => {
       dateFrom: dateRange.from,
       dateTo: dateRange.to,
       companyId: currentCompany.id,
-      currency: 'EUR',
+      currency: currentCompany?.default_currency || getCurrentCompanyCurrency(),
       includeComparisons: true,
       previousPeriod: true
     };

@@ -15,6 +15,8 @@
  * Génération de fichiers de virement compatibles banques européennes
  */
 
+import { formatCurrency } from '@/lib/utils';
+
 export interface SEPAConfig {
   companyName: string;
   debtorName?: string;
@@ -315,7 +317,7 @@ class SEPAExportService {
       }
 
       if (payment.amount > 999999999.99) {
-        errors.push(`Paiement ${index + 1}: Le montant est trop élevé (max: 999 999 999,99 €)`);
+        errors.push(`Paiement ${index + 1}: Le montant est trop élevé (max: ${formatCurrency(999999999.99)})`);
       }
 
       if (!payment.reference || payment.reference.trim().length === 0) {

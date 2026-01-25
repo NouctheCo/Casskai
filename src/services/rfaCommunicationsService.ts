@@ -10,6 +10,7 @@
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import { emailService } from '@/services/emailService';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 // =====================================================
 // TYPES
@@ -343,10 +344,11 @@ class RFACommunicationsService {
    * Génère le HTML d'un email RFA à partir d'un template
    */
   generateRFAEmailHtml(data: RFAEmailTemplateData): string {
-    const formatCurrency = (amount: number, currency: string = 'EUR') => {
+    const formatCurrency = (amount: number, currency?: string) => {
+      const cur = currency || getCurrentCompanyCurrency();
       return new Intl.NumberFormat('fr-FR', {
         style: 'currency',
-        currency
+        currency: cur
       }).format(amount);
     };
 
@@ -469,10 +471,11 @@ class RFACommunicationsService {
    * Génère le texte brut d'un email RFA
    */
   generateRFAEmailText(data: RFAEmailTemplateData): string {
-    const formatCurrency = (amount: number, currency: string = 'EUR') => {
+    const formatCurrency = (amount: number, currency?: string) => {
+      const cur = currency || getCurrentCompanyCurrency();
       return new Intl.NumberFormat('fr-FR', {
         style: 'currency',
-        currency
+        currency: cur
       }).format(amount);
     };
 

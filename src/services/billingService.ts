@@ -4,6 +4,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export interface CheckoutSessionResponse {
   url: string;
   sessionId?: string;
@@ -51,9 +52,10 @@ export const billingService = {
   async createCheckoutSession(
     planId: string,
     interval: 'monthly' | 'yearly' = 'monthly',
-    currency: 'EUR' | 'USD' = 'EUR'
+    currency?: string
   ): Promise<CheckoutSessionResponse> {
     try {
+      currency = currency || getCurrentCompanyCurrency();
       // Construire le planId complet (ex: 'starter_monthly')
       const fullPlanId = planId.includes('_') ? planId : `${planId}_${interval}`;
       logger.debug('Billing', '[BillingService] Creating checkout session:', { planId: fullPlanId, interval, currency });

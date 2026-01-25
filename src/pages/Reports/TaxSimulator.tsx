@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency, getCurrentCompanyCurrency } from '@/lib/utils';
 import { taxSimulationService, TaxSimulationInput, TaxSimulationResult } from '@/services/fiscal/TaxSimulationService';
 import { getAvailableCountries } from '@/data/taxConfigurations';
 import { useAuth } from '@/contexts/AuthContext';
@@ -69,15 +69,8 @@ const TaxSimulator: React.FC = () => {
       : taxSimulationService.simulateCorporateTax(formData);
     setResult(simulationResult);
   };
-  // Formater devise
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  // Formater devise — use central util
+  // const formatCurrency removed; using import from utils
   // Formater pourcentage
   const formatPercent = (value: number) => {
     return `${value.toFixed(2)}%`;
@@ -160,7 +153,7 @@ const TaxSimulator: React.FC = () => {
             </div>
             {/* Chiffre d'affaires */}
             <div className="space-y-2">
-              <Label htmlFor="revenue">Chiffre d'affaires annuel (€)</Label>
+              <Label htmlFor="revenue">Chiffre d'affaires annuel ({company?.default_currency ?? getCurrentCompanyCurrency()})</Label>
               <Input
                 id="revenue"
                 type="number"
@@ -173,7 +166,7 @@ const TaxSimulator: React.FC = () => {
             </div>
             {/* Charges */}
             <div className="space-y-2">
-              <Label htmlFor="expenses">Charges déductibles (€)</Label>
+              <Label htmlFor="expenses">Charges déductibles ({company?.default_currency ?? getCurrentCompanyCurrency()})</Label>
               <Input
                 id="expenses"
                 type="number"
@@ -183,7 +176,7 @@ const TaxSimulator: React.FC = () => {
                 onChange={(e) => handleInputChange('expenses', parseFloat(e.target.value) || 0)}
                 placeholder="Ex: 150000"
               />
-              <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500">
                 Bénéfice estimé : {formatCurrency(formData.revenue - formData.expenses)}
               </p>
             </div>

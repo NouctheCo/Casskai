@@ -28,6 +28,7 @@ import {
   Package
 } from 'lucide-react';
 import { reportGenerationService } from '@/services/reportGenerationService';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { DEFAULT_REPORT_TEMPLATES } from '@/data/reportTemplates';
 import type { FinancialReport, ReportFormData } from '@/types/reports.types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -287,7 +288,7 @@ export default function OptimizedReportsTab() {
         period_start: periodDates.start,
         period_end: periodDates.end,
         file_format: 'pdf',
-        currency: 'EUR'
+        currency: currentCompany?.default_currency || getCurrentCompanyCurrency()
       };
       // Génération du rapport avec notre service
       if (!currentCompany?.id) {

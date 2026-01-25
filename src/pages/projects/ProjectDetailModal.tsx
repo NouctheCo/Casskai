@@ -11,6 +11,7 @@
  */
 
 import React from 'react';
+import { formatCurrency } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -110,20 +111,20 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Budget total:</span>
-                  <span className="text-sm font-medium">€{project.budget.toLocaleString()}</span>
+                  <span className="text-sm font-medium">{formatCurrency(project.budget)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Dépensé:</span>
-                  <span className="text-sm font-medium">€{project.spent.toLocaleString()}</span>
+                  <span className="text-sm font-medium">{formatCurrency(project.spent)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Revenus:</span>
-                  <span className="text-sm font-medium text-green-600">€{project.revenue.toLocaleString()}</span>
+                  <span className="text-sm font-medium text-green-600">{formatCurrency(project.revenue)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Profit:</span>
                   <span className={`text-sm font-medium ${(project.profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    €{(project.profit || 0).toLocaleString()}
+                    {formatCurrency(project.profit || 0)}
                   </span>
                 </div>
                 <div>

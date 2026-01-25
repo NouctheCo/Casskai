@@ -11,6 +11,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 /**
  * Service pour migrer et synchroniser les données entre localStorage et Supabase
  */
@@ -35,7 +36,7 @@ class DataMigrationService {
           country: companyData.country || 'FR',
           phone: companyData.phone,
           email: companyData.email,
-          default_currency: companyData.currency || 'EUR',
+          default_currency: companyData.currency || getCurrentCompanyCurrency(),
           fiscal_year_start: companyData.fiscalYearStart || 1
         })
         .select()

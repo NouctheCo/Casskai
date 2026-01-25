@@ -8,6 +8,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 // ============ TYPES ============
 export interface FecExportOptions {
   companyId: string;
@@ -105,10 +106,10 @@ const fetchCompanyInfo = async (companyId: string): Promise<{ siren: string; nam
   if (error) throw new Error(`Erreur récupération entreprise: ${error.message}`);
   // SIREN = 9 premiers chiffres du SIRET
   const siren = data.siret ? data.siret.replace(/\s/g, '').substring(0, 9).padEnd(9, '0') : '000000000';
-  return {
+    return {
     siren,
     name: data.name || 'Entreprise',
-    currency: data.default_currency || 'EUR'
+    currency: data.default_currency || getCurrentCompanyCurrency()
   };
 };
 // ============ GÉNÉRATEURS PAR FORMAT ============
@@ -279,7 +280,7 @@ const generateIFRSContent = (
       escapeCSV(entry.ecriturelib),
       formatAmount(entry.debit, decSep),
       formatAmount(entry.credit, decSep),
-      entry.idevise || 'EUR',
+      entry.idevise || getCurrentCompanyCurrency(),
       formatDateISO(entry.validdate),
     ].join(sep);
   });

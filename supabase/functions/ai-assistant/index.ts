@@ -526,7 +526,7 @@ async function getCompanyContext(supabase: any, companyId: string, userId: strin
     const { data: transactions } = await supabase
       .from('journal_entries')
       .select(`
-        id, entry_date, reference, description, total_amount,
+        id, entry_date, reference_number as reference, description, total_amount,
         journal_entry_lines (
           account_code, debit_amount, credit_amount, description
         )

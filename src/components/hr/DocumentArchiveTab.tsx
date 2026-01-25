@@ -193,6 +193,7 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
               />
             </div>
             <select
+              aria-label="Filtrer les archives par type de document"
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               className="px-4 py-2 border rounded-lg"

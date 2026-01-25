@@ -15,6 +15,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { PieChart as PieChartIcon } from 'lucide-react';
 import { dashboardStatsService } from '@/services/dashboardStatsService';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface ExpenseByCategory {
   name: string;
   value: number;
@@ -95,11 +96,11 @@ const ExpensesByCategoryChart: React.FC<ExpensesByCategoryChartProps> = ({ compa
         <div className="bg-white dark:bg-gray-700 p-3 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
           <p className="font-medium text-gray-900 dark:text-white">{payload[0].name}</p>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            {new Intl.NumberFormat('fr-FR', {
-              style: 'currency',
-              currency: 'EUR',
-              minimumFractionDigits: 0
-            }).format(value).replace(/\s/g, '\u00A0')}
+              {new Intl.NumberFormat('fr-FR', {
+                style: 'currency',
+                currency: getCurrentCompanyCurrency(),
+                minimumFractionDigits: 0
+              }).format(value).replace(/\s/g, '\u00A0')}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-300">
             {percentage}%
@@ -167,7 +168,7 @@ const ExpensesByCategoryChart: React.FC<ExpensesByCategoryChartProps> = ({ compa
             <span className="ml-2 font-semibold text-gray-900 dark:text-white">
               {new Intl.NumberFormat('fr-FR', {
                 style: 'currency',
-                currency: 'EUR',
+                currency: getCurrentCompanyCurrency(),
                 minimumFractionDigits: 0
               }).format(total).replace(/\s/g, '\u00A0')}
             </span>
@@ -177,4 +178,4 @@ const ExpensesByCategoryChart: React.FC<ExpensesByCategoryChartProps> = ({ compa
     </div>
   );
 };
-export default ExpensesByCategoryChart;
+export default ExpensesByCategoryChart;

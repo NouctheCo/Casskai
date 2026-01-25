@@ -12,6 +12,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { logger } from '@/lib/logger';
+import { formatCurrencyForPDF, getCurrentCompanyCurrency } from '@/lib/utils';
 
 type InvoicePdfClient = {
   name?: string | null;
@@ -129,7 +130,7 @@ export class InvoicePdfService {
    */
   static generateInvoicePDF(invoice: InvoicePdfInput, companyData?: CompanyInfo): jsPDF {
     const doc = new jsPDF();
-    const currency = invoice.currency || companyData?.currency || 'EUR';
+    const currency = invoice.currency || companyData?.currency || getCurrentCompanyCurrency();
     // Configuration des couleurs
   const primaryColor = [41, 98, 255]; // Bleu
     // 1. En-tête de l'entreprise
@@ -508,7 +509,7 @@ export class InvoicePdfService {
     if (companyData?.shareCapital !== undefined) {
       const capitalValue =
         typeof companyData.shareCapital === 'number'
-          ? this.formatCurrency(companyData.shareCapital, companyData.currency || currency || 'EUR')
+          ? this.formatCurrency(companyData.shareCapital, companyData.currency || currency || getCurrentCompanyCurrency())
           : companyData.shareCapital;
       legalInfo.push(`Capital: ${capitalValue}`);
     }
@@ -541,18 +542,8 @@ export class InvoicePdfService {
    * Formate un montant en devise pour les PDF
    * Note: On remplace l'espace insécable par un espace normal car jsPDF ne le supporte pas bien
    */
-  private static formatCurrency(amount: number, currency = 'EUR'): string {
-    // Formater avec Intl
-    const formatted = new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
-
-    // Remplacer l'espace insécable (U+00A0) par un espace normal
-    // car jsPDF/Helvetica ne le rend pas correctement
-    return formatted.replace(/\u00A0/g, ' ');
+  private static formatCurrency(amount: number, currency?: string): string {
+    return formatCurrencyForPDF(amount, currency || undefined);
   }
   /**
    * Télécharge le PDF

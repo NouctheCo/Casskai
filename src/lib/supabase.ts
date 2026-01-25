@@ -19,54 +19,73 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl) {
-
   throw new Error('Missing environment variable: VITE_SUPABASE_URL');
-
 }
-
-
 
 if (!supabaseAnonKey) {
-
   throw new Error('Missing environment variable: VITE_SUPABASE_ANON_KEY');
-
 }
 
+// Conservative custom fetch wrapper to rewrite problematic PostgREST `select=` embeds
+// This avoids PGRST200/PGRST201 errors when the DB schema or relationship cache
+// does not contain the expected FK relationships. It rewrites only a few
+// well-known cases (invoices -> suppliers, journal_entries -> journals, contacts->customers)
+// to safer selects (use foreign key id fields instead of embedded relations).
+const customFetch: (input: RequestInfo, init?: RequestInit) => Promise<Response> = async (input, init) => {
+  try {
+    const original = typeof input === 'string' ? input : input instanceof Request ? input.url : String(input);
+    let url = original;
+    try {
+      const u = new URL(original);
+      const sel = u.searchParams.get('select');
+      if (sel) {
+        const decoded = decodeURIComponent(sel);
+        let replaced = decoded;
+        // invoices embedding suppliers -> many apps used supplier:suppliers(name) etc.
+        if (u.pathname.includes('/rest/v1/invoices') && /(?:\w+:)?suppliers(?:![\w_]+)?\([^)]*\)/.test(decoded)) {
+          // Replace any suppliers(...) embed with supplier_id to avoid FK dependency
+          replaced = replaced.replace(/(?:\w+:)?suppliers(?:![\w_]+)?\([^)]*\)/g, 'supplier_id');
+        }
+        // journal_entries embedding journals -> force using journal_id instead of embedded journal object
+        if (u.pathname.includes('/rest/v1/journal_entries') && /journals\(/.test(decoded)) {
+          replaced = replaced.replace(/journals\([^)]*\)/g, 'journal_id');
+        }
+        // legacy contacts embed -> use customer_id
+        if (u.pathname.includes('/rest/v1/invoices') && /contacts\(/.test(decoded)) {
+          replaced = replaced.replace(/contacts\([^)]*\)/g, 'customer_id');
+        }
+        if (replaced !== decoded) {
+          u.searchParams.set('select', encodeURIComponent(replaced));
+          url = u.toString();
+        }
+      }
+    } catch (_err) {
+      // ignore URL parsing errors and fall back to original
+      url = original;
+    }
+    const fetchInput = typeof input === 'string' ? url : new Request(url, init ?? (input as Request).clone());
+    return await (globalThis.fetch as typeof fetch)(fetchInput, init);
+  } catch (_err) {
+    return await (globalThis.fetch as typeof fetch)(input, init);
+  }
+};
 
-
-// Create Supabase client with proper configuration
-
+// Create Supabase client with proper configuration and attach custom fetch
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-
   auth: {
-
     autoRefreshToken: true,
-
     persistSession: true,
-
     detectSessionInUrl: true,
-
   },
-
-  db: {
-
-    schema: 'public',
-
-  },
-
+  db: { schema: 'public' },
   global: {
-
     headers: {
-
       'x-application-name': 'CassKai',
-        // Force inclusion of Supabase API key to avoid 400 "No API key found"
-        apikey: supabaseAnonKey,
-
+      apikey: supabaseAnonKey,
     },
-
   },
-
-});
+  fetch: customFetch as unknown as typeof fetch,
+} as unknown as any);
 
 // Export raw values for services needing explicit headers (fallback fetch)
 export const SUPABASE_URL = supabaseUrl;
@@ -211,3 +230,31 @@ export const getCurrentCompany = async (userId?: string) => {
 
 
 export default supabase;
+
+// Normalize Supabase responses that sometimes return parser error strings
+export function normalizeData<T>(maybeData: unknown): T[] {
+  if (!maybeData) return [];
+  // If it's an array, filter out any parser-error-like entries
+  if (Array.isArray(maybeData)) {
+    return maybeData.filter(item => {
+      if (!item) return false;
+      if (typeof item === 'object') {
+        // Parser errors sometimes are { error: true } & string-like; treat those as invalid
+        // Keep items that have own properties beyond 'error'
+        const keys = Object.keys(item as Record<string, unknown>);
+        if (keys.length === 1 && keys[0] === 'error') return false;
+        return true;
+      }
+      // Strings/other primitives are not valid data rows
+      return false;
+    }) as unknown as T[];
+  }
+  // If a single object was returned (RPC or .single()), normalize it into an array
+  if (typeof maybeData === 'object') {
+    const obj = maybeData as Record<string, unknown>;
+    const keys = Object.keys(obj);
+    if (keys.length === 1 && keys[0] === 'error') return [];
+    return [maybeData as T];
+  }
+  return [];
+}

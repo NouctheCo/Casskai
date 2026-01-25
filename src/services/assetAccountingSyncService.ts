@@ -18,6 +18,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { AccountingStandardAdapter, type AccountingStandard } from './accountingStandardAdapter';
 import type { Asset, AssetFormData } from '@/types/assets.types';
 
@@ -45,20 +46,20 @@ export interface JournalEntry {
   description?: string;
   status: string;
   journal_entry_lines?: JournalEntryLineDB[];
+  // Some queries may return these fields
+  journal_code?: string;
+  lines?: JournalEntryLine[];
 }
 
 // Type pour les lignes venant de la DB
 export interface JournalEntryLineDB {
   id: string;
-  journal_entry_id: string;
+  journal_entry_id?: string;
   account_id: string;
   debit_amount: number;
   credit_amount: number;
   description?: string;
-  chart_of_accounts?: {
-    account_number: string;
-    account_name: string;
-  };
+  chart_of_accounts?: { account_number: string; account_name: string } | { account_number: string; account_name: string }[];
 }
 
 export interface AssetSuggestion {
@@ -195,8 +196,8 @@ export class AssetAccountingSyncService {
         const lines: JournalEntryLine[] = dbLines.map(dbLine => ({
           id: dbLine.id,
           account_id: dbLine.account_id,
-          account_number: dbLine.chart_of_accounts?.account_number || '',
-          account_name: dbLine.chart_of_accounts?.account_name,
+          account_number: (Array.isArray(dbLine.chart_of_accounts) ? dbLine.chart_of_accounts[0]?.account_number : dbLine.chart_of_accounts?.account_number) || '',
+          account_name: (Array.isArray(dbLine.chart_of_accounts) ? dbLine.chart_of_accounts[0]?.account_name : dbLine.chart_of_accounts?.account_name) || undefined,
           label: dbLine.description || '',
           debit: dbLine.debit_amount,
           credit: dbLine.credit_amount,
@@ -295,8 +296,8 @@ export class AssetAccountingSyncService {
       const lines: JournalEntryLine[] = dbLines.map(dbLine => ({
         id: dbLine.id,
         account_id: dbLine.account_id,
-        account_number: dbLine.chart_of_accounts?.account_number || '',
-        account_name: dbLine.chart_of_accounts?.account_name,
+        account_number: (Array.isArray(dbLine.chart_of_accounts) ? dbLine.chart_of_accounts[0]?.account_number : dbLine.chart_of_accounts?.account_number) || '',
+        account_name: (Array.isArray(dbLine.chart_of_accounts) ? dbLine.chart_of_accounts[0]?.account_name : dbLine.chart_of_accounts?.account_name) || undefined,
         label: dbLine.description || '',
         debit: dbLine.debit_amount,
         credit: dbLine.credit_amount,
@@ -741,7 +742,8 @@ export class AssetAccountingSyncService {
     const reasons: string[] = [];
 
     reasons.push(`Compte ${line.account_number} (classe 2 - immobilisations)`);
-    reasons.push(`Montant: ${line.debit.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}`);
+    const _currency = getCurrentCompanyCurrency();
+    reasons.push(`Montant: ${line.debit.toLocaleString('fr-FR', { style: 'currency', currency: _currency })}`);
 
     if (entry.journal_code) {
       reasons.push(`Journal: ${entry.journal_code}`);

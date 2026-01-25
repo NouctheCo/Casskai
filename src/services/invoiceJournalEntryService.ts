@@ -300,8 +300,8 @@ export async function onInvoiceCreated(invoiceId: string): Promise<void> {
   try {
     // Récupérer la facture avec le client
     const { data: invoice, error: invoiceError } = await supabase
-      .from('invoices')
-      .select('*, customer:customers(name)')
+        .from('invoices')
+        .select('*, customer:customers!customer_id(name)')
       .eq('id', invoiceId)
       .single();
     if (invoiceError || !invoice) {

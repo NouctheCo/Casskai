@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import Joyride, { STATUS, EVENTS, type CallBackProps, type Step } from 'react-joyride';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -318,6 +318,7 @@ export function OnboardingTour({ isNewAccount, companyName }: OnboardingTourProp
   const location = useLocation();
   const [run, setRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const isUpdatingRef = useRef(false);
   const storageKey = useMemo(() => `onboarding_tour_completed_${user?.id ?? 'anonymous'}`, [user?.id]);
   const steps = useMemo(() => buildTourSteps(t, companyName), [t, companyName]);
 
@@ -357,30 +358,49 @@ export function OnboardingTour({ isNewAccount, companyName }: OnboardingTourProp
     }
     return undefined;
   }, [isNewAccount, storageKey, location.search]);
-  const handleJoyrideCallback = (data: CallBackProps) => {
-    const { status, type, index } = data;
-    logger.debug('OnboardingTour', '[OnboardingTour] Callback:', { status, type, index });
+  const handleJoyrideCallback = useCallback((data: CallBackProps) => {
+    const { status, type, index, action } = data;
+
+    // Éviter les mises à jour multiples
+    if (isUpdatingRef.current) {
+      return;
+    }
+
+    logger.debug('OnboardingTour', '[OnboardingTour] Callback:', {
+      status,
+      type,
+      index,
+      action
+    });
+
+    // Gérer la fin du tour
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       localStorage.setItem(storageKey, 'true');
       setRun(false);
       return;
     }
+
     // Gérer target non trouvé - passer à l'étape suivante
     if (type === EVENTS.TARGET_NOT_FOUND) {
       logger.warn('OnboardingTour', '[OnboardingTour] Target not found, skipping to next step');
+      isUpdatingRef.current = true;
       setStepIndex(index + 1);
+      setTimeout(() => {
+        isUpdatingRef.current = false;
+      }, 100);
       return;
     }
-    // Gérer STEP_AFTER (bouton Next ou Last cliqué)
-    if (type === EVENTS.STEP_AFTER) {
-      setStepIndex(index + 1);
+
+    // Gérer la navigation (Next/Back)
+    if (type === EVENTS.STEP_AFTER || type === EVENTS.STEP_BEFORE) {
+      logger.debug('OnboardingTour', `[OnboardingTour] ${type} - moving to index ${index}`);
+      isUpdatingRef.current = true;
+      setStepIndex(index + (type === EVENTS.STEP_AFTER ? 1 : 0));
+      setTimeout(() => {
+        isUpdatingRef.current = false;
+      }, 100);
     }
-    // Gérer STEP_BEFORE (bouton Back cliqué)
-    // L'index fourni par Joyride est déjà celui de l'étape précédente
-    if (type === EVENTS.STEP_BEFORE) {
-      setStepIndex(index);
-    }
-  };
+  }, [storageKey]);
   const restartTour = useCallback(() => {
     localStorage.removeItem(storageKey);
     setStepIndex(0);
@@ -417,12 +437,32 @@ export function OnboardingTour({ isNewAccount, companyName }: OnboardingTourProp
           border: '1px solid hsl(var(--border))',
           borderRadius: 16,
           fontSize: 14,
-          padding: 24,
+          padding: 16,
           maxWidth: 520,
+          width: 'min(520px, calc(100vw - 32px))',
+          maxHeight: '90vh',
+          minHeight: 300,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
         },
         tooltipContent: {
-          padding: 0
+          padding: 0,
+          paddingBottom: 8,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          flex: '1 1 auto',
+          minHeight: 0,
+          WebkitOverflowScrolling: 'touch'
+        },
+        tooltipFooter: {
+          backgroundColor: 'hsl(var(--popover))',
+          paddingTop: 12,
+          marginTop: 0,
+          borderTop: '1px solid hsl(var(--border))',
+          flex: '0 0 auto',
+          flexShrink: 0
         },
         buttonNext: {
           backgroundColor: '#8b5cf6',

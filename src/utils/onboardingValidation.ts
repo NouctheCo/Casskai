@@ -2,6 +2,7 @@
  * Script de validation pour tester les améliorations du flux onboarding
  */
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 interface ValidationResult {
   test: string;
@@ -24,7 +25,7 @@ class OnboardingValidator {
         id: 'test-enterprise-123',
         name: 'Test Enterprise',
         country: 'FR',
-        currency: 'EUR',
+        currency: getCurrentCompanyCurrency(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -104,7 +105,7 @@ class OnboardingValidator {
       const validCompanyData = {
         name: 'Test Company',
         country: 'FR',
-        currency: 'EUR',
+        currency: getCurrentCompanyCurrency(),
         sector: 'tech'
       };
       if (!validCompanyData.name) {
@@ -114,7 +115,7 @@ class OnboardingValidator {
       const invalidCompanyData = {
         name: '', // Nom vide
         country: 'FR',
-        currency: 'EUR'
+        currency: getCurrentCompanyCurrency()
       };
       if (invalidCompanyData.name) {
         throw new Error('Validation n\'a pas détecté le nom vide');

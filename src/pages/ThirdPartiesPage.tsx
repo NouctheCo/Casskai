@@ -31,6 +31,7 @@ import {
   ThirdPartyDashboardData
 } from '../types/third-parties.types';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import {
   Users,
   Building2,
@@ -291,7 +292,7 @@ const ThirdPartiesPage: React.FC = () => {
             country: c.billing_country || 'FR'
           },
           payment_terms: c.payment_terms || 30,
-          currency: c.currency || 'EUR',
+          currency: c.currency || getCurrentCompanyCurrency(),
           credit_limit: c.credit_limit,
           is_active: isActive,
           notes: c.notes,
@@ -330,7 +331,7 @@ const ThirdPartiesPage: React.FC = () => {
             country: s.billing_country || 'FR'
           },
           payment_terms: s.payment_terms || 30,
-          currency: s.currency || 'EUR',
+          currency: s.currency || getCurrentCompanyCurrency(),
           credit_limit: undefined,
           is_active: isActive,
           notes: s.notes,

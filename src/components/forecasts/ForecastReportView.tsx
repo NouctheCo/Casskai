@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
 import { ForecastData, ForecastReport, ForecastScenario, ForecastPeriod } from '../../types/forecasts.types';
-import ForecastChartView from './ForecastChartView';
+import ForecastChartView from './ForecastChartView2';
 import { forecastsService } from '../../services/forecastsService';
 import { logger } from '@/lib/logger';
 import {
@@ -18,6 +18,7 @@ import {
   BarChart3,
   ArrowLeft
 } from 'lucide-react';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface ForecastReportViewProps {
   forecast: ForecastData;
   scenario?: ForecastScenario;
@@ -33,9 +34,13 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
   className = ""
 }) => {
   const formatCurrency = (amount: number) => {
+    const currency = getCurrentCompanyCurrency();
+    const isZero = currency === 'XOF' || currency === 'XAF';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency,
+      minimumFractionDigits: isZero ? 0 : 2,
+      maximumFractionDigits: isZero ? 0 : 2
     }).format(amount);
   };
   const formatPercentage = (value: number) => {
