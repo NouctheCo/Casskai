@@ -5,6 +5,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/logger';
+import { formatCurrency } from '@/lib/utils';
 import type { AIInsight } from '@/types/automation.types';
 import { toAIInsightDB, fromAIInsightDB } from '../automation/workflowAdapter';
 
@@ -107,7 +108,7 @@ export async function detectTransactionAnomalies(
             category: 'finance',
             severity: Math.abs(zScore) > 3 ? 'high' : 'medium',
             title: `Dépense inhabituelle détectée`,
-            description: `La transaction "${transaction.description}" de ${amount.toFixed(2)}€ dans la catégorie "${category}" est ${Math.abs(percentageDiff).toFixed(0)}% ${percentageDiff > 0 ? 'au-dessus' : 'en-dessous'} de la moyenne (${mean.toFixed(2)}€)`,
+            description: `La transaction "${transaction.description}" de ${formatCurrency(amount)} dans la catégorie "${category}" est ${Math.abs(percentageDiff).toFixed(0)}% ${percentageDiff > 0 ? 'au-dessus' : 'en-dessous'} de la moyenne (${formatCurrency(mean)})`,
             related_entity_type: 'transaction',
             related_entity_id: transaction.id,
             data: {
@@ -224,7 +225,7 @@ export async function detectExpenseAnomalies(
             category: 'finance',
             severity: Math.abs(zScore) > 3 ? 'critical' : 'high',
             title: `Dépense anormalement ${percentageDiff > 0 ? 'élevée' : 'basse'}`,
-            description: `La dépense "${expense.description}" de ${expense.amount.toFixed(2)}€ dans la catégorie "${category}" dépasse de ${Math.abs(percentageDiff).toFixed(0)}% la moyenne habituelle`,
+            description: `La dépense "${expense.description}" de ${formatCurrency(expense.amount)} dans la catégorie "${category}" dépasse de ${Math.abs(percentageDiff).toFixed(0)}% la moyenne habituelle`,
             related_entity_type: 'expense',
             related_entity_id: expense.id,
             data: {

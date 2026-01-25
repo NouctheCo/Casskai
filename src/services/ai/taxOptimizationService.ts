@@ -5,6 +5,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/logger';
+import { formatCurrency } from '@/lib/utils';
 import type { TaxOptimization, AIInsight } from '@/types/automation.types';
 import { toAIInsightDB } from '../automation/workflowAdapter';
 
@@ -56,11 +57,11 @@ async function checkCPProvision(companyId: string): Promise<TaxOptimization | nu
         company_id: companyId,
         type: 'provision',
         title: 'Provision congés payés insuffisante',
-        description: `La provision pour congés payés est sous-estimée de ${missingProvision.toFixed(2)}€. En augmentant cette provision, vous réduisez votre résultat imposable.`,
+        description: `La provision pour congés payés est sous-estimée de ${formatCurrency(missingProvision)}. En augmentant cette provision, vous réduisez votre résultat imposable.`,
         amount: missingProvision,
         tax_impact: taxImpact,
         actions_required: [
-          `Passer une écriture comptable de provision de ${missingProvision.toFixed(2)}€`,
+          `Passer une écriture comptable de provision de ${formatCurrency(missingProvision)}`,
           'Débiter le compte 6414 (Indemnités congés payés)',
           'Créditer le compte 4386 (Provision pour congés payés)'
         ],
@@ -119,7 +120,7 @@ async function checkPendingDepreciation(companyId: string): Promise<TaxOptimizat
         company_id: companyId,
         type: 'amortissement',
         title: 'Amortissements non comptabilisés',
-        description: `Vous pouvez comptabiliser ${totalDepreciationAvailable.toFixed(2)}€ d'amortissements supplémentaires sur vos immobilisations, réduisant votre résultat imposable.`,
+        description: `Vous pouvez comptabiliser ${formatCurrency(totalDepreciationAvailable)} d'amortissements supplémentaires sur vos immobilisations, réduisant votre résultat imposable.`,
         amount: totalDepreciationAvailable,
         tax_impact: taxImpact,
         actions_required: [
@@ -182,7 +183,7 @@ async function checkMissingDeductibleExpenses(companyId: string): Promise<TaxOpt
         company_id: companyId,
         type: 'deduction',
         title: 'Charges déductibles non comptabilisées',
-        description: `${unrecordedInvoices.length} facture(s) fournisseur pour un total de ${totalAmount.toFixed(2)}€ n'ont pas d'écriture comptable associée.`,
+        description: `${unrecordedInvoices.length} facture(s) fournisseur pour un total de ${formatCurrency(totalAmount)} n'ont pas d'écriture comptable associée.`,
         amount: totalAmount,
         tax_impact: taxImpact,
         actions_required: [
@@ -255,7 +256,7 @@ export async function createTaxOptimizationAlerts(
         category: 'finance',
         severity: opt.tax_impact > 1000 ? 'high' : 'medium',
         title: opt.title,
-        description: `${opt.description}\n\nÉconomie d'impôt potentielle : ${opt.tax_impact.toFixed(2)}€`,
+        description: `${opt.description}\n\nÉconomie d'impôt potentielle : ${formatCurrency(opt.tax_impact)}`,
         data: {
           optimization: opt,
           amount: opt.amount,

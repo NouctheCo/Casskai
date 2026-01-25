@@ -12,6 +12,7 @@
 import { supabase } from '@/lib/supabase';
 import { AIInsight, SmartAlert, CashFlowPrediction, TaxOptimization, AnomalyDetection } from '@/types/ai.types';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 interface AIServiceResponse<T = any> {
   data?: T;
   error?: string;
@@ -372,7 +373,7 @@ export class OpenAIService {
         id: 'liquidity_low',
         type: 'alert',
         title: 'Trésorerie faible',
-        description: `Votre trésorerie (${totalCash.toLocaleString()}€) est en dessous du seuil recommandé.`,
+        description: `Votre trésorerie (${formatCurrency(totalCash)}) est en dessous du seuil recommandé.`,
         confidence: 0.9,
         category: 'Liquidité',
         priority: 'high',
@@ -505,7 +506,7 @@ export class OpenAIService {
       let severity: 'low' | 'medium' | 'high' | 'critical' = 'low';
       // Montant inhabituel
       if (Math.abs(transaction.total_amount) > threshold) {
-        reasons.push(`Montant inhabituel (${transaction.total_amount.toLocaleString()}€)`);
+        reasons.push(`Montant inhabituel (${formatCurrency(transaction.total_amount)})`);
         score += 0.4;
         severity = 'medium';
       }
