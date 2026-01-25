@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface ClientsManagementProps {
   clients: Client[];
   contacts?: Contact[];
@@ -77,7 +78,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency: getCurrentCompanyCurrency()
     }).format(amount);
   };
   const formatDate = (dateString: string) => {
