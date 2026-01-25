@@ -26,6 +26,7 @@ import type { InvoiceWithDetails } from '@/types/database/invoices.types';
 import type { ThirdParty } from '@/types/third-parties.types';
 import type { CompanySettings } from '@/types/company-settings.types';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import {
   Plus,
   Search,
@@ -115,7 +116,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         },
         business: { 
           employeesCount: 1,
-          currency: 'EUR',
+          currency: getCurrentCompanyCurrency(),
           language: 'fr',
           timezone: 'Europe/Paris'
         },
@@ -275,7 +276,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         mainBankName: companySettings?.accounting?.mainBank?.name || '',
         mainBankIban: companySettings?.accounting?.mainBank?.iban || '',
         mainBankBic: companySettings?.accounting?.mainBank?.bic || '',
-        currency: company?.currency || companySettings?.business?.currency || 'EUR'
+        currency: company?.currency || companySettings?.business?.currency || getCurrentCompanyCurrency()
       };
 
       console.log('5. Company data prepared:', companyData);
@@ -367,7 +368,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         mainBankName: companySettings?.accounting?.mainBank?.name || '',
         mainBankIban: companySettings?.accounting?.mainBank?.iban || '',
         mainBankBic: companySettings?.accounting?.mainBank?.bic || '',
-        currency: companySettings?.business?.currency || 'EUR'
+        currency: companySettings?.business?.currency || getCurrentCompanyCurrency()
       };
 
       // Générer et télécharger le PDF
@@ -423,7 +424,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         mainBankName: companySettings?.accounting?.mainBank?.name || '',
         mainBankIban: companySettings?.accounting?.mainBank?.iban || '',
         mainBankBic: companySettings?.accounting?.mainBank?.bic || '',
-        currency: companySettings?.business?.currency || 'EUR'
+        currency: companySettings?.business?.currency || getCurrentCompanyCurrency()
       };
       // Générer un PDF pour chaque facture filtrée
       filteredInvoices.forEach((invoice, index) => {
@@ -447,7 +448,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency: getCurrentCompanyCurrency()
     }).format(amount);
   };
   const handleDuplicateInvoice = async (invoice: InvoiceWithDetails) => {
@@ -985,7 +986,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
         invoice_number: formData.invoiceNumber,
         invoice_date: formData.issueDate,
         due_date: formData.dueDate,
-        currency: 'EUR',
+        currency: getCurrentCompanyCurrency(),
         notes: formData.notes
       };
       const items = formData.items.map((item, index) => ({
@@ -1211,7 +1212,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                     </div>
                     <div className="col-span-1">
                       <div className="text-sm font-medium">
-                        {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(item.total)}
+                        {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: getCurrentCompanyCurrency() }).format(item.total)}
                       </div>
                     </div>
                     <div className="col-span-1">
@@ -1233,15 +1234,15 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                   <div className="w-64 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Total HT:</span>
-                      <span>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(totals.totalHT)}</span>
+                      <span>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: getCurrentCompanyCurrency() }).format(totals.totalHT)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>TVA:</span>
-                      <span>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(totals.totalTVA)}</span>
+                      <span>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: getCurrentCompanyCurrency() }).format(totals.totalTVA)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-lg border-t pt-2">
                       <span>Total TTC:</span>
-                      <span>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(totals.totalTTC)}</span>
+                      <span>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: getCurrentCompanyCurrency() }).format(totals.totalTTC)}</span>
                     </div>
                   </div>
                 </div>

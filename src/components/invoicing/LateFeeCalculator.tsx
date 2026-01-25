@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
+import { cn, getCurrentCompanyCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 interface LateFeeResult {
   invoiceAmount: number;
@@ -84,7 +84,7 @@ export const LateFeeCalculator: React.FC<{
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
