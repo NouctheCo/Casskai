@@ -39,16 +39,33 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { realDashboardKpiService, type RealKPIData } from '@/services/realDashboardKpiService';
 import { aiDashboardAnalysisService, type AIAnalysisResult } from '@/services/aiDashboardAnalysisService';
 import { useKpiRefresh } from '@/hooks/useKpiRefresh';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getCurrentCompanyCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { kpiCacheService } from '@/services/kpiCacheService';
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+// Helper to get currency symbol based on company settings
+const getCurrencySymbol = () => {
+  const currency = getCurrentCompanyCurrency();
+  const symbols: Record<string, string> = {
+    'EUR': '€',
+    'XOF': 'FCFA',
+    'XAF': 'FCFA',
+    'USD': '$',
+    'GBP': '£',
+    'CHF': 'CHF',
+    'CAD': 'CA$',
+    'MAD': 'MAD',
+    'TND': 'TND'
+  };
+  return symbols[currency] || currency;
+};
 
 // Helper to format units correctly
 const formatUnit = (unit: string) => {
   switch (unit) {
     case 'currency':
-      return '€';
+      return getCurrencySymbol();
     case 'percentage':
       return '%';
     case 'days':
