@@ -11,6 +11,7 @@ import { Loader2, CheckCircle2, AlertTriangle, RefreshCw, History } from 'lucide
 import { bankAccountBalanceService } from '@/services/bankAccountBalanceService';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface BankAccountBalanceManagerProps {
   companyId: string;
   bankAccounts: Array<{
@@ -200,7 +201,7 @@ export function BankAccountBalanceManager({
                       <Badge variant="secondary" className="font-mono">
                         {new Intl.NumberFormat('fr-FR', {
                           style: 'currency',
-                          currency: account.currency || 'EUR'
+                          currency: account.currency || getCurrentCompanyCurrency()
                         }).format(account.current_balance || 0)}
                       </Badge>
                     </div>
@@ -288,7 +289,7 @@ export function BankAccountBalanceManager({
                           {movement.debit > 0
                             ? new Intl.NumberFormat('fr-FR', {
                               style: 'currency',
-                              currency: 'EUR'
+                              currency: getCurrentCompanyCurrency()
                             }).format(movement.debit)
                             : '-'}
                         </td>
@@ -296,7 +297,7 @@ export function BankAccountBalanceManager({
                           {movement.credit > 0
                             ? new Intl.NumberFormat('fr-FR', {
                               style: 'currency',
-                              currency: 'EUR'
+                              currency: getCurrentCompanyCurrency()
                             }).format(movement.credit)
                             : '-'}
                         </td>
@@ -309,7 +310,7 @@ export function BankAccountBalanceManager({
                         >
                           {new Intl.NumberFormat('fr-FR', {
                             style: 'currency',
-                            currency: 'EUR'
+                            currency: getCurrentCompanyCurrency()
                           }).format(movement.movement)}
                         </td>
                       </tr>

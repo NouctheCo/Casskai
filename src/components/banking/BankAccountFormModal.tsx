@@ -7,6 +7,7 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface BankAccountFormData {
@@ -38,7 +39,7 @@ export function BankAccountFormModal({
     account_number: '',
     iban: '',
     bic: '',
-    currency: 'EUR',
+    currency: getCurrentCompanyCurrency(),
     initial_balance: 0
   });
 
@@ -64,7 +65,7 @@ export function BankAccountFormModal({
         account_number: '',
         iban: '',
         bic: '',
-        currency: 'EUR',
+        currency: getCurrentCompanyCurrency(),
         initial_balance: 0
       });
     }
