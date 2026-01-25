@@ -38,7 +38,7 @@ import { Progress } from '../../ui/progress';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 
-import { cn } from '../../../lib/utils';
+import { cn, getCurrentCompanyCurrency } from '../../../lib/utils';
 
 import { CashFlowPrediction } from '../../../types/ai.types';
 
@@ -172,11 +172,11 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
 
   const formatCurrency = (amount: number): string => {
 
-    return new Intl.NumberFormat('fr-FR', { 
+    return new Intl.NumberFormat('fr-FR', {
 
-      style: 'currency', 
+      style: 'currency',
 
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
 
       minimumFractionDigits: 0,
 

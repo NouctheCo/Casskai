@@ -25,7 +25,7 @@ import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
 import { Progress } from '../../ui/progress';
 import { Tabs, /* TabsContent, */ TabsList, TabsTrigger } from '../../ui/tabs';
-import { cn } from '../../../lib/utils';
+import { cn, getCurrentCompanyCurrency } from '../../../lib/utils';
 import { TaxOptimization } from '../../../types/ai.types';
 
 interface TaxOptimizationWidgetProps {
@@ -137,7 +137,7 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
@@ -290,6 +290,7 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-500 dark:text-gray-400">Trier par:</span>
             <select
+              aria-label="Trier les optimisations par économies, effort ou échéance"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
               className="text-sm border rounded px-2 py-1 bg-white dark:bg-gray-800"
