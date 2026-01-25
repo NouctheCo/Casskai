@@ -13,6 +13,7 @@
 // src/services/AdvancedBusinessValidationService.ts
 import { supabase } from '../lib/supabase';
 import type { ValidationResult, JournalEntry } from '../types/accounting';
+import { formatCurrency } from '@/lib/utils';
 
 export interface BusinessValidationRule {
   id: string;
@@ -258,7 +259,7 @@ export class AdvancedBusinessValidationService {
     if (!balanceCheck.isBalanced) {
       errors.push({
         field: 'balance',
-        message: `Écriture non équilibrée: différence de ${balanceCheck.difference}€`,
+        message: `Écriture non équilibrée: différence de ${formatCurrency(balanceCheck.difference)}`,
         severity: 'error'
       });
     }
@@ -539,7 +540,7 @@ export class AdvancedBusinessValidationService {
     if (totalAmount > threshold) {
       warnings.push({
         field: 'amount',
-        message: `Montant élevé détecté: ${totalAmount}€ (seuil: ${threshold}€)`,
+        message: `Montant élevé détecté: ${formatCurrency(totalAmount)} (seuil: ${formatCurrency(threshold)})`,
         severity: 'warning'
       });
     }
@@ -696,7 +697,7 @@ export class AdvancedBusinessValidationService {
       if (amount > 100000) {
         warnings.push({
           field: `lines[${entry.lines.indexOf(line)}].amount`,
-          message: `Montant très élevé: ${amount}€`,
+          message: `Montant très élevé: ${formatCurrency(amount)}`,
           severity: 'warning'
         });
       }

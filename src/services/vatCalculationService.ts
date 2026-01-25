@@ -11,6 +11,7 @@
  */
 
 import { supabase } from '../lib/supabase';
+import { formatCurrency } from '@/lib/utils';
 
 // Types utilitaires pour éviter les `any`
 // —
@@ -730,16 +731,16 @@ export class VATCalculationService {
     // Logique de suggestion
     if (annualRevenue <= thresholds.microServices) {
       suggestedRegime = 'franchise';
-      reasons.push(`CA ${annualRevenue}€ < seuil franchise ${thresholds.microServices}€`);
+      reasons.push(`CA ${formatCurrency(annualRevenue)} < seuil franchise ${formatCurrency(thresholds.microServices)}`);
     } else if (annualRevenue <= thresholds.microGoods) {
       suggestedRegime = 'mini';
-      reasons.push(`CA ${annualRevenue}€ éligible régime micro`);
+      reasons.push(`CA ${formatCurrency(annualRevenue)} éligible régime micro`);
     } else if (annualRevenue <= thresholds.simplifiedVAT) {
       suggestedRegime = 'simplified';
-      reasons.push(`CA ${annualRevenue}€ éligible régime simplifié`);
+      reasons.push(`CA ${formatCurrency(annualRevenue)} éligible régime simplifié`);
     } else {
       suggestedRegime = 'normal';
-      reasons.push(`CA ${annualRevenue}€ > seuil régime simplifié`);
+      reasons.push(`CA ${formatCurrency(annualRevenue)} > seuil régime simplifié`);
     }
 
     return {

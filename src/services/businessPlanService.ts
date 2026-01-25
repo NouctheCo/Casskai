@@ -13,7 +13,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { fromBudgetLinesDB, type BudgetLineDB } from '@/utils/budgetMapping';
-import { formatCurrencyForPDF } from '@/lib/utils';
+import { formatCurrencyForPDF, formatCurrency } from '@/lib/utils';
 
 // Types partagés avec le mapping
 export interface BudgetCategory {
@@ -174,12 +174,8 @@ export const businessPlanService = {
     pdf.setTextColor(80, 80, 80);
     const commentary =
       netResult >= 0
-        ? `L'entreprise prévoit un résultat positif de ${netResult.toLocaleString(
-            'fr-FR'
-          )} € pour l'année ${data.year}, soit une marge nette de ${margin.toFixed(1)}%.`
-        : `L'entreprise prévoit un déficit de ${Math.abs(netResult).toLocaleString(
-            'fr-FR'
-          )} € pour l'année ${data.year}. Des mesures correctives sont à envisager.`;
+        ? `L'entreprise prévoit un résultat positif de ${formatCurrency(netResult)} pour l'année ${data.year}, soit une marge nette de ${margin.toFixed(1)}%.`
+        : `L'entreprise prévoit un déficit de ${formatCurrency(Math.abs(netResult))} pour l'année ${data.year}. Des mesures correctives sont à envisager.`;
 
     const splitText = pdf.splitTextToSize(commentary, pageWidth - 40);
     pdf.text(splitText, 20, y);
@@ -256,7 +252,7 @@ export const businessPlanService = {
     // Résultat
     pdf.setFontSize(14);
     pdf.setTextColor(netResult >= 0 ? 0 : 150, netResult >= 0 ? 100 : 0, 0);
-    pdf.text(`RÉSULTAT NET : ${netResult.toLocaleString('fr-FR')} €`, 20, y);
+    pdf.text(`RÉSULTAT NET : ${formatCurrency(netResult)}`, 20, y);
 
     // ===== PAGE 4 : RÉPARTITION MENSUELLE =====
     pdf.addPage();
