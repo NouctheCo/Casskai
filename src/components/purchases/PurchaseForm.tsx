@@ -12,7 +12,7 @@ import { Loader2, Upload, X, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SupplierSelectWithCreate } from './SupplierSelectWithCreate';
 import { logger } from '@/lib/logger';
-import { getCurrentCompanyCurrency, formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 interface PurchaseFormProps {
   isOpen: boolean;
   onClose: () => void;
