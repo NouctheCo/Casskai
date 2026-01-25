@@ -31,7 +31,7 @@ import {
   ThirdPartyDashboardData
 } from '../types/third-parties.types';
 import { logger } from '@/lib/logger';
-import { getCurrentCompanyCurrency } from '@/lib/utils';
+import { getCurrentCompanyCurrency, formatCurrency } from '@/lib/utils';
 import {
   Users,
   Building2,
@@ -441,12 +441,6 @@ const ThirdPartiesPage: React.FC = () => {
       logger.error('ThirdPartiesPage', 'Error exporting third parties:', error);
       toastError('Erreur lors de l\'export');
     }
-  };
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amount);
   };
   const handleViewThirdParty = (thirdParty: ThirdPartyListItem) => {
     setSelectedThirdParty(thirdParty);
