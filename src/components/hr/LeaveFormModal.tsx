@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Leave, Employee } from '@/services/hrService';
 import { logger } from '@/lib/logger';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 interface LeaveFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,6 +22,7 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
   employees,
   leave
 }) => {
+  useBodyScrollLock(isOpen);
   const [formData, setFormData] = useState({
     employee_id: leave?.employee_id || '',
     type: leave?.type || 'vacation' as const,
@@ -92,11 +94,11 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b px-6 py-4 flex items-center justify-between">
+        <div className="shrink-0 bg-white dark:bg-gray-800 border-b px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Calendar className="h-6 w-6 text-blue-600" />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -111,7 +113,7 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
           </button>
         </div>
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
           <div className="space-y-6">
             {/* Employé */}
             <div>
@@ -220,25 +222,26 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
               </p>
             </div>
           </div>
-          {/* Footer */}
-          <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              Annuler
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            >
-              {isSubmitting ? 'Envoi...' : leave ? 'Mettre à jour' : 'Soumettre la demande'}
-            </Button>
-          </div>
         </form>
+        {/* Footer */}
+        <div className="shrink-0 flex justify-end gap-3 p-6 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Annuler
+          </Button>
+          <Button
+            type="submit"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+          >
+            {isSubmitting ? 'Envoi...' : leave ? 'Mettre à jour' : 'Soumettre la demande'}
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { logger } from '@/lib/logger';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import {
   Select,
   SelectContent,
@@ -24,6 +25,7 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
   onClose,
   onSuccess
 }) => {
+  useBodyScrollLock(isOpen);
   const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -126,7 +128,7 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
   ];
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b shrink-0">
           <h2 className="text-xl font-semibold flex items-center gap-2">

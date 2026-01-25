@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 interface BankAccountFormData {
   account_name: string;
@@ -33,6 +34,7 @@ export function BankAccountFormModal({
   onSubmit,
   account
 }: BankAccountFormModalProps) {
+  useBodyScrollLock(isOpen);
   const [formData, setFormData] = useState<BankAccountFormData>({
     account_name: '',
     bank_name: '',
@@ -163,8 +165,8 @@ export function BankAccountFormModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden">
+        <div className="shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">
             {account ? 'Modifier le compte bancaire' : 'Nouveau compte bancaire'}
           </h2>
@@ -176,7 +178,7 @@ export function BankAccountFormModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Nom du compte */}
           <div>
             <Label htmlFor="account_name">Nom du compte *</Label>
@@ -298,17 +300,17 @@ export function BankAccountFormModal({
               💡 L'IBAN et le BIC sont nécessaires pour générer des virements SEPA
             </p>
           </div>
-
-          {/* Boutons */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? 'Enregistrement...' : account ? 'Modifier' : 'Créer'}
-            </Button>
-          </div>
         </form>
+
+        {/* Boutons */}
+        <div className="shrink-0 flex justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button type="submit" onClick={handleSubmit} disabled={submitting}>
+            {submitting ? 'Enregistrement...' : account ? 'Modifier' : 'Créer'}
+          </Button>
+        </div>
       </div>
     </div>
   );

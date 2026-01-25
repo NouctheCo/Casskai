@@ -11,6 +11,7 @@ import { hrDocumentTemplatesService } from '@/services/hrDocumentTemplatesServic
 import type { DocumentTemplate, GenerateDocumentRequest } from '@/types/hr-document-templates.types';
 import { createSafeHTML } from '@/utils/sanitize';
 import { logger } from '@/lib/logger';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 type Employee = any; // Employee type not yet defined
 interface GenerateDocumentModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export function GenerateDocumentModal({
   employees,
   companyId
 }: GenerateDocumentModalProps) {
+  useBodyScrollLock(isOpen);
   const [selectedEmployee, setSelectedEmployee] = useState<string>('');
   const [documentName, setDocumentName] = useState('');
   const [variables, setVariables] = useState<Record<string, any>>({});
@@ -106,8 +108,8 @@ export function GenerateDocumentModal({
   };
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>
