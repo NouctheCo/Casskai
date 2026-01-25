@@ -759,7 +759,7 @@ export default function FECImportTab() {
 
                       <CheckCircle className="mr-1 h-3 w-3" />
 
-                      {(analysisResult.statistics.totalDebit ?? 0).toFixed(2)} €
+                      <CurrencyAmount amount={analysisResult.statistics.totalDebit ?? 0} />
 
                     </Badge>
 

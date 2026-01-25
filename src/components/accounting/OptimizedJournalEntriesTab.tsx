@@ -18,6 +18,7 @@ import { useJournalEntries } from '@/hooks/useJournalEntries';
 import JournalEntryAttachments from '@/components/accounting/JournalEntryAttachments';
 import { WorkflowActions } from '@/components/accounting/WorkflowActions';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 import {
   Plus,
   Search,
@@ -726,10 +727,10 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
                       <TableCell className="font-mono">{line.accountLabel || line.account}</TableCell>
                       <TableCell>{line.description}</TableCell>
                       <TableCell className="text-right font-mono">
-                        {line.debit ? `${parseFloat(line.debit).toFixed(2)} €` : ''}
+                        {line.debit ? formatCurrency(parseFloat(line.debit)) : ''}
                       </TableCell>
                       <TableCell className="text-right font-mono">
-                        {line.credit ? `${parseFloat(line.credit).toFixed(2)} €` : ''}
+                        {line.credit ? formatCurrency(parseFloat(line.credit)) : ''}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -799,11 +800,11 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
           <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="text-center">
               <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Débit</Label>
-              <p className="text-xl font-bold text-red-600 dark:text-red-400">{entry.totalDebit?.toFixed(2)} €</p>
+              <p className="text-xl font-bold text-red-600 dark:text-red-400">{formatCurrency(entry.totalDebit || 0)}</p>
             </div>
             <div className="text-center">
               <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Crédit</Label>
-              <p className="text-xl font-bold text-green-600 dark:text-green-400">{entry.totalCredit?.toFixed(2)} €</p>
+              <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatCurrency(entry.totalCredit || 0)}</p>
             </div>
           </div>
           {/* Balance Status */}
@@ -866,10 +867,10 @@ const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate: _onValidate, on
         <TableCell>{new Date(entry.date).toLocaleDateString('fr-FR')}</TableCell>
         <TableCell className="max-w-xs truncate">{entry.description}</TableCell>
         <TableCell className="text-right font-mono">
-          {entry.totalDebit?.toFixed(2)} €
+          {formatCurrency(entry.totalDebit || 0)}
         </TableCell>
         <TableCell className="text-right font-mono">
-          {entry.totalCredit?.toFixed(2)} €
+          {formatCurrency(entry.totalCredit || 0)}
         </TableCell>
         <TableCell>{getStatusBadge(entry.status)}</TableCell>
         <TableCell>
@@ -919,8 +920,8 @@ const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate: _onValidate, on
                 <div key={index} className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
                   <span>{line.account} - {line.description}</span>
                   <span>
-                    {line.debit && `D: ${parseFloat(line.debit).toFixed(2)}€`}
-                    {line.credit && `C: ${parseFloat(line.credit).toFixed(2)}€`}
+                    {line.debit && `D: ${formatCurrency(parseFloat(line.debit))}`}
+                    {line.credit && `C: ${formatCurrency(parseFloat(line.credit))}`}
                   </span>
                 </div>
               ))}
@@ -960,11 +961,20 @@ export default function OptimizedJournalEntriesTab() {
     }
     try {
       setLoading(true);
+      // Log that loadEntries started for this company
+      try {
+        console.log('[OptimizedJournalEntriesTab] loadEntries starting for companyId:', currentCompany.id);
+      } catch (_e) { /* ignore logging errors */ }
       const result = await journalEntriesService.getJournalEntries(currentCompany.id, {
         limit: 100,
         sortBy: 'entry_date',
         sortOrder: 'desc'
       });
+      // Log the raw service result so Playwright can capture it
+      try {
+        const r: any = result;
+        console.log('[OptimizedJournalEntriesTab] getJournalEntries raw result:', r && typeof r === 'object' && r.success ? { success: r.success, rows: r.data?.data?.length ?? 0, count: r.data?.count ?? 0 } : r);
+      } catch (_e) { /* ignore logging errors */ }
       if (result.success && result.data) {
         // Transformer les données Supabase en format UI
         const transformedEntries = result.data.data.map(entry => ({
@@ -990,6 +1000,15 @@ export default function OptimizedJournalEntriesTab() {
             };
           })
         }));
+        // Log for browser debugging: raw result and transformed entries
+        try {
+          console.debug('[OptimizedJournalEntriesTab] getJournalEntries result:', {
+            success: result.success,
+            rows: result.data?.data?.length,
+            count: result.data?.count,
+          });
+          console.debug('[OptimizedJournalEntriesTab] transformedEntries length:', transformedEntries.length, transformedEntries.slice(0, 5));
+        } catch (_err) { /* ignore debug logging errors */ }
         setEntries(transformedEntries);
       }
     } catch (error) {
