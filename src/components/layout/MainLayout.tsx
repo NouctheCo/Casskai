@@ -138,9 +138,9 @@ export function MainLayout() {
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
 
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
 
-          <main className="main-content flex-1 overflow-y-auto">
+          <main className="main-content flex-1 min-h-0 overflow-y-auto">
 
             <div className="page-content container mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -256,7 +256,7 @@ export function MainLayout() {
           )}
 
           {/* Main content area avec glassmorphism */}
-          <div className="flex-1 flex flex-col m-3 ml-0 overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0 m-3 ml-0 gap-3 overflow-hidden">
             {/* Header avec glassmorphism */}
             {showSidebar && (
               <Header
@@ -267,7 +267,7 @@ export function MainLayout() {
             )}
 
             {/* Page content avec glassmorphism */}
-            <main className="flex-1 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/20 border border-white/50 dark:border-gray-700/50 overflow-auto mt-3">
+            <main className="flex-1 min-h-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/20 border border-white/50 dark:border-gray-700/50 overflow-auto">
               <div className="p-6">
                 {/* Bandeau d'avertissement abonnement expiré ou expirant */}
                 {showSidebar && (
