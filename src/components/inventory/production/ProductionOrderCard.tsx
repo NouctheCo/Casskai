@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Eye, Play, CheckCircle, XCircle } from 'lucide-react';
 import type { ProductionOrder, ProductionOrderWithComponents } from '@/services/productionOrdersService';
 import { productionPriorityLabels, productionStatusLabels, productionStatusVariant } from '@/types/production';
+import { formatCurrency } from '@/lib/utils';
 
 type ComponentCardProps = { order: ProductionOrderWithComponents; actionLoading: boolean; onStatusChange: (orderId: string, status: ProductionOrder['status']) => void; onViewDetails: (order: ProductionOrderWithComponents) => void; };
 
@@ -77,7 +78,7 @@ const ProductionOrderCard: FC<ComponentCardProps> = ({ order, actionLoading, onS
       </div>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
         <span>Réf. ordre : {order.id}</span>
-        <span>Coût estimé : €{order.cost.toFixed(2)}</span>
+        <span>Coût estimé : {formatCurrency(order.cost)}</span>
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
         {order.status === 'pending' && <Button size="sm" onClick={() => onStatusChange(order.id, 'in_progress')} disabled={actionLoading}><Play className="mr-1 h-4 w-4" />Lancer</Button>}

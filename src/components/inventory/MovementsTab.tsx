@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { StockMovement } from '@/services/inventoryService';
+import { formatCurrency } from '@/lib/utils';
 
 export interface MovementFilters { type: 'all' | StockMovement['type']; product: string; dateFrom?: string; dateTo?: string; }
 
@@ -42,7 +43,7 @@ const MovementsSummary: FC<{ stats: MovementStats; total: number; visible: numbe
       ))}
       <div className="rounded-lg border p-3 text-center">
         <p className="text-xs text-muted-foreground">Valeur totale</p>
-        <p className="text-lg font-semibold">€{stats.totalValue.toFixed(2)}</p>
+        <p className="text-lg font-semibold">{formatCurrency(stats.totalValue)}</p>
       </div>
     </div>
   </div>
@@ -133,7 +134,7 @@ const MovementsTableView: FC<{ rows: StockMovement[]; loading: boolean; onViewDe
                   {movement.type === 'exit' ? '-' : movement.type === 'entry' ? '+' : '±'}{Math.abs(movement.quantity)}
                 </div>
               </TableCell>
-              <TableCell>€{Math.abs(movement.total_value || 0).toFixed(2)}</TableCell>
+              <TableCell>{formatCurrency(Math.abs(movement.total_value || 0))}</TableCell>
               <TableCell className="text-sm text-muted-foreground">{new Date(movement.movement_date || movement.created_at).toLocaleDateString()}</TableCell>
               <TableCell className="text-right">
                 <Button variant="ghost" size="sm" onClick={() => onViewDetails(movement)}>

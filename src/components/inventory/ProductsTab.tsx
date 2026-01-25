@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Search, ListFilter, ArrowUpDown, ArrowUp, ArrowDown, Package, Edit, Trash2 } from 'lucide-react';
 import type { InventoryItem, InventoryStatus } from '@/services/inventoryService';
+import { formatCurrency } from '@/lib/utils';
 export type Product = InventoryItem;
 export interface ProductsTabProps {
   products: Product[];
@@ -172,7 +173,7 @@ const ProductsTab: FC<ProductsTabProps> = ({ products, filteredProducts, searchT
                         <span className="text-xs text-muted-foreground">Min {product.minStock}</span>
                       </div>
                     </TableCell>
-                    <TableCell>€{product.totalValue.toFixed(2)}</TableCell>
+                    <TableCell>{formatCurrency(product.totalValue)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon" onClick={() => onEdit(product)}>

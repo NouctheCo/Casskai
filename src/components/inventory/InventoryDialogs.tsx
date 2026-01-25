@@ -14,6 +14,7 @@ import { PlusCircle, Trash2, Play, CheckCircle, XCircle } from 'lucide-react';
 import type { InventoryAlertSettings, InventoryItem } from '@/services/inventoryService';
 import type { ProductionOrder, ProductionOrderWithComponents } from '@/services/productionOrdersService';
 import type { NewOrderComponentDraft, NewProductionOrderForm } from '@/types/production';
+import { formatCurrency } from '@/lib/utils';
 
 export type InventoryComponentOption = {
   value: string;
@@ -305,7 +306,7 @@ export const OrderDetailsDialog: FC<OrderDetailsDialogProps> = ({
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs text-muted-foreground uppercase">Coût estimé</p>
-                  <p className="text-sm font-semibold">€{order.cost.toFixed(2)}</p>
+                  <p className="text-sm font-semibold">{formatCurrency(order.cost)}</p>
                 </div>
               </div>
 
