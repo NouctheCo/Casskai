@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { formatCurrency } from '@/lib/utils';
 import {
   Users,
   DollarSign,
@@ -176,10 +177,10 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-green-600">
-              {Math.round(avgSalary).toLocaleString('fr-FR')} €
+              {formatCurrency(Math.round(avgSalary))}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Masse salariale: {Math.round(avgSalary * totalEmployees).toLocaleString('fr-FR')} €
+              Masse salariale: {formatCurrency(Math.round(avgSalary * totalEmployees))}
             </p>
           </CardContent>
         </Card>
@@ -405,9 +406,9 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
               <div className="text-right">
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Par employé</p>
                 <p className="text-xl font-bold text-blue-600">
-                  {totalEmployees > 0
-                    ? Math.round(stats.training.total_cost / totalEmployees).toLocaleString('fr-FR')
-                    : 0} €
+                  {formatCurrency(totalEmployees > 0
+                    ? Math.round(stats.training.total_cost / totalEmployees)
+                    : 0)}
                 </p>
               </div>
             </div>

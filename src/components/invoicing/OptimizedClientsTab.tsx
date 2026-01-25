@@ -302,13 +302,13 @@ const ClientPreviewDialog: React.FC<ClientPreviewDialogProps> = ({ open, onClose
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md text-center">
                 <Euro className="w-6 h-6 text-green-500 mx-auto mb-2" />
                 <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">CA total</Label>
-                <p className="text-xl font-bold">{(client.totalAmount ?? 0).toFixed(2)} €</p>
+                <p className="text-xl font-bold"><CurrencyAmount amount={client.totalAmount ?? 0} /></p>
               </div>
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md text-center">
                 <Building className="w-6 h-6 text-purple-500 mx-auto mb-2" />
                 <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">CA moyen</Label>
                 <p className="text-xl font-bold">
-                  {(client.invoicesCount ?? 0) > 0 ? ((client.totalAmount ?? 0) / (client.invoicesCount ?? 1)).toFixed(2) : '0.00'} €
+                  <CurrencyAmount amount={(client.invoicesCount ?? 0) > 0 ? ((client.totalAmount ?? 0) / (client.invoicesCount ?? 1)) : 0} />
                 </p>
               </div>
             </div>
@@ -392,7 +392,7 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, onEdit, onDelete, onView 
         <Badge variant="secondary">{client.invoicesCount}</Badge>
       </TableCell>
       <TableCell className="text-right font-mono">
-        {(client.totalAmount ?? 0).toFixed(2)} €
+        <CurrencyAmount amount={client.totalAmount ?? 0} />
       </TableCell>
       <TableCell>
         <div className="flex items-center space-x-2">
