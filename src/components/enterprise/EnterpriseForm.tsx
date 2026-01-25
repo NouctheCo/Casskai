@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building, MapPin, Landmark, Settings } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface EnterpriseFormProps {
   enterprise?: Enterprise;
   onSuccess: () => void;
@@ -36,7 +37,7 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
     },
     fiscalYearStart: enterprise?.fiscalYearStart || 1,
     fiscalYearEnd: enterprise?.fiscalYearEnd || 12,
-    currency: enterprise?.currency || 'EUR',
+    currency: enterprise?.currency || getCurrentCompanyCurrency(),
     settings: {
       defaultVATRate: enterprise?.settings?.defaultVATRate || '20',
       defaultPaymentTerms: enterprise?.settings?.defaultPaymentTerms || 30,
