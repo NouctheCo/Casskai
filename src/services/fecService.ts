@@ -2,10 +2,10 @@
  * CassKai - Plateforme de gestion financière
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
- * 
+ *
  * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
  * Toute reproduction, distribution ou utilisation non autorisée est interdite.
- * 
+ *
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
@@ -14,6 +14,7 @@
 // Conforme aux normes DGFiP (Direction Générale des Finances Publiques)
 
 import { supabase } from '@/lib/supabase';
+import { formatCurrency } from '@/lib/utils';
 
 export interface FECEntry {
   JournalCode: string;
@@ -213,7 +214,7 @@ export class FECService {
       const balanced = balanceDifference < 0.01; // Tolérance de 1 centime
 
       if (!balanced) {
-        errors.push(`Fichier déséquilibré: différence de ${balanceDifference.toFixed(2)}€ entre débit et crédit`);
+        errors.push(`Fichier déséquilibré: différence de ${formatCurrency(balanceDifference)} entre débit et crédit`);
       }
 
       // Vérifier la cohérence des dates

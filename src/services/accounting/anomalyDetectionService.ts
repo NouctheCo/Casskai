@@ -13,6 +13,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
+import { formatCurrency } from '@/lib/utils';
 
 // ============================================================================
 // TYPES
@@ -144,7 +145,7 @@ async function detectSuspiciousAmounts(
         type: 'suspicious_amount',
         severity: 'medium',
         title: 'Montant très arrondi détecté',
-        description: `Montant exactement ${amount.toFixed(2)}€ sur compte ${entry.account_number}. Vérifier si c'est une estimation.`,
+        description: `Montant exactement ${formatCurrency(amount)} sur compte ${entry.account_number}. Vérifier si c'est une estimation.`,
         detected_at: new Date().toISOString(),
         journal_entry_id: entry.journal_entry_id,
         account_number: entry.account_number,
@@ -164,7 +165,7 @@ async function detectSuspiciousAmounts(
         type: 'suspicious_amount',
         severity: 'low',
         title: 'Montant arrondi',
-        description: `Montant rond ${amount.toFixed(2)}€ sur compte ${entry.account_number}.`,
+        description: `Montant rond ${formatCurrency(amount)} sur compte ${entry.account_number}.`,
         detected_at: new Date().toISOString(),
         journal_entry_id: entry.journal_entry_id,
         account_number: entry.account_number,
@@ -254,7 +255,7 @@ async function detectInactiveAccountMovements(
         type: 'inactive_account',
         severity: 'medium',
         title: `Compte inactif réactivé`,
-        description: `Le compte ${movement.account_number} (${movement.account_name}) était inactif depuis ${config.inactive_days_threshold} jours et a reçu un mouvement de ${amount.toFixed(2)}€.`,
+        description: `Le compte ${movement.account_number} (${movement.account_name}) était inactif depuis ${config.inactive_days_threshold} jours et a reçu un mouvement de ${formatCurrency(amount)}.`,
         detected_at: new Date().toISOString(),
         journal_entry_id: movement.journal_entry_id,
         account_number: movement.account_number,
@@ -325,7 +326,7 @@ async function detectOverdueLettrage(
       type: 'overdue_lettrage',
       severity,
       title: `${isClient ? 'Client' : 'Fournisseur'} non lettré depuis ${daysOverdue} jours`,
-      description: `Ligne ${line.account_number} (${line.account_name}) non lettrée depuis ${daysOverdue} jours pour ${amount.toFixed(2)}€.`,
+      description: `Ligne ${line.account_number} (${line.account_name}) non lettrée depuis ${daysOverdue} jours pour ${formatCurrency(amount)}.`,
       detected_at: new Date().toISOString(),
       journal_entry_id: line.journal_entry_id,
       account_number: line.account_number,
@@ -423,7 +424,7 @@ async function detectDuplicateEntries(
             type: 'duplicate_entry',
             severity: 'high',
             title: 'Écriture potentiellement dupliquée',
-            description: `Les écritures ${entry1.entry_number} et ${entry2.entry_number} sont identiques (${totalAmount.toFixed(2)}€).`,
+            description: `Les écritures ${entry1.entry_number} et ${entry2.entry_number} sont identiques (${formatCurrency(totalAmount)}).`,
             detected_at: new Date().toISOString(),
             journal_entry_id: entry1.id,
             amount: totalAmount,

@@ -2,10 +2,10 @@
  * CassKai - Plateforme de gestion financière
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
- * 
+ *
  * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
  * Toute reproduction, distribution ou utilisation non autorisée est interdite.
- * 
+ *
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
@@ -17,6 +17,7 @@
  */
 
 import { FECEntry, ImportError, ImportWarning } from '../types/accounting-import.types';
+import { formatCurrency } from '../lib/utils';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -372,7 +373,7 @@ class FECValidationService {
     if (difference > 0.01) {
       errors.push({
         row: 0,
-        message: `Fichier non équilibré: Débit total = ${totalDebit.toFixed(2)}€, Crédit total = ${totalCredit.toFixed(2)}€, Différence = ${difference.toFixed(2)}€`,
+        message: `Fichier non équilibré: Débit total = ${formatCurrency(totalDebit)}, Crédit total = ${formatCurrency(totalCredit)}, Différence = ${formatCurrency(difference)}`,
         type: 'business',
         severity: 'error'
       });
@@ -391,7 +392,7 @@ class FECValidationService {
         errors.push({
           row: firstRow,
           field: 'entryNumber',
-          message: `Écriture "${entryNumber}" non équilibrée: Débit = ${debit.toFixed(2)}€, Crédit = ${credit.toFixed(2)}€, Différence = ${diff.toFixed(2)}€`,
+          message: `Écriture "${entryNumber}" non équilibrée: Débit = ${formatCurrency(debit)}, Crédit = ${formatCurrency(credit)}, Différence = ${formatCurrency(diff)}`,
           type: 'business',
           severity: 'error'
         });

@@ -2,16 +2,17 @@
  * CassKai - Plateforme de gestion financière
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
- * 
+ *
  * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
  * Toute reproduction, distribution ou utilisation non autorisée est interdite.
- * 
+ *
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
 import { JournalEntrySchema, JournalEntryType, ImportError } from '../types/accounting-import.types';
 import { supabase } from '../lib/supabase';
+import { formatCurrency } from '../lib/utils';
 
 /**
  * Service de validation comptable avec Zod et règles métier
@@ -292,7 +293,7 @@ export class AccountingValidationService {
       errors.push({
         row: 0,
         field: 'items',
-        message: `Écriture déséquilibrée: Débit ${totalDebit}€, Crédit ${totalCredit}€ (écart: ${difference.toFixed(2)}€)`,
+        message: `Écriture déséquilibrée: Débit ${formatCurrency(totalDebit)}, Crédit ${formatCurrency(totalCredit)} (écart: ${formatCurrency(difference)})`,
         type: 'business',
         severity: 'error'
       });

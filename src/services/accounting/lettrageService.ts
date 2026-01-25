@@ -14,6 +14,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -287,7 +288,7 @@ export async function applyLettrage(
         lettrage_code: '',
         lines_count: 0,
         total_amount: 0,
-        error: `Lignes déséquilibrées: débit=${totalDebit.toFixed(2)}€ crédit=${totalCredit.toFixed(2)}€ diff=${balance.toFixed(2)}€`,
+        error: `Lignes déséquilibrées: débit=${formatCurrency(totalDebit)} crédit=${formatCurrency(totalCredit)} diff=${formatCurrency(balance)}`,
       };
     }
     // Generate or use custom lettrage code
