@@ -134,7 +134,7 @@ describe('ConfigMigration', () => {
           accountingStandard: 'SYSCOHADA',
           name: 'Default Company',
           country: 'Default Country',
-          currency: 'USD',
+          currency: 'EUR',
           timezone: 'UTC',
           fiscalYearStart: '2025-01-01',
         },
