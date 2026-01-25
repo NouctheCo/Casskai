@@ -12,6 +12,7 @@ import { Loader2, Upload, X, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SupplierSelectWithCreate } from './SupplierSelectWithCreate';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency, formatCurrency } from '@/lib/utils';
 interface PurchaseFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -143,12 +144,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
       ...prev,
       attachments: prev.attachments?.filter((_, i) => i !== index) || []
     }));
-  };
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amount);
   };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
