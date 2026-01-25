@@ -27,6 +27,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 interface Transaction {
   id: string;
   type: 'invoice' | 'payment' | 'credit_note' | 'purchase';
@@ -679,7 +680,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
                         {transaction.balance > 0 ? (
                           <span className="text-orange-600"><CurrencyAmount amount={transaction.balance} /></span>
                         ) : (
-                          <span className="text-green-600">0.00 €</span>
+                          <span className="text-green-600">{formatCurrency(0)}</span>
                         )}
                       </td>
                       <td className="py-3 px-4 text-center">
@@ -698,19 +699,19 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
                 <div className="flex justify-between">
                   <span className="font-medium">Total montant:</span>
                   <span className="font-bold">
-                    {filteredTransactions.reduce((sum, t) => sum + t.amount, 0).toFixed(2)} €
+                    {formatCurrency(filteredTransactions.reduce((sum, t) => sum + t.amount, 0))}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Total payé:</span>
                   <span className="font-bold text-green-600">
-                    {filteredTransactions.reduce((sum, t) => sum + t.paid_amount, 0).toFixed(2)} €
+                    {formatCurrency(filteredTransactions.reduce((sum, t) => sum + t.paid_amount, 0))}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Total solde:</span>
                   <span className="font-bold text-orange-600">
-                    {filteredTransactions.reduce((sum, t) => sum + t.balance, 0).toFixed(2)} €
+                    {formatCurrency(filteredTransactions.reduce((sum, t) => sum + t.balance, 0))}
                   </span>
                 </div>
               </div>
