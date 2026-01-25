@@ -33,6 +33,7 @@ import {
 import * as XLSX from 'xlsx';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 // Types pour l'import CA (rfa_turnover_entries)
 interface CAImportRow {
@@ -239,7 +240,7 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
         turnover_amount: 200000,
         rfa_percentage: 3.00,
         rfa_amount: 6000,
-        currency: 'EUR',
+        currency: getCurrentCompanyCurrency(),
         calculation_method: 'progressive',
         notes: 'RFA T1 2024'
       },
@@ -251,7 +252,7 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
         turnover_amount: 350000,
         rfa_percentage: 5.00,
         rfa_amount: 17500,
-        currency: 'EUR',
+        currency: getCurrentCompanyCurrency(),
         calculation_method: 'fixed',
         notes: 'RFA taux fixe'
       }
@@ -401,7 +402,7 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
       const turnoverAmount = Number(row.turnover_amount) || 0;
       const rfaPercentage = Number(row.rfa_percentage) || 0;
       const rfaAmount = Number(row.rfa_amount) || 0;
-      const currency = String(row.currency || 'EUR').trim();
+      const currency = String(row.currency || getCurrentCompanyCurrency()).trim();
       const calculationMethod = String(row.calculation_method || 'progressive').trim();
 
       // Validation

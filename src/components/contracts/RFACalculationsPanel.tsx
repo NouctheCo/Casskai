@@ -14,6 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export const RFACalculationsPanel: React.FC = () => {
   const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -40,7 +41,7 @@ export const RFACalculationsPanel: React.FC = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);

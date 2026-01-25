@@ -18,6 +18,7 @@ import { useCurrency } from '../../hooks/useCurrency';
 import { ContractData, ContractFormData, ContractType } from '../../types/contracts.types';
 import { Plus, X, DollarSign, Percent, TrendingUp } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 // Schéma de validation Zod
 const contractSchema = z.object({
   client_id: z.string().min(1, 'Veuillez sélectionner un client'),
@@ -68,7 +69,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
       contract_type: contract?.contract_type || 'progressive',
       start_date: contract?.start_date || '',
       end_date: contract?.end_date || '',
-      currency: contract?.currency || 'EUR',
+      currency: contract?.currency || getCurrentCompanyCurrency(),
       conditions: '',
       fixed_rate: contract?.discount_config.type === 'fixed_percent' ? contract.discount_config.rate : 0.01,
       fixed_amount: contract?.discount_config.type === 'fixed_amount' ? contract.discount_config.amount : 10000,
