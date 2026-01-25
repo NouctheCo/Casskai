@@ -54,7 +54,7 @@ export function BankAccountFormModal({
         account_number: account.account_number || '',
         iban: account.iban || '',
         bic: account.bic || '',
-        currency: account.currency || 'EUR',
+        currency: account.currency || getCurrentCompanyCurrency(),
         initial_balance: account.current_balance || 0
       });
     } else {

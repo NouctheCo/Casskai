@@ -40,6 +40,7 @@ import { dashboardStatsService } from '../../services/dashboardStatsService';
 import { useAuth } from '../../contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface KPICardProps {
   title: string;
   value: string;
@@ -125,7 +126,7 @@ const ReportsFinancialDashboard: React.FC = () => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       minimumFractionDigits: 0
     }).format(value);
   };

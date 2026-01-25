@@ -8,6 +8,8 @@ import { Badge } from '../ui/badge';
 
 import { ForecastData, ForecastScenario } from '../../types/forecasts.types';
 
+import { getCurrentCompanyCurrency } from '@/lib/utils';
+
 import { 
 
   ArrowLeft,
@@ -58,7 +60,7 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
 
       style: 'currency',
 
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
 
       minimumFractionDigits: 0,
 
