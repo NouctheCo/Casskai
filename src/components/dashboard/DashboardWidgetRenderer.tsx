@@ -50,7 +50,7 @@ import {
 
 } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -856,7 +856,7 @@ export function TableWidget({ widget: _widget, data }: { widget: DashboardWidget
 
             <p className="font-medium text-sm truncate">{facture.invoice_number || 'N/A'}</p>
 
-            <p className="text-xs text-muted-foreground">€{facture.total_amount?.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">{formatCurrency(facture.total_amount || 0)}</p>
 
           </div>
 
@@ -964,7 +964,7 @@ export function ChartWidget({ widget: _widget, data }: { widget: DashboardWidget
 
             }}
 
-            formatter={(value: string | number) => [`€${Number(value).toLocaleString()}`, 'Revenus']}
+            formatter={(value: string | number) => [formatCurrency(Number(value)), 'Revenus']}
 
           />
 

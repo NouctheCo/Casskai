@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface ReportsKPIProps {
   title: string;
@@ -12,17 +13,17 @@ interface ReportsKPIProps {
   format?: 'number' | 'currency' | 'percentage';
 }
 
-const ReportsKPI: React.FC<ReportsKPIProps> = ({ 
-  title, 
-  value, 
-  change, 
-  icon: Icon, 
-  color = "blue", 
-  trend, 
-  format = "number" 
+const ReportsKPI: React.FC<ReportsKPIProps> = ({
+  title,
+  value,
+  change,
+  icon: Icon,
+  color = "blue",
+  trend,
+  format = "number"
 }) => {
   const formatValue = (val: number) => {
-    if (format === 'currency') return `${val.toLocaleString()} €`;
+    if (format === 'currency') return formatCurrency(val);
     if (format === 'number') return val.toLocaleString();
     if (format === 'percentage') return `${val}%`;
     return val;

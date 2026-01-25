@@ -12,6 +12,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { ReportsDashboardData, FinancialReport } from '../../types/reports.types';
+import { formatCurrency } from '@/lib/utils';
 
 interface DashboardSectionProps {
   dashboardData: ReportsDashboardData | null;
@@ -36,7 +37,7 @@ const MetricsCard: React.FC<{
           <div>
             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
             <p className={`text-2xl font-bold ${color}`}>
-              €{value.toLocaleString('fr-FR')}
+              {formatCurrency(value)}
             </p>
           </div>
           {icon}
