@@ -1,50 +1,46 @@
 /**
  * CassKai - Plateforme de gestion financière
- * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
- * Tous droits réservés - All rights reserved
+ * Copyright © 2025 NOUTCHE CONSEIL
  */
 
 import { useEffect } from 'react';
 
 /**
- * Hook to lock/unlock body scroll when a modal is open
- * Prevents background scrolling while modal is active
- *
- * @param isOpen - Whether the modal is currently open
- *
- * @example
- * ```tsx
- * function MyModal({ isOpen }) {
- *   useBodyScrollLock(isOpen);
- *
- *   if (!isOpen) return null;
- *   return <div>Modal content</div>;
- * }
- * ```
+ * Global lock counter to support nested modals
  */
+let lockCount = 0;
+let originalOverflow = '';
+let originalPaddingRight = '';
+
 export function useBodyScrollLock(isOpen: boolean) {
   useEffect(() => {
     if (!isOpen) return;
 
-    // Store original styles to restore later
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    const originalPaddingRight = window.getComputedStyle(document.body).paddingRight;
+    // First modal opens → lock body
+    if (lockCount === 0) {
+      originalOverflow = document.body.style.overflow;
+      originalPaddingRight = document.body.style.paddingRight;
 
-    // Calculate scrollbar width to prevent layout shift
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      const scrollbarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
 
-    // Lock scroll
-    document.body.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
 
-    // Add padding to prevent layout shift when scrollbar disappears
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
     }
 
-    // Cleanup: restore original styles
+    lockCount++;
+
     return () => {
-      document.body.style.overflow = originalStyle;
-      document.body.style.paddingRight = originalPaddingRight;
+      lockCount--;
+
+      // Last modal closed → restore body
+      if (lockCount === 0) {
+        document.body.style.overflow = originalOverflow;
+        document.body.style.paddingRight = originalPaddingRight;
+      }
     };
   }, [isOpen]);
 }

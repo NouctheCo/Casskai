@@ -6,6 +6,8 @@
 import { supabase } from '@/lib/supabase';
 import type { DashboardMetric, DashboardChart } from '@/types/enterprise-dashboard.types';
 import { kpiCacheService } from './kpiCacheService';
+import AccountMappingService, { ACCOUNT_MAPPING, UniversalAccountType } from './accountMappingService';
+import { AccountingStandard } from './accountingRulesService';
 import { logger } from '@/lib/logger';
 import { formatCurrency } from '@/lib/utils';
 export interface RealKPIData {
@@ -101,40 +103,74 @@ export class RealDashboardKpiService {
     endDate: string
   ): Promise<number> {
     try {
-      // APPROCHE 1: Lire depuis les factures (source de vérité métier)
-      const { data: invoices, error: invoicesError } = await supabase
-        .from('invoices')
-        .select('total_incl_tax, status, invoice_type')
-        .eq('company_id', companyId)
-        .eq('invoice_type', 'sale')
-        .in('status', ['sent', 'paid', 'partially_paid'])
-        .neq('status', 'cancelled')
-        .gte('invoice_date', startDate)
-        .lte('invoice_date', endDate);
+      // Lire à la fois les factures de vente ET les comptes classe 7,
+      // puis retourner la somme des deux sources. Cela garantit que
+      // le KPI prend en compte à la fois les écritures métier
+      // (invoices) et les écritures comptables (chart_of_accounts).
+      const [invoicesResult, accountsResult] = await Promise.all([
+        supabase
+          .from('invoices')
+          .select('total_incl_tax')
+          .eq('company_id', companyId)
+          .eq('invoice_type', 'sale')
+          .in('status', ['sent', 'paid', 'partially_paid'])
+          .neq('status', 'cancelled')
+          .gte('invoice_date', startDate)
+          .lte('invoice_date', endDate),
+        supabase
+          .from('chart_of_accounts')
+          .select('current_balance')
+          .eq('company_id', companyId)
+          .eq('account_class', 7)
+          .eq('is_active', true),
+      ]);
 
+      const invoices = invoicesResult.data;
+      const invoicesError = invoicesResult.error;
+      const accounts = accountsResult.data;
+      const accountsError = accountsResult.error;
+
+      let totalFromInvoices = 0;
       if (!invoicesError && invoices && invoices.length > 0) {
-        const totalRevenue = invoices.reduce((sum, inv) =>
-          sum + Number(inv.total_incl_tax || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculateRevenue] From invoices: ${formatCurrency(totalRevenue)} (${invoices.length} factures)`);
-        return totalRevenue;
+        totalFromInvoices = invoices.reduce((sum: number, inv: any) => sum + Number(inv.total_incl_tax || 0), 0);
+        logger.debug('RealDashboardKpi', `[calculateRevenue] From invoices: ${formatCurrency(totalFromInvoices)} (${invoices.length} factures)`);
       }
 
-      // APPROCHE 2 (Fallback): Lire depuis les comptes comptables classe 7
-      const { data: accounts, error: accountsError } = await supabase
-        .from('chart_of_accounts')
-        .select('current_balance, account_number')
-        .eq('company_id', companyId)
-        .eq('account_class', 7)
-        .eq('is_active', true);
-
-      if (!accountsError && accounts) {
-        const totalRevenue = accounts.reduce((sum, account) =>
-          sum + Math.abs(account.current_balance || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculateRevenue] From accounts: ${formatCurrency(totalRevenue)}`);
-        return totalRevenue;
+      // Try to identify sales accounts using account mapping rules per company
+      let totalFromAccounts = 0;
+      try {
+        const standard = await AccountMappingService.detectAccountingStandard(companyId) as AccountingStandard;
+        const mapping = ACCOUNT_MAPPING[standard];
+        const salesPattern = mapping?.[UniversalAccountType.SALES];
+        if (standard === AccountingStandard.PCG || standard === AccountingStandard.SYSCOHADA) {
+          const prefix = (salesPattern || '70').replace(/%/g, '');
+          const { data: salesAccounts, error: salesErr } = await supabase
+            .from('chart_of_accounts')
+            .select('current_balance')
+            .eq('company_id', companyId)
+            .ilike('account_number', `${prefix}%`)
+            .eq('is_active', true);
+          if (!salesErr && salesAccounts && salesAccounts.length > 0) {
+            totalFromAccounts = salesAccounts.reduce((sum: number, a: any) => sum + Math.abs(a.current_balance || 0), 0);
+            logger.debug('RealDashboardKpi', `[calculateRevenue] From accounts (by prefix ${prefix}): ${formatCurrency(totalFromAccounts)}`);
+          }
+        } else {
+          // IFRS/US_GAAP: fallback to account_class = 7
+          if (!accountsError && accounts && accounts.length > 0) {
+            totalFromAccounts = accounts.reduce((sum: number, account: any) => sum + Math.abs(account.current_balance || 0), 0);
+            logger.debug('RealDashboardKpi', `[calculateRevenue] From accounts (class 7 fallback): ${formatCurrency(totalFromAccounts)}`);
+          }
+        }
+      } catch (err) {
+        // If mapping fails, fallback to previous behavior
+        if (!accountsError && accounts && accounts.length > 0) {
+          totalFromAccounts = accounts.reduce((sum: number, account: any) => sum + Math.abs(account.current_balance || 0), 0);
+          logger.debug('RealDashboardKpi', `[calculateRevenue] From accounts (fallback): ${formatCurrency(totalFromAccounts)}`);
+        }
       }
 
-      return 0;
+      const totalRevenue = totalFromInvoices + totalFromAccounts;
+      return totalRevenue;
     } catch (error) {
       logger.error('RealDashboardKpi', 'Exception calculating revenue:', error);
       return 0;
@@ -150,53 +186,85 @@ export class RealDashboardKpiService {
     endDate: string
   ): Promise<number> {
     try {
-      // APPROCHE 1: Lire depuis la table purchases
-      const { data: purchases, error: purchasesError } = await supabase
-        .from('purchases')
-        .select('total_amount')
-        .eq('company_id', companyId)
-        .gte('purchase_date', startDate)
-        .lte('purchase_date', endDate);
+      // Lire les sources de charges en parallèle:
+      // - table `purchases` (si utilisée)
+      // - factures d'achat `invoices` (invoice_type = 'purchase')
+      // - comptes comptables classe 6 (chart_of_accounts)
+      const [purchasesResult, invoicesResult, accountsResult] = await Promise.all([
+        supabase
+          .from('purchases')
+          .select('total_amount')
+          .eq('company_id', companyId)
+          .gte('purchase_date', startDate)
+          .lte('purchase_date', endDate),
+        supabase
+          .from('invoices')
+          .select('total_incl_tax')
+          .eq('company_id', companyId)
+          .eq('invoice_type', 'purchase')
+          .in('status', ['sent', 'paid', 'partially_paid'])
+          .gte('invoice_date', startDate)
+          .lte('invoice_date', endDate),
+        supabase
+          .from('chart_of_accounts')
+          .select('current_balance')
+          .eq('company_id', companyId)
+          .eq('account_class', 6)
+          .eq('is_active', true),
+      ]);
 
-      if (!purchasesError && purchases && purchases.length > 0) {
-        const totalExpenses = purchases.reduce((sum, p) =>
-          sum + Number(p.total_amount || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculatePurchases] From purchases: ${formatCurrency(totalExpenses)}`);
-        return totalExpenses;
+      const purchases = purchasesResult.data;
+      const purchasesErr = purchasesResult.error;
+      const invoices = invoicesResult.data;
+      const invoicesErr = invoicesResult.error;
+      const accounts = accountsResult.data;
+      const accountsErr = accountsResult.error;
+
+      let totalFromPurchases = 0;
+      if (!purchasesErr && purchases && purchases.length > 0) {
+        totalFromPurchases = purchases.reduce((sum: number, p: any) => sum + Number(p.total_amount || 0), 0);
+        logger.debug('RealDashboardKpi', `[calculatePurchases] From purchases table: ${formatCurrency(totalFromPurchases)}`);
       }
 
-      // APPROCHE 2: Lire depuis les factures d'achat
-      const { data: invoices, error: invoicesError } = await supabase
-        .from('invoices')
-        .select('total_incl_tax')
-        .eq('company_id', companyId)
-        .eq('invoice_type', 'purchase')
-        .in('status', ['sent', 'paid', 'partially_paid'])
-        .gte('invoice_date', startDate)
-        .lte('invoice_date', endDate);
-
-      if (!invoicesError && invoices && invoices.length > 0) {
-        const totalExpenses = invoices.reduce((sum, inv) =>
-          sum + Number(inv.total_incl_tax || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculatePurchases] From invoices: ${formatCurrency(totalExpenses)}`);
-        return totalExpenses;
+      let totalFromInvoicePurchases = 0;
+      if (!invoicesErr && invoices && invoices.length > 0) {
+        totalFromInvoicePurchases = invoices.reduce((sum: number, inv: any) => sum + Number(inv.total_incl_tax || 0), 0);
+        logger.debug('RealDashboardKpi', `[calculatePurchases] From invoices: ${formatCurrency(totalFromInvoicePurchases)}`);
       }
 
-      // APPROCHE 3 (Fallback): Comptes classe 6
-      const { data: accounts, error: accountsError } = await supabase
-        .from('chart_of_accounts')
-        .select('current_balance')
-        .eq('company_id', companyId)
-        .eq('account_class', 6)
-        .eq('is_active', true);
-
-      if (!accountsError && accounts) {
-        const totalExpenses = accounts.reduce((sum, account) =>
-          sum + Math.abs(account.current_balance || 0), 0);
-        return totalExpenses;
+      // Identify purchase accounts using account mapping rules
+      let totalFromAccounts = 0;
+      try {
+        const standard = await AccountMappingService.detectAccountingStandard(companyId) as AccountingStandard;
+        const mapping = ACCOUNT_MAPPING[standard];
+        const purchasesPattern = mapping?.[UniversalAccountType.PURCHASES];
+        if (standard === AccountingStandard.PCG || standard === AccountingStandard.SYSCOHADA) {
+          const prefix = (purchasesPattern || '60').replace(/%/g, '');
+          const { data: purchaseAccounts, error: purchaseAccErr } = await supabase
+            .from('chart_of_accounts')
+            .select('current_balance')
+            .eq('company_id', companyId)
+            .ilike('account_number', `${prefix}%`)
+            .eq('is_active', true);
+          if (!purchaseAccErr && purchaseAccounts && purchaseAccounts.length > 0) {
+            totalFromAccounts = purchaseAccounts.reduce((sum: number, a: any) => sum + Math.abs(a.current_balance || 0), 0);
+            logger.debug('RealDashboardKpi', `[calculatePurchases] From accounts (by prefix ${prefix}): ${formatCurrency(totalFromAccounts)}`);
+          }
+        } else {
+          // IFRS/US_GAAP: fallback to account_class = 6
+          if (!accountsErr && accounts && accounts.length > 0) {
+            totalFromAccounts = accounts.reduce((sum: number, account: any) => sum + Math.abs(account.current_balance || 0), 0);
+            logger.debug('RealDashboardKpi', `[calculatePurchases] From accounts (class 6 fallback): ${formatCurrency(totalFromAccounts)}`);
+          }
+        }
+      } catch (err) {
+        if (!accountsErr && accounts && accounts.length > 0) {
+          totalFromAccounts = accounts.reduce((sum: number, account: any) => sum + Math.abs(account.current_balance || 0), 0);
+          logger.debug('RealDashboardKpi', `[calculatePurchases] From accounts (fallback): ${formatCurrency(totalFromAccounts)}`);
+        }
       }
 
-      return 0;
+      return totalFromPurchases + totalFromInvoicePurchases + totalFromAccounts;
     } catch (error) {
       logger.error('RealDashboardKpi', 'Exception calculating purchases:', error);
       return 0;
