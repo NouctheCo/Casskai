@@ -366,8 +366,13 @@ export class RealDashboardKpiService {
     try {
       const startDate = `${year}-01-01`;
       const endDate = `${year}-12-31`;
+      // We must aggregate monthly revenue from the SAME source used for YTD:
+      // - invoices (invoice_type = 'sale')
+      // - accounting journal lines on accounts matching the SALES mapping (70% for PCG/SYSCOHADA)
+      // This ensures the tile and the chart use the exact same rule.
 
-      const { data: invoices, error } = await supabase
+      // 1) Get invoices aggregated by month
+      const { data: invoices, error: invoicesError } = await supabase
         .from('invoices')
         .select('total_incl_tax, invoice_date')
         .eq('company_id', companyId)
@@ -376,36 +381,65 @@ export class RealDashboardKpiService {
         .gte('invoice_date', startDate)
         .lte('invoice_date', endDate);
 
-      if (error || !invoices) {
-        logger.error('RealDashboardKpi', 'Error fetching monthly revenue:', error);
-        // Retourner les 12 mois à 0
-        return Array.from({ length: 12 }, (_, i) => ({
-          month: String(i + 1),
-          amount: 0
-        }));
+      if (invoicesError) {
+        logger.error('RealDashboardKpi', 'Error fetching monthly revenue (invoices):', invoicesError);
       }
 
-      // Initialiser tous les mois à 0
+      // 2) Determine sales account prefix via AccountMappingService
+      let accountPrefix = '70'; // default
+      try {
+        const standard = await AccountMappingService.detectAccountingStandard(companyId) as AccountingStandard;
+        const mapping = ACCOUNT_MAPPING[standard];
+        const salesPattern = mapping?.[UniversalAccountType.SALES] || '70%';
+        accountPrefix = (salesPattern || '70').replace(/%/g, '');
+      } catch (err) {
+        logger.warn('RealDashboardKpi', 'Unable to detect accounting standard for monthly revenue, using default prefix 70');
+      }
+
+      // 3) Get journal_entry_lines for sales accounts and aggregate by month (use journal_entries.entry_date)
+      const { data: journalLines, error: journalErr } = await supabase
+        .from('journal_entry_lines')
+        .select('credit_amount, debit_amount, account_number, journal_entry_id, journal_entries(entry_date)')
+        .ilike('account_number', `${accountPrefix}%`)
+        .gte('journal_entries.entry_date', startDate)
+        .lte('journal_entries.entry_date', endDate);
+
+      if (journalErr) {
+        logger.error('RealDashboardKpi', 'Error fetching journal entry lines for monthly revenue:', journalErr);
+      }
+
+      // Initialize months
       const monthlyData = new Map<number, number>();
-      for (let i = 1; i <= 12; i++) {
-        monthlyData.set(i, 0);
-      }
+      for (let i = 1; i <= 12; i++) monthlyData.set(i, 0);
 
-      // Agréger par mois
-      invoices.forEach((invoice) => {
-        const date = new Date(invoice.invoice_date);
-        const month = date.getMonth() + 1;
-        const amount = Number(invoice.total_incl_tax || 0);
-        monthlyData.set(month, (monthlyData.get(month) || 0) + amount);
+      // Aggregate invoices by invoice_date
+      (invoices || []).forEach((inv: any) => {
+        if (!inv || !inv.invoice_date) return;
+        const d = new Date(inv.invoice_date);
+        const m = d.getMonth() + 1;
+        monthlyData.set(m, (monthlyData.get(m) || 0) + Number(inv.total_incl_tax || 0));
       });
 
-      // Convertir en tableau
+      // Aggregate journal lines by journal_entries.entry_date (credit_amount considered positive revenue)
+      const retainedAccounts: string[] = [];
+      (journalLines || []).forEach((line: any) => {
+        const entryDate = line?.journal_entries?.entry_date;
+        if (!entryDate) return;
+        const d = new Date(entryDate);
+        const m = d.getMonth() + 1;
+        const credit = Number(line.credit_amount || 0);
+        const debit = Number(line.debit_amount || 0);
+        const amount = credit - debit; // revenue is usually credit
+        monthlyData.set(m, (monthlyData.get(m) || 0) + amount);
+        if (line.account_number && !retainedAccounts.includes(line.account_number)) retainedAccounts.push(line.account_number);
+      });
+
+      // Temporary debug: list accounts retained for sales mapping
+      logger.debug('RealDashboardKpi', `[calculateMonthlyRevenue] sales accountPrefix=${accountPrefix}, retainedAccounts=${JSON.stringify(retainedAccounts)}`);
+
       return Array.from(monthlyData.entries())
         .sort((a, b) => a[0] - b[0])
-        .map(([month, amount]) => ({
-          month: String(month),
-          amount
-        }));
+        .map(([month, amount]) => ({ month: String(month), amount }));
     } catch (error) {
       logger.error('RealDashboardKpi', 'Exception calculating monthly revenue:', error);
       return Array.from({ length: 12 }, (_, i) => ({

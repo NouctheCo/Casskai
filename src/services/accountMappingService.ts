@@ -52,7 +52,8 @@ export const ACCOUNT_MAPPING = {
     [UniversalAccountType.BANK]: '512%',
     [UniversalAccountType.CASH]: '53%',
     [UniversalAccountType.PURCHASES]: '607%',
-    [UniversalAccountType.SALES]: '707%',
+    // Use '70%' to include 701..707 (all 70x sales accounts)
+    [UniversalAccountType.SALES]: '70%',
     [UniversalAccountType.SERVICES]: '706%',
     [UniversalAccountType.VAT_DEDUCTIBLE]: '44566',
     [UniversalAccountType.VAT_COLLECTED]: '44571',
