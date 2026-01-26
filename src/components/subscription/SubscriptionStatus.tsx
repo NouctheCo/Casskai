@@ -25,6 +25,7 @@ import {
   getSubscriptionStatusLabel,
   formatPrice
 } from '@/types/subscription.types';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 const SubscriptionStatus: React.FC = () => {
   const navigate = useNavigate();
   const {
@@ -175,7 +176,7 @@ const SubscriptionStatus: React.FC = () => {
                 </Badge>
               </div>
               <p className="text-gray-600 dark:text-gray-300">
-                {formatPrice(plan?.price ?? 0, plan?.currency ?? 'eur')}/{plan?.interval === 'month' ? 'mois' : 'an'}
+                {formatPrice(plan?.price ?? 0, plan?.currency ?? getCurrentCompanyCurrency())}/{plan?.interval === 'month' ? 'mois' : 'an'}
               </p>
             </div>
             <div className="text-right">

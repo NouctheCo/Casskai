@@ -43,11 +43,11 @@ export async function getPurchases(
   filters: PurchaseFilters = {}
 ): Promise<{ data: Purchase[]; error?: any }> {
   try {
-    let query = supabase
+      let query = supabase
       .from('purchases')
       .select(`
         *,
-        supplier:suppliers(name)
+        supplier:suppliers!supplier_id(name)
       `)
       .eq('company_id', companyId);
     // Apply filters
@@ -84,7 +84,7 @@ export async function getPurchaseById(id: string): Promise<{ data: Purchase | nu
       .from('purchases')
       .select(`
         *,
-        supplier:suppliers(name)
+        supplier:suppliers!supplier_id(name)
       `)
       .eq('id', id)
       .single();
@@ -122,7 +122,7 @@ export async function createPurchase(
       })
       .select(`
         *,
-        supplier:suppliers(name)
+        supplier:suppliers!supplier_id(name)
       `)
       .single();
     if (error) {
@@ -188,7 +188,7 @@ export async function updatePurchase(
       .eq('id', id)
       .select(`
         *,
-        supplier:suppliers(name)
+        supplier:suppliers!supplier_id(name)
       `)
       .single();
     if (error) {
@@ -300,7 +300,7 @@ export async function markAsPaid(
       .eq('id', id)
       .select(`
         *,
-        supplier:suppliers(name)
+        supplier:suppliers!supplier_id(name)
       `)
       .single();
     if (error) throw error;

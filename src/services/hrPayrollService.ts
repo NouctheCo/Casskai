@@ -13,6 +13,7 @@
 import { supabase } from '@/lib/supabase';
 import { Employee } from './hrService';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 export interface PayrollCalculation {
   id?: string;
   employee_id: string;
@@ -249,12 +250,12 @@ export class HRPayrollService {
           <p><strong>Période:</strong> ${payslipData.period}</p>
           <table>
             <tr><th>Libellé</th><th>Montant</th></tr>
-            <tr><td>Salaire Brut</td><td>${payslipData.grossSalary} €</td></tr>
-            <tr><td>Charges Sociales Salariales</td><td>-${payslipData.socialChargesEmployee} €</td></tr>
-            <tr><td>Prélèvement à la Source</td><td>-${payslipData.taxWithholding} €</td></tr>
-            <tr class="total"><td>Net à Payer</td><td>${payslipData.netSalary} €</td></tr>
+            <tr><td>Salaire Brut</td><td>${formatCurrency(payroll.gross_salary)}</td></tr>
+            <tr><td>Charges Sociales Salariales</td><td>${formatCurrency(-payroll.social_charges_employee)}</td></tr>
+            <tr><td>Prélèvement à la Source</td><td>${formatCurrency(-payroll.tax_withholding)}</td></tr>
+            <tr class="total"><td>Net à Payer</td><td>${formatCurrency(payroll.net_salary)}</td></tr>
           </table>
-          <p><strong>Coût Total Employeur:</strong> ${payslipData.totalCost} € (charges patronales: ${payslipData.socialChargesEmployer} €)</p>
+          <p><strong>Coût Total Employeur:</strong> ${formatCurrency(payroll.gross_salary + payroll.social_charges_employer)} (charges patronales: ${formatCurrency(payroll.social_charges_employer)})</p>
         </body>
         </html>
       `;

@@ -11,6 +11,7 @@
  */
 
 import React from 'react';
+import { formatCurrency } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -63,7 +64,7 @@ export function ProjectStats({ metrics, projects }: ProjectStatsProps) {
               <DollarSign className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Revenus</span>
             </div>
-            <div className="text-2xl font-bold">€{metrics.totalRevenue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{formatCurrency(metrics.totalRevenue)}</div>
             <p className="text-xs text-muted-foreground">Marge: {metrics.profitMargin.toFixed(1)}%</p>
           </CardContent>
         </Card>
@@ -86,7 +87,7 @@ export function ProjectStats({ metrics, projects }: ProjectStatsProps) {
               <span className="text-sm font-medium">Budget utilisé</span>
             </div>
             <div className="text-2xl font-bold">{((metrics.totalSpent / metrics.totalBudget) * 100).toFixed(0)}%</div>
-            <p className="text-xs text-muted-foreground">€{metrics.totalSpent.toLocaleString()} / €{metrics.totalBudget.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">{formatCurrency(metrics.totalSpent)} / {formatCurrency(metrics.totalBudget)}</p>
           </CardContent>
         </Card>
       </div>

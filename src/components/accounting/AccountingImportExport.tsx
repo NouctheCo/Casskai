@@ -289,8 +289,9 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
             {/* Configuration d'import */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Format</label>
-                <select 
+                <label htmlFor="format-select" className="block text-sm font-medium mb-1">Format</label>
+                <select
+                  id="format-select"
                   {...importForm.register('format')}
                   className="w-full p-2 border rounded"
                 >
@@ -301,8 +302,9 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Encodage</label>
-                <select 
+                <label htmlFor="encoding-select" className="block text-sm font-medium mb-1">Encodage</label>
+                <select
+                  id="encoding-select"
                   {...importForm.register('encoding')}
                   className="w-full p-2 border rounded"
                 >
@@ -469,8 +471,9 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
         <CardContent>
           <form onSubmit={templateForm.handleSubmit(onTemplateSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Template</label>
-              <select 
+              <label htmlFor="template-select" className="block text-sm font-medium mb-2">Template</label>
+              <select
+                id="template-select"
                 {...templateForm.register('templateId' as any)}
                 className="w-full p-2 border rounded"
               >

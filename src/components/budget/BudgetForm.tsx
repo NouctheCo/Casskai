@@ -5,6 +5,7 @@ import { Save, X, Plus, Trash2, Calculator, TrendingUp, AlertTriangle, CheckCirc
 import { budgetService } from '@/services/budgetService';
 import { AccountSelectDropdown, type AccountOption } from '@/components/budget/AccountSelectDropdown';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import type {
   BudgetFormData,
   BudgetCategoryFormData,
@@ -318,7 +319,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
@@ -386,10 +387,11 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       {/* Year Selection */}
       <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
         <div className="flex items-center space-x-4">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="budget-year-select" className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Année budgétaire :
           </label>
           <select
+            id="budget-year-select"
             value={formData.year}
             onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
             className="px-3 py-1 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:bg-gray-700 dark:text-gray-100"
@@ -672,10 +674,11 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label htmlFor={`assumption-category-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Catégorie
                       </label>
                       <select
+                        id={`assumption-category-${index}`}
                         value={assumption.category}
                         onChange={(e) => updateAssumption(index, 'category', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"

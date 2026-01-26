@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Box, DollarSign, AlertTriangle, XCircle } from 'lucide-react';
 import type { ComputedMetrics } from '@/types/inventory';
+import { formatCurrency } from '@/lib/utils';
 
 export interface InventoryStatsProps {
   metrics: ComputedMetrics;
@@ -28,7 +29,7 @@ const InventoryStats: FC<InventoryStatsProps> = ({ metrics, alertsCount, lowStoc
           <DollarSign className="h-4 w-4 text-green-500" />
           <span className="text-sm font-medium">Valeur totale</span>
         </div>
-        <div className="text-2xl font-bold">€{(metrics.totalValue || 0).toLocaleString()}</div>
+        <div className="text-2xl font-bold">{formatCurrency(metrics.totalValue || 0)}</div>
         <p className="text-xs text-muted-foreground">Inventaire valorisé</p>
       </CardContent>
     </Card>

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, Plus, Trash2, Save } from 'lucide-react';
 import { hrDocumentTemplatesService } from '@/services/hrDocumentTemplatesService';
 import { logger } from '@/lib/logger';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import {
   STANDARD_VARIABLES,
   type DocumentTemplate,
@@ -33,6 +34,7 @@ export function TemplateFormModal({
   companyId,
   isEditing
 }: TemplateFormModalProps) {
+  useBodyScrollLock(isOpen);
   const [formData, setFormData] = useState<DocumentTemplateFormData>({
     name: '',
     description: '',
@@ -103,11 +105,11 @@ export function TemplateFormModal({
   };
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white dark:bg-gray-800">
+          <div className="flex items-center justify-between p-6 border-b shrink-0 bg-white dark:bg-gray-800">
             <h2 className="text-2xl font-bold">
               {isEditing ? 'Modifier le Template' : 'Nouveau Template'}
             </h2>
@@ -120,7 +122,7 @@ export function TemplateFormModal({
             </button>
           </div>
           {/* Body */}
-          <div className="p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -293,17 +295,17 @@ export function TemplateFormModal({
               </label>
             </div>
           </div>
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 dark:bg-gray-900/30">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button type="submit" disabled={saving} className="gap-2">
-              <Save className="w-4 h-4" />
-              {saving ? 'Enregistrement...' : isEditing ? 'Mettre à jour' : 'Créer'}
-            </Button>
-          </div>
         </form>
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 dark:bg-gray-900/30 shrink-0">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button type="submit" onClick={handleSubmit} disabled={saving} className="gap-2">
+            <Save className="w-4 h-4" />
+            {saving ? 'Enregistrement...' : isEditing ? 'Mettre à jour' : 'Créer'}
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -382,11 +382,12 @@ const BanksPageNew: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+            <label htmlFor="bank-account-select" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
               {t('banking.import.accountLabel')}
             </label>
             <select
-              className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 dark:text-gray-100 border-gray-300 dark:border-gray-600 dark:border-gray-600"
+              id="bank-account-select"
+              className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
               value={selectedAccountId}
               onChange={(e) => setSelectedAccountId(e.target.value)}
               disabled={loading}

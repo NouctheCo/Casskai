@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCompanyCurrency } from '@/hooks/useCompanyCurrency';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -86,7 +87,7 @@ const ModuleManager: React.FC = () => {
           pricing: {
             type: 'subscription',
             price: 29,
-            currency: 'EUR',
+            currency: getCurrentCompanyCurrency(),
             billingPeriod: 'monthly',
             trialDays: 14,
           },
@@ -112,7 +113,7 @@ const ModuleManager: React.FC = () => {
           pricing: {
             type: 'subscription',
             price: 19,
-            currency: 'EUR',
+            currency: getCurrentCompanyCurrency(),
             billingPeriod: 'monthly',
             trialDays: 14,
           },
@@ -138,7 +139,7 @@ const ModuleManager: React.FC = () => {
           pricing: {
             type: 'subscription',
             price: 25,
-            currency: 'EUR',
+            currency: getCurrentCompanyCurrency(),
             billingPeriod: 'monthly',
             trialDays: 14,
           },
@@ -164,7 +165,7 @@ const ModuleManager: React.FC = () => {
           pricing: {
             type: 'free',
             price: 0,
-            currency: 'EUR',
+            currency: getCurrentCompanyCurrency(),
           },
           author: 'CassKai Team',
           rating: 4.9,
@@ -188,7 +189,7 @@ const ModuleManager: React.FC = () => {
           pricing: {
             type: 'subscription',
             price: 39,
-            currency: 'EUR',
+            currency: getCurrentCompanyCurrency(),
             billingPeriod: 'monthly',
           },
           author: 'CassKai Team',
@@ -213,7 +214,7 @@ const ModuleManager: React.FC = () => {
           pricing: {
             type: 'subscription',
             price: 49,
-            currency: 'EUR',
+            currency: getCurrentCompanyCurrency(),
             billingPeriod: 'monthly',
           },
           author: 'CassKai Labs',

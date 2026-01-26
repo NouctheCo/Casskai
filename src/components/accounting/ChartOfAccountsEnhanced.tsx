@@ -16,6 +16,7 @@ import { supabase } from '@/lib/supabase';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
 import { getBudgetCategoryLabel } from '@/utils/budgetCategoryMapping';
 import { logger } from '@/lib/logger';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import {
   Search,
   Filter,
@@ -57,6 +58,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
   const [initializingChart, setInitializingChart] = useState(false);
   const [savingMapping, setSavingMapping] = useState<string | null>(null);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
+  useBodyScrollLock(showAddAccountModal);
   const [newAccount, setNewAccount] = useState({
     number: '',
     name: '',
@@ -563,11 +565,11 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
       {/* Modale d'ajout de compte auxiliaire */}
       {showAddAccountModal && createPortal(
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] overflow-y-auto p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
           onClick={() => setShowAddAccountModal(false)}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 w-full max-w-md my-8 max-h-[85vh] overflow-y-auto"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold mb-4">Nouveau compte</h3>

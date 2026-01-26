@@ -11,6 +11,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export interface Quote {
   id: string;
   company_id: string;
@@ -104,7 +105,7 @@ class QuotesService {
         .from('invoices')
         .select(`
           *,
-          customer:customers(id, name, email, phone, address_line1, city, postal_code, country),
+          customer:customers!customer_id(id, name, email, phone, address_line1, city, postal_code, country),
           invoice_lines(id, description, quantity, unit_price, discount_percent, tax_rate, line_total, line_order)
         `)
         .eq('company_id', companyId)
@@ -180,7 +181,7 @@ class QuotesService {
         .from('invoices')
         .select(`
           *,
-          customer:customers(id, name, email, phone, address_line1, city, postal_code, country),
+          customer:customers!customer_id(id, name, email, phone, address_line1, city, postal_code, country),
           invoice_lines(id, description, quantity, unit_price, discount_percent, tax_rate, line_total, line_order)
         `)
         .eq('id', id)
@@ -261,7 +262,7 @@ class QuotesService {
           tax_amount,
           total_amount,
           paid_amount: 0,
-          currency: quoteData.currency || 'EUR',
+          currency: quoteData.currency || getCurrentCompanyCurrency(),
           notes: quoteData.notes,
           created_by: user.id
         })

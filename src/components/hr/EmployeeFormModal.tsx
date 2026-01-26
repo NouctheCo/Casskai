@@ -10,6 +10,8 @@ import { Employee } from '@/services/hrService';
 import { employeeFormSchema } from '@/lib/validation-schemas';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 type EmployeeFormData = z.infer<typeof employeeFormSchema>;
 interface EmployeeFormModalProps {
   isOpen: boolean;
@@ -23,6 +25,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
   onSubmit,
   employee
 }) => {
+  useBodyScrollLock(isOpen);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeFormSchema),
@@ -37,7 +40,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
       department: employee?.department || '',
       hire_date: employee?.hire_date || new Date().toISOString().split('T')[0],
       salary: employee?.salary?.toString() || '',
-      salary_currency: employee?.salary_currency || 'EUR',
+      salary_currency: employee?.salary_currency || getCurrentCompanyCurrency(),
       contract_type: employee?.contract_type || 'permanent',
       status: employee?.status || 'active',
       address: employee?.address || '',
@@ -60,7 +63,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
         department: employee.department || '',
         hire_date: employee.hire_date || new Date().toISOString().split('T')[0],
         salary: employee.salary?.toString() || '',
-        salary_currency: employee.salary_currency || 'EUR',
+        salary_currency: employee.salary_currency || getCurrentCompanyCurrency(),
         contract_type: employee.contract_type || 'permanent',
         status: employee.status || 'active',
         address: employee.address || '',
@@ -110,7 +113,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}

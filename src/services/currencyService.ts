@@ -12,6 +12,7 @@
 // src/services/currencyService.ts - VERSION FINALE
 import ConfigService from './configService';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 // import { supabase } from '../lib/supabase'; // Commenté pour la compatibilité de build
 // Types principaux (fusion de votre interface existante + nouvelles fonctionnalités)
 export interface Currency {
@@ -614,9 +615,9 @@ export class CurrencyService {
   private getBaseCurrency(): string {
     try {
       const config = this.configService.getConfig();
-      return config?.company?.currency || 'EUR';
+      return config?.company?.currency || getCurrentCompanyCurrency();
     } catch {
-      return 'EUR';
+      return getCurrentCompanyCurrency();
     }
   }
   // Nouvelles méthodes utilitaires

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 interface AgingBucket {
   label: string;
   min: number;
@@ -319,7 +320,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
                                 <CurrencyAmount amount={bucket.receivables} />
                               </span>
                             ) : (
-                              <span className="text-muted-foreground">0.00 €</span>
+                              <span className="text-muted-foreground">{formatCurrency(0)}</span>
                             )}
                           </td>
                           <td className="py-3 px-4">
@@ -340,7 +341,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
                                 <CurrencyAmount amount={bucket.payables} />
                               </span>
                             ) : (
-                              <span className="text-muted-foreground">0.00 €</span>
+                              <span className="text-muted-foreground">{formatCurrency(0)}</span>
                             )}
                           </td>
                           <td className="py-3 px-4">

@@ -243,6 +243,7 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
               />
             </div>
             <select
+              aria-label="Filtrer les templates par catégorie"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="px-4 py-2 border rounded-lg"

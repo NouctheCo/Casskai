@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { logger } from '@/lib/logger';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import {
   dataGovernanceService,
   type CompanySearchResult
@@ -40,6 +41,7 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
   onComplete,
   onCancel
 }) => {
+  useBodyScrollLock(isOpen);
   const [formData, setFormData] = useState<CompanyFormData>({
     name: '',
     siret: '',
@@ -110,9 +112,9 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden"
       >
-        <div className="p-6">
+        <div className="flex-1 overflow-y-auto p-6">
           {/* En-tête */}
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -317,8 +319,9 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
               )}
             </div>
           </div>
-          {/* Actions */}
-          <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
+        </div>
+        {/* Actions */}
+        <div className="shrink-0 flex justify-end gap-3 p-6 border-t">
             <Button variant="outline" onClick={onCancel}>
               Annuler
             </Button>
@@ -336,46 +339,45 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
               )}
             </Button>
           </div>
-          {/* Dialog de fusion */}
-          <AnimatePresence>
-            {selectedMergeTarget && (
+        {/* Dialog de fusion */}
+        <AnimatePresence>
+          {selectedMergeTarget && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            >
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.95 }}
+                className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4"
               >
-                <motion.div
-                  initial={{ scale: 0.95 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0.95 }}
-                  className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4"
-                >
-                  <h3 className="font-bold mb-4">Confirmer la fusion</h3>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    Voulez-vous fusionner cette nouvelle entreprise avec l'existante ?
-                    Cette action est irréversible.
-                  </p>
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => setSelectedMergeTarget(null)}
-                      className="flex-1"
-                    >
-                      Annuler
-                    </Button>
-                    <Button
-                      onClick={() => handleMergeWithExisting(selectedMergeTarget)}
-                      className="flex-1"
-                    >
-                      Confirmer la fusion
-                    </Button>
-                  </div>
-                </motion.div>
+                <h3 className="font-bold mb-4">Confirmer la fusion</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Voulez-vous fusionner cette nouvelle entreprise avec l'existante ?
+                  Cette action est irréversible.
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedMergeTarget(null)}
+                    className="flex-1"
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    onClick={() => handleMergeWithExisting(selectedMergeTarget)}
+                    className="flex-1"
+                  >
+                    Confirmer la fusion
+                  </Button>
+                </div>
               </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </div>
   );

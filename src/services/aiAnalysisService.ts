@@ -9,6 +9,7 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { isAIServiceEnabled, shouldUseEdgeFunction, getEdgeFunctionName } from '@/config/ai.config';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
@@ -415,10 +416,13 @@ Sois précis, professionnel et actionnable. Utilise le contexte français (PCG) 
    * Formate un montant en devise
    */
   private formatCurrency(value: number): string {
+    const currency = getCurrentCompanyCurrency();
+    const isZero = currency === 'XOF' || currency === 'XAF';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0
+      currency,
+      minimumFractionDigits: isZero ? 0 : 0,
+      maximumFractionDigits: isZero ? 0 : 0
     }).format(value);
   }
 }

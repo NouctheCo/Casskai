@@ -10,7 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 // src/services/dashboardService.js
-import { supabase } from '../lib/supabase';
+import { supabase, normalizeData } from '../lib/supabase';
 import { logger } from '@/lib/logger';
 export const dashboardService = {
   // Obtenir les statistiques principales du dashboard
@@ -24,7 +24,7 @@ export const dashboardService = {
         company_id: currentEnterpriseId
       });
       if (error) throw error;
-      return { data, error: null };
+      return { data: (Array.isArray(data) ? normalizeData(data) : data) || null, error: null };
     } catch (error) {
       logger.error('Dashboard', 'Error fetching dashboard stats:', error instanceof Error ? error.message : String(error));
       // Fallback : calculer manuellement si la fonction RPC n'est pas disponible
@@ -40,6 +40,7 @@ export const dashboardService = {
         .select('account_class, account_type, account_number, current_balance, is_active')
         .eq('company_id', currentEnterpriseId);
       if (accountsError) throw accountsError;
+      const accountsRows = normalizeData<any>(accounts);
       // 2. Statistiques des écritures récentes
       const { data: recentEntries, error: entriesError } = await supabase
         .from('journal_entries')
@@ -48,11 +49,12 @@ export const dashboardService = {
         .gte('entry_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
         .order('entry_date', { ascending: false });
       if (entriesError) throw entriesError;
+      const recentRows = normalizeData<any>(recentEntries);
       // 3. Calculer les totaux
       const stats = {
         accounts: {
-          total: accounts.length,
-          active: accounts.filter(a => a.is_active).length,
+          total: accountsRows.length,
+          active: accountsRows.filter(a => a.is_active).length,
           by_class: {} as Record<number, { count: number; balance: number }>
         },
         balances: {
@@ -63,13 +65,13 @@ export const dashboardService = {
           expenses: 0     // Classe 6
         },
         recent_activity: {
-          entries_last_30_days: recentEntries.length,
-          draft_entries: recentEntries.filter(e => e.status === 'draft').length
+          entries_last_30_days: recentRows.length,
+          draft_entries: recentRows.filter(e => e.status === 'draft').length
         }
       };
       // Calculer les balances par type
-      accounts.forEach(account => {
-        const accountClass = account.account_class ?? Number.parseInt(account.account_number?.charAt(0) ?? '', 10);
+      accountsRows.forEach(account => {
+        const accountClass = account.account_class ?? Number.parseInt((account.account_number || '').charAt(0) ?? '', 10);
         if (Number.isNaN(accountClass)) {
           return;
         }
@@ -117,7 +119,7 @@ export const dashboardService = {
         p_date: targetDate
       });
       if (error) throw error;
-      return { data, error: null };
+      return { data: (Array.isArray(data) ? normalizeData(data) : data) || null, error: null };
     } catch (error) {
       logger.error('Dashboard', 'Error fetching balance sheet:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
@@ -137,7 +139,7 @@ export const dashboardService = {
         p_end_date: end
       });
       if (error) throw error;
-      return { data, error: null };
+      return { data: (Array.isArray(data) ? normalizeData(data) : data) || null, error: null };
     } catch (error) {
       logger.error('Dashboard', 'Error fetching income statement:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
@@ -154,7 +156,7 @@ export const dashboardService = {
         p_months: months
       });
       if (error) throw error;
-      return { data: data || [], error: null };
+      return { data: normalizeData<any>(data) || [], error: null };
     } catch (error) {
       logger.error('Dashboard', 'Error fetching cash flow data:', error instanceof Error ? error.message : String(error));
       // Fallback : simuler des données de cash-flow
@@ -172,12 +174,13 @@ export const dashboardService = {
         .eq('account_class', 5)
         .eq('is_active', true);
       if (accountsError) throw accountsError;
+      const accountsRows = normalizeData<any>(accounts);
       // Générer des données mensuelles simulées
       const cashFlowData = [];
       const currentDate = new Date();
       for (let i = months - 1; i >= 0; i--) {
         const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-        const totalBalance = accounts.reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
+        const totalBalance = accountsRows.reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
         cashFlowData.push({
           month: monthDate.toISOString().slice(0, 7),
           inflows: Math.max(0, totalBalance * 0.1 + Math.random() * 1000),
@@ -209,8 +212,9 @@ export const dashboardService = {
         .order('created_at', { ascending: false })
         .limit(limit);
       if (error) throw error;
+      const rows = normalizeData<any>(data);
       // Calculer le montant total pour chaque écriture
-      const entriesWithAmount = (data || []).map(entry => {
+      const entriesWithAmount = rows.map(entry => {
         const totalAmount = (entry.journal_entry_lines || []).reduce(
           (sum, item) => sum + (item.debit_amount || 0), 0
         );
@@ -244,9 +248,10 @@ export const dashboardService = {
         .eq('journal_entries.company_id', currentEnterpriseId)
         .gte('journal_entries.entry_date', dateFrom);
       if (error) throw error;
+      const rows = normalizeData<any>(data);
       // Grouper par compte et calculer l'activité
       const accountActivity: Record<string, { account: any; total_movement: number; transaction_count: number }> = {};
-      (data || []).forEach(item => {
+      rows.forEach(item => {
         const accountId = item.account_id;
         if (!accountActivity[accountId]) {
           accountActivity[accountId] = {
@@ -286,7 +291,8 @@ export const dashboardService = {
         .eq('company_id', currentEnterpriseId)
         .eq('status', 'draft');
       if (!balanceError && unbalancedEntries) {
-        unbalancedEntries.forEach(entry => {
+        const unbalancedRows = normalizeData<any>(unbalancedEntries);
+        unbalancedRows.forEach(entry => {
           const totalDebit = (entry.journal_entry_lines || []).reduce(
             (sum: number, item: any) => sum + (item.debit_amount || 0), 0
           );
@@ -311,8 +317,9 @@ export const dashboardService = {
         .eq('company_id', currentEnterpriseId)
         .eq('is_active', true);
       if (!accountsError && accounts) {
-        accounts.forEach(account => {
-          const accountClass = account.account_class ?? Number.parseInt(account.account_number?.charAt(0) ?? '', 10);
+        const accountsRows = normalizeData<any>(accounts);
+        accountsRows.forEach(account => {
+          const accountClass = account.account_class ?? Number.parseInt((account.account_number || '').charAt(0) ?? '', 10);
           if (Number.isNaN(accountClass)) {
             return;
           }
@@ -347,14 +354,17 @@ export const dashboardService = {
         .eq('company_id', currentEnterpriseId)
         .eq('status', 'draft')
         .lt('entry_date', thirtyDaysAgo);
-      if (!draftsError && oldDrafts?.length > 0) {
-        alerts.push({
-          type: 'warning',
-          title: 'Écritures en brouillon anciennes',
-          message: `${oldDrafts.length} écriture(s) en brouillon datant de plus de 30 jours`,
-          action: 'review_drafts',
-          data: { count: oldDrafts.length }
-        });
+      if (!draftsError && oldDrafts) {
+        const oldDraftsRows = normalizeData<any>(oldDrafts);
+        if (oldDraftsRows.length > 0) {
+          alerts.push({
+            type: 'warning',
+            title: 'Écritures en brouillon anciennes',
+            message: `${oldDraftsRows.length} écriture(s) en brouillon datant de plus de 30 jours`,
+            action: 'review_drafts',
+            data: { count: oldDraftsRows.length }
+          });
+        }
       }
       return { data: alerts, error: null };
     } catch (error) {

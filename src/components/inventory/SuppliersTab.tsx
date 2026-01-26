@@ -3,6 +3,7 @@ import { Truck, PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { SupplierWithStats } from '@/services/suppliersService';
+import { formatCurrency } from '@/lib/utils';
 
 export interface SuppliersTabProps {
   suppliers: SupplierWithStats[];
@@ -54,7 +55,7 @@ const SuppliersTab: FC<SuppliersTabProps> = ({ suppliers, loading, onNewSupplier
               </div>
               <div className="flex flex-wrap items-center justify-between gap-4 sm:flex-col sm:items-end">
                 <div className="text-right text-sm">
-                  <p className="font-semibold">€{(supplier.total_amount || 0).toLocaleString()}</p>
+                  <p className="font-semibold">{formatCurrency(supplier.total_amount || 0)}</p>
                   <p className="text-xs text-muted-foreground">{supplier.total_orders} commande(s)</p>
                   {supplier.payment_terms && <p className="text-xs text-muted-foreground">Paiement: {supplier.payment_terms}</p>}
                 </div>

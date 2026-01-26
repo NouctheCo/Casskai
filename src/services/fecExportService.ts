@@ -6,6 +6,7 @@
 import { supabase } from '../lib/supabase';
 import { auditService } from './auditService';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 interface FECValidation {
   is_valid: boolean;
   total_lines: number;
@@ -122,7 +123,7 @@ export async function downloadFECFile(
         .map((e) => e.message)
         .join('\n');
       throw new Error(
-        `Export FEC invalide:\n${errorMessages}\n\nDifférence débit/crédit: ${validation.balance_difference.toFixed(2)} €`
+        `Export FEC invalide:\n${errorMessages}\n\nDifférence débit/crédit: ${formatCurrency(validation.balance_difference)}`
       );
     }
     // 2. Générer le contenu CSV

@@ -14,6 +14,7 @@
  * Garde la même interface mais utilise Supabase en arrière-plan
  */
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { bankImportService, ImportResult } from './bankImportService';
 import { logger } from '@/lib/logger';
 export interface ImportedFile {
@@ -69,7 +70,7 @@ class BankStorageAdapter {
           bank_name: 'Compte principal',
           account_name: 'Compte courant',
           account_number: 'XXXXX',
-          currency: 'EUR',
+          currency: getCurrentCompanyCurrency(),
           current_balance: 0,
           initial_balance: 0,
           account_type: 'checking',
@@ -278,7 +279,7 @@ class BankStorageAdapter {
         company_id: companyId,
         transaction_date: t.date,
         amount: t.amount,
-        currency: 'EUR',
+        currency: getCurrentCompanyCurrency(),
         description: t.description,
         reference: t.reference,
         category: t.category,

@@ -1,5 +1,7 @@
 // Subscription and Stripe related types
 
+import { getCurrentCompanyCurrency } from '@/lib/utils';
+
 
 
 export interface SubscriptionPlan {
@@ -568,16 +570,11 @@ export const getPlanByStripeId = (stripePriceId: string): SubscriptionPlan | und
 
 
 
-export const formatPrice = (price: number, currency: string = 'EUR'): string => {
-
+export const formatPrice = (price: number, currency: string = getCurrentCompanyCurrency()): string => {
   return new Intl.NumberFormat('fr-FR', {
-
     style: 'currency',
-
     currency
-
   }).format(price);
-
 };
 
 

@@ -1,17 +1,21 @@
 # CassKai - Configuration et Commandes
 
 ## Déploiement VPS
+**⚠️ Architecture mise à jour (21 janvier 2026) :**
+- Traefik et Docker supprimés
+- Nginx sert directement les fichiers statiques
+- Plus besoin de redémarrer les containers après déploiement
+
 **Commande automatisée recommandée :**
 - **Windows PowerShell** : `.\deploy-vps.ps1`
 - **Linux/Mac/Git Bash** : `./deploy-vps.sh`
 
 **Options avancées :**
-- Skip build : `.\deploy-vps.ps1 -SkipBuild` (utilise le build existant)
+- Skip build : `.\deploy-vps.ps1 -SkipBuild` ou `./deploy-vps.sh --skip-build`
 - **Commandes manuelles** :
   - `npm run build` - Build local
   - `npm run type-check` - Vérification TypeScript
   - `npm run validate:db` - Validation colonnes DB Supabase
-  - `npm run deploy` - Déploiement basique (obsolète)
 
 ## État TypeScript
 Il reste des erreurs TypeScript complexes liées à :
@@ -27,12 +31,21 @@ Il reste des erreurs TypeScript complexes liées à :
 3. Vérifier les imports de services (`journalEntriesService` vs `journalEntryService`)
 
 ## Architecture déployée :
+**Architecture simplifiée (sans Docker/Traefik) :**
+```
+Internet → Nginx (système) → Fichiers statiques
+```
+
 - **VPS** : 89.116.111.88
-- **Domaine** : https://casskai.app
-- **SSL** : Let's Encrypt avec Nginx
-- **Frontend** : React/Vite servi par Nginx depuis `/var/www/casskai.app/`
+- **Domaines** :
+  - Production : https://casskai.app et https://www.casskai.app
+  - Staging : https://staging.casskai.app
+- **SSL** : Let's Encrypt (`/etc/letsencrypt/live/casskai.app/`)
+- **Frontend Production** : React/Vite servi par Nginx depuis `/var/www/casskai.app/`
+- **Frontend Staging** : `/var/www/casskai-staging/`
 - **API Backend** : Node.js géré par PM2 (casskai-api)
 - **Nginx Config** : `/etc/nginx/sites-available/casskai-frontend`
+- **Cache** : Désactivé pour HTML, 30 jours pour assets
 
 ## Processus de déploiement automatisé :
 1. **Build local** - Construction optimisée du projet
@@ -40,6 +53,23 @@ Il reste des erreurs TypeScript complexes liées à :
 3. **Upload sécurisé** - Transfert vers répertoire temporaire
 4. **Déploiement atomique** - Remplacement sans interruption
 5. **Permissions** - Correction automatique (www-data:www-data)
-6. **Services** - Redémarrage de Nginx et vérification API
-7. **Tests de santé** - Validation HTTP/HTTPS
+6. **Vérification API** - Redémarrage PM2 si nécessaire
+7. **Tests de santé** - Validation HTTPS (casskai.app et www.casskai.app)
 8. **Rapport** - Informations détaillées du déploiement
+
+**Note importante :** Nginx sert automatiquement les nouveaux fichiers après upload. Aucun redémarrage de service n'est nécessaire pour le frontend.
+
+## Commandes de déploiement manuel :
+```bash
+# Production
+scp -r dist/* root@89.116.111.88:/var/www/casskai.app/
+ssh root@89.116.111.88 "chown -R www-data:www-data /var/www/casskai.app"
+
+# Staging
+scp -r dist/* root@89.116.111.88:/var/www/casskai-staging/
+ssh root@89.116.111.88 "chown -R www-data:www-data /var/www/casskai-staging"
+
+# Vérification
+curl -I https://casskai.app
+ssh root@89.116.111.88 "tail -f /var/log/nginx/casskai-access.log"
+```

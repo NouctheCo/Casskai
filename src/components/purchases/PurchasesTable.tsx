@@ -6,6 +6,7 @@ import { Card, CardContent } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Edit2, Trash2, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 interface PurchasesTableProps {
   purchases: Purchase[];
@@ -53,7 +54,7 @@ const PurchasesTable: React.FC<PurchasesTableProps> = ({
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency: getCurrentCompanyCurrency()
     }).format(amount);
   };
 

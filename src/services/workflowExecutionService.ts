@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/logger';
 import { auditService } from './auditService';
 import { emailService } from './emailService';
+import { formatCurrency } from '@/lib/utils';
 import type {
   Workflow,
   WorkflowExecution,
@@ -354,15 +355,15 @@ async function executeSendPaymentReminder(
   const tones = {
     friendly: {
       subject: `Rappel amical - Facture ${invoice.invoice_number}`,
-      body: `Bonjour,\n\nNous vous rappelons aimablement que la facture ${invoice.invoice_number} d'un montant de ${invoice.total_amount}€ est en attente de paiement.\n\nCordialement`
+      body: `Bonjour,\n\nNous vous rappelons aimablement que la facture ${invoice.invoice_number} d'un montant de ${formatCurrency(invoice.total_amount)} est en attente de paiement.\n\nCordialement`
     },
     firm: {
       subject: `Relance - Facture ${invoice.invoice_number} en retard`,
-      body: `Madame, Monsieur,\n\nNous constatons que la facture ${invoice.invoice_number} d'un montant de ${invoice.total_amount}€ n'a pas été réglée malgré notre précédent rappel.\n\nNous vous demandons de régulariser cette situation rapidement.\n\nCordialement`
+      body: `Madame, Monsieur,\n\nNous constatons que la facture ${invoice.invoice_number} d'un montant de ${formatCurrency(invoice.total_amount)} n'a pas été réglée malgré notre précédent rappel.\n\nNous vous demandons de régulariser cette situation rapidement.\n\nCordialement`
     },
     legal: {
       subject: `MISE EN DEMEURE - Facture ${invoice.invoice_number}`,
-      body: `Madame, Monsieur,\n\nPar la présente, nous vous mettons formellement en demeure de régler la facture ${invoice.invoice_number} d'un montant de ${invoice.total_amount}€.\n\nÀ défaut de règlement sous 8 jours, nous nous réserverons le droit d'engager une procédure de recouvrement.\n\nCordialement`
+      body: `Madame, Monsieur,\n\nPar la présente, nous vous mettons formellement en demeure de régler la facture ${invoice.invoice_number} d'un montant de ${formatCurrency(invoice.total_amount)}.\n\nÀ défaut de règlement sous 8 jours, nous nous réserverons le droit d'engager une procédure de recouvrement.\n\nCordialement`
     }
   };
 

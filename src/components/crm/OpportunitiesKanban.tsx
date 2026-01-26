@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface OpportunitiesKanbanProps {
   opportunities: Opportunity[];
   clients?: Client[];
@@ -71,7 +72,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency: getCurrentCompanyCurrency()
     }).format(amount);
   };
   const formatDate = (dateString: string) => {

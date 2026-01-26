@@ -16,6 +16,7 @@ import { SUPPORTED_CURRENCIES } from '../utils/constants';
 import { supabase } from '../lib/supabase';
 import type { DatabaseFunctions } from '../types/supabase-rpc.types';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export class CurrencyIntegration {
   private static instance: CurrencyIntegration;
   private configService = ConfigService.getInstance();
@@ -199,19 +200,21 @@ export class CurrencyIntegration {
       logger.warn('CurrencyIntegration', 'Supabase client non disponible, opération ignorée');
       return;
     }
+    const config = this.configService.getConfig();
+    const companyCurrency = (config && (config.company as any)?.currency) ? (config.company as any).currency : getCurrentCompanyCurrency();
     const updateQueries = [
       // Ajouter devise aux companies
       `ALTER TABLE companies 
-       ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'EUR';`,
+       ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT '${companyCurrency}';`,
       // Ajouter devise aux accounts
       `ALTER TABLE accounts 
-       ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'EUR';`,
+       ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT '${companyCurrency}';`,
       // Ajouter devise aux transactions
       `ALTER TABLE transactions 
-       ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'EUR';`,
+       ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT '${companyCurrency}';`,
       // Ajouter colonnes devise aux journal_lines
       `ALTER TABLE journal_lines 
-       ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'EUR',
+       ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT '${companyCurrency}',
        ADD COLUMN IF NOT EXISTS exchange_rate DECIMAL(15,8),
        ADD COLUMN IF NOT EXISTS base_currency_debit DECIMAL(15,2) DEFAULT 0,
        ADD COLUMN IF NOT EXISTS base_currency_credit DECIMAL(15,2) DEFAULT 0;`

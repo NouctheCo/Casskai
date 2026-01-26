@@ -256,6 +256,7 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
               />
             </div>
             <select
+              aria-label="Filtrer les documents par statut"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2 border rounded-lg"

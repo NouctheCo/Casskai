@@ -26,6 +26,7 @@ import {
 } from '../types/tax.types';
 import * as TaxImpl from './taxServiceImplementations';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 /**
  * Service for managing tax-related operations
  */
@@ -241,7 +242,7 @@ export const taxService = {
         status: declaration.status,
         amount: declaration.amount,
         description: declaration.description || '',
-        currency: 'EUR' // This should come from the company
+        currency: getCurrentCompanyCurrency() // This should come from the company
       };
       // Insert into database
       const { data, error } = await supabase

@@ -68,11 +68,10 @@ export function truncate(text: string, maxLength: number): string {
 /**
  * Formats currency amounts
  */
-export function formatCurrency(amount: number, currency = 'EUR'): string {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency
-  }).format(amount);
+import { formatCurrency as formatCurrencyLib } from '@/lib/utils';
+
+export function formatCurrency(amount: number, currency?: string): string {
+  return formatCurrencyLib(amount, currency);
 }
 
 /**

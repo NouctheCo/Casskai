@@ -10,6 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 import { MARKET_CONFIGS } from '../../data/markets';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import {
   OnboardingData,
   CompanyProfile,
@@ -59,7 +60,7 @@ class OnboardingService {
         },
         preferences: {
           language: 'fr',
-          currency: 'EUR',
+          currency: getCurrentCompanyCurrency(),
           timezone: 'Europe/Paris'
         },
         selectedModules: [],

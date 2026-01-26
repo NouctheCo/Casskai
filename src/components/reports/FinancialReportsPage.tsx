@@ -167,9 +167,13 @@ export const FinancialReportsPage: React.FC = () => {
 
   // Formater une valeur monétaire
   const formatCurrency = (value: number) => {
+    const currency = (currentEnterprise as any)?.default_currency || (typeof window !== 'undefined' ? (localStorage.getItem('casskai_current_company_currency') || 'EUR') : 'EUR');
+    const isZero = currency === 'XOF' || currency === 'XAF';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency,
+      minimumFractionDigits: isZero ? 0 : 2,
+      maximumFractionDigits: isZero ? 0 : 2
     }).format(value);
   };
 

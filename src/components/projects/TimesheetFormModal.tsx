@@ -17,6 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { timesheetsService, type CreateTimesheetInput } from '@/services/timesheetsService';
 import { projectTasksService } from '@/services/projectTasksService';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 export interface TimesheetFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -281,7 +282,7 @@ const TimesheetFormModal: React.FC<TimesheetFormModalProps> = ({ isOpen, onClose
               )}
               {formData.hourly_rate > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  {t('projects.timesheetModal.totalAmount', 'Montant total')} : €{(formData.hours * formData.hourly_rate).toFixed(2)}
+                  {t('projects.timesheetModal.totalAmount', 'Montant total')} : {formatCurrency(formData.hours * formData.hourly_rate)}
                 </p>
               )}
             </div>

@@ -12,6 +12,8 @@ import { Badge } from '@/components/ui/badge';
 
 import { Button } from '@/components/ui/button';
 
+import { getCurrentCompanyCurrency } from '@/lib/utils';
+
 import type { Opportunity } from '@/types/crm.types';
 
 import {
@@ -192,7 +194,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
 
       style: 'currency',
 
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
 
       minimumFractionDigits: 0,
 

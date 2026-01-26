@@ -10,6 +10,7 @@ import { BankAccountFormModal } from './BankAccountFormModal';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface BankAccountsTabProps {
   companyId: string;
   accounts: any[];
@@ -165,14 +166,14 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
                             }`}>
                               {new Intl.NumberFormat('fr-FR', {
                                 style: 'currency',
-                                currency: account.currency || 'EUR'
+                                currency: account.currency || getCurrentCompanyCurrency()
                               }).format(account.current_balance || 0)}
                             </span>
                           </div>
                           <div>
                             <span className="text-gray-500 dark:text-gray-400">Devise:</span>
                             <span className="ml-2 text-gray-900 dark:text-gray-100">
-                              {account.currency || 'EUR'}
+                              {account.currency || getCurrentCompanyCurrency()}
                             </span>
                           </div>
                         </div>

@@ -13,6 +13,7 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabase';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { invoicingService, type InvoiceWithDetails } from '@/services/invoicingService';
 import { InvoicePdfService } from '@/services/invoicePdfService';
 import CompanySettingsService from '@/services/companySettingsService';
@@ -122,7 +123,7 @@ export function useInvoiceEmail() {
       ? new Date(invoice.due_date as string).toLocaleDateString('fr-FR')
       : 'Non spécifiée';
     const totalTtc = Number(invoice.total_incl_tax ?? 0);
-    const currency = invoice.currency || 'EUR';
+    const currency = invoice.currency || getCurrentCompanyCurrency();
 
     const formatCurrency = (amount: number) => {
       // ✅ Fix: S'assurer que amount est un nombre valide
@@ -270,7 +271,7 @@ export function useInvoiceEmail() {
       ? new Date(invoice.due_date as string).toLocaleDateString('fr-FR')
       : 'Non spécifiée';
     const totalTtc = Number(invoice.total_incl_tax ?? 0);
-    const currency = invoice.currency || 'EUR';
+    const currency = invoice.currency || getCurrentCompanyCurrency();
 
     const formatCurrency = (amount: number) => {
       // ✅ Fix: S'assurer que amount est un nombre valide

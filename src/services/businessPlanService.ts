@@ -13,6 +13,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { fromBudgetLinesDB, type BudgetLineDB } from '@/utils/budgetMapping';
+import { formatCurrencyForPDF, formatCurrency } from '@/lib/utils';
 
 // Types partagés avec le mapping
 export interface BudgetCategory {
@@ -148,9 +149,9 @@ export const businessPlanService = {
     pdf.setTextColor(0, 0, 0);
 
     const kpis = [
-      ['Chiffre d\'affaires prévisionnel', `${totalRevenue.toLocaleString('fr-FR')} EUR`],
-      ['Total des charges', `${totalExpenses.toLocaleString('fr-FR')} EUR`],
-      ['Résultat net prévisionnel', `${netResult.toLocaleString('fr-FR')} EUR`],
+      ['Chiffre d\'affaires prévisionnel', formatCurrencyForPDF(totalRevenue)],
+      ['Total des charges', formatCurrencyForPDF(totalExpenses)],
+      ['Résultat net prévisionnel', formatCurrencyForPDF(netResult)],
       ['Marge nette', `${margin.toFixed(1)}%`],
     ];
 
@@ -173,12 +174,8 @@ export const businessPlanService = {
     pdf.setTextColor(80, 80, 80);
     const commentary =
       netResult >= 0
-        ? `L'entreprise prévoit un résultat positif de ${netResult.toLocaleString(
-            'fr-FR'
-          )} € pour l'année ${data.year}, soit une marge nette de ${margin.toFixed(1)}%.`
-        : `L'entreprise prévoit un déficit de ${Math.abs(netResult).toLocaleString(
-            'fr-FR'
-          )} € pour l'année ${data.year}. Des mesures correctives sont à envisager.`;
+        ? `L'entreprise prévoit un résultat positif de ${formatCurrency(netResult)} pour l'année ${data.year}, soit une marge nette de ${margin.toFixed(1)}%.`
+        : `L'entreprise prévoit un déficit de ${formatCurrency(Math.abs(netResult))} pour l'année ${data.year}. Des mesures correctives sont à envisager.`;
 
     const splitText = pdf.splitTextToSize(commentary, pageWidth - 40);
     pdf.text(splitText, 20, y);
@@ -203,10 +200,10 @@ export const businessPlanService = {
       .map((c) => [
         c.account_number || '-',
         c.account_name || 'Revenu',
-        `${c.annual_amount.toLocaleString('fr-FR')} EUR`,
+        formatCurrencyForPDF(c.annual_amount),
       ]);
 
-    revenueRows.push(['', 'TOTAL PRODUITS', `${totalRevenue.toLocaleString('fr-FR')} EUR`]);
+    revenueRows.push(['', 'TOTAL PRODUITS', formatCurrencyForPDF(totalRevenue)]);
 
     autoTable(pdf, {
       startY: y,
@@ -233,10 +230,10 @@ export const businessPlanService = {
       .map((c) => [
         c.account_number || '-',
         c.account_name || 'Dépense',
-        `${c.annual_amount.toLocaleString('fr-FR')} EUR`,
+        formatCurrencyForPDF(c.annual_amount),
       ]);
 
-    expenseRows.push(['', 'TOTAL CHARGES', `${totalExpenses.toLocaleString('fr-FR')} EUR`]);
+    expenseRows.push(['', 'TOTAL CHARGES', formatCurrencyForPDF(totalExpenses)]);
 
     autoTable(pdf, {
       startY: y,
@@ -255,7 +252,7 @@ export const businessPlanService = {
     // Résultat
     pdf.setFontSize(14);
     pdf.setTextColor(netResult >= 0 ? 0 : 150, netResult >= 0 ? 100 : 0, 0);
-    pdf.text(`RÉSULTAT NET : ${netResult.toLocaleString('fr-FR')} €`, 20, y);
+    pdf.text(`RÉSULTAT NET : ${formatCurrency(netResult)}`, 20, y);
 
     // ===== PAGE 4 : RÉPARTITION MENSUELLE =====
     pdf.addPage();

@@ -41,28 +41,29 @@ $deployScript = "cd /var/www && cp -r casskai.app casskai.app.backup.`$(date +%Y
 
 ssh ${VPS_USER}@${VPS_HOST} $deployScript
 
-# 5. Restart services (Nginx container or host, then PM2)
-Write-Host "[SERVICES] Redemarrage des services..." -ForegroundColor Blue
+# 5. Verification (pas besoin de redemarrer Nginx - sert directement les fichiers)
+Write-Host "[INFO] Fichiers deployes - Nginx les sert automatiquement" -ForegroundColor Green
+Write-Host "[SERVICES] Verification de l'API..." -ForegroundColor Blue
 $serviceScript = @'
 set -e
 
-# Reload Nginx if container casskai-proxy exists, else try host nginx
-if docker ps --format '{{.Names}}' | grep -q '^casskai-proxy$'; then
-    echo "[NGINX] Reload via container casskai-proxy"
-    docker exec casskai-proxy nginx -s reload 2>/dev/null || docker restart casskai-proxy
+# Verification Nginx host (architecture actuelle sans Docker/Traefik)
+if systemctl is-active --quiet nginx; then
+    echo "[NGINX] Service actif (sert directement /var/www/casskai.app)"
 else
-    if command -v nginx >/dev/null 2>&1; then
-        echo "[NGINX] Reload host nginx"
-        nginx -s reload || nginx -g 'daemon on;'
-    else
-        echo "[NGINX] Aucun nginx detecte (container peut etre gere par Traefik)"
-    fi
+    echo "[WARNING] Nginx n'est pas actif"
+    systemctl status nginx --no-pager
 fi
 
-# Restart API via PM2
-cd /var/www/casskai.app/api 2>/dev/null || true
-pm2 restart casskai-api 2>/dev/null || pm2 start server.js --name casskai-api
-pm2 save || true
+# Restart API via PM2 si elle existe
+if pm2 list | grep -q casskai-api; then
+    echo "[API] Redemarrage de l'API PM2"
+    pm2 restart casskai-api
+    pm2 save
+else
+    echo "[API] API casskai-api non trouvee dans PM2 (normal si frontend uniquement)"
+fi
+
 echo "[SERVICES] OK"
 '@
 # Strip Windows CR to avoid bash parsing issues on the remote host
@@ -70,9 +71,14 @@ $serviceScript = $serviceScript -replace "`r",""
 ssh ${VPS_USER}@${VPS_HOST} "$serviceScript"
 
 # 6. Tests
-Write-Host "[TEST] Verification Nginx (localhost:8080) et domaine (https)" -ForegroundColor Blue
+Write-Host "[TEST] Verification du domaine HTTPS" -ForegroundColor Blue
 Start-Sleep -Seconds 2
-ssh ${VPS_USER}@${VPS_HOST} "curl -s -o /dev/null -w 'Local Nginx: %{http_code}\n' http://127.0.0.1:8080/ ; curl -s -o /dev/null -w 'Domaine: %{http_code}\n' https://casskai.app"
+$testScript = @'
+curl -s -o /dev/null -w 'HTTPS casskai.app: %{http_code}\n' https://casskai.app
+curl -s -o /dev/null -w 'HTTPS www.casskai.app: %{http_code}\n' https://www.casskai.app
+'@
+$testScript = $testScript -replace "`r",""
+ssh ${VPS_USER}@${VPS_HOST} "$testScript"
 
 # 7. Cleanup
 Write-Host "[CLEANUP] Nettoyage..." -ForegroundColor Blue

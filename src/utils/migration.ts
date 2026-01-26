@@ -5,6 +5,7 @@ import { AppConfig } from '../types/config';
 import { APP_VERSION } from './constants';
 import { supabase } from '../lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export class ConfigMigration {
   private configService = ConfigService.getInstance();
   /**
@@ -64,7 +65,7 @@ export class ConfigMigration {
         accountingStandard: 'SYSCOHADA',
         name: 'Default Company',
         country: 'Default Country',
-        currency: 'USD',
+        currency: getCurrentCompanyCurrency(),
         timezone: 'UTC',
         fiscalYearStart: '2025-01-01'
       },

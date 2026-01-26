@@ -167,7 +167,7 @@ export class SampleDataService {
     ];
   }
   // Données d'exemple pour fournisseurs
-  private getSampleSuppliers(_config: ChartOfAccountsConfig) {
+  private getSampleSuppliers(config: ChartOfAccountsConfig) {
     return [
       {
         name: 'FOURNISSEUR GLOBAL SARL',
@@ -180,7 +180,7 @@ export class SampleDataService {
         tax_number: 'FR11223344556',
         supplier_type: 'materials',
         payment_terms: 30,
-        currency: 'EUR'
+        currency: config.currency
       },
       {
         name: 'IMPORT EXPORT MAGHREB',
@@ -193,7 +193,7 @@ export class SampleDataService {
         tax_number: 'MA123456789',
         supplier_type: 'goods',
         payment_terms: 45,
-        currency: 'MAD'
+        currency: config.currency
       }
     ];
   }

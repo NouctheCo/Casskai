@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 interface AmortizationLine {
   period: number;
@@ -119,15 +119,6 @@ const LoanSimulator: React.FC = () => {
       amortizationSchedule
     };
   }, [loanAmount, annualRate, durationYears, amortizationType, startDate]);
-  // Formate une devise
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
-  };
   // Export PDF (placeholder)
   const exportToPDF = () => {
     logger.debug('LoanSimulator', 'Export PDF - Fonctionnalité à venir');

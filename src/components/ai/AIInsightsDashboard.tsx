@@ -22,7 +22,7 @@ import { Button } from '../ui/button';
 // import { Progress } from '../ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 // import { Alert, AlertDescription } from '../ui/alert';
-import { cn } from '../../lib/utils';
+import { cn, formatCurrency } from '../../lib/utils';
 import { aiAnalyticsService } from '../../services/aiAnalyticsService';
 import { aiVisualizationService } from '../../services/aiVisualizationService';
 import { openAIService } from '@/services/ai/OpenAIService';
@@ -183,7 +183,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
         type: 'opportunity',
         severity: 'info',
         title: 'Opportunités d\'optimisation fiscale',
-        message: `Économies potentielles de ${highValueOptimizations.reduce((sum, opt) => sum + opt.potentialSavings, 0).toLocaleString('fr-FR')}€`,
+        message: `Économies potentielles de ${formatCurrency(highValueOptimizations.reduce((sum, opt) => sum + opt.potentialSavings, 0))}`,
         data: { optimizations: highValueOptimizations },
         timestamp: new Date(),
         isRead: false
@@ -289,7 +289,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
                 </p>
               </div>
             </motion.div>
-            <motion.div 
+            <motion.div
               className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
               whileHover={{ scale: 1.02 }}
             >
@@ -297,7 +297,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Économies pot.</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-white">
-                  {taxOptimizations.reduce((sum, opt) => sum + opt.potentialSavings, 0).toLocaleString('fr-FR')}€
+                  {formatCurrency(taxOptimizations.reduce((sum, opt) => sum + opt.potentialSavings, 0))}
                 </p>
               </div>
             </motion.div>

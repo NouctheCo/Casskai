@@ -14,6 +14,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 /**
  * Référentiels comptables supportés
  */
@@ -500,7 +501,7 @@ export class AccountingRulesService {
     const difference = Math.abs(totalDebit - totalCredit);
     if (difference > 0.01) {
       errors.push(
-        `L'écriture n'est pas équilibrée: Débit ${totalDebit.toFixed(2)}€ ≠ Crédit ${totalCredit.toFixed(2)}€ (différence: ${difference.toFixed(2)}€)`
+        `L'écriture n'est pas équilibrée: Débit ${formatCurrency(totalDebit)} ≠ Crédit ${formatCurrency(totalCredit)} (différence: ${formatCurrency(difference)})`
       );
     }
     // 2. Minimum 2 lignes requises

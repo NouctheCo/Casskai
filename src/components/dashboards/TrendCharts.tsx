@@ -191,6 +191,7 @@ export const TrendChartsComponent: React.FC = () => {
           <div className="timeframe-selector">
             <h3>Timeframe</h3>
             <select
+              aria-label="Sélectionner la période d'analyse (trimestrielle ou annuelle)"
               value={state.timeframe}
               onChange={e =>
                 setState(prev => ({

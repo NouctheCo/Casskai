@@ -20,6 +20,7 @@ import { chartImageService } from './chartImageService';
 import { aiAnalysisService, type FinancialKPIs as AIFinancialKPIs } from './aiAnalysisService';
 import { aiReportAnalysisService, type CashFlowData, type ReceivablesData, type FinancialRatiosData, type BudgetVarianceData, type PayablesData, type InventoryData, type AIAnalysisResult } from './aiReportAnalysisService';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export interface FinancialData {
   compte: string;
   libelle: string;
@@ -3170,7 +3171,7 @@ export class ReportGenerationService {
   private formatCurrency(amount: number): string {
     const formatted = new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);

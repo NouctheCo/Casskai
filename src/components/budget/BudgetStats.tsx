@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign, Target, Percent } from 'lucide-react';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import type { Budget } from '@/types/budget.types';
 
 interface BudgetStatsProps {
@@ -30,7 +31,7 @@ export const BudgetStats: React.FC<BudgetStatsProps> = ({ budgets }) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);

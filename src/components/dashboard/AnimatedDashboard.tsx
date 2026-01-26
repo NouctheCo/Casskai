@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 import { motion } from 'framer-motion';
 
+import { getCurrentCompanyCurrency } from '@/lib/utils';
+
 import { KPICard, AnimatedNumber } from '../ui/AnimatedCard';
 
 import { DragDropGrid, DragDropItem } from '../ui/DragDropGrid';
@@ -306,7 +308,7 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
 
                               style: 'currency',
 
-                              currency: 'EUR',
+                              currency: getCurrentCompanyCurrency(),
 
                               notation: 'compact'
 
@@ -549,15 +551,15 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
 
               <div className="text-2xl font-bold mt-1">
 
-                <AnimatedNumber 
+                <AnimatedNumber
 
-                  value={dashboardData.revenue.current} 
+                  value={dashboardData.revenue.current}
 
                   format={(val) => new Intl.NumberFormat('fr-FR', {
 
                     style: 'currency',
 
-                    currency: 'EUR',
+                    currency: getCurrentCompanyCurrency(),
 
                     notation: 'compact'
 

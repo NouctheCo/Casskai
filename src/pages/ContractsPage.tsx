@@ -15,6 +15,7 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -202,7 +203,7 @@ const ContractsPage: React.FC = () => {
         />
         <StatCard
           title={t('contracts.stats.total_rfa_pending', 'RFA en attente')}
-          value={<AmountDisplay amount={dashboardData?.stats.total_rfa_pending || 0} currency="EUR" />}
+          value={<AmountDisplay amount={dashboardData?.stats.total_rfa_pending || 0} currency={getCurrentCompanyCurrency()} />}
           icon={<DollarSign />}
         />
         <StatCard

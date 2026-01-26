@@ -341,48 +341,48 @@ export function HeroTerminal() {
         }}
       />
 
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex justify-center mb-6"
-        >
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* LEFT COLUMN - Text Content */}
+          <div className="space-y-6">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="flex justify-center lg:justify-start mb-6"
+            >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 backdrop-blur-sm">
             <Sparkles className="w-4 h-4 text-blue-400" />
             <span className="text-sm text-blue-300 font-medium">{t('landing.hero.badge')}</span>
           </div>
         </motion.div>
 
-        {/* Main headline */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-center mb-10"
-        >
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 leading-tight">
-            {t('landing.hero.title')}
-            <br />
-            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              {t('landing.hero.titleHighlight')}
-            </span>
-          </h1>
-          <p className="text-lg sm:text-xl text-slate-400 max-w-3xl mx-auto">
-            {t('landing.hero.subtitle')}{' '}
-            <span className="text-white font-medium whitespace-nowrap">{t('landing.hero.subtitleHighlight')}</span>
-            <br className="hidden sm:block" />
-            {t('landing.hero.subtitleLine2')}
-          </p>
+            {/* Main headline */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-center lg:text-left mb-10"
+            >
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 leading-tight">
+                {t('landing.hero.newTitle')}
+                <br />
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  {t('landing.hero.newTitleHighlight')}
+                </span>
+              </h1>
+              <p className="text-lg sm:text-xl text-slate-400 max-w-3xl mx-auto lg:mx-0">
+                {t('landing.hero.newSubtitle')}
+              </p>
 
-          {/* Quick Features Pills */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-wrap justify-center gap-3 mt-6"
-          >
+              {/* Quick Features Pills */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="flex flex-wrap justify-center lg:justify-start gap-3 mt-6"
+              >
             {[
               { icon: BarChart3, label: t('landing.hero.features.dashboard') },
               { icon: Receipt, label: t('landing.hero.features.invoicing') },
@@ -399,16 +399,72 @@ export function HeroTerminal() {
                 <span>{feature.label}</span>
               </div>
             ))}
-          </motion.div>
-        </motion.div>
+              </motion.div>
+            </motion.div>
 
-        {/* Chat Interface */}
-        <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="relative max-w-3xl mx-auto"
-        >
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4 mt-10"
+            >
+              <Button
+                size="lg"
+                type="button"
+                onClick={() => navigate('/auth')}
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-blue-500/40"
+              >
+                {t('landing.hero.newCta.primary')}
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+              <Button
+                size="lg"
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  const featuresSection = document.getElementById('features');
+                  featuresSection?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-6 text-lg rounded-xl"
+              >
+                <Play className="mr-2 w-5 h-5" />
+                {t('landing.hero.newCta.secondary')}
+              </Button>
+            </motion.div>
+
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.8 }}
+              className="flex flex-wrap items-center justify-center lg:justify-start gap-8 sm:gap-12 mt-14 text-center lg:text-left"
+            >
+              {[
+                { value: '26+', label: t('landing.hero.stats.countries') },
+                { value: '5', label: t('landing.hero.stats.standards') },
+                { value: '99.9%', label: t('landing.hero.stats.availability') },
+                { value: '24/7', label: t('landing.hero.stats.support') },
+              ].map((stat, index) => (
+                <div key={index} className="px-2">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    {stat.value}
+                  </div>
+                  <div className="text-sm text-slate-500 mt-1">{stat.label}</div>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* RIGHT COLUMN - Chat Demo */}
+          <div>
+            {/* Chat Interface */}
+            <motion.div
+              initial={{ opacity: 0, y: 40, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="relative"
+            >
           {/* Glow effect */}
           <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-60" />
 
@@ -584,60 +640,9 @@ export function HeroTerminal() {
               </div>
             </div>
           </div>
-        </motion.div>
-
-        {/* CTA Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10"
-        >
-          <Button
-            size="lg"
-            type="button"
-            onClick={() => navigate('/auth')}
-            className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-blue-500/40"
-          >
-            {t('landing.hero.cta.tryFree')}
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
-          <Button
-            size="lg"
-            type="button"
-            variant="outline"
-            onClick={() => {
-              const featuresSection = document.getElementById('features');
-              featuresSection?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-6 text-lg rounded-xl"
-          >
-            <Play className="mr-2 w-5 h-5" />
-            {t('landing.hero.cta.discover')}
-          </Button>
-        </motion.div>
-
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.8 }}
-          className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 mt-14 text-center"
-        >
-          {[
-            { value: '26+', label: t('landing.hero.stats.countries') },
-            { value: '5', label: t('landing.hero.stats.standards') },
-            { value: '99.9%', label: t('landing.hero.stats.availability') },
-            { value: '24/7', label: t('landing.hero.stats.support') },
-          ].map((stat, index) => (
-            <div key={index} className="px-2">
-              <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                {stat.value}
-              </div>
-              <div className="text-sm text-slate-500 mt-1">{stat.label}</div>
-            </div>
-          ))}
-        </motion.div>
+            </motion.div>
+          </div>
+        </div>
       </div>
 
       {/* Scroll indicator */}

@@ -221,8 +221,42 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     window.addEventListener('enterpriseContextRefresh', handleRefresh);
 
+    // Defensive: swallow specific DOM NotFoundError (removeChild) that surfaces
+    // sporadically in dev when third-party UI elements are removed from the page.
+    const globalErrorHandler = (event: ErrorEvent) => {
+      try {
+        const msg = String(event.message || '');
+        if (msg.includes('Failed to execute "removeChild"') || msg.includes('The node to be removed is not a child')) {
+          devLogger.warn('EnterpriseContext', 'Suppressed benign DOM removeChild error', msg);
+          // Prevent the error from propagating to React's error boundary in dev.
+          event.preventDefault();
+          return;
+        }
+      } catch (_e) {
+        // ignore
+      }
+    };
+
+    const unhandledRejectionHandler = (ev: PromiseRejectionEvent) => {
+      try {
+        const reason = ev.reason ? String(ev.reason) : '';
+        if (reason.includes('Failed to execute "removeChild"') || reason.includes('The node to be removed is not a child')) {
+          devLogger.warn('EnterpriseContext', 'Suppressed benign promise rejection for removeChild', reason);
+          ev.preventDefault();
+          return;
+        }
+      } catch (_e) {
+        // ignore
+      }
+    };
+
+    window.addEventListener('error', globalErrorHandler as EventListener);
+    window.addEventListener('unhandledrejection', unhandledRejectionHandler as EventListener);
+
     return () => {
       window.removeEventListener('enterpriseContextRefresh', handleRefresh);
+      window.removeEventListener('error', globalErrorHandler as EventListener);
+      window.removeEventListener('unhandledrejection', unhandledRejectionHandler as EventListener);
     };
      
   }, []); // Empty deps - only run once on mount

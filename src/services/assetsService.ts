@@ -9,7 +9,7 @@
  * Support: PCG français + SYSCOHADA
  */
 
-import { supabase } from '@/lib/supabase';
+import { supabase, normalizeData } from '@/lib/supabase';
 import type {
   Asset,
   AssetCategory,
@@ -41,7 +41,7 @@ export const getAssetCategories = async (companyId: string): Promise<AssetCatego
     .order('name');
 
   if (error) throw error;
-  return data || [];
+  return normalizeData<AssetCategory>(data) || [];
 };
 
 /**
@@ -64,7 +64,8 @@ export const createAssetCategory = async (
     .single();
 
   if (error) throw error;
-  return data;
+  if (!data || typeof data !== 'object') throw error ?? new Error('Failed to create asset category');
+  return data as AssetCategory;
 };
 
 /**
@@ -158,9 +159,9 @@ export const getAssets = async (
   const { data, error } = await query;
 
   if (error) throw error;
-
   // Transformer les données pour le format de liste
-  return (data || []).map((asset: any) => ({
+  const rows = normalizeData<any>(data);
+  return rows.map((asset: any) => ({
     id: asset.id,
     asset_number: asset.asset_number,
     name: asset.name,
@@ -725,7 +726,7 @@ export const getDepreciationSchedule = async (
     .order('period_start_date');
 
   if (error) throw error;
-  return data || [];
+  return normalizeData<AssetDepreciationScheduleLine>(data) || [];
 };
 
 /**

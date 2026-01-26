@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
 import { Users, Building2 } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface ThirdPartyFormDialogProps {
   open: boolean;
   onClose: () => void;
@@ -36,7 +37,7 @@ export function ThirdPartyFormDialog({
     billing_postal_code: '',
     billing_country: 'FR',
     payment_terms: 30,
-    currency: 'EUR',
+    currency: getCurrentCompanyCurrency(),
     notes: ''
   });
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,7 +91,7 @@ export function ThirdPartyFormDialog({
         billing_postal_code: '',
         billing_country: 'FR',
         payment_terms: 30,
-        currency: 'EUR',
+        currency: getCurrentCompanyCurrency(),
         notes: ''
       });
       onSuccess();

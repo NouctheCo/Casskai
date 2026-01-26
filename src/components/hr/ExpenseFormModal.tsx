@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Expense, Employee } from '@/services/hrService';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface ExpenseFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -26,7 +27,7 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
     category: expense?.category || 'other' as const,
     description: expense?.description || '',
     amount: expense?.amount?.toString() || '',
-    currency: expense?.currency || 'EUR',
+    currency: expense?.currency || getCurrentCompanyCurrency(),
     expense_date: expense?.expense_date || new Date().toISOString().split('T')[0],
     notes: expense?.notes || '',
   });

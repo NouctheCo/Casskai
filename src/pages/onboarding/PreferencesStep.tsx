@@ -11,6 +11,7 @@
  */
 
 import React, { useState } from 'react';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 import { motion } from 'framer-motion';
 
@@ -644,7 +645,7 @@ const usePreferences = (companyData: Record<string, unknown>, updateCompanyProfi
 
     language: 'fr',
 
-    currency: (companyData.default_currency as string) || 'EUR',
+    currency: (companyData.default_currency as string) || getCurrentCompanyCurrency(),
 
     accountingStandard: (companyData.accountingStandard as string) || 'PCG',
 

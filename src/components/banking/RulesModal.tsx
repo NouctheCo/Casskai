@@ -225,10 +225,11 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         </div>
                         {/* Compte */}
                         <div className="flex-1">
-                          <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">
+                          <label htmlFor={`account-select-${rule.id}`} className="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                             Compte comptable
                           </label>
                           <select
+                            id={`account-select-${rule.id}`}
                             value={rule.account_id}
                             onChange={(e) =>
                               handleUpdateRule(rule.id, { account_id: e.target.value })
@@ -310,8 +311,9 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium block mb-1">Compte comptable *</label>
+                      <label htmlFor="new-rule-account-select" className="text-sm font-medium block mb-1">Compte comptable *</label>
                       <select
+                        id="new-rule-account-select"
                         value={newRule.account_id}
                         onChange={(e) =>
                           setNewRule({ ...newRule, account_id: e.target.value })

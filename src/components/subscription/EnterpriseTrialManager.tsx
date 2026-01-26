@@ -32,7 +32,7 @@ import {
   CheckCircle2,
   Sparkles
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 interface TrialEngagement {
   days_remaining: number;
@@ -280,7 +280,7 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
         </Button>
         {/* Pricing link */}
         <p className="text-center text-sm text-muted-foreground">
-          À partir de 29€/mois • Sans engagement •{' '}
+          À partir de {formatCurrency(29)}/mois • Sans engagement •{' '}
           <button
             onClick={() => {
               trackEngagement('viewed_pricing');

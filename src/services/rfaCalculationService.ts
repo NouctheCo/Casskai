@@ -18,6 +18,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 export interface RFABracket {
   min: number;
   max: number | null;
@@ -106,8 +107,8 @@ export const rfaCalculationService = {
       if (revenueInBracket > 0) {
         details.push({
           bracket: bracket.max
-            ? `${bracketMin.toLocaleString('fr-FR')} € - ${bracketMax.toLocaleString('fr-FR')} €`
-            : `> ${bracketMin.toLocaleString('fr-FR')} €`,
+            ? `${formatCurrency(bracketMin)} - ${formatCurrency(bracketMax)}`
+            : `> ${formatCurrency(bracketMin)}`,
           revenue: revenueInBracket,
           rate: bracket.rate * 100,
           rfa: rfaForBracket

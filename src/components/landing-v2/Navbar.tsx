@@ -45,7 +45,7 @@ export function Navbar() {
         { icon: Globe, label: t('landing.navbar.features.multiCountry'), description: t('landing.navbar.features.multiCountryDesc'), href: '#coverage' }
       ]
     },
-    { label: t('landing.navbar.pricing'), href: '#cta' },
+    { label: t('landing.navbar.pricing'), href: '#plans' },
     {
       label: t('landing.navbar.resources'),
       href: '/docs',

@@ -12,6 +12,8 @@ import { BudgetStatusBadge } from './BudgetStatusBadge';
 
 import type { Budget } from '@/types/budget.types';
 
+import { getCurrentCompanyCurrency } from '@/lib/utils';
+
 
 
 interface BudgetCardProps {
@@ -62,7 +64,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
 
       style: 'currency',
 
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
 
       minimumFractionDigits: 0,
 

@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { OpportunityCard } from './OpportunityCard';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 interface OpportunityPipelineProps {
   enterpriseId: string;
   onCreateOpportunity: () => void;
@@ -192,7 +193,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
                   Valeur totale
                 </p>
                 <p className="text-xl font-bold">
-                  {opportunities.reduce((sum, opp) => sum + opp.value, 0).toLocaleString()} €
+                  {formatCurrency(opportunities.reduce((sum, opp) => sum + opp.value, 0))}
                 </p>
               </div>
             </div>
@@ -266,7 +267,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
                     </div>
                     {stats.totalValue > 0 && (
                       <p className={`text-xs ${stage.color} opacity-80`}>
-                        {stats.totalValue.toLocaleString()} €
+                        {formatCurrency(stats.totalValue)}
                       </p>
                     )}
                   </CardHeader>

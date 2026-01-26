@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -165,7 +166,7 @@ export function ProjectForm({ onCancel, onSubmit }: ProjectFormProps) {
             />
           </div>
           <div>
-            <label htmlFor="projectBudget" className="text-sm font-medium">{t('projectspage.budget_', { defaultValue: 'Budget (€)' })}</label>
+            <label htmlFor="projectBudget" className="text-sm font-medium">{t('projectspage.budget_', { defaultValue: `Budget (${getCurrentCompanyCurrency()})` })}</label>
             <Input
               id="projectBudget"
               value={projectBudget}

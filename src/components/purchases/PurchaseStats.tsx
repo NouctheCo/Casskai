@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { TrendingUp, ShoppingCart, Clock, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 interface PurchaseStatsProps {
   stats: PurchaseStats;
@@ -16,7 +17,7 @@ const PurchaseStatsComponent: React.FC<PurchaseStatsProps> = ({ stats, loading }
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency: getCurrentCompanyCurrency()
     }).format(amount);
   };
 

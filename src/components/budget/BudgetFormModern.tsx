@@ -20,6 +20,8 @@ import { Save, X, Plus, Trash2, Calculator, TrendingUp, CheckCircle, DollarSign,
 
 import { budgetService } from '@/services/budgetService';
 
+import { getCurrentCompanyCurrency } from '@/lib/utils';
+
 import type {
 
   BudgetFormData,
@@ -450,7 +452,7 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
 
       style: 'currency',
 
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
 
       minimumFractionDigits: 0
 

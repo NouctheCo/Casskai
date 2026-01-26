@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { SepaService, SepaPayment, BankAccount } from '@/services/sepaService';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -303,7 +304,7 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
                             <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">
                               {payment.amount.toLocaleString('fr-FR', {
                                 style: 'currency',
-                                currency: 'EUR',
+                                currency: getCurrentCompanyCurrency(),
                               })}
                             </p>
                             <Badge variant={payment.type === 'supplier_invoice' ? 'default' : 'secondary'}>
@@ -344,7 +345,7 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
                   <Euro className="h-6 w-6" />
                   {totalAmount.toLocaleString('fr-FR', {
                     style: 'currency',
-                    currency: 'EUR',
+                    currency: getCurrentCompanyCurrency(),
                   })}
                 </p>
               </div>

@@ -14,6 +14,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 import type {
   DocumentTemplate,
   DocumentTemplateFormData,
@@ -135,7 +136,7 @@ export class HRDocumentTemplatesService {
         formattedValue = date.toLocaleDateString('fr-FR');
       } else if (typeof value === 'number' && key.toLowerCase().includes('salary')) {
         // Format currency
-        formattedValue = `${value.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+        formattedValue = formatCurrency(value);
       } else if (value === null || value === undefined) {
         formattedValue = '';
       }

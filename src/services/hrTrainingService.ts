@@ -14,6 +14,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import type {
   TrainingCatalog,
   TrainingSession,
@@ -56,7 +57,7 @@ export class HRTrainingService {
           ...formData,
           company_id: companyId,
           status: 'active',
-          currency: formData.currency || 'EUR',
+          currency: formData.currency || getCurrentCompanyCurrency(),
           provides_certification: formData.provides_certification || false,
           is_mandatory: formData.is_mandatory || false
         })

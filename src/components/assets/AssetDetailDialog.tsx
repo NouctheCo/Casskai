@@ -198,15 +198,15 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                 <CardContent className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">{t('assets.form.acquisitionValue')}</span>
-                    <span className="font-medium">{formatCurrency(asset.acquisition_value, 'EUR')}</span>
+                    <span className="font-medium">{formatCurrency(asset.acquisition_value)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">{t('assets.kpi.depreciation')}</span>
-                    <span className="font-medium text-orange-600">{formatCurrency(asset.total_depreciation, 'EUR')}</span>
+                    <span className="font-medium text-orange-600">{formatCurrency(asset.total_depreciation)}</span>
                   </div>
                   <div className="flex justify-between border-t pt-3">
                     <span className="font-medium">{t('assets.table.netBookValue')}</span>
-                    <span className="font-bold text-green-600">{formatCurrency(asset.net_book_value, 'EUR')}</span>
+                    <span className="font-bold text-green-600">{formatCurrency(asset.net_book_value)}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -274,7 +274,7 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
                     <div className="space-y-2">
                       <Label>{t('assets.disposal.gain')}</Label>
                       <div className={`p-2 rounded border ${calculateDisposalGain() >= 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                        {formatCurrency(calculateDisposalGain(), 'EUR')}
+                        {formatCurrency(calculateDisposalGain())}
                       </div>
                     </div>
                   </div>

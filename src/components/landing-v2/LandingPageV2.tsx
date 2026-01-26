@@ -7,6 +7,8 @@
 import React, { useEffect } from 'react';
 import { Navbar } from './Navbar';
 import { HeroTerminal } from './HeroTerminal';
+import { EarlyPricingSection } from './EarlyPricingSection';
+import { PlatformCoverageSection } from './PlatformCoverageSection';
 import { AnimatedWorldMap } from './AnimatedWorldMap';
 import { TransformationTimeline } from './TransformationTimeline';
 import { FeaturesShowcase } from './FeaturesShowcase';
@@ -27,37 +29,47 @@ export function LandingPageV2() {
       {/* Navbar fixe */}
       <Navbar />
 
-      {/* Hero Section avec Terminal interactif */}
+      {/* 1. Hero Section avec Terminal interactif */}
       <section id="hero">
         <HeroTerminal />
       </section>
 
-      {/* Carte du monde animée - Couverture géographique */}
-      <section id="coverage">
-        <AnimatedWorldMap />
+      {/* 2. EARLY PRICING - NEW - High visibility for conversion */}
+      <section id="plans">
+        <EarlyPricingSection />
       </section>
 
-      {/* Timeline Transformation Avant/Après */}
-      <section id="transformation">
-        <TransformationTimeline />
+      {/* 3. Platform Coverage - Complete Business OS positioning */}
+      <section id="platform">
+        <PlatformCoverageSection />
       </section>
 
-      {/* Showcase des fonctionnalités */}
+      {/* 4. Features - Problem/Solution framing */}
       <section id="features">
         <FeaturesShowcase />
       </section>
 
-      {/* Calculateur ROI */}
+      {/* 5. ROI Calculator */}
       <section id="roi">
         <ROICalculator />
       </section>
 
-      {/* Témoignages Beta Testeurs */}
+      {/* 6. Transformation Timeline - Before/After */}
+      <section id="transformation">
+        <TransformationTimeline />
+      </section>
+
+      {/* 7. World Map - Multi-country proof */}
+      <section id="coverage">
+        <AnimatedWorldMap />
+      </section>
+
+      {/* 8. Testimonials */}
       <section id="testimonials">
         <BetaTestimonials />
       </section>
 
-      {/* CTA Final */}
+      {/* 9. Final CTA - Simplified */}
       <section id="cta">
         <CTASection />
       </section>

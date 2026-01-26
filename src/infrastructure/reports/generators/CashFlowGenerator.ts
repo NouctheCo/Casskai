@@ -3,6 +3,7 @@ import { BaseReportGenerator } from '../../../domain/reports/services/IReportGen
 import { Report, ReportParameters, ReportResult } from '../../../domain/reports/entities/Report';
 
 import { IReportRepository } from '../../../domain/reports/repositories/IReportRepository';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 
 
@@ -278,7 +279,7 @@ export class CashFlowGenerator extends BaseReportGenerator {
 
       style: 'currency',
 
-      currency: 'EUR'
+      currency: getCurrentCompanyCurrency()
 
     }).format(amount);
 

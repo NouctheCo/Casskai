@@ -54,7 +54,7 @@ import type {
   AssetStatus,
   DepreciationMethod,
 } from '@/types/assets.types';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getCurrentCompanyCurrency } from '@/lib/utils';
 // Sous-composants (à créer séparément pour modularité)
 import { AssetFormDialog } from '@/components/assets/AssetFormDialog';
 import { AssetDetailDialog } from '@/components/assets/AssetDetailDialog';
@@ -65,6 +65,7 @@ import { logger } from '@/lib/logger';
 const AssetsPage: React.FC = () => {
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
+  const companyCurrency = (currentCompany as any)?.default_currency || (currentCompany as any)?.business?.currency || getCurrentCompanyCurrency();
   // États
   const [loading, setLoading] = useState(true);
   const [assets, setAssets] = useState<AssetListItem[]>([]);
@@ -301,7 +302,7 @@ const AssetsPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(statistics?.total_acquisition_value || 0, 'EUR')}
+              {formatCurrency(statistics?.total_acquisition_value || 0, companyCurrency)}
             </div>
             <div className="text-xs text-muted-foreground mt-1">
               {t('assets.kpi.acquisitionValue')}
@@ -317,7 +318,7 @@ const AssetsPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-              {formatCurrency(statistics?.total_depreciation || 0, 'EUR')}
+              {formatCurrency(statistics?.total_depreciation || 0, companyCurrency)}
             </div>
             <div className="text-xs text-muted-foreground mt-1">
               {t('assets.kpi.cumulative')}
@@ -332,7 +333,7 @@ const AssetsPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-              {formatCurrency(statistics?.total_net_book_value || 0, 'EUR')}
+              {formatCurrency(statistics?.total_net_book_value || 0, companyCurrency)}
             </div>
             <div className="text-xs text-muted-foreground mt-1">
               VNC = {t('assets.kpi.gross')} - {t('assets.kpi.amortization')}
@@ -484,10 +485,10 @@ const AssetsPage: React.FC = () => {
                       {new Date(asset.acquisition_date).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatCurrency(asset.acquisition_value, 'EUR')}
+                      {formatCurrency(asset.acquisition_value, companyCurrency)}
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      {formatCurrency(asset.net_book_value, 'EUR')}
+                      {formatCurrency(asset.net_book_value, companyCurrency)}
                     </TableCell>
                     <TableCell>
                       <span className="text-xs">

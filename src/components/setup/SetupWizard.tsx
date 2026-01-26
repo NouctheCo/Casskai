@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, AlertCircle, Database, Building, Globe, Shield, MapPin, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 const changeLanguageAndDetectCountry = async (langCode: string) => {
   // Stub function - i18n module not available
   logger.debug('SetupWizard', 'Language change requested:', langCode);
@@ -81,7 +82,7 @@ const UniversalSetupWizard = () => {
       id: 'france',
       name: t('setup.market.countries.france'),
       region: t('setup.market.regions.europe'),
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       standard: 'PCG',
       pricing: '€19/month',
       features: ['GDPR', 'FEC', 'SEPA', 'EU VAT'],
@@ -91,7 +92,7 @@ const UniversalSetupWizard = () => {
       id: 'belgium',
       name: t('setup.market.countries.belgium'),
       region: t('setup.market.regions.europe'),
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       standard: 'Belgian GAAP',
       pricing: '€19/month',
       features: ['GDPR', 'NBB', 'Bancontact'],
@@ -209,7 +210,7 @@ const UniversalSetupWizard = () => {
     setConfig(prev => ({
       ...prev,
       market: marketId,
-      currency: market?.currency ?? 'EUR',
+      currency: market?.currency ?? getCurrentCompanyCurrency(),
       accountingStandard: market?.standard ?? 'PCG'
     }));
   };

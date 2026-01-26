@@ -30,6 +30,7 @@ import {
   ForecastData,
   ClientHealthScore
 } from './crmAnalyticsService';
+import { formatCurrency } from '@/lib/utils';
 
 class CRMExportService {
   private static instance: CRMExportService;
@@ -210,9 +211,9 @@ class CRMExportService {
     // Summary metrics
     content += '=== SUMMARY ===\n';
     content += `Total Opportunities: ${conversionMetrics.total_opportunities}\n`;
-    content += `Total Pipeline Value: €${conversionMetrics.total_pipeline_value.toLocaleString()}\n`;
-    content += `Weighted Pipeline Value: €${conversionMetrics.weighted_pipeline_value.toLocaleString()}\n`;
-    content += `Average Deal Size: €${conversionMetrics.average_deal_size.toLocaleString()}\n`;
+    content += `Total Pipeline Value: ${formatCurrency(conversionMetrics.total_pipeline_value)}\n`;
+    content += `Weighted Pipeline Value: ${formatCurrency(conversionMetrics.weighted_pipeline_value)}\n`;
+    content += `Average Deal Size: ${formatCurrency(conversionMetrics.average_deal_size)}\n`;
     content += `Conversion Rate: ${conversionMetrics.conversion_rate.toFixed(1)}%\n`;
     content += `Won Opportunities: ${conversionMetrics.won_opportunities}\n`;
     content += `Lost Opportunities: ${conversionMetrics.lost_opportunities}\n\n`;
@@ -221,7 +222,7 @@ class CRMExportService {
     content += '=== PIPELINE BY STAGE ===\n';
     content += 'Stage,Count,Value,Avg Deal Size\n';
     pipelineStats.forEach(stat => {
-      content += `${stat.stage},${stat.count},€${stat.value.toLocaleString()},€${stat.avg_deal_size.toLocaleString()}\n`;
+      content += `${stat.stage},${stat.count},${formatCurrency(stat.value)},${formatCurrency(stat.avg_deal_size)}\n`;
     });
     content += '\n';
 
@@ -263,7 +264,7 @@ class CRMExportService {
 
     content += 'Month,Committed Revenue,Best Case Revenue,Pipeline Revenue,Confidence\n';
     forecast.forEach(month => {
-      content += `${month.month},€${month.committed_revenue.toLocaleString()},€${month.best_case_revenue.toLocaleString()},€${month.pipeline_revenue.toLocaleString()},${month.confidence_level}\n`;
+      content += `${month.month},${formatCurrency(month.committed_revenue)},${formatCurrency(month.best_case_revenue)},${formatCurrency(month.pipeline_revenue)},${month.confidence_level}\n`;
     });
 
     const filename = `sales_forecast_${this.getDateString()}.csv`;
@@ -300,7 +301,7 @@ class CRMExportService {
       const created = new Date(opp.created_at);
       const closed = opp.actual_close_date ? new Date(opp.actual_close_date) : new Date();
       const daysToClose = Math.floor((closed.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
-      content += `"${opp.title}","${opp.client_name || ''}",${opp.stage},€${opp.value},${daysToClose},${created.toISOString().substring(0, 10)},${closed.toISOString().substring(0, 10)}\n`;
+      content += `"${opp.title}","${opp.client_name || ''}",${opp.stage},${formatCurrency(opp.value)},${daysToClose},${created.toISOString().substring(0, 10)},${closed.toISOString().substring(0, 10)}\n`;
     });
 
     const filename = `sales_cycle_analysis_${this.getDateString()}.csv`;
@@ -347,11 +348,11 @@ class CRMExportService {
     content += `Active Clients: ${stats.active_clients}\n`;
     content += `Prospects: ${stats.prospects}\n`;
     content += `Total Opportunities: ${stats.total_opportunities}\n`;
-    content += `Total Pipeline Value: €${stats.opportunities_value.toLocaleString()}\n`;
+    content += `Total Pipeline Value: ${formatCurrency(stats.opportunities_value)}\n`;
     content += `Won Opportunities: ${stats.won_opportunities}\n`;
-    content += `Won Value: €${stats.won_value.toLocaleString()}\n`;
+    content += `Won Value: ${formatCurrency(stats.won_value)}\n`;
     content += `Conversion Rate: ${stats.conversion_rate.toFixed(1)}%\n`;
-    content += `Monthly Revenue: €${stats.monthly_revenue.toLocaleString()}\n`;
+    content += `Monthly Revenue: ${formatCurrency(stats.monthly_revenue)}\n`;
     content += `Revenue Growth: ${stats.revenue_growth.toFixed(1)}%\n\n`;
 
     // Activity metrics
@@ -363,8 +364,8 @@ class CRMExportService {
 
     // Conversion metrics
     content += '=== CONVERSION METRICS ===\n';
-    content += `Average Deal Size: €${conversionMetrics.average_deal_size.toLocaleString()}\n`;
-    content += `Weighted Pipeline: €${conversionMetrics.weighted_pipeline_value.toLocaleString()}\n\n`;
+    content += `Average Deal Size: ${formatCurrency(conversionMetrics.average_deal_size)}\n`;
+    content += `Weighted Pipeline: ${formatCurrency(conversionMetrics.weighted_pipeline_value)}\n\n`;
 
     // Top opportunities
     content += '=== TOP OPPORTUNITIES (by value) ===\n';
@@ -375,7 +376,7 @@ class CRMExportService {
 
     content += 'Title,Client,Stage,Value,Probability,Expected Close\n';
     topOpportunities.forEach(opp => {
-      content += `"${opp.title}","${opp.client_name || ''}",${opp.stage},€${opp.value},${opp.probability}%,${opp.expected_close_date}\n`;
+      content += `"${opp.title}","${opp.client_name || ''}",${opp.stage},${formatCurrency(opp.value)},${opp.probability}%,${opp.expected_close_date}\n`;
     });
     content += '\n';
 
@@ -387,7 +388,7 @@ class CRMExportService {
 
     content += 'Company,Status,Industry,Revenue,Last Interaction\n';
     topClients.forEach(client => {
-      content += `"${client.company_name}",${client.status},${client.industry || 'N/A'},€${(client.total_revenue || 0).toLocaleString()},${client.last_interaction || 'N/A'}\n`;
+      content += `"${client.company_name}",${client.status},${client.industry || 'N/A'},${formatCurrency(client.total_revenue || 0)},${client.last_interaction || 'N/A'}\n`;
     });
 
     const filename = `crm_dashboard_report_${this.getDateString()}.csv`;

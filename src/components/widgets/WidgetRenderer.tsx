@@ -29,7 +29,7 @@ import { WidgetConfig } from '../../types/dashboard.types';
 import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
 import { Skeleton } from '../ui/skeleton';
-import { cn } from '../../lib/utils';
+import { cn, getCurrentCompanyCurrency } from '../../lib/utils';
 import { logger } from '@/lib/logger';
 // Lazy loading des composants de widgets complexes
 const LazyChart = lazy(() =>
@@ -182,7 +182,7 @@ const KPICard: React.FC<{ config: KPICardConfig }> = ({ config }) => {
       case 'currency':
         return new Intl.NumberFormat('fr-FR', {
           style: 'currency',
-          currency: 'EUR'
+          currency: getCurrentCompanyCurrency()
         }).format(val);
       case 'percentage':
         return `${val}%`;

@@ -21,6 +21,7 @@ import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesServic
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import CompanySettingsService from '@/services/companySettingsService';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -285,7 +286,7 @@ export const RFACommunicationsPanel: React.FC<RFACommunicationsPanelProps> = ({
         turnover_amount: rfaCalc?.turnover_amount,
         rfa_percentage: rfaCalc?.rfa_percentage,
         rfa_amount: rfaCalc?.rfa_amount,
-        currency: rfaCalc?.currency || 'EUR',
+        currency: rfaCalc?.currency || getCurrentCompanyCurrency(),
         custom_message: formData.custom_message
       };
       
@@ -813,7 +814,7 @@ export const RFACommunicationsPanel: React.FC<RFACommunicationsPanelProps> = ({
                             <TableCell className="text-right font-medium">
                               {new Intl.NumberFormat('fr-FR', {
                                 style: 'currency',
-                                currency: calc.currency || 'EUR'
+                                currency: calc.currency || getCurrentCompanyCurrency()
                               }).format(calc.rfa_amount)}
                             </TableCell>
                           </TableRow>

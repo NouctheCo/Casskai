@@ -212,7 +212,7 @@ export class AssetImportExportService {
       if (error) throw error;
 
       // 2. Récupérer les plans d'amortissement si demandé
-      let schedules: Map<string, AssetDepreciationScheduleLine[]> = new Map();
+      const schedules: Map<string, AssetDepreciationScheduleLine[]> = new Map();
       if (options.includeSchedule) {
         const assetIds = assets?.map(a => a.id) || [];
         if (assetIds.length > 0) {

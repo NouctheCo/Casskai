@@ -9,7 +9,7 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-import { supabase } from '@/lib/supabase';
+import { supabase, normalizeData } from '@/lib/supabase';
 import type { Database } from '@/types/supabase';
 import type {
   JournalEntryLineForm,
@@ -94,8 +94,10 @@ class JournalEntriesService {
               .eq('company_id', payload.companyId)
               .in('id', accountIds);
 
-            if (accounts && accounts.length > 0) {
-              const accountNumbers = accounts.map(acc => acc.account_number || '').filter(Boolean);
+            const accountsRows = normalizeData<{ id: string; account_number?: string }>(accounts);
+
+            if (accountsRows.length > 0) {
+              const accountNumbers = accountsRows.map(acc => acc.account_number || '').filter(Boolean);
               // ✅ Passer le standard comptable pour appliquer les bonnes règles
               const suggestedJournalType = AccountingRulesService.suggestJournal(accountNumbers, accountingStandard);
               logger.info('JournalEntries', `🎯 Journal suggéré (${accountingStandard}): ${suggestedJournalType}`, { accountNumbers });
@@ -120,9 +122,9 @@ class JournalEntriesService {
                 .limit(1)
                 .single();
 
-              if (!suggestError && suggestedJournal) {
-                journalId = suggestedJournal.id;
-                logger.info('JournalEntries', `✅ Journal automatiquement sélectionné: ${suggestedJournal.code} - ${suggestedJournal.name} (type: ${suggestedJournal.type})`);
+              if (!suggestError && suggestedJournal && typeof suggestedJournal === 'object') {
+                journalId = (suggestedJournal as any).id;
+                logger.info('JournalEntries', `✅ Journal automatiquement sélectionné: ${(suggestedJournal as any).code} - ${(suggestedJournal as any).name} (type: ${(suggestedJournal as any).type})`);
               }
             }
           }
@@ -149,13 +151,16 @@ class JournalEntriesService {
                 .eq('is_active', true)
                 .limit(1)
                 .single();
-              if (!anyJournal) {
+              if (!anyJournal || typeof anyJournal !== 'object') {
                 throw new Error('Aucun journal actif trouvé pour cette entreprise. Veuillez créer au moins un journal.');
               }
-              journalId = anyJournal.id;
-              logger.warn('JournalEntries', `⚠️ Journal de secours utilisé: ${anyJournal.code} - ${anyJournal.name} (type: ${anyJournal.type})`);
+              journalId = (anyJournal as any).id;
+              logger.warn('JournalEntries', `⚠️ Journal de secours utilisé: ${(anyJournal as any).code} - ${(anyJournal as any).name} (type: ${(anyJournal as any).type})`);
             } else {
-              journalId = defaultJournal.id;
+              if (!defaultJournal || typeof defaultJournal !== 'object') {
+                throw new Error('Aucun journal OD valide trouvé');
+              }
+              journalId = (defaultJournal as any).id;
               logger.warn('JournalEntries', '✅ Journal OD trouvé:', defaultJournal);
             }
           }
@@ -186,7 +191,7 @@ class JournalEntriesService {
         .insert(entryInsert)
         .select('*')
         .single();
-      if (entryError || !entry) {
+      if (entryError || !entry || typeof entry !== 'object') {
         throw entryError ?? new Error('Failed to create journal entry');
       }
       const linesInsert = await this.normalizeLines(payload.companyId, entry.id, payload.items);
@@ -194,6 +199,7 @@ class JournalEntriesService {
         .from('journal_entry_lines')
         .insert(linesInsert)
         .select('*, chart_of_accounts!account_id (id, account_number, account_name, account_type, account_class)');
+      const linesRows = normalizeData<any>(lines);
       if (linesError) {
         await supabase.from('journal_entries').delete().eq('id', entry.id);
         throw linesError;
@@ -448,7 +454,7 @@ class JournalEntriesService {
         .from('journal_entries')
         .select(
           `*,
-          journals (id, code, name),
+          journals!journal_entries_journal_id_fkey (id, code, name),
           journal_entry_lines (
             *,
             chart_of_accounts!account_id (id, account_number, account_name, account_type, account_class)
@@ -495,9 +501,21 @@ class JournalEntriesService {
         const offset = (page - 1) * limit;
         query = query.range(offset, offset + limit - 1);
       }
+      // Emit a console log so Playwright can capture the request context
+      try {
+        console.log('[journalEntriesService] getJournalEntries calling Supabase for companyId:', companyId, 'filters:', { page, limit, dateFrom, dateTo, journalId, accountId, reference, description, status, sortBy, sortOrder });
+      } catch (_e) { /* ignore logging errors */ }
       const { data, error, count } = await query;
+      // Log raw result for browser debugging
+      try {
+        console.log('[journalEntriesService] getJournalEntries raw result:', { rows: (data || []).length, count });
+      } catch (_e) { /* ignore logging errors */ }
       if (error) {
         throw error;
+      }
+      logger.info('JournalEntries', `[getJournalEntries] fetched ${((data||[]).length)} rows, count=${count}`);
+      if (Array.isArray(data) && data.length > 0) {
+        logger.info('JournalEntries', `[getJournalEntries] first entry id: ${(data[0] as any).id}`);
       }
       return {
         success: true,
@@ -556,7 +574,8 @@ class JournalEntriesService {
       if (entriesError) {
         throw entriesError;
       }
-      const entryIds = (entries ?? []).map((entry) => entry.id);
+      const entriesRows = normalizeData<{ id: string; status?: string }>(entries);
+      const entryIds = (entriesRows ?? []).map((entry) => entry.id);
       let lines: { debit_amount: number | null; credit_amount: number | null }[] = [];
       if (entryIds.length > 0) {
         const { data: linesData, error: linesError } = await supabase
@@ -566,7 +585,7 @@ class JournalEntriesService {
         if (linesError) {
           throw linesError;
         }
-        lines = linesData ?? [];
+        lines = normalizeData<{ debit_amount: number | null; credit_amount: number | null }>(linesData) ?? [];
       }
       const totals = lines.reduce(
         (acc, line) => {
@@ -604,7 +623,7 @@ class JournalEntriesService {
       logger.error('JournalEntries', 'Error fetching accounts list:', error);
       return [];
     }
-    return data ?? [];
+    return normalizeData<MinimalAccount>(data) || [];
   }
   async getJournalsList(companyId: string): Promise<MinimalJournal[]> {
     const { data, error } = await supabase
@@ -617,7 +636,7 @@ class JournalEntriesService {
       logger.error('JournalEntries', 'Error fetching journals list:', error);
       return [];
     }
-    return data ?? [];
+    return normalizeData<MinimalJournal>(data) || [];
   }
   async getJournalEntryById(entryId: string, companyId: string): Promise<ServiceResult<JournalEntryWithItems>> {
     try {
@@ -625,7 +644,7 @@ class JournalEntriesService {
         .from('journal_entries')
         .select(
           `*,
-          journals (id, code, name),
+          journals!journal_entries_journal_id_fkey (id, code, name),
           journal_entry_lines (
             *,
             chart_of_accounts (id, account_number, account_name, account_type, account_class)
@@ -635,7 +654,7 @@ class JournalEntriesService {
         .eq('id', entryId)
         .eq('company_id', companyId)
         .single();
-      if (error || !data) {
+      if (error || !data || typeof data !== 'object') {
         throw error ?? new Error('Journal entry not found');
       }
       return { success: true, data };
@@ -665,7 +684,8 @@ class JournalEntriesService {
       .select('id, account_number')
       .eq('company_id', companyId)
       .in('id', accountIds);
-    const accountMap = new Map((accounts || []).map(acc => [acc.id, acc.account_number || '']));
+    const accountsRows = normalizeData<{ id: string; account_number?: string }>(accounts);
+    const accountMap = new Map((accountsRows || []).map(acc => [acc.id, acc.account_number || '']));
     // Construire l'objet pour la validation
     const entryToValidate = {
       lines: items.map(item => ({
@@ -696,7 +716,8 @@ class JournalEntriesService {
     if (accountsError) {
       throw accountsError;
     }
-    const accountMap = new Map((accounts ?? []).map((account) => [account.id, account]));
+    const accountsRows = normalizeData<{ id: string; account_number?: string; account_name?: string }>(accounts);
+    const accountMap = new Map((accountsRows ?? []).map((account) => [account.id, account]));
     return items.map((item, index) => {
       const accountInfo = accountMap.get(item.accountId);
       if (!accountInfo) {
@@ -704,6 +725,7 @@ class JournalEntriesService {
       }
       return {
         journal_entry_id: entryId,
+        company_id: companyId,
         account_id: item.accountId,
         description: item.description || '',
         debit_amount: coerceNumber(item.debitAmount),

@@ -21,6 +21,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export type ThirdPartyType = 'customer' | 'supplier';
 export interface ThirdPartyBase {
   name: string;
@@ -137,7 +138,7 @@ class UnifiedThirdPartiesService {
         ...data,
         company_id: companyId,
         customer_number: customerNumber,
-        currency: data.currency || 'EUR',
+        currency: data.currency || getCurrentCompanyCurrency(),
         payment_terms: data.payment_terms || 30,
         is_active: data.is_active !== undefined ? data.is_active : true,
         billing_country: data.billing_country || 'FR'
@@ -239,7 +240,7 @@ class UnifiedThirdPartiesService {
         ...data,
         company_id: companyId,
         supplier_number: supplierNumber,
-        currency: data.currency || 'EUR',
+        currency: data.currency || getCurrentCompanyCurrency(),
         payment_terms: data.payment_terms || 30,
         is_active: data.is_active !== undefined ? data.is_active : true,
         billing_country: data.billing_country || 'FR'

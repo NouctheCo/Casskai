@@ -15,6 +15,7 @@ import {
 import { openAIService } from '@/services/ai/OpenAIService';
 import { AIInsight, CashFlowPrediction, SmartAlert, TaxOptimization } from '@/types/ai.types';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 interface PredictiveDashboardProps {
   companyId: string;
   className?: string;
@@ -274,19 +275,19 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
                   <div className="flex justify-between text-sm">
                     <span className="text-green-600">Revenus prévus</span>
                     <span className="font-medium">
-                      {prediction.predictedIncome.toLocaleString()}€
+                      {formatCurrency(prediction.predictedIncome)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-red-600 dark:text-red-400">Dépenses prévues</span>
                     <span className="font-medium">
-                      {prediction.predictedExpenses.toLocaleString()}€
+                      {formatCurrency(prediction.predictedExpenses)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm font-semibold pt-1 border-t">
                     <span>Solde prévu</span>
                     <span className={prediction.predictedBalance >= 0 ? 'text-green-600' : 'text-red-600'}>
-                      {prediction.predictedBalance.toLocaleString()}€
+                      {formatCurrency(prediction.predictedBalance)}
                     </span>
                   </div>
                 </div>
@@ -362,7 +363,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
                     <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{tax.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-green-700 dark:text-green-400">
-                        Économie: {tax.potentialSavings.toLocaleString()}€
+                        Économie: {formatCurrency(tax.potentialSavings)}
                       </span>
                       <span className="text-xs bg-white dark:bg-gray-800 px-2 py-0.5 rounded border">
                         {tax.category}

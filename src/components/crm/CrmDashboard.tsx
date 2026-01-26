@@ -3,16 +3,17 @@ import { CrmDashboardData } from '../../types/crm.types';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { 
-  Users, 
-  TrendingUp, 
-  Target, 
-  DollarSign, 
-  Calendar, 
+import {
+  Users,
+  TrendingUp,
+  Target,
+  DollarSign,
+  Calendar,
   Activity,
   Eye
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface CrmDashboardProps {
   dashboardData: CrmDashboardData;
   loading: boolean;
@@ -31,7 +32,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency: getCurrentCompanyCurrency()
     }).format(amount);
   };
   const formatDate = (dateString: string) => {

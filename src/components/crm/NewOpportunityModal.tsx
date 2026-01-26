@@ -29,6 +29,7 @@ import { ClientSelector } from '@/components/invoicing/ClientSelector';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { Target, Calendar, DollarSign, TrendingUp } from 'lucide-react';
 import { devLogger } from '@/utils/devLogger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 interface NewOpportunityModalProps {
   open: boolean;
@@ -227,7 +228,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
                   <span className="text-lg font-bold text-blue-900 dark:text-blue-100">
                     {new Intl.NumberFormat('fr-FR', {
                       style: 'currency',
-                      currency: 'EUR',
+                      currency: getCurrentCompanyCurrency(),
                     }).format(calculateWeightedAmount())}
                   </span>
                 </div>

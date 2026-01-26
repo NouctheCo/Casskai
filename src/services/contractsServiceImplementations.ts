@@ -12,6 +12,7 @@
 import { supabase } from '../lib/supabase';
 import { emailService } from './emailService';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import {
   ContractData,
   ContractFormData,
@@ -135,7 +136,7 @@ export async function getContracts(
       .from('contracts')
       .select(`
         *,
-        client:customers(id, name)
+        client:customers!client_id(id, name)
       `)
       .eq('company_id', enterpriseId);
     // Apply filters
@@ -168,7 +169,7 @@ export async function getContracts(
       start_date: c.start_date,
       end_date: c.end_date,
       status: c.status as any,
-      currency: c.currency || 'EUR',
+      currency: c.currency || getCurrentCompanyCurrency(),
       notes: c.description,
       created_at: c.created_at,
       updated_at: c.updated_at
@@ -188,7 +189,7 @@ export async function getContract(id: string): Promise<ContractServiceResponse<C
       .from('contracts')
       .select(`
         *,
-        client:customers(id, name)
+        client:customers!client_id(id, name)
       `)
       .eq('id', id)
       .single();
@@ -211,7 +212,7 @@ export async function getContract(id: string): Promise<ContractServiceResponse<C
       start_date: data.start_date,
       end_date: data.end_date,
       status: data.status as any,
-      currency: data.currency || 'EUR',
+      currency: data.currency || getCurrentCompanyCurrency(),
       created_at: data.created_at,
       updated_at: data.updated_at
     } as any;
@@ -244,12 +245,12 @@ export async function createContract(
         start_date: contractData.start_date,
         end_date: contractData.end_date,
         status: (contractData as any).status || 'draft',
-        currency: contractData.currency || 'EUR',
+        currency: contractData.currency || getCurrentCompanyCurrency(),
         description: (contractData as any).notes
       })
       .select(`
         *,
-        client:customers(id, name)
+        client:customers!client_id(id, name)
       `)
       .single();
     if (error) throw error;
@@ -268,7 +269,7 @@ export async function createContract(
       start_date: data.start_date,
       end_date: data.end_date,
       status: data.status as any,
-      currency: data.currency || 'EUR',
+      currency: data.currency || getCurrentCompanyCurrency(),
       created_at: data.created_at,
       updated_at: data.updated_at
     } as any;
@@ -321,7 +322,7 @@ export async function updateContract(
       .eq('id', id)
       .select(`
         *,
-        client:customers(id, name)
+        client:customers!client_id(id, name)
       `)
       .single();
     if (error) throw error;
@@ -343,7 +344,7 @@ export async function updateContract(
       start_date: data.start_date,
       end_date: data.end_date,
       status: data.status as any,
-      currency: data.currency || 'EUR',
+      currency: data.currency || getCurrentCompanyCurrency(),
       created_at: data.created_at,
       updated_at: data.updated_at
     } as any;
@@ -402,7 +403,7 @@ export async function getRFACalculations(
       .from('rfa_calculations')
       .select(`
         *,
-        contract:contracts(id, contract_name, client:customers(name))
+        contract:contracts(id, contract_name, client:customers!client_id(name))
       `)
       .eq('company_id', enterpriseId);
     if (filters?.contract_id) {
@@ -436,7 +437,7 @@ export async function getRFACalculations(
         applied_rate: Number(r.rfa_percentage) ? Number(r.rfa_percentage) / 100 : 0
       },
       status: r.status as any,
-      currency: r.currency || 'EUR',
+      currency: r.currency || getCurrentCompanyCurrency(),
       created_at: r.created_at,
       updated_at: r.updated_at
     }));
@@ -478,7 +479,7 @@ export async function createRFACalculation(
       })
       .select(`
         *,
-        contract:contracts(id, contract_name, client:customers(name))
+        contract:contracts(id, contract_name, client:customers!client_id(name))
       `)
       .single();
     if (error) throw error;
@@ -575,7 +576,7 @@ export async function autoCalculateCurrentMonthRFA(
           discount_amount: calculation.discount_amount,
           discount_rate: calculation.discount_rate,
           status: 'calculated',
-          currency: contract.currency || 'EUR'
+          currency: contract.currency || getCurrentCompanyCurrency()
         });
       }
       processed += 1;
@@ -678,7 +679,7 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
       .from('rfa_calculations')
       .select(`
         *,
-        contract:contracts(id, contract_name, client_id, currency, client:customers(name))
+        contract:contracts(id, contract_name, client_id, currency, client:customers!client_id(name))
       `)
       .eq('company_id', enterpriseId)
       .gte('period_start', yearStart)
@@ -694,7 +695,7 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
       const contract = rfa.contract as any;
       const clientId = contract?.client_id;
       const clientName = contract?.client?.name || 'Client inconnu';
-      const currency = contract?.currency || 'EUR';
+      const currency = contract?.currency || getCurrentCompanyCurrency();
       if (clientId) {
         const existing = clientRFAMap.get(clientId) || { name: clientName, totalRFA: 0, totalTurnover: 0, count: 0, currency };
         existing.totalRFA += Number(rfa.discount_amount ?? rfa.rfa_amount ?? 0) || 0;
@@ -735,7 +736,7 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
           applied_rate: Number(r.rfa_percentage) ? Number(r.rfa_percentage) / 100 : 0
         },
         status: r.status as any,
-        currency: r.currency || contract?.currency || 'EUR',
+        currency: r.currency || contract?.currency || getCurrentCompanyCurrency(),
         created_at: r.created_at || new Date().toISOString(),
         updated_at: r.updated_at || r.created_at || new Date().toISOString()
       };
@@ -797,7 +798,7 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
         start_date: c.start_date,
         end_date: c.end_date,
         status: c.status as any,
-        currency: c.currency || 'EUR',
+        currency: c.currency || getCurrentCompanyCurrency(),
         notes: c.notes,
         created_at: c.created_at,
         updated_at: c.updated_at

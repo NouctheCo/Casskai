@@ -14,6 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { accountDeletionService } from '@/services/accountDeletionService';
 import { logger } from '@/lib/logger';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 interface DeletionWizardProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,6 +26,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
   onClose,
   onComplete
 }) => {
+  useBodyScrollLock(isOpen);
   const [currentStep, setCurrentStep] = useState<WizardStep>('welcome');
   const [analysis, setAnalysis] = useState<any>(null);
   const [transferPlans, setTransferPlans] = useState<any[]>([]);
@@ -606,9 +608,9 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden"
       >
-        <div className="p-6">
+        <div className="flex-1 overflow-y-auto p-6">
           {/* Progress bar */}
           {currentStep !== 'farewell' && (
             <div className="mb-6">

@@ -31,6 +31,7 @@ import { ReconciliationService } from './reconciliation/ReconciliationEngine';
 import { WebhookManager } from './webhooks/WebhookManager';
 import { AccountingExportService, ExportFormatFactory } from './export/AccountingExportService';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 // Gestionnaire principal Open Banking
 export class OpenBankingManager {
   private static instance: OpenBankingManager;
@@ -381,7 +382,7 @@ export class OpenBankingManager {
         transactionId: '',
         date: new Date(),
         amount: 0,
-        currency: 'EUR',
+        currency: getCurrentCompanyCurrency(),
         description: '',
         originalDescription: '',
         type: 'debit',

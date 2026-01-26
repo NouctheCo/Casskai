@@ -5,6 +5,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/logger';
+import { getCurrentCompanyCurrency, formatCurrency } from '@/lib/utils';
 import type {
   CashFlowPrediction,
   DailyPrediction,
@@ -301,7 +302,7 @@ export async function generateCashFlowPrediction(
       company_id: companyId,
       generated_at: new Date().toISOString(),
       current_balance: currentBalance,
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       predictions,
       min_balance: minPrediction.predicted_balance,
       min_balance_date: minPrediction.date,
@@ -346,7 +347,7 @@ export async function checkCashFlowRiskAndCreateAlert(
         title: prediction.risk_level === 'critical'
           ? '⚠️ Risque de découvert bancaire'
           : '📉 Trésorerie basse prévue',
-        description: `Solde prévisionnel minimum de ${prediction.min_balance.toFixed(2)}€ dans ${daysUntilMin} jours (${prediction.min_balance_date})`,
+        description: `Solde prévisionnel minimum de ${formatCurrency(prediction.min_balance)} dans ${daysUntilMin} jours (${prediction.min_balance_date})`,
         data: {
           prediction,
           current_balance: prediction.current_balance,

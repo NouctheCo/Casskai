@@ -9,6 +9,7 @@ import { X, Send, FileSignature, Archive } from 'lucide-react';
 import { DOCUMENT_TYPE_LABELS } from '@/data/hr-document-templates-defaults';
 import type { GeneratedDocument, GeneratedDocumentStatus } from '@/types/hr-document-templates.types';
 import { createSafeHTML } from '@/utils/sanitize';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 interface DocumentDetailModalProps {
   isOpen: boolean;
@@ -23,6 +24,8 @@ export function DocumentDetailModal({
   document,
   onStatusUpdate
 }: DocumentDetailModalProps) {
+  useBodyScrollLock(isOpen);
+
   if (!isOpen) return null;
 
   const getStatusColor = (status: GeneratedDocumentStatus) => {
@@ -48,8 +51,8 @@ export function DocumentDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>

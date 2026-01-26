@@ -10,9 +10,11 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
+
 import { supabase } from '@/lib/supabase';
 
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 import { unifiedThirdPartiesService } from './unifiedThirdPartiesService';
 
@@ -216,7 +218,7 @@ class ThirdPartiesService {
 
         contacts: item.contacts || [],
 
-        currency: item.currency || 'EUR',
+        currency: item.currency || getCurrentCompanyCurrency(),
 
         payment_terms: item.payment_terms || 30,
 

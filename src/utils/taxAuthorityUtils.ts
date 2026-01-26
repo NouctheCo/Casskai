@@ -4,6 +4,7 @@
 // Note: En production, utiliser une vraie librairie de crypto (crypto-js, tweetnacl, etc.)
 // Ceci est une implémentation basique pour la démo
 import { logger } from '@/lib/logger';
+import { formatCurrency as formatCurrencyLib } from '@/lib/utils';
 
 export class CredentialEncryption {
   /**
@@ -160,11 +161,8 @@ export class FormatterUtils {
     const d = new Date(date);
     return d.toLocaleString('fr-FR');
   }
-  static formatCurrency(amount: number, currency: string = 'EUR'): string {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency,
-    }).format(amount);
+  static formatCurrency(amount: number, currency?: string): string {
+    return formatCurrencyLib(amount, currency);
   }
   static formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 Bytes';

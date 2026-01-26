@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import {
   TrendingUp,
   TrendingDown,
@@ -88,7 +89,7 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);

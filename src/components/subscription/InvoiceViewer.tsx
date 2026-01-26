@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Download, Eye, Calendar, CreditCard, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { supabase as _supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/useToast';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -38,12 +39,13 @@ export function InvoiceViewer() {
       setError(null);
       // Récupérer les factures depuis Supabase (nous pourrions avoir une table invoices)
       // Pour l'instant, on simule avec des données de test
+      const companyCurrency = getCurrentCompanyCurrency();
       const mockInvoices: Invoice[] = [
         {
           id: 'inv_001',
           invoice_number: 'INV-2024-001',
           amount: 29.99,
-          currency: 'EUR',
+          currency: companyCurrency,
           status: 'paid',
           created_at: '2024-01-15T10:00:00Z',
           due_date: '2024-01-22T10:00:00Z',
@@ -55,7 +57,7 @@ export function InvoiceViewer() {
           id: 'inv_002',
           invoice_number: 'INV-2024-002',
           amount: 29.99,
-          currency: 'EUR',
+          currency: companyCurrency,
           status: 'paid',
           created_at: '2024-02-15T10:00:00Z',
           due_date: '2024-02-22T10:00:00Z',
@@ -110,10 +112,11 @@ export function InvoiceViewer() {
       day: 'numeric'
     });
   };
-  const formatAmount = (amount: number, currency: string) => {
+  const formatAmount = (amount: number, currency?: string) => {
+    const cur = currency || getCurrentCompanyCurrency();
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: currency.toUpperCase()
+      currency: cur.toUpperCase()
     }).format(amount);
   };
   const getStatusBadge = (status: string) => {

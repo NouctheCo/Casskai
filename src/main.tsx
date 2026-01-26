@@ -13,6 +13,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import './i18n/i18n.ts';
+import './lib/devApiShims';
 import App from './App.tsx';
 import './index.css';
 import { ConfigProvider } from './contexts/ConfigContext';

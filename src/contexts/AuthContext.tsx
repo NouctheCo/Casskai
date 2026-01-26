@@ -27,6 +27,7 @@ import { auditService } from '../services/auditService';
 import type { Company } from '../types/database/company.types';
 
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 
 
@@ -79,6 +80,10 @@ interface AuthContextType {
   signOut: () => Promise<{ error: AuthError | null }>;
 
   switchCompany: (companyId: string) => Promise<void>;
+
+  refreshUserCompanies: (userId?: string) => Promise<Company[]>;
+
+  setCurrentCompanyIdFromOnboarding: (companyId: string) => Promise<void>;
 
 }
 
@@ -246,6 +251,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Conserver les deux clés locales utilisées par les guards (legacy/new)
         localStorage.setItem('casskai_current_company_id', companyId);
         localStorage.setItem('casskai_current_enterprise', companyId);
+        // Store current company currency for global formatting fallback
+        try {
+          const currency = (companyDetails as any).default_currency || (companyDetails as any).currency || ((companyDetails as any).business && (companyDetails as any).business.currency) || getCurrentCompanyCurrency();
+          localStorage.setItem('casskai_current_company_currency', currency);
+        } catch (_e) {
+          // ignore localStorage failures
+        }
 
         const modules = await getCompanyModules(companyId);
 
@@ -253,9 +265,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         window.dispatchEvent(new CustomEvent('module-states-reset'));
 
-        
 
-        
+
+
 
       } else {
 
@@ -270,6 +282,55 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
   }, []);
+
+  // Refresh user companies list and set current company
+  const refreshUserCompanies = useCallback(async (userId?: string): Promise<Company[]> => {
+    const uid = userId ?? user?.id;
+    if (!uid) {
+      logger.warn('Auth', 'refreshUserCompanies called without userId');
+      return [];
+    }
+
+    setIsCheckingOnboarding(true);
+    try {
+      const companies = await getUserCompanies(uid);
+      setUserCompanies((companies as Company[]) || []);
+      setOnboardingCompleted(companies && companies.length > 0);
+
+      if (companies && companies.length > 0) {
+        logger.info('Auth', 'refreshUserCompanies: Found companies, marking onboarding as completed');
+        localStorage.setItem(`onboarding_completed_${uid}`, 'true');
+        localStorage.removeItem('onboarding_just_completed');
+
+        // If no currentCompany OR currentCompany not in the list, set it to first company
+        const currentId = currentCompany?.id;
+        const companyToLoad = companies.find(c => c.id === currentId) || companies[0];
+
+        if (companyToLoad) {
+          await switchCompany(companyToLoad.id);
+        }
+      } else {
+        setOnboardingCompleted(false);
+        setCurrentCompany(null);
+      }
+
+      return (companies as Company[]) || [];
+    } catch (error) {
+      logger.error('Auth', 'Error refreshing user companies:', error);
+      setUserCompanies([]);
+      setCurrentCompany(null);
+      setOnboardingCompleted(false);
+      return [];
+    } finally {
+      setIsCheckingOnboarding(false);
+    }
+  }, [user?.id, currentCompany?.id, switchCompany]);
+
+  // Helper to set current company from onboarding (after company creation)
+  const setCurrentCompanyIdFromOnboarding = useCallback(async (companyId: string): Promise<void> => {
+    logger.info('Auth', 'setCurrentCompanyIdFromOnboarding called with:', companyId);
+    await switchCompany(companyId);
+  }, [switchCompany]);
 
 
 
@@ -795,6 +856,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     signOut,
 
     switchCompany,
+
+    refreshUserCompanies,
+
+    setCurrentCompanyIdFromOnboarding,
 
   };
 

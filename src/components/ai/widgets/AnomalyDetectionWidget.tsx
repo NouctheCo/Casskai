@@ -20,7 +20,7 @@ import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Alert, AlertDescription } from '../../ui/alert';
-import { cn } from '../../../lib/utils';
+import { cn, getCurrentCompanyCurrency } from '../../../lib/utils';
 import { AnomalyDetection } from '../../../types/ai.types';
 
 interface AnomalyDetectionWidgetProps {
@@ -85,9 +85,9 @@ export const AnomalyDetectionWidget: React.FC<AnomalyDetectionWidgetProps> = ({
   };
 
   const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('fr-FR', { 
-      style: 'currency', 
-      currency: 'EUR' 
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: getCurrentCompanyCurrency()
     }).format(amount);
   };
 

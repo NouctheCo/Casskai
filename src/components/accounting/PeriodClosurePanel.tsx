@@ -174,7 +174,7 @@ export function PeriodClosurePanel({ companyId }: PeriodClosurePanelProps) {
         // Afficher le résultat si disponible
         if (result.resultAmount !== undefined) {
           const type = result.resultType === 'profit' ? 'Bénéfice' : 'Perte';
-          toast.info(`${type}: ${result.resultAmount.toFixed(2)} €`);
+          toast.info(`${type}: ${formatAmount(result.resultAmount)}`);
         }
         await loadPeriods();
         setSelectedPeriod(null);

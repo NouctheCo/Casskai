@@ -12,6 +12,7 @@
 
 // Service de test pour valider le système modulaire
 import { ModuleDefinition } from '@/types/modules.types';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 
 export class ModuleTestService {
   // Mock de modules pour les tests
@@ -33,10 +34,10 @@ export class ModuleTestService {
         permissions: ['crm:view', 'crm:manage_contacts', 'crm:manage_deals'],
         dependencies: ['accounting-core'],
         conflicts: [],
-        pricing: {
+          pricing: {
           type: 'subscription',
           price: 29,
-          currency: 'EUR',
+          currency: getCurrentCompanyCurrency(),
           billingPeriod: 'monthly',
           trialDays: 14,
           features: [
@@ -88,10 +89,10 @@ export class ModuleTestService {
         permissions: ['hr:view', 'hr:manage_employees', 'hr:approve_leaves'],
         dependencies: ['accounting-core'],
         conflicts: [],
-        pricing: {
+          pricing: {
           type: 'subscription',
           price: 19,
-          currency: 'EUR',
+          currency: getCurrentCompanyCurrency(),
           billingPeriod: 'monthly',
           trialDays: 14,
           features: [
@@ -137,10 +138,10 @@ export class ModuleTestService {
         permissions: ['project:view', 'project:manage', 'project:track_time'],
         dependencies: ['accounting-core', 'crm-sales'],
         conflicts: [],
-        pricing: {
+          pricing: {
           type: 'subscription',
           price: 25,
-          currency: 'EUR',
+          currency: getCurrentCompanyCurrency(),
           billingPeriod: 'monthly',
           trialDays: 14,
           features: [
@@ -183,7 +184,7 @@ export class ModuleTestService {
         pricing: {
           type: 'free',
           price: 0,
-          currency: 'EUR',
+          currency: getCurrentCompanyCurrency(),
           features: [
             'Navigateur d\'extensions',
             'Templates sectoriels',
@@ -224,7 +225,7 @@ export class ModuleTestService {
         pricing: {
           type: 'subscription',
           price: 39,
-          currency: 'EUR',
+          currency: getCurrentCompanyCurrency(),
           billingPeriod: 'monthly',
           features: [
             'Dashboards IA personnalisés',
@@ -266,7 +267,7 @@ export class ModuleTestService {
         pricing: {
           type: 'subscription',
           price: 49,
-          currency: 'EUR',
+          currency: getCurrentCompanyCurrency(),
           billingPeriod: 'monthly',
           features: [
             'Catégorisation automatique',

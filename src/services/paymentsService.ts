@@ -88,7 +88,7 @@ class PaymentsService {
             invoice_number,
             total_incl_tax,
             customer_id,
-            customer:customers(id, name, email)
+            customer:customers!customer_id(id, name, email)
           )
         `)
         .eq('company_id', companyId);
@@ -154,7 +154,7 @@ class PaymentsService {
             invoice_number,
             total_incl_tax,
             customer_id,
-            customer:customers(id, name, email)
+            customer:customers!customer_id(id, name, email)
           )
         `)
         .eq('id', id)

@@ -2,16 +2,17 @@
  * CassKai - Plateforme de gestion financière
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
- * 
+ *
  * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
  * Toute reproduction, distribution ou utilisation non autorisée est interdite.
- * 
+ *
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 import type { Database } from '@/types/supabase';
 
 type AccountingPeriod = Database['public']['Tables']['accounting_periods']['Row'];
@@ -302,7 +303,7 @@ class PeriodClosureService {
       const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
 
       if (!isBalanced) {
-        errors.push(`Déséquilibre comptable: Débit ${totalDebit.toFixed(2)}€ ≠ Crédit ${totalCredit.toFixed(2)}€`);
+        errors.push(`Déséquilibre comptable: Débit ${formatCurrency(totalDebit)} ≠ Crédit ${formatCurrency(totalCredit)}`);
       }
 
       return {

@@ -10,6 +10,7 @@ import { TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { startOfYear, endOfYear } from 'date-fns';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface BudgetVsActualData {
   category: string;
   budget: number;
@@ -155,7 +156,7 @@ const BudgetVsActualChart: React.FC<BudgetVsActualChartProps> = ({ companyId }) 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: getCurrentCompanyCurrency(),
       minimumFractionDigits: 0
     }).format(value).replace(/\s/g, '\u00A0');
   };

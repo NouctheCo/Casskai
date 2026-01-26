@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase';
 import { auditService } from './auditService';
 import { generateInvoiceJournalEntry } from './invoiceJournalEntryService';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { kpiCacheService } from './kpiCacheService';
 export interface Invoice {
   id: string;
@@ -270,7 +271,7 @@ class InvoicingService {
         total_incl_tax: total_amount,
         paid_amount: 0,
         remaining_amount: total_amount,
-        currency: invoiceData.currency || 'EUR',
+        currency: invoiceData.currency || getCurrentCompanyCurrency(),
         notes: invoiceData.notes,
         created_by: user.id
       };
