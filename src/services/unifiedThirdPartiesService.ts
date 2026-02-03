@@ -2,79 +2,186 @@
  * CassKai - Plateforme de gestion financière
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
- * 
+ *
  * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
  * Toute reproduction, distribution ou utilisation non autorisée est interdite.
- * 
+ *
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 /**
  * Service Unifié de Gestion des Tiers (Clients & Fournisseurs)
  *
- * Ce service centralise la gestion des tiers en utilisant :
- * - Table `customers` pour les clients
- * - Table `suppliers` pour les fournisseurs
- * - Vue `third_parties` pour lectures unifiées
+ * Ce service centralise la gestion des tiers en utilisant la table unifiée `third_parties`.
+ * Les anciennes tables `customers` et `suppliers` sont maintenant des vues de compatibilité.
+ *
+ * Architecture (après migration Phase 2) :
+ * - Table `third_parties` : source unique de vérité
+ * - Vue `customers` : compatibilité pour le code existant (INSTEAD OF triggers)
+ * - Vue `suppliers` : compatibilité pour le code existant (INSTEAD OF triggers)
+ * - Vue `unified_third_parties_view` : lecture unifiée avec statistiques
  *
  * Garantit la cohérence entre tous les modules de l'application.
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
-export type ThirdPartyType = 'customer' | 'supplier';
+
+export type ThirdPartyType = 'customer' | 'supplier' | 'both' | 'other';
+export type ClientType = 'customer' | 'prospect' | 'supplier' | 'partner';
+
+/**
+ * Interface de base pour les tiers
+ */
 export interface ThirdPartyBase {
   name: string;
   email?: string;
   phone?: string;
+  mobile?: string;
   company_name?: string;
+  legal_name?: string;
+
+  // Identifiants légaux
+  siret?: string;
+  vat_number?: string;
   tax_number?: string;
+  registration_number?: string;
+
+  // Adresse de facturation
   billing_address_line1?: string;
   billing_address_line2?: string;
   billing_city?: string;
   billing_postal_code?: string;
   billing_country?: string;
-  payment_terms?: number; // En jours
+
+  // Adresse de livraison
+  shipping_address_line1?: string;
+  shipping_address_line2?: string;
+  shipping_city?: string;
+  shipping_postal_code?: string;
+  shipping_country?: string;
+
+  // Conditions commerciales
+  payment_terms?: number;
   currency?: string;
   discount_rate?: number;
-  credit_limit?: number; // Seulement pour customers
+  credit_limit?: number;
+
+  // Statut
   is_active?: boolean;
+
+  // Notes
   notes?: string;
+  internal_notes?: string;
+  tags?: string[];
+
+  // Site web
+  website?: string;
 }
+
+/**
+ * Interface pour la table third_parties (source unique)
+ */
+export interface ThirdParty extends ThirdPartyBase {
+  id?: string;
+  company_id: string;
+  type: ThirdPartyType;
+  client_type?: ClientType;
+  code?: string;
+  customer_number?: string;
+  supplier_number?: string;
+  customer_type?: 'individual' | 'business';
+  supplier_type?: 'company' | 'individual';
+  current_balance?: number;
+  account_balance?: number;
+  customer_account_id?: string;
+  supplier_account_id?: string;
+  created_by?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * Interface Customer (compatibilité avec code existant)
+ */
 export interface Customer extends ThirdPartyBase {
   id?: string;
   company_id: string;
   customer_number?: string;
+  customer_type?: 'individual' | 'business';
   credit_limit?: number;
+  created_by?: string;
+  created_at?: string;
+  updated_at?: string;
 }
+
+/**
+ * Interface Supplier (compatibilité avec code existant)
+ */
 export interface Supplier extends ThirdPartyBase {
   id?: string;
   company_id: string;
   supplier_number?: string;
+  supplier_type?: 'company' | 'individual';
+  account_balance?: number;
+  created_at?: string;
+  updated_at?: string;
 }
+
+/**
+ * Interface pour la vue unifiée avec statistiques
+ */
 export interface UnifiedThirdParty {
-  type: 'customer' | 'supplier';
+  type: ThirdPartyType;
+  client_type?: ClientType;
   id: string;
   company_id: string;
-  party_number: string;
+  code?: string;
+  party_number?: string;
+  customer_number?: string;
+  supplier_number?: string;
   name: string;
   email: string | null;
   phone: string | null;
+  mobile?: string | null;
   company_name: string | null;
+  legal_name?: string | null;
   tax_number: string | null;
-  address_line1: string | null;
-  city: string | null;
-  postal_code: string | null;
-  country: string | null;
+  siret?: string | null;
+  vat_number?: string | null;
+
+  // Adresses
+  billing_address_line1?: string | null;
+  billing_city?: string | null;
+  billing_postal_code?: string | null;
+  billing_country?: string | null;
+  address_line1?: string | null;
+  city?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
+
+  // Conditions
   payment_terms: number | null;
   currency: string | null;
   discount_rate: number | null;
+  credit_limit?: number | null;
+
+  // Statut
   is_active: boolean;
+
+  // Notes
   notes: string | null;
-  total_amount: number;
-  transaction_count: number;
-  balance: number;
-  current_balance?: number; // Alias pour balance (from third_parties view)
+  internal_notes?: string | null;
+  tags?: string[] | null;
+
+  // Statistiques
+  total_amount?: number;
+  transaction_count?: number;
+  balance?: number;
+  current_balance?: number;
+  account_balance?: number;
+
+  // Timestamps
   created_at: string;
   updated_at: string;
 }
@@ -96,27 +203,33 @@ class UnifiedThirdPartiesService {
     }
     return userCompanies.company_id;
   }
+
   /**
-   * Génère automatiquement un numéro unique pour customer/supplier
+   * Génère automatiquement un code unique pour un tiers
    */
-  private async generateNumber(
+  private async generateCode(
     companyId: string,
     type: ThirdPartyType
   ): Promise<string> {
-    const table = type === 'customer' ? 'customers' : 'suppliers';
+    const prefix = type === 'customer' ? 'CL' : type === 'supplier' ? 'FO' : 'TP';
     const numberField = type === 'customer' ? 'customer_number' : 'supplier_number';
-    const prefix = type === 'customer' ? 'CL' : 'FO';
-    // Récupérer le dernier numéro
+
+    // Récupérer le dernier numéro depuis third_parties directement
     const { data, error } = await supabase
-      .from(table)
+      .from('third_parties')
       .select(numberField)
       .eq('company_id', companyId)
+      .eq('type', type)
+      .not(numberField, 'is', null)
       .order('created_at', { ascending: false })
       .limit(1);
+
     if (error) throw error;
+
     let nextNumber = 1;
     if (data && data.length > 0) {
-      const lastNumber = data[0][numberField];
+      const record = data[0] as Record<string, string | null>;
+      const lastNumber = record[numberField];
       if (lastNumber) {
         const match = lastNumber.match(/\d+$/);
         if (match) {
@@ -126,6 +239,165 @@ class UnifiedThirdPartiesService {
     }
     return `${prefix}${String(nextNumber).padStart(6, '0')}`;
   }
+
+  /**
+   * @deprecated Utiliser generateCode à la place
+   * Maintenu pour compatibilité avec le code existant
+   */
+  private async generateNumber(
+    companyId: string,
+    type: 'customer' | 'supplier'
+  ): Promise<string> {
+    return this.generateCode(companyId, type);
+  }
+
+  // ============================================================================
+  // THIRD_PARTIES - Méthodes directes pour la table unifiée
+  // ============================================================================
+
+  /**
+   * Créer un tiers directement dans third_parties
+   */
+  async createThirdParty(data: Partial<ThirdParty>): Promise<{ data: ThirdParty | null; error: any }> {
+    try {
+      const companyId = data.company_id || await this.getCurrentCompanyId();
+      const type = data.type || 'customer';
+
+      // Générer code et numéro automatiques si non fournis
+      const code = data.code || await this.generateCode(companyId, type);
+      const customerNumber = type === 'customer' && !data.customer_number
+        ? code
+        : data.customer_number;
+      const supplierNumber = type === 'supplier' && !data.supplier_number
+        ? code
+        : data.supplier_number;
+
+      const thirdPartyData = {
+        ...data,
+        company_id: companyId,
+        type,
+        client_type: data.client_type || (type === 'customer' ? 'customer' : 'supplier'),
+        code,
+        customer_number: customerNumber,
+        supplier_number: supplierNumber,
+        currency: data.currency || getCurrentCompanyCurrency(),
+        payment_terms: data.payment_terms || 30,
+        is_active: data.is_active !== undefined ? data.is_active : true,
+        billing_country: data.billing_country || 'FR',
+      };
+
+      const { data: created, error } = await supabase
+        .from('third_parties')
+        .insert(thirdPartyData)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { data: created, error: null };
+    } catch (error) {
+      logger.error('UnifiedThirdParties', 'Error creating third party:', error instanceof Error ? error.message : String(error));
+      return { data: null, error };
+    }
+  }
+
+  /**
+   * Récupérer tous les tiers depuis third_parties
+   */
+  async getThirdParties(
+    companyId?: string,
+    options?: {
+      type?: ThirdPartyType;
+      clientType?: ClientType;
+      activeOnly?: boolean;
+    }
+  ): Promise<ThirdParty[]> {
+    try {
+      const activeCompanyId = companyId || await this.getCurrentCompanyId();
+      let query = supabase
+        .from('third_parties')
+        .select('*')
+        .eq('company_id', activeCompanyId)
+        .order('name');
+
+      if (options?.type) {
+        query = query.eq('type', options.type);
+      }
+      if (options?.clientType) {
+        query = query.eq('client_type', options.clientType);
+      }
+      if (options?.activeOnly !== false) {
+        query = query.eq('is_active', true);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      logger.error('UnifiedThirdParties', 'Error fetching third parties:', error instanceof Error ? error.message : String(error));
+      return [];
+    }
+  }
+
+  /**
+   * Récupérer un tiers par ID depuis third_parties
+   */
+  async getThirdPartyById(id: string): Promise<{ data: ThirdParty | null; error: any }> {
+    try {
+      const { data, error } = await supabase
+        .from('third_parties')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      logger.error('UnifiedThirdParties', 'Error fetching third party:', error instanceof Error ? error.message : String(error));
+      return { data: null, error };
+    }
+  }
+
+  /**
+   * Mettre à jour un tiers dans third_parties
+   */
+  async updateThirdParty(
+    id: string,
+    data: Partial<ThirdParty>
+  ): Promise<{ data: ThirdParty | null; error: any }> {
+    try {
+      const { data: updated, error } = await supabase
+        .from('third_parties')
+        .update({ ...data, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return { data: updated, error: null };
+    } catch (error) {
+      logger.error('UnifiedThirdParties', 'Error updating third party:', error instanceof Error ? error.message : String(error));
+      return { data: null, error };
+    }
+  }
+
+  /**
+   * Supprimer (soft delete) un tiers
+   */
+  async deleteThirdParty(id: string): Promise<{ success: boolean; error: any }> {
+    try {
+      const { error } = await supabase
+        .from('third_parties')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) throw error;
+      return { success: true, error: null };
+    } catch (error) {
+      logger.error('UnifiedThirdParties', 'Error deleting third party:', error instanceof Error ? error.message : String(error));
+      return { success: false, error };
+    }
+  }
+
+  // ============================================================================
+  // CUSTOMERS - Méthodes via vue de compatibilité
+  // ============================================================================
   /**
    * CUSTOMERS - Créer un nouveau client
    */
@@ -330,8 +602,12 @@ class UnifiedThirdPartiesService {
       return { success: false, error };
     }
   }
+  // ============================================================================
+  // UNIFIED - Méthodes de lecture unifiée
+  // ============================================================================
+
   /**
-   * UNIFIED - Récupérer tous les tiers via la vue unifiée
+   * Récupérer tous les tiers via la vue unifiée (avec statistiques)
    */
   async getUnifiedThirdParties(
     companyId?: string,
@@ -345,9 +621,11 @@ class UnifiedThirdPartiesService {
         .eq('company_id', activeCompanyId)
         .eq('is_active', true)
         .order('name');
+
       if (type) {
         query = query.eq('type', type);
       }
+
       const { data, error } = await query;
       if (error) throw error;
       return data || [];
@@ -356,8 +634,50 @@ class UnifiedThirdPartiesService {
       return [];
     }
   }
+
   /**
-   * UNIFIED - Recherche intelligente de tiers
+   * Récupérer les tiers pour une liste déroulante (optimisé)
+   */
+  async getThirdPartiesForSelect(
+    companyId?: string,
+    options?: {
+      type?: ThirdPartyType;
+      clientType?: ClientType;
+    }
+  ): Promise<Array<{ id: string; name: string; code: string; type: ThirdPartyType }>> {
+    try {
+      const activeCompanyId = companyId || await this.getCurrentCompanyId();
+      let query = supabase
+        .from('third_parties')
+        .select('id, name, code, type, customer_number, supplier_number')
+        .eq('company_id', activeCompanyId)
+        .eq('is_active', true)
+        .order('name');
+
+      if (options?.type) {
+        query = query.eq('type', options.type);
+      }
+      if (options?.clientType) {
+        query = query.eq('client_type', options.clientType);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      return (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        code: item.code || item.customer_number || item.supplier_number || '',
+        type: item.type as ThirdPartyType,
+      }));
+    } catch (error) {
+      logger.error('UnifiedThirdParties', 'Error fetching third parties for select:', error instanceof Error ? error.message : String(error));
+      return [];
+    }
+  }
+
+  /**
+   * Recherche intelligente de tiers
    */
   async searchThirdParties(
     searchTerm: string,
@@ -371,12 +691,22 @@ class UnifiedThirdPartiesService {
         .select('*')
         .eq('company_id', activeCompanyId)
         .eq('is_active', true);
+
       if (type) {
         query = query.eq('type', type);
       }
-      // Recherche sur nom, email, company_name, party_number
-      query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,company_name.ilike.%${searchTerm}%,party_number.ilike.%${searchTerm}%`);
+
+      // Recherche sur nom, email, company_name, code, customer_number, supplier_number
+      query = query.or(
+        `name.ilike.%${searchTerm}%,` +
+        `email.ilike.%${searchTerm}%,` +
+        `company_name.ilike.%${searchTerm}%,` +
+        `code.ilike.%${searchTerm}%,` +
+        `customer_number.ilike.%${searchTerm}%,` +
+        `supplier_number.ilike.%${searchTerm}%`
+      );
       query = query.limit(50);
+
       const { data, error } = await query;
       if (error) throw error;
       return data || [];
@@ -385,8 +715,13 @@ class UnifiedThirdPartiesService {
       return [];
     }
   }
+
+  // ============================================================================
+  // STATS - Dashboard et KPIs
+  // ============================================================================
+
   /**
-   * STATS - Dashboard KPIs
+   * Dashboard KPIs
    */
   async getDashboardStats(companyId?: string): Promise<{
     total_customers: number;
@@ -401,10 +736,12 @@ class UnifiedThirdPartiesService {
       const activeCompanyId = companyId || await this.getCurrentCompanyId();
       const { data, error } = await supabase
         .from('third_parties')
-        .select('type, balance')
+        .select('type, current_balance, account_balance')
         .eq('company_id', activeCompanyId)
         .eq('is_active', true);
+
       if (error) throw error;
+
       const stats = {
         total_customers: 0,
         total_suppliers: 0,
@@ -414,17 +751,20 @@ class UnifiedThirdPartiesService {
         total_payables: 0,
         net_balance: 0
       };
+
       (data || []).forEach(item => {
+        const balance = item.current_balance || item.account_balance || 0;
         if (item.type === 'customer') {
           stats.total_customers++;
           stats.active_customers++;
-          stats.total_receivables += item.balance || 0;
-        } else {
+          stats.total_receivables += balance;
+        } else if (item.type === 'supplier') {
           stats.total_suppliers++;
           stats.active_suppliers++;
-          stats.total_payables += item.balance || 0;
+          stats.total_payables += balance;
         }
       });
+
       stats.net_balance = stats.total_receivables - stats.total_payables;
       return stats;
     } catch (error) {
@@ -439,6 +779,96 @@ class UnifiedThirdPartiesService {
         net_balance: 0
       };
     }
+  }
+
+  /**
+   * Compter les tiers par type
+   */
+  async countByType(companyId?: string): Promise<Record<ThirdPartyType, number>> {
+    try {
+      const activeCompanyId = companyId || await this.getCurrentCompanyId();
+      const { data, error } = await supabase
+        .from('third_parties')
+        .select('type')
+        .eq('company_id', activeCompanyId)
+        .eq('is_active', true);
+
+      if (error) throw error;
+
+      const counts: Record<ThirdPartyType, number> = {
+        customer: 0,
+        supplier: 0,
+        both: 0,
+        other: 0
+      };
+
+      (data || []).forEach(item => {
+        const type = item.type as ThirdPartyType;
+        if (type in counts) {
+          counts[type]++;
+        }
+      });
+
+      return counts;
+    } catch (error) {
+      logger.error('UnifiedThirdParties', 'Error counting third parties by type:', error instanceof Error ? error.message : String(error));
+      return { customer: 0, supplier: 0, both: 0, other: 0 };
+    }
+  }
+
+  // ============================================================================
+  // HELPERS - Méthodes utilitaires
+  // ============================================================================
+
+  /**
+   * Vérifier si un code existe déjà
+   */
+  async codeExists(code: string, companyId?: string, excludeId?: string): Promise<boolean> {
+    try {
+      const activeCompanyId = companyId || await this.getCurrentCompanyId();
+      let query = supabase
+        .from('third_parties')
+        .select('id')
+        .eq('company_id', activeCompanyId)
+        .eq('code', code);
+
+      if (excludeId) {
+        query = query.neq('id', excludeId);
+      }
+
+      const { data, error } = await query.limit(1);
+      if (error) throw error;
+      return (data?.length || 0) > 0;
+    } catch (error) {
+      logger.error('UnifiedThirdParties', 'Error checking code existence:', error instanceof Error ? error.message : String(error));
+      return false;
+    }
+  }
+
+  /**
+   * Convertir un Customer en ThirdParty
+   */
+  customerToThirdParty(customer: Customer, companyId: string): Partial<ThirdParty> {
+    return {
+      ...customer,
+      company_id: companyId,
+      type: 'customer',
+      client_type: 'customer',
+      code: customer.customer_number,
+    };
+  }
+
+  /**
+   * Convertir un Supplier en ThirdParty
+   */
+  supplierToThirdParty(supplier: Supplier, companyId: string): Partial<ThirdParty> {
+    return {
+      ...supplier,
+      company_id: companyId,
+      type: 'supplier',
+      client_type: 'supplier',
+      code: supplier.supplier_number,
+    };
   }
 }
 // Export singleton instance

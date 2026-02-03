@@ -904,7 +904,7 @@ export class AssetImportExportService {
 
   private static formatNumber(value: number | null | undefined): string {
     if (value == null) return '';
-    return value.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return value.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\u00A0/g, ' ');
   }
 
   private static escapeCSV(value: string): string {

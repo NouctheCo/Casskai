@@ -58,11 +58,11 @@ class PaymentsService {
       .select('company_id')
       .eq('user_id', user.id)
       .eq('is_default', true)
-      .single();
-    if (error || !userCompanies) {
+      .limit(1);
+    if (error || !userCompanies || userCompanies.length === 0) {
       throw new Error('No active company found');
     }
-    return userCompanies.company_id;
+    return userCompanies[0].company_id;
   }
   async getPayments(options?: {
     status?: string;
@@ -88,7 +88,7 @@ class PaymentsService {
             invoice_number,
             total_incl_tax,
             customer_id,
-            customer:customers!customer_id(id, name, email)
+            customer:third_parties!invoices_customer_id_fkey(id, name, email)
           )
         `)
         .eq('company_id', companyId);
@@ -154,7 +154,7 @@ class PaymentsService {
             invoice_number,
             total_incl_tax,
             customer_id,
-            customer:customers!customer_id(id, name, email)
+            customer:third_parties!invoices_customer_id_fkey(id, name, email)
           )
         `)
         .eq('id', id)

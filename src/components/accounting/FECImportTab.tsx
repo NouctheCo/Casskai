@@ -519,6 +519,8 @@ export default function FECImportTab() {
 
                     className="hidden"
 
+                    aria-label="Sélectionner un fichier FEC"
+
                   />
 
                 </div>

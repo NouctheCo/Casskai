@@ -32,6 +32,10 @@ export interface BankTransaction {
   created_at?: string;
   updated_at?: string;
   status?: 'pending' | 'reconciled' | 'ignored';
+  // AI suggestions
+  ai_suggested_account?: string;
+  ai_confidence?: number;
+  ai_reasoning?: string;
 }
 export interface BankAccount {
   id?: string;
@@ -98,6 +102,14 @@ class BankImportService {
       }
       // Sauvegarde en base
       const saveResult = await this.saveTransactions(transactions);
+      
+      // Catégorisation IA automatique (async, ne bloque pas l'import)
+      if (saveResult.success && saveResult.imported_count > 0) {
+        this.categorizeWithAI(transactions, companyId).catch(err => {
+          logger.error('BankImport', 'AI categorization failed (non-blocking):', err);
+        });
+      }
+
       const combinedErrors = [...errors, ...saveResult.errors];
       return {
         success: saveResult.success,
@@ -431,6 +443,67 @@ class BankImportService {
       errors
     };
   }
+
+  /**
+   * Catégorise automatiquement les transactions avec l'IA
+   * Appelle la Edge Function ai-bank-categorization
+   */
+  async categorizeWithAI(
+    transactions: BankTransaction[],
+    companyId: string
+  ): Promise<BankTransaction[]> {
+    try {
+      if (transactions.length === 0) return transactions;
+
+      logger.info('BankImport', `Categorizing ${transactions.length} transactions with AI...`);
+
+      const { data, error } = await supabase.functions.invoke('ai-bank-categorization', {
+        body: {
+          transactions: transactions.map(t => ({
+            description: t.description,
+            amount: t.amount,
+            date: t.transaction_date,
+            reference: t.reference
+          })),
+          company_id: companyId
+        }
+      });
+
+      if (error) {
+        logger.error('BankImport', 'AI categorization failed:', error);
+        return transactions; // Return original transactions without AI
+      }
+
+      if (!data || !data.categories) {
+        logger.warn('BankImport', 'No categories returned from AI');
+        return transactions;
+      }
+
+      // Merge AI suggestions with original transactions
+      const categorized = transactions.map((t, index) => {
+        const aiSuggestion = data.categories[index];
+        if (!aiSuggestion) return t;
+
+        return {
+          ...t,
+          category: aiSuggestion.category,
+          ai_suggested_account: aiSuggestion.account_number,
+          ai_confidence: aiSuggestion.confidence,
+          ai_reasoning: aiSuggestion.reasoning
+        };
+      });
+
+      logger.info('BankImport', `AI categorization complete. Avg confidence: ${
+        data.categories.reduce((s: number, c: any) => s + c.confidence, 0) / data.categories.length
+      }%`);
+
+      return categorized;
+    } catch (error) {
+      logger.error('BankImport', 'AI categorization error:', error);
+      return transactions; // Fallback to original transactions
+    }
+  }
+
   /**
    * Utilitaires de parsing
    */

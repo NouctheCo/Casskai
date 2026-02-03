@@ -24,6 +24,9 @@ import {
   Shield,
   Info
 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PaymentTermsAuditPanel } from '@/components/invoicing/PaymentTermsAuditPanel';
+import { ExtendedPaymentTermsAuditPanel } from '@/components/compliance/ExtendedPaymentTermsAuditPanel';
 interface CompanyInvoiceSettings {
   name: string;
   siret: string;
@@ -176,7 +179,23 @@ export function InvoiceComplianceSettings() {
     );
   }
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="settings" className="space-y-6">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="settings" className="flex items-center gap-2">
+          <FileText className="h-4 w-4" />
+          Paramètres
+        </TabsTrigger>
+        <TabsTrigger value="audit" className="flex items-center gap-2">
+          <Shield className="h-4 w-4" />
+          Audit Conditions
+        </TabsTrigger>
+        <TabsTrigger value="audit-extended" className="flex items-center gap-2">
+          <Shield className="h-4 w-4" />
+          Audit Complet
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="settings" className="space-y-6">
       {/* Statut de conformité */}
       <Card className={`border-2 ${compliance.isComplete ? 'border-green-200 bg-green-50 dark:bg-green-900/10' : 'border-orange-200 bg-orange-50 dark:bg-orange-900/10'}`}>
         <CardContent className="p-6">
@@ -487,6 +506,19 @@ export function InvoiceComplianceSettings() {
           )}
         </Button>
       </div>
-    </div>
+      </TabsContent>
+
+      {/* Onglet Audit Multi-Devise */}
+      <TabsContent value="audit">
+        <PaymentTermsAuditPanel />
+      </TabsContent>
+
+      {/* Onglet Audit Complet (Factures, Devis, Bons, Avoirs) */}
+      <TabsContent value="audit-extended">
+        {currentCompany?.id && (
+          <ExtendedPaymentTermsAuditPanel companyId={currentCompany.id} />
+        )}
+      </TabsContent>
+    </Tabs>
   );
 }

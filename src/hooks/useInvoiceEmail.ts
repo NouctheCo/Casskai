@@ -131,7 +131,7 @@ export function useInvoiceEmail() {
       return new Intl.NumberFormat('fr-FR', {
         style: 'currency',
         currency
-      }).format(validAmount);
+      }).format(validAmount).replace(/\u00A0/g, ' '); // Remplacer espace insecable
     };
 
     return `
@@ -279,7 +279,7 @@ export function useInvoiceEmail() {
       return new Intl.NumberFormat('fr-FR', {
         style: 'currency',
         currency
-      }).format(validAmount);
+      }).format(validAmount).replace(/\u00A0/g, ' '); // Remplacer espace insecable
     };
 
     return `

@@ -456,7 +456,7 @@ export class TaxSimulationService {
       currency,
       minimumFractionDigits: isZero ? 0 : 2,
       maximumFractionDigits: isZero ? 0 : 2
-    }).format(amount);
+    }).format(amount).replace(/\u00A0/g, ' '); // Remplacer espace insecable
   }
 }
 

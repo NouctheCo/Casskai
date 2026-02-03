@@ -485,8 +485,9 @@ export const FinancialReportsPage: React.FC = () => {
             </Select>
 
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-300">Date de début</label>
+              <label htmlFor="financial-start-date" className="text-sm text-gray-600 dark:text-gray-300">Date de début</label>
               <input
+                id="financial-start-date"
                 type="date"
                 value={dateRange.start}
                 onChange={e => setDateRange({ ...dateRange, start: e.target.value })}
@@ -495,8 +496,9 @@ export const FinancialReportsPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-300">Date de fin</label>
+              <label htmlFor="financial-end-date" className="text-sm text-gray-600 dark:text-gray-300">Date de fin</label>
               <input
+                id="financial-end-date"
                 type="date"
                 value={dateRange.end}
                 onChange={e => setDateRange({ ...dateRange, end: e.target.value })}

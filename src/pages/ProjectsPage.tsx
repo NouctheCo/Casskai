@@ -59,13 +59,14 @@ import { timesheetsService, type TimesheetWithDetails } from '@/services/timeshe
 import TimesheetFormModal from '@/components/projects/TimesheetFormModal';
 import { projectResourcesService, type ProjectResourceWithDetails } from '@/services/projectResourcesService';
 import ResourceAllocationModal from '@/components/projects/ResourceAllocationModal';
+import InvoiceFormDialog from '@/components/invoicing/InvoiceFormDialog';
 import type { Project } from '@/services/projectsService';
 import { logger } from '@/lib/logger';
 // Les données sont chargées depuis le service projectsService via useProjects hook
 export default function ProjectsPage() {
   const { t } = useLocale();
   const { currentCompany } = useAuth();
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   // Hook pour la gestion des projets
   const {
     projects,
@@ -107,6 +108,8 @@ export default function ProjectsPage() {
   // State pour les modales de création
   const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
   const [isNewEmployeeModalOpen, setIsNewEmployeeModalOpen] = useState(false);
+  // State pour le modal de facture
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   // Charger les employees et clients depuis Supabase
   useEffect(() => {
     const loadEmployeesAndClients = async () => {
@@ -120,10 +123,11 @@ export default function ProjectsPage() {
             .eq('company_id', currentCompany.id)
             .eq('status', 'active'),
           supabase
-            .from('tiers')
+            .from('third_parties')
             .select('*')
             .eq('company_id', currentCompany.id)
-            .eq('type', 'client')
+            .eq('is_active', true)
+            .or('type.eq.customer,client_type.eq.customer,client_type.eq.prospect')
         ]);
         if (employeesResponse.error) throw employeesResponse.error;
         if (clientsResponse.error) throw clientsResponse.error;
@@ -1110,7 +1114,7 @@ export default function ProjectsPage() {
                     </CardTitle>
                     <CardDescription>Gestion des factures et revenus</CardDescription>
                   </div>
-                  <Button onClick={() => navigate('/invoicing')}>
+                  <Button onClick={() => setIsInvoiceModalOpen(true)}>
                     <PlusCircle className="h-4 w-4 mr-2" />
                     Créer une facture
                   </Button>
@@ -1687,7 +1691,7 @@ export default function ProjectsPage() {
         isOpen={isNewClientModalOpen}
         onClose={() => setIsNewClientModalOpen(false)}
         onSuccess={async (clientId) => {
-          const { data } = await supabase.from('tiers').select('*').eq('company_id', currentCompany!.id).eq('type', 'client');
+          const { data } = await supabase.from('third_parties').select('*').eq('company_id', currentCompany!.id).or('client_type.eq.customer,client_type.eq.prospect');
           const clientsFormatted = (data || []).map(client => ({
             id: client.id,
             name: client.name || client.company_name || 'Client sans nom',
@@ -1778,6 +1782,15 @@ export default function ProjectsPage() {
         onSuccess={handleResourceAllocated}
         projects={projects.map(p => ({ id: p.id, name: p.name }))}
         users={resources.map(r => ({ id: r.id, email: r.email, name: r.full_name }))}
+      />
+      {/* Invoice Form Modal */}
+      <InvoiceFormDialog
+        open={isInvoiceModalOpen}
+        onClose={() => setIsInvoiceModalOpen(false)}
+        onSuccess={() => {
+          setIsInvoiceModalOpen(false);
+          toastSuccess(t('projects.invoiceCreated', { defaultValue: 'Facture créée avec succès' }));
+        }}
       />
     </motion.div>
   );

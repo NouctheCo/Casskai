@@ -278,7 +278,7 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
       siret: r.siret || undefined,
 
-      apeCode: (r.ape_code as string) || undefined,
+      apeCode: undefined, // 'ape_code' n'existe pas
 
       vatNumber: r.vat_number || undefined,
 
@@ -290,33 +290,17 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
       address: {
 
-        street: (r.address_street as string) || r.address || undefined,
+        street: r.address || undefined,
 
-        postalCode: (r.address_postal_code as string) || r.postal_code || undefined,
+        postalCode: r.postal_code || undefined,
 
-        city: (r.address_city as string) || r.city || undefined,
+        city: r.city || undefined,
 
-        country: (r.address_country as string) || r.country || undefined,
+        country: r.country || undefined,
 
       },
 
-      correspondenceAddress: ((r.correspondence_address_street as string) || 
-
-                             (r.correspondence_address_postal_code as string) || 
-
-                             (r.correspondence_address_city as string) || 
-
-                             (r.correspondence_address_country as string)) ? {
-
-        street: (r.correspondence_address_street as string) || undefined,
-
-        postalCode: (r.correspondence_address_postal_code as string) || undefined,
-
-        city: (r.correspondence_address_city as string) || undefined,
-
-        country: (r.correspondence_address_country as string) || undefined,
-
-      } : undefined,
+      correspondenceAddress: undefined, // Pas de colonnes de correspondance en base
 
       phone: r.phone || undefined,
 
@@ -332,53 +316,33 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
         startMonth: r.fiscal_year_start_month || 1,
 
-        endMonth: (r.fiscal_year_end_month as number) || 12,
+        endMonth: undefined, // 'fiscal_year_end_month' n'existe pas
 
       },
 
-      taxRegime: ((r.tax_regime as string) as TaxRegime) || 'real_normal',
+      taxRegime: undefined, // 'tax_regime' n'existe pas - ne pas essayer de mapper
 
-      vatRegime: ((r.vat_regime as string) as VATRegime) || 'subject',
+      vatRegime: undefined, // 'vat_regime' n'existe pas
 
-      defaultVatRate: (r.vat_rate as number) || 20.0,
+      defaultVatRate: undefined, // 'vat_rate' n'existe pas
 
-      accountant: ((r.accountant_firm_name as string) || (r.accountant_contact as string) || 
+      accountant: undefined, // Pas de colonnes accountant en base
 
-                   (r.accountant_email as string) || (r.accountant_phone as string)) ? {
-
-        firmName: (r.accountant_firm_name as string) || undefined,
-
-        contact: (r.accountant_contact as string) || undefined,
-
-        email: (r.accountant_email as string) || undefined,
-
-        phone: (r.accountant_phone as string) || undefined,
-
-      } : undefined,
-
-      mainBank: ((r.main_bank_name as string) || (r.main_bank_iban as string) || (r.main_bank_bic as string)) ? {
-
-        name: (r.main_bank_name as string) || undefined,
-
-        iban: (r.main_bank_iban as string) || undefined,
-
-        bic: (r.main_bank_bic as string) || undefined,
-
-      } : undefined,
+      mainBank: undefined, // Pas de colonnes mainBank en base
 
     },
 
     business: {
 
-      sector: ((r.business_sector as string) as BusinessSector) || undefined,
+      sector: (r.activity_sector as BusinessSector) || undefined, // 'activity_sector' existe
 
-      employeesCount: parseInt(String(r.employees_count || r.employee_count || '1'), 10) || 1,
+      employeesCount: parseInt(String(r.employee_count || '1'), 10) || 1, // 'employee_count' existe
 
       annualRevenue: (r.annual_revenue as number) || undefined,
 
       currency: r.default_currency || 'EUR',
 
-      language: (r.interface_language as string) || r.default_locale || 'fr',
+      language: r.default_locale || 'fr',
 
       timezone: r.timezone || 'Europe/Paris',
 
@@ -386,17 +350,17 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
     branding: {
 
-      logoUrl: (r.logo_url as string) || r.logo || undefined,
+      logoUrl: (r.logo as string) || undefined, // 'logo' existe
 
-      primaryColor: (r.brand_primary_color as string) || '#3B82F6',
+      primaryColor: undefined, // 'brand_primary_color' n'existe pas
 
-      secondaryColor: (r.brand_secondary_color as string) || '#1E40AF',
+      secondaryColor: undefined, // 'brand_secondary_color' n'existe pas
 
-      emailSignature: (r.email_signature as string) || undefined,
+      emailSignature: undefined, // 'email_signature' n'existe pas
 
-      legalMentions: (r.legal_mentions as string) || undefined,
+      legalMentions: undefined, // 'legal_mentions' n'existe pas
 
-      defaultTermsConditions: (r.default_terms_conditions as string) || undefined,
+      defaultTermsConditions: undefined, // 'default_terms_conditions' n'existe pas
 
     },
 
@@ -404,29 +368,29 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
       templates: {
 
-        invoice: ((r.invoice_template as string) as DocumentTemplate) || 'default',
+        invoice: undefined, // Templates ne sont pas stockés ici
 
-        quote: ((r.quote_template as string) as DocumentTemplate) || 'default',
+        quote: undefined,
 
       },
 
-      headers: (r.document_header as string) || undefined,
+      headers: undefined, // 'document_header' n'existe pas
 
-      footers: (r.document_footer as string) || undefined,
+      footers: undefined, // 'document_footer' n'existe pas
 
       numbering: {
 
-        invoicePrefix: (r.invoice_prefix as string) || 'FAC',
+        invoicePrefix: undefined, // 'invoice_prefix' n'existe pas
 
-        quotePrefix: (r.quote_prefix as string) || 'DEV',
+        quotePrefix: undefined, // 'quote_prefix' n'existe pas
 
-        format: (r.numbering_format as string) || '{prefix}-{year}-{number:0000}',
+        format: undefined, // 'numbering_format' n'existe pas
 
         counters: {
 
-          invoice: (r.invoice_counter as number) || 1,
+          invoice: 1, // Valeurs par défaut
 
-          quote: (r.quote_counter as number) || 1,
+          quote: 1,
 
         },
 
@@ -434,13 +398,13 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
     },
 
-    ceo: (r.ceo_name || r.ceo_title || (r.ceo_email as string)) ? {
+    ceo: r.ceo_name ? {
 
       name: r.ceo_name || undefined,
 
       title: r.ceo_title || undefined,
 
-      email: (r.ceo_email as string) || undefined,
+      email: undefined, // 'ceo_email' n'existe pas
 
     } : undefined,
 
@@ -473,13 +437,15 @@ export function mapSettingsToUpdate(settings: Partial<CompanySettings>): Extende
 
     if (generalInfo.name !== undefined) update.name = generalInfo.name;
 
-    if (generalInfo.commercialName !== undefined) update.commercial_name = generalInfo.commercialName;
+    // 'commercialName' n'existe pas en base, on la stocke dans 'legal_name' ou on l'ignore
+    // if (generalInfo.commercialName !== undefined) update.commercial_name = generalInfo.commercialName;
 
     if (generalInfo.legalForm !== undefined) update.legal_form = generalInfo.legalForm;
 
     if (generalInfo.siret !== undefined) update.siret = generalInfo.siret;
 
-    if (generalInfo.apeCode !== undefined) update.ape_code = generalInfo.apeCode;
+    // 'apeCode' n'existe pas en base (activité_sector existe)
+    // if (generalInfo.apeCode !== undefined) update.ape_code = generalInfo.apeCode;
 
     if (generalInfo.vatNumber !== undefined) update.vat_number = generalInfo.vatNumber;
 
@@ -495,32 +461,28 @@ export function mapSettingsToUpdate(settings: Partial<CompanySettings>): Extende
 
     if (contact.address) {
 
-      if (contact.address.street !== undefined) update.address_street = contact.address.street;
-
-      if (contact.address.postalCode !== undefined) update.address_postal_code = contact.address.postalCode;
-
-      if (contact.address.city !== undefined) update.address_city = contact.address.city;
-
-      if (contact.address.country !== undefined) update.address_country = contact.address.country;
-
-    }
-
-    if (contact.correspondenceAddress) {
-
-      if (contact.correspondenceAddress.street !== undefined) update.correspondence_address_street = contact.correspondenceAddress.street;
-
-      if (contact.correspondenceAddress.postalCode !== undefined) update.correspondence_address_postal_code = contact.correspondenceAddress.postalCode;
-
-      if (contact.correspondenceAddress.city !== undefined) update.correspondence_address_city = contact.correspondenceAddress.city;
-
-      if (contact.correspondenceAddress.country !== undefined) update.correspondence_address_country = contact.correspondenceAddress.country;
+      // La base de données stocke l'adresse dans un champ unique 'address'
+      // On concatène les champs individuels
+      const addressParts: string[] = [];
+      if (contact.address.street) addressParts.push(contact.address.street);
+      if (contact.address.city) addressParts.push(contact.address.city);
+      if (contact.address.postalCode) addressParts.push(contact.address.postalCode);
+      if (contact.address.country) addressParts.push(contact.address.country);
+      
+      if (addressParts.length > 0 && contact.address.street !== undefined) {
+        update.address = contact.address.street;
+      }
+      if (contact.address.postalCode !== undefined) update.postal_code = contact.address.postalCode;
+      if (contact.address.city !== undefined) update.city = contact.address.city;
+      if (contact.address.country !== undefined) update.country = contact.address.country;
 
     }
+
+    // Note: correspondenceAddress n'a pas de colonnes équivalentes en base
+    // Les données de correspondance sont stockées dans 'address', 'city', 'postal_code'
 
     if (contact.phone !== undefined) update.phone = contact.phone;
-
     if (contact.email !== undefined) update.email = contact.email;
-
     if (contact.website !== undefined) update.website = contact.website;
 
   }
@@ -533,27 +495,22 @@ export function mapSettingsToUpdate(settings: Partial<CompanySettings>): Extende
 
     if (accounting.fiscalYear?.startMonth !== undefined) update.fiscal_year_start_month = accounting.fiscalYear.startMonth;
 
-    if (accounting.fiscalYear?.endMonth !== undefined) update.fiscal_year_end_month = accounting.fiscalYear.endMonth;
+    // 'fiscalYear.endMonth' n'existe pas en base
+    // if (accounting.fiscalYear?.endMonth !== undefined) update.fiscal_year_end_month = accounting.fiscalYear.endMonth;
 
-    if (accounting.taxRegime !== undefined) update.tax_regime = accounting.taxRegime;
+    // 'taxRegime', 'vatRegime', 'vat_rate' n'existent pas en base - ces données ne sont pas stockées dans 'companies'
+    // if (accounting.taxRegime !== undefined) update.tax_regime = accounting.taxRegime;
+    // if (accounting.vatRegime !== undefined) update.vat_regime = accounting.vatRegime;
+    // if (accounting.defaultVatRate !== undefined) update.vat_rate = accounting.defaultVatRate;
 
-    if (accounting.vatRegime !== undefined) update.vat_regime = accounting.vatRegime;
-
-    if (accounting.defaultVatRate !== undefined) update.vat_rate = accounting.defaultVatRate;
-
-    if (accounting.accountant?.firmName !== undefined) update.accountant_firm_name = accounting.accountant.firmName;
-
-    if (accounting.accountant?.contact !== undefined) update.accountant_contact = accounting.accountant.contact;
-
-    if (accounting.accountant?.email !== undefined) update.accountant_email = accounting.accountant.email;
-
-    if (accounting.accountant?.phone !== undefined) update.accountant_phone = accounting.accountant.phone;
-
-    if (accounting.mainBank?.name !== undefined) update.main_bank_name = accounting.mainBank.name;
-
-    if (accounting.mainBank?.iban !== undefined) update.main_bank_iban = accounting.mainBank.iban;
-
-    if (accounting.mainBank?.bic !== undefined) update.main_bank_bic = accounting.mainBank.bic;
+    // Les informations comptables sont peut-être dans une autre table ou ne sont pas persistées
+    // if (accounting.accountant?.firmName !== undefined) update.accountant_firm_name = accounting.accountant.firmName;
+    // if (accounting.accountant?.contact !== undefined) update.accountant_contact = accounting.accountant.contact;
+    // if (accounting.accountant?.email !== undefined) update.accountant_email = accounting.accountant.email;
+    // if (accounting.accountant?.phone !== undefined) update.accountant_phone = accounting.accountant.phone;
+    // if (accounting.mainBank?.name !== undefined) update.main_bank_name = accounting.mainBank.name;
+    // if (accounting.mainBank?.iban !== undefined) update.main_bank_iban = accounting.mainBank.iban;
+    // if (accounting.mainBank?.bic !== undefined) update.main_bank_bic = accounting.mainBank.bic;
 
   }
 
@@ -563,9 +520,10 @@ export function mapSettingsToUpdate(settings: Partial<CompanySettings>): Extende
 
     const { business } = settings;
 
-    if (business.sector !== undefined) update.business_sector = business.sector;
+    if (business.sector !== undefined) update.activity_sector = business.sector; // 'activity_sector' existe
 
-    if (business.employeesCount !== undefined) update.employees_count = business.employeesCount;
+    if (business.employeesCount !== undefined) update.employee_count = String(business.employeesCount); // employee_count existe comme TEXT
+
 
     if (business.annualRevenue !== undefined) update.annual_revenue = business.annualRevenue;
 
@@ -573,8 +531,8 @@ export function mapSettingsToUpdate(settings: Partial<CompanySettings>): Extende
 
     if (business.language !== undefined) {
 
-      update.interface_language = business.language;
-
+      // 'interface_language' n'existe pas, on ignore
+      // update.interface_language = business.language;
       update.default_locale = business.language;
 
     }

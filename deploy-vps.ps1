@@ -37,9 +37,23 @@ scp casskai-build.tar.gz ${VPS_USER}@${VPS_HOST}:/tmp/
 
 # 4. Deploy
 Write-Host "[DEPLOY] Deploiement sur le VPS..." -ForegroundColor Blue
-$deployScript = "cd /var/www && cp -r casskai.app casskai.app.backup.`$(date +%Y%m%d_%H%M%S) && rm -rf casskai.app.tmp && mkdir -p casskai.app.tmp && cd casskai.app.tmp && tar xzf /tmp/casskai-build.tar.gz && cd /var/www && rm -rf casskai.app/* && cp -r casskai.app.tmp/* casskai.app/ && rm -rf casskai.app.tmp && chown -R www-data:www-data casskai.app && chmod -R 755 casskai.app && echo 'Deploy OK'"
+$deployScript = @'
+cd /var/www && \
+cp -r casskai.app casskai.app.backup.$(date +%Y%m%d_%H%M%S) && \
+rm -rf casskai.app.tmp && \
+mkdir -p casskai.app.tmp && \
+cd casskai.app.tmp && \
+tar xzf /tmp/casskai-build.tar.gz && \
+cd /var/www && \
+rm -rf casskai.app/* && \
+cp -r casskai.app.tmp/* casskai.app/ && \
+rm -rf casskai.app.tmp && \
+chown -R www-data:www-data casskai.app && \
+chmod -R 755 casskai.app && \
+echo 'Deploy OK'
+'@
 
-ssh ${VPS_USER}@${VPS_HOST} $deployScript
+ssh "${VPS_USER}@${VPS_HOST}" "$deployScript"
 
 # 5. Verification (pas besoin de redemarrer Nginx - sert directement les fichiers)
 Write-Host "[INFO] Fichiers deployes - Nginx les sert automatiquement" -ForegroundColor Green
@@ -68,7 +82,7 @@ echo "[SERVICES] OK"
 '@
 # Strip Windows CR to avoid bash parsing issues on the remote host
 $serviceScript = $serviceScript -replace "`r",""
-ssh ${VPS_USER}@${VPS_HOST} "$serviceScript"
+ssh "${VPS_USER}@${VPS_HOST}" "$serviceScript"
 
 # 6. Tests
 Write-Host "[TEST] Verification du domaine HTTPS" -ForegroundColor Blue
@@ -78,12 +92,12 @@ curl -s -o /dev/null -w 'HTTPS casskai.app: %{http_code}\n' https://casskai.app
 curl -s -o /dev/null -w 'HTTPS www.casskai.app: %{http_code}\n' https://www.casskai.app
 '@
 $testScript = $testScript -replace "`r",""
-ssh ${VPS_USER}@${VPS_HOST} "$testScript"
+ssh "${VPS_USER}@${VPS_HOST}" "$testScript"
 
 # 7. Cleanup
 Write-Host "[CLEANUP] Nettoyage..." -ForegroundColor Blue
 Remove-Item casskai-build.tar.gz -ErrorAction SilentlyContinue
-ssh ${VPS_USER}@${VPS_HOST} "rm /tmp/casskai-build.tar.gz"
+ssh "${VPS_USER}@${VPS_HOST}" "rm -f /tmp/casskai-build.tar.gz"
 
 Write-Host "`n[SUCCESS] Deploiement termine!" -ForegroundColor Green
 Write-Host "[INFO] Site disponible sur: https://casskai.app" -ForegroundColor Cyan

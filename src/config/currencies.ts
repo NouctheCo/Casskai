@@ -3,6 +3,8 @@
  * Basé sur les annonces de la landing page
  */
 
+import { CurrencyService } from '@/services/currencyService';
+
 export interface Currency {
   code: string;
   symbol: string;
@@ -415,7 +417,8 @@ export function convertPrice(priceEUR: number, currencyCode: string): number {
   const currency = CURRENCIES[currencyCode];
   if (!currency) return priceEUR;
 
-  const convertedPrice = priceEUR * currency.conversionRateFromEUR;
+  const currencyService = CurrencyService.getInstance();
+  const convertedPrice = currencyService.convertAmountSync(priceEUR, 'EUR', currencyCode);
 
   // Arrondir intelligemment selon la devise
   if (currency.code === 'XOF' || currency.code === 'XAF') {

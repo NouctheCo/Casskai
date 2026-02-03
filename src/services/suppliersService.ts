@@ -210,9 +210,10 @@ class SuppliersService {
   async deleteSupplier(id: string): Promise<void> {
     try {
       const companyId = await this.getCurrentCompanyId();
+      // Soft delete - marquer comme inactif au lieu de supprimer physiquement
       const { error } = await supabase
         .from('suppliers')
-        .delete()
+        .update({ is_active: false, updated_at: new Date().toISOString() })
         .eq('id', id)
         .eq('company_id', companyId);
       if (error) {

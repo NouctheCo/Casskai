@@ -546,6 +546,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
               <th className="px-4 py-3 text-left">
                 <input
                   type="checkbox"
+                  aria-label="Sélectionner toutes les transactions"
                   onChange={(e) => {
                     if (e.target.checked) {
                       setSelectedTransactions(

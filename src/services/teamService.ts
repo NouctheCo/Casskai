@@ -57,11 +57,11 @@ class TeamService {
       .select('company_id')
       .eq('user_id', user.id)
       .eq('is_default', true)
-      .single();
-    if (error || !userCompanies) {
+      .limit(1);
+    if (error || !userCompanies || userCompanies.length === 0) {
       throw new Error('No active company found');
     }
-    return userCompanies.company_id;
+    return userCompanies[0].company_id;
   }
   /**
    * Récupère tous les membres de l'équipe

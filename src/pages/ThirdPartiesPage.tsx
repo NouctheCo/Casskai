@@ -147,27 +147,19 @@ const ThirdPartiesPage: React.FC = () => {
     try {
       logger.debug('ThirdPartiesPage', '📊 Loading dashboard data for company:', currentEnterprise!.id);
 
-      // Count active customers
-      const { count: activeCustomers, error: customersError } = await supabase
-        .from('customers')
-        .select('*', { count: 'exact', head: true })
+      // Count active customers and suppliers directly from third_parties
+      const { data: thirdPartiesStats, error: statsError } = await supabase
+        .from('third_parties')
+        .select('type')
         .eq('company_id', currentEnterprise!.id)
         .eq('is_active', true);
 
-      if (customersError) {
-        logger.error('ThirdPartiesPage', 'Error counting customers:', customersError);
+      if (statsError) {
+        logger.error('ThirdPartiesPage', 'Error counting third parties:', statsError);
       }
 
-      // Count active suppliers
-      const { count: activeSuppliers, error: suppliersError } = await supabase
-        .from('suppliers')
-        .select('*', { count: 'exact', head: true })
-        .eq('company_id', currentEnterprise!.id)
-        .eq('is_active', true);
-
-      if (suppliersError) {
-        logger.error('ThirdPartiesPage', 'Error counting suppliers:', suppliersError);
-      }
+      const activeCustomers = (thirdPartiesStats || []).filter(tp => tp.type === 'customer').length;
+      const activeSuppliers = (thirdPartiesStats || []).filter(tp => tp.type === 'supplier').length;
 
       const totalCustomers = activeCustomers || 0;
       const totalSuppliers = activeSuppliers || 0;
@@ -207,23 +199,19 @@ const ThirdPartiesPage: React.FC = () => {
       setLoading(true);
       logger.debug('ThirdPartiesPage', '🔄 Loading third parties with real balances...');
 
-      // Charger les clients
-      const { data: customers, error: customersError } = await supabase
-        .from('customers')
+      // Charger tous les tiers directement depuis third_parties
+      const { data: allThirdParties, error: thirdPartiesError } = await supabase
+        .from('third_parties')
         .select('*')
         .eq('company_id', currentEnterprise.id)
+        .eq('is_active', true)
         .order('name');
 
-      if (customersError) throw customersError;
+      if (thirdPartiesError) throw thirdPartiesError;
 
-      // Charger les fournisseurs
-      const { data: suppliers, error: suppliersError } = await supabase
-        .from('suppliers')
-        .select('*')
-        .eq('company_id', currentEnterprise.id)
-        .order('name');
-
-      if (suppliersError) throw suppliersError;
+      // Séparer clients et fournisseurs
+      const customers = (allThirdParties || []).filter(tp => tp.type === 'customer');
+      const suppliers = (allThirdParties || []).filter(tp => tp.type === 'supplier');
 
       // Charger les factures pour calculer les balances clients
       const { data: customerInvoices } = await supabase
@@ -236,7 +224,7 @@ const ThirdPartiesPage: React.FC = () => {
       // Charger les achats pour calculer les balances fournisseurs
       const { data: supplierInvoices } = await supabase
         .from('invoices')
-        .select('supplier_id, total_incl_tax, paid_amount, status, due_date')
+        .select('third_party_id, total_incl_tax, paid_amount, status, due_date')
         .eq('company_id', currentEnterprise.id)
         .eq('invoice_type', 'purchase')
         .neq('status', 'cancelled');
@@ -259,15 +247,15 @@ const ThirdPartiesPage: React.FC = () => {
       // Calculer les balances fournisseurs (dettes = total - payé)
       const supplierBalances = new Map<string, { balance: number; payables: number; hasOverdue: boolean }>();
       (supplierInvoices || []).forEach(inv => {
-        if (!inv.supplier_id) return;
-        const current = supplierBalances.get(inv.supplier_id) || { balance: 0, payables: 0, hasOverdue: false };
+        if (!inv.third_party_id) return;
+        const current = supplierBalances.get(inv.third_party_id) || { balance: 0, payables: 0, hasOverdue: false };
         const remaining = (inv.total_incl_tax || 0) - (inv.paid_amount || 0);
         current.balance += remaining;
         current.payables += inv.total_incl_tax || 0;
         if (remaining > 0 && inv.due_date && new Date(inv.due_date) < new Date()) {
           current.hasOverdue = true;
         }
-        supplierBalances.set(inv.supplier_id, current);
+        supplierBalances.set(inv.third_party_id, current);
       });
 
       // Mapper les clients avec les vraies balances
@@ -277,7 +265,7 @@ const ThirdPartiesPage: React.FC = () => {
         return {
           id: c.id,
           type: 'customer' as const,
-          code: c.customer_number,
+          code: c.customer_number || c.code,
           name: c.name,
           email: c.email || '',
           phone: c.phone || '',
@@ -286,24 +274,24 @@ const ThirdPartiesPage: React.FC = () => {
           company_name: c.company_name,
           tax_number: c.tax_number || '',
           billing_address: {
-            street: c.billing_address_line1 || '',
-            city: c.billing_city || '',
-            postal_code: c.billing_postal_code || '',
-            country: c.billing_country || 'FR'
+            street: c.billing_address_line1 || c.address_line1 || '',
+            city: c.billing_city || c.city || '',
+            postal_code: c.billing_postal_code || c.postal_code || '',
+            country: c.billing_country || c.country || 'FR'
           },
           payment_terms: c.payment_terms || 30,
           currency: c.currency || getCurrentCompanyCurrency(),
           credit_limit: c.credit_limit,
           is_active: isActive,
           notes: c.notes,
-          current_balance: balanceData.balance,
+          current_balance: balanceData.balance || c.current_balance || 0,
           total_receivables: balanceData.receivables,
           total_payables: 0,
           has_overdue: balanceData.hasOverdue,
-          last_interaction: c.last_interaction,
+          last_interaction: undefined,
           status: isActive ? 'active' : 'inactive',
-          category: 'company',
-          tags: [],
+          category: c.customer_type === 'individual' ? 'individual' : 'company',
+          tags: c.tags || [],
           created_at: c.created_at,
           updated_at: c.updated_at
         };
@@ -316,7 +304,7 @@ const ThirdPartiesPage: React.FC = () => {
         return {
           id: s.id,
           type: 'supplier' as const,
-          code: s.supplier_number,
+          code: s.supplier_number || s.code,
           name: s.name,
           email: s.email || '',
           phone: s.phone || '',
@@ -325,24 +313,24 @@ const ThirdPartiesPage: React.FC = () => {
           company_name: s.company_name,
           tax_number: s.tax_number || '',
           billing_address: {
-            street: s.billing_address_line1 || '',
-            city: s.billing_city || '',
-            postal_code: s.billing_postal_code || '',
-            country: s.billing_country || 'FR'
+            street: s.billing_address_line1 || s.address_line1 || '',
+            city: s.billing_city || s.city || '',
+            postal_code: s.billing_postal_code || s.postal_code || '',
+            country: s.billing_country || s.country || 'FR'
           },
           payment_terms: s.payment_terms || 30,
           currency: s.currency || getCurrentCompanyCurrency(),
           credit_limit: undefined,
           is_active: isActive,
           notes: s.notes,
-          current_balance: balanceData.balance,
+          current_balance: balanceData.balance || s.account_balance || 0,
           total_receivables: 0,
           total_payables: balanceData.payables,
           has_overdue: balanceData.hasOverdue,
-          last_interaction: s.last_interaction,
+          last_interaction: undefined,
           status: isActive ? 'active' : 'inactive',
-          category: 'company',
-          tags: [],
+          category: s.supplier_type === 'individual' ? 'individual' : 'company',
+          tags: s.tags || [],
           created_at: s.created_at,
           updated_at: s.updated_at
         };
@@ -376,7 +364,7 @@ const ThirdPartiesPage: React.FC = () => {
       filtered = filtered.filter(tp =>
         tp.name.toLowerCase().includes(searchLower) ||
         tp.primary_email.toLowerCase().includes(searchLower) ||
-        tp.code.toLowerCase().includes(searchLower)
+        (tp.code || '').toLowerCase().includes(searchLower)
       );
     }
     if (filters.type) {
@@ -454,35 +442,24 @@ const ThirdPartiesPage: React.FC = () => {
   };
   const handleDeleteThirdParty = async (thirdParty: ThirdPartyListItem) => {
     // eslint-disable-next-line no-alert
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce tiers ?')) {
+    if (!window.confirm('Êtes-vous sûr de vouloir désactiver ce tiers ?')) {
       return;
     }
     try {
-      logger.debug('ThirdPartiesPage', `🗑️ Deleting ${thirdParty.type}: ${thirdParty.name}`);
+      logger.debug('ThirdPartiesPage', `🗑️ Soft deleting ${thirdParty.type}: ${thirdParty.name}`);
 
-      if (thirdParty.type === 'customer') {
-        const { error } = await supabase
-          .from('customers')
-          .delete()
-          .eq('id', thirdParty.id);
+      // Soft delete - marquer comme inactif au lieu de supprimer physiquement
+      const { error } = await supabase
+        .from('third_parties')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('id', thirdParty.id);
 
-        if (error) {
-          logger.error('ThirdPartiesPage', 'Error deleting customer:', error);
-          throw error;
-        }
-      } else if (thirdParty.type === 'supplier') {
-        const { error } = await supabase
-          .from('suppliers')
-          .delete()
-          .eq('id', thirdParty.id);
-
-        if (error) {
-          logger.error('ThirdPartiesPage', 'Error deleting supplier:', error);
-          throw error;
-        }
+      if (error) {
+        logger.error('ThirdPartiesPage', 'Error soft deleting third party:', error);
+        throw error;
       }
 
-      logger.debug('ThirdPartiesPage', `✅ Deleted ${thirdParty.type} successfully`);
+      logger.debug('ThirdPartiesPage', `✅ Soft deleted ${thirdParty.type} successfully`);
       await loadThirdParties();
       await loadDashboardData();
       toastDeleted('Le tiers');

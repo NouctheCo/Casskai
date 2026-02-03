@@ -24,6 +24,7 @@ import AccountingRulesService from './accountingRulesService';
 import { AccountingStandardAdapter, type AccountingStandard } from './accountingStandardAdapter';
 import { kpiCacheService } from './kpiCacheService';
 import { logger } from '@/lib/logger';
+import i18n from '@/i18n/i18n';
 type JournalEntryInsert = Database['public']['Tables']['journal_entries']['Insert'];
 type JournalEntryUpdate = Database['public']['Tables']['journal_entries']['Update'];
 type JournalEntryLineInsert = Database['public']['Tables']['journal_entry_lines']['Insert'];
@@ -53,6 +54,25 @@ function coerceNumber(value: unknown): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 class JournalEntriesService {
+  private getUserFriendlyError(error: unknown, fallback: string): string {
+    const rawMessage =
+      error instanceof Error
+        ? error.message
+        : typeof error === 'string'
+          ? error
+          : (error as { message?: string })?.message || fallback;
+    const code = (error as { code?: string })?.code;
+    const isClosedPeriodError =
+      code === 'P0001' ||
+      /période.*clôtur|clôtur.*période|period.*closed|closed.*period/i.test(rawMessage);
+    if (isClosedPeriodError) {
+      return i18n.t(
+        'accounting.closure.errors.closedPeriodOperation',
+        'Action impossible : la période comptable est clôturée. Réouvrez la période pour modifier ou saisir des écritures.'
+      );
+    }
+    return rawMessage;
+  }
   private async generateReferenceNumber(companyId: string): Promise<string> {
     const today = new Date();
     const year = today.getFullYear();
@@ -230,7 +250,7 @@ class JournalEntriesService {
         },
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create journal entry';
+      const message = this.getUserFriendlyError(error, 'Failed to create journal entry');
       logger.error('JournalEntries', '[JournalEntriesService] createJournalEntry failed:', error);
       return { success: false, error: message };
     }
@@ -350,7 +370,7 @@ class JournalEntriesService {
         },
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update journal entry';
+      const message = this.getUserFriendlyError(error, 'Failed to update journal entry');
       return { success: false, error: message };
     }
   }
@@ -399,7 +419,7 @@ class JournalEntriesService {
       kpiCacheService.invalidateCache(companyId);
       return { success: true, data: null };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete journal entry';
+      const message = this.getUserFriendlyError(error, 'Failed to delete journal entry');
       return { success: false, error: message };
     }
   }
@@ -832,7 +852,7 @@ class JournalEntriesService {
         data: updatedEntry as unknown as JournalEntryWithItems
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      const errorMessage = this.getUserFriendlyError(error, 'Erreur inconnue');
       logger.error('JournalEntries', '[journalEntriesService] Error updating entry status:', errorMessage);
       return {
         success: false,

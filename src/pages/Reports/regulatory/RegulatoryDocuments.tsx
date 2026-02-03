@@ -194,6 +194,7 @@ export function RegulatoryDocuments() {
             value={filters.fiscalYear || ''}
             onChange={(e) => setFilters({ ...filters, fiscalYear: e.target.value ? parseInt(e.target.value) : undefined })}
             className="input bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+            aria-label={t('reports.regulatory.filters.allYears')}
           >
             <option value="">{t('reports.regulatory.filters.allYears')}</option>
             {[2024, 2023, 2022, 2021].map(year => (
@@ -204,6 +205,7 @@ export function RegulatoryDocuments() {
             value={filters.status || ''}
             onChange={(e) => setFilters({ ...filters, status: e.target.value as DocumentStatus || undefined })}
             className="input bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+            aria-label={t('reports.regulatory.filters.allStatuses')}
           >
             <option value="">{t('reports.regulatory.filters.allStatuses')}</option>
             <option value="draft">{t('reports.regulatory.status.draft')}</option>
@@ -216,6 +218,7 @@ export function RegulatoryDocuments() {
             value={filters.accountingStandard || ''}
             onChange={(e) => setFilters({ ...filters, accountingStandard: e.target.value as AccountingStandard || undefined })}
             className="input bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+            aria-label={t('reports.regulatory.filters.allStandards')}
           >
             <option value="">{t('reports.regulatory.filters.allStandards')}</option>
             <option value="PCG">PCG (France)</option>

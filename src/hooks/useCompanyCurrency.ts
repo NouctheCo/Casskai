@@ -215,7 +215,7 @@ export function useCompanyCurrency() {
         formattedNumber = value.toLocaleString(currencyInfo.locale, {
           minimumFractionDigits: decimals,
           maximumFractionDigits: decimals
-        });
+        }).replace(/\u00A0/g, ' '); // Remplacer espace insecable par espace normal
       }
 
       if (!showSymbol) {
@@ -292,7 +292,7 @@ export function formatCurrency(
     formattedNumber = amount.toLocaleString(config.locale, {
       minimumFractionDigits: config.decimals,
       maximumFractionDigits: config.decimals
-    });
+    }).replace(/\u00A0/g, ' '); // Remplacer espace insecable par espace normal
   }
 
   if (!showSymbol) {

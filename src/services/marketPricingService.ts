@@ -340,39 +340,39 @@ export function formatMarketPrice(price: number, currency: string, symbol: strin
       return `${price.toLocaleString('fr-FR', { 
         minimumFractionDigits: 0, 
         maximumFractionDigits: 0 
-      })} ${symbol}`;
+      }).replace(/\u00A0/g, ' ')} ${symbol}`;
       
     case 'GHS':
       // Cedi ghanéen
       return `${symbol}${price.toLocaleString('en-GH', { 
         minimumFractionDigits: 0, 
         maximumFractionDigits: 0 
-      })}`;
+      }).replace(/\u00A0/g, ' ')}`;
       
     case 'NGN':
       // Naira nigérian
       return `${symbol}${price.toLocaleString('en-NG', { 
         minimumFractionDigits: 0, 
         maximumFractionDigits: 0 
-      })}`;
+      }).replace(/\u00A0/g, ' ')}`;
       
     case 'EUR':
       return `${price.toLocaleString('fr-FR', { 
         minimumFractionDigits: 2, 
         maximumFractionDigits: 2 
-      })}${symbol}`;
+      }).replace(/\u00A0/g, ' ')}${symbol}`;
       
     case 'USD':
       return `${symbol}${price.toLocaleString('en-US', { 
         minimumFractionDigits: 2, 
         maximumFractionDigits: 2 
-      })}`;
+      }).replace(/\u00A0/g, ' ')}`;
       
     case 'GBP':
       return `${symbol}${price.toLocaleString('en-GB', { 
         minimumFractionDigits: 2, 
         maximumFractionDigits: 2 
-      })}`;
+      }).replace(/\u00A0/g, ' ')}`;
       
     default:
       return `${price} ${symbol}`;

@@ -11,7 +11,7 @@
  */
 import { subscriptionService } from './subscriptionService';
 import { logger } from '@/lib/logger';
-import { trialService } from './trialService';
+import { canCreateTrial } from './trialService';
 /**
  * Service pour gérer l'expiration des périodes d'essai
  */
@@ -83,7 +83,7 @@ class TrialExpirationService {
       if (!status) {
         // Aucun statut retourné peut signifier "pas d'abonnement" OU "erreur côté backend".
         // On ne crée jamais un essai sans vérifier l'éligibilité, et on évite de bloquer l'accès en cas d'incertitude.
-        const canCreate = await trialService.canCreateTrial(userId);
+        const canCreate = await canCreateTrial(userId);
         if (canCreate) {
           const trialResult = await subscriptionService.createTrialSubscription(userId);
           if (trialResult.success) {

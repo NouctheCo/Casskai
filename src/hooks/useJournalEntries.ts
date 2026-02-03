@@ -13,6 +13,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import i18n from '@/i18n/i18n';
 import type {
   JournalEntry,
   Account,
@@ -46,6 +47,26 @@ export interface JournalEntryFilters {
   status?: 'draft' | 'posted' | 'cancelled';
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+function mapClosedPeriodError(error: unknown, fallback: string): string {
+  const rawMessage =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'string'
+        ? error
+        : (error as { message?: string })?.message || fallback;
+  const code = (error as { code?: string })?.code;
+  const isClosedPeriodError =
+    code === 'P0001' ||
+    /période.*clôtur|clôtur.*période|period.*closed|closed.*period/i.test(rawMessage);
+  if (isClosedPeriodError) {
+    return i18n.t(
+      'accounting.closure.errors.closedPeriodOperation',
+      'Action impossible : la période comptable est clôturée. Réouvrez la période pour modifier ou saisir des écritures.'
+    );
+  }
+  return rawMessage;
 }
 export function useJournalEntries(companyId: string) {
   const { user } = useAuth();
@@ -174,7 +195,7 @@ export function useJournalEntries(companyId: string) {
       setJournalEntries(prev => [entry, ...prev]);
       return entry;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create journal entry';
+      const errorMessage = mapClosedPeriodError(err, 'Failed to create journal entry');
       setError(errorMessage);
       logger.error('UseJournalEntries', '...', error);
       throw new Error(errorMessage);

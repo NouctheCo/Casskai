@@ -205,7 +205,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
         // Charger les 5 dernières factures et devis
         const { data: recentInvoices } = await supabase
           .from('invoices')
-          .select('id, invoice_number, status, total_incl_tax, created_at, customer:customers!customer_id(name)')
+          .select('id, invoice_number, status, total_incl_tax, created_at, customer:third_parties!invoices_customer_id_fkey(name)')
           .eq('company_id', currentCompany.id)
           .order('created_at', { ascending: false })
           .limit(3);
@@ -225,7 +225,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
             const customer = Array.isArray(invoice.customer) ? invoice.customer[0] : invoice.customer;
             const customerName = customer?.name || 'Client inconnu';
             const amount = invoice.total_incl_tax || 0;
-            const formattedAmount = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: ((invoice as any).currency as string) || getCurrentCompanyCurrency() }).format(amount);
+            const formattedAmount = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: ((invoice as any).currency as string) || getCurrentCompanyCurrency() }).format(amount).replace(/\u00A0/g, ' ');
             const timeAgo = getTimeAgo(invoice.created_at);
 
             activityItems.push({
@@ -241,7 +241,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
         if (recentQuotes) {
           for (const quote of recentQuotes) {
             const amount = quote.total_amount || 0;
-            const formattedAmount = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: ((quote as any).currency as string) || getCurrentCompanyCurrency() }).format(amount);
+            const formattedAmount = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: ((quote as any).currency as string) || getCurrentCompanyCurrency() }).format(amount).replace(/\u00A0/g, ' ');
             const timeAgo = getTimeAgo(quote.created_at);
 
             activityItems.push({

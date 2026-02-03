@@ -15,7 +15,7 @@ import {
   XCircle,
   Loader2
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { logger } from '@/lib/logger';
 interface ImportRow {
@@ -82,24 +82,39 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
         vat_number: 'FR11122233301'
       }
     ];
-    const ws = XLSX.utils.json_to_sheet(template);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Tiers');
-    // Largeur des colonnes
-    ws['!cols'] = [
-      { wch: 25 }, // name
-      { wch: 12 }, // type
-      { wch: 25 }, // email
-      { wch: 18 }, // phone
-      { wch: 30 }, // address
-      { wch: 15 }, // city
-      { wch: 12 }, // postal_code
-      { wch: 8 },  // country
-      { wch: 18 }, // siret
-      { wch: 18 }  // vat_number
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Tiers');
+    const headers = Object.keys(template[0]);
+    worksheet.addRow(headers);
+    template.forEach((row) => worksheet.addRow(headers.map((key) => (row as any)[key])));
+    worksheet.columns = [
+      { width: 25 }, // name
+      { width: 12 }, // type
+      { width: 25 }, // email
+      { width: 18 }, // phone
+      { width: 30 }, // address
+      { width: 15 }, // city
+      { width: 12 }, // postal_code
+      { width: 8 },  // country
+      { width: 18 }, // siret
+      { width: 18 }  // vat_number
     ];
-    XLSX.writeFile(wb, 'template_import_tiers.xlsx');
-    toastSuccess('Modèle téléchargé');
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+    });
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'template_import_tiers.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toastSuccess('Modèle téléchargé');
+    });
   };
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,15 +123,38 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
     setImportComplete(false);
     try {
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json<any>(sheet);
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(data);
+      const sheet = workbook.worksheets[0];
+      if (!sheet) {
+        throw new Error('Feuille Excel introuvable');
+      }
+      const headers = (sheet.getRow(1).values as Array<string | number | null | undefined>)
+        .slice(1)
+        .map((header) => String(header || '').trim());
+      const jsonData: Array<Record<string, unknown>> = [];
+      sheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+        if (rowNumber === 1) return;
+        const rowValues = row.values as Array<string | number | null | undefined>;
+        const record: Record<string, unknown> = {};
+        headers.forEach((header, index) => {
+          record[header] = rowValues[index + 1];
+        });
+        const hasValues = Object.values(record).some((value) => value !== undefined && value !== null && String(value).trim() !== '');
+        if (hasValues) jsonData.push(record);
+      });
       const rows: ImportRow[] = jsonData.map((row, _index) => {
         const errors: string[] = [];
         const name = row.name?.toString().trim() || '';
         const type = row.type?.toString().toLowerCase().trim() || '';
         const email = row.email?.toString().trim() || '';
+        const phone = row.phone?.toString().trim() || '';
+        const address = row.address?.toString().trim() || '';
+        const city = row.city?.toString().trim() || '';
+        const postalCode = row.postal_code?.toString().trim() || '';
+        const country = row.country?.toString().trim() || '';
+        const siret = row.siret?.toString().trim() || '';
+        const vatNumber = row.vat_number?.toString().trim() || '';
         // Validation
         if (!name) {
           errors.push('Nom obligatoire');
@@ -130,14 +168,14 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
         return {
           name,
           type,
-          email: row.email || undefined,
-          phone: row.phone || undefined,
-          address: row.address || undefined,
-          city: row.city || undefined,
-          postal_code: row.postal_code || undefined,
-          country: row.country || 'FR',
-          siret: row.siret || undefined,
-          vat_number: row.vat_number || undefined,
+          email: email || undefined,
+          phone: phone || undefined,
+          address: address || undefined,
+          city: city || undefined,
+          postal_code: postalCode || undefined,
+          country: country || 'FR',
+          siret: siret || undefined,
+          vat_number: vatNumber || undefined,
           isValid: errors.length === 0,
           errors
         };

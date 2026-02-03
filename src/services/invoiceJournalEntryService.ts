@@ -207,25 +207,32 @@ async function getThirdPartyAccount(
   try {
     // Déterminer le préfixe du compte selon le type
     const accountPrefix = invoiceType === 'sale' ? '411' : '401';
-    const tableName = invoiceType === 'sale' ? 'customers' : 'suppliers';
+    const isCustomer = invoiceType === 'sale';
+    const accountFieldName = isCustomer ? 'customer_account_id' : 'supplier_account_id';
+    
+    // ✅ Utiliser third_parties pour toutes les données de tiers
+    const tableName = 'third_parties';
 
     // Chercher si le client/fournisseur a déjà un compte auxiliaire
     const { data: thirdParty } = await supabase
       .from(tableName)
-      .select('id, name, accounting_account_id')
+      .select('id, name, customer_account_id, supplier_account_id')
       .eq('id', thirdPartyId)
       .single();
 
     if (!thirdParty) {
-      throw new Error(`${invoiceType === 'sale' ? 'Client' : 'Fournisseur'} non trouvé`);
+      throw new Error(`${isCustomer ? 'Client' : 'Fournisseur'} non trouvé`);
     }
 
+    // ✅ Utiliser le bon champ selon le type (customer_account_id ou supplier_account_id)
+    const accountId = isCustomer ? thirdParty.customer_account_id : thirdParty.supplier_account_id;
+
     // Si le compte existe déjà, le retourner
-    if (thirdParty.accounting_account_id) {
+    if (accountId) {
       const { data: account } = await supabase
         .from('chart_of_accounts')
         .select('id, account_number')
-        .eq('id', thirdParty.accounting_account_id)
+        .eq('id', accountId)
         .maybeSingle();
       if (account) return account;
     }
@@ -243,7 +250,7 @@ async function getThirdPartyAccount(
         company_id: companyId,
         account_number: accountNumber,
         account_name: thirdParty.name,
-        account_type: invoiceType === 'sale' ? 'asset' : 'liability',
+        account_type: isCustomer ? 'asset' : 'liability',
         account_class: 4,
         parent_account_id: null,
         is_detail_account: true,
@@ -254,10 +261,10 @@ async function getThirdPartyAccount(
 
     if (error) throw error;
 
-    // Mettre à jour le client/fournisseur avec le nouveau compte
+    // ✅ Mettre à jour le bon champ selon le type
     await supabase
       .from(tableName)
-      .update({ accounting_account_id: newAccount!.id })
+      .update({ [accountFieldName]: newAccount!.id })
       .eq('id', thirdPartyId);
 
     return newAccount;
@@ -301,7 +308,7 @@ export async function onInvoiceCreated(invoiceId: string): Promise<void> {
     // Récupérer la facture avec le client
     const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
-        .select('*, customer:customers!customer_id(name)')
+        .select('*, customer:third_parties!invoices_customer_id_fkey(name)')
       .eq('id', invoiceId)
       .single();
     if (invoiceError || !invoice) {

@@ -180,8 +180,8 @@ const TimesheetFormModal: React.FC<TimesheetFormModalProps> = ({ isOpen, onClose
               {t('projects.timesheetModal.task', 'Tâche')} {t('common.optional', '(optionnel)')}
             </Label>
             <Select
-              value={formData.task_id}
-              onValueChange={(value) => handleInputChange('task_id', value)}
+              value={formData.task_id || '_none_'}
+              onValueChange={(value) => handleInputChange('task_id', value === '_none_' ? '' : value)}
               disabled={!formData.project_id || loadingTasks}
             >
               <SelectTrigger>
@@ -194,7 +194,7 @@ const TimesheetFormModal: React.FC<TimesheetFormModalProps> = ({ isOpen, onClose
                 } />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t('projects.timesheetModal.noTask', 'Aucune tâche')}</SelectItem>
+                <SelectItem value="_none_">{t('projects.timesheetModal.noTask', 'Aucune tâche')}</SelectItem>
                 {availableTasks.map(task => (
                   <SelectItem key={task.id} value={task.id}>{task.name}</SelectItem>
                 ))}

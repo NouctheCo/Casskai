@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
+import { buildVatRateOptions, getDefaultVatRate, resolveCompanyCountryCode } from '@/utils/vatRateUtils';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { invoicingService } from '@/services/invoicingService';
@@ -838,13 +839,25 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
   const { currentCompany } = useAuth();
   const { generateFromInvoice, isGenerating } = useAutoAccounting();
   const [loading, setLoading] = useState(false);
+  const countryCode = useMemo(
+    () => resolveCompanyCountryCode({ currentCompany, companySettings }),
+    [currentCompany, companySettings]
+  );
+  const vatRateOptions = useMemo(
+    () => buildVatRateOptions(countryCode, companySettings?.accounting?.defaultVatRate),
+    [countryCode, companySettings?.accounting?.defaultVatRate]
+  );
+  const defaultTaxRate = useMemo(
+    () => getDefaultVatRate(countryCode, companySettings?.accounting?.defaultVatRate),
+    [countryCode, companySettings?.accounting?.defaultVatRate]
+  );
   const [formData, setFormData] = useState<InvoiceFormData>({
     clientId: '',
     invoiceNumber: '',
     issueDate: new Date().toISOString().split('T')[0],
     dueDate: '',
     description: '',
-    items: [{ description: '', quantity: 1, unitPrice: 0, taxRate: 20, total: 0 }],
+    items: [{ description: '', quantity: 1, unitPrice: 0, taxRate: defaultTaxRate, total: 0 }],
     notes: '',
     terms: ''
   });
@@ -855,7 +868,6 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       generateInvoiceNumber();
       // Reset form with company default terms
       const defaultTerms = companySettings?.branding?.defaultTermsConditions || '';
-      const defaultTaxRate = companySettings?.accounting?.defaultVatRate || 20;
       setFormData({
         clientId: '',
         invoiceNumber: '',
@@ -878,14 +890,14 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
           description: line.description as string,
           quantity: line.quantity as number,
           unitPrice: line.unit_price as number,
-          taxRate: (line.tax_rate as number) || 20,
+          taxRate: (line.tax_rate as number) || defaultTaxRate,
           total: (line.line_total_ht as number) || 0
-        })) || [{ description: '', quantity: 1, unitPrice: 0, taxRate: 20, total: 0 }],
+        })) || [{ description: '', quantity: 1, unitPrice: 0, taxRate: defaultTaxRate, total: 0 }],
         notes: (invoice.notes as string) || '',
         terms: ''
       });
     }
-  }, [open, invoice]);
+  }, [open, invoice, defaultTaxRate, companySettings]);
   const generateInvoiceNumber = async () => {
     try {
       const number = await invoicingService.generateInvoiceNumber();
@@ -895,7 +907,6 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
     }
   };
   const addItem = () => {
-    const defaultTaxRate = companySettings?.accounting?.defaultVatRate || 20;
     setFormData(prev => ({
       ...prev,
       items: [...prev.items, { description: '', quantity: 1, unitPrice: 0, taxRate: defaultTaxRate, total: 0 }]
@@ -943,7 +954,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
         description: article.name,
         unitPrice: article.selling_price,
         quantity: 1,
-        taxRate: article.tva_rate || 20, // TVA depuis l'article ou 20% par défaut
+        taxRate: article.tva_rate || defaultTaxRate, // TVA depuis l'article ou taux par défaut du pays
       };
       // Recalculer le total
       const totalHT = newItems[index].quantity * newItems[index].unitPrice;
@@ -1197,18 +1208,24 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="0">0%</SelectItem>
-                          <SelectItem value="5.5">5.5%</SelectItem>
-                          <SelectItem value="10">10%</SelectItem>
-                          <SelectItem value="20">20%</SelectItem>
-                          {companySettings?.accounting?.defaultVatRate && 
-                           ![0, 5.5, 10, 20].includes(companySettings.accounting.defaultVatRate) && (
-                            <SelectItem value={companySettings.accounting.defaultVatRate.toString()}>
-                              {companySettings.accounting.defaultVatRate}% (par défaut)
-                            </SelectItem>
-                          )}
+                          {Array.from(new Set([...vatRateOptions, item.taxRate]))
+                            .sort((a, b) => a - b)
+                            .map((rate) => (
+                              <SelectItem key={rate} value={rate.toString()}>
+                                {rate}%
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
+                      <Input
+                        type="number"
+                        placeholder="Taux manuel (%)"
+                        min="0"
+                        step="0.01"
+                        value={item.taxRate}
+                        onChange={(e) => updateItem(index, 'taxRate', parseFloat(e.target.value) || 0)}
+                        className="mt-2"
+                      />
                     </div>
                     <div className="col-span-1">
                       <div className="text-sm font-medium">

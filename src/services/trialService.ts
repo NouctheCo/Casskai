@@ -1,251 +1,321 @@
 /**
- * CassKai - Plateforme de gestion financière
- * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
- * Tous droits réservés - All rights reserved
+ * Trial Management Service
+ * Gère les essais gratuits limités (1 par utilisateur)
  * 
- * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
- * Toute reproduction, distribution ou utilisation non autorisée est interdite.
- * 
- * This software is the exclusive property of NOUTCHE CONSEIL.
- * Any unauthorized reproduction, distribution or use is prohibited.
+ * ✅ NOUVEAU: Limite stricte d'1 essai par utilisateur
  */
+
 import { supabase } from '@/lib/supabase';
-import { logger } from '@/lib/logger';
-export interface TrialInfo {
-  subscriptionId: string;
-  planId: string;
-  status: string;
-  trialStart: Date;
-  trialEnd: Date;
-  daysRemaining: number;
-  isExpired: boolean;
+
+export interface TrialStatus {
+  hasActiveTrial: boolean;
+  trialStartDate?: string;
+  trialEndDate?: string;
+  daysRemaining?: number;
+  hasUsedTrial: boolean;
 }
-export interface ExpiringTrial {
-  id: string;
-  user_id: string;
-  plan_id: string;
-  status: string;
-  trial_end: string;
-  created_at: string;
-  subscription_plans: Array<{
-    name: string;
-    price: number;
-    currency: string;
-  }>;
-}
-class TrialService {
-  /**
-   * Crée un abonnement d'essai pour un utilisateur
-   */
-  async createTrialSubscription(
-    userId: string,
-    companyId?: string
-  ): Promise<{ success: boolean; subscriptionId?: string; error?: string }> {
-    try {
-      const { data, error } = await supabase.rpc('create_trial_subscription', {
-        p_user_id: userId,
-        p_company_id: companyId || null
-      });
-      if (error) {
-        logger.error('Trial', 'Error creating trial subscription:', error);
-        return { success: false, error: error.message };
-      }
-      if (data === 'ALREADY_EXISTS') {
-        return { success: false, error: 'Un essai existe déjà pour cet utilisateur' };
-      }
-      if (!data) {
-        return { success: false, error: 'Erreur lors de la création de l\'essai' };
-      }
-      return { success: true, subscriptionId: data };
-    } catch (error) {
-      logger.error('Trial', 'Error in createTrialSubscription:', error);
-      return { success: false, error: 'Erreur inattendue' };
+
+/**
+ * Vérifie le statut d'essai de l'utilisateur
+ */
+export async function getUserTrialStatus(userId: string): Promise<TrialStatus> {
+  try {
+    const { data, error } = await supabase
+      .from('user_subscriptions')
+      .select('trial_start, trial_end, status')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.error('Error checking trial status:', error);
+      return { hasActiveTrial: false, hasUsedTrial: false };
     }
-  }
-  /**
-   * Vérifie si un utilisateur peut créer un essai
-   */
-  async canCreateTrial(userId: string): Promise<boolean> {
-    try {
-      const { data, error } = await supabase.rpc('can_create_trial', {
-        p_user_id: userId
-      });
-      if (error) {
-        logger.error('Trial', 'Error checking trial creation eligibility:', error);
-        return false;
-      }
-      return data || false;
-    } catch (error) {
-      logger.error('Trial', 'Error in canCreateTrial:', error);
-      return false;
+
+    if (!data || data.length === 0) {
+      return { hasActiveTrial: false, hasUsedTrial: false };
     }
-  }
-  /**
-   * Obtient les informations détaillées d'essai d'un utilisateur
-   */
-  async getUserTrialInfo(userId: string): Promise<TrialInfo | null> {
-    try {
-      const { data, error } = await supabase.rpc('get_user_trial_info', {
-        p_user_id: userId
-      });
-      if (error) {
-        logger.error('Trial', 'Error getting trial info:', error);
-        return null;
-      }
-      if (!data || data.length === 0) {
-        return null;
-      }
-      const trial = data[0];
-      return {
-        subscriptionId: trial.subscription_id,
-        planId: trial.plan_id,
-        status: trial.status,
-        trialStart: new Date(trial.trial_start),
-        trialEnd: new Date(trial.trial_end),
-        daysRemaining: trial.days_remaining,
-        isExpired: trial.is_expired
-      };
-    } catch (error) {
-      logger.error('Trial', 'Error in getUserTrialInfo:', error);
-      return null;
-    }
-  }
-  /**
-   * Convertit un essai en abonnement payant
-   */
-  async convertTrialToPaid(
-    userId: string,
-    newPlanId: string,
-    stripeSubscriptionId?: string,
-    stripeCustomerId?: string
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      const { data, error } = await supabase.rpc('convert_trial_to_paid', {
-        p_user_id: userId,
-        p_new_plan_id: newPlanId,
-        p_stripe_subscription_id: stripeSubscriptionId || null,
-        p_stripe_customer_id: stripeCustomerId || null
-      });
-      if (error) {
-        logger.error('Trial', 'Error converting trial to paid:', error);
-        return { success: false, error: error.message };
-      }
-      if (data === 'PLAN_NOT_FOUND') {
-        return { success: false, error: 'Plan d\'abonnement non trouvé' };
-      }
-      if (data === 'NO_ACTIVE_TRIAL') {
-        return { success: false, error: 'Aucun essai actif trouvé' };
-      }
-      if (data === 'SUCCESS') {
-        return { success: true };
-      }
-      return { success: false, error: 'Erreur lors de la conversion' };
-    } catch (error) {
-      logger.error('Trial', 'Error in convertTrialToPaid:', error);
-      return { success: false, error: 'Erreur inattendue' };
-    }
-  }
-  /**
-   * Annule un abonnement d'essai
-   */
-  async cancelTrial(
-    userId: string,
-    reason?: string
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      // Utiliser une approche directe au lieu de la fonction RPC
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .update({
-          status: 'canceled',
-          canceled_at: new Date().toISOString(),
-          cancel_reason: reason || null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-        .eq('status', 'trialing')
-        .eq('plan_id', 'trial')
-        .select();
-      if (error) {
-        logger.error('Trial', 'Error canceling trial:', error);
-        return { success: false, error: error.message };
-      }
-      if (!data || data.length === 0) {
-        return { success: false, error: 'Aucun essai actif trouvé pour cet utilisateur' };
-      }
-      return { success: true };
-    } catch (error) {
-      logger.error('Trial', 'Error in cancelTrial:', error);
-      return { success: false, error: 'Erreur lors de l\'annulation de l\'essai' };
-    }
-  }
-  /**
-   * Obtient des statistiques sur les essais
-   */
-  async getTrialStatistics(): Promise<Array<{ metric: string; value: number }>> {
-    try {
-      const { data, error } = await supabase.rpc('get_trial_statistics');
-      if (error) {
-        logger.error('Trial', 'Error getting trial statistics:', error);
-        return [];
-      }
-      return data || [];
-    } catch (error) {
-      logger.error('Trial', 'Error in getTrialStatistics:', error);
-      return [];
-    }
-  }
-  /**
-   * Obtient la liste des essais qui expirent bientôt
-   */
-  async getExpiringTrials(daysAhead: number = 7): Promise<ExpiringTrial[]> {
-    try {
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select(`
-          id,
-          user_id,
-          plan_id,
-          status,
-          trial_end,
-          created_at,
-          subscription_plans (
-            name,
-            price,
-            currency
-          )
-        `)
-        .eq('status', 'trialing')
-        .eq('plan_id', 'trial')
-        .gte('trial_end', new Date().toISOString())
-        .lte('trial_end', new Date(Date.now() + daysAhead * 24 * 60 * 60 * 1000).toISOString())
-        .order('trial_end', { ascending: true });
-      if (error) {
-        logger.error('Trial', 'Error getting expiring trials:', error);
-        return [];
-      }
-      return (data || []) as ExpiringTrial[];
-    } catch (error) {
-      logger.error('Trial', 'Error in getExpiringTrials:', error);
-      return [];
-    }
-  }
-  /**
-   * Vérifie et met à jour automatiquement les essais expirés
-   */
-  async checkAndExpireTrials(): Promise<{ expiredCount: number; error?: string }> {
-    try {
-      const { data, error } = await supabase.rpc('expire_trials');
-      if (error) {
-        logger.error('Trial', 'Error expiring trials:', error);
-        return { expiredCount: 0, error: error.message };
-      }
-      return { expiredCount: data || 0 };
-    } catch (error) {
-      logger.error('Trial', 'Error in checkAndExpireTrials:', error);
-      return { expiredCount: 0, error: 'Erreur inattendue' };
-    }
+
+    const subscription = data[0];
+    const now = new Date();
+    const trialEnd = subscription.trial_end ? new Date(subscription.trial_end) : null;
+
+    // Vérifier si l'essai est encore actif
+    const hasActiveTrial = trialEnd ? now < trialEnd : false;
+    const daysRemaining = trialEnd
+      ? Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
+
+    return {
+      hasActiveTrial,
+      trialStartDate: subscription.trial_start,
+      trialEndDate: subscription.trial_end,
+      daysRemaining: Math.max(0, daysRemaining),
+      hasUsedTrial: true, // L'utilisateur a déjà utilisé un essai
+    };
+  } catch (error) {
+    console.error('Error in getUserTrialStatus:', error);
+    return { hasActiveTrial: false, hasUsedTrial: false };
   }
 }
-export const trialService = new TrialService();
-export default trialService;
+
+/**
+ * ✅ NOUVEAU: Créer un essai gratuit pour l'utilisateur
+ * Limite stricte: 1 essai par utilisateur, sinon erreur
+ */
+export async function createUserTrial(userId: string, planId: string, daysToAdd: number = 30) {
+  try {
+    // Vérifier si l'utilisateur a déjà utilisé un essai
+    const { data: existingTrials, error: checkError } = await supabase
+      .from('user_subscriptions')
+      .select('id')
+      .eq('user_id', userId)
+      .not('trial_end', 'is', null)
+      .limit(1);
+
+    if (checkError) {
+      console.error('Error checking existing trials:', checkError);
+      throw checkError;
+    }
+
+    if (existingTrials && existingTrials.length > 0) {
+      throw new Error('Utilisateur a déjà utilisé son essai gratuit (limité à 1 par utilisateur)');
+    }
+
+    // Créer un nouvel essai
+    const now = new Date();
+    const trialEnd = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+
+    const { data: subscription, error: createError } = await supabase
+      .from('user_subscriptions')
+      .insert({
+        user_id: userId,
+        plan_id: planId,
+        status: 'trial',
+        trial_start: now.toISOString(),
+        trial_end: trialEnd.toISOString(),
+        current_period_start: now.toISOString(),
+        current_period_end: trialEnd.toISOString(),
+      })
+      .select()
+      .single();
+
+    if (createError) {
+      console.error('Error creating trial:', createError);
+      throw createError;
+    }
+
+    return {
+      success: true,
+      subscription,
+      daysRemaining: daysToAdd,
+    };
+  } catch (error) {
+    console.error('Error in createUserTrial:', error);
+    throw error;
+  }
+}
+
+/**
+ * ✅ NOUVEAU: Vérifier si l'utilisateur peut créer un essai
+ */
+export async function canCreateTrial(userId: string): Promise<boolean> {
+  try {
+    const status = await getUserTrialStatus(userId);
+    return !status.hasUsedTrial;
+  } catch (error) {
+    console.error('Error checking if can create trial:', error);
+    return false;
+  }
+}
+
+/**
+ * ✅ NOUVEAU: Créer un abonnement d'essai
+ */
+export async function createTrialSubscription(
+  userId: string,
+  companyId: string,
+  planId: string = 'trial',
+  daysToAdd: number = 30
+) {
+  try {
+    const result = await createUserTrial(userId, planId, daysToAdd);
+    return {
+      success: true,
+      subscription: result.subscription,
+      daysRemaining: result.daysRemaining,
+    };
+  } catch (error) {
+    console.error('Error creating trial subscription:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * ✅ NOUVEAU: Obtenir les infos d'essai de l'utilisateur
+ */
+export async function getUserTrialInfo(userId: string) {
+  try {
+    const status = await getUserTrialStatus(userId);
+    return {
+      hasActiveTrial: status.hasActiveTrial,
+      trialStartDate: status.trialStartDate,
+      trialEndDate: status.trialEndDate,
+      daysRemaining: status.daysRemaining,
+      hasUsedTrial: status.hasUsedTrial,
+    };
+  } catch (error) {
+    console.error('Error getting trial info:', error);
+    return null;
+  }
+}
+
+/**
+ * ✅ NOUVEAU: Statistiques des essais
+ */
+export async function getTrialStatistics() {
+  try {
+    const { data, error } = await supabase
+      .from('user_subscriptions')
+      .select('*')
+      .eq('status', 'trial');
+
+    if (error) throw error;
+
+    return {
+      totalTrials: data?.length || 0,
+      activeTrials: data?.filter(s => {
+        const endDate = new Date(s.trial_end);
+        return endDate > new Date();
+      }).length || 0,
+    };
+  } catch (error) {
+    console.error('Error getting trial statistics:', error);
+    return { totalTrials: 0, activeTrials: 0 };
+  }
+}
+
+/**
+ * ✅ NOUVEAU: Essais expirant bientôt
+ */
+export async function getExpiringTrials(daysAhead: number = 3) {
+  try {
+    const { data, error } = await supabase
+      .from('user_subscriptions')
+      .select('*')
+      .eq('status', 'trial')
+      .not('trial_end', 'is', null);
+
+    if (error) throw error;
+
+    const now = new Date();
+    const cutoff = new Date(now.getTime() + daysAhead * 24 * 60 * 60 * 1000);
+
+    return data?.filter(s => {
+      const endDate = new Date(s.trial_end);
+      return endDate <= cutoff && endDate > now;
+    }) || [];
+  } catch (error) {
+    console.error('Error getting expiring trials:', error);
+    return [];
+  }
+}
+
+/**
+ * ✅ NOUVEAU: Convertir essai en payant
+ */
+export async function convertTrialToPaid(userId: string, reason?: string) {
+  try {
+    const { error } = await supabase
+      .from('user_subscriptions')
+      .update({
+        status: 'active',
+        trial_start: null,
+        trial_end: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId)
+      .eq('status', 'trial');
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Error converting trial to paid:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Trial Status interface exportée
+ */
+export type TrialInfo = TrialStatus;
+
+/**
+ * ✅ NOUVEAU: Annuler l'essai gratuit
+ */
+export async function cancelTrial(userId: string, reason?: string) {
+  try {
+    const { error } = await supabase
+      .from('user_subscriptions')
+      .update({
+        status: 'cancelled',
+        trial_end: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId)
+      .eq('status', 'trial');
+
+    if (error) {
+      console.error('Error cancelling trial:', error);
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in cancelTrial:', error);
+    throw error;
+  }
+}
+
+/**
+ * ✅ NOUVEAU: Formater les jours restants pour affichage
+ */
+export function formatTrialDaysRemaining(days: number): string {
+  if (days <= 0) return 'Expiré';
+  if (days === 1) return '1 jour restant';
+  return `${days} jours restants`;
+}
+
+/**
+ * ✅ NOUVEAU: Envoyer email de rappel avant expiration
+ */
+export async function sendTrialExpiringEmail(
+  email: string,
+  daysRemaining: number,
+  userName: string
+): Promise<boolean> {
+  try {
+    // Utiliser SendGrid ou autre service d'email
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: email,
+        template: 'trial_expiring',
+        data: {
+          userName,
+          daysRemaining,
+          actionUrl: `${window.location.origin}/pricing`,
+        },
+      }),
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('Error sending trial expiring email:', error);
+    return false;
+  }
+}

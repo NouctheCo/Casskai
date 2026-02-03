@@ -458,13 +458,14 @@ export class RealDashboardKpiService {
     endDate: string
   ): Promise<{ name: string; amount: number }[]> {
     try {
-      // ✅ Utiliser la table customers au lieu de la VIEW third_parties
+      // ✅ Utiliser la table third_parties (client side) pas customers
+      // ✅ Spécifier explicitement la relation customer_id pour éviter l'ambiguité
       const { data, error } = await supabase
         .from('invoices')
         .select(`
           total_incl_tax,
           customer_id,
-          customers!inner(id, name)
+          third_parties!invoices_customer_id_fkey(id, name)
         `)
         .eq('company_id', companyId)
         .eq('invoice_type', 'sale') // ✅ Seulement les factures de vente
@@ -495,6 +496,8 @@ export class RealDashboardKpiService {
   }
   /**
    * Récupère la répartition des dépenses par catégorie
+   * SOURCE PRIMAIRE: Comptes de classe 6 (charges) via journal_entries
+   * FALLBACK: purchases table, puis invoices
    */
   private async getExpenseBreakdown(
     companyId: string,
@@ -502,50 +505,111 @@ export class RealDashboardKpiService {
     endDate: string
   ): Promise<{ category: string; amount: number }[]> {
     try {
-      // Try purchases table first
+      // 🎯 SOURCE PRIMAIRE: Journal entries avec comptes classe 6
+      const { data: journalLines, error: journalError } = await supabase
+        .from('journal_entry_lines')
+        .select(`
+          debit_amount,
+          credit_amount,
+          description,
+          chart_of_accounts!inner (
+            account_number,
+            account_name,
+            account_class
+          ),
+          journal_entries!inner (
+            entry_date,
+            company_id
+          )
+        `)
+        .eq('journal_entries.company_id', companyId)
+        .gte('journal_entries.entry_date', startDate)
+        .lte('journal_entries.entry_date', endDate);
+
+      if (!journalError && journalLines && journalLines.length > 0) {
+        const categoryMap = new Map<string, number>();
+        
+        journalLines.forEach((line: any) => {
+          const accountNumber = line.chart_of_accounts?.account_number;
+          const accountName = line.chart_of_accounts?.account_name;
+          const accountClass = line.chart_of_accounts?.account_class;
+          
+          // Ne garder que les comptes de classe 6 (charges)
+          if (accountClass !== 6 && !accountNumber?.startsWith('6')) {
+            return;
+          }
+
+          // Montant = débit - crédit (les charges sont au débit)
+          const amount = (line.debit_amount || 0) - (line.credit_amount || 0);
+          if (amount <= 0) return;
+
+          // Catégoriser par sous-classe de compte
+          let category = 'Autres charges';
+          if (accountNumber) {
+            if (accountNumber.startsWith('60')) category = 'Achats de marchandises et matières';
+            else if (accountNumber.startsWith('61')) category = 'Services extérieurs';
+            else if (accountNumber.startsWith('62')) category = 'Autres services extérieurs';
+            else if (accountNumber.startsWith('63')) category = 'Impôts et taxes';
+            else if (accountNumber.startsWith('64')) category = 'Charges de personnel';
+            else if (accountNumber.startsWith('65')) category = 'Autres charges de gestion courante';
+            else if (accountNumber.startsWith('66')) category = 'Charges financières';
+            else if (accountNumber.startsWith('67')) category = 'Charges exceptionnelles';
+            else if (accountNumber.startsWith('68')) category = 'Dotations aux amortissements';
+            else if (accountName) category = accountName;
+          }
+
+          categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
+        });
+
+        if (categoryMap.size > 0) {
+          return Array.from(categoryMap.entries())
+            .map(([category, amount]) => ({ category, amount }))
+            .sort((a, b) => b.amount - a.amount)
+            .slice(0, 6); // Top 6 categories
+        }
+      }
+
+      // 🔄 FALLBACK 1: Try purchases table
       const { data: purchasesData, error: purchasesError } = await supabase
         .from('purchases')
-        .select('total_amount, description')
+        .select('amount_ttc, description')
         .eq('company_id', companyId)
         .gte('purchase_date', startDate)
         .lte('purchase_date', endDate);
 
       if (!purchasesError && purchasesData && purchasesData.length > 0) {
-        // Agréger par catégorie (utiliser description comme proxy pour la catégorie)
         const categoryMap = new Map<string, number>();
         purchasesData.forEach((purchase: any) => {
           const category = purchase.description || 'Non catégorisé';
-          const amount = purchase.total_amount || 0;
+          const amount = purchase.amount_ttc || 0;
           categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
         });
-        // Convertir en tableau et trier
         return Array.from(categoryMap.entries())
           .map(([category, amount]) => ({ category, amount }))
           .sort((a, b) => b.amount - a.amount)
-          .slice(0, 5); // Top 5 categories
+          .slice(0, 6);
       }
 
-      // Fallback: Use invoices with invoice_type='purchase'
+      // 🔄 FALLBACK 2: Use invoices with invoice_type='purchase'
       const { data: invoicesData, error: invoicesError } = await supabase
         .from('invoices')
-        .select('total_incl_tax, description, supplier_id')
+        .select('total_incl_tax, third_party_id')
         .eq('company_id', companyId)
         .eq('invoice_type', 'purchase')
         .in('status', ['sent', 'paid', 'partially_paid'])
         .gte('invoice_date', startDate)
         .lte('invoice_date', endDate);
 
-      if (invoicesError || !invoicesData) {
-        logger.error('RealDashboardKpi', 'Error fetching expense breakdown:', invoicesError);
+      if (invoicesError || !invoicesData || invoicesData.length === 0) {
+        logger.warn('RealDashboardKpi', 'No expense data found in any source');
         return [];
       }
 
-      // Récupérer les fournisseurs référencés (si présents) puis agréger
-      const supplierIds = Array.from(new Set((invoicesData as any[]).map(i => i.supplier_id).filter(Boolean)));
+      const supplierIds = Array.from(new Set((invoicesData as any[]).map(i => i.third_party_id).filter(Boolean)));
       const suppliersMap: Map<string, string> = new Map();
       if (supplierIds.length > 0) {
         const { data: suppliersRows } = await supabase
-          .from('suppliers')
+          .from('third_parties')
           .select('id, name')
           .in('id', supplierIds);
         (suppliersRows || []).forEach((s: any) => suppliersMap.set(s.id, s.name));
@@ -553,16 +617,15 @@ export class RealDashboardKpiService {
 
       const categoryMap = new Map<string, number>();
       (invoicesData as any[]).forEach((invoice: any) => {
-        const category = (invoice.supplier_id && suppliersMap.get(invoice.supplier_id)) || invoice.description || 'Non catégorisé';
+        const category = (invoice.third_party_id && suppliersMap.get(invoice.third_party_id)) || 'Fournisseur non spécifié';
         const amount = invoice.total_incl_tax || 0;
         categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
       });
 
-      // Convertir en tableau et trier
       return Array.from(categoryMap.entries())
         .map(([category, amount]) => ({ category, amount }))
         .sort((a, b) => b.amount - a.amount)
-        .slice(0, 5); // Top 5 categories
+        .slice(0, 6);
     } catch (error) {
       logger.error('RealDashboardKpi', 'Exception fetching expense breakdown:', error);
       return [];

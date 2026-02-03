@@ -88,6 +88,7 @@ const fetchFECData = async (options: FecExportOptions): Promise<FECRow[]> => {
     p_company_id: options.companyId,
     p_start_date: options.startDate,
     p_end_date: options.endDate,
+    p_include_unvalidated: options.includeUnvalidated ?? false,
   });
   if (error) {
     logger.error('FecExporter', 'Erreur récupération données FEC:', error);

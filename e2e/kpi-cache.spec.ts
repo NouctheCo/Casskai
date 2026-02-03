@@ -2,6 +2,17 @@ import { test, expect } from '@playwright/test';
 import { dismissOverlays } from './testUtils/dismissOverlays';
 
 test('dev kpi cache page shows cache and recomputed JSON', async ({ page }) => {
+  // Login first (dev page is protected)
+  const testEmail = process.env.TEST_USER_EMAIL || 'test@casskai.app';
+  const testPassword = process.env.TEST_USER_PASSWORD || 'Test123456az';
+
+  await page.goto('/login');
+  await dismissOverlays(page);
+  await page.getByLabel(/email/i).fill(testEmail);
+  await page.getByLabel(/mot de passe|password/i).fill(testPassword);
+  await page.getByRole('button', { name: /sign in|se connecter|connexion/i }).click();
+  await page.waitForURL(/dashboard|accueil/i, { timeout: 10000 });
+
   // Navigate to the dev page and ensure overlays are dismissed
   await page.goto('/dev/kpi-cache');
   await dismissOverlays(page);

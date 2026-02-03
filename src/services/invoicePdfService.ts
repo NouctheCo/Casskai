@@ -13,6 +13,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { logger } from '@/lib/logger';
 import { formatCurrencyForPDF, getCurrentCompanyCurrency } from '@/lib/utils';
+import { paymentTermsComplianceService } from '@/services/paymentTermsComplianceService';
 
 type InvoicePdfClient = {
   name?: string | null;
@@ -448,16 +449,20 @@ export class InvoicePdfService {
     const dueDateText = invoice.due_date
       ? new Date(invoice.due_date as string).toLocaleDateString('fr-FR')
       : undefined;
-    const penaltyRateText =
-      'Pénalités de retard: taux directeur BCE en vigueur + 10 points (minimum légal applicable).';
-    const recoveryFeeText =
-      'Indemnité forfaitaire pour frais de recouvrement: 40€ (art. L441-10 CMF).';
-    const discountText = 'Escompte pour paiement anticipé: aucun (0%) sauf stipulation contraire.';
+    
+    // ✅ NOUVEAU: Utiliser les conditions conformes à la devise
+    const currency = _currency || getCurrentCompanyCurrency();
+    const complianceTerms = paymentTermsComplianceService.buildPaymentTermsText(
+      currency,
+      invoice.terms || companyData?.defaultTerms
+    );
+    
     const providedTermsRaw = invoice.terms || companyData?.defaultTerms || '';
     const providedTerms = typeof providedTermsRaw === 'string' ? providedTermsRaw : String(providedTermsRaw);
     const mergedTerms = providedTerms
       ? doc.splitTextToSize(providedTerms, 170)
-      : [penaltyRateText, recoveryFeeText, discountText];
+      : complianceTerms;
+    
     const vatNoteShouldShow = typeof invoice.total_tva === 'number' && invoice.total_tva === 0;
     const vatNote = vatNoteShouldShow
       ? invoice.vat_exemption_reason || companyData?.vatNote || 'TVA non applicable, art. 293 B du CGI.'

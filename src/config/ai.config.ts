@@ -33,21 +33,21 @@ export const AI_CONFIG = {
     // Analyse des KPI financiers : utilise Edge Function
     kpiAnalysis: {
       enabled: true,
-      useEdgeFunction: import.meta.env.PROD, // Edge Function en prod, direct en dev
+      useEdgeFunction: true, // ✅ Toujours Edge Function (dev + prod)
       edgeFunctionName: 'ai-kpi-analysis'
     },
 
     // Analyse du dashboard : utilise Edge Function
     dashboardAnalysis: {
       enabled: true,
-      useEdgeFunction: import.meta.env.PROD, // Edge Function en prod, direct en dev
+      useEdgeFunction: true, // ✅ Toujours Edge Function (dev + prod)
       edgeFunctionName: 'ai-dashboard-analysis'
     },
 
     // Analyse des rapports : utilise Edge Function
     reportAnalysis: {
       enabled: true,
-      useEdgeFunction: import.meta.env.PROD, // Edge Function en prod, direct en dev
+      useEdgeFunction: true, // ✅ Toujours Edge Function (dev + prod)
       edgeFunctionName: 'ai-report-analysis'
     }
   },

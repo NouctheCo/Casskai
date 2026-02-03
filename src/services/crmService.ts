@@ -29,13 +29,15 @@ import {
 import { auditService } from './auditService';
 import { logger } from '@/lib/logger';
 class CrmService {
-  // Clients - Utilise la table third_parties existante
+  // Clients - Utilise la table third_parties unifiée (Phase 2)
   async getClients(enterpriseId: string, filters?: CrmFilters): Promise<CrmServiceResponse<Client[]>> {
     try {
       let query = supabase
         .from('third_parties')
         .select('*')
         .eq('company_id', enterpriseId)
+        .eq('is_active', true)
+        .or('type.eq.customer,client_type.eq.customer,client_type.eq.prospect')
         .order('created_at', { ascending: false });
       if (filters?.search) {
         query = query.ilike('name', `%${filters.search}%`);
@@ -63,12 +65,12 @@ class CrmService {
           id: client.id,
           enterprise_id: enterpriseId,
           company_name: client.name,
-          industry: client.industry || undefined,
-          size: client.size as 'small' | 'medium' | 'large' | undefined,
-          address: client.address_street,
-          city: client.address_city,
-          postal_code: client.address_postal_code,
-          country: client.address_country,
+          industry: client.internal_notes || undefined, // industry stocké dans internal_notes
+          size: undefined, // Ce champ n'existe plus - à gérer via tags
+          address: client.billing_address_line1 || client.address_line1,
+          city: client.billing_city || client.city,
+          postal_code: client.billing_postal_code || client.postal_code,
+          country: client.billing_country || client.country,
           website: client.website,
           notes: client.notes,
           status: client.client_type === 'customer' ? 'active' : 'prospect',
@@ -103,20 +105,28 @@ class CrmService {
   }
   async createClient(enterpriseId: string, formData: ClientFormData): Promise<CrmServiceResponse<Client>> {
     try {
-      // Créer dans la table third_parties
+      // Générer un code unique pour le client
+      const code = `CL-${Date.now().toString(36).toUpperCase()}`;
+
+      // Créer dans la table third_parties unifiée
       const { data, error } = await supabase
         .from('third_parties')
         .insert({
           company_id: enterpriseId,
+          type: 'customer',
+          client_type: formData.status === 'active' ? 'customer' : 'prospect',
+          code,
+          customer_number: code,
           name: formData.company_name,
-          industry: formData.industry,
-          address_street: formData.address,
-          address_city: formData.city,
-          address_postal_code: formData.postal_code,
-          address_country: formData.country,
+          company_name: formData.company_name,
+          internal_notes: formData.industry, // industry stocké dans internal_notes
+          billing_address_line1: formData.address,
+          billing_city: formData.city,
+          billing_postal_code: formData.postal_code,
+          billing_country: formData.country || 'FR',
           website: formData.website,
           notes: formData.notes,
-          client_type: formData.status === 'active' ? 'customer' : 'prospect',
+          is_active: true,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -128,12 +138,12 @@ class CrmService {
         id: data.id,
         enterprise_id: enterpriseId,
         company_name: data.name,
-        industry: data.industry,
+        industry: data.internal_notes,
         size: formData.size,
-        address: data.address_street,
-        city: data.address_city,
-        postal_code: data.address_postal_code,
-        country: data.address_country,
+        address: data.billing_address_line1,
+        city: data.billing_city,
+        postal_code: data.billing_postal_code,
+        country: data.billing_country,
         website: data.website,
         notes: data.notes,
         status: formData.status,
@@ -178,11 +188,12 @@ class CrmService {
         .from('third_parties')
         .update({
           name: formData.company_name,
-          industry: formData.industry,
-          address_street: formData.address,
-          address_city: formData.city,
-          address_postal_code: formData.postal_code,
-          address_country: formData.country,
+          company_name: formData.company_name,
+          internal_notes: formData.industry, // industry stocké dans internal_notes
+          billing_address_line1: formData.address,
+          billing_city: formData.city,
+          billing_postal_code: formData.postal_code,
+          billing_country: formData.country || 'FR',
           website: formData.website,
           notes: formData.notes,
           client_type: formData.status === 'active' ? 'customer' : 'prospect',
@@ -197,12 +208,12 @@ class CrmService {
         id: data.id,
         enterprise_id: data.company_id,
         company_name: data.name,
-        industry: data.industry,
+        industry: data.internal_notes,
         size: formData.size,
-        address: data.address_street,
-        city: data.address_city,
-        postal_code: data.address_postal_code,
-        country: data.address_country,
+        address: data.billing_address_line1,
+        city: data.billing_city,
+        postal_code: data.billing_postal_code,
+        country: data.billing_country,
         website: data.website,
         notes: data.notes,
         status: formData.status,
@@ -255,24 +266,31 @@ class CrmService {
         .select('*')
         .eq('id', clientId)
         .single();
+
+      // Soft delete - marquer comme inactif au lieu de supprimer physiquement
       const { error } = await supabase
         .from('third_parties')
-        .delete()
+        .update({ is_active: false, updated_at: new Date().toISOString() })
         .eq('id', clientId);
       if (error) throw error;
-      // ✅ Audit Log: DELETE client (CRITICAL - suppression données personnelles)
+
+      // ✅ Audit Log: SOFT DELETE client (HIGH - désactivation données personnelles)
       if (clientToDelete) {
         auditService.log({
-          event_type: 'DELETE',
+          event_type: 'UPDATE',
           table_name: 'third_parties',
           record_id: clientId,
           company_id: clientToDelete.company_id,
           old_values: {
             name: clientToDelete.name,
             client_type: clientToDelete.client_type,
-            industry: clientToDelete.industry
+            is_active: true
           },
-          security_level: 'critical', // ⚠️ Suppression = toujours critical
+          new_values: {
+            is_active: false
+          },
+          changed_fields: ['is_active'],
+          security_level: 'high',
           compliance_tags: ['RGPD']
         }).catch(err => logger.error('Crm', 'Audit log failed:', err));
       }
@@ -288,20 +306,28 @@ class CrmService {
   }
   async createSupplier(enterpriseId: string, formData: ClientFormData): Promise<CrmServiceResponse<Client>> {
     try {
-      // Créer dans la table third_parties avec client_type = supplier
+      // Générer un code unique pour le fournisseur
+      const code = `FO-${Date.now().toString(36).toUpperCase()}`;
+
+      // Créer dans la table third_parties unifiée avec type = supplier
       const { data, error } = await supabase
         .from('third_parties')
         .insert({
           company_id: enterpriseId,
+          type: 'supplier',
+          client_type: 'supplier',
+          code,
+          supplier_number: code,
           name: formData.company_name,
-          industry: formData.industry,
-          address_street: formData.address,
-          address_city: formData.city,
-          address_postal_code: formData.postal_code,
-          address_country: formData.country,
+          company_name: formData.company_name,
+          internal_notes: formData.industry, // industry stocké dans internal_notes
+          billing_address_line1: formData.address,
+          billing_city: formData.city,
+          billing_postal_code: formData.postal_code,
+          billing_country: formData.country || 'FR',
           website: formData.website,
           notes: formData.notes,
-          client_type: 'supplier',
+          is_active: true,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -313,12 +339,12 @@ class CrmService {
         id: data.id,
         enterprise_id: enterpriseId,
         company_name: data.name,
-        industry: data.industry,
+        industry: data.internal_notes,
         size: formData.size,
-        address: data.address_street,
-        city: data.address_city,
-        postal_code: data.address_postal_code,
-        country: data.address_country,
+        address: data.billing_address_line1,
+        city: data.billing_city,
+        postal_code: data.billing_postal_code,
+        country: data.billing_country,
         website: data.website,
         notes: data.notes,
         status: formData.status || 'active',

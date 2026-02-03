@@ -212,6 +212,7 @@ const TutorialsPage: React.FC = () => {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="pl-12 pr-8 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-xl text-sm font-medium appearance-none cursor-pointer hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
+                aria-label="Filtrer par catégorie"
               >
                 <option value="all">Toutes les catégories</option>
                 {categories.filter((c) => c !== 'all').map((category) => (

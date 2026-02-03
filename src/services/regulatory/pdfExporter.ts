@@ -267,18 +267,18 @@ function formatFieldValue(value: any, field: FormField): string {
         style: 'currency',
         currency
       }).format(Number(value));
-      // Remplacer les espaces par des espaces insécables pour éviter les problèmes d'affichage
-      return formatted.replace(/\s/g, '\u00A0');
+      // Remplacer les espaces insécables (U+00A0) par des espaces normaux pour les PDFs
+      return formatted.replace(/\u00A0/g, ' ');
     }
     case 'percentage':
-      return `${Number(value).toFixed(field.decimals || 2)}\u00A0%`;
+      return `${Number(value).toFixed(field.decimals || 2)} %`;
     case 'number': {
       const formatted = new Intl.NumberFormat('fr-FR', {
         minimumFractionDigits: field.decimals || 0,
         maximumFractionDigits: field.decimals || 2
       }).format(Number(value));
-      // Remplacer les espaces par des espaces insécables
-      return formatted.replace(/\s/g, '\u00A0');
+      // Remplacer les espaces insécables (U+00A0) par des espaces normaux
+      return formatted.replace(/\u00A0/g, ' ');
     }
     case 'date':
       try {

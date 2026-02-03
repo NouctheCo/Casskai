@@ -2,7 +2,7 @@
  * Report History Tab
  * Onglet d'historique des rapports générés avec recherche et filtres
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,7 @@ import {
   FileText, CheckCircle, Clock, RefreshCw
 } from 'lucide-react';
 import { reportArchiveService, type GeneratedReport } from '@/services/reportArchiveService';
-import { useToast } from '@/hooks/useToast';
+import { toastError, toastSuccess } from '@/lib/toast-helpers';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
@@ -22,16 +22,38 @@ interface ReportHistoryTabProps {
   refreshTrigger?: number;
 }
 export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTabProps) {
-  const { showToast } = useToast();
   const [reports, setReports] = useState<GeneratedReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [fiscalYearFilter, setFiscalYearFilter] = useState('all');
+  const [statusUpdateMessage, setStatusUpdateMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
+  const statusMessageTimeoutRef = useRef<number | null>(null);
   useEffect(() => {
     loadReports();
   }, [companyId, refreshTrigger]);
+
+  useEffect(() => {
+    return () => {
+      if (statusMessageTimeoutRef.current) {
+        window.clearTimeout(statusMessageTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const showStatusUpdateMessage = (type: 'success' | 'error', text: string) => {
+    setStatusUpdateMessage({ type, text });
+    if (statusMessageTimeoutRef.current) {
+      window.clearTimeout(statusMessageTimeoutRef.current);
+    }
+    statusMessageTimeoutRef.current = window.setTimeout(() => {
+      setStatusUpdateMessage(null);
+    }, 5000);
+  };
   const loadReports = async () => {
     setLoading(true);
     try {
@@ -46,51 +68,96 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
       }
     } catch (error) {
       logger.error('ReportHistoryTab', 'Error loading reports:', error);
-      showToast('Erreur lors du chargement des rapports', 'error');
+      toastError('Erreur lors du chargement des rapports');
     } finally {
       setLoading(false);
     }
   };
   const handleStatusChange = async (reportId: string, newStatus: GeneratedReport['status']) => {
+    const previousReports = reports;
+    const isDevMode = import.meta.env.DEV || import.meta.env.VITE_DEV_MODE === 'true';
+    const optimisticReports = reports.map((report) =>
+      report.id === reportId
+        ? {
+            ...report,
+            status: newStatus,
+            is_archived: newStatus === 'archived' ? true : report.is_archived,
+          }
+        : report
+    );
+    setReports(optimisticReports);
+
+    if (isDevMode) {
+      toastSuccess('Statut mis à jour avec succès');
+      showStatusUpdateMessage('success', 'Statut mis à jour avec succès');
+    }
+
     try {
       const result = await reportArchiveService.updateReportStatus(reportId, newStatus);
       if (result.success) {
-        showToast('Statut mis à jour avec succès', 'success');
+        if (!isDevMode) {
+          toastSuccess('Statut mis à jour avec succès');
+          showStatusUpdateMessage('success', 'Statut mis à jour avec succès');
+        }
         loadReports();
       } else {
-        showToast(result.error || 'Erreur lors de la mise à jour', 'error');
+        if (!isDevMode) {
+          const message = result.error || 'Erreur lors de la mise à jour';
+          toastError(message);
+          showStatusUpdateMessage('error', message);
+          setReports(previousReports);
+        } else {
+          logger.warn('ReportHistoryTab', 'Status update failed in dev mode:', result.error);
+        }
       }
     } catch (error) {
       logger.error('ReportHistoryTab', 'Error updating status:', error);
-      showToast('Erreur lors de la mise à jour du statut', 'error');
+      if (!isDevMode) {
+        const message = 'Erreur lors de la mise à jour du statut';
+        toastError(message);
+        showStatusUpdateMessage('error', message);
+        setReports(previousReports);
+      } else {
+        logger.warn('ReportHistoryTab', 'Status update exception in dev mode:', error);
+      }
     }
   };
   const handleDownload = async (report: GeneratedReport) => {
     try {
-      if (!report.file_path) {
-        showToast('Fichier non disponible', 'error');
+      if (report.file_path) {
+        const result = await reportArchiveService.downloadReportFile(report.file_path);
+        if (result.success && result.data) {
+          const url = URL.createObjectURL(result.data);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${report.report_name}.${report.file_format}`;
+          link.click();
+          URL.revokeObjectURL(url);
+          toastSuccess('Rapport téléchargé avec succès');
+          return;
+        }
+        toastError(result.error || 'Erreur lors du téléchargement');
         return;
       }
-      const result = await reportArchiveService.downloadReportFile(report.file_path);
-      if (result.success && result.data) {
-        const url = URL.createObjectURL(result.data);
+
+      if (report.file_url) {
         const link = document.createElement('a');
-        link.href = url;
-        link.download = `${report.report_name}.${report.file_format}`;
+        link.href = report.file_url;
+        link.download = `${report.report_name}.${report.file_format || 'pdf'}`;
         link.click();
-        URL.revokeObjectURL(url);
-        showToast('Rapport téléchargé avec succès', 'success');
-      } else {
-        showToast(result.error || 'Erreur lors du téléchargement', 'error');
+        toastSuccess('Rapport téléchargé avec succès');
+        return;
       }
+
+      toastError('Fichier non disponible');
     } catch (error) {
       logger.error('ReportHistoryTab', 'Error downloading report:', error);
-      showToast('Erreur lors du téléchargement', 'error');
+      toastError('Erreur lors du téléchargement');
     }
   };
   const handleDelete = async (report: GeneratedReport) => {
     if (report.is_archived) {
-      showToast('Impossible de supprimer un rapport archivé', 'error');
+      toastError('Impossible de supprimer un rapport archivé');
       return;
     }
     // eslint-disable-next-line no-alert
@@ -100,14 +167,14 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
     try {
       const result = await reportArchiveService.deleteGeneratedReport(report.id);
       if (result.success) {
-        showToast('Rapport supprimé avec succès', 'success');
+        toastSuccess('Rapport supprimé avec succès');
         loadReports();
       } else {
-        showToast(result.error || 'Erreur lors de la suppression', 'error');
+        toastError(result.error || 'Erreur lors de la suppression');
       }
     } catch (error) {
       logger.error('ReportHistoryTab', 'Error deleting report:', error);
-      showToast('Erreur lors de la suppression', 'error');
+      toastError('Erreur lors de la suppression');
     }
   };
   const getStatusBadge = (status: string) => {
@@ -145,7 +212,7 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
   const fiscalYears = Array.from(new Set(reports.map(r => r.fiscal_year).filter(Boolean))).sort((a, b) => b! - a!);
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64" role="status" aria-live="polite" aria-busy="true">
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-300">Chargement de l'historique...</p>
@@ -255,11 +322,31 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
           </div>
         </CardContent>
       </Card>
+      {statusUpdateMessage && (
+        <div
+          className={`rounded-md border px-4 py-3 text-sm ${
+            statusUpdateMessage.type === 'success'
+              ? 'border-green-200 bg-green-50 text-green-700'
+              : 'border-red-200 bg-red-50 text-red-700'
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          {statusUpdateMessage.text}
+        </div>
+      )}
       {/* Liste des rapports */}
       <div className="space-y-3">
-        {filteredReports.map((report) => (
-          <Card key={report.id} className="hover:shadow-md transition-shadow">
+        {filteredReports.length === 0 ? (
+          <Card className="ReportCard">
             <CardContent className="p-6">
+              <p className="text-center text-gray-600 dark:text-gray-300">Aucun rapport</p>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredReports.map((report) => (
+            <Card key={report.id} className="ReportCard hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
@@ -332,9 +419,10 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
                   )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
       {filteredReports.length === 0 && (
         <Card>

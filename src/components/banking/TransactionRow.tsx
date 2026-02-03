@@ -97,6 +97,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
             onChange={(e) => onSelect(e.target.checked)}
             disabled={transaction.status !== 'pending'}
             className="rounded"
+            aria-label="Sélectionner cette transaction"
           />
         </td>
 

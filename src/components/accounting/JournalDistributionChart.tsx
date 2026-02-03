@@ -75,12 +75,37 @@ const JournalDistributionChart: React.FC<JournalDistributionChartProps> = ({ dat
     );
   }
 
-  // Prepare data for chart
-  const chartData = data.map(item => ({
-    name: `${item.code} - ${item.name}`,
-    value: item.count,
-    percentage: item.percentage
-  }));
+  // Prepare data for chart - Filter out journals with 0 entries
+  const chartData = data
+    .filter(item => item.count > 0) // Only include journals with entries
+    .map(item => ({
+      name: `${item.code} - ${item.name}`,
+      value: item.count,
+      percentage: item.percentage
+    }));
+
+  // If no journals have entries, show empty state
+  if (chartData.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <BookOpen className="h-5 w-5 text-blue-600" />
+          <h3 className="text-lg font-semibold text-gray-900">
+            {t('accounting.journalDistribution.title', 'Répartition par journal')}
+          </h3>
+        </div>
+        <div className="flex flex-col items-center justify-center h-80 text-gray-500">
+          <BookOpen className="h-16 w-16 mb-4 opacity-20" />
+          <p className="text-lg font-medium mb-2">
+            {t('accounting.journalDistribution.noDataForPeriod', 'Aucune écriture pour cette période')}
+          </p>
+          <p className="text-sm text-center max-w-md">
+            {t('accounting.journalDistribution.changePeriodHint', 'Essayez de modifier la période sélectionnée ou créez de nouvelles écritures comptables.')}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {

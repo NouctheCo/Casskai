@@ -21,6 +21,8 @@ import { aiAnalysisService, type FinancialKPIs as AIFinancialKPIs } from './aiAn
 import { aiReportAnalysisService, type CashFlowData, type ReceivablesData, type FinancialRatiosData, type BudgetVarianceData, type PayablesData, type InventoryData, type AIAnalysisResult } from './aiReportAnalysisService';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
+import { reportLoggingService } from '@/services/accounting/reportLoggingService';
+import { periodSnapshotService } from '@/services/accounting/periodSnapshotService';
 export interface FinancialData {
   compte: string;
   libelle: string;
@@ -108,7 +110,12 @@ export class ReportGenerationService {
       const currentYear = new Date(endDate).getFullYear();
       const previousYearStart = `${currentYear - 1}-01-01`;
       const previousYearEnd = `${currentYear - 1}-12-31`;
-      const previousYearData = await this.calculatePeriodData(companyId, previousYearStart, previousYearEnd);
+      const previousYearData = await this.getPreviousPeriodData(
+        companyId,
+        startDate,
+        previousYearStart,
+        previousYearEnd
+      );
       // Séparer actif et passif
       const actifAccounts = accountBalances.filter(acc => acc.type === 'actif');
       const passifAccounts = accountBalances.filter(acc => acc.type === 'passif');
@@ -308,7 +315,8 @@ export class ReportGenerationService {
         aiAnalysis = await aiReportAnalysisService.analyzeFinancialRatios(
           ratiosData,
           format(new Date(startDate), 'dd/MM/yyyy', { locale: fr }),
-          format(new Date(endDate), 'dd/MM/yyyy', { locale: fr })
+          format(new Date(endDate), 'dd/MM/yyyy', { locale: fr }),
+          companyId
         );
       } catch (error) {
         logger.error('ReportGeneration', 'Erreur lors de l\'analyse IA du bilan:', error);
@@ -339,18 +347,41 @@ export class ReportGenerationService {
         ...exportOptions
       };
       // Générer selon le format demandé
+      let url: string;
       switch (defaultOptions.format) {
         case 'pdf':
-          return await reportExportService.exportToPDF(tables, defaultOptions);
+          url = await reportExportService.exportToPDF(tables, defaultOptions);
+          break;
         case 'excel':
-          return await reportExportService.exportToExcel(tables, defaultOptions);
+          url = await reportExportService.exportToExcel(tables, defaultOptions);
+          break;
         case 'csv':
-          return reportExportService.exportToCSV(actifTable, defaultOptions);
+          url = reportExportService.exportToCSV(actifTable, defaultOptions);
+          break;
         default:
-          return await reportExportService.exportToPDF(tables, defaultOptions);
+          url = await reportExportService.exportToPDF(tables, defaultOptions);
+          break;
       }
+
+      await this.logReportSuccess(
+        'balance_sheet',
+        defaultOptions.title || 'BILAN COMPTABLE',
+        filters,
+        defaultOptions,
+        url
+      );
+
+      return url;
     } catch (error) {
-      logger.error('ReportGeneration', 'Erreur génération bilan:', error instanceof Error ? error.message : String(error));
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error('ReportGeneration', 'Erreur génération bilan:', message);
+      await this.logReportFailure(
+        'balance_sheet',
+        'BILAN COMPTABLE',
+        filters,
+        exportOptions,
+        message
+      );
       throw new Error('Impossible de générer le bilan');
     }
   }
@@ -403,7 +434,12 @@ export class ReportGenerationService {
       const currentYear = new Date(endDate).getFullYear();
       const previousYearStart = `${currentYear - 1}-01-01`;
       const previousYearEnd = `${currentYear - 1}-12-31`;
-      const previousYearDataCR = await this.calculatePeriodData(companyId, previousYearStart, previousYearEnd);
+      const previousYearDataCR = await this.getPreviousPeriodData(
+        companyId,
+        startDate,
+        previousYearStart,
+        previousYearEnd
+      );
       // Helper pour trouver un compte dans les données de l'année précédente
       const findPreviousYearAccountCR = (accountNumber: string, accountType: 'charge' | 'produit') => {
         const previousAccounts = accountType === 'charge'
@@ -625,18 +661,41 @@ export class ReportGenerationService {
         watermark: 'CassKai',
         ...exportOptions
       };
+      let url: string;
       switch (defaultOptions.format) {
         case 'pdf':
-          return await reportExportService.exportToPDF(tables, defaultOptions);
+          url = await reportExportService.exportToPDF(tables, defaultOptions);
+          break;
         case 'excel':
-          return await reportExportService.exportToExcel(tables, defaultOptions);
+          url = await reportExportService.exportToExcel(tables, defaultOptions);
+          break;
         case 'csv':
-          return reportExportService.exportToCSV(resultatTable, defaultOptions);
+          url = reportExportService.exportToCSV(resultatTable, defaultOptions);
+          break;
         default:
-          return await reportExportService.exportToPDF(tables, defaultOptions);
+          url = await reportExportService.exportToPDF(tables, defaultOptions);
+          break;
       }
+
+      await this.logReportSuccess(
+        'income_statement',
+        defaultOptions.title || 'COMPTE DE RÉSULTAT',
+        filters,
+        defaultOptions,
+        url
+      );
+
+      return url;
     } catch (error) {
-      logger.error('ReportGeneration', 'Erreur génération compte de résultat:', error instanceof Error ? error.message : String(error));
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error('ReportGeneration', 'Erreur génération compte de résultat:', message);
+      await this.logReportFailure(
+        'income_statement',
+        'COMPTE DE RÉSULTAT',
+        filters,
+        exportOptions,
+        message
+      );
       throw new Error('Impossible de générer le compte de résultat');
     }
   }
@@ -709,18 +768,41 @@ export class ReportGenerationService {
         watermark: 'CassKai',
         ...exportOptions
       };
+      let url: string;
       switch (defaultOptions.format) {
         case 'pdf':
-          return await reportExportService.exportToPDF(balanceTable, defaultOptions);
+          url = await reportExportService.exportToPDF(balanceTable, defaultOptions);
+          break;
         case 'excel':
-          return await reportExportService.exportToExcel(balanceTable, defaultOptions);
+          url = await reportExportService.exportToExcel(balanceTable, defaultOptions);
+          break;
         case 'csv':
-          return reportExportService.exportToCSV(balanceTable, defaultOptions);
+          url = reportExportService.exportToCSV(balanceTable, defaultOptions);
+          break;
         default:
-          return await reportExportService.exportToPDF(balanceTable, defaultOptions);
+          url = await reportExportService.exportToPDF(balanceTable, defaultOptions);
+          break;
       }
+
+      await this.logReportSuccess(
+        'trial_balance',
+        defaultOptions.title || 'BALANCE GÉNÉRALE',
+        filters,
+        defaultOptions,
+        url
+      );
+
+      return url;
     } catch (error) {
-      logger.error('ReportGeneration', 'Erreur génération balance:', error instanceof Error ? error.message : String(error));
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error('ReportGeneration', 'Erreur génération balance:', message);
+      await this.logReportFailure(
+        'trial_balance',
+        'BALANCE GÉNÉRALE',
+        filters,
+        exportOptions,
+        message
+      );
       throw new Error('Impossible de générer la balance');
     }
   }
@@ -811,21 +893,44 @@ export class ReportGenerationService {
         watermark: 'CassKai',
         ...exportOptions
       };
+      let url: string;
       switch (defaultOptions.format) {
         case 'pdf':
-          return await reportExportService.exportToPDF(tables, defaultOptions);
+          url = await reportExportService.exportToPDF(tables, defaultOptions);
+          break;
         case 'excel':
-          return await reportExportService.exportToExcel(tables, defaultOptions);
+          url = await reportExportService.exportToExcel(tables, defaultOptions);
+          break;
         case 'csv': {
           // Pour CSV, on combine tout en une seule table
           const combinedTable = this.combineTables(tables, 'Grand Livre Complet');
-          return reportExportService.exportToCSV(combinedTable, defaultOptions);
+          url = reportExportService.exportToCSV(combinedTable, defaultOptions);
+          break;
         }
         default:
-          return await reportExportService.exportToPDF(tables, defaultOptions);
+          url = await reportExportService.exportToPDF(tables, defaultOptions);
+          break;
       }
+
+      await this.logReportSuccess(
+        'general_ledger',
+        defaultOptions.title || 'GRAND LIVRE',
+        filters,
+        defaultOptions,
+        url
+      );
+
+      return url;
     } catch (error) {
-      logger.error('ReportGeneration', 'Erreur génération grand livre:', error instanceof Error ? error.message : String(error));
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error('ReportGeneration', 'Erreur génération grand livre:', message);
+      await this.logReportFailure(
+        'general_ledger',
+        'GRAND LIVRE',
+        filters,
+        exportOptions,
+        message
+      );
       throw new Error('Impossible de générer le grand livre');
     }
   }
@@ -916,7 +1021,8 @@ export class ReportGenerationService {
         aiAnalysis = await aiReportAnalysisService.analyzeCashFlow(
           cashFlowData,
           format(new Date(startDate), 'dd/MM/yyyy', { locale: fr }),
-          format(new Date(endDate), 'dd/MM/yyyy', { locale: fr })
+          format(new Date(endDate), 'dd/MM/yyyy', { locale: fr }),
+          companyId
         );
       } catch (error) {
         logger.error('ReportGeneration', 'Erreur lors de l\'analyse IA du flux de trésorerie:', error);
@@ -1116,7 +1222,8 @@ export class ReportGenerationService {
         aiAnalysis = await aiReportAnalysisService.analyzeReceivables(
           receivablesData,
           format(startOfYear(new Date(asOfDate)), 'dd/MM/yyyy', { locale: fr }),
-          format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr })
+          format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr }),
+          companyId
         );
       } catch (error) {
         logger.error('ReportGeneration', 'Erreur lors de l\'analyse IA des créances clients:', error);
@@ -1274,7 +1381,8 @@ export class ReportGenerationService {
         aiAnalysis = await aiReportAnalysisService.analyzeFinancialRatios(
           financialRatiosData,
           format(new Date(startDate), 'dd/MM/yyyy', { locale: fr }),
-          format(new Date(endDate), 'dd/MM/yyyy', { locale: fr })
+          format(new Date(endDate), 'dd/MM/yyyy', { locale: fr }),
+          companyId
         );
       } catch (error) {
         logger.error('ReportGeneration', 'Erreur lors de l\'analyse IA des ratios financiers:', error);
@@ -1624,7 +1732,8 @@ export class ReportGenerationService {
         aiAnalysis = await aiReportAnalysisService.analyzePayables(
           payablesData,
           format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr }),
-          format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr })
+          format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr }),
+          companyId
         );
       } catch (error) {
         logger.error('ReportGeneration', 'Erreur lors de l\'analyse IA des dettes fournisseurs:', error);
@@ -1787,7 +1896,7 @@ export class ReportGenerationService {
         .gte('period_start', periodStart)
         .lte('period_end', periodEnd)
         .limit(1)
-        .single();
+        .maybeSingle();
       // Si la table n'existe pas ou pas de budget, utiliser des valeurs estimées
       let budgetedRevenue = revenues * 1.1; // Estimation: +10% du réalisé
       let budgetedExpenses = expenses * 0.95; // Estimation: -5% du réalisé
@@ -1874,7 +1983,8 @@ export class ReportGenerationService {
         aiAnalysis = await aiReportAnalysisService.analyzeBudgetVariance(
           budgetVarianceData,
           format(new Date(periodStart), 'dd/MM/yyyy', { locale: fr }),
-          format(new Date(periodEnd), 'dd/MM/yyyy', { locale: fr })
+          format(new Date(periodEnd), 'dd/MM/yyyy', { locale: fr }),
+          companyId
         );
       } catch (error) {
         logger.error('ReportGeneration', 'Erreur lors de l\'analyse IA des écarts budgétaires:', error);
@@ -2618,7 +2728,8 @@ export class ReportGenerationService {
         aiAnalysis = await aiReportAnalysisService.analyzeInventory(
           inventoryAnalysisData,
           format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr }),
-          format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr })
+          format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr }),
+          companyId
         );
       } catch (error) {
         logger.error('ReportGeneration', 'Erreur lors de l\'analyse IA de la valorisation des stocks:', error);
@@ -2775,6 +2886,147 @@ export class ReportGenerationService {
     }
   }
   // Helpers privés
+  private resolveFileFormat(exportOptions?: ExportOptions): 'pdf' | 'excel' | 'csv' | 'json' {
+    switch (exportOptions?.format) {
+      case 'excel':
+        return 'excel';
+      case 'csv':
+        return 'csv';
+      case 'pdf':
+      default:
+        return 'pdf';
+    }
+  }
+
+  private async logReportSuccess(
+    reportType: string,
+    reportName: string,
+    filters: ReportFilters,
+    exportOptions: ExportOptions | undefined,
+    fileUrl: string
+  ): Promise<void> {
+    if (!filters.startDate || !filters.endDate) return;
+    await reportLoggingService.logGeneratedReport({
+      companyId: filters.companyId,
+      reportType,
+      reportName,
+      periodStart: filters.startDate,
+      periodEnd: filters.endDate,
+      fileFormat: this.resolveFileFormat(exportOptions),
+      fileUrl,
+      parameters: { ...filters, ...exportOptions },
+      status: 'generated'
+    });
+  }
+
+  private async logReportFailure(
+    reportType: string,
+    reportName: string,
+    filters: ReportFilters,
+    exportOptions: ExportOptions | undefined,
+    errorMessage: string
+  ): Promise<void> {
+    if (!filters.startDate || !filters.endDate) return;
+    await reportLoggingService.logFailedReport(
+      filters.companyId,
+      reportType,
+      reportName,
+      filters.startDate,
+      filters.endDate,
+      errorMessage,
+      { ...filters, ...exportOptions }
+    );
+  }
+
+  private async buildPeriodDataFromSnapshot(
+    companyId: string,
+    snapshot: Array<{ accountNumber: string; accountName: string; debitTotal: number; creditTotal: number; balance: number; snapshotDate: string }>,
+    snapshotDate: string
+  ): Promise<{
+    actifImmobilise: any[];
+    actifCirculant: any[];
+    capitauxPropres: any[];
+    provisions: any[];
+    dettes: any[];
+    charges: any[];
+    produits: any[];
+    depreciationMap: Map<string, number>;
+  }> {
+    const snapshotData = periodSnapshotService
+      .snapshotToFinancialData(snapshot)
+      .map(item => ({
+        ...item,
+        type: this.getAccountType(item.compte)
+      }));
+
+    const accountBalances = snapshotData as FinancialData[];
+    const depreciationMap = await this.calculateDepreciation(companyId, snapshotDate);
+
+    const actifAccounts = accountBalances.filter(acc => acc.type === 'actif');
+    const passifAccounts = accountBalances.filter(acc => acc.type === 'passif');
+    const actifImmobilise = actifAccounts.filter(acc => acc.compte.startsWith('2'));
+    const actifCirculant = actifAccounts.filter(acc =>
+      acc.compte.startsWith('3') ||
+      (acc.compte.startsWith('4') && !acc.compte.startsWith('44')) ||
+      acc.compte.startsWith('5')
+    );
+    const capitauxPropres = passifAccounts.filter(acc =>
+      acc.compte.startsWith('1') &&
+      !acc.compte.startsWith('16') &&
+      !acc.compte.startsWith('17') &&
+      !acc.compte.startsWith('18')
+    );
+    const provisions = passifAccounts.filter(acc =>
+      acc.compte.startsWith('15') || acc.compte.startsWith('16')
+    );
+    const dettes = passifAccounts.filter(acc =>
+      acc.compte.startsWith('17') ||
+      acc.compte.startsWith('18') ||
+      (acc.compte.startsWith('4') && acc.type === 'passif')
+    );
+    const charges = accountBalances.filter(acc => acc.type === 'charge');
+    const produits = accountBalances.filter(acc => acc.type === 'produit');
+
+    return {
+      actifImmobilise,
+      actifCirculant,
+      capitauxPropres,
+      provisions,
+      dettes,
+      charges,
+      produits,
+      depreciationMap
+    };
+  }
+
+  private async getPreviousPeriodData(
+    companyId: string,
+    currentPeriodStartDate: string,
+    fallbackStartDate: string,
+    fallbackEndDate: string
+  ): Promise<{
+    actifImmobilise: any[];
+    actifCirculant: any[];
+    capitauxPropres: any[];
+    provisions: any[];
+    dettes: any[];
+    charges: any[];
+    produits: any[];
+    depreciationMap: Map<string, number>;
+  }> {
+    const previousSnapshot = await periodSnapshotService.getPreviousPeriodSnapshot(
+      companyId,
+      currentPeriodStartDate
+    );
+
+    if (previousSnapshot?.snapshot?.length) {
+      const snapshotDate = previousSnapshot.snapshot[0]?.snapshotDate || fallbackEndDate;
+      return this.buildPeriodDataFromSnapshot(companyId, previousSnapshot.snapshot, snapshotDate);
+    }
+
+    return this.calculatePeriodData(companyId, fallbackStartDate, fallbackEndDate);
+  }
+
   private calculateAccountBalances(journalEntries: ReadonlyArray<JournalEntry>): FinancialData[] {
     const balances: Record<string, FinancialData> = {};
     journalEntries.forEach(entry => {

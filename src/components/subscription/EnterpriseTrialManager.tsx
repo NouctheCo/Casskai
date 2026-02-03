@@ -251,7 +251,7 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
             </div>
             <Progress value={progressValue} className="h-2" />
             <p className="text-xs text-muted-foreground text-right">
-              Expire le {trialInfo?.trialEnd.toLocaleDateString('fr-FR', {
+              Expire le {(trialInfo as any)?.trialEnd?.toLocaleDateString('fr-FR', {
                 day: '2-digit',
                 month: 'long',
                 year: 'numeric'

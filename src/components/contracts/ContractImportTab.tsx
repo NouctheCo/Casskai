@@ -30,7 +30,7 @@ import {
   Calculator,
   Info
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
@@ -195,7 +195,7 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
         amount_incl_tax: 90000
       }
     ];
-    downloadTemplate(template, 'template_import_ca_rfa.xlsx', 'CA RFA');
+    void downloadTemplate(template, 'template_import_ca_rfa.xlsx', 'CA RFA');
     toastSuccess(t('contracts.import.template_downloaded', 'Modèle téléchargé'));
   };
 
@@ -226,7 +226,7 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
         product_name: 'Service Premium'
       }
     ];
-    downloadTemplate(template, 'template_import_groupes_produits.xlsx', 'Groupes Produits');
+    void downloadTemplate(template, 'template_import_groupes_produits.xlsx', 'Groupes Produits');
     toastSuccess(t('contracts.import.template_downloaded', 'Modèle téléchargé'));
   };
 
@@ -257,19 +257,31 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
         notes: 'RFA taux fixe'
       }
     ];
-    downloadTemplate(template, 'template_import_calculs_rfa.xlsx', 'Calculs RFA');
+    void downloadTemplate(template, 'template_import_calculs_rfa.xlsx', 'Calculs RFA');
     toastSuccess(t('contracts.import.template_downloaded', 'Modèle téléchargé'));
   };
 
-  const downloadTemplate = (data: object[], filename: string, sheetName: string) => {
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-    
-    // Ajuster la largeur des colonnes
-    ws['!cols'] = Object.keys(data[0] || {}).map(() => ({ wch: 22 }));
-    
-    XLSX.writeFile(wb, filename);
+  const downloadTemplate = async (data: object[], filename: string, sheetName: string) => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(sheetName);
+    const headers = Object.keys(data[0] || {});
+    worksheet.addRow(headers);
+    data.forEach((row) => worksheet.addRow(headers.map((key) => (row as any)[key])));
+    worksheet.columns = headers.map(() => ({ width: 22 }));
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+    });
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   // ========================================
@@ -285,10 +297,26 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
 
     try {
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(data);
+      const sheet = workbook.worksheets[0];
+      if (!sheet) {
+        throw new Error('Feuille Excel introuvable');
+      }
+      const headers = (sheet.getRow(1).values as Array<string | number | null | undefined>)
+        .slice(1)
+        .map((header) => String(header || '').trim());
+      const jsonData: Record<string, unknown>[] = [];
+      sheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+        if (rowNumber === 1) return;
+        const rowValues = row.values as Array<string | number | null | undefined>;
+        const record: Record<string, unknown> = {};
+        headers.forEach((header, index) => {
+          record[header] = rowValues[index + 1];
+        });
+        const hasValues = Object.values(record).some((value) => value !== undefined && value !== null && String(value).trim() !== '');
+        if (hasValues) jsonData.push(record);
+      });
 
       switch (importType) {
         case 'ca':

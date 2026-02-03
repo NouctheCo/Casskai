@@ -10,7 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 // Service pour l'import/export de budgets au format Excel
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import type { BudgetImportData, BudgetCategoryImport, BudgetAssumptionImport, CategoryType } from '@/types/budget.types';
 import { logger } from '@/lib/logger';
 export class BudgetImportExportService {
@@ -27,7 +27,7 @@ export class BudgetImportExportService {
   async downloadBudgetTemplate(year: number, companyName: string = 'MonEntreprise'): Promise<void> {
     try {
       // Création du workbook
-      const wb = XLSX.utils.book_new();
+      const wb = new ExcelJS.Workbook();
       // Feuille 1: Instructions
       const instructionsData = [
         ['MODÈLE DE BUDGET - INSTRUCTIONS'],
@@ -46,8 +46,9 @@ export class BudgetImportExportService {
         ['- Ne modifiez pas les en-têtes de colonnes'],
         ['- Les cellules en gris sont des exemples, vous pouvez les supprimer'],
       ];
-      const wsInstructions = XLSX.utils.aoa_to_sheet(instructionsData);
-      XLSX.utils.book_append_sheet(wb, wsInstructions, 'Instructions');
+      const wsInstructions = wb.addWorksheet('Instructions');
+      instructionsData.forEach((row) => wsInstructions.addRow(row));
+      wsInstructions.columns = [{ width: 80 }];
       // Feuille 2: Catégories budgétaires
       const categoriesData = [
         [
@@ -76,38 +77,34 @@ export class BudgetImportExportService {
         ['Charges', 'Marketing', 'expense', 8000, 8000, 9000, 10000, 12000, 12000, 10000, 9000, 9000, 10000, 11000, 15000, 'Budget variable'],
         ['Investissements', 'Matériel informatique', 'capex', 0, 0, 15000, 0, 0, 0, 0, 0, 0, 0, 0, 10000, 'Renouvellement matériel'],
       ];
-      const wsCategories = XLSX.utils.aoa_to_sheet(categoriesData);
+      const wsCategories = wb.addWorksheet('Catégories');
+      categoriesData.forEach((row) => wsCategories.addRow(row));
       // Mise en forme des en-têtes
-      const headerRange = XLSX.utils.decode_range(wsCategories['!ref'] || 'A1');
-      for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-        if (!wsCategories[cellAddress]) continue;
-        wsCategories[cellAddress].s = {
-          font: { bold: true },
-          fill: { fgColor: { rgb: '4472C4' } },
-          alignment: { horizontal: 'center' }
-        };
-      }
+      const headerRow = wsCategories.getRow(1);
+      headerRow.eachCell((cell) => {
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '4472C4' } };
+        cell.alignment = { horizontal: 'center' };
+      });
       // Définir les largeurs de colonnes
-      wsCategories['!cols'] = [
-        { wch: 20 }, // category
-        { wch: 20 }, // subcategory
-        { wch: 15 }, // category_type
-        { wch: 10 }, // jan
-        { wch: 10 }, // feb
-        { wch: 10 }, // mar
-        { wch: 10 }, // apr
-        { wch: 10 }, // may
-        { wch: 10 }, // jun
-        { wch: 10 }, // jul
-        { wch: 10 }, // aug
-        { wch: 10 }, // sep
-        { wch: 10 }, // oct
-        { wch: 10 }, // nov
-        { wch: 10 }, // dec
-        { wch: 30 }, // notes
+      wsCategories.columns = [
+        { width: 20 }, // category
+        { width: 20 }, // subcategory
+        { width: 15 }, // category_type
+        { width: 10 }, // jan
+        { width: 10 }, // feb
+        { width: 10 }, // mar
+        { width: 10 }, // apr
+        { width: 10 }, // may
+        { width: 10 }, // jun
+        { width: 10 }, // jul
+        { width: 10 }, // aug
+        { width: 10 }, // sep
+        { width: 10 }, // oct
+        { width: 10 }, // nov
+        { width: 10 }, // dec
+        { width: 30 }, // notes
       ];
-      XLSX.utils.book_append_sheet(wb, wsCategories, 'Catégories');
       // Feuille 3: Hypothèses (optionnel)
       const assumptionsData = [
         ['key', 'description', 'value', 'unit', 'category'],
@@ -116,18 +113,29 @@ export class BudgetImportExportService {
         ['employee_count', 'Nombre d\'employés', 25, 'personnes', 'RH'],
         ['avg_salary', 'Salaire moyen mensuel', 3500, ' EUR', 'RH'],
       ];
-      const wsAssumptions = XLSX.utils.aoa_to_sheet(assumptionsData);
-      wsAssumptions['!cols'] = [
-        { wch: 20 },
-        { wch: 40 },
-        { wch: 15 },
-        { wch: 10 },
-        { wch: 20 },
+      const wsAssumptions = wb.addWorksheet('Hypothèses');
+      assumptionsData.forEach((row) => wsAssumptions.addRow(row));
+      wsAssumptions.columns = [
+        { width: 20 },
+        { width: 40 },
+        { width: 15 },
+        { width: 10 },
+        { width: 20 },
       ];
-      XLSX.utils.book_append_sheet(wb, wsAssumptions, 'Hypothèses');
       // Télécharger le fichier
       const fileName = `Budget_${year}_${companyName}_Modele.xlsx`;
-      XLSX.writeFile(wb, fileName);
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (error) {
       logger.error('BudgetImportExport', 'Error generating budget template:', error);
       throw new Error('Erreur lors de la génération du modèle Excel');
@@ -139,56 +147,79 @@ export class BudgetImportExportService {
   async importBudgetFromExcel(file: File): Promise<BudgetImportData> {
     try {
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array' });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(data);
       // Vérifier que le fichier contient les feuilles nécessaires
-      if (!workbook.SheetNames.includes('Catégories')) {
+      const categoriesSheet = workbook.getWorksheet('Catégories');
+      if (!categoriesSheet) {
         throw new Error('Le fichier doit contenir une feuille "Catégories"');
       }
-      // Lire les catégories
-      const categoriesSheet = workbook.Sheets['Catégories'];
-      const categoriesJson = XLSX.utils.sheet_to_json<Record<string, unknown>>(categoriesSheet);
-      const categories: BudgetCategoryImport[] = categoriesJson.map((row: Record<string, unknown>) => {
+      const categories: BudgetCategoryImport[] = [];
+      const categoryHeaders = (categoriesSheet.getRow(1).values as Array<string | number | null | undefined>)
+        .slice(1)
+        .map((header) => String(header || '').trim());
+      categoriesSheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+        if (rowNumber === 1) return;
+        const rowValues = row.values as Array<string | number | null | undefined>;
+        const record: Record<string, unknown> = {};
+        categoryHeaders.forEach((header, index) => {
+          record[header] = rowValues[index + 1];
+        });
+        const hasValues = Object.values(record).some((value) => value !== undefined && value !== null && String(value).trim() !== '');
+        if (!hasValues) return;
         // Valider les champs obligatoires
-        if (!row.category || !row.category_type) {
+        if (!record.category || !record.category_type) {
           throw new Error('Chaque ligne doit avoir au minimum "category" et "category_type"');
         }
         // Valider le type de catégorie
         const validTypes: CategoryType[] = ['revenue', 'expense', 'capex'];
-        if (!validTypes.includes(row.category_type as CategoryType)) {
-          throw new Error(`category_type doit être: revenue, expense ou capex (trouvé: ${row.category_type})`);
+        if (!validTypes.includes(record.category_type as CategoryType)) {
+          throw new Error(`category_type doit être: revenue, expense ou capex (trouvé: ${record.category_type})`);
         }
         const result: BudgetCategoryImport = {
-          category: String(row.category).trim(),
-          subcategory: row.subcategory ? String(row.subcategory).trim() : undefined,
-          category_type: row.category_type as CategoryType,
-          jan: Number(row.jan || 0),
-          feb: Number(row.feb || 0),
-          mar: Number(row.mar || 0),
-          apr: Number(row.apr || 0),
-          may: Number(row.may || 0),
-          jun: Number(row.jun || 0),
-          jul: Number(row.jul || 0),
-          aug: Number(row.aug || 0),
-          sep: Number(row.sep || 0),
-          oct: Number(row.oct || 0),
-          nov: Number(row.nov || 0),
-          dec: Number(row.dec || 0),
-          notes: row.notes ? String(row.notes) : undefined,
+          category: String(record.category).trim(),
+          subcategory: record.subcategory ? String(record.subcategory).trim() : undefined,
+          category_type: record.category_type as CategoryType,
+          jan: Number(record.jan || 0),
+          feb: Number(record.feb || 0),
+          mar: Number(record.mar || 0),
+          apr: Number(record.apr || 0),
+          may: Number(record.may || 0),
+          jun: Number(record.jun || 0),
+          jul: Number(record.jul || 0),
+          aug: Number(record.aug || 0),
+          sep: Number(record.sep || 0),
+          oct: Number(record.oct || 0),
+          nov: Number(record.nov || 0),
+          dec: Number(record.dec || 0),
+          notes: record.notes ? String(record.notes) : undefined,
         };
-        return result;
+        categories.push(result);
       });
       // Lire les hypothèses (optionnel)
-      let assumptions: BudgetAssumptionImport[] = [];
-      if (workbook.SheetNames.includes('Hypothèses')) {
-        const assumptionsSheet = workbook.Sheets['Hypothèses'];
-        const assumptionsJson = XLSX.utils.sheet_to_json<Record<string, unknown>>(assumptionsSheet);
-        assumptions = assumptionsJson.map((row: Record<string, unknown>) => ({
-          key: String(row.key || '').trim(),
-          description: String(row.description || '').trim(),
-          value: row.value as number | string,
-          unit: row.unit ? String(row.unit) : undefined,
-          category: String(row.category || 'Général').trim(),
-        }));
+      const assumptions: BudgetAssumptionImport[] = [];
+      const assumptionsSheet = workbook.getWorksheet('Hypothèses');
+      if (assumptionsSheet) {
+        const assumptionsHeaders = (assumptionsSheet.getRow(1).values as Array<string | number | null | undefined>)
+          .slice(1)
+          .map((header) => String(header || '').trim());
+        assumptionsSheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+          if (rowNumber === 1) return;
+          const rowValues = row.values as Array<string | number | null | undefined>;
+          const record: Record<string, unknown> = {};
+          assumptionsHeaders.forEach((header, index) => {
+            record[header] = rowValues[index + 1];
+          });
+          const hasValues = Object.values(record).some((value) => value !== undefined && value !== null && String(value).trim() !== '');
+          if (!hasValues) return;
+          assumptions.push({
+            key: String(record.key || '').trim(),
+            description: String(record.description || '').trim(),
+            value: record.value as number | string,
+            unit: record.unit ? String(record.unit) : undefined,
+            category: String(record.category || 'Général').trim(),
+          });
+        });
       }
       // Déterminer l'année (utiliser l'année en cours par défaut)
       const year = new Date().getFullYear();
@@ -228,7 +259,7 @@ export class BudgetImportExportService {
     companyName: string = 'MonEntreprise'
   ): Promise<void> {
     try {
-      const wb = XLSX.utils.book_new();
+      const wb = new ExcelJS.Workbook();
       // Feuille Catégories
       const categoriesData = [
         [
@@ -270,15 +301,19 @@ export class BudgetImportExportService {
           cat.notes || '',
         ])
       ];
-      const wsCategories = XLSX.utils.aoa_to_sheet(categoriesData);
-      wsCategories['!cols'] = [
-        { wch: 20 }, { wch: 20 }, { wch: 15 },
-        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
-        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
-        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
-        { wch: 12 }, { wch: 30 }
+      const wsCategories = wb.addWorksheet('Catégories');
+      categoriesData.forEach((row) => wsCategories.addRow(row));
+      wsCategories.columns = [
+        { width: 20 }, { width: 20 }, { width: 15 },
+        { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+        { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+        { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+        { width: 12 }, { width: 30 }
       ];
-      XLSX.utils.book_append_sheet(wb, wsCategories, 'Catégories');
+      const headerRow = wsCategories.getRow(1);
+      headerRow.eachCell((cell) => {
+        cell.font = { bold: true };
+      });
       // Feuille Hypothèses (si présentes)
       if (assumptions && assumptions.length > 0) {
         const assumptionsData = [
@@ -291,15 +326,30 @@ export class BudgetImportExportService {
             ass.category,
           ])
         ];
-        const wsAssumptions = XLSX.utils.aoa_to_sheet(assumptionsData);
-        wsAssumptions['!cols'] = [
-          { wch: 20 }, { wch: 40 }, { wch: 15 }, { wch: 10 }, { wch: 20 }
+        const wsAssumptions = wb.addWorksheet('Hypothèses');
+        assumptionsData.forEach((row) => wsAssumptions.addRow(row));
+        wsAssumptions.columns = [
+          { width: 20 }, { width: 40 }, { width: 15 }, { width: 10 }, { width: 20 }
         ];
-        XLSX.utils.book_append_sheet(wb, wsAssumptions, 'Hypothèses');
+        const assumptionsHeader = wsAssumptions.getRow(1);
+        assumptionsHeader.eachCell((cell) => {
+          cell.font = { bold: true };
+        });
       }
       // Télécharger
       const fileName = `Budget_${year}_${companyName}_Export.xlsx`;
-      XLSX.writeFile(wb, fileName);
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (error) {
       logger.error('BudgetImportExport', 'Error exporting budget to Excel:', error);
       throw new Error('Erreur lors de l\'export du budget');

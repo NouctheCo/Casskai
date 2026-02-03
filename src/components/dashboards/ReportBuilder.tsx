@@ -235,8 +235,9 @@ export const ReportBuilder: React.FC = () => {
           <section className="builder-section">
             <h3>Basic Information</h3>
             <div className="form-group">
-              <label>Report Title</label>
+              <label htmlFor="report-title">Report Title</label>
               <input
+                id="report-title"
                 type="text"
                 value={state.reportTitle}
                 onChange={e => setState(prev => ({ ...prev, reportTitle: e.target.value }))}
@@ -244,8 +245,9 @@ export const ReportBuilder: React.FC = () => {
               />
             </div>
             <div className="form-group">
-              <label>Company ID</label>
+              <label htmlFor="report-company-id">Company ID</label>
               <input
+                id="report-company-id"
                 type="text"
                 value={state.companyId}
                 onChange={e => setState(prev => ({ ...prev, companyId: e.target.value }))}
@@ -253,8 +255,9 @@ export const ReportBuilder: React.FC = () => {
               />
             </div>
             <div className="form-group">
-              <label>Start Date</label>
+              <label htmlFor="report-start-date">Start Date</label>
               <input
+                id="report-start-date"
                 type="date"
                 value={state.dateRange.start.toISOString().split('T')[0]}
                 onChange={e =>
@@ -267,8 +270,9 @@ export const ReportBuilder: React.FC = () => {
               />
             </div>
             <div className="form-group">
-              <label>End Date</label>
+              <label htmlFor="report-end-date">End Date</label>
               <input
+                id="report-end-date"
                 type="date"
                 value={state.dateRange.end.toISOString().split('T')[0]}
                 onChange={e =>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { PurchaseFormData, Purchase, Supplier } from '../../types/purchase.types';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
@@ -13,6 +13,8 @@ import { useTranslation } from 'react-i18next';
 import { SupplierSelectWithCreate } from './SupplierSelectWithCreate';
 import { logger } from '@/lib/logger';
 import { formatCurrency } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { buildVatRateOptions, getDefaultVatRate, resolveCompanyCountryCode } from '@/utils/vatRateUtils';
 interface PurchaseFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -30,13 +32,26 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
   loading
 }) => {
   const { t } = useTranslation();
+  const { currentCompany } = useAuth();
+  const countryCode = useMemo(
+    () => resolveCompanyCountryCode({ currentCompany }),
+    [currentCompany]
+  );
+  const vatRateOptions = useMemo(
+    () => buildVatRateOptions(countryCode),
+    [countryCode]
+  );
+  const defaultTaxRate = useMemo(
+    () => getDefaultVatRate(countryCode),
+    [countryCode]
+  );
   const [formData, setFormData] = useState<PurchaseFormData>({
     invoice_number: '',
     purchase_date: new Date().toISOString().split('T')[0],
     supplier_id: '',
     description: '',
     amount_ht: 0,
-    tva_rate: 20,
+    tva_rate: defaultTaxRate,
     due_date: '',
     attachments: []
   });
@@ -65,13 +80,13 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
         supplier_id: '',
         description: '',
         amount_ht: 0,
-        tva_rate: 20,
+        tva_rate: defaultTaxRate,
         due_date: '',
         attachments: []
       });
     }
     setErrors({});
-  }, [purchase]);
+  }, [purchase, defaultTaxRate]);
   // Calculate amounts when amount_ht or tva_rate changes
   useEffect(() => {
     const tvaAmount = formData.amount_ht * (formData.tva_rate / 100);
@@ -265,12 +280,24 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="0">0%</SelectItem>
-                      <SelectItem value="5.5">5,5%</SelectItem>
-                      <SelectItem value="10">10%</SelectItem>
-                      <SelectItem value="20">20%</SelectItem>
+                      {Array.from(new Set([...vatRateOptions, formData.tva_rate]))
+                        .sort((a, b) => a - b)
+                        .map((rate) => (
+                          <SelectItem key={rate} value={rate.toString()}>
+                            {rate}%
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
+                  <Input
+                    type="number"
+                    placeholder="Taux manuel (%)"
+                    min="0"
+                    step="0.01"
+                    value={formData.tva_rate}
+                    onChange={(e) => handleInputChange('tva_rate', parseFloat(e.target.value) || 0)}
+                    className="mt-2"
+                  />
                 </div>
                 {/* Calculated amounts display */}
                 <div className="space-y-2">

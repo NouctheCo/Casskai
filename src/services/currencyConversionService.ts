@@ -9,120 +9,38 @@
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
-// Service de conversion des devises pour les marchés africains
-// Taux de change approximatifs (à mettre à jour régulièrement)
+// Service de conversion des devises (compatibilité)
+// IMPORTANT: Les taux sont désormais centralisés via currencyRegistry.
+import { currencyRegistry } from '@/services/currencyRegistry';
+import { CurrencyService, type Currency } from '@/services/currencyService';
+import type { CurrencyCode } from '@/hooks/useCompanyCurrency';
 import { logger } from '@/lib/logger';
 
-export interface CurrencyRate {
-  code: string;
-  name: string;
-  symbol: string;
-  rateFromEUR: number; // Taux par rapport à l'EUR (base)
-}
-// Taux de change actuels approximatifs (base EUR = 1)
-export const CURRENCY_RATES: Record<string, CurrencyRate> = {
-  'EUR': {
-    code: 'EUR',
-    name: 'Euro',
-    symbol: ' EUR',
-    rateFromEUR: 1
-  },
-  'XOF': {
-    code: 'XOF',
-    name: 'Franc CFA BCEAO',
-    symbol: 'CFA',
-    rateFromEUR: 655.957 // Taux fixe EUR/XOF
-  },
-  'XAF': {
-    code: 'XAF',
-    name: 'Franc CFA BEAC',
-    symbol: 'FCFA',
-    rateFromEUR: 655.957 // Taux fixe EUR/XAF (même que XOF)
-  },
-  'GHS': {
-    code: 'GHS',
-    name: 'Cedi ghanéen',
-    symbol: '₵',
-    rateFromEUR: 12.5 // Approximatif, à ajuster
-  },
-  'NGN': {
-    code: 'NGN',
-    name: 'Naira nigérian',
-    symbol: '₦',
-    rateFromEUR: 1650 // Approximatif, à ajuster
-  },
-  'USD': {
-    code: 'USD',
-    name: 'Dollar américain',
-    symbol: '$',
-    rateFromEUR: 1.05 // Approximatif
-  },
-  'GBP': {
-    code: 'GBP',
-    name: 'Livre sterling',
-    symbol: '£',
-    rateFromEUR: 0.85 // Approximatif
-  },
-  'CAD': {
-    code: 'CAD',
-    name: 'Dollar canadien',
-    symbol: 'CAD$',
-    rateFromEUR: 1.45 // Approximatif
-  }
-};
 // Fonction pour convertir un prix d'EUR vers une autre devise
-export function convertPrice(priceEUR: number, targetCurrency: string): number {
-  const rate = CURRENCY_RATES[targetCurrency];
-  if (!rate) {
-    logger.warn('CurrencyConversion', `Devise non supportée: ${targetCurrency}`);
+export async function convertPrice(priceEUR: number, targetCurrency: CurrencyCode): Promise<number> {
+  try {
+    return await currencyRegistry.convertPriceFromEUR(priceEUR, targetCurrency);
+  } catch (error) {
+    logger.warn('CurrencyConversion', 'Conversion fallback (EUR)', error);
     return priceEUR;
   }
-  const convertedPrice = priceEUR * rate.rateFromEUR;
-  // Arrondi intelligent selon la devise
-  if (targetCurrency === 'XOF' || targetCurrency === 'XAF') {
-    // Pour les francs CFA, arrondir à la dizaine proche
-    return Math.round(convertedPrice / 10) * 10;
-  } else if (targetCurrency === 'NGN') {
-    // Pour le Naira, arrondir à la centaine proche
-    return Math.round(convertedPrice / 100) * 100;
-  } else if (targetCurrency === 'GHS') {
-    // Pour le Cedi, arrondir à l'unité
-    return Math.round(convertedPrice);
-  } else {
-    // Pour les autres devises, garder 2 décimales
-    return Math.round(convertedPrice * 100) / 100;
-  }
 }
+
 // Fonction pour formater un prix selon la devise
 export function formatPriceWithCurrency(price: number, currency: string): string {
-  const rate = CURRENCY_RATES[currency];
-  if (!rate) {
-    return `${price} EUR`;
-  }
-  // Formatage selon la devise
-  switch (currency) {
-    case 'XOF':
-    case 'XAF':
-      return `${price.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ${rate.symbol}`;
-    case 'NGN':
-      return `${rate.symbol}${price.toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-    case 'GHS':
-      return `${rate.symbol}${price.toLocaleString('en-GH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-    case 'USD':
-      return `${rate.symbol}${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    case 'EUR':
-      return `${price.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${rate.symbol}`;
-    case 'GBP':
-      return `${rate.symbol}${price.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    case 'CAD':
-      return `${rate.symbol}${price.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    default:
-      return `${price} ${rate.symbol}`;
+  try {
+    const currencyService = CurrencyService.getInstance();
+    return currencyService.formatAmount(price, currency);
+  } catch (error) {
+    logger.warn('CurrencyConversion', 'Format fallback', error);
+    return `${price} ${currency}`;
   }
 }
+
 // Fonction pour obtenir les informations d'une devise
-export function getCurrencyInfo(currency: string): CurrencyRate | null {
-  return CURRENCY_RATES[currency] || null;
+export function getCurrencyInfo(currency: string): Currency | null {
+  const currencyService = CurrencyService.getInstance();
+  return currencyService.getCurrency(currency) || null;
 }
 // Liste des pays africains supportés
 export const AFRICAN_COUNTRIES = [

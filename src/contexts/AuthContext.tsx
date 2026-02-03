@@ -18,7 +18,7 @@ import type { User, Session, AuthResponse, AuthError } from '@supabase/supabase-
 
 import { getCompanyDetails, getUserCompanies, getCompanyModules } from '../lib/company';
 
-import { trialService } from '../services/trialService';
+import { canCreateTrial, createTrialSubscription } from '../services/trialService';
 
 import { trialExpirationService } from '../services/trialExpirationService';
 
@@ -196,7 +196,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Vérifier si l'utilisateur peut créer un essai
 
-      const canCreate = await trialService.canCreateTrial(userId);
+      const canCreate = await canCreateTrial(userId);
 
 
 
@@ -208,7 +208,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         // Créer un abonnement d'essai automatiquement
 
-        const result = await trialService.createTrialSubscription(userId, companyId);
+        const result = await createTrialSubscription(userId, companyId);
 
 
 

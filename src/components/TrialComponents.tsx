@@ -135,13 +135,13 @@ export const TrialStatusCard: React.FC = () => {
           <div>
             <p className="text-muted-foreground">Date de début</p>
             <p className="font-medium">
-              {trialInfo.trialStart.toLocaleDateString('fr-FR')}
+              {trialInfo?.trialStartDate ? new Date(trialInfo.trialStartDate).toLocaleDateString('fr-FR') : 'N/A'}
             </p>
           </div>
           <div>
             <p className="text-muted-foreground">Date de fin</p>
             <p className="font-medium">
-              {trialInfo.trialEnd.toLocaleDateString('fr-FR')}
+              {trialInfo?.trialEndDate ? new Date(trialInfo.trialEndDate).toLocaleDateString('fr-FR') : 'N/A'}
             </p>
           </div>
         </div>
@@ -149,7 +149,7 @@ export const TrialStatusCard: React.FC = () => {
           <Alert>
             <XCircle className="h-4 w-4" />
             <AlertDescription>
-              Votre essai a expiré le {trialInfo.trialEnd.toLocaleDateString('fr-FR')}.
+              Votre essai a expiré le {trialInfo?.trialEndDate ? new Date(trialInfo.trialEndDate).toLocaleDateString('fr-FR') : 'N/A'}.
               Certaines fonctionnalités peuvent être limitées.
             </AlertDescription>
           </Alert>

@@ -352,49 +352,52 @@ class SubscriptionService {
     }
   }
   /**
-   * Obtenir le plan actuel de l'utilisateur avec fallback intelligent
+   * Obtenir le plan actuel de l'utilisateur (UNIQUEMENT depuis Supabase)
+   * SÉCURITÉ: Ne plus utiliser localStorage pour éviter la manipulation côté client
    */
   async getCurrentUserPlan(userId: string): Promise<string> {
     try {
-      // Essayer de récupérer depuis Supabase d'abord
       const subscription = await this.getCurrentSubscription(userId);
+
       if (subscription && subscription.status === 'trialing') {
         return 'trial';
       }
       if (subscription && subscription.status === 'active') {
         return subscription.planId;
       }
-      // Vérifier le localStorage pour les utilisateurs sans DB
-      const localPlan = localStorage.getItem(`user_plan_${userId}`);
-      if (localPlan) {
-        return localPlan;
-      }
-      // Vérifier si c'est un nouvel utilisateur (période d'essai)
-      return await this.checkTrialStatus(userId);
+
+      // Pas d'abonnement trouvé - l'utilisateur doit s'inscrire ou son essai a expiré
+      logger.warn('Subscription', '[SubscriptionService] Aucun abonnement actif trouvé pour user:', userId);
+      return 'expired';
     } catch (error) {
       logger.error('Subscription', '[SubscriptionService] Erreur récupération plan:', error);
-      return await this.checkTrialStatus(userId);
+      return 'expired';
     }
   }
   /**
-   * Vérifier le statut d'essai avec localStorage fallback
+   * Vérifier le statut d'essai (UNIQUEMENT depuis Supabase)
+   * SÉCURITÉ: Cette fonction interroge maintenant la base de données
    */
-  private async checkTrialStatus(userId: string): Promise<string> {
-    const trialKey = `trial_start_${userId}`;
-    const trialStart = localStorage.getItem(trialKey);
-    if (!trialStart) {
-      // Première connexion, démarrer l'essai
-      localStorage.setItem(trialKey, new Date().toISOString());
-      return 'trial';
-    }
-    const trialStartDate = new Date(trialStart);
-    const now = new Date();
-    const daysDiff = Math.floor((now.getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24));
-    if (daysDiff < 30) {
-      return 'trial';
-    } else {
-      // Essai expiré, passer au plan starter par défaut
-      return 'starter';
+  async checkTrialStatus(userId: string): Promise<{ isOnTrial: boolean; daysRemaining: number; trialEnd: Date | null }> {
+    try {
+      const subscription = await this.getCurrentSubscription(userId);
+
+      if (subscription && subscription.status === 'trialing' && subscription.trialEnd) {
+        const now = new Date();
+        const daysRemaining = Math.max(0, Math.ceil(
+          (subscription.trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        ));
+        return {
+          isOnTrial: daysRemaining > 0,
+          daysRemaining,
+          trialEnd: subscription.trialEnd
+        };
+      }
+
+      return { isOnTrial: false, daysRemaining: 0, trialEnd: null };
+    } catch (error) {
+      logger.error('Subscription', '[SubscriptionService] Erreur vérification trial:', error);
+      return { isOnTrial: false, daysRemaining: 0, trialEnd: null };
     }
   }
   /**
@@ -410,7 +413,8 @@ class SubscriptionService {
     return isModuleAllowedForPlan(moduleKey, planId);
   }
   /**
-   * Obtenir les jours restants d'essai
+   * Obtenir les jours restants d'essai (UNIQUEMENT depuis Supabase)
+   * SÉCURITÉ: Ne plus utiliser localStorage pour éviter la manipulation côté client
    */
   async getTrialDaysRemaining(userId: string): Promise<number> {
     const subscription = await this.getCurrentSubscription(userId);
@@ -421,37 +425,34 @@ class SubscriptionService {
       );
       return Math.max(0, daysRemaining);
     }
-    // Fallback localStorage pour les utilisateurs sans DB
-    const trialKey = `trial_start_${userId}`;
-    const trialStart = localStorage.getItem(trialKey);
-    if (!trialStart) return 30;
-    const trialStartDate = new Date(trialStart);
-    const now = new Date();
-    const daysDiff = Math.floor((now.getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24));
-    return Math.max(0, 30 - daysDiff);
+    // Pas d'abonnement d'essai trouvé en DB
+    return 0;
   }
   /**
-   * Changer de plan (avec support localStorage)
+   * Changer de plan (UNIQUEMENT via Supabase)
+   * SÉCURITÉ: Plus de fallback localStorage
    */
   async changePlan(userId: string, newPlanId: string): Promise<boolean> {
     try {
-      // Essayer la mise à jour en DB d'abord
       const subscription = await this.getCurrentSubscription(userId);
-      if (subscription) {
-        const { error } = await supabase
-          .from('subscriptions')
-          .update({ plan_id: newPlanId, updated_at: new Date().toISOString() })
-          .eq('user_id', userId);
-        if (error) {
-          logger.warn('Subscription', '[SubscriptionService] Erreur mise à jour DB, fallback localStorage');
-        }
+      if (!subscription) {
+        logger.error('Subscription', '[SubscriptionService] Aucun abonnement trouvé pour changer de plan');
+        return false;
       }
-      // Toujours sauvegarder en localStorage comme fallback
-      const subscriptionKey = `user_plan_${userId}`;
-      localStorage.setItem(subscriptionKey, newPlanId);
+
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({ plan_id: newPlanId, updated_at: new Date().toISOString() })
+        .eq('user_id', userId);
+
+      if (error) {
+        logger.error('Subscription', '[SubscriptionService] Erreur mise à jour DB:', error);
+        return false;
+      }
+
       // Émettre un événement pour que les composants se mettent à jour
-      window.dispatchEvent(new CustomEvent('subscription-changed', { 
-        detail: { userId, newPlanId } 
+      window.dispatchEvent(new CustomEvent('subscription-changed', {
+        detail: { userId, newPlanId }
       }));
       return true;
     } catch (error) {

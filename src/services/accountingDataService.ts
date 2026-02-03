@@ -646,22 +646,8 @@ export class AccountingDataService {
       }
       if (!data || data.length === 0) {
         logger.warn('AccountingData', '⚠️ No journal entries found for this period');
-        // Retourner les journaux existants avec count = 0
-        const { data: journals } = await supabase
-          .from('journals')
-          .select('code, name')
-          .eq('company_id', companyId)
-          .eq('is_active', true);
-
-        if (journals && journals.length > 0) {
-          logger.debug('AccountingData', '📚 Showing empty journals:', journals.length);
-          return journals.map(j => ({
-            name: j.name,
-            code: j.code,
-            count: 0,
-            percentage: 0
-          }));
-        }
+        // Ne retournons rien au lieu de retourner des journaux vides
+        // Cela permettra au composant d'afficher "Aucune donnée disponible"
         return [];
       }
       // Aggregate by journal

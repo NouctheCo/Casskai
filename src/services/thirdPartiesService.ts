@@ -132,11 +132,11 @@ class ThirdPartiesService {
 
       .eq('is_default', true)
 
-      .single();
+      .limit(1);
 
 
 
-    if (error || !userCompanies) {
+    if (error || !userCompanies || userCompanies.length === 0) {
 
       throw new Error('No active company found');
 
@@ -144,7 +144,7 @@ class ThirdPartiesService {
 
 
 
-    return userCompanies.company_id;
+    return userCompanies[0].company_id;
 
   }
 

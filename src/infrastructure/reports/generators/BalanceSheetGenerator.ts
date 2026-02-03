@@ -253,7 +253,7 @@ export class BalanceSheetGenerator extends BaseReportGenerator {
 
       currency: getCurrentCompanyCurrency()
 
-    }).format(amount);
+    }).format(amount).replace(/\u00A0/g, ' ');
 
   }
 

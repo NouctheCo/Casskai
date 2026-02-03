@@ -168,7 +168,7 @@ export const TrialManager: React.FC = () => {
 
                 <span>Date d'expiration:</span>
 
-                <span>{new Date(trialInfo.trialEnd).toLocaleDateString('fr-FR')}</span>
+                <span>{new Date((trialInfo as any).trialEnd).toLocaleDateString('fr-FR')}</span>
 
               </div>
 

@@ -57,10 +57,13 @@ const LazyForgotPasswordPage = React.lazy(() => import('@/pages/auth/ForgotPassw
 const LazySystemStatusPage = React.lazy(() => import('@/pages/SystemStatusPage'));
 const LazyStripeSuccessPage = React.lazy(() => import('@/pages/StripeSuccessPage'));
 const LazyStripeCancelPage = React.lazy(() => import('@/pages/StripeCancelPage'));
+const LazyEmailVerificationPage = React.lazy(() => import('@/pages/auth/EmailVerificationPage'));
+const LazyPaymentConfirmationPage = React.lazy(() => import('@/pages/PaymentConfirmationPage'));
 const LazyBudgetPage = React.lazy(() => import('@/pages/BudgetPage'));
 const LazyAutomationPage = React.lazy(() => import('@/pages/AutomationPage'));
 const LazyThirdPartiesPage = React.lazy(() => import('@/pages/ThirdPartiesPage'));
 const LazyRGPDAdminDashboard = React.lazy(() => import('@/pages/admin/RGPDAdminDashboard'));
+const LazyAdminSubscriptions = React.lazy(() => import('@/pages/admin/AdminSubscriptions'));
 const LazyAuditLogsPage = React.lazy(() => import('@/pages/AuditLogsPage'));
 const LazyDocumentationPage = React.lazy(() => import('@/pages/public/DocumentationPage'));
 const LazyTutorialsPage = React.lazy(() => import('@/pages/public/TutorialsPage'));
@@ -136,6 +139,16 @@ const AppRouter: React.FC = () => {
             <Route path="stripe/cancel" element={
               <Suspense fallback={<LoadingFallback />}>
                 <LazyStripeCancelPage />
+              </Suspense>
+            } />
+            <Route path="auth/verify-email" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyEmailVerificationPage />
+              </Suspense>
+            } />
+            <Route path="payment-confirmation" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyPaymentConfirmationPage />
               </Suspense>
             } />
             <Route path="auth" element={<AuthForm />} />
@@ -239,6 +252,16 @@ const AppRouter: React.FC = () => {
       {/* Onboarding Routes */}
       {routingState === 'needs-onboarding' && (
         <>
+          <Route path="auth/verify-email" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <LazyEmailVerificationPage />
+            </Suspense>
+          } />
+          <Route path="payment-confirmation" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <LazyPaymentConfirmationPage />
+            </Suspense>
+          } />
           <Route path="/" element={<MainLayout />}>
             <Route path="onboarding" element={
               <OnboardingProvider>
@@ -253,6 +276,16 @@ const AppRouter: React.FC = () => {
       {/* Authenticated App Routes */}
       {routingState === 'authenticated' && (
         <>
+          <Route path="auth/verify-email" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <LazyEmailVerificationPage />
+            </Suspense>
+          } />
+          <Route path="payment-confirmation" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <LazyPaymentConfirmationPage />
+            </Suspense>
+          } />
           <Route path="/" element={<MainLayout />}>
             <Route index element={<HomePage />} />
             <Route path="dashboard" element={
@@ -413,6 +446,13 @@ const AppRouter: React.FC = () => {
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
                   <LazyAuditLogsPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="admin/subscriptions" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyAdminSubscriptions />
                 </Suspense>
               </ProtectedRoute>
             } />

@@ -16,6 +16,21 @@ import { BusinessIdValidator } from '@/components/validation/BusinessIdValidator
 import { ComplianceChecklist } from './ComplianceChecklist';
 import { mapRowToSettings, mapSettingsToUpdate, type CompanySettings as CompanySettingsType } from '@/types/company-settings.types';
 
+// Fonction pour mapper un pays à sa devise par défaut
+const getDefaultCurrencyForCountry = (countryCode: string): string => {
+  if (countryCode === 'FR') return 'EUR';
+  if (['SN', 'CI', 'ML', 'BF', 'BJ', 'GW', 'NE', 'TG'].includes(countryCode)) return 'XOF';
+  if (countryCode === 'MA') return 'MAD';
+  if (countryCode === 'TN') return 'TND';
+  if (['CM', 'CF', 'TD', 'CG', 'GQ', 'GA'].includes(countryCode)) return 'XAF';
+  if (countryCode === 'BE') return 'EUR';
+  if (countryCode === 'CH') return 'CHF';
+  if (countryCode === 'GB') return 'GBP';
+  if (countryCode === 'US') return 'USD';
+  // Défaut EUR si pas de mapping
+  return 'EUR';
+};
+
 export function CompanySettings() {
   const { user: _user, currentCompany } = useAuth();
   const { toast } = useToast();
@@ -60,6 +75,30 @@ export function CompanySettings() {
     loadCompanySettings();
   }, [currentCompany?.id]);
 
+  // Auto-mettre à jour la devise quand le pays change
+  useEffect(() => {
+    if (!settings) return;
+
+    const currentCountry = settings.contact.address.country || 'FR';
+    const currentCurrency = settings.business.currency;
+    const expectedCurrency = getDefaultCurrencyForCountry(currentCountry);
+
+    // Seulement mettre à jour si la devise ne correspond pas au pays
+    if (currentCurrency !== expectedCurrency) {
+      devLogger.info('[CompanySettings] Devise auto-mise à jour:', `${currentCurrency} → ${expectedCurrency} (pays: ${currentCountry})`);
+      setSettings(prev => prev ? ({
+        ...prev,
+        business: { ...prev.business, currency: expectedCurrency }
+      }) : prev);
+
+      // Afficher un toast pour informer l'utilisateur
+      toast({
+        title: 'Devise mise à jour automatiquement',
+        description: `La devise a été changée de ${currentCurrency} à ${expectedCurrency} selon le pays sélectionné.`,
+      });
+    }
+  }, [settings?.contact.address.country]);
+
   const handleSave = async () => {
     if (!currentCompany?.id || !settings) return;
 
@@ -77,12 +116,23 @@ export function CompanySettings() {
 
       if (error) throw error;
 
+      // Mettre à jour la devise dans le localStorage pour toute l'application
+      if (settings.business.currency) {
+        localStorage.setItem('casskai_current_company_currency', settings.business.currency);
+        devLogger.info('[CompanySettings] Devise mise à jour dans localStorage:', settings.business.currency);
+      }
+
       toast({
         title: 'Paramètres sauvegardés',
         description: 'Les paramètres de l\'entreprise ont été mis à jour avec succès'
       });
 
       await loadCompanySettings();
+
+      // Recharger la page pour forcer la mise à jour du contexte Auth et de toute l'app
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       devLogger.error('[CompanySettings] Erreur sauvegarde:', error);
       toast({
@@ -618,7 +668,7 @@ export function CompanySettings() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="currency">Devise *</Label>
+              <Label htmlFor="currency">Devise * <span className="text-xs text-gray-500">(auto-détectée par pays)</span></Label>
               <Select
                 value={settings.business.currency}
                 onValueChange={(value) => setSettings(prev => prev ? ({
@@ -630,10 +680,14 @@ export function CompanySettings() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="EUR">EUR (€)</SelectItem>
-                  <SelectItem value="USD">USD ($)</SelectItem>
-                  <SelectItem value="GBP">GBP (£)</SelectItem>
-                  <SelectItem value="CHF">CHF (Fr)</SelectItem>
+                  <SelectItem value="EUR">EUR (€) - Euro</SelectItem>
+                  <SelectItem value="USD">USD ($) - Dollar américain</SelectItem>
+                  <SelectItem value="GBP">GBP (£) - Livre sterling</SelectItem>
+                  <SelectItem value="CHF">CHF (Fr) - Franc suisse</SelectItem>
+                  <SelectItem value="XOF">XOF (CFA) - Franc CFA BCEAO</SelectItem>
+                  <SelectItem value="XAF">XAF (FCFA) - Franc CFA BEAC</SelectItem>
+                  <SelectItem value="MAD">MAD (DH) - Dirham marocain</SelectItem>
+                  <SelectItem value="TND">TND (DT) - Dinar tunisien</SelectItem>
                 </SelectContent>
               </Select>
             </div>

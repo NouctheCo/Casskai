@@ -345,7 +345,7 @@ export default function AccountingPageOptimized() {
     logger.debug('Accounting', '🔍 AccountingPage - Tab changed from', activeTab, 'to', newTab);
     setActiveTab(newTab);
   };
-  const [selectedPeriod, setSelectedPeriod] = useState('current-month');
+  const [selectedPeriod, setSelectedPeriod] = useState('current-year');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(true);

@@ -81,6 +81,95 @@
       "fiscalYear": "Fiscal Year",
       "fiscalYearDesc": "Define your fiscal year periods",
       "fiscalYearDialogDesc": "Define your fiscal year settings",
+    "closure": {
+      "title": "Accounting close",
+      "subtitle": "Manage your accounting periods and perform year-end closures",
+      "refresh": "Refresh",
+      "newPeriod": "New period",
+      "loading": "Loading periods...",
+      "createTitle": "Create an accounting period",
+      "createDescription": "Define a new period for your accounting year",
+      "periodNameLabel": "Period name",
+      "periodNamePlaceholder": "E.g.: Fiscal year 2025",
+      "startDateLabel": "Start date",
+      "endDateLabel": "End date",
+      "cancel": "Cancel",
+      "createPeriodCta": "Create period",
+      "periodsTitle": "Accounting periods",
+      "periodsCount": "{{count}} period(s) recorded",
+      "noPeriodsTitle": "No accounting period defined",
+      "noPeriodsDescription": "Create your first period to get started",
+      "table": {
+        "period": "Period",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "closed": "Closed",
+        "open": "Open"
+      },
+      "tooltips": {
+        "validate": "Validate for closing",
+        "generateAN": "Generate opening entries",
+        "reopen": "Reopen period"
+      },
+      "validationTitle": "Closing validation: {{periodName}}",
+      "validationRange": "From {{start}} to {{end}}",
+      "validationState": "Validation status",
+      "balanceCheck": "Trial balance check",
+      "totalDebit": "Total debit",
+      "totalCredit": "Total credit",
+      "draftEntries": "Draft entries",
+      "unletteredEntries": "Unreconciled third-party lines",
+      "periodResultTitle": "Period result",
+      "profit": "Profit",
+      "loss": "Loss",
+      "profitLower": "profit",
+      "lossLower": "loss",
+      "chargesLabel": "Expenses (class 6)",
+      "productsLabel": "Revenue (class 7)",
+      "blockingErrors": "Blocking errors",
+      "warnings": "Warnings",
+      "actionsTitle": "Closing actions",
+      "actions": {
+        "items": {
+          "balanceAccounts": "Clear expense (class 6) and revenue (class 7) accounts",
+          "assignResult": "Allocate the result to account {{account}}",
+          "lockPeriod": "Lock the period (no further changes)",
+          "generateOpening": "Option to generate opening entries for the next period"
+        }
+      },
+      "closePeriod": "Close period",
+      "confirmTitle": "Confirm closing",
+      "confirmDescription": "Are you sure you want to close period {{periodName}}?",
+      "confirmIntro": "This action will:",
+      "confirmItems": {
+        "closingEntries": "Generate closing entries for income statement accounts",
+        "assignResult": "Allocate the result ({{resultType}} of {{amount}})",
+        "lockPeriod": "Lock the period against any changes"
+      },
+      "confirmCta": "Confirm closing",
+      "reopenTitle": "Reopen period",
+      "reopenDescription": "Reopening a closed period is exceptional and must be justified.",
+      "reopenPeriodLabel": "Selected period",
+      "reopenReasonLabel": "Reopening reason *",
+      "reopenReasonPlaceholder": "E.g.: Correction of a data entry error...",
+      "reopenAuditNote": "⚠️ This action will be logged in audit records",
+      "reopenCta": "Reopen period",
+      "errors": {
+        "fillAllFields": "Please fill in all fields",
+        "create": "Error while creating",
+        "loadPeriods": "Error loading periods",
+        "validation": "Error during validation",
+        "close": "Error while closing",
+        "generateAN": "Error generating opening entries",
+        "reopenReasonRequired": "Please provide a reason for reopening",
+        "reopen": "Error while reopening",
+        "closedPeriodOperation": "Action not allowed: the accounting period is closed. Reopen the period to modify or enter journal entries."
+      }
+    },
       "fiscalYearEnd": "Fiscal year end",
       "fiscalYearError": "Error saving fiscal year",
       "fiscalYearSaved": "Fiscal year saved successfully",
@@ -421,7 +510,40 @@
     "lastNamePlaceholder": "Votre nom",
     "register": "S'inscrire",
     "sendResetEmail": "Send reset email",
-    "sending": "Sending..."
+    "sending": "Sending...",
+    "emailVerification": {
+      "instruction": "A confirmation email has been sent. Click the link to verify your email."
+    },
+    "tabs": {
+      "login": "Login",
+      "signup": "Sign Up"
+    },
+    "fields": {
+      "email": "Email address",
+      "password": "Password"
+    },
+    "buttons": {
+      "signin": "Sign In",
+      "signup": "Sign Up"
+    },
+    "links": {
+      "forgot_password": "Forgot password?"
+    },
+    "signup": {
+      "prompt": "Don't have an account yet?",
+      "link": "Create account",
+      "check_email": "Check your email to confirm your registration",
+      "error": "Registration error"
+    },
+    "signin": {
+      "success": "Login successful!",
+      "error": "Login error"
+    },
+    "verify": {
+      "pending_title": "Email not verified",
+      "pending_description": "Please verify your email before continuing. A confirmation email has been sent.",
+      "go_to_verification": "Go to verification"
+    }
   },
   "backupAndExport": "Sauvegarde et Export",
   "backupData": "Sauvegarder data",
@@ -536,7 +658,82 @@
     "underDevelopmentMessage": "Ce module est actuellement en cours de dÃ©veloppement. Il sera bientÃ´t disponible.",
     "update": "Mettre Ã  jour",
     "view": "View",
-    "year": "AnnÃ©e"
+    "year": "Year",
+    "optional": "(optional)"
+  },
+  "projects": {
+    "resourceModal": {
+      "title": "Allocate a Resource",
+      "description": "Assign a user to a project with an allocation rate",
+      "project": "Project",
+      "projectPlaceholder": "Select a project",
+      "user": "User",
+      "userPlaceholder": "Select a user",
+      "role": "Role",
+      "rolePlaceholder": "E.g.: Developer, Project Manager",
+      "allocation": "Allocation (%)",
+      "hourlyRate": "Hourly Rate",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "allocate": "Allocate Resource",
+      "errorProject": "Project is required",
+      "errorUser": "User is required",
+      "errorAllocation": "Allocation must be between 1 and 100%",
+      "errorStartDate": "Start date is required",
+      "errorDuplicate": "This resource is already allocated to this project",
+      "errorCreating": "Error allocating resource"
+    },
+    "timesheetModal": {
+      "title": "New Time Entry",
+      "description": "Record a time entry for a project",
+      "project": "Project",
+      "projectPlaceholder": "Select a project",
+      "task": "Task",
+      "taskPlaceholder": "Select a task",
+      "loadingTasks": "Loading tasks...",
+      "selectProjectFirst": "Select a project first",
+      "noTask": "No task",
+      "date": "Date",
+      "hours": "Hours",
+      "hoursPlaceholder": "8.0",
+      "description": "Description",
+      "descriptionPlaceholder": "Description of work performed",
+      "billable": "Billable time",
+      "hourlyRate": "Hourly Rate",
+      "hourlyRatePlaceholder": "50.00",
+      "totalAmount": "Total amount",
+      "status": "Status",
+      "statusDraft": "Draft",
+      "statusSubmitted": "Submit for approval",
+      "create": "Create Entry",
+      "errorProject": "Project is required",
+      "errorDate": "Date is required",
+      "errorHours": "Hours must be greater than 0",
+      "errorRate": "Hourly rate is required for billable time",
+      "errorCreating": "Error creating time entry"
+    },
+    "clientModal": {
+      "title": "New Client",
+      "description": "Create a new client for the project",
+      "companyName": "Company Name",
+      "companyNamePlaceholder": "E.g.: ABC Company",
+      "industry": "Industry",
+      "industryPlaceholder": "E.g.: Technology, Commerce, etc.",
+      "address": "Address",
+      "addressPlaceholder": "123 Main Street",
+      "city": "City",
+      "cityPlaceholder": "New York",
+      "postalCode": "Postal Code",
+      "postalCodePlaceholder": "10001",
+      "website": "Website",
+      "websitePlaceholder": "https://example.com",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional information",
+      "create": "Create Client",
+      "errorCompanyName": "Company name is required",
+      "errorCreating": "Error creating client"
+    },
+    "invoiceCreated": "Invoice created successfully"
   },
   "company": {
     "fields": {
@@ -2413,7 +2610,10 @@
     "uploaded_at": "Uploaded at",
     "confirm_delete": "Are you sure you want to delete this attachment?",
     "max_file_size": "Max size: 50 MB",
-    "allowed_formats": "Allowed formats: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, WebP, TXT"
+    "allowed_formats": "Allowed formats: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, WebP, TXT",
+    "period_closed_title": "Period Closed",
+    "period_closed_error": "Cannot create an entry on a closed period. Please reopen the period or choose another date.",
+    "period_validation_error": "Period validation error"
   },
   "journals": {
     "accountingJournals": "Accounting Journals",
@@ -3345,7 +3545,6 @@
       }
     }
   },
-  "projects": "Projects",
   "billingPage": {
     "title": "Billing & Subscriptions",
     "subtitle": "Manage your subscription, payments and invoices",
@@ -3436,6 +3635,38 @@
       "invoiceOpening": "Opening invoice in new tab...",
       "viewError": "Error opening invoice"
     }
+  },
+  "paymentConfirmation": {
+    "processingTitle": "Processing payment",
+    "processingDescription": "Please wait while we confirm your payment.",
+    "successTitle": "Payment confirmed ✅",
+    "successSubtitle": "Your subscription is active",
+    "planLabel": "Plan",
+    "amountLabel": "Amount",
+    "nextBillingLabel": "Next billing date",
+    "confirmationEmail": "A confirmation email has been sent",
+    "accessGranted": "Access to all tools is unlocked",
+    "billingPortal": "Manage billing in the portal",
+    "goToBilling": "Go to billing",
+    "sessionIdLabel": "Session ID",
+    "redirectingIn5": "Redirecting in 5 seconds...",
+    "pendingTitle": "Payment pending",
+    "pendingDescription": "Your payment is being processed.",
+    "dontCloseTab": "Please keep this tab open during verification.",
+    "errorTitle": "Payment failed",
+    "errorDescription": "The payment could not be processed.",
+    "errorSuggestions": "Suggestions",
+    "checkCard": "Check your card details",
+    "sufficientFunds": "Make sure you have sufficient funds",
+    "contactSupport": "Contact support",
+    "tryAgain": "Try again",
+    "needHelp": "Need help?",
+    "cancelled": "Payment cancelled",
+    "invalidSession": "Invalid payment session",
+    "processing": "Processing payment...",
+    "pendingPayment": "Payment pending",
+    "checking": "Checking status...",
+    "error": "Error while checking payment"
   },
   "projectspage": {
     "title": "Project Management",
@@ -5808,5 +6039,40 @@
     "errorDeletingDocument": "Error deleting document",
     "errorExportingDocument": "Error exporting document",
     "submissionError": "Form submission error"
+  },
+  "ai": {
+    "automatic_analysis": "Automatic AI Analysis",
+    "upload_document_instruction": "Upload an invoice or receipt to automatically pre-fill the journal entry.",
+    "analyzing": "Analyzing...",
+    "choose_document": "Choose a document (PDF, JPG, PNG)",
+    "extracted_data": "Extracted data from document",
+    "unknown_party": "Unknown party",
+    "invoice": "Invoice",
+    "amount_incl_tax": "Amount incl. VAT",
+    "confidence": "Confidence",
+    "analysis_failed": "Analysis failed",
+    "unable_to_analyze": "Unable to analyze document",
+    "incomplete_data": "Incomplete data",
+    "warnings": "Warnings",
+    "mapping_failed": "Mapping failed",
+    "unable_to_map_accounts": "Unable to map chart of accounts",
+    "analysis_success": "✨ Analysis successful",
+    "entry_prefilled": "Entry pre-filled with {score}% confidence",
+    "unexpected_error": "An error occurred during analysis",
+    "no_company_selected": "No company selected",
+    "categorization_in_progress": "AI categorization in progress...",
+    "categorization_complete": "AI categorization complete",
+    "suggested_category": "Suggested category",
+    "suggested_account": "Suggested account",
+    "low_confidence_warning": "⚠️ Low confidence - Verification recommended",
+    "medium_confidence_warning": "Medium confidence - Please review",
+    "high_confidence": "High confidence",
+    "ai_assistant": "CassKai AI Assistant",
+    "ask_question": "Ask a question...",
+    "thinking": "Thinking...",
+    "no_conversations": "No conversations",
+    "new_conversation": "New conversation",
+    "context_enriched": "Context enriched with company data",
+    "personalized_suggestions": "Personalized suggestions"
   }
 }

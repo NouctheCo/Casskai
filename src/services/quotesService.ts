@@ -99,13 +99,13 @@ class QuotesService {
       // For now, we'll use the invoices table with invoice_type='quote'
       // In a real implementation, you might have a separate quotes table
 
-      // Note: third_parties is now a VIEW, so we cannot JOIN directly
-      // Instead, we use the customer relation from invoices table
+      // Note: third_parties is the unified table for all customers and suppliers
+      // Use explicit FK relationship to avoid ambiguity
       let query = supabase
         .from('invoices')
         .select(`
           *,
-          customer:customers!customer_id(id, name, email, phone, address_line1, city, postal_code, country),
+          customer:third_parties!invoices_customer_id_fkey(id, name, email, phone, address_line1, city, postal_code, country),
           invoice_lines(id, description, quantity, unit_price, discount_percent, tax_rate, line_total, line_order)
         `)
         .eq('company_id', companyId)
@@ -181,7 +181,7 @@ class QuotesService {
         .from('invoices')
         .select(`
           *,
-          customer:customers!customer_id(id, name, email, phone, address_line1, city, postal_code, country),
+          customer:third_parties!invoices_customer_id_fkey(id, name, email, phone, address_line1, city, postal_code, country),
           invoice_lines(id, description, quantity, unit_price, discount_percent, tax_rate, line_total, line_order)
         `)
         .eq('id', id)

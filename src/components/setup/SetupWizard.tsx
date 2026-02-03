@@ -30,6 +30,7 @@ const LanguageSwitcher = ({ className = "" }) => {
         value={i18n.language} 
         onChange={(e) => handleLanguageChange(e.target.value)}
         className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800"
+        aria-label="Changer la langue"
       >
         <option value="fr">🇫🇷 Français</option>
         <option value="en">🇺🇸 English</option>
@@ -396,6 +397,7 @@ const UniversalSetupWizard = () => {
             <Label htmlFor="legalForm">{t('setup.company.legal_form')}</Label>
             <select
               id="legalForm"
+              aria-label={t('setup.company.legal_form')}
               value={config.legalForm || ''}
               onChange={(e) => setConfig(prev => ({ ...prev, legalForm: e.target.value }))}
               className="w-full mt-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -457,6 +459,7 @@ const UniversalSetupWizard = () => {
           <Label htmlFor="sector">{t('setup.company.sector_label')}</Label>
           <select
             id="sector"
+            aria-label={t('setup.company.sector_label')}
             value={config.sector || ''}
             onChange={(e) => setConfig(prev => ({ ...prev, sector: e.target.value }))}
             className="w-full mt-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"

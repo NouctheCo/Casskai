@@ -27,6 +27,7 @@ export { useHR } from './useHR';
 export { useHRPayroll } from './useHRPayroll';
 export { useCrm } from './useCrm';
 export { useCRMAnalytics } from './useCRMAnalytics';
+export { useIsSuperAdmin, useSuperAdminList } from './useSuperAdmin';
 
 // Types exports
 type _UseConfigReturn = any;

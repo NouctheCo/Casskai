@@ -542,7 +542,7 @@ export const Formatters = {
 
         maximumFractionDigits: 2
 
-      }).format(amount);
+      }).format(amount).replace(/\u00A0/g, ' '); // Remplacer espace insecable par espace normal
 
     } catch {
 
@@ -570,7 +570,7 @@ export const Formatters = {
 
         maximumFractionDigits: decimals
 
-      }).format(value);
+      }).format(value).replace(/\u00A0/g, ' '); // Remplacer espace insecable par espace normal
 
     } catch {
 

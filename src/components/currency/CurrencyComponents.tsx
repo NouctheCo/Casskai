@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useCurrency, useCurrencySelector } from '../hooks/useCurrency';
+import { useCurrency, useCurrencySelector } from '@/hooks/useCurrency';
 import { ArrowRightLeft, RefreshCw, TrendingUp, Calculator, AlertCircle } from 'lucide-react';
 import { logger } from '@/lib/logger';
 // Sélecteur de devise
@@ -27,14 +27,15 @@ export const CurrencySelector = ({
       <Label htmlFor="currency-select">{label}</Label>
       <select
         id="currency-select"
+        aria-label={label || 'Sélectionner une devise'}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-900/50"
       >
         {currencyOptions.map(option => (
-          <option key={option.code} value={option.code}>
-            {option.name} ({option.symbol})
+          <option key={option.value} value={option.value}>
+            {option.label} ({option.symbol})
           </option>
         ))}
       </select>
@@ -55,20 +56,33 @@ export const AmountDisplay = ({
   precision?: number;
   className?: string;
 }) => {
-  const { formatAmount, formatAmountWithConversion, baseCurrency } = useCurrency();
+  const { formatAmount, formatAmountWithConversion, currentCurrency } = useCurrency();
   const [convertedAmount, setConvertedAmount] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
-    if (showConverted && currency !== baseCurrency.code) {
-      setIsLoading(true);
-      const currencyObj: any = { code: currency, name: '', symbol: '' };
-      const converted = formatAmountWithConversion(amount, currencyObj);
-      setConvertedAmount(converted);
-      setIsLoading(false);
-    }
-  }, [amount, currency, showConverted, baseCurrency, formatAmountWithConversion]);
+    let isActive = true;
+    const run = async () => {
+      if (showConverted && currency !== currentCurrency) {
+        setIsLoading(true);
+        try {
+          const converted = await formatAmountWithConversion(amount, currency, currentCurrency);
+          if (isActive) {
+            setConvertedAmount(converted);
+          }
+        } finally {
+          if (isActive) {
+            setIsLoading(false);
+          }
+        }
+      }
+    };
+    run();
+    return () => {
+      isActive = false;
+    };
+  }, [amount, currency, showConverted, currentCurrency, formatAmountWithConversion]);
   const originalAmount = formatAmount(amount);
-  if (showConverted && currency !== baseCurrency.code) {
+  if (showConverted && currency !== currentCurrency) {
     return (
       <div className={className}>
         <span className="font-medium">{originalAmount}</span>
@@ -111,9 +125,9 @@ export const CurrencyConverter = () => {
     }
     try {
       setIsConverting(true);
-      const convertedAmount = await convertAmount(numAmount, fromCurrency, toCurrency);
-      setResult(convertedAmount.toString());
-      setRate(1);
+      const conversion = await convertAmount(numAmount, fromCurrency, toCurrency);
+      setResult(conversion.convertedAmount.toString());
+      setRate(conversion.rate);
     } catch (error) {
       logger.error('CurrencyComponents', '...', error);
       setResult('Erreur');

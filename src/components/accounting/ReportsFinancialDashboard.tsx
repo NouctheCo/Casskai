@@ -227,25 +227,40 @@ const ReportsFinancialDashboard: React.FC = () => {
             </h3>
           </div>
           {expensesByCategory && expensesByCategory.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={expensesByCategory}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {expensesByCategory.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: any) => formatCurrency(value)} />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="space-y-4">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={expensesByCategory}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {expensesByCategory.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: any) => formatCurrency(value)} />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Legend below the chart */}
+              <div className="grid grid-cols-2 gap-3 text-sm font-semibold text-gray-900 dark:text-white p-3 rounded-md bg-gray-50 dark:bg-gray-800">
+                {expensesByCategory.map((entry, index) => (
+                  <div key={index} className="flex items-start gap-2">
+                    <div
+                      className="mt-1 w-4 h-4 rounded-full flex-shrink-0 shadow-sm"
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <span className="break-words leading-snug">
+                      {entry.name || t('reports.dashboard.other', 'Autres')}: <span className="font-bold text-base">{((entry.value / expensesByCategory.reduce((sum, e) => sum + e.value, 0)) * 100).toFixed(0)}%</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
             <div className="h-[300px] flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
               <PieChartIcon className="h-12 w-12 mb-3 opacity-30" />

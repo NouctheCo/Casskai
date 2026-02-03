@@ -111,7 +111,7 @@ export const TrialExpirationNotice: React.FC<TrialExpirationNoticeProps> = ({
     if (dismissible) {
       setIsDismissed(true);
       // Stocker le dismiss dans localStorage pour éviter de réafficher trop souvent
-      const subscriptionId = trialInfo?.subscriptionId || subscription?.id || 'default';
+      const subscriptionId = (trialInfo as any)?.subscriptionId || subscription?.id || 'default';
       localStorage.setItem(`trial_notice_dismissed_${subscriptionId}`, Date.now().toString());
     }
   };
@@ -175,7 +175,7 @@ export const TrialExpirationNotice: React.FC<TrialExpirationNoticeProps> = ({
                       {urgencyLevel === 'critical' ? 'Essai se termine bientôt !' : 'Période d\'essai active'}
                     </h3>
                     <Badge variant="secondary" className="text-xs">
-                      {trialInfo?.planId || plan?.name || 'Essai gratuit'}
+                      {(trialInfo as any)?.planId || plan?.name || 'Essai gratuit'}
                     </Badge>
                   </div>
                   
@@ -214,7 +214,7 @@ export const TrialExpirationNotice: React.FC<TrialExpirationNoticeProps> = ({
                     <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
                       <Calendar className="w-3 h-3" />
                       <span>
-                        Expire le {trialInfo?.trialEnd?.toLocaleDateString('fr-FR') || subscription?.currentPeriodEnd?.toLocaleDateString('fr-FR')}
+                        Expire le {(trialInfo as any)?.trialEnd?.toLocaleDateString('fr-FR') || subscription?.currentPeriodEnd?.toLocaleDateString('fr-FR')}
                       </span>
                     </div>
                   </div>

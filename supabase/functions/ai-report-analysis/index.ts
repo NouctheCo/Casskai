@@ -9,7 +9,7 @@ import OpenAI from 'https://esm.sh/openai@4.20.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
 }
 
 interface AIAnalysisResult {
@@ -23,10 +23,11 @@ interface AIAnalysisResult {
 
 interface ReportAnalysisRequest {
   reportType: 'cashflow' | 'receivables' | 'payables' | 'ratios' | 'budget_variance' | 'inventory'
-  reportData: any
+  reportData?: any
   company_id: string
   periodStart?: string
   periodEnd?: string
+  prompt?: string
 }
 
 serve(async (req) => {
@@ -35,7 +36,7 @@ serve(async (req) => {
   }
 
   try {
-    const { reportType, reportData, company_id, periodStart, periodEnd }: ReportAnalysisRequest = await req.json()
+    const { reportType, reportData, company_id, periodStart, periodEnd, prompt }: ReportAnalysisRequest = await req.json()
 
     // Initialize services
     const supabaseClient = createClient(
@@ -75,8 +76,22 @@ serve(async (req) => {
       })
     }
 
-    // Build analysis prompt based on report type
-    const prompt = buildPromptForReportType(reportType, reportData, periodStart, periodEnd)
+    if (!company_id) {
+      return new Response(JSON.stringify({ error: 'company_id is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    // Build analysis prompt based on report type (or use provided prompt)
+    const finalPrompt = prompt ?? buildPromptForReportType(reportType, reportData, periodStart, periodEnd)
+
+    if (!finalPrompt) {
+      return new Response(JSON.stringify({ error: 'prompt or reportData is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
 
     // Call OpenAI
     const completion = await openai.chat.completions.create({
@@ -101,7 +116,7 @@ IMPORTANT: Réponds UNIQUEMENT au format JSON avec la structure suivante:
         },
         {
           role: 'user',
-          content: prompt
+          content: finalPrompt
         }
       ],
       temperature: 0.7,

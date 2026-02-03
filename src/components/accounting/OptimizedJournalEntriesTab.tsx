@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import AccountingRulesService from '@/services/accountingRulesService';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
@@ -7,18 +7,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
+import { useLocale } from '@/contexts/LocaleContext';
 import { journalEntriesService } from '@/services/journalEntriesService';
 import { journalEntryAttachmentService } from '@/services/journalEntryAttachmentService';
+import { aiDocumentAnalysisService } from '@/services/aiDocumentAnalysisService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useJournalEntries } from '@/hooks/useJournalEntries';
 import JournalEntryAttachments from '@/components/accounting/JournalEntryAttachments';
 import { WorkflowActions } from '@/components/accounting/WorkflowActions';
 import { logger } from '@/lib/logger';
 import { formatCurrency } from '@/lib/utils';
+import type { JournalEntryExtracted } from '@/types/ai-document.types';
 import {
   Plus,
   Search,
@@ -35,7 +39,8 @@ import {
   Copy,
   Paperclip,
   Upload,
-  Loader2
+  Loader2,
+  Sparkles
 } from 'lucide-react';
 interface EntryLine {
   account: string;
@@ -159,6 +164,7 @@ function EntryLineForm({ line, index, updateLine, removeLine, canRemove, account
           size="sm"
           onClick={() => removeLine(index)}
           disabled={!canRemove}
+          aria-label="Supprimer la ligne"
         >
           <Trash2 className="w-4 h-4" />
         </Button>
@@ -218,11 +224,17 @@ interface EntryFormDialogProps {
 }
 const EntryFormDialog: React.FC<EntryFormDialogProps> = ({ open, onClose, entry = null, onSave, accounts, companyId }) => {
   const { toast } = useToast();
+  const { t } = useLocale();
+  const { currentCompany } = useAuth();
   const { formData, setFormData } = useEntryFormState(entry);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploadFailures, setUploadFailures] = useState<File[]>([]);
   const [persistedEntryId, setPersistedEntryId] = useState<string | null>(null);
+  
+  // AI Analysis states
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<JournalEntryExtracted | null>(null);
   // ✅ Générer automatiquement une référence si elle n'existe pas
   const generateAutoReference = () => {
     const today = new Date();
@@ -249,6 +261,166 @@ const EntryFormDialog: React.FC<EntryFormDialogProps> = ({ open, onClose, entry 
     }
     // ✅ Pour l'édition, on ne fait RIEN ici - useEntryFormState gère déjà
   }, [open, entry?.id]); // Dépendance sur entry.id pour éviter re-render inutiles
+
+  const handleAIAnalysis = useCallback(async (file: File) => {
+    if (!currentCompany?.id) {
+      toast({
+        variant: 'destructive',
+        title: t('error'),
+        description: t('ai.no_company_selected', { defaultValue: 'Aucune entreprise sélectionnée' })
+      });
+      return;
+    }
+
+    setAiAnalyzing(true);
+    setAiSuggestion(null);
+
+    try {
+      // Appel du service d'analyse
+      const result = await aiDocumentAnalysisService.analyzeDocument(
+        file,
+        currentCompany.id,
+        'invoice'
+      );
+
+      if (!result.success || !result.data) {
+        toast({
+          variant: 'destructive',
+          title: t('ai.analysis_failed', { defaultValue: 'Analyse échouée' }),
+          description: result.error || t('ai.unable_to_analyze', { defaultValue: 'Impossible d\'analyser le document' })
+        });
+        return;
+      }
+
+      const extracted = result.data;
+      
+      // Valider et corriger les données
+      const validation = aiDocumentAnalysisService.validateExtractedEntry(extracted);
+      
+      // Utiliser la version corrigée (avec HT/TVA/TTC recalculés si nécessaire)
+      const finalExtracted = validation.corrected || extracted;
+      
+      if (validation.errors.length > 0) {
+        toast({
+          variant: 'destructive',
+          title: t('ai.incomplete_data', { defaultValue: 'Données incomplètes' }),
+          description: validation.errors[0]
+        });
+      }
+
+      if (validation.warnings.length > 0) {
+        toast({
+          title: t('ai.warnings', { defaultValue: 'Avertissements' }),
+          description: validation.warnings[0],
+          variant: 'default'
+        });
+      }
+
+      setAiSuggestion(finalExtracted);
+      
+      // ✅ PRÉ-REMPLIR LE FORMULAIRE avec les données extraites (corrigées)
+      if (finalExtracted.entry_date) {
+        setFormData(prev => ({ ...prev, date: finalExtracted.entry_date }));
+      }
+      
+      if (finalExtracted.description) {
+        setFormData(prev => ({ ...prev, description: finalExtracted.description }));
+      }
+      
+      if (finalExtracted.reference_number) {
+        setFormData(prev => ({ ...prev, reference: finalExtracted.reference_number }));
+      }
+      
+      // ✅ PRÉ-REMPLIR LES LIGNES D'ÉCRITURE (HT, TVA, TTC)
+      if (finalExtracted.lines && finalExtracted.lines.length > 0) {
+        // Utiliser les comptes déjà chargés dans le state
+        const newLines = finalExtracted.lines.map(line => {
+          // L'IA retourne account_class (ex: "411", "707", "44571")
+          // Chercher un compte dont le numéro commence par ce code
+          const accountClass = (line.account_class || '').trim();
+          const accountLabel = (line.account_suggestion || '').trim();
+          
+          // Logique de matching :
+          // 1. Chercher un compte qui commence par le code de classe
+          let matchingAccount = accounts.find(acc => 
+            acc.account_number?.startsWith(accountClass)
+          );
+          
+          // 2. Si pas trouvé, essayer de matcher sur les 3 premiers chiffres
+          if (!matchingAccount && accountClass.length >= 2) {
+            const prefix = accountClass.substring(0, 3);
+            matchingAccount = accounts.find(acc => 
+              acc.account_number?.startsWith(prefix)
+            );
+          }
+          
+          logger.info('[AI] Account matching', { 
+            class: accountClass, 
+            label: accountLabel,
+            found: !!matchingAccount,
+            accountNumber: matchingAccount?.account_number 
+          });
+          
+          return {
+            account: matchingAccount?.id || '', // ID du compte trouvé, vide si pas trouvé
+            description: line.description || accountLabel || '',
+            debit: String(Number(line.debit_amount) || 0),
+            credit: String(Number(line.credit_amount) || 0),
+            accountLabel: matchingAccount 
+              ? `${matchingAccount.account_number} - ${matchingAccount.account_name}`
+              : `[${accountClass}] ${accountLabel}` // Affiche le code et label si pas trouvé
+          };
+        });
+        
+        setFormData(prev => ({
+          ...prev,
+          lines: newLines
+        }));
+        
+        logger.info('[AI] Lines prefilled', { 
+          count: newLines.length, 
+          lines: newLines.map(l => ({ account: l.account, debit: l.debit, credit: l.credit }))
+        });
+      }
+      
+      // ✅ Ajouter automatiquement le fichier aux pièces jointes
+      setSelectedFiles(prev => {
+        // Vérifier si le fichier n'est pas déjà dans la liste
+        const isDuplicate = prev.some(f => 
+          f.name === file.name && 
+          f.size === file.size && 
+          f.lastModified === file.lastModified
+        );
+        if (isDuplicate) return prev;
+        return [...prev, file];
+      });
+      
+      logger.debug('AI Analysis result (corrected):', finalExtracted);
+      
+      toast({
+        title: t('ai.analysis_success', { defaultValue: '✨ Analyse réussie' }),
+        description: t('ai.form_prefilled', { defaultValue: 'Le formulaire a été pré-rempli avec les données extraites' }),
+        variant: 'default'
+      });
+      
+      toast({
+        title: t('ai.analysis_complete', { defaultValue: 'Analyse terminée' }),
+        description: t('ai.document_added_to_attachments', { 
+          defaultValue: 'Document ajouté aux pièces jointes et données extraites avec succès' 
+        })
+      });
+    } catch (error) {
+      logger.error('AI Analysis error:', error);
+      toast({
+        variant: 'destructive',
+        title: t('error'),
+        description: String(error)
+      });
+    } finally {
+      setAiAnalyzing(false);
+    }
+  }, [currentCompany?.id, t, toast, accounts, setFormData]);
+
   const addLine = () => {
     setFormData(prev => ({
       ...prev,
@@ -398,7 +570,7 @@ const EntryFormDialog: React.FC<EntryFormDialogProps> = ({ open, onClose, entry 
   };
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <FileText className="w-5 h-5 text-blue-500" />
@@ -436,6 +608,77 @@ const EntryFormDialog: React.FC<EntryFormDialogProps> = ({ open, onClose, entry 
               />
             </div>
           </div>
+
+          {/* AI Document Analysis Section */}
+          <div className="border-2 border-dashed border-primary/20 rounded-lg p-4 bg-primary/5">
+            <div className="flex items-center gap-3 mb-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h3 className="text-sm font-semibold text-primary">
+                {t('ai.automatic_analysis', { defaultValue: 'Analyse automatique par IA' })}
+              </h3>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              {t('ai.upload_document_instruction', { 
+                defaultValue: 'Uploadez une facture, reçu ou justificatif (PDF, JPG, PNG, WebP). Les PDFs sont automatiquement convertis en images pour l\'analyse.' 
+              })}
+            </p>
+            <label htmlFor="ai-upload" className="cursor-pointer">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={aiAnalyzing || !currentCompany}
+                className="w-full"
+                asChild
+              >
+                <div>
+                  {aiAnalyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {t('ai.analyzing', { defaultValue: 'Analyse en cours...' })}
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      {t('ai.choose_document', { defaultValue: 'Choisir un document (PDF, JPG, PNG, WebP)' })}
+                    </>
+                  )}
+                </div>
+              </Button>
+              <input
+                id="ai-upload"
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleAIAnalysis(file);
+                  e.target.value = ''; // Reset input
+                }}
+                disabled={aiAnalyzing || !currentCompany}
+              />
+            </label>
+
+            {aiSuggestion && (
+              <Alert className="mt-3 bg-primary/10 border-primary/20">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <AlertDescription className="text-xs">
+                  <strong>{t('ai.extracted_data', { defaultValue: 'Données extraites du document' })} :</strong><br />
+                  • {aiSuggestion.raw_extraction.supplier_name || aiSuggestion.raw_extraction.customer_name || t('ai.unknown_party', { defaultValue: 'Tiers inconnu' })}<br />
+                  {aiSuggestion.raw_extraction.invoice_number && (
+                    <>• {t('ai.invoice', { defaultValue: 'Facture' })} {aiSuggestion.raw_extraction.invoice_number}<br /></>
+                  )}
+                  {aiSuggestion.raw_extraction.total_ttc && (
+                    <>• {t('ai.amount_incl_tax', { defaultValue: 'Montant TTC' })} : {aiSuggestion.raw_extraction.total_ttc}€<br /></>
+                  )}
+                  <span className="text-primary font-medium">
+                    {t('ai.confidence', { defaultValue: 'Confiance' })} : {aiSuggestion.confidence_score}%
+                  </span>
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+
           {/* Entry Lines */}
           <Card>
             <CardHeader>
@@ -674,7 +917,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
   };
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-3">
             <FileText className="w-5 h-5 text-blue-500" />

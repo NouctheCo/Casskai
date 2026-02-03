@@ -427,7 +427,7 @@ export abstract class BaseFiscalService {
       currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    }).format(amount);
+    }).format(amount).replace(/\u00A0/g, ' '); // Remplacer espace insecable
   }
 
   /**

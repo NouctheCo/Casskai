@@ -502,13 +502,15 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
 
                   <div>
 
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label htmlFor="sample-transaction-count" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 
                       Nombre d'écritures comptables (max: 100)
 
                     </label>
 
                     <input
+
+                      id="sample-transaction-count"
 
                       type="number"
 
@@ -546,13 +548,15 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
 
                     <div>
 
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label htmlFor="sample-start-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 
                         Date de début
 
                       </label>
 
                       <input
+
+                        id="sample-start-date"
 
                         type="date"
 
@@ -574,13 +578,15 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
 
                     <div>
 
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label htmlFor="sample-end-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 
                         Date de fin
 
                       </label>
 
                       <input
+
+                        id="sample-end-date"
 
                         type="date"
 

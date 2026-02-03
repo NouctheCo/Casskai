@@ -56,7 +56,7 @@ export function Header({
 
   isMobile = false, 
 
-  isDesktopSidebarCollapsed = false 
+  isDesktopSidebarCollapsed: _isDesktopSidebarCollapsed = false 
 
 }: HeaderProps) {
 
@@ -86,27 +86,19 @@ export function Header({
 
   return (
 
-    <motion.header 
+    <motion.header
 
       className={cn(
 
-        "main-header bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 fixed top-0 z-40 shadow-sm transition-all duration-300 ease-in-out",
+        "main-header bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/20 border border-white/50 dark:border-gray-700/50 z-40 transition-all duration-300 ease-in-out",
 
-        isMobile 
-
-          ? "left-0 right-0 w-full" 
-
-          : isDesktopSidebarCollapsed 
-
-            ? "left-16 right-0" 
-
-            : "left-64 right-0"
+        "w-full"
 
       )}
 
-      initial={{ y: -100 }}
+      initial={{ y: -20, opacity: 0 }}
 
-      animate={{ y: 0 }}
+      animate={{ y: 0, opacity: 1 }}
 
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
 

@@ -296,6 +296,7 @@ export function AccountingNavigation({
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                  aria-label="Fermer le menu"
                 >
                   <X className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                 </button>

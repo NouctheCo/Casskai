@@ -189,7 +189,7 @@ export class AccountingStandardAdapter {
         .from('companies')
         .select('country, accounting_standard')
         .eq('id', companyId)
-        .single();
+        .maybeSingle();
       if (error || !company) {
         logger.warn('AccountingStandardAdapter', `Cannot fetch company ${companyId}, using default PCG`, error);
         return 'PCG';

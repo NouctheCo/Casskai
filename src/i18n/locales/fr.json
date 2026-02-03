@@ -128,6 +128,8 @@
     "journalDistribution": {
       "title": "Répartition par journal",
       "noData": "Aucune donnée disponible",
+      "noDataForPeriod": "Aucune écriture pour cette période",
+      "changePeriodHint": "Essayez de modifier la période sélectionnée ou créez de nouvelles écritures comptables.",
       "entries": "Écritures",
       "totalJournals": "Total journaux",
       "totalEntries": "Total écritures"
@@ -166,6 +168,95 @@
       "success": "Export réussi",
       "error": "Erreur lors de l'export",
       "no_entries": "Aucune écriture trouvée pour la période"
+    },
+    "closure": {
+      "title": "Clôture comptable",
+      "subtitle": "Gérez vos périodes comptables et effectuez les clôtures d'exercice",
+      "refresh": "Actualiser",
+      "newPeriod": "Nouvelle période",
+      "loading": "Chargement des périodes...",
+      "createTitle": "Créer une période comptable",
+      "createDescription": "Définissez une nouvelle période pour votre exercice comptable",
+      "periodNameLabel": "Nom de la période",
+      "periodNamePlaceholder": "Ex: Exercice 2025",
+      "startDateLabel": "Date de début",
+      "endDateLabel": "Date de fin",
+      "cancel": "Annuler",
+      "createPeriodCta": "Créer la période",
+      "periodsTitle": "Périodes comptables",
+      "periodsCount": "{{count}} période(s) enregistrée(s)",
+      "noPeriodsTitle": "Aucune période comptable définie",
+      "noPeriodsDescription": "Créez votre première période pour commencer",
+      "table": {
+        "period": "Période",
+        "startDate": "Date début",
+        "endDate": "Date fin",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "status": {
+        "closed": "Clôturée",
+        "open": "Ouverte"
+      },
+      "tooltips": {
+        "validate": "Valider pour clôture",
+        "generateAN": "Générer les à-nouveaux",
+        "reopen": "Réouvrir la période"
+      },
+      "validationTitle": "Validation de clôture: {{periodName}}",
+      "validationRange": "Du {{start}} au {{end}}",
+      "validationState": "État de la validation",
+      "balanceCheck": "Équilibre comptable",
+      "totalDebit": "Total débit",
+      "totalCredit": "Total crédit",
+      "draftEntries": "Écritures en brouillon",
+      "unletteredEntries": "Lignes tiers non lettrées",
+      "periodResultTitle": "Résultat de l'exercice",
+      "profit": "Bénéfice",
+      "loss": "Perte",
+      "profitLower": "bénéfice",
+      "lossLower": "perte",
+      "chargesLabel": "Charges (cl. 6)",
+      "productsLabel": "Produits (cl. 7)",
+      "blockingErrors": "Erreurs bloquantes",
+      "warnings": "Avertissements",
+      "actionsTitle": "Actions de clôture",
+      "actions": {
+        "items": {
+          "balanceAccounts": "Solde des comptes de charges (classe 6) et de produits (classe 7)",
+          "assignResult": "Affectation du résultat au compte {{account}}",
+          "lockPeriod": "Verrouillage de la période (aucune modification ultérieure)",
+          "generateOpening": "Possibilité de générer les écritures à-nouveaux pour la période suivante"
+        }
+      },
+      "closePeriod": "Clôturer la période",
+      "confirmTitle": "Confirmer la clôture",
+      "confirmDescription": "Êtes-vous sûr de vouloir clôturer la période {{periodName}} ?",
+      "confirmIntro": "Cette action va :",
+      "confirmItems": {
+        "closingEntries": "Générer les écritures de clôture des comptes de résultat",
+        "assignResult": "Affecter le résultat ({{resultType}} de {{amount}})",
+        "lockPeriod": "Verrouiller la période contre toute modification"
+      },
+      "confirmCta": "Confirmer la clôture",
+      "reopenTitle": "Réouverture de période",
+      "reopenDescription": "La réouverture d'une période clôturée est une action exceptionnelle qui doit être justifiée.",
+      "reopenPeriodLabel": "Période concernée",
+      "reopenReasonLabel": "Motif de réouverture *",
+      "reopenReasonPlaceholder": "Ex: Correction d'une erreur de saisie...",
+      "reopenAuditNote": "⚠️ Cette action sera tracée dans les logs d'audit",
+      "reopenCta": "Réouvrir la période",
+      "errors": {
+        "fillAllFields": "Veuillez remplir tous les champs",
+        "create": "Erreur lors de la création",
+        "loadPeriods": "Erreur lors du chargement des périodes",
+        "validation": "Erreur lors de la validation",
+        "close": "Erreur lors de la clôture",
+        "generateAN": "Erreur lors de la génération des à-nouveaux",
+        "reopenReasonRequired": "Veuillez indiquer la raison de la réouverture",
+        "reopen": "Erreur lors de la réouverture",
+        "closedPeriodOperation": "Action impossible : la période comptable est clôturée. Réouvrez la période pour modifier ou saisir des écritures."
+      }
     },
     "tabs": {
       "overview": "Vue d'ensemble",
@@ -700,7 +791,40 @@
     "lastNamePlaceholder": "Votre nom",
     "register": "S'inscrire",
     "sending": "Envoi...",
-    "sendResetEmail": "Envoyer l'email de réinitialisation"
+    "sendResetEmail": "Envoyer l'email de réinitialisation",
+    "emailVerification": {
+      "instruction": "Un email de confirmation a été envoyé. Cliquez sur le lien pour vérifier votre email."
+    },
+    "tabs": {
+      "login": "Connexion",
+      "signup": "Inscription"
+    },
+    "fields": {
+      "email": "Adresse email",
+      "password": "Mot de passe"
+    },
+    "buttons": {
+      "signin": "Se connecter",
+      "signup": "S'inscrire"
+    },
+    "links": {
+      "forgot_password": "Mot de passe oublié ?"
+    },
+    "signup": {
+      "prompt": "Pas encore de compte ?",
+      "link": "Créer un compte",
+      "check_email": "Vérifiez votre email pour confirmer votre inscription",
+      "error": "Erreur lors de l'inscription"
+    },
+    "signin": {
+      "success": "Connexion réussie !",
+      "error": "Erreur lors de la connexion"
+    },
+    "verify": {
+      "pending_title": "Email non vérifié",
+      "pending_description": "Veuillez vérifier votre email avant de continuer. Un email de confirmation a été envoyé.",
+      "go_to_verification": "Aller à la vérification"
+    }
   },
   "backupAndExport": "Sauvegarde et Export",
   "backupData": "Sauvegarder données",
@@ -768,6 +892,7 @@
       "saving": "Enregistrement...",
       "loading": "Chargement..."
     },
+    "clear": "Effacer",
     "back": "Retour",
     "backToDashboard": "Retour au tableau de bord",
     "beta": "Bêta",
@@ -816,7 +941,82 @@
     "underDevelopmentMessage": "Ce module est actuellement en cours de développement. Il sera bientôt disponible.",
     "update": "Mettre à jour",
     "view": "Voir",
-    "year": "Année"
+    "year": "Année",
+    "optional": "(optionnel)"
+  },
+  "projects": {
+    "resourceModal": {
+      "title": "Allouer une ressource",
+      "description": "Assigner un utilisateur à un projet avec un taux d'allocation",
+      "project": "Projet",
+      "projectPlaceholder": "Sélectionner un projet",
+      "user": "Utilisateur",
+      "userPlaceholder": "Sélectionner un utilisateur",
+      "role": "Rôle",
+      "rolePlaceholder": "Ex: Développeur, Chef de projet",
+      "allocation": "Allocation (%)",
+      "hourlyRate": "Taux horaire",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "allocate": "Allouer la ressource",
+      "errorProject": "Le projet est requis",
+      "errorUser": "L'utilisateur est requis",
+      "errorAllocation": "L'allocation doit être entre 1 et 100%",
+      "errorStartDate": "La date de début est requise",
+      "errorDuplicate": "Cette ressource est déjà allouée à ce projet",
+      "errorCreating": "Erreur lors de l'allocation de la ressource"
+    },
+    "timesheetModal": {
+      "title": "Nouvelle entrée de temps",
+      "description": "Enregistrer une entrée de temps pour un projet",
+      "project": "Projet",
+      "projectPlaceholder": "Sélectionner un projet",
+      "task": "Tâche",
+      "taskPlaceholder": "Sélectionner une tâche",
+      "loadingTasks": "Chargement des tâches...",
+      "selectProjectFirst": "Sélectionner d'abord un projet",
+      "noTask": "Aucune tâche",
+      "date": "Date",
+      "hours": "Heures",
+      "hoursPlaceholder": "8.0",
+      "description": "Description",
+      "descriptionPlaceholder": "Description du travail effectué",
+      "billable": "Temps facturable",
+      "hourlyRate": "Taux horaire",
+      "hourlyRatePlaceholder": "50.00",
+      "totalAmount": "Montant total",
+      "status": "Statut",
+      "statusDraft": "Brouillon",
+      "statusSubmitted": "Soumettre pour approbation",
+      "create": "Créer l'entrée",
+      "errorProject": "Le projet est requis",
+      "errorDate": "La date est requise",
+      "errorHours": "Les heures doivent être supérieures à 0",
+      "errorRate": "Le taux horaire est requis pour les heures facturables",
+      "errorCreating": "Erreur lors de la création de l'entrée de temps"
+    },
+    "clientModal": {
+      "title": "Nouveau client",
+      "description": "Créer un nouveau client pour le projet",
+      "companyName": "Nom de l'entreprise",
+      "companyNamePlaceholder": "Ex: Entreprise ABC",
+      "industry": "Secteur d'activité",
+      "industryPlaceholder": "Ex: Technologie, Commerce, etc.",
+      "address": "Adresse",
+      "addressPlaceholder": "123 Rue de la Paix",
+      "city": "Ville",
+      "cityPlaceholder": "Paris",
+      "postalCode": "Code postal",
+      "postalCodePlaceholder": "75001",
+      "website": "Site web",
+      "websitePlaceholder": "https://example.com",
+      "notes": "Notes",
+      "notesPlaceholder": "Informations complémentaires",
+      "create": "Créer le client",
+      "errorCompanyName": "Le nom de l'entreprise est requis",
+      "errorCreating": "Erreur lors de la création du client"
+    },
+    "invoiceCreated": "Facture créée avec succès"
   },
   "company": {
     "fields": {
@@ -2734,7 +2934,10 @@
     "uploaded_at": "Téléchargé le",
     "confirm_delete": "Êtes-vous sûr de vouloir supprimer cette pièce jointe ?",
     "max_file_size": "Taille maximale: 50 MB",
-    "allowed_formats": "Formats acceptés: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, WebP, TXT"
+    "allowed_formats": "Formats acceptés: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, WebP, TXT",
+    "period_closed_title": "Période clôturée",
+    "period_closed_error": "Impossible de créer une écriture sur une période clôturée. Veuillez réouvrir la période ou choisir une autre date.",
+    "period_validation_error": "Erreur de validation de période"
   },
   "journalEntryDeletedSuccess": "Écriture supprimée avec succès",
   "journals": {
@@ -3667,7 +3870,6 @@
       }
     }
   },
-  "projects": "Projets",
   "billingPage": {
     "title": "Facturation & Abonnements",
     "subtitle": "Gérez votre abonnement, vos paiements et vos factures",
@@ -3795,6 +3997,38 @@
       "invoiceOpening": "Ouverture de la facture dans un nouvel onglet...",
       "viewError": "Erreur lors de l'ouverture de la facture"
     }
+  },
+  "paymentConfirmation": {
+    "processingTitle": "Traitement du paiement",
+    "processingDescription": "Veuillez patienter, nous confirmons votre paiement...",
+    "successTitle": "Paiement confirmé ✅",
+    "successSubtitle": "Votre souscription est active",
+    "planLabel": "Plan",
+    "amountLabel": "Montant",
+    "nextBillingLabel": "Prochaine facturation",
+    "confirmationEmail": "Un email de confirmation a été envoyé",
+    "accessGranted": "Accès à tous les outils débloqué",
+    "billingPortal": "Gérez votre facturation depuis le portail",
+    "goToBilling": "Voir ma facturation",
+    "sessionIdLabel": "ID de session",
+    "redirectingIn5": "Redirection automatique dans 5 secondes...",
+    "pendingTitle": "Paiement en attente",
+    "pendingDescription": "Votre paiement est en cours de traitement.",
+    "dontCloseTab": "Ne fermez pas cet onglet pendant la vérification.",
+    "errorTitle": "Paiement refusé",
+    "errorDescription": "Le paiement n'a pas pu être traité.",
+    "errorSuggestions": "Suggestions",
+    "checkCard": "Vérifiez les informations de votre carte",
+    "sufficientFunds": "Assurez-vous que vous avez des fonds suffisants",
+    "contactSupport": "Contactez notre support",
+    "tryAgain": "Réessayer",
+    "needHelp": "Besoin d'aide ?",
+    "cancelled": "Paiement annulé",
+    "invalidSession": "Session de paiement invalide",
+    "processing": "Traitement du paiement en cours...",
+    "pendingPayment": "Paiement en attente",
+    "checking": "Vérification du statut...",
+    "error": "Erreur lors de la vérification du paiement"
   },
   "projectspage": {
     "title": "Gestion des Projets",
@@ -5843,5 +6077,40 @@
     "errorDeletingDocument": "Erreur lors de la suppression du document",
     "errorExportingDocument": "Erreur lors de l'export du document",
     "submissionError": "Erreur lors de la soumission du formulaire"
+  },
+  "ai": {
+    "automatic_analysis": "Analyse automatique par IA",
+    "upload_document_instruction": "Uploadez une facture ou un reçu pour pré-remplir automatiquement l'écriture comptable.",
+    "analyzing": "Analyse en cours...",
+    "choose_document": "Choisir un document (PDF, JPG, PNG)",
+    "extracted_data": "Données extraites du document",
+    "unknown_party": "Tiers inconnu",
+    "invoice": "Facture",
+    "amount_incl_tax": "Montant TTC",
+    "confidence": "Confiance",
+    "analysis_failed": "Analyse échouée",
+    "unable_to_analyze": "Impossible d'analyser le document",
+    "incomplete_data": "Données incomplètes",
+    "warnings": "Avertissements",
+    "mapping_failed": "Échec du mapping",
+    "unable_to_map_accounts": "Impossible de mapper les comptes comptables",
+    "analysis_success": "✨ Analyse réussie",
+    "entry_prefilled": "Écriture pré-remplie avec {score}% de confiance",
+    "unexpected_error": "Une erreur est survenue lors de l'analyse",
+    "no_company_selected": "Aucune entreprise sélectionnée",
+    "categorization_in_progress": "Catégorisation IA en cours...",
+    "categorization_complete": "Catégorisation IA terminée",
+    "suggested_category": "Catégorie suggérée",
+    "suggested_account": "Compte suggéré",
+    "low_confidence_warning": "⚠️ Confiance faible - Vérification recommandée",
+    "medium_confidence_warning": "Confiance moyenne - Veuillez vérifier",
+    "high_confidence": "Haute confiance",
+    "ai_assistant": "Assistant IA CassKai",
+    "ask_question": "Posez une question...",
+    "thinking": "Réflexion en cours...",
+    "no_conversations": "Aucune conversation",
+    "new_conversation": "Nouvelle conversation",
+    "context_enriched": "Contexte enrichi avec données entreprise",
+    "personalized_suggestions": "Suggestions personnalisées"
   }
 }

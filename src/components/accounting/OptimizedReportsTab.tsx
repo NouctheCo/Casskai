@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/useToast';
+import { toastError, toastSuccess, toastWarning } from '@/lib/toast-helpers';
 import {
   TrendingUp,
   Download,
@@ -34,6 +34,7 @@ import type { FinancialReport, ReportFormData } from '@/types/reports.types';
 import { useAuth } from '@/contexts/AuthContext';
 import { dashboardStatsService, type DashboardStats } from '@/services/dashboardStatsService';
 import ReportsFinancialDashboard from './ReportsFinancialDashboard';
+import { ScheduleReportModal } from '@/components/reports/ScheduleReportModal';
 // Type union strict pour les types de rapports
 type ReportType =
   | 'balance_sheet'
@@ -70,13 +71,13 @@ const isReportAvailable = (reportType: string): boolean => {
   return AVAILABLE_REPORTS.includes(reportType as ReportType);
 };
 export default function OptimizedReportsTab() {
-  const { showToast } = useToast();
   const { currentCompany } = useAuth();
-  const [selectedPeriod, setSelectedPeriod] = useState('current-month');
+  const [selectedPeriod, setSelectedPeriod] = useState('current-year');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   const [selectedReportType, setSelectedReportType] = useState('all_types');
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
+  const [lastGenerationMessage, setLastGenerationMessage] = useState<string | null>(null);
   const [recentReports, setRecentReports] = useState<FinancialReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   // États pour les actions view/download
@@ -278,9 +279,13 @@ export default function OptimizedReportsTab() {
   };
   // Génération automatique d'un rapport financier
   const handleGenerateReport = async (reportType: string, reportName: string) => {
+    logger.debug('OptimizedReportsTab', '🎯 handleGenerateReport appelé:', { reportType, reportName });
     setIsGenerating(reportType);
+    setLastGenerationMessage(null);
     try {
       const periodDates = getPeriodDates(selectedPeriod);
+      logger.debug('OptimizedReportsTab', '📅 Period dates calculées:', periodDates);
+      
       const reportData: ReportFormData = {
         name: `${reportName} - ${selectedPeriod}`,
         type: reportType as ReportType,
@@ -290,16 +295,20 @@ export default function OptimizedReportsTab() {
         file_format: 'pdf',
         currency: currentCompany?.default_currency || getCurrentCompanyCurrency()
       };
+      logger.debug('OptimizedReportsTab', '📋 Report data:', reportData);
+      
       // Génération du rapport avec notre service
       if (!currentCompany?.id) {
         throw new Error('Aucune entreprise sélectionnée');
       }
       const filters = {
         companyId: currentCompany.id,
-        dateFrom: reportData.period_start,
-        dateTo: reportData.period_end,
+        startDate: reportData.period_start,
+        endDate: reportData.period_end,
         currency: reportData.currency
       };
+      logger.debug('OptimizedReportsTab', '🔧 Filters:', filters);
+      
       const exportOptions = {
         format: reportData.file_format as 'pdf' | 'excel' | 'csv',
         title: reportData.name,
@@ -310,19 +319,31 @@ export default function OptimizedReportsTab() {
           email: currentCompany.email || undefined
         }
       };
+      logger.debug('OptimizedReportsTab', '📤 Export options:', exportOptions);
+      
       let downloadUrl: string;
+      logger.debug('OptimizedReportsTab', `🔄 Calling generate${reportType.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')}...`);
+      
       switch (reportData.type) {
         case 'balance_sheet':
+          logger.debug('OptimizedReportsTab', '⚙️ Generating balance sheet...');
           downloadUrl = await reportGenerationService.generateBalanceSheet(filters, exportOptions);
+          logger.debug('OptimizedReportsTab', '✅ Balance sheet generated:', downloadUrl);
           break;
         case 'income_statement':
+          logger.debug('OptimizedReportsTab', '⚙️ Generating income statement...');
           downloadUrl = await reportGenerationService.generateIncomeStatement(filters, exportOptions);
+          logger.debug('OptimizedReportsTab', '✅ Income statement generated:', downloadUrl);
           break;
         case 'trial_balance':
+          logger.debug('OptimizedReportsTab', '⚙️ Generating trial balance...');
           downloadUrl = await reportGenerationService.generateTrialBalance(filters, exportOptions);
+          logger.debug('OptimizedReportsTab', '✅ Trial balance generated:', downloadUrl);
           break;
         case 'general_ledger':
+          logger.debug('OptimizedReportsTab', '⚙️ Generating general ledger...');
           downloadUrl = await reportGenerationService.generateGeneralLedger(filters, exportOptions);
+          logger.debug('OptimizedReportsTab', '✅ General ledger generated:', downloadUrl);
           break;
         case 'cash_flow':
           downloadUrl = await reportGenerationService.generateCashFlow(filters, exportOptions);
@@ -354,21 +375,34 @@ export default function OptimizedReportsTab() {
         default:
           throw new Error('Type de rapport non supporté');
       }
+      logger.debug('OptimizedReportsTab', '📥 Download URL:', downloadUrl);
+      
       // Auto-download the generated report
       if (downloadUrl) {
+        logger.debug('OptimizedReportsTab', '💾 Triggering download...');
         const link = document.createElement('a');
         link.href = downloadUrl;
         link.download = `${reportData.name}.${reportData.file_format}`;
         link.click();
+        logger.debug('OptimizedReportsTab', '✅ Download triggered');
       }
-      showToast(`Rapport "${reportName}" généré avec succès et disponible au téléchargement.`, 'success');
+      const successMessage = `Rapport généré avec succès (${reportName}).`;
+      toastSuccess(successMessage);
+      setLastGenerationMessage(successMessage);
+      logger.debug('OptimizedReportsTab', '🎉 Success toast shown');
+      
       // Actualiser la liste des rapports récents
       loadRecentReports();
-      } catch (error) {
-      logger.error('OptimizedReportsTab', 'Erreur génération rapport:', error);
+    } catch (error) {
+      logger.error('OptimizedReportsTab', '❌ Erreur génération rapport:', {
+        error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       const errorMessage = error instanceof Error ? error.message : "Impossible de générer le rapport. Veuillez réessayer.";
-      showToast(errorMessage, 'error');
+      toastError(errorMessage);
     } finally {
+      logger.debug('OptimizedReportsTab', '🏁 Cleaning up...');
       setIsGenerating(null);
     }
   };
@@ -488,7 +522,7 @@ export default function OptimizedReportsTab() {
           email: currentCompany.email || undefined
         }
       };
-      let downloadUrl: string;
+      let downloadUrl: string | null = null;
       switch (reportType) {
         case 'balance_sheet':
           downloadUrl = await reportGenerationService.generateBalanceSheet(filters, exportOptions);
@@ -530,18 +564,18 @@ export default function OptimizedReportsTab() {
           downloadUrl = await reportGenerationService.generateInventoryValuation(filters, exportOptions);
           break;
         default:
-          showToast(`Le rapport "${reportName}" n'est pas encore disponible.`, 'warning');
+          toastWarning(`Le rapport "${reportName}" n'est pas encore disponible.`);
           return;
       }
       // Ouvrir dans un nouvel onglet
       if (downloadUrl) {
         window.open(downloadUrl, '_blank');
-        showToast(`Rapport "${reportName}" ouvert avec succès.`, 'success');
+        toastSuccess(`Rapport "${reportName}" ouvert avec succès.`);
       }
     } catch (error) {
       logger.error('OptimizedReportsTab', 'Erreur ouverture rapport:', error);
       const errorMessage = error instanceof Error ? error.message : "Impossible d'ouvrir le rapport. Veuillez réessayer.";
-      showToast(errorMessage, 'error');
+      toastError(errorMessage);
     } finally {
       setViewingReport(null);
     }
@@ -559,7 +593,8 @@ export default function OptimizedReportsTab() {
       const filters = {
         companyId: currentCompany.id,
         startDate: periodDates.start,
-        endDate: periodDates.end
+        endDate: periodDates.end,
+        currency: currentCompany?.default_currency || getCurrentCompanyCurrency()
       };
       const exportOptions = {
         format: 'pdf' as const,
@@ -613,7 +648,7 @@ export default function OptimizedReportsTab() {
           downloadUrl = await reportGenerationService.generateInventoryValuation(filters, exportOptions);
           break;
         default:
-          showToast(`Le rapport "${reportName}" n'est pas encore disponible.`, 'warning');
+          toastWarning(`Le rapport "${reportName}" n'est pas encore disponible.`);
           return;
       }
       // Télécharger le fichier
@@ -622,12 +657,12 @@ export default function OptimizedReportsTab() {
         link.href = downloadUrl;
         link.download = `${reportName}-${selectedPeriod}.pdf`;
         link.click();
-        showToast(`Rapport "${reportName}" téléchargé avec succès.`, 'success');
+        toastSuccess(`Rapport "${reportName}" téléchargé avec succès.`);
       }
     } catch (error) {
       logger.error('OptimizedReportsTab', 'Erreur téléchargement rapport:', error);
       const errorMessage = error instanceof Error ? error.message : 'Impossible de télécharger le rapport. Veuillez réessayer.';
-      showToast(errorMessage, 'error');
+      toastError(errorMessage);
     } finally {
       setDownloadingReport(null);
     }
@@ -684,35 +719,14 @@ export default function OptimizedReportsTab() {
           Programmer un rapport
         </Button>
       </div>
-      {/* Dashboard Graphique Financier */}
-      <ReportsFinancialDashboard />
-      {/* Statistiques rapides */}
-      <div className="grid gap-4 md:grid-cols-4">
-        {quickStats.map((stat, index) => (
-          <Card key={index} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    {stat.label}
-                  </p>
-                  <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                    stat.trend > 0
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                      : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                  }`}>
-                    <span>{stat.trend > 0 ? '+' : ''}{stat.trend}%</span>
-                  </div>
-                </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {stat.isPercentage ? `${stat.value}%` : <CurrencyAmount amount={stat.value} />}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      {/* Filtres et sélecteurs */}
+
+      {lastGenerationMessage && (
+        <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+          {lastGenerationMessage}
+        </div>
+      )}
+
+      {/* Filtres et sélecteurs - AVANT les statistiques */}
       <Card>
         <CardContent className="p-6">
           <div className="grid gap-4 md:grid-cols-3">
@@ -803,6 +817,36 @@ export default function OptimizedReportsTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dashboard Graphique Financier */}
+      <ReportsFinancialDashboard />
+
+      {/* Statistiques rapides */}
+      <div className="grid gap-4 md:grid-cols-4">
+        {quickStats.map((stat, index) => (
+          <Card key={index} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    {stat.label}
+                  </p>
+                  <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
+                    stat.trend > 0
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                  }`}>
+                    <span>{stat.trend > 0 ? '+' : ''}{stat.trend}%</span>
+                  </div>
+                </div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {stat.isPercentage ? `${stat.value}%` : <CurrencyAmount amount={stat.value} />}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
       {/* Grille des rapports professionnels */}
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {filteredReports.map((report) => (
@@ -1031,31 +1075,15 @@ export default function OptimizedReportsTab() {
         </DialogContent>
       </Dialog>
       {/* Modal de programmation de rapport */}
-      <Dialog open={showScheduleModal} onOpenChange={setShowScheduleModal}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-500" />
-              Programmer un rapport
-            </DialogTitle>
-            <DialogDescription>
-              Fonctionnalité en développement - Programmation automatique de rapports périodiques
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="text-center text-gray-500 dark:text-gray-400">
-              <Clock className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-              <p>Cette fonctionnalité sera bientôt disponible.</p>
-              <p className="text-sm mt-2">Vous pourrez programmer la génération automatique de vos rapports.</p>
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={() => setShowScheduleModal(false)}>
-              Fermer
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ScheduleReportModal
+        open={showScheduleModal}
+        onOpenChange={setShowScheduleModal}
+        onSchedule={(config) => {
+          logger.debug('OptimizedReportsTab', '📅 Report scheduled:', config);
+          toastSuccess('Rapport programmé avec succès');
+          setShowScheduleModal(false);
+        }}
+      />
     </div>
   );
 }

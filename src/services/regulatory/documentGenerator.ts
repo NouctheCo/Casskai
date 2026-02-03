@@ -135,7 +135,7 @@ async function fetchAccountingData(
   logger.debug('DocumentGenerator', '🔵 Fetching accounting data for period:', { companyId, fiscalYear, fiscalPeriod, startDate, endDate });
   // Récupérer les écritures comptables - IMPORTANT: requête depuis journal_entries
   // Inclure les statuts 'posted', 'validated' ET 'imported' (pour les imports FEC)
-  // Note: account_name n'existe PAS dans journal_entry_lines, uniquement account_number
+  // Note: account_name existe bien dans journal_entry_lines (ajouté automatiquement lors de l'insertion)
   const { data: entries, error } = await supabase
     .from('journal_entries')
     .select(`
@@ -143,6 +143,7 @@ async function fetchAccountingData(
       status,
       journal_entry_lines (
         account_number,
+        account_name,
         debit_amount,
         credit_amount
       )

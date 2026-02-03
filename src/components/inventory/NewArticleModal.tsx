@@ -28,6 +28,7 @@ import warehousesService, { type Warehouse } from '@/services/warehousesService'
 import { ChartOfAccountsService } from '@/services/chartOfAccountsService';
 import { useToast } from '@/hooks/useToast';
 import { logger } from '@/lib/logger';
+import { buildVatRateOptions, getDefaultVatRate, resolveCompanyCountryCode } from '@/utils/vatRateUtils';
 
 export interface NewArticleModalProps {
   isOpen: boolean;
@@ -126,8 +127,6 @@ const UNIT_LABELS: Record<string, string> = {
   'forfait': 'Forfait'
 };
 
-const TVA_RATES = ['0', '5.5', '10', '20'];
-
 const NewArticleModal: React.FC<NewArticleModalProps> = ({
   isOpen,
   onClose,
@@ -136,7 +135,22 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
   const { showToast } = useToast();
-  const [formData, setFormData] = useState<ArticleFormData>(INITIAL_FORM_DATA);
+  const countryCode = useMemo(
+    () => resolveCompanyCountryCode({ currentCompany }),
+    [currentCompany]
+  );
+  const vatRateOptions = useMemo(
+    () => buildVatRateOptions(countryCode),
+    [countryCode]
+  );
+  const defaultVatRate = useMemo(
+    () => getDefaultVatRate(countryCode),
+    [countryCode]
+  );
+  const [formData, setFormData] = useState<ArticleFormData>({
+    ...INITIAL_FORM_DATA,
+    tva_rate: defaultVatRate.toString()
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showNewSupplierForm, setShowNewSupplierForm] = useState(false);
@@ -155,6 +169,15 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
   const unitOptions = useMemo(() =>
     UNITS.map(u => ({ value: u, label: getUnitLabel(u) }))
   , []);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(prev => ({
+        ...prev,
+        tva_rate: prev.tva_rate || defaultVatRate.toString()
+      }));
+    }
+  }, [isOpen, defaultVatRate]);
 
   // Charger les données quand le modal s'ouvre
   useEffect(() => {
@@ -316,7 +339,10 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
 
       const article = await articlesService.createArticle(currentCompany.id, articleInput);
 
-      setFormData(INITIAL_FORM_DATA);
+      setFormData({
+        ...INITIAL_FORM_DATA,
+        tva_rate: defaultVatRate.toString()
+      });
       onSuccess(article.id);
       onClose();
     } catch (err) {
@@ -497,13 +523,32 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {TVA_RATES.map(rate => (
-                    <SelectItem key={rate} value={rate}>
-                      {rate}%
-                    </SelectItem>
-                  ))}
+                  {Array.from(
+                    new Set([
+                      ...vatRateOptions,
+                      Number.isFinite(Number(formData.tva_rate))
+                        ? Number(formData.tva_rate)
+                        : defaultVatRate
+                    ])
+                  )
+                    .sort((a, b) => a - b)
+                    .map((rate) => (
+                      <SelectItem key={rate} value={rate.toString()}>
+                        {rate}%
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
+              <Input
+                id="tva_rate_manual"
+                type="number"
+                placeholder="Taux manuel (%)"
+                min="0"
+                step="0.01"
+                value={formData.tva_rate}
+                onChange={(e) => handleInputChange('tva_rate', e.target.value)}
+                className="mt-2"
+              />
             </div>
           </div>
 

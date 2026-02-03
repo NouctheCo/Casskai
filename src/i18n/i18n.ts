@@ -352,7 +352,7 @@ export function formatCurrency(amount: number, locale: string, currency?: string
       minimumFractionDigits: currencyConfig.format.decimal,
       maximumFractionDigits: currencyConfig.format.decimal,
       useGrouping: true
-    }).format(amount);
+    }).format(amount).replace(/\u00A0/g, ' '); // Remplacer espace insecable
     return `${formatted} ${currencyConfig.symbol}`;
   }
   // Fallback standard
@@ -360,7 +360,7 @@ export function formatCurrency(amount: number, locale: string, currency?: string
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: detectedCurrency || 'EUR'
-    }).format(amount);
+    }).format(amount).replace(/\u00A0/g, ' '); // Remplacer espace insecable
   } catch (_err) {
     return `${amount} ${detectedCurrency || 'EUR'}`;
   }
@@ -368,7 +368,7 @@ export function formatCurrency(amount: number, locale: string, currency?: string
 // Fonction de formatage des nombres
 export function formatNumber(value: number, locale: string): string {
   try {
-    return new Intl.NumberFormat(locale.startsWith('fr') ? 'fr-FR' : 'en-US').format(value);
+    return new Intl.NumberFormat(locale.startsWith('fr') ? 'fr-FR' : 'en-US').format(value).replace(/\u00A0/g, ' '); // Remplacer espace insecable
   } catch (_err) {
     return value.toString();
   }

@@ -20,10 +20,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CalendarIcon, AlertCircle, Loader2, PlusCircle, Trash2 } from 'lucide-react';
+import { CalendarIcon, AlertCircle, Loader2, PlusCircle, Trash2, Sparkles, Upload } from 'lucide-react';
 import JournalEntryAttachments from '@/components/accounting/JournalEntryAttachments';
 import { useAuth } from '@/contexts/AuthContext';
 import { journalEntriesService } from '@/services/journalEntriesService';
+import { aiDocumentAnalysisService } from '@/services/aiDocumentAnalysisService';
 import type {
   JournalEntryFormInitialValues,
   JournalEntryFormValues,
@@ -31,6 +32,7 @@ import type {
   MinimalJournal,
   MinimalAccount,
 } from '@/types/journalEntries.types';
+import type { JournalEntryExtracted } from '@/types/ai-document.types';
 import { cn, getCurrentCompanyCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 const DEFAULT_CURRENCY = getCurrentCompanyCurrency();
@@ -120,6 +122,11 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   const [localAccounts, setLocalAccounts] = useState<MinimalAccount[]>([]);
   const [createdEntryId] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  
+  // AI Analysis states
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<JournalEntryExtracted | null>(null);
+
   const isSupabaseConfigured = useMemo(() => {
     const url = import.meta.env.VITE_SUPABASE_URL;
     const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -238,6 +245,28 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
         });
         return;
       }
+
+      // VALIDATION DE PÉRIODE CLÔTURÉE
+      if (currentCompanyId) {
+        const { periodValidationService } = await import('@/services/accounting/periodValidationService');
+        const validation = await periodValidationService.validateEntryDate(
+          currentCompanyId,
+          values.entryDate
+        );
+        
+        if (!validation.canProceed) {
+          toast({
+            variant: 'destructive',
+            title: t('journal_entries.period_closed_title', { defaultValue: 'Période clôturée' }),
+            description: validation.error || t('journal_entries.period_closed_error', { 
+              defaultValue: 'Impossible de créer une écriture sur une période clôturée.' 
+            }),
+          });
+          setSubmitting(false);
+          return;
+        }
+      }
+
       setSubmitting(true);
       try {
         const normalizedItems = values.items.map((item) => ({
@@ -297,6 +326,107 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   const retryFetch = useCallback(() => {
     fetchDropdownData();
   }, [fetchDropdownData]);
+
+  /**
+   * Handler pour l'analyse IA de documents
+   */
+  const handleAIAnalysis = useCallback(async (file: File) => {
+    if (!currentCompany?.id) {
+      toast({
+        variant: 'destructive',
+        title: t('error'),
+        description: t('ai.no_company_selected', { defaultValue: 'Aucune entreprise sélectionnée' })
+      });
+      return;
+    }
+
+    setAiAnalyzing(true);
+    setAiSuggestion(null);
+
+    try {
+      // Appel du service d'analyse
+      const result = await aiDocumentAnalysisService.analyzeDocument(
+        file,
+        currentCompany.id,
+        'invoice'
+      );
+
+      if (!result.success || !result.data) {
+        toast({
+          variant: 'destructive',
+          title: t('ai.analysis_failed', { defaultValue: 'Analyse échouée' }),
+          description: result.error || t('ai.unable_to_analyze', { defaultValue: 'Impossible d\'analyser le document' })
+        });
+        return;
+      }
+
+      const extracted = result.data;
+      
+      // Valider les données
+      const validation = aiDocumentAnalysisService.validateExtractedEntry(extracted);
+      
+      if (validation.errors.length > 0) {
+        toast({
+          variant: 'destructive',
+          title: t('ai.incomplete_data', { defaultValue: 'Données incomplètes' }),
+          description: validation.errors[0]
+        });
+      }
+
+      if (validation.warnings.length > 0) {
+        toast({
+          title: t('ai.warnings', { defaultValue: 'Avertissements' }),
+          description: validation.warnings[0],
+          variant: 'default'
+        });
+      }
+
+      // Stocker la suggestion
+      setAiSuggestion(extracted);
+
+      // Mapper vers le format du formulaire
+      const mapped = await aiDocumentAnalysisService.mapToFormFormat(
+        extracted,
+        currentCompany.id,
+        DEFAULT_CURRENCY
+      );
+
+      if (!mapped) {
+        toast({
+          variant: 'destructive',
+          title: t('ai.mapping_failed', { defaultValue: 'Échec du mapping' }),
+          description: t('ai.unable_to_map_accounts', { defaultValue: 'Impossible de mapper les comptes comptables' })
+        });
+        return;
+      }
+
+      // Pré-remplir le formulaire
+      setValue('entryDate', mapped.entryDate);
+      setValue('description', mapped.description);
+      setValue('referenceNumber', mapped.referenceNumber);
+      replace(mapped.items);
+
+      toast({
+        title: t('ai.analysis_success', { defaultValue: 'Analyse réussie' }),
+        description: t('ai.entry_prefilled', { 
+          defaultValue: 'Écriture pré-remplie avec {score}% de confiance',
+          score: extracted.confidence_score
+        }),
+        variant: 'default'
+      });
+
+    } catch (error) {
+      logger.error('JournalEntryForm', 'AI analysis error:', error);
+      toast({
+        variant: 'destructive',
+        title: t('error'),
+        description: t('ai.unexpected_error', { defaultValue: 'Une erreur est survenue lors de l\'analyse' })
+      });
+    } finally {
+      setAiAnalyzing(false);
+    }
+  }, [currentCompany, toast, t, setValue, replace]);
+
   return (
     <Form form={form}>
       <form className="space-y-6" onSubmit={handleSubmit(onSubmitHandler)}>
@@ -393,6 +523,77 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
             )}
           />
         </div>
+
+        {/* AI Document Analysis Section */}
+        <div className="border-2 border-dashed border-primary/20 rounded-lg p-4 bg-primary/5">
+          <div className="flex items-center gap-3 mb-2">
+            <Sparkles className="w-5 h-5 text-primary" />
+            <h3 className="text-sm font-semibold text-primary">
+              {t('ai.automatic_analysis', { defaultValue: 'Analyse automatique par IA' })}
+            </h3>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            {t('ai.upload_document_instruction', { 
+              defaultValue: 'Uploadez une facture ou un reçu pour pré-remplir automatiquement l\'écriture comptable.' 
+            })}
+          </p>
+          <label htmlFor="ai-upload" className="cursor-pointer">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={aiAnalyzing || !currentCompany}
+              className="w-full"
+              asChild
+            >
+              <div>
+                {aiAnalyzing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t('ai.analyzing', { defaultValue: 'Analyse en cours...' })}
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    {t('ai.choose_document', { defaultValue: 'Choisir un document (PDF, JPG, PNG)' })}
+                  </>
+                )}
+              </div>
+            </Button>
+            <input
+              id="ai-upload"
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png,.webp"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleAIAnalysis(file);
+                e.target.value = ''; // Reset input
+              }}
+              disabled={aiAnalyzing || !currentCompany}
+            />
+          </label>
+
+          {aiSuggestion && (
+            <Alert className="mt-3 bg-primary/10 border-primary/20">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <AlertDescription className="text-xs">
+                <strong>{t('ai.extracted_data', { defaultValue: 'Données extraites du document' })} :</strong><br />
+                • {aiSuggestion.raw_extraction.supplier_name || aiSuggestion.raw_extraction.customer_name || t('ai.unknown_party', { defaultValue: 'Tiers inconnu' })}<br />
+                {aiSuggestion.raw_extraction.invoice_number && (
+                  <>• {t('ai.invoice', { defaultValue: 'Facture' })} {aiSuggestion.raw_extraction.invoice_number}<br /></>
+                )}
+                {aiSuggestion.raw_extraction.total_ttc && (
+                  <>• {t('ai.amount_incl_tax', { defaultValue: 'Montant TTC' })} : {aiSuggestion.raw_extraction.total_ttc}€<br /></>
+                )}
+                <span className="text-primary font-medium">
+                  {t('ai.confidence', { defaultValue: 'Confiance' })} : {aiSuggestion.confidence_score}%
+                </span>
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+
         <FormField
           control={control}
           name="referenceNumber"

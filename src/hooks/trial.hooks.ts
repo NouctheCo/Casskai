@@ -10,13 +10,12 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 import { useState, useEffect } from 'react';
-import { trialService, TrialInfo } from '@/services/trialService';
-type TrialStatistics = { metric: string; value: number };
+import { getUserTrialInfo, convertTrialToPaid, cancelTrial, createTrialSubscription, getTrialStatistics, getExpiringTrials, canCreateTrial, type TrialStatus } from '@/services/trialService';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 export interface UseTrialReturn {
   // État de l'essai
-  trialInfo: TrialInfo | null;
+  trialInfo: TrialStatus | null;
   isLoading: boolean;
   error: string | null;
   // Actions
@@ -32,10 +31,10 @@ export interface UseTrialReturn {
 }
 export const useTrial = (): UseTrialReturn => {
   const { user } = useAuth();
-  const [trialInfo, setTrialInfo] = useState<TrialInfo | null>(null);
+  const [trialInfo, setTrialInfo] = useState<TrialStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [canCreateTrial, setCanCreateTrial] = useState(false);
+  const [canCreateTrialFlag, setCanCreateTrialFlag] = useState(false);
   // Charger les informations d'essai au montage
   useEffect(() => {
     if (user?.id) {
@@ -48,7 +47,7 @@ export const useTrial = (): UseTrialReturn => {
     setIsLoading(true);
     setError(null);
     try {
-      const info = await trialService.getUserTrialInfo(user.id);
+      const info = await getUserTrialInfo(user.id);
       setTrialInfo(info);
     } catch (_err) {
       setError('Erreur lors du chargement des informations d\'essai');
@@ -60,8 +59,8 @@ export const useTrial = (): UseTrialReturn => {
   const checkTrialEligibility = async () => {
     if (!user?.id) return;
     try {
-      const canCreate = await trialService.canCreateTrial(user.id);
-      setCanCreateTrial(canCreate);
+      const canCreate = await canCreateTrial(user.id);
+      setCanCreateTrialFlag(canCreate);
     } catch (_err) {
       logger.error('Trial.hooks', '...', error);
     }
@@ -73,7 +72,7 @@ export const useTrial = (): UseTrialReturn => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await trialService.createTrialSubscription(user.id, companyId);
+      const result = await createTrialSubscription(user.id, companyId);
       if (result.success) {
         // Recharger les informations après création
         await loadTrialInfo();
@@ -88,10 +87,10 @@ export const useTrial = (): UseTrialReturn => {
       setIsLoading(false);
     }
   };
-  const convertTrialToPaid = async (
-    newPlanId: string,
-    stripeSubscriptionId?: string,
-    stripeCustomerId?: string
+  const convertTrialToPaidAsync = async (
+    _newPlanId?: string,
+    _stripeSubscriptionId?: string,
+    _stripeCustomerId?: string
   ) => {
     if (!user?.id) {
       return { success: false, error: 'Utilisateur non connecté' };
@@ -99,12 +98,7 @@ export const useTrial = (): UseTrialReturn => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await trialService.convertTrialToPaid(
-        user.id,
-        newPlanId,
-        stripeSubscriptionId,
-        stripeCustomerId
-      );
+      const result = await convertTrialToPaid(user.id);
       if (result.success) {
         // Recharger les informations après conversion
         await loadTrialInfo();
@@ -119,14 +113,14 @@ export const useTrial = (): UseTrialReturn => {
       setIsLoading(false);
     }
   };
-  const cancelTrial = async (reason?: string) => {
+  const cancelTrialAsync = async (_reason?: string) => {
     if (!user?.id) {
       return { success: false, error: 'Utilisateur non connecté' };
     }
     setIsLoading(true);
     setError(null);
     try {
-      const result = await trialService.cancelTrial(user.id, reason);
+      const result = await cancelTrial(user.id);
       if (result.success) {
         // Recharger les informations après annulation
         await loadTrialInfo();
@@ -147,18 +141,18 @@ export const useTrial = (): UseTrialReturn => {
   };
   // Utilitaires calculés
   const daysRemaining = trialInfo?.daysRemaining || 0;
-  const isExpired = trialInfo?.isExpired || false;
-  const isActive = trialInfo?.status === 'trialing' && !isExpired;
+  const isExpired = (trialInfo?.daysRemaining || 0) <= 0;
+  const isActive = (trialInfo as any)?.status === 'trialing' && !isExpired;
   return {
     // État
     trialInfo,
     isLoading,
     error,
     // Actions
-    canCreateTrial,
+    canCreateTrial: canCreateTrialFlag,
     createTrial,
-    convertTrialToPaid,
-    cancelTrial,
+    convertTrialToPaid: convertTrialToPaidAsync,
+    cancelTrial: cancelTrialAsync,
     // Utilitaires
     refreshTrialInfo,
     daysRemaining,
@@ -168,14 +162,14 @@ export const useTrial = (): UseTrialReturn => {
 };
 // Hook pour les statistiques d'essai (pour les administrateurs)
 export const useTrialStatistics = () => {
-  const [statistics, setStatistics] = useState<TrialStatistics[]>([]);
+  const [statistics, setStatistics] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const loadStatistics = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const stats = await trialService.getTrialStatistics();
+      const stats = await getTrialStatistics();
       setStatistics(stats);
     } catch (_err) {
       setError('Erreur lors du chargement des statistiques');
@@ -203,7 +197,7 @@ export const useExpiringTrials = (daysAhead: number = 7) => {
     setIsLoading(true);
     setError(null);
     try {
-      const trials = await trialService.getExpiringTrials(daysAhead);
+      const trials = await getExpiringTrials(daysAhead);
       setExpiringTrials(trials);
     } catch (_err) {
       setError('Erreur lors du chargement des essais expirants');

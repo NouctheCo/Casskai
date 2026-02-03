@@ -114,16 +114,30 @@ class AIReportAnalysisService {
   /**
    * Méthode générique d'analyse avec fallback
    */
-  private async analyzeWithAI(prompt: string, reportType: string): Promise<string> {
+  private async analyzeWithAI(prompt: string, reportType: string, companyId?: string): Promise<string> {
     // En production, route via Edge Function sécurisée
     if (shouldUseEdgeFunction('reportAnalysis')) {
       const fnName = getEdgeFunctionName('reportAnalysis') || 'ai-report-analysis';
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return '';
-        const response = await supabase.functions.invoke(fnName, {
-          body: { prompt, reportType }
-        });
+        if (!companyId) {
+          logger.warn('AiReportAnalysis', 'Missing companyId for Edge Function reportAnalysis call.');
+          return '';
+        }
+        const timeoutMs = 2000;
+        const response = await Promise.race([
+          supabase.functions.invoke(fnName, {
+            body: { prompt, reportType, company_id: companyId }
+          }),
+          new Promise<null>((resolve) => {
+            setTimeout(() => resolve(null), timeoutMs);
+          })
+        ]);
+        if (!response) {
+          logger.warn('AiReportAnalysis', `Edge Function reportAnalysis timed out after ${timeoutMs}ms.`);
+          return '';
+        }
         if (response.error) {
           logger.error('AiReportAnalysis', 'Edge Function reportAnalysis error:', response.error);
           return '';
@@ -176,7 +190,7 @@ IMPORTANT: Réponds UNIQUEMENT avec le format structuré demandé, sans texte su
   /**
    * Analyse du Flux de Trésorerie
    */
-  async analyzeCashFlow(data: CashFlowData, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
+  async analyzeCashFlow(data: CashFlowData, periodStart: string, periodEnd: string, companyId?: string): Promise<AIAnalysisResult> {
     const prompt = `Analyse le flux de trésorerie suivant pour la période du ${periodStart} au ${periodEnd}:
 FLUX DE TRÉSORERIE:
 - Flux opérationnel: ${this.formatCurrency(data.operatingCashFlow)}
@@ -205,7 +219,7 @@ Fournis une analyse au format suivant (STRICT):
 3. [Recommandation action 3]
 ## NIVEAU DE RISQUE
 [Faible/Modéré/Élevé/Critique] - [Justification en 1 phrase]`;
-    const response = await this.analyzeWithAI(prompt, 'flux de trésorerie');
+    const response = await this.analyzeWithAI(prompt, 'flux de trésorerie', companyId);
     if (!response) {
       return this.generateDefaultCashFlowAnalysis(data);
     }
@@ -214,7 +228,7 @@ Fournis une analyse au format suivant (STRICT):
   /**
    * Analyse des Créances Clients
    */
-  async analyzeReceivables(data: ReceivablesData, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
+  async analyzeReceivables(data: ReceivablesData, periodStart: string, periodEnd: string, companyId?: string): Promise<AIAnalysisResult> {
     const prompt = `Analyse les créances clients suivantes pour la période du ${periodStart} au ${periodEnd}:
 CRÉANCES CLIENTS:
 - Total créances: ${this.formatCurrency(data.totalReceivables)}
@@ -226,7 +240,7 @@ CRÉANCES CLIENTS:
 - Taux de recouvrement: ${data.collectionRate.toFixed(1)}%
 - Montant moyen en retard: ${this.formatCurrency(data.averageOverdueAmount)}
 Fournis une analyse au format structuré (STRICT) avec sections: RÉSUMÉ EXÉCUTIF, ANALYSE DES CRÉANCES, POINTS FORTS, POINTS D'ATTENTION, RECOMMANDATIONS PRIORITAIRES, NIVEAU DE RISQUE.`;
-    const response = await this.analyzeWithAI(prompt, 'créances clients');
+    const response = await this.analyzeWithAI(prompt, 'créances clients', companyId);
     if (!response) {
       return this.generateDefaultReceivablesAnalysis(data);
     }
@@ -235,7 +249,7 @@ Fournis une analyse au format structuré (STRICT) avec sections: RÉSUMÉ EXÉCU
   /**
    * Analyse des Ratios Financiers
    */
-  async analyzeFinancialRatios(data: FinancialRatiosData, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
+  async analyzeFinancialRatios(data: FinancialRatiosData, periodStart: string, periodEnd: string, companyId?: string): Promise<AIAnalysisResult> {
     const prompt = `Analyse les ratios financiers suivants pour la période du ${periodStart} au ${periodEnd}:
 RATIOS DE LIQUIDITÉ:
 - Ratio de liquidité générale: ${data.liquidityRatios.currentRatio.toFixed(2)}
@@ -255,7 +269,7 @@ RATIOS D'EFFICACITÉ:
 - Rotation des stocks: ${data.efficiencyRatios.inventoryTurnover.toFixed(2)}x
 - Rotation des créances: ${data.efficiencyRatios.receivablesTurnover.toFixed(2)}x
 Fournis une analyse comparative au format structuré (STRICT) en comparant avec les standards sectoriels.`;
-    const response = await this.analyzeWithAI(prompt, 'ratios financiers');
+    const response = await this.analyzeWithAI(prompt, 'ratios financiers', companyId);
     if (!response) {
       return this.generateDefaultRatiosAnalysis(data);
     }
@@ -264,7 +278,7 @@ Fournis une analyse comparative au format structuré (STRICT) en comparant avec 
   /**
    * Analyse des Écarts Budgétaires
    */
-  async analyzeBudgetVariance(data: BudgetVarianceData, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
+  async analyzeBudgetVariance(data: BudgetVarianceData, periodStart: string, periodEnd: string, companyId?: string): Promise<AIAnalysisResult> {
     const majorVariancesText = data.majorVariances
       .map(v => `  - ${v.category}: Budget ${this.formatCurrency(v.budget)} vs Réel ${this.formatCurrency(v.actual)} = Écart ${this.formatCurrency(v.variance)} (${v.variancePercent > 0 ? '+' : ''}${v.variancePercent.toFixed(1)}%)`)
       .join('\n');
@@ -280,7 +294,7 @@ Fournis une analyse au format structuré (STRICT) en identifiant:
 - Les domaines nécessitant des actions correctives
 - Les opportunités d'optimisation
 - Les ajustements budgétaires à envisager`;
-    const response = await this.analyzeWithAI(prompt, 'écarts budgétaires');
+    const response = await this.analyzeWithAI(prompt, 'écarts budgétaires', companyId);
     if (!response) {
       return this.generateDefaultBudgetVarianceAnalysis(data);
     }
@@ -289,7 +303,7 @@ Fournis une analyse au format structuré (STRICT) en identifiant:
   /**
    * Analyse des Dettes Fournisseurs
    */
-  async analyzePayables(data: PayablesData, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
+  async analyzePayables(data: PayablesData, periodStart: string, periodEnd: string, companyId?: string): Promise<AIAnalysisResult> {
     const prompt = `Analyse les dettes fournisseurs suivantes pour la période du ${periodStart} au ${periodEnd}:
 DETTES FOURNISSEURS:
 - Total dettes: ${this.formatCurrency(data.totalPayables)}
@@ -301,7 +315,7 @@ DETTES FOURNISSEURS:
 - Taux de paiement: ${data.paymentRate.toFixed(1)}%
 - Montant moyen en retard: ${this.formatCurrency(data.averageOverdueAmount)}
 Fournis une analyse au format structuré (STRICT) en équilibrant trésorerie vs relations fournisseurs.`;
-    const response = await this.analyzeWithAI(prompt, 'dettes fournisseurs');
+    const response = await this.analyzeWithAI(prompt, 'dettes fournisseurs', companyId);
     if (!response) {
       return this.generateDefaultPayablesAnalysis(data);
     }
@@ -310,7 +324,7 @@ Fournis une analyse au format structuré (STRICT) en équilibrant trésorerie vs
   /**
    * Analyse de la Valorisation des Stocks
    */
-  async analyzeInventory(data: InventoryData, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
+  async analyzeInventory(data: InventoryData, periodStart: string, periodEnd: string, companyId?: string): Promise<AIAnalysisResult> {
     const prompt = `Analyse la valorisation des stocks suivante pour la période du ${periodStart} au ${periodEnd}:
 VALORISATION DES STOCKS:
 - Stock total: ${this.formatCurrency(data.totalInventory)}
@@ -322,7 +336,7 @@ VALORISATION DES STOCKS:
 - Stock obsolète: ${this.formatCurrency(data.obsoleteInventory)} (${((data.obsoleteInventory / data.totalInventory) * 100).toFixed(1)}%)
 - Ratio stock/ventes: ${(data.inventoryToSales * 100).toFixed(1)}%
 Fournis une analyse au format structuré (STRICT) avec focus sur l'optimisation du BFR.`;
-    const response = await this.analyzeWithAI(prompt, 'valorisation des stocks');
+    const response = await this.analyzeWithAI(prompt, 'valorisation des stocks', companyId);
     if (!response) {
       return this.generateDefaultInventoryAnalysis(data);
     }

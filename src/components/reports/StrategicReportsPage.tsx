@@ -209,8 +209,9 @@ export const StrategicReportsPage: React.FC = () => {
             </Select>
 
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-300">Date de début</label>
+              <label htmlFor="strategic-start-date" className="text-sm text-gray-600 dark:text-gray-300">Date de début</label>
               <input
+                id="strategic-start-date"
                 type="date"
                 value={dateRange.start}
                 onChange={e => setDateRange({ ...dateRange, start: e.target.value })}
@@ -219,8 +220,9 @@ export const StrategicReportsPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-300">Date de fin</label>
+              <label htmlFor="strategic-end-date" className="text-sm text-gray-600 dark:text-gray-300">Date de fin</label>
               <input
+                id="strategic-end-date"
                 type="date"
                 value={dateRange.end}
                 onChange={e => setDateRange({ ...dateRange, end: e.target.value })}

@@ -16,7 +16,7 @@ function formatValue(value: unknown): string {
     return new Intl.NumberFormat('fr-FR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format(value);
+    }).format(value).replace(/\u00A0/g, ' '); // Remplacer espace insecable
   }
   if (value instanceof Date) return value.toLocaleDateString('fr-FR');
   if (typeof value === 'object') return JSON.stringify(value);

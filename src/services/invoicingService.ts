@@ -12,6 +12,7 @@
 import { supabase } from '@/lib/supabase';
 import { auditService } from './auditService';
 import { generateInvoiceJournalEntry } from './invoiceJournalEntryService';
+import { autoAuditService } from './autoAuditService';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { kpiCacheService } from './kpiCacheService';
@@ -115,11 +116,11 @@ class InvoicingService {
       .select('company_id')
       .eq('user_id', user.id)
       .eq('is_default', true)
-      .single();
-    if (error || !userCompanies) {
+      .limit(1);
+    if (error || !userCompanies || userCompanies.length === 0) {
       throw new Error('No active company found');
     }
-    return userCompanies.company_id;
+    return userCompanies[0].company_id;
   }
   async getInvoices(options?: {
     status?: string;
@@ -350,7 +351,16 @@ class InvoicingService {
         logger.error('InvoicingService: Failed to generate journal entry for invoice:', journalError);
         // L'utilisateur peut régénérer l'écriture manuellement depuis la compta
       }
-      // 6. Invalider le cache KPI pour forcer le recalcul
+
+      // 6. ✅ Auto-audit des conditions de paiement (fire-and-forget)
+      try {
+        await autoAuditService.autoAuditInvoice(createdInvoice as any);
+      } catch (auditError) {
+        logger.error('InvoicingService: Failed to auto-audit invoice payment terms:', auditError);
+        // Ne bloque pas la création
+      }
+
+      // 7. Invalider le cache KPI pour forcer le recalcul
       kpiCacheService.invalidateCache(companyId);
       return createdInvoice;
     } catch (error) {

@@ -1053,6 +1053,8 @@ const DocumentationCategoryPage = () => {
 
                 className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
 
+                aria-label="Filtrer par difficulté"
+
               >
 
                 <option value="">Toutes difficultés</option>
@@ -1080,6 +1082,8 @@ const DocumentationCategoryPage = () => {
                 onChange={(e) => setSortBy(e.target.value)}
 
                 className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+
+                aria-label="Trier par"
 
               >
 

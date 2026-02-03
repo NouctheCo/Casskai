@@ -127,7 +127,7 @@ class ChartGenerationService {
       ctx.font = '12px Arial';
       ctx.textAlign = 'center';
       ctx.fillText(
-        new Intl.NumberFormat('fr-FR').format(value),
+        new Intl.NumberFormat('fr-FR').format(value).replace(/\u00A0/g, ' '),
         x + barWidth / 2,
         y - 5
       );
@@ -151,7 +151,7 @@ class ChartGenerationService {
       ctx.font = '11px Arial';
       ctx.textAlign = 'right';
       ctx.fillText(
-        new Intl.NumberFormat('fr-FR').format(Math.round(value)),
+        new Intl.NumberFormat('fr-FR').format(Math.round(value)).replace(/\u00A0/g, ' '),
         margin.left - 10,
         y + 4
       );
@@ -225,7 +225,7 @@ class ChartGenerationService {
       ctx.font = '11px Arial';
       ctx.textAlign = 'right';
       ctx.fillText(
-        new Intl.NumberFormat('fr-FR').format(Math.round(value)),
+        new Intl.NumberFormat('fr-FR').format(Math.round(value)).replace(/\u00A0/g, ' '),
         margin.left - 10,
         y + 4
       );

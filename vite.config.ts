@@ -73,7 +73,10 @@ export default defineConfig(({ mode }) => ({
 			'tailwind-merge',
 			'class-variance-authority',
 		],
-		exclude: ['@tensorflow/tfjs'], // Heavy libs that should be loaded on-demand
+		exclude: [
+			'@tensorflow/tfjs',
+			'pdfjs-dist'
+		], // Heavy libs that should be loaded on-demand
 		force: true, // Force pre-bundling to avoid runtime issues
 	},
 	

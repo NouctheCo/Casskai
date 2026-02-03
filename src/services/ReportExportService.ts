@@ -12,11 +12,12 @@
 // Service d'export de rapports avec génération PDF et Excel
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { chartGenerationService } from './chartGenerationService';
 import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
 export interface ExportOptions {
   format: 'pdf' | 'excel' | 'csv';
   orientation?: 'portrait' | 'landscape';
@@ -94,8 +95,9 @@ export class ReportExportService {
       pdf.text(`Généré le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`, 20, currentY);
       currentY += 15;
       // Tables
+      const resolvedCurrency = this.resolveCurrency();
       for (let i = 0; i < tables.length; i++) {
-        const table = tables[i];
+        const table = this.sanitizeTableData(tables[i]);
         if (table.title) {
           pdf.setFontSize(14);
           pdf.setFont('helvetica', 'bold');
@@ -108,6 +110,9 @@ export class ReportExportService {
           head: [table.headers],
           body: table.rows,
           theme: 'grid',
+          styles: {
+            cellPadding: 2
+          } as any,
           headStyles: {
             fillColor: [41, 128, 185],
             textColor: 255,
@@ -116,7 +121,8 @@ export class ReportExportService {
           },
           bodyStyles: {
             fontSize: 9,
-            textColor: 50
+            textColor: 50,
+            overflow: 'linebreak' as const
           },
           alternateRowStyles: {
             fillColor: [245, 245, 245]
@@ -142,6 +148,8 @@ export class ReportExportService {
           this.addPDFSummary(pdf, table.summary, currentY);
           currentY += 30;
         }
+        // Note de devise sous le tableau
+        currentY = this.addCurrencyNote(pdf, resolvedCurrency, currentY);
         // Nouvelle page pour le tableau suivant (sauf le dernier)
         if (i < tables.length - 1) {
           pdf.addPage();
@@ -191,76 +199,56 @@ export class ReportExportService {
     options: ExportOptions = { format: 'excel' }
   ): Promise<string> {
     try {
-      const workbook = XLSX.utils.book_new();
+      const workbook = new ExcelJS.Workbook();
       const tables = Array.isArray(data) ? data : [data];
       for (let i = 0; i < tables.length; i++) {
         const table = tables[i];
         const sheetName = table.title || `Feuille ${i + 1}`;
-        // Créer les données avec en-têtes
-        const worksheetData = [
-          table.headers,
-          ...table.rows
-        ];
         // Créer la feuille
-        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-        // Formatage des colonnes
-        const range = XLSX.utils.decode_range(worksheet['!ref']!);
+        const worksheet = workbook.addWorksheet(sheetName);
+        // En-têtes + données
+        worksheet.addRow(table.headers);
+        table.rows.forEach((row) => worksheet.addRow(row));
         // Largeurs de colonnes automatiques
-        const colWidths = table.headers.map(header => ({
-          wch: Math.max(header.length, 15)
+        worksheet.columns = table.headers.map((header) => ({
+          header,
+          width: Math.max(String(header).length, 15)
         }));
-        worksheet['!cols'] = colWidths;
         // Style des en-têtes
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-          if (!worksheet[cellAddress]) continue;
-          worksheet[cellAddress].s = {
-            font: { bold: true, color: { rgb: "FFFFFF" } },
-            fill: { fgColor: { rgb: "2980B9" } },
-            border: {
-              top: { style: "thin" },
-              bottom: { style: "thin" },
-              left: { style: "thin" },
-              right: { style: "thin" }
-            }
+        const headerRow = worksheet.getRow(1);
+        headerRow.eachCell((cell) => {
+          cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '2980B9' } };
+          cell.border = {
+            top: { style: 'thin' },
+            bottom: { style: 'thin' },
+            left: { style: 'thin' },
+            right: { style: 'thin' }
           };
-        }
+        });
         // Bordures pour toutes les cellules
-        for (let row = range.s.r; row <= range.e.r; row++) {
-          for (let col = range.s.c; col <= range.e.c; col++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-            if (!worksheet[cellAddress]) continue;
-            if (!worksheet[cellAddress].s) {
-              worksheet[cellAddress].s = {};
-            }
-            worksheet[cellAddress].s.border = {
-              top: { style: "thin" },
-              bottom: { style: "thin" },
-              left: { style: "thin" },
-              right: { style: "thin" }
+        worksheet.eachRow((row) => {
+          row.eachCell((cell) => {
+            cell.border = {
+              top: { style: 'thin' },
+              bottom: { style: 'thin' },
+              left: { style: 'thin' },
+              right: { style: 'thin' }
             };
-          }
-        }
-        // Ajouter la feuille au classeur
-        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+          });
+        });
         // Ajouter une feuille de résumé si disponible
         if (table.summary) {
           this.addExcelSummarySheet(workbook, table.summary, `${sheetName} - Résumé`);
         }
       }
       // Métadonnées du fichier
-      workbook.Props = {
-        Title: options.title || 'Rapport Financier',
-        Subject: options.subtitle || 'Rapport généré automatiquement',
-        Author: options.companyInfo?.name || 'CassKai',
-        CreatedDate: new Date()
-      };
+      workbook.creator = options.companyInfo?.name || 'CassKai';
+      workbook.title = options.title || 'Rapport Financier';
+      workbook.subject = options.subtitle || 'Rapport généré automatiquement';
+      workbook.created = new Date();
       // Générer le fichier Excel
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: 'xlsx',
-        type: 'array',
-        bookSST: true
-      });
+      const excelBuffer = await workbook.xlsx.writeBuffer();
       const excelBlob = new Blob([excelBuffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
@@ -366,6 +354,8 @@ export class ReportExportService {
         styles[index] = {
           halign: 'right',
           minCellWidth: 30, // Largeur minimale en mm pour éviter le débordement
+          cellWidth: 'wrap',
+          overflow: 'linebreak',
           cellPadding: { left: 2, right: 3 } // Padding pour un meilleur espacement
         };
       } else if (header.toLowerCase().includes('date')) {
@@ -388,6 +378,51 @@ export class ReportExportService {
     });
     return styles;
   }
+  private resolveCurrency(): string {
+    return getCurrentCompanyCurrency();
+  }
+  private stripCurrencyFromValue(value: any): any {
+    if (typeof value !== 'string') return value;
+    const trimmed = value.trim();
+    // Remplacer l'espace insecable (U+00A0) par espace normal d'abord
+    const normalized = trimmed.replace(/\u00A0/g, ' ');
+    const currencyRegex = /(€|EUR|XOF|XAF|FCFA|F\s*\/?\/\s*CFA)\s*$/i;
+    if (!currencyRegex.test(normalized)) return normalized;
+    const withoutCurrency = normalized.replace(currencyRegex, '').replace(/\s{2,}/g, ' ').trim();
+    return withoutCurrency || value;
+  }
+  private sanitizeTableData(table: TableData): TableData {
+    const rows = table.rows.map(row => row.map(cell => this.stripCurrencyFromValue(cell)));
+    let summary = table.summary;
+    if (summary && !Array.isArray(summary)) {
+      summary = Object.fromEntries(
+        Object.entries(summary).map(([key, value]) => [key, this.stripCurrencyFromValue(value)])
+      );
+    } else if (Array.isArray(summary)) {
+      summary = summary.map(row => row.map(cell => this.stripCurrencyFromValue(cell)));
+    }
+    return {
+      ...table,
+      rows,
+      summary
+    };
+  }
+  private addCurrencyNote(pdf: any, currency: string, startY: number): number {
+    const note = `Devise: ${currency} (valeurs exprimées dans cette devise)`;
+    const pageHeight = pdf.internal.pageSize.height;
+    let yPos = startY + 6;
+    if (yPos > pageHeight - 20) {
+      pdf.addPage();
+      yPos = 20;
+    }
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'italic');
+    pdf.setTextColor(120);
+    pdf.text(note, 20, yPos);
+    pdf.setTextColor(0);
+    pdf.setFont('helvetica', 'normal');
+    return yPos + 8;
+  }
   private addPDFSummary(pdf: any, summary: Record<string, any>, startY: number) {
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
@@ -396,7 +431,9 @@ export class ReportExportService {
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
     Object.entries(summary).forEach(([key, value]) => {
-      pdf.text(`${key}: ${value}`, 25, yPos);
+      // Normaliser les espaces insécables (U+00A0) en espaces normaux pour jsPDF
+      const normalizedValue = String(value).replace(/\u00A0/g, ' ');
+      pdf.text(`${key}: ${normalizedValue}`, 25, yPos);
       yPos += 5;
     });
   }
@@ -417,20 +454,22 @@ export class ReportExportService {
       });
     }
   }
-  private addExcelSummarySheet(workbook: any, summary: Record<string, any>, sheetName: string) {
+  private addExcelSummarySheet(workbook: ExcelJS.Workbook, summary: Record<string, any>, sheetName: string) {
     const summaryData = [
       ['Élément', 'Valeur'],
       ...Object.entries(summary)
     ];
-    const worksheet = XLSX.utils.aoa_to_sheet(summaryData);
-    // Style des en-têtes du résumé
-    const headerStyle = {
-      font: { bold: true, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "2980B9" } }
-    };
-    worksheet['A1'].s = headerStyle;
-    worksheet['B1'].s = headerStyle;
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    const worksheet = workbook.addWorksheet(sheetName);
+    summaryData.forEach((row) => worksheet.addRow(row));
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '2980B9' } };
+    });
+    worksheet.columns = [
+      { width: 30 },
+      { width: 40 }
+    ];
   }
   /**
    * Export PDF avec tables ET graphiques intégrés
@@ -470,8 +509,9 @@ export class ReportExportService {
       pdf.text(`Généré le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`, 20, currentY);
       currentY += 15;
       // Tables avec graphiques intercalés
+      const resolvedCurrency = this.resolveCurrency();
       for (let i = 0; i < tables.length; i++) {
-        const table = tables[i];
+        const table = this.sanitizeTableData(tables[i]);
         // Vérifier si on a besoin d'une nouvelle page
         if (currentY > 250) {
           pdf.addPage();
@@ -490,10 +530,16 @@ export class ReportExportService {
           head: [table.headers],
           body: table.rows,
           theme: 'grid' as const,
+          styles: {
+            cellPadding: 2
+          } as any,
           headStyles: {
             fillColor: [41, 128, 185] as [number, number, number],
             textColor: 255,
             fontStyle: 'bold' as const
+          },
+          bodyStyles: {
+            overflow: 'linebreak' as const
           },
           alternateRowStyles: {
             fillColor: [245, 245, 245] as [number, number, number]
@@ -522,6 +568,8 @@ export class ReportExportService {
           });
           currentY = (pdf as any).lastAutoTable.finalY + 15;
         }
+        // Note de devise sous le tableau
+        currentY = this.addCurrencyNote(pdf, resolvedCurrency, currentY);
         // Ajouter un graphique après certaines tables si disponible
         if (options.includeCharts && charts[i]) {
           const chart = charts[i];

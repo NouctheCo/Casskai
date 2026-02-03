@@ -1,3 +1,27 @@
+// Get session status
+app.get('/api/stripe/session-status', async (req, res) => {
+  try {
+    const { session_id } = req.query;
+
+    if (!session_id) {
+      return res.status(400).json({ error: 'session_id is required' });
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+    
+    res.json({
+      id: session.id,
+      payment_status: session.payment_status,
+      customer: session.customer,
+      subscription: session.subscription,
+      client_secret: session.client_secret,
+    });
+  } catch (error) {
+    console.error('Error retrieving session status:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';

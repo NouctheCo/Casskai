@@ -287,10 +287,10 @@ export const businessPlanService = {
 
     const monthlyData = MONTHS.map((month, i) => [
       month,
-      `${Math.round(monthlyRevenue[i]).toLocaleString('fr-FR')}`,
-      `${Math.round(monthlyExpenses[i]).toLocaleString('fr-FR')}`,
-      `${Math.round(monthlyResult[i]).toLocaleString('fr-FR')}`,
-      `${Math.round(cumulativeResult[i]).toLocaleString('fr-FR')}`,
+      `${Math.round(monthlyRevenue[i]).toLocaleString('fr-FR').replace(/\u00A0/g, ' ')}`,
+      `${Math.round(monthlyExpenses[i]).toLocaleString('fr-FR').replace(/\u00A0/g, ' ')}`,
+      `${Math.round(monthlyResult[i]).toLocaleString('fr-FR').replace(/\u00A0/g, ' ')}`,
+      `${Math.round(cumulativeResult[i]).toLocaleString('fr-FR').replace(/\u00A0/g, ' ')}`,
     ]);
 
     autoTable(pdf, {

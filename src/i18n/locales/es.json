@@ -71,6 +71,95 @@
       "fiscalYear": "Año Fiscal",
       "fiscalYearDesc": "Definir el ejercicio fiscal",
       "fiscalYearDialogDesc": "Define las fechas de su ejercicio fiscal",
+    "closure": {
+      "title": "Cierre contable",
+      "subtitle": "Gestione sus períodos contables y realice cierres de ejercicio",
+      "refresh": "Actualizar",
+      "newPeriod": "Nuevo período",
+      "loading": "Cargando períodos...",
+      "createTitle": "Crear un período contable",
+      "createDescription": "Defina un nuevo período para su ejercicio contable",
+      "periodNameLabel": "Nombre del período",
+      "periodNamePlaceholder": "Ej.: Ejercicio 2025",
+      "startDateLabel": "Fecha de inicio",
+      "endDateLabel": "Fecha de fin",
+      "cancel": "Cancelar",
+      "createPeriodCta": "Crear período",
+      "periodsTitle": "Períodos contables",
+      "periodsCount": "{{count}} período(s) registrado(s)",
+      "noPeriodsTitle": "No hay períodos contables definidos",
+      "noPeriodsDescription": "Cree su primer período para comenzar",
+      "table": {
+        "period": "Período",
+        "startDate": "Fecha inicio",
+        "endDate": "Fecha fin",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "status": {
+        "closed": "Cerrado",
+        "open": "Abierto"
+      },
+      "tooltips": {
+        "validate": "Validar para cierre",
+        "generateAN": "Generar asientos de apertura",
+        "reopen": "Reabrir período"
+      },
+      "validationTitle": "Validación de cierre: {{periodName}}",
+      "validationRange": "Del {{start}} al {{end}}",
+      "validationState": "Estado de validación",
+      "balanceCheck": "Balance de comprobación",
+      "totalDebit": "Total débito",
+      "totalCredit": "Total crédito",
+      "draftEntries": "Asientos en borrador",
+      "unletteredEntries": "Líneas de terceros sin conciliación",
+      "periodResultTitle": "Resultado del período",
+      "profit": "Beneficio",
+      "loss": "Pérdida",
+      "profitLower": "beneficio",
+      "lossLower": "pérdida",
+      "chargesLabel": "Gastos (clase 6)",
+      "productsLabel": "Ingresos (clase 7)",
+      "blockingErrors": "Errores bloqueantes",
+      "warnings": "Advertencias",
+      "actionsTitle": "Acciones de cierre",
+      "actions": {
+        "items": {
+          "balanceAccounts": "Saldar cuentas de gastos (clase 6) e ingresos (clase 7)",
+          "assignResult": "Asignar el resultado a la cuenta {{account}}",
+          "lockPeriod": "Bloquear el período (sin cambios posteriores)",
+          "generateOpening": "Posibilidad de generar asientos de apertura para el siguiente período"
+        }
+      },
+      "closePeriod": "Cerrar período",
+      "confirmTitle": "Confirmar cierre",
+      "confirmDescription": "¿Seguro que desea cerrar el período {{periodName}}?",
+      "confirmIntro": "Esta acción va a:",
+      "confirmItems": {
+        "closingEntries": "Generar asientos de cierre para cuentas de resultados",
+        "assignResult": "Asignar el resultado ({{resultType}} de {{amount}})",
+        "lockPeriod": "Bloquear el período contra cualquier modificación"
+      },
+      "confirmCta": "Confirmar cierre",
+      "reopenTitle": "Reapertura de período",
+      "reopenDescription": "Reabrir un período cerrado es una acción excepcional y debe justificarse.",
+      "reopenPeriodLabel": "Período seleccionado",
+      "reopenReasonLabel": "Motivo de reapertura *",
+      "reopenReasonPlaceholder": "Ej.: Corrección de un error de registro...",
+      "reopenAuditNote": "⚠️ Esta acción se registrará en los logs de auditoría",
+      "reopenCta": "Reabrir período",
+      "errors": {
+        "fillAllFields": "Por favor, complete todos los campos",
+        "create": "Error al crear",
+        "loadPeriods": "Error al cargar períodos",
+        "validation": "Error durante la validación",
+        "close": "Error al cerrar",
+        "generateAN": "Error al generar asientos de apertura",
+        "reopenReasonRequired": "Por favor indique el motivo de reapertura",
+        "reopen": "Error al reabrir",
+        "closedPeriodOperation": "Acción no permitida: el período contable está cerrado. Reabra el período para modificar o registrar asientos."
+      }
+    },
       "fiscalYearEnd": "Fin del Año Fiscal",
       "fiscalYearError": "Error al guardar el año fiscal",
       "fiscalYearSaved": "Año fiscal guardado con éxito",
@@ -407,11 +496,44 @@
     "emailPlaceholder": "tu@email.com",
     "firstName": "Nombre",
     "firstNamePlaceholder": "Tu nombre",
-    "lastName": "Nombre",
+    "lastName": "Apellido",
     "lastNamePlaceholder": "Tu apellido",
     "register": "Registrarse",
     "sendResetEmail": "Enviar correo de restablecimiento",
-    "sending": "Enviando..."
+    "sending": "Enviando...",
+    "emailVerification": {
+      "instruction": "Se ha enviado un correo de confirmación. Haz clic en el enlace para verificar tu email."
+    },
+    "tabs": {
+      "login": "Iniciar sesión",
+      "signup": "Registrarse"
+    },
+    "fields": {
+      "email": "Correo electrónico",
+      "password": "Contraseña"
+    },
+    "buttons": {
+      "signin": "Iniciar sesión",
+      "signup": "Registrarse"
+    },
+    "links": {
+      "forgot_password": "¿Olvidaste tu contraseña?"
+    },
+    "signup": {
+      "prompt": "¿Aún no tienes cuenta?",
+      "link": "Crear cuenta",
+      "check_email": "Revisa tu correo para confirmar tu registro",
+      "error": "Error al registrarse"
+    },
+    "signin": {
+      "success": "¡Inicio de sesión exitoso!",
+      "error": "Error al iniciar sesión"
+    },
+    "verify": {
+      "pending_title": "Email no verificado",
+      "pending_description": "Por favor, verifica tu email antes de continuar. Se ha enviado un correo de confirmación.",
+      "go_to_verification": "Ir a verificación"
+    }
   },
   "backupAndExport": "Copia de seguridad y exportación",
   "backupData": "Guardar datos",
@@ -526,7 +648,8 @@
     "underDevelopmentMessage": "Ce module est actuellement en cours de développement. Il sera bientôt disponible.",
     "update": "Mettre à jour",
     "view": "Ver",
-    "year": "Année"
+    "year": "Année",
+    "optional": "(opcional)"
   },
   "company": {
     "fields": {
@@ -2409,7 +2532,10 @@
     "uploaded_at": "Subido el",
     "confirm_delete": "¿Estás seguro de que deseas eliminar este archivo?",
     "max_file_size": "Tamaño máximo: 50 MB",
-    "allowed_formats": "Formatos permitidos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, WebP, TXT"
+    "allowed_formats": "Formatos permitidos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, WebP, TXT",
+    "period_closed_title": "Período Cerrado",
+    "period_closed_error": "No se puede crear un asiento en un período cerrado. Por favor, reabra el período o elija otra fecha.",
+    "period_validation_error": "Error de validación de período"
   },
   "journals": {
     "accountingJournals": "Diarios contables",
@@ -3432,6 +3558,83 @@
       "invoiceOpening": "Abriendo factura en nueva pestaña...",
       "viewError": "Error al abrir la factura"
     }
+  },
+  "paymentConfirmation": {
+    "processingTitle": "Procesando el pago",
+    "processingDescription": "Espera mientras confirmamos tu pago.",
+    "successTitle": "Pago confirmado ✅",
+    "successSubtitle": "Tu suscripción está activa",
+    "planLabel": "Plan",
+    "amountLabel": "Importe",
+    "nextBillingLabel": "Próxima facturación",
+    "confirmationEmail": "Se ha enviado un email de confirmación",
+    "accessGranted": "Acceso a todas las herramientas desbloqueado",
+    "billingPortal": "Gestiona la facturación desde el portal",
+    "goToBilling": "Ver facturación",
+    "sessionIdLabel": "ID de sesión",
+    "redirectingIn5": "Redirigiendo en 5 segundos...",
+    "pendingTitle": "Pago pendiente",
+    "pendingDescription": "Tu pago se está procesando.",
+    "dontCloseTab": "No cierres esta pestaña durante la verificación.",
+    "errorTitle": "Pago rechazado",
+    "errorDescription": "No se pudo procesar el pago.",
+    "errorSuggestions": "Sugerencias",
+    "checkCard": "Revisa los datos de tu tarjeta",
+    "sufficientFunds": "Asegúrate de tener fondos suficientes",
+    "contactSupport": "Contacta con soporte",
+    "tryAgain": "Intentar de nuevo",
+    "needHelp": "¿Necesitas ayuda?",
+    "cancelled": "Pago cancelado",
+    "invalidSession": "Sesión de pago inválida",
+    "processing": "Procesando el pago...",
+    "pendingPayment": "Pago pendiente",
+    "checking": "Comprobando el estado...",
+    "error": "Error al comprobar el pago"
+  },
+  "projects": {
+    "resourceModal": {
+      "title": "Asignar un recurso",
+      "description": "Asignar un usuario a un proyecto con una tasa de asignación",
+      "project": "Proyecto",
+      "projectPlaceholder": "Seleccionar un proyecto",
+      "user": "Usuario",
+      "userPlaceholder": "Seleccionar un usuario",
+      "role": "Rol",
+      "rolePlaceholder": "Ej: Desarrollador, Jefe de proyecto",
+      "allocation": "Asignación (%)",
+      "hourlyRate": "Tarifa por hora",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de fin",
+      "allocate": "Asignar el recurso",
+      "errorProject": "El proyecto es obligatorio",
+      "errorUser": "El usuario es obligatorio",
+      "errorAllocation": "La asignación debe estar entre 1 y 100%",
+      "errorStartDate": "La fecha de inicio es obligatoria",
+      "errorDuplicate": "Este recurso ya está asignado a este proyecto",
+      "errorCreating": "Error al asignar el recurso"
+    },
+    "clientModal": {
+      "title": "Nuevo cliente",
+      "description": "Crear un nuevo cliente para el proyecto",
+      "companyName": "Nombre de la empresa",
+      "companyNamePlaceholder": "Ej: Empresa ABC",
+      "industry": "Sector de actividad",
+      "industryPlaceholder": "Ej: Tecnología, Comercio, etc.",
+      "address": "Dirección",
+      "addressPlaceholder": "123 Calle Principal",
+      "city": "Ciudad",
+      "cityPlaceholder": "Madrid",
+      "postalCode": "Código postal",
+      "postalCodePlaceholder": "28001",
+      "website": "Sitio web",
+      "websitePlaceholder": "https://example.com",
+      "notes": "Notas",
+      "notesPlaceholder": "Información adicional",
+      "create": "Crear cliente",
+      "errorCompanyName": "El nombre de la empresa es obligatorio",
+      "errorCreating": "Error al crear el cliente"
+    },
+    "invoiceCreated": "Factura creada con éxito"
   },
   "projectspage": {
     "title": "Gestión de Proyectos",
@@ -5809,5 +6012,40 @@
     "errorDeletingDocument": "Error al eliminar el documento",
     "errorExportingDocument": "Error al exportar el documento",
     "submissionError": "Error al enviar el formulario"
+  },
+  "ai": {
+    "automatic_analysis": "Análisis automático por IA",
+    "upload_document_instruction": "Sube una factura o recibo para rellenar automáticamente el asiento contable.",
+    "analyzing": "Analizando...",
+    "choose_document": "Elegir un documento (PDF, JPG, PNG)",
+    "extracted_data": "Datos extraídos del documento",
+    "unknown_party": "Tercero desconocido",
+    "invoice": "Factura",
+    "amount_incl_tax": "Importe con IVA",
+    "confidence": "Confianza",
+    "analysis_failed": "Análisis fallido",
+    "unable_to_analyze": "No se pudo analizar el documento",
+    "incomplete_data": "Datos incompletos",
+    "warnings": "Advertencias",
+    "mapping_failed": "Fallo en el mapeo",
+    "unable_to_map_accounts": "No se pudieron mapear las cuentas contables",
+    "analysis_success": "✨ Análisis exitoso",
+    "entry_prefilled": "Asiento rellenado con {score}% de confianza",
+    "unexpected_error": "Ocurrió un error durante el análisis",
+    "no_company_selected": "Ninguna empresa seleccionada",
+    "categorization_in_progress": "Categorización IA en curso...",
+    "categorization_complete": "Categorización IA completa",
+    "suggested_category": "Categoría sugerida",
+    "suggested_account": "Cuenta sugerida",
+    "low_confidence_warning": "⚠️ Confianza baja - Verificación recomendada",
+    "medium_confidence_warning": "Confianza media - Por favor revise",
+    "high_confidence": "Alta confianza",
+    "ai_assistant": "Asistente IA CassKai",
+    "ask_question": "Haz una pregunta...",
+    "thinking": "Pensando...",
+    "no_conversations": "Sin conversaciones",
+    "new_conversation": "Nueva conversación",
+    "context_enriched": "Contexto enriquecido con datos de empresa",
+    "personalized_suggestions": "Sugerencias personalizadas"
   }
 }
