@@ -14,11 +14,12 @@ function fixInputs(src) {
   return src.replace(/<input([^>]*?)>/gs, (m, attrs) => {
     // if already has /> just return
     if (/\/>\s*$/.test(m)) return m;
-    // ignore cases where input is followed by </input> (rare)
-    if (/<\/input>/.test(src)) return m;
-    // if it's a JSX expression like <input>child</input> leave it
-    const after = src.slice(src.indexOf(m) + m.length);
-    if (/\s*<\/input>/.test(after)) return m;
+    
+    // Check only the substring immediately following this match for </input>
+    const matchEnd = src.indexOf(m) + m.length;
+    const after = src.slice(matchEnd, matchEnd + 50); // Look ahead max 50 chars
+    if (/^\s*<\/input>/.test(after)) return m;
+    
     // otherwise ensure space before slash
     const trimmed = attrs.replace(/\s+$/,'');
     return `<input${trimmed} />`;

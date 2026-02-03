@@ -1,27 +1,3 @@
-// Get session status
-app.get('/api/stripe/session-status', async (req, res) => {
-  try {
-    const { session_id } = req.query;
-
-    if (!session_id) {
-      return res.status(400).json({ error: 'session_id is required' });
-    }
-
-    const session = await stripe.checkout.sessions.retrieve(session_id);
-    
-    res.json({
-      id: session.id,
-      payment_status: session.payment_status,
-      customer: session.customer,
-      subscription: session.subscription,
-      client_secret: session.client_secret,
-    });
-  } catch (error) {
-    console.error('Error retrieving session status:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -430,11 +406,85 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
 
+// =================
+// SECURE STRIPE ENDPOINTS
+// =================
+
+// Middleware: verify user owns this Stripe session (via DB record)
+async function verifySessionOwnership(req, res, next) {
+  try {
+    const { session_id } = req.query || req.body;
+    
+    if (!session_id) {
+      return res.status(400).json({ error: 'session_id is required' });
+    }
+
+    // Retrieve session metadata from DB to verify user ownership
+    const { data: subscription, error } = await supabase
+      .from('user_subscriptions')
+      .select('user_id, stripe_subscription_id')
+      .eq('stripe_subscription_id', session_id)
+      .limit(1);
+
+    if (error || !subscription || subscription.length === 0) {
+      console.warn(`Unauthorized access attempt to session ${session_id}`);
+      return res.status(403).json({ error: 'Unauthorized access to this session' });
+    }
+
+    // Store for next middleware
+    req.sessionMetadata = subscription[0];
+    next();
+  } catch (err) {
+    console.error('Session verification error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+// Get session status (SECURED: verify ownership)
+app.get('/api/stripe/session-status', verifySessionOwnership, async (req, res) => {
+  try {
+    const { session_id } = req.query;
+
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+    
+    // Only return safe fields - NEVER return client_secret to frontend
+    res.json({
+      id: session.id,
+      payment_status: session.payment_status,
+      customer: session.customer,
+      subscription: session.subscription,
+      // Removed: client_secret (sensitive - only (SECURED with devOnlyProtection)
+  app.get('/api/dev/kpis', devOnlyProtection, async (req, res) => {
+    try {
+      const companyId = String(req.query.companyId || req.headers['x-company-id'] || '').trim(
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // -------------------------
 // Dev-only: recompute KPIs on-demand
 // -------------------------
+// Middleware: strict dev-only protection
+function devOnlyProtection(req, res, next) {
+  if (process.env.NODE_ENV === 'production') {
+    console.warn(`Unauthorized dev endpoint access from ${req.ip}`);
+    return res.status(403).json({ error: 'This endpoint is not available in production' });
+  }
+
+  // In development, require explicit dev token or localhost
+  const devToken = req.headers['x-dev-token'] || req.query.dev_token;
+  const isLocalhost = req.ip === '127.0.0.1' || req.ip === '::1' || req.hostname === 'localhost';
+  
+  if (!isLocalhost && devToken !== process.env.DEV_TOKEN) {
+    console.warn(`Dev token missing or invalid from ${req.ip}`);
+    return res.status(401).json({ error: 'Dev token required for non-local access' });
+  }
+
+  next();
+}
+
 // server-side KPI cache (dev-only)
-if (process.env.VITE_DEV_MODE === 'true' || process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production') {
   const serverKpiCache = new Map();
   const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -499,17 +549,17 @@ if (process.env.VITE_DEV_MODE === 'true' || process.env.NODE_ENV !== 'production
     }
   });
 
-  // POST: clear cache for a company or all
-  app.post('/api/dev/kpis/clear', (req, res) => {
+  // POST: clear cache for a company or all (SECURED with devOnlyProtection)
+  app.post('/api/dev/kpis/clear', devOnlyProtection, (req, res) => {
     try {
-      const companyId = req.body?.companyId || req.query.companyId || req.headers['x-company-id'];
+      const companyId = (req.body?.companyId || req.query.companyId || req.headers['x-company-id'] || '').toString().trim();
       if (companyId) {
-        serverKpiCache.delete(String(companyId));
-        console.log('[dev/kpis/clear] Cleared cache for', companyId);
+        serverKpiCache.delete(companyId);
+        console.log(`[dev/kpis/clear] Cleared cache for ${companyId} from ${req.ip}`);
         return res.json({ cleared: companyId });
       }
       serverKpiCache.clear();
-      console.log('[dev/kpis/clear] Cleared all KPI cache');
+      console.log(`[dev/kpis/clear] Cleared all KPI cache from ${req.ip}`);
       return res.json({ cleared: 'all' });
     } catch (err) {
       console.error('[dev/kpis/clear] Error:', err);

@@ -33,6 +33,15 @@ const url = (p) => `${SUPABASE_URL.replace(/\/$/,'')}/rest/v1/${p}`;
 
 async function fetchJson(u) {
   const res = await fetch(u, { headers });
+  if (!res.ok) {
+    let bodyText;
+    try {
+      bodyText = await res.text();
+    } catch (e) {
+      bodyText = '<unable to read response body>';
+    }
+    throw new Error(`Request to ${u} failed with status ${res.status} ${res.statusText}: ${bodyText}`);
+  }
   return res.json();
 }
 

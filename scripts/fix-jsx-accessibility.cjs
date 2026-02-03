@@ -38,10 +38,12 @@ function processFile(file) {
 
   // Add placeholder and aria-label to <input> without them, preserve self-closing
   src = src.replace(/<input([^>]*?)(\/?\s*)>/gs, (m, attrs, closing) => {
-    if (/aria-label=|aria-labelledby=|title=/.test(attrs) || /placeholder=/.test(attrs)) return `<input${attrs}${closing}>`;
-    // keep closing slash if present
-    const end = closing && closing.includes('/') ? ' /' : '';
-    return `<input aria-label=\"Input\" placeholder=\"\"${attrs}${end}>`;
+    const hasSelfClosingSlash = !!(closing && closing.includes('/'));
+    const suffix = hasSelfClosingSlash ? ' />' : '>';
+    if (/aria-label=|aria-labelledby=|title=/.test(attrs) || /placeholder=/.test(attrs)) {
+      return `<input${attrs}${suffix}`;
+    }
+    return `<input aria-label="Input" placeholder=""${attrs}${suffix}`;
   });
 
   if (src !== orig) fs.writeFileSync(file, src, 'utf8');

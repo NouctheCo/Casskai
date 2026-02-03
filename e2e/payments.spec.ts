@@ -12,8 +12,12 @@ const RUN_AUTHED_E2E =
 
 // Helper function to login
 async function login(page: any) {
-  const testEmail = process.env.TEST_USER_EMAIL || 'test@casskai.app';
-  const testPassword = process.env.TEST_USER_PASSWORD || 'Test123456az';
+  const testEmail = process.env.TEST_USER_EMAIL;
+  const testPassword = process.env.TEST_USER_PASSWORD;
+
+  if (!testEmail || !testPassword) {
+    throw new Error('TEST_USER_EMAIL and TEST_USER_PASSWORD must be set in .env.test.local');
+  }
 
   await page.goto('/login');
   await dismissOverlays(page);
