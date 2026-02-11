@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AccountingStandardAdapter } from '../AccountingStandardAdapter';
+import { AccountingStandardAdapter } from '../accountingStandardAdapter';
 
 // Mock Supabase
 vi.mock('@/lib/supabase', () => ({
@@ -67,25 +67,25 @@ describe('AccountingStandardAdapter', () => {
   });
 
   describe('getStandardName', () => {
-    it('should return "Plan Comptable Général (PCG)" for PCG', () => {
+    it('should return full name for PCG', () => {
       const name = AccountingStandardAdapter.getStandardName('PCG');
       expect(name).toContain('Plan Comptable Général');
-      expect(name).toContain('PCG');
+      expect(name).toContain('France');
     });
 
-    it('should return "SYSCOHADA" for SYSCOHADA', () => {
+    it('should return full name for SYSCOHADA', () => {
       const name = AccountingStandardAdapter.getStandardName('SYSCOHADA');
-      expect(name).toContain('SYSCOHADA');
+      expect(name).toContain('OHADA');
     });
 
-    it('should return "IFRS" for IFRS', () => {
+    it('should return full name for IFRS', () => {
       const name = AccountingStandardAdapter.getStandardName('IFRS');
-      expect(name).toContain('IFRS');
+      expect(name).toContain('International Financial Reporting Standards');
     });
 
-    it('should return "SCF" for SCF', () => {
+    it('should return full name for SCF', () => {
       const name = AccountingStandardAdapter.getStandardName('SCF');
-      expect(name).toContain('SCF');
+      expect(name).toContain('Algérie');
     });
   });
 
@@ -166,15 +166,18 @@ describe('AccountingStandardAdapter', () => {
     });
   });
 
-  describe('isSyscohadaAccount', () => {
-    it('should identify SYSCOHADA-specific accounts', () => {
+  describe('isHAO (SYSCOHADA-specific accounts)', () => {
+    it('should identify SYSCOHADA HAO accounts (class 8)', () => {
       // Comptes HAO (8x) spécifiques SYSCOHADA
-      expect(AccountingStandardAdapter.isSyscohadaAccount('838000')).toBe(true);
-      expect(AccountingStandardAdapter.isSyscohadaAccount('848000')).toBe(true);
+      expect(AccountingStandardAdapter.isHAO('838000', 'SYSCOHADA')).toBe(true);
+      expect(AccountingStandardAdapter.isHAO('848000', 'SYSCOHADA')).toBe(true);
 
-      // Comptes ordinaires (pas spécifiques SYSCOHADA)
-      expect(AccountingStandardAdapter.isSyscohadaAccount('701000')).toBe(false);
-      expect(AccountingStandardAdapter.isSyscohadaAccount('601000')).toBe(false);
+      // Comptes ordinaires (pas HAO)
+      expect(AccountingStandardAdapter.isHAO('701000', 'SYSCOHADA')).toBe(false);
+      expect(AccountingStandardAdapter.isHAO('601000', 'SYSCOHADA')).toBe(false);
+
+      // HAO n'existe pas pour PCG
+      expect(AccountingStandardAdapter.isHAO('838000', 'PCG')).toBe(false);
     });
   });
 });

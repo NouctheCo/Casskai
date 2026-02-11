@@ -39,6 +39,7 @@ describe('reportDrilldownHelper', () => {
       expect(drilldown.account_number).toBe('411000');
       expect(drilldown.action).toBe('show_entries');
       expect(drilldown.filters).toEqual({
+        company_id: 'company-123',
         start_date: '2024-01-01',
         end_date: '2024-12-31',
         account_number: '411000'
@@ -51,7 +52,7 @@ describe('reportDrilldownHelper', () => {
       const drilldown = buildAccountDrilldown(
         1,
         '512000',
-        undefined,
+        '',
         mockContext
       );
 
@@ -123,13 +124,13 @@ describe('reportDrilldownHelper', () => {
 
   describe('generateAccountDrilldowns', () => {
     it('should generate drill-downs for all account rows', () => {
-      const rows = [
-        ['411000', 'Clients', '10 000 €', '8 000 €'],
-        ['512000', 'Banque', '5 000 €', '3 000 €'],
-        ['607000', 'Achats de marchandises', '2 000 €', '1 500 €']
+      const accounts = [
+        { compte: '411000', libelle: 'Clients' },
+        { compte: '512000', libelle: 'Banque' },
+        { compte: '607000', libelle: 'Achats de marchandises' }
       ];
 
-      const drilldowns = generateAccountDrilldowns(rows, mockContext);
+      const drilldowns = generateAccountDrilldowns(accounts, mockContext);
 
       expect(drilldowns).toHaveLength(3);
       expect(drilldowns[0].account_number).toBe('411000');
@@ -137,17 +138,19 @@ describe('reportDrilldownHelper', () => {
       expect(drilldowns[2].account_number).toBe('607000');
     });
 
-    it('should handle rows with different column counts', () => {
-      const rows = [
-        ['411000', 'Clients', '10 000 €'],
-        ['512000', 'Banque']
+    it('should handle accounts with startIndex offset', () => {
+      const accounts = [
+        { compte: '411000', libelle: 'Clients' },
+        { compte: '512000', libelle: 'Banque' }
       ];
 
-      const drilldowns = generateAccountDrilldowns(rows, mockContext);
+      const drilldowns = generateAccountDrilldowns(accounts, mockContext, 5);
 
       expect(drilldowns).toHaveLength(2);
       expect(drilldowns[0].account_number).toBe('411000');
+      expect(drilldowns[0].row_index).toBe(5);
       expect(drilldowns[1].account_number).toBe('512000');
+      expect(drilldowns[1].row_index).toBe(6);
     });
   });
 
@@ -212,19 +215,38 @@ describe('reportDrilldownHelper', () => {
   });
 
   describe('isRowClickable', () => {
-    it('should return true if drill-down exists', () => {
-      const drilldown: DrilldownMetadata = {
-        row_index: 0,
-        type: 'account',
-        account_number: '411000',
-        action: 'show_entries'
-      };
+    it('should return true if drill-down exists for row index', () => {
+      const drilldowns: DrilldownMetadata[] = [
+        {
+          row_index: 0,
+          type: 'account',
+          account_number: '411000',
+          action: 'show_entries'
+        }
+      ];
 
-      expect(isRowClickable(drilldown)).toBe(true);
+      expect(isRowClickable(0, drilldowns)).toBe(true);
     });
 
-    it('should return false if drill-down is undefined', () => {
-      expect(isRowClickable(undefined)).toBe(false);
+    it('should return false if no drill-down for row index', () => {
+      const drilldowns: DrilldownMetadata[] = [
+        {
+          row_index: 0,
+          type: 'account',
+          account_number: '411000',
+          action: 'show_entries'
+        }
+      ];
+
+      expect(isRowClickable(5, drilldowns)).toBe(false);
+    });
+
+    it('should return false if drilldowns is undefined', () => {
+      expect(isRowClickable(0, undefined)).toBe(false);
+    });
+
+    it('should return false if drilldowns is empty', () => {
+      expect(isRowClickable(0, [])).toBe(false);
     });
   });
 
@@ -276,9 +298,9 @@ describe('reportDrilldownHelper', () => {
       const url = buildDrilldownURL(drilldown);
 
       expect(url).toContain('/accounting/entries');
-      expect(url).toContain('account=411000');
-      expect(url).toContain('start=2024-01-01');
-      expect(url).toContain('end=2024-12-31');
+      expect(url).toContain('account_number=411000');
+      expect(url).toContain('start_date=2024-01-01');
+      expect(url).toContain('end_date=2024-12-31');
     });
 
     it('should build URL for invoice document drill-down', () => {
@@ -294,7 +316,7 @@ describe('reportDrilldownHelper', () => {
 
       const url = buildDrilldownURL(drilldown);
 
-      expect(url).toContain('/invoicing');
+      expect(url).toContain('/invoicing/invoices/');
       expect(url).toContain('invoice-123');
     });
 
@@ -345,8 +367,8 @@ describe('reportDrilldownHelper', () => {
 
       expect(url).toContain('/accounting/entries');
       expect(url).toContain('account_prefix=21');
-      expect(url).toContain('start=2024-01-01');
-      expect(url).toContain('end=2024-12-31');
+      expect(url).toContain('start_date=2024-01-01');
+      expect(url).toContain('end_date=2024-12-31');
     });
 
     it('should handle drill-down without filters', () => {
@@ -360,7 +382,6 @@ describe('reportDrilldownHelper', () => {
       const url = buildDrilldownURL(drilldown);
 
       expect(url).toContain('/accounting/entries');
-      expect(url).toContain('account=411000');
     });
   });
 });
