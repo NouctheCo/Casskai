@@ -5,6 +5,7 @@
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageVisibility } from '@/hooks/usePageVisibility';
 import {
@@ -45,6 +46,7 @@ import { logger } from '@/lib/logger';
 import { kpiCacheService } from '@/services/kpiCacheService';
 import ThresholdAlert from '@/components/dashboard/ThresholdAlert';
 import { RealtimeStatusIndicator } from '@/components/dashboard/RealtimeStatusIndicator';
+// Chart colors - work well in both light and dark modes
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 // Helper to get currency symbol based on company settings
@@ -118,6 +120,7 @@ const formatUnit = (unit: string, t?: (key: string) => string) => {
 
 export const RealOperationalDashboard: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -258,14 +261,54 @@ export const RealOperationalDashboard: React.FC = () => {
   }, []);
   if (loading || !kpiData) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="space-y-6 p-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-8 w-64 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-lg animate-shimmer bg-[length:200%_100%]" />
+            <div className="h-4 w-96 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded animate-shimmer bg-[length:200%_100%]" />
+          </div>
+          <div className="h-10 w-32 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-lg animate-shimmer bg-[length:200%_100%]" />
+        </div>
+
+        {/* Realtime indicator skeleton */}
+        <div className="h-12 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-xl animate-shimmer bg-[length:200%_100%]" />
+
+        {/* KPI Cards skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-32 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-xl animate-shimmer bg-[length:200%_100%]" />
+          ))}
+        </div>
+
+        {/* Charts skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-80 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-xl animate-shimmer bg-[length:200%_100%]" />
+          <div className="h-80 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-xl animate-shimmer bg-[length:200%_100%]" />
+          <div className="lg:col-span-2 h-96 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-xl animate-shimmer bg-[length:200%_100%]" />
+        </div>
+
+        {/* AI Analysis skeleton */}
+        <div className="h-64 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-xl animate-shimmer bg-[length:200%_100%]" />
       </div>
     );
   }
   const metrics = realDashboardKpiService.generateMetrics(kpiData, t);
   const charts = realDashboardKpiService.generateCharts(kpiData, t);
   const expenseTotal = charts[2]?.data?.reduce((sum, item) => sum + ((item as { value: number }).value || 0), 0) || 0;
+
+  // Map KPI IDs to navigation paths
+  const getNavigationPath = (metricId: string): string | null => {
+    const pathMap: Record<string, string> = {
+      'revenue': '/invoicing',
+      'expenses': '/purchases',
+      'profit': '/reports',
+      'invoices_count': '/invoicing',
+      'pending_invoices': '/invoicing',
+      'third_parties_count': '/third-parties',
+    };
+    return pathMap[metricId] || null;
+  };
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -316,62 +359,83 @@ export const RealOperationalDashboard: React.FC = () => {
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="region" aria-label="Indicateurs clés de performance">
-        {metrics.map((metric) => (
-          <Card key={metric.id} className="relative overflow-hidden">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {metric.label}
-                </CardTitle>
-                {metric.trend === 'up' && <TrendingUp className="w-4 h-4 text-green-600" />}
-                {metric.trend === 'down' && <TrendingDown className="w-4 h-4 text-red-600" />}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="text-2xl font-bold">
-                  {metric.unit === 'currency'
-                    ? formatCurrency(Number(metric.value ?? 0))
-                    : (
-                      <>
-                        {Number(metric.value ?? 0).toLocaleString(i18n.language || 'fr-FR', {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: metric.unit === 'percentage' ? 1 : 0,
-                        })}
-                        <span className="text-sm font-normal text-muted-foreground ml-1">
-                          {formatUnit(metric.unit || '', t)}
-                        </span>
-                      </>
-                    )
-                  }
+        {metrics.map((metric) => {
+          const navigationPath = getNavigationPath(metric.id);
+          const isClickable = !!navigationPath;
+
+          return (
+            <Card
+              key={metric.id}
+              className={`relative overflow-hidden ${
+                isClickable
+                  ? 'cursor-pointer hover:ring-2 hover:ring-blue-500/30 transition-all hover:shadow-lg'
+                  : ''
+              }`}
+              onClick={isClickable ? () => navigate(navigationPath) : undefined}
+              role={isClickable ? 'button' : undefined}
+              tabIndex={isClickable ? 0 : undefined}
+              onKeyDown={isClickable ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  navigate(navigationPath);
+                }
+              } : undefined}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    {metric.label}
+                  </CardTitle>
+                  {metric.trend === 'up' && <TrendingUp className="w-4 h-4 text-green-600" />}
+                  {metric.trend === 'down' && <TrendingDown className="w-4 h-4 text-red-600" />}
                 </div>
-                {metric.change !== undefined && metric.period && (
-                  <div className="flex items-center gap-2 text-xs">
-                    <Badge
-                      variant={metric.trend === 'up' ? 'default' : metric.trend === 'down' ? 'destructive' : 'secondary'}
-                      className="text-xs"
-                    >
-                      {metric.trend === 'up' ? '+' : metric.trend === 'down' ? '-' : ''}
-                      {metric.change.toFixed(1)}%
-                    </Badge>
-                    <span className="text-muted-foreground">{metric.period}</span>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="text-2xl font-bold">
+                    {metric.unit === 'currency'
+                      ? formatCurrency(Number(metric.value ?? 0))
+                      : (
+                        <>
+                          {Number(metric.value ?? 0).toLocaleString(i18n.language || 'fr-FR', {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: metric.unit === 'percentage' ? 1 : 0,
+                          })}
+                          <span className="text-sm font-normal text-muted-foreground ml-1">
+                            {formatUnit(metric.unit || '', t)}
+                          </span>
+                        </>
+                      )
+                    }
                   </div>
-                )}
-                {metric.importance === 'high' && (
-                  <div
-                    className={`absolute top-0 right-0 w-2 h-full ${
-                      metric.trend === 'up'
-                        ? 'bg-green-500'
-                        : metric.trend === 'down'
-                        ? 'bg-red-500'
-                        : 'bg-blue-500'
-                    }`}
-                  />
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                  {metric.change !== undefined && metric.period && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <Badge
+                        variant={metric.trend === 'up' ? 'default' : metric.trend === 'down' ? 'destructive' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {metric.trend === 'up' ? '+' : metric.trend === 'down' ? '-' : ''}
+                        {metric.change.toFixed(1)}%
+                      </Badge>
+                      <span className="text-muted-foreground">{metric.period}</span>
+                    </div>
+                  )}
+                  {metric.importance === 'high' && (
+                    <div
+                      className={`absolute top-0 right-0 w-2 h-full ${
+                        metric.trend === 'up'
+                          ? 'bg-green-500'
+                          : metric.trend === 'down'
+                          ? 'bg-red-500'
+                          : 'bg-blue-500'
+                      }`}
+                    />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

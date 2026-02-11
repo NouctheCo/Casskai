@@ -18,6 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useTranslation } from 'react-i18next';
 import {
   Building2,
   Calculator,
@@ -30,7 +31,8 @@ import {
   Settings,
   CheckCircle,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  AlertCircle
 } from 'lucide-react';
 import { moduleService } from '@/services/moduleService';
 
@@ -79,9 +81,11 @@ const availableModules: ModuleOption[] = moduleService.getAllModules().map(modul
 
 const ModulesStep: React.FC = () => {
   const { state, updateSelectedModules, goToNextStep, goToPreviousStep } = useOnboarding();
+  const { t } = useTranslation();
   const [selectedModules, setSelectedModules] = useState<string[]>(
     state.data?.selectedModules || []
   );
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleModuleToggle = (moduleId: string) => {
     setSelectedModules(prev =>
@@ -89,6 +93,7 @@ const ModulesStep: React.FC = () => {
         ? prev.filter(id => id !== moduleId)
         : [...prev, moduleId]
     );
+    if (validationError) setValidationError(null);
   };
 
   const handleSelectRecommended = () => {
@@ -96,13 +101,19 @@ const ModulesStep: React.FC = () => {
       .filter(module => module.recommended)
       .map(module => module.id);
     setSelectedModules(recommended);
+    if (validationError) setValidationError(null);
   };
 
   const handleSelectAll = () => {
     setSelectedModules(availableModules.map(module => module.id));
+    if (validationError) setValidationError(null);
   };
 
   const handleContinue = () => {
+    if (selectedModules.length === 0) {
+      setValidationError(t('onboarding.modules.validationError', { defaultValue: 'Veuillez selectionner au moins un module pour continuer.' }));
+      return;
+    }
     updateSelectedModules(selectedModules);
     goToNextStep();
   };
@@ -142,11 +153,21 @@ const ModulesStep: React.FC = () => {
             selectedModules={selectedModules}
             onModuleToggle={handleModuleToggle}
           />
+          {validationError && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center space-x-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400"
+            >
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{validationError}</span>
+            </motion.div>
+          )}
           <ModulesNavigation
             onPrevious={goToPreviousStep}
             onContinue={handleContinue}
             canGoPrevious={!!(state.currentStep && state.currentStep.order > 1)}
-            canContinue={selectedCount > 0}
+            canContinue={true}
           />
         </CardContent>
       </Card>
@@ -165,7 +186,7 @@ const ModulesHeader: React.FC = () => (
       <Settings className="w-8 h-8 text-white" />
     </motion.div>
     
-    <CardTitle className="text-2xl font-bold gradient-text mb-2">
+    <CardTitle className="text-2xl font-bold font-heading gradient-text mb-2">
       Sélection des Modules
     </CardTitle>
     <CardDescription className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">

@@ -11,12 +11,14 @@
  */
 
 import { useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import LanguageStep from './onboarding/LanguageStep';
 import WelcomeStep from './onboarding/WelcomeStep';
 import PreferencesStep from './onboarding/PreferencesStep';
 import CompanyStep from './onboarding/CompanyStep';
 import ModulesStep from './onboarding/ModulesStep';
 import CompleteStep from './onboarding/CompleteStep';
+import OnboardingProgressBar from '@/components/onboarding/OnboardingProgressBar';
 import { useOnboarding } from '@/hooks/useOnboarding';
 
 export default function OnboardingPage() {
@@ -52,9 +54,19 @@ export default function OnboardingPage() {
     <CompleteStep key="complete" />,
   ];
 
+  const currentOrder = state.currentStep?.order ?? 1;
+  const completedSteps = state.data?.completedSteps ?? [];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-  {steps[(state.currentStep?.order ?? 1) - 1]}
+      <OnboardingProgressBar
+        currentStepOrder={currentOrder}
+        totalSteps={steps.length}
+        completedSteps={completedSteps}
+      />
+      <AnimatePresence mode="wait">
+        {steps[currentOrder - 1]}
+      </AnimatePresence>
     </div>
   );
 }

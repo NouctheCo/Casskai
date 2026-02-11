@@ -74,7 +74,7 @@ const CompletionHeader: React.FC<{
       {isCompleted ? <CheckCircle className="w-10 h-10 text-white" /> : <Sparkles className="w-10 h-10 text-white animate-pulse" />}
     </motion.div>
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}>
-      <CardTitle className="text-3xl font-bold gradient-text mb-3">
+      <CardTitle className="text-3xl font-bold font-heading gradient-text mb-3">
         {isCompleted ? t('onboarding.complete.welcomeTitle', 'Bienvenue dans CassKai !') : t('onboarding.complete.configuringTitle', 'Configuration en cours...')}
       </CardTitle>
       <CardDescription className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -142,36 +142,166 @@ const ErrorSection: React.FC<{
     </motion.div>
   );
 };
-const CompletedContent: React.FC<{
+const SummaryReviewPanel: React.FC<{
   companyData: Record<string, unknown>;
-  enabledModulesCount: number;
-  nextSteps: typeof nextSteps;
-  handleNavigate: (path: string) => void;
-}> = ({ companyData, enabledModulesCount, nextSteps, handleNavigate }) => (
-  <>
+  selectedModules: string[];
+  preferences: Record<string, unknown>;
+  t: (key: string, options?: Record<string, unknown>) => string;
+}> = ({ companyData, selectedModules, preferences, t }) => {
+  const moduleLabels: Record<string, string> = {
+    accounting: 'Comptabilite',
+    invoicing: 'Facturation',
+    crm: 'CRM & Ventes',
+    inventory: 'Stocks & Inventaire',
+    purchases: 'Achats',
+    projects: 'Projets',
+    reports: 'Rapports & Analytics',
+    banking: 'Connexions Bancaires',
+    dashboard: 'Tableau de bord',
+    settings: 'Parametres',
+    users: 'Utilisateurs',
+    security: 'Securite',
+  };
+
+  const countryLabels: Record<string, string> = {
+    FR: 'France', SN: 'Senegal', CI: "Cote d'Ivoire", ML: 'Mali',
+    BF: 'Burkina Faso', BJ: 'Benin', TG: 'Togo', NE: 'Niger',
+    CM: 'Cameroun', MA: 'Maroc', TN: 'Tunisie', DZ: 'Algerie',
+  };
+
+  const standardLabels: Record<string, string> = {
+    PCG: 'PCG (France)', SYSCOHADA: 'SYSCOHADA (Afrique)',
+    IFRS: 'IFRS International', OTHER: 'Autre',
+  };
+
+  return (
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6 }} className="mb-8">
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-6 text-center">Récapitulatif de votre configuration</h3>
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-600 dark:border-gray-700">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center"><Users className="w-5 h-5 text-blue-600 dark:text-blue-400" /></div>
-            <div>
-              <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white">Entreprise</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{String(companyData.name ?? '')}</p>
+      <h3 className="text-xl font-heading font-semibold text-gray-900 dark:text-gray-100 mb-6 text-center">
+        {t('onboarding.complete.summaryTitle', { defaultValue: 'Recapitulatif de votre configuration' })}
+      </h3>
+
+      <div className="space-y-4">
+        {/* Company info */}
+        <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+              <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
+            <h4 className="font-semibold text-gray-900 dark:text-white">
+              {t('onboarding.complete.companySection', { defaultValue: 'Entreprise' })}
+            </h4>
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <span className="text-gray-500 dark:text-gray-400">{t('onboarding.complete.companyName', { defaultValue: 'Nom' })}</span>
+              <p className="font-medium text-gray-900 dark:text-white">{String(companyData.name || '-')}</p>
+            </div>
+            <div>
+              <span className="text-gray-500 dark:text-gray-400">{t('onboarding.complete.companyCountry', { defaultValue: 'Pays' })}</span>
+              <p className="font-medium text-gray-900 dark:text-white">{countryLabels[String(companyData.country || '')] || String(companyData.country || '-')}</p>
+            </div>
+            {Boolean(companyData.sector) && (
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">{t('onboarding.complete.companySector', { defaultValue: 'Secteur' })}</span>
+                <p className="font-medium text-gray-900 dark:text-white">{String(companyData.sector)}</p>
+              </div>
+            )}
+            {Boolean(companyData.email) && (
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">{t('onboarding.complete.companyEmail', { defaultValue: 'Email' })}</span>
+                <p className="font-medium text-gray-900 dark:text-white">{String(companyData.email)}</p>
+              </div>
+            )}
+            {Boolean(companyData.city) && (
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">{t('onboarding.complete.companyCity', { defaultValue: 'Ville' })}</span>
+                <p className="font-medium text-gray-900 dark:text-white">{String(companyData.city)}</p>
+              </div>
+            )}
+            {Boolean(companyData.ceoName) && (
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">{t('onboarding.complete.companyCeo', { defaultValue: 'Dirigeant' })}</span>
+                <p className="font-medium text-gray-900 dark:text-white">{String(companyData.ceoName)}</p>
+              </div>
+            )}
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-600 dark:border-gray-700">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center"><Settings className="w-5 h-5 text-purple-600 dark:text-purple-400" /></div>
-            <div>
-              <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white">Modules</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{enabledModulesCount} module{enabledModulesCount > 1 ? 's' : ''} activé{enabledModulesCount > 1 ? 's' : ''}</p>
+
+        {/* Preferences */}
+        <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+              <Settings className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
+            <h4 className="font-semibold text-gray-900 dark:text-white">
+              {t('onboarding.complete.preferencesSection', { defaultValue: 'Preferences' })}
+            </h4>
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {Boolean(preferences.accountingStandard) && (
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">{t('onboarding.complete.accountingStandard', { defaultValue: 'Standard comptable' })}</span>
+                <p className="font-medium text-gray-900 dark:text-white">{standardLabels[String(preferences.accountingStandard)] || String(preferences.accountingStandard)}</p>
+              </div>
+            )}
+            {Boolean(companyData.currency || companyData.default_currency) && (
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">{t('onboarding.complete.currency', { defaultValue: 'Devise' })}</span>
+                <p className="font-medium text-gray-900 dark:text-white">{String(companyData.currency || companyData.default_currency)}</p>
+              </div>
+            )}
+            {Boolean(preferences.language) && (
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">{t('onboarding.complete.language', { defaultValue: 'Langue' })}</span>
+                <p className="font-medium text-gray-900 dark:text-white">{String(preferences.language) === 'fr' ? 'Francais' : String(preferences.language) === 'en' ? 'English' : String(preferences.language) === 'es' ? 'Espanol' : String(preferences.language)}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Modules */}
+        <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+              <Settings className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <h4 className="font-semibold text-gray-900 dark:text-white">
+              {t('onboarding.complete.modulesSection', { defaultValue: 'Modules actives' })} ({selectedModules.length})
+            </h4>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {selectedModules.map((mod) => (
+              <span
+                key={mod}
+                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300"
+              >
+                <CheckCircle className="w-3 h-3 mr-1.5" />
+                {moduleLabels[mod] || mod}
+              </span>
+            ))}
           </div>
         </div>
       </div>
     </motion.div>
+  );
+};
+
+const CompletedContent: React.FC<{
+  companyData: Record<string, unknown>;
+  enabledModulesCount: number;
+  selectedModules: string[];
+  preferences: Record<string, unknown>;
+  nextSteps: typeof nextSteps;
+  handleNavigate: (path: string) => void;
+  t: (key: string, options?: Record<string, unknown>) => string;
+}> = ({ companyData, selectedModules, preferences, nextSteps, handleNavigate, t }) => (
+  <>
+    <SummaryReviewPanel
+      companyData={companyData}
+      selectedModules={selectedModules}
+      preferences={preferences}
+      t={t}
+    />
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.6 }} className="mb-8">
       <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-6 text-center">Prochaines étapes recommandées</h3>
       <div className="grid gap-4">
@@ -372,11 +502,14 @@ export default function CompleteStep() {
             goBackToCompanyStep={goBackToCompanyStep}
           />
           {isCompleted && (
-            <CompletedContent 
-              companyData={state.data?.companyProfile as Record<string, unknown> || {}} 
-              enabledModulesCount={enabledModulesCount} 
-              nextSteps={nextSteps} 
-              handleNavigate={handleNavigate} 
+            <CompletedContent
+              companyData={state.data?.companyProfile as Record<string, unknown> || {}}
+              enabledModulesCount={enabledModulesCount}
+              selectedModules={state.data?.selectedModules || []}
+              preferences={state.data?.preferences as Record<string, unknown> || {}}
+              nextSteps={nextSteps}
+              handleNavigate={handleNavigate}
+              t={t}
             />
           )}
         </CardContent>

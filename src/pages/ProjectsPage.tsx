@@ -19,6 +19,7 @@ import { toastError, toastSuccess } from '@/lib/toast-helpers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useProjects } from '@/hooks/useProjects';
+import { EmptyList } from '@/components/ui/EmptyState';
 import { 
   KanbanSquare, 
   PlusCircle, 
@@ -774,11 +775,15 @@ export default function ProjectsPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <KanbanSquare className="mx-auto h-16 w-16 text-primary/50" />
-                    <p className="mt-4 text-lg text-muted-foreground">Aucun projet pour le moment</p>
-                    <p className="text-sm text-muted-foreground mb-4">Commencez par créer votre premier projet</p>
-                  </div>
+                  <EmptyList
+                    icon={KanbanSquare}
+                    title="Aucun projet pour le moment"
+                    description="Commencez par creer votre premier projet pour suivre vos activites et budgets."
+                    action={{
+                      label: 'Creer un projet',
+                      onClick: () => setShowProjectForm(true),
+                    }}
+                  />
                 )}
               </CardContent>
             </Card>
@@ -835,9 +840,29 @@ export default function ProjectsPage() {
                   </div>
                   {/* Liste des tâches */}
                   {tasksLoading ? (
-                    <div className="text-center py-8">Chargement des tâches...</div>
+                    <div className="space-y-3 py-4">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
+                          <div className="skeleton-shimmer h-10 w-10 rounded-lg" />
+                          <div className="flex-1 space-y-2">
+                            <div className="skeleton-shimmer h-4 w-3/4 rounded" />
+                            <div className="skeleton-shimmer h-3 w-1/2 rounded" />
+                          </div>
+                          <div className="skeleton-shimmer h-6 w-20 rounded-full" />
+                        </div>
+                      ))}
+                    </div>
                   ) : allTasks.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">Aucune tâche à afficher</div>
+                    <EmptyList
+                      icon={CheckCircle2}
+                      title="Aucune tache"
+                      description="Creez des taches pour organiser le travail au sein de vos projets."
+                      action={{
+                        label: 'Nouvelle tache',
+                        onClick: () => setIsTaskModalOpen(true),
+                      }}
+                      iconSize="sm"
+                    />
                   ) : allTasks.map((task) => {
                     const project = projects.find(p => p.id === task.project_id);
                     return (
@@ -913,14 +938,29 @@ export default function ProjectsPage() {
               </CardHeader>
               <CardContent>
                 {resourcesLoading ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Chargement des ressources...</p>
+                  <div className="space-y-3 py-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
+                        <div className="skeleton-shimmer h-12 w-12 rounded-full" />
+                        <div className="flex-1 space-y-2">
+                          <div className="skeleton-shimmer h-4 w-1/2 rounded" />
+                          <div className="skeleton-shimmer h-3 w-1/3 rounded" />
+                        </div>
+                        <div className="skeleton-shimmer h-8 w-24 rounded-lg" />
+                      </div>
+                    ))}
                   </div>
                 ) : allResources.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Aucune ressource allouée</p>
-                    <p className="text-sm text-muted-foreground mt-2">Cliquez sur "Allouer une ressource" pour commencer</p>
-                  </div>
+                  <EmptyList
+                    icon={Users}
+                    title="Aucune ressource allouee"
+                    description="Allouez des membres de votre equipe a vos projets pour suivre leur charge et disponibilite."
+                    action={{
+                      label: 'Allouer une ressource',
+                      onClick: () => setIsResourceModalOpen(true),
+                    }}
+                    iconSize="sm"
+                  />
                 ) : (
                   <div className="space-y-4">
                     {allResources.map((resource) => (
@@ -1037,13 +1077,29 @@ export default function ProjectsPage() {
                 </div>
                 <div className="space-y-4">
                   {timesheetsLoading ? (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">Chargement des timesheets...</p>
+                    <div className="space-y-3 py-4">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
+                          <div className="skeleton-shimmer h-10 w-10 rounded-lg" />
+                          <div className="flex-1 space-y-2">
+                            <div className="skeleton-shimmer h-4 w-2/3 rounded" />
+                            <div className="skeleton-shimmer h-3 w-1/3 rounded" />
+                          </div>
+                          <div className="skeleton-shimmer h-6 w-16 rounded" />
+                        </div>
+                      ))}
                     </div>
                   ) : allTimesheets.length === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">Aucun timesheet à afficher</p>
-                    </div>
+                    <EmptyList
+                      icon={Timer}
+                      title="Aucun timesheet"
+                      description="Enregistrez le temps passe sur vos projets pour un suivi precis des couts et de la productivite."
+                      action={{
+                        label: 'Nouveau timesheet',
+                        onClick: () => setIsTimesheetModalOpen(true),
+                      }}
+                      iconSize="sm"
+                    />
                   ) : (
                     allTimesheets.map((timesheet) => {
                       // Obtenir le badge de statut

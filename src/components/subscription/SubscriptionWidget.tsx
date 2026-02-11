@@ -163,7 +163,15 @@ const SubscriptionWidget: React.FC = () => {
                   {usageData.users.current}/{usageData.users.limit}
                 </span>
               </div>
-              <Progress value={usagePercentage} className="h-2" />
+              <Progress
+                value={usagePercentage}
+                className="h-2"
+                role="progressbar"
+                aria-label="Utilisation des utilisateurs"
+                aria-valuenow={usagePercentage}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              />
             </div>
           )}
           {/* Warnings */}
@@ -179,20 +187,22 @@ const SubscriptionWidget: React.FC = () => {
           )}
           {/* Actions */}
           <div className="flex space-x-2 pt-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="flex-1"
               onClick={() => navigate('/billing')}
+              aria-label="Gérer l'abonnement"
             >
               <Settings className="w-4 h-4 mr-2" />
               Gérer
             </Button>
             {plan.id === 'starter' && (
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                 onClick={() => navigate('/pricing')}
+                aria-label="Améliorer le plan"
               >
                 <ArrowUpCircle className="w-4 h-4 mr-2" />
                 Upgrade

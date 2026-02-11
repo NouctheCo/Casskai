@@ -3726,10 +3726,23 @@
       "configuringSubtitle": "Estamos preparando su espacio de trabajo personalizado...",
       "configuringTitle": "Configuration en cours...",
       "welcomeSubtitle": "Votre plateforme est prête ! Vous pouvez maintenant commencer à gérer su entreprise avec CassKai.",
-      "welcomeTitle": "Bienvenue dans CassKai !"
+      "welcomeTitle": "Bienvenido a CassKai!",
+      "summaryTitle": "Resumen de su configuracion",
+      "companySection": "Empresa",
+      "companyName": "Nombre",
+      "companyCountry": "Pais",
+      "companySector": "Sector",
+      "companyEmail": "Email",
+      "companyCity": "Ciudad",
+      "companyCeo": "Director",
+      "preferencesSection": "Preferencias",
+      "accountingStandard": "Norma contable",
+      "currency": "Moneda",
+      "language": "Idioma",
+      "modulesSection": "Modulos activados"
     },
     "completion": {
-      "explore_dashboard": "Explorer le tableau de bord",
+      "explore_dashboard": "Explorar el panel",
       "import_data": "Importar sus datos",
       "invite_team": "Invitar a su equipo",
       "next_steps": "Prochaines étapes",
@@ -3744,13 +3757,22 @@
       "subtitle": "Personnalisez su expérience CassKai selon sus besoins",
       "title": "Configurez sus préférences"
     },
+    "progress": {
+      "stepOf": "Paso {{current}} de {{total}}",
+      "language": "Idioma",
+      "welcome": "Bienvenida",
+      "company": "Empresa",
+      "preferences": "Preferencias",
+      "modules": "Modulos",
+      "complete": "Finalizacion"
+    },
     "steps": {
-      "company": "Entreprise",
-      "companyDesc": "Configurez su société",
-      "features": "Fonctionnalités",
-      "featuresDesc": "Découvrez nos modules",
-      "preferences": "Préférences",
-      "preferencesDesc": "Personnalisez su expérience"
+      "company": "Empresa",
+      "companyDesc": "Configure su empresa",
+      "features": "Funcionalidades",
+      "featuresDesc": "Descubra nuestros modulos",
+      "preferences": "Preferencias",
+      "preferencesDesc": "Personalice su experiencia"
     },
     "welcome": {
       "duration": "⏱️ Configuration estimée : 3-5 minutes",

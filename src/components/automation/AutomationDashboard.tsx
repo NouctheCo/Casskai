@@ -294,7 +294,7 @@ export function AutomationDashboard() {
                       {workflows.slice(0, 5).map((workflow) => (
                         <div key={workflow.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow">
                           <div className="flex items-center space-x-3">
-                            <div className={`w-3 h-3 rounded-full ${workflow.is_active ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                            <div className={`w-3 h-3 rounded-full ${workflow.is_active ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} aria-label={workflow.is_active ? 'Actif' : 'Inactif'} />
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">{workflow.name}</p>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -395,6 +395,7 @@ export function AutomationDashboard() {
                           size="sm"
                           onClick={() => setSelectedWorkflow(workflow.id)}
                           title="Voir l'historique"
+                          aria-label="Voir l'historique"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -403,6 +404,7 @@ export function AutomationDashboard() {
                           size="sm"
                           onClick={() => handleExecuteWorkflow(workflow.id)}
                           title="Exécuter maintenant"
+                          aria-label="Exécuter maintenant"
                         >
                           <Play className="h-4 w-4" />
                         </Button>
@@ -414,6 +416,7 @@ export function AutomationDashboard() {
                             setShowWorkflowBuilder(true);
                           }}
                           title="Modifier"
+                          aria-label="Modifier"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -422,6 +425,7 @@ export function AutomationDashboard() {
                           size="sm"
                           onClick={() => handleToggleWorkflow(workflow.id, false)}
                           title="Désactiver"
+                          aria-label="Désactiver"
                         >
                           <Pause className="h-4 w-4" />
                         </Button>
@@ -430,6 +434,7 @@ export function AutomationDashboard() {
                           size="sm"
                           onClick={() => handleDeleteWorkflow(workflow.id)}
                           title="Supprimer"
+                          aria-label="Supprimer"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -495,6 +500,7 @@ export function AutomationDashboard() {
                           onClick={() => handleToggleWorkflow(workflow.id, true)}
                           className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
                           title="Activer"
+                          aria-label="Activer"
                         >
                           <Play className="h-4 w-4" />
                         </Button>
@@ -506,6 +512,7 @@ export function AutomationDashboard() {
                             setShowWorkflowBuilder(true);
                           }}
                           title="Modifier"
+                          aria-label="Modifier"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -514,6 +521,7 @@ export function AutomationDashboard() {
                           size="sm"
                           onClick={() => handleDeleteWorkflow(workflow.id)}
                           title="Supprimer"
+                          aria-label="Supprimer"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                         >
                           <Trash2 className="h-4 w-4" />

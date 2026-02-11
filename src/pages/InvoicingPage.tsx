@@ -292,8 +292,12 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
       <CardContent>
         <div className="space-y-3">
           {activities.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <p>{t('invoicing.recentActivity.noActivity', 'Aucune activité récente')}</p>
+            <div className="flex flex-col items-center justify-center text-center py-8">
+              <div className="mb-3 flex items-center justify-center rounded-full bg-muted/50 p-3">
+                <Activity className="w-10 h-10 text-muted-foreground/50" strokeWidth={1.5} />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground">{t('invoicing.recentActivity.noActivity', 'Aucune activité récente')}</p>
+              <p className="text-xs text-muted-foreground/70 mt-1">{t('invoicing.recentActivity.noActivityHint', 'Les factures et devis récents apparaitront ici')}</p>
             </div>
           ) : (
             activities.map((activity, index) => (
@@ -484,12 +488,45 @@ export default function InvoicingPageOptimized() {
   };
   if (isLoading) {
     return (
-      <div className="space-y-8 p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-4"></div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+      <div className="space-y-8 p-6" role="status" aria-label="Loading">
+        {/* Header skeleton */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="skeleton-shimmer h-12 w-12 rounded-xl" />
+              <div className="space-y-2">
+                <div className="skeleton-shimmer h-8 w-56 rounded-lg" />
+                <div className="skeleton-shimmer h-4 w-40 rounded" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="skeleton-shimmer h-10 w-36 rounded-lg" />
+              <div className="skeleton-shimmer h-10 w-28 rounded-lg" />
+              <div className="skeleton-shimmer h-10 w-40 rounded-lg" />
+            </div>
+          </div>
+        </div>
+        {/* KPI cards skeleton - 4 columns matching the real layout */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="skeleton-shimmer h-12 w-12 rounded-xl" />
+                <div className="skeleton-shimmer h-6 w-16 rounded-full" />
+              </div>
+              <div className="space-y-2">
+                <div className="skeleton-shimmer h-4 w-24 rounded" />
+                <div className="skeleton-shimmer h-7 w-32 rounded" />
+                <div className="skeleton-shimmer h-3 w-20 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Tab navigation skeleton */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-2">
+          <div className="flex gap-2 p-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="skeleton-shimmer h-9 w-28 rounded-lg" />
             ))}
           </div>
         </div>
@@ -740,8 +777,12 @@ export default function InvoicingPageOptimized() {
                           ];
                           if (totalAmount === 0) {
                             return (
-                              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                <p>{t('invoicing.revenueBreakdown.noData', 'Aucune donnée de revenus disponible pour la période sélectionnée')}</p>
+                              <div className="flex flex-col items-center justify-center text-center py-8">
+                                <div className="mb-3 flex items-center justify-center rounded-full bg-muted/50 p-3">
+                                  <PieChart className="w-10 h-10 text-muted-foreground/50" strokeWidth={1.5} />
+                                </div>
+                                <p className="text-sm font-medium text-muted-foreground">{t('invoicing.revenueBreakdown.noData', 'Aucune donnée de revenus disponible')}</p>
+                                <p className="text-xs text-muted-foreground/70 mt-1">{t('invoicing.revenueBreakdown.noDataHint', 'Creez des factures pour voir la repartition ici')}</p>
                               </div>
                             );
                           }

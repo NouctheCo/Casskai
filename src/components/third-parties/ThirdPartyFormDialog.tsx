@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
@@ -458,13 +459,13 @@ export function ThirdPartyFormDialog({
           {/* Notes */}
           <div>
             <Label htmlFor="notes">Notes</Label>
-            <textarea
+            <Textarea
               id="notes"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder="Notes internes..."
               rows={3}
-              className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-sm"
+              className="mt-1"
             />
           </div>
           {/* Actions */}

@@ -68,7 +68,13 @@ export default function LanguageStep() {
     goToNextStep();
   };
   return (
-    <div className="max-w-4xl mx-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4 }}
+      className="max-w-4xl mx-auto"
+    >
       <Card className="glass-card overflow-hidden">
         <CardHeader className="text-center pb-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
           <motion.div
@@ -84,7 +90,7 @@ export default function LanguageStep() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
-            <CardTitle className="text-3xl font-bold gradient-text mb-3">
+            <CardTitle className="text-3xl font-bold font-heading gradient-text mb-3">
               Choose your language
             </CardTitle>
             <CardDescription className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -170,6 +176,6 @@ export default function LanguageStep() {
           </motion.div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }

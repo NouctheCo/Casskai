@@ -713,32 +713,21 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         </CardHeader>
         <CardContent className="p-0">
           {filteredInvoices.length > 0 ? (
-            <div className="rounded-md border overflow-hidden">
-              {/* Fixed Header - stays visible while scrolling */}
-              <div className="bg-white dark:bg-slate-950 sticky top-0 z-10 border-b overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="bg-slate-50 dark:bg-slate-900">Numéro</TableHead>
-                      <TableHead className="bg-slate-50 dark:bg-slate-900">Client</TableHead>
-                      <TableHead className="bg-slate-50 dark:bg-slate-900">Date</TableHead>
-                      <TableHead className="bg-slate-50 dark:bg-slate-900">Échéance</TableHead>
-                      <TableHead className="bg-slate-50 dark:bg-slate-900">Montant</TableHead>
-                      <TableHead className="bg-slate-50 dark:bg-slate-900">Statut</TableHead>
-                      <TableHead className="bg-slate-50 dark:bg-slate-900 text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                </Table>
-              </div>
-              
-              {/* Scrollable Body */}
-              <div className="overflow-y-auto max-h-[60vh]" style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'rgb(156, 163, 175) rgb(241, 245, 249)',
-              }}>
-                <Table>
-                  <TableBody>
-                    {filteredInvoices.map((invoice) => (
+            <div className="overflow-y-auto max-h-[60vh] rounded-md border">
+              <Table>
+                <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950">
+                  <TableRow>
+                    <TableHead className="bg-slate-50 dark:bg-slate-900">Numéro</TableHead>
+                    <TableHead className="bg-slate-50 dark:bg-slate-900">Client</TableHead>
+                    <TableHead className="bg-slate-50 dark:bg-slate-900">Date</TableHead>
+                    <TableHead className="bg-slate-50 dark:bg-slate-900">Échéance</TableHead>
+                    <TableHead className="bg-slate-50 dark:bg-slate-900">Montant</TableHead>
+                    <TableHead className="bg-slate-50 dark:bg-slate-900">Statut</TableHead>
+                    <TableHead className="bg-slate-50 dark:bg-slate-900 text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredInvoices.map((invoice) => (
                     <TableRow key={invoice.id as string} className="hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-900/30">
                       <TableCell className="font-medium">
                         <div className="flex items-center space-x-2">
@@ -854,16 +843,8 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
                       </TableCell>
                     </TableRow>
                   ))}
-                  </TableBody>
-                </Table>
-              </div>
-              
-              {/* Scroll Position Indicator */}
-              {filteredInvoices.length > 5 && (
-                <div className="absolute bottom-2 right-2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-60 hover:opacity-100 transition-opacity">
-                  {filteredInvoices.length} facture(s)
-                </div>
-              )}
+                </TableBody>
+              </Table>
             </div>
           ) : (
             <div className="text-center py-12">

@@ -428,6 +428,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-20 px-4"
       onClick={onClose}
+      aria-label="Palette de commandes"
+      role="dialog"
+      aria-modal="true"
     >
       <div
         className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-2xl overflow-hidden"
@@ -453,7 +456,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         </div>
 
         {/* Results */}
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-96 overflow-y-auto" role="listbox">
           {filteredCommands.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-gray-500 dark:text-gray-400">Aucun résultat trouvé</p>
@@ -480,6 +483,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       <button
                         key={command.id}
                         onClick={() => executeCommand(command)}
+                        role="option"
+                        aria-selected={isSelected}
                         className={cn(
                           'w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
                           isSelected

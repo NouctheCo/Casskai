@@ -3832,10 +3832,23 @@
       "configuringSubtitle": "We're preparing your personalized workspace...",
       "configuringTitle": "Configuration en cours...",
       "welcomeSubtitle": "Votre plateforme est prÃªte ! Vous pouvez maintenant commencer Ã  gÃ©rer your entreprise avec CassKai.",
-      "welcomeTitle": "Bienvenue dans CassKai !"
+      "welcomeTitle": "Welcome to CassKai!",
+      "summaryTitle": "Configuration summary",
+      "companySection": "Company",
+      "companyName": "Name",
+      "companyCountry": "Country",
+      "companySector": "Industry",
+      "companyEmail": "Email",
+      "companyCity": "City",
+      "companyCeo": "CEO",
+      "preferencesSection": "Preferences",
+      "accountingStandard": "Accounting standard",
+      "currency": "Currency",
+      "language": "Language",
+      "modulesSection": "Enabled modules"
     },
     "completion": {
-      "explore_dashboard": "Explorer le tableau de bord",
+      "explore_dashboard": "Explore the dashboard",
       "import_data": "Import your data",
       "invite_team": "Invite your team",
       "next_steps": "Prochaines Ã©tapes",
@@ -3850,8 +3863,17 @@
       "subtitle": "Personnalisez your expÃ©rience CassKai selon your besoins",
       "title": "Configurez your prÃ©fÃ©rences"
     },
+    "progress": {
+      "stepOf": "Step {{current}} of {{total}}",
+      "language": "Language",
+      "welcome": "Welcome",
+      "company": "Company",
+      "preferences": "Preferences",
+      "modules": "Modules",
+      "complete": "Finalization"
+    },
     "steps": {
-      "company": "Entreprise",
+      "company": "Company",
       "companyDesc": "Configurez your sociÃ©tÃ©",
       "features": "FonctionnalitÃ©s",
       "featuresDesc": "DÃ©couvrez nos modules",

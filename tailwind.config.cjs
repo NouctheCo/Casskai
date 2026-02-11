@@ -86,6 +86,10 @@ module.exports = {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.8" },
         },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
       },
       animation: {
         "collapsible-down": "collapsible-down 0.2s ease-out",
@@ -94,6 +98,7 @@ module.exports = {
         "fade-out": "fade-out 0.2s ease-out",
         "slide-in-from-bottom": "slide-in-from-bottom 0.3s ease-out",
         "pulse-subtle": "pulse-subtle 2s ease-in-out infinite",
+        shimmer: "shimmer 2s ease-in-out infinite",
       },
     },
   },

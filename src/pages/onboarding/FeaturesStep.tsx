@@ -149,9 +149,9 @@ export default function FeaturesStep() {
             <Zap className="w-8 h-8 text-white" />
           </motion.div>
           
-          <CardTitle className="text-2xl font-bold gradient-text mb-2">
+          <CardTitle className="text-2xl font-bold font-heading gradient-text mb-2">
             {t('onboarding.features.title', {
-              defaultValue: 'Choisissez vos fonctionnalités'
+              defaultValue: 'Choisissez vos fonctionnalites'
             })}
           </CardTitle>
           <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-300 max-w-2xl mx-auto">

@@ -313,7 +313,7 @@ const HeroSection = () => {
 
 
 
-          {/* Boutons CTA */}
+          {/* Boutons CTA - Hiérarchie claire */}
 
           <motion.div
 
@@ -323,10 +323,11 @@ const HeroSection = () => {
 
             transition={{ duration: 0.8, delay: 0.2 }}
 
-            className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 mb-16"
+            className="flex flex-col items-center justify-center gap-6 mb-16"
 
           >
 
+            {/* CTA Principal - Le plus visible */}
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
 
               <Button
@@ -335,7 +336,7 @@ const HeroSection = () => {
 
                 size="lg"
 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-6 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-xl"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-7 text-xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-2xl"
 
               >
 
@@ -349,53 +350,56 @@ const HeroSection = () => {
 
             </motion.div>
 
+            <p className="text-sm text-gray-500 dark:text-gray-400 -mt-2">
+              {t('landing.hero.cta.noCreditCard', 'Sans carte bancaire • Configuration en 2 min')}
+            </p>
 
+            {/* CTAs Secondaires */}
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
 
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
 
-              <Button
+                  size="lg"
 
-                size="lg"
+                  onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeP1H29iZLZ7CgEnJz-Mey9wZDWij0NVZ42EK-mqmbjb5vqzg/viewform', '_blank')}
 
-                onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeP1H29iZLZ7CgEnJz-Mey9wZDWij0NVZ42EK-mqmbjb5vqzg/viewform', '_blank')}
+                  variant="outline"
 
-                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-10 py-6 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-xl"
+                  className="px-8 py-5 text-base font-semibold border-2 border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/30 rounded-xl"
 
-              >
+                >
 
-                <Users className="mr-3 w-6 h-6" />
+                  <Users className="mr-2 w-5 h-5" />
 
-                {t('landing.hero.cta.beta', 'Devenir beta tester')}
+                  {t('landing.hero.cta.beta', 'Devenir beta tester')}
 
-                <ArrowRight className="ml-3 w-6 h-6" />
+                </Button>
 
-              </Button>
+              </motion.div>
 
-            </motion.div>
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
 
+                <Button
 
+                  variant="ghost"
 
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  size="lg"
 
-              <Button
+                  onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
 
-                variant="outline"
+                  className="px-8 py-5 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-xl"
 
-                size="lg"
+                >
 
-                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                  <Play className="mr-2 w-5 h-5" />
 
-                className="px-10 py-6 text-lg font-semibold border-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl dark:bg-gray-900/30"
+                  {t('landing.hero.cta.demo', 'Voir la démo')}
 
-              >
+                </Button>
 
-                <Play className="mr-3 w-6 h-6" />
-
-                {t('landing.hero.cta.demo', 'Voir la démo')}
-
-              </Button>
-
-            </motion.div>
+              </motion.div>
+            </div>
 
           </motion.div>
 
@@ -471,6 +475,149 @@ const HeroSection = () => {
 
   );
 
+};
+
+// Trust Strip - Social proof & technology partners
+const TrustStripSection = () => {
+  const { t } = useTranslation();
+
+  return (
+    <section className="py-10 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+      <div className="container mx-auto px-4">
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center text-sm font-medium text-gray-500 dark:text-gray-400 mb-6 uppercase tracking-wider"
+        >
+          {t('landing.trust.title', 'Infrastructure de confiance')}
+        </motion.p>
+        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-60 hover:opacity-100 transition-opacity duration-500">
+          {[
+            { name: 'PostgreSQL', desc: 'Base de données' },
+            { name: 'Stripe', desc: 'Paiements sécurisés' },
+            { name: 'OpenAI', desc: 'Intelligence artificielle' },
+            { name: 'Let\'s Encrypt', desc: 'SSL/TLS' },
+          ].map((partner, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="flex flex-col items-center gap-1"
+            >
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{partner.name}</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{partner.desc}</span>
+            </motion.div>
+          ))}
+        </div>
+        <div className="flex justify-center items-center gap-6 mt-6">
+          <Badge variant="outline" className="text-xs gap-1.5">
+            <Shield className="w-3 h-3 text-green-500" />
+            {t('landing.trust.gdpr', 'RGPD Conforme')}
+          </Badge>
+          <Badge variant="outline" className="text-xs gap-1.5">
+            <Lock className="w-3 h-3 text-blue-500" />
+            {t('landing.trust.ssl', 'Chiffrement SSL')}
+          </Badge>
+          <Badge variant="outline" className="text-xs gap-1.5">
+            <Database className="w-3 h-3 text-purple-500" />
+            {t('landing.trust.hosting', 'Hébergement Europe')}
+          </Badge>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// How It Works - 3 step process
+const HowItWorksSection = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const steps = [
+    {
+      step: '01',
+      icon: Users,
+      title: t('landing.howItWorks.step1.title', 'Créez votre compte'),
+      description: t('landing.howItWorks.step1.desc', 'Inscription gratuite en 2 minutes. Aucune carte bancaire requise. 30 jours d\'essai complet.'),
+      color: 'from-blue-500 to-blue-600'
+    },
+    {
+      step: '02',
+      icon: Upload,
+      title: t('landing.howItWorks.step2.title', 'Importez vos données'),
+      description: t('landing.howItWorks.step2.desc', 'Importez vos relevés bancaires, FEC, ou saisissez manuellement. L\'IA catégorise automatiquement.'),
+      color: 'from-purple-500 to-purple-600'
+    },
+    {
+      step: '03',
+      icon: TrendingUp,
+      title: t('landing.howItWorks.step3.title', 'Pilotez votre activité'),
+      description: t('landing.howItWorks.step3.desc', 'Tableau de bord en temps réel, rapports automatiques, analyses IA. Prenez les bonnes décisions.'),
+      color: 'from-green-500 to-green-600'
+    }
+  ];
+
+  return (
+    <section className="py-20 bg-gray-50 dark:bg-gray-900/50">
+      <div className="container mx-auto px-4">
+        <AnimatedSection className="text-center mb-16">
+          <Badge className="mb-4 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
+            <Zap className="w-4 h-4 mr-2" />
+            {t('landing.howItWorks.badge', 'Simple et rapide')}
+          </Badge>
+          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            {t('landing.howItWorks.title', 'Opérationnel en 3 étapes')}
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            {t('landing.howItWorks.subtitle', 'Pas besoin d\'être expert-comptable. CassKai s\'adapte à votre niveau.')}
+          </p>
+        </AnimatedSection>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
+          {steps.map((step, index) => (
+            <AnimatedSection key={index}>
+              <motion.div
+                className="relative text-center p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                whileHover={{ y: -5 }}
+              >
+                {/* Step number */}
+                <div className={`inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r ${step.color} text-white text-xl font-bold mb-6 shadow-lg`}>
+                  {step.step}
+                </div>
+                {/* Connector line */}
+                {index < steps.length - 1 && (
+                  <div className="hidden md:block absolute top-16 -right-4 w-8 h-0.5 bg-gray-300 dark:bg-gray-600" />
+                )}
+                <step.icon className="w-8 h-8 mx-auto mb-4 text-gray-600 dark:text-gray-300" />
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{step.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{step.description}</p>
+              </motion.div>
+            </AnimatedSection>
+          ))}
+        </div>
+
+        <div className="text-center">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={() => navigate('/register')}
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-6 text-lg font-semibold shadow-xl rounded-xl"
+            >
+              <Zap className="mr-2 w-5 h-5" />
+              {t('landing.howItWorks.cta', 'Commencer gratuitement')}
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </motion.div>
+          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+            {t('landing.howItWorks.noCreditCard', 'Sans carte bancaire • 30 jours gratuits • Annulation libre')}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 // Section Compteurs Factuels
@@ -3587,7 +3734,11 @@ const LandingPage = () => {
 
         <HeroSection />
 
+        <TrustStripSection />
+
         <FactsCounterSection />
+
+        <HowItWorksSection />
 
         <AIAnalysisSection />
 

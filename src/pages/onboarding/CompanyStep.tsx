@@ -1180,7 +1180,7 @@ const renderHeader = (t: (key: string, options?: { defaultValue?: string }) => s
 
     
 
-    <CardTitle className="text-2xl font-bold gradient-text mb-2">
+    <CardTitle className="text-2xl font-bold font-heading gradient-text mb-2">
 
       {t('onboarding.company.title', {
 

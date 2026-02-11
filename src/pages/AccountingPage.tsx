@@ -291,8 +291,16 @@ const RecentAccountingActivities = () => {
       <CardContent>
         <div className="space-y-3">
           {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <div className="space-y-3 py-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center space-x-3 p-2">
+                  <div className="skeleton-shimmer h-8 w-8 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <div className="skeleton-shimmer h-4 w-3/4 rounded" />
+                    <div className="skeleton-shimmer h-3 w-1/3 rounded" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : activities.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -578,14 +586,47 @@ export default function AccountingPageOptimized() {
   };
   if (isLoading) {
     return (
-      <div className="space-y-8 p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-4"></div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            ))}
+      <div className="space-y-8 p-6" role="status" aria-label="Loading">
+        {/* Title skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="skeleton-shimmer h-8 w-64 rounded-lg" />
+            <div className="skeleton-shimmer h-4 w-48 rounded" />
           </div>
+          <div className="flex gap-3">
+            <div className="skeleton-shimmer h-10 w-32 rounded-lg" />
+            <div className="skeleton-shimmer h-10 w-40 rounded-lg" />
+          </div>
+        </div>
+        {/* KPI cards skeleton - 6 columns matching the real layout */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="skeleton-shimmer h-12 w-12 rounded-xl" />
+                <div className="skeleton-shimmer h-6 w-16 rounded-full" />
+              </div>
+              <div className="space-y-2">
+                <div className="skeleton-shimmer h-4 w-24 rounded" />
+                <div className="skeleton-shimmer h-7 w-32 rounded" />
+                <div className="skeleton-shimmer h-3 w-20 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Second KPI row skeleton */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="skeleton-shimmer h-12 w-12 rounded-xl" />
+              </div>
+              <div className="space-y-2">
+                <div className="skeleton-shimmer h-4 w-24 rounded" />
+                <div className="skeleton-shimmer h-7 w-28 rounded" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
