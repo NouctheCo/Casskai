@@ -29,6 +29,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 import {
   syscohadaValidationService,
   type ValidationResult,
@@ -69,7 +70,7 @@ export function SyscohadaValidationPanel({
       setValidation(result);
       setLastChecked(new Date());
     } catch (err) {
-      console.error('Erreur validation SYSCOHADA:', err);
+      logger.error('SyscohadaValidationPanel', 'Erreur validation SYSCOHADA:', err);
       setError('Impossible de valider la conformité SYSCOHADA');
     } finally {
       setLoading(false);

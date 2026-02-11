@@ -28,6 +28,7 @@ import { ThirdPartyFormDialog } from '@/components/third-parties/ThirdPartyFormD
 import { useInventoryPageController } from '@/hooks/useInventoryPageController';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import { ComponentErrorBoundary } from '@/components/ComponentErrorBoundary';
 
 export default function InventoryPage() {
   const { t } = useTranslation();
@@ -51,6 +52,7 @@ export default function InventoryPage() {
   } = useInventoryPageController();
 
   return (
+    <ComponentErrorBoundary componentName="InventoryPage">
     <div className="space-y-6">
       <InventoryHeader {...headerProps} />
 
@@ -129,6 +131,7 @@ export default function InventoryPage() {
         />
       )}
     </div>
+    </ComponentErrorBoundary>
   );
 }
 

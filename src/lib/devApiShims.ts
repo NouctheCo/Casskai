@@ -1,5 +1,6 @@
 // Dev-only API shims: intercept certain backend API calls during local development
 // This file is imported early from src/main.tsx when running in `import.meta.env.DEV`.
+import { logger } from '@/lib/logger';
 if (import.meta.env.DEV) {
   try {
     const originalFetch = window.fetch.bind(window);
@@ -31,8 +32,8 @@ if (import.meta.env.DEV) {
       }
       return originalFetch(input, init);
     };
-    console.info('Dev API shim active: /api/openai/chat is mocked in dev');
+    logger.info('devApiShims', 'Dev API shim active: /api/openai/chat is mocked in dev');
   } catch (err) {
-    console.warn('Failed to install dev API shims:', err);
+    logger.warn('devApiShims', 'Failed to install dev API shims:', err);
   }
 }

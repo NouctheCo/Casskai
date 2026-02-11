@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
+import { logger } from '@/lib/logger';
 import { Target, Calendar, DollarSign, TrendingUp } from 'lucide-react';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
 import type { Client, Contact, OpportunityFormData, Opportunity } from '@/types/crm.types';
@@ -50,7 +51,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
   // Debug: log props
   React.useEffect(() => {
     if (open) {
-      console.log('[NewOpportunityModal] Props received:', {
+      logger.debug('NewOpportunityModal', 'Props received:', {
         clientsCount: clients?.length || 0,
         contactsCount: contacts?.length || 0,
         isEditing: !!editingOpportunity,
@@ -211,7 +212,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
       let success = false;
 
       if (isEditing && editingOpportunity && onUpdateOpportunity) {
-        console.log('[NewOpportunityModal] Updating opportunity:', editingOpportunity.id, dataToSubmit);
+        logger.debug('NewOpportunityModal', 'Updating opportunity:', { id: editingOpportunity.id, data: dataToSubmit });
         success = await onUpdateOpportunity(editingOpportunity.id, dataToSubmit);
         if (success) {
           toastSuccess(t('crm.opportunity.updated') || 'Opportunité mise à jour');
@@ -219,7 +220,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
           toastError(t('crm.opportunity.errors.updateFailed') || 'Erreur lors de la mise à jour');
         }
       } else {
-        console.log('[NewOpportunityModal] Creating new opportunity:', dataToSubmit);
+        logger.debug('NewOpportunityModal', 'Creating new opportunity:', dataToSubmit);
         success = await onCreateOpportunity(dataToSubmit);
         if (success) {
           toastSuccess(t('crm.opportunity.created'));
@@ -234,7 +235,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
         if (onSuccess) onSuccess();
       }
     } catch (error) {
-      console.error('Error submitting opportunity:', error);
+      logger.error('NewOpportunityModal', 'Error submitting opportunity:', error);
       const errorMsg = isEditing ? t('crm.opportunity.errors.updateFailed') : t('crm.opportunity.errors.createFailed');
       toastError(errorMsg);
     } finally {

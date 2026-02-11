@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { aiService } from '@/services/ai/chatService';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface Message {
   id: string;
@@ -94,7 +95,7 @@ export function AIAssistantChat({
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (err) {
-      console.error('AI chat error:', err);
+      logger.error('AIAssistantChat', 'AI chat error:', err);
       setError(t('ai.unexpected_error'));
       
       const errorMessage: Message = {

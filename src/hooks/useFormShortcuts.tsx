@@ -8,6 +8,7 @@
 import { useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { logger } from '@/lib/logger';
 
 export interface FormShortcutsHandlers {
   /**
@@ -133,7 +134,7 @@ export function useFormShortcuts(
         if (preventDefault) e.preventDefault();
 
         if (handlers.onSave) {
-          if (debug) console.log('🔧 Shortcut: Ctrl+S (Save)');
+          if (debug) logger.debug('useFormShortcuts', 'Shortcut: Ctrl+S (Save)');
 
           try {
             await handlers.onSave();
@@ -141,7 +142,7 @@ export function useFormShortcuts(
               toast.success(`${toastPrefix} Sauvegardé`.trim());
             }
           } catch (error) {
-            console.error('Error in onSave:', error);
+            logger.error('useFormShortcuts', 'Error in onSave:', error);
             if (showToast) {
               toast.error(`${toastPrefix} Erreur de sauvegarde`.trim());
             }
@@ -155,7 +156,7 @@ export function useFormShortcuts(
         if (preventDefault) e.preventDefault();
 
         if (handlers.onSubmit) {
-          if (debug) console.log('🔧 Shortcut: Ctrl+Enter (Submit)');
+          if (debug) logger.debug('useFormShortcuts', 'Shortcut: Ctrl+Enter (Submit)');
 
           try {
             await handlers.onSubmit();
@@ -163,7 +164,7 @@ export function useFormShortcuts(
               toast.success(`${toastPrefix} Validé`.trim());
             }
           } catch (error) {
-            console.error('Error in onSubmit:', error);
+            logger.error('useFormShortcuts', 'Error in onSubmit:', error);
             if (showToast) {
               toast.error(`${toastPrefix} Erreur de validation`.trim());
             }
@@ -177,7 +178,7 @@ export function useFormShortcuts(
         if (preventDefault) e.preventDefault();
 
         if (handlers.onCancel) {
-          if (debug) console.log('🔧 Shortcut: Esc (Cancel)');
+          if (debug) logger.debug('useFormShortcuts', 'Shortcut: Esc (Cancel)');
           handlers.onCancel();
           if (showToast) {
             toast('Annulé', { icon: '↩️' });
@@ -194,7 +195,7 @@ export function useFormShortcuts(
         if (preventDefault) e.preventDefault();
 
         if (handlers.onUndo) {
-          if (debug) console.log('🔧 Shortcut: Ctrl+Z (Undo)');
+          if (debug) logger.debug('useFormShortcuts', 'Shortcut: Ctrl+Z (Undo)');
           handlers.onUndo();
           if (showToast) {
             toast('Annulation', { icon: '↩️' });
@@ -208,7 +209,7 @@ export function useFormShortcuts(
         if (preventDefault) e.preventDefault();
 
         if (handlers.onRedo) {
-          if (debug) console.log('🔧 Shortcut: Ctrl+Y (Redo)');
+          if (debug) logger.debug('useFormShortcuts', 'Shortcut: Ctrl+Y (Redo)');
           handlers.onRedo();
           if (showToast) {
             toast('Rétablir', { icon: '↪️' });
@@ -222,7 +223,7 @@ export function useFormShortcuts(
         if (preventDefault) e.preventDefault();
 
         if (handlers.onDuplicate) {
-          if (debug) console.log('🔧 Shortcut: Ctrl+D (Duplicate)');
+          if (debug) logger.debug('useFormShortcuts', 'Shortcut: Ctrl+D (Duplicate)');
           handlers.onDuplicate();
           if (showToast) {
             toast.success('Dupliqué');
@@ -234,7 +235,7 @@ export function useFormShortcuts(
       // Delete - Supprimer
       if (e.key === 'Delete' && !isInput && !isContentEditable) {
         if (handlers.onDelete) {
-          if (debug) console.log('🔧 Shortcut: Delete');
+          if (debug) logger.debug('useFormShortcuts', 'Shortcut: Delete');
           // Note: pas de preventDefault ici pour permettre Delete dans inputs
           handlers.onDelete();
         }
@@ -246,7 +247,7 @@ export function useFormShortcuts(
         if (preventDefault) e.preventDefault();
 
         if (handlers.onPrint) {
-          if (debug) console.log('🔧 Shortcut: Ctrl+P (Print)');
+          if (debug) logger.debug('useFormShortcuts', 'Shortcut: Ctrl+P (Print)');
           handlers.onPrint();
         }
         return;

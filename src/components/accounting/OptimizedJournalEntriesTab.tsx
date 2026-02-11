@@ -1222,7 +1222,7 @@ export default function OptimizedJournalEntriesTab() {
       setLoading(true);
       // Log that loadEntries started for this company
       try {
-        console.log('[OptimizedJournalEntriesTab] loadEntries starting for companyId:', currentCompany.id);
+        logger.debug('OptimizedJournalEntriesTab', 'loadEntries starting for companyId:', currentCompany.id);
       } catch (_e) { /* ignore logging errors */ }
       const result = await journalEntriesService.getJournalEntries(currentCompany.id, {
         limit: 100,
@@ -1232,7 +1232,7 @@ export default function OptimizedJournalEntriesTab() {
       // Log the raw service result so Playwright can capture it
       try {
         const r: any = result;
-        console.log('[OptimizedJournalEntriesTab] getJournalEntries raw result:', r && typeof r === 'object' && r.success ? { success: r.success, rows: r.data?.data?.length ?? 0, count: r.data?.count ?? 0 } : r);
+        logger.debug('OptimizedJournalEntriesTab', 'getJournalEntries raw result:', r && typeof r === 'object' && r.success ? { success: r.success, rows: r.data?.data?.length ?? 0, count: r.data?.count ?? 0 } : r);
       } catch (_e) { /* ignore logging errors */ }
       if (result.success && result.data) {
         // Transformer les données Supabase en format UI
@@ -1261,12 +1261,12 @@ export default function OptimizedJournalEntriesTab() {
         }));
         // Log for browser debugging: raw result and transformed entries
         try {
-          console.debug('[OptimizedJournalEntriesTab] getJournalEntries result:', {
+          logger.debug('OptimizedJournalEntriesTab', 'getJournalEntries result:', {
             success: result.success,
             rows: result.data?.data?.length,
             count: result.data?.count,
           });
-          console.debug('[OptimizedJournalEntriesTab] transformedEntries length:', transformedEntries.length, transformedEntries.slice(0, 5));
+          logger.debug('OptimizedJournalEntriesTab', 'transformedEntries length:', { count: transformedEntries.length, sample: transformedEntries.slice(0, 5) });
         } catch (_err) { /* ignore debug logging errors */ }
         setEntries(transformedEntries);
       }

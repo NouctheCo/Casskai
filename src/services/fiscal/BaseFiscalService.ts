@@ -7,6 +7,7 @@
  */
 
 import { supabase } from '../../lib/supabase';
+import { logger } from '../../lib/logger';
 import type {
   FiscalStandard,
   FiscalDeclaration,
@@ -73,7 +74,7 @@ export abstract class BaseFiscalService {
 
       return balances;
     } catch (error) {
-      console.error('[BaseFiscalService] Error getting account balances:', error);
+      logger.error('BaseFiscalService', 'Error getting account balances:', error);
       throw error;
     }
   }
@@ -251,7 +252,7 @@ export abstract class BaseFiscalService {
 
       return data.id;
     } catch (error) {
-      console.error('[BaseFiscalService] Error saving fiscal declaration:', error);
+      logger.error('BaseFiscalService', 'Error saving fiscal declaration:', error);
       throw error;
     }
   }
@@ -290,7 +291,7 @@ export abstract class BaseFiscalService {
         updatedAt: new Date(data.updated_at)
       };
     } catch (error) {
-      console.error('[BaseFiscalService] Error getting fiscal declaration:', error);
+      logger.error('BaseFiscalService', 'Error getting fiscal declaration:', error);
       throw error;
     }
   }
@@ -351,7 +352,7 @@ export abstract class BaseFiscalService {
         updatedAt: new Date(d.updated_at)
       }));
     } catch (error) {
-      console.error('[BaseFiscalService] Error listing fiscal declarations:', error);
+      logger.error('BaseFiscalService', 'Error listing fiscal declarations:', error);
       throw error;
     }
   }
@@ -392,7 +393,7 @@ export abstract class BaseFiscalService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('[BaseFiscalService] Error updating declaration status:', error);
+      logger.error('BaseFiscalService', 'Error updating declaration status:', error);
       throw error;
     }
   }

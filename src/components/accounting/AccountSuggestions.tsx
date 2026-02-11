@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 import { aiAccountCategorizationService, type AccountSuggestion } from '@/services/ai/accountCategorizationService';
 
 interface AccountSuggestionsProps {
@@ -61,7 +62,7 @@ export function AccountSuggestions({
 
       setSuggestions(results.slice(0, 3)); // Max 3 suggestions
     } catch (err) {
-      console.error('Erreur chargement suggestions:', err);
+      logger.error('AccountSuggestions', 'Erreur chargement suggestions:', err);
       setError('Impossible de charger les suggestions');
       setSuggestions([]);
     } finally {
@@ -86,7 +87,7 @@ export function AccountSuggestions({
           suggestion.account_code
         );
       } catch (err) {
-        console.error('Erreur incrémentation usage:', err);
+        logger.error('AccountSuggestions', 'Erreur incrémentation usage:', err);
       }
 
       onSelectSuggestion(suggestion.account_code, suggestion.account_name);

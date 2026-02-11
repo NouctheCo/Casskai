@@ -8,6 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { AlertCircle, CheckCircle2, Download } from 'lucide-react';
 import { extendedPaymentTermsAuditService, type ExtendedAuditReport } from '@/services/extendedPaymentTermsAuditService';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -28,7 +29,7 @@ export function ExtendedPaymentTermsAuditPanel({ companyId }: ExtendedPaymentTer
       toastSuccess(`✅ Audit terminé: ${report.compliantCount}/${report.totalDocuments} conformes`);
     } catch (error) {
       toastError('Erreur lors de l\'audit');
-      console.error(error);
+      logger.error('ExtendedPaymentTermsAuditPanel', 'Audit error:', error);
     } finally {
       setIsLoading(false);
     }

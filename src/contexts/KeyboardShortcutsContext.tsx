@@ -198,7 +198,7 @@ export const KeyboardShortcutsProvider: React.FC<KeyboardShortcutsProviderProps>
       handler: () => {
         if (debug) logger.debug('KeyboardShortcuts', 'Help triggered');
         // TODO: Ouvrir modal d'aide avec liste des shortcuts
-        console.log('Aide - Raccourcis clavier disponibles');
+        logger.debug('KeyboardShortcuts', 'Aide - Raccourcis clavier disponibles');
       },
     },
   ];

@@ -250,8 +250,8 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
     }
   };
   const handleViewInvoice = async (invoice: InvoiceWithDetails) => {
-    console.log('=== START handleViewInvoice ===');
-    console.log('1. Invoice:', invoice);
+    logger.debug('OptimizedInvoicesTab', '=== START handleViewInvoice ===');
+    logger.debug('OptimizedInvoicesTab', '1. Invoice:', invoice);
 
     try {
       // Récupérer la facture complète avec les items et le client
@@ -265,8 +265,8 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         .eq('id', invoice.id)
         .single();
 
-      console.log('2. Full invoice:', fullInvoice);
-      console.log('3. Error:', error);
+      logger.debug('OptimizedInvoicesTab', '2. Full invoice:', fullInvoice);
+      logger.debug('OptimizedInvoicesTab', '3. Error:', error);
 
       if (error) {
         logger.error('OptimizedInvoicesTab', 'Error fetching full invoice:', error);
@@ -277,8 +277,8 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         throw new Error('Facture introuvable');
       }
 
-      console.log('3b. Invoice items count:', fullInvoice.invoice_items?.length || 0);
-      console.log('3c. Client:', fullInvoice.client);
+      logger.debug('OptimizedInvoicesTab', '3b. Invoice items count:', fullInvoice.invoice_items?.length || 0);
+      logger.debug('OptimizedInvoicesTab', '3c. Client:', fullInvoice.client);
 
       // Récupérer les données de l'entreprise depuis la DB
       const { data: company, error: companyError } = await supabase
@@ -287,8 +287,8 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         .eq('id', fullInvoice.company_id)
         .single();
 
-      console.log('4. Company:', company);
-      console.log('4b. Company error:', companyError);
+      logger.debug('OptimizedInvoicesTab', '4. Company:', company);
+      logger.debug('OptimizedInvoicesTab', '4b. Company error:', companyError);
 
       // Préparer les données de l'entreprise
       const companyData = {
@@ -311,25 +311,25 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         currency: company?.currency || companySettings?.business?.currency || getCurrentCompanyCurrency()
       };
 
-      console.log('5. Company data prepared:', companyData);
+      logger.debug('OptimizedInvoicesTab', '5. Company data prepared:', companyData);
 
       // Générer le PDF
-      console.log('6. Generating PDF...');
+      logger.debug('OptimizedInvoicesTab', '6. Generating PDF...');
       const pdfDoc = InvoicePdfService.generateInvoicePDF(fullInvoice as InvoiceWithDetails, companyData);
-      console.log('7. PDF generated:', pdfDoc);
+      logger.debug('OptimizedInvoicesTab', '7. PDF generated:', pdfDoc);
 
       // Convertir en Blob et créer une URL
       const pdfBlob = pdfDoc.output('blob');
       const pdfUrl = URL.createObjectURL(pdfBlob);
-      console.log('8. PDF URL created:', pdfUrl);
+      logger.debug('OptimizedInvoicesTab', '8. PDF URL created:', pdfUrl);
 
       // Ouvrir dans un nouvel onglet
       const newWindow = window.open(pdfUrl, '_blank');
-      console.log('9. Window opened:', newWindow ? 'Success' : 'Blocked');
+      logger.debug('OptimizedInvoicesTab', '9. Window opened:', newWindow ? 'Success' : 'Blocked');
 
       if (!newWindow) {
         // Fallback si le popup est bloqué
-        console.log('10. Using fallback download');
+        logger.debug('OptimizedInvoicesTab', '10. Using fallback download');
         const link = document.createElement('a');
         link.href = pdfUrl;
         link.download = `Facture-${fullInvoice.invoice_number}.pdf`;
@@ -341,9 +341,9 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `Aperçu de la facture ${fullInvoice.invoice_number} dans un nouvel onglet`
       });
 
-      console.log('=== END handleViewInvoice ===');
+      logger.debug('OptimizedInvoicesTab', '=== END handleViewInvoice ===');
     } catch (err) {
-      console.error('handleViewInvoice ERROR:', err);
+      logger.error('OptimizedInvoicesTab', 'handleViewInvoice ERROR:', err);
       logger.error('OptimizedInvoicesTab', 'Error viewing PDF:', err instanceof Error ? err.message : String(err));
       toast({
         title: "Erreur",

@@ -32,6 +32,7 @@ import {
 } from '../types/third-parties.types';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency, formatCurrency } from '@/lib/utils';
+import { ComponentErrorBoundary } from '@/components/ComponentErrorBoundary';
 import {
   Users,
   Building2,
@@ -603,7 +604,8 @@ const ThirdPartiesPage: React.FC = () => {
     );
   }
   return (
-    <motion.div 
+    <ComponentErrorBoundary componentName="ThirdPartiesPage">
+    <motion.div
       className="space-y-8 p-6"
       variants={containerVariants}
       initial="hidden"
@@ -1145,6 +1147,7 @@ const ThirdPartiesPage: React.FC = () => {
         />
       )}
     </motion.div>
+    </ComponentErrorBoundary>
   );
 };
 export default ThirdPartiesPage;

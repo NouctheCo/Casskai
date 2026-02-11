@@ -60,6 +60,7 @@ import { PeriodClosurePanel } from '@/components/accounting/PeriodClosurePanel';
 import { SyscohadaValidationPanel } from '@/components/accounting/SyscohadaValidationPanel';
 import { AccountingStandardAdapter } from '@/services/accountingStandardAdapter';
 import { logger } from '@/lib/logger';
+import { ComponentErrorBoundary } from '@/components/ComponentErrorBoundary';
 // Types
 interface AccountingKPICardProps {
   title: string;
@@ -590,6 +591,7 @@ export default function AccountingPageOptimized() {
     );
   }
   return (
+    <ComponentErrorBoundary componentName="AccountingPage">
     <motion.div
       className="space-y-8 p-6"
       initial={{ opacity: 0, y: 20 }}
@@ -848,5 +850,6 @@ export default function AccountingPageOptimized() {
         onImportComplete={() => window.location.reload()}
       />
     </motion.div>
+    </ComponentErrorBoundary>
   );
 }

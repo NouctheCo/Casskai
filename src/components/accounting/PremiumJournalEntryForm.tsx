@@ -25,6 +25,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
+import { logger } from '@/lib/logger';
 import { Undo2, Redo2, Save, X, Info } from 'lucide-react';
 import {
   Tooltip,
@@ -187,14 +188,14 @@ export function PremiumJournalEntryForm({
           await onSave(data);
           toastSuccess(t('premiumForm.saveSuccess'));
         } catch (error) {
-          console.error('Error saving journal entry:', error);
+          logger.error('PremiumJournalEntryForm', 'Error saving journal entry:', error);
           toastError(t('premiumForm.saveError'));
         } finally {
           setIsSaving(false);
         }
       },
       (errors) => {
-        console.log('Validation errors:', errors);
+        logger.debug('PremiumJournalEntryForm', 'Validation errors:', errors);
         toastError(t('premiumForm.validationError'));
       }
     )();

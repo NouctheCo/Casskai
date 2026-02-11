@@ -67,6 +67,7 @@ import { LateFeeCalculator } from '@/components/invoicing/LateFeeCalculator';
 import { InvoiceComplianceSettings } from '@/components/invoicing/InvoiceComplianceSettings';
 import { BulkJournalImportTab } from '@/components/accounting/BulkJournalImportTab';
 import { logger } from '@/lib/logger';
+import { ComponentErrorBoundary } from '@/components/ComponentErrorBoundary';
 // Invoicing KPI Card Component
 const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }: {
   title: string;
@@ -496,6 +497,7 @@ export default function InvoicingPageOptimized() {
     );
   }
   return (
+    <ComponentErrorBoundary componentName="InvoicingPage">
     <PageContainer variant="default" className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header professionnel */}
@@ -904,5 +906,6 @@ export default function InvoicingPageOptimized() {
         </Tabs>
       </div>
     </PageContainer>
+    </ComponentErrorBoundary>
   );
 }

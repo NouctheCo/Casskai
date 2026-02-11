@@ -12,6 +12,7 @@
  */
 
 import { COUNTRIES, CURRENCIES, BASE_PRICES_EUR, convertPrice, formatPrice as formatCurrencyPrice } from '@/config/currencies';
+import { logger } from '@/lib/logger';
 
 export interface CountryPricing {
   countryCode: string;
@@ -138,7 +139,7 @@ export function getDefaultCountry(): string {
     }
   } catch (e) {
     // localStorage non disponible (SSR ou restrictions)
-    console.warn('localStorage not available:', e);
+    logger.warn('PricingMultiCurrency', 'localStorage not available:', e);
   }
 
   // 2️⃣ Détecter selon la langue du navigateur
@@ -180,10 +181,10 @@ export function setPreferredCountry(countryCode: string): void {
     if (COUNTRIES.some(c => c.code === countryCode)) {
       localStorage.setItem('preferredCountry', countryCode);
     } else {
-      console.warn(`Invalid country code: ${countryCode}`);
+      logger.warn('PricingMultiCurrency', `Invalid country code: ${countryCode}`);
     }
   } catch (e) {
-    console.warn('Could not save preferred country:', e);
+    logger.warn('PricingMultiCurrency', 'Could not save preferred country:', e);
   }
 }
 

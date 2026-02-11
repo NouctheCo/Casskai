@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { logger } from '@/lib/logger';
 
 const stripe = new Stripe(import.meta.env.VITE_STRIPE_SECRET_KEY as string, {
   apiVersion: '2025-08-27.basil' as any
@@ -21,7 +22,7 @@ export async function getSessionStatus(sessionId: string) {
       url: session.url,
     };
   } catch (error) {
-    console.error('Error retrieving session status:', error);
+    logger.error('StripeSessionService', 'Error retrieving session status:', error);
     throw error;
   }
 }
@@ -47,7 +48,7 @@ export async function getSubscriptionDetails(subscriptionId: string) {
       metadata: subscription.metadata,
     };
   } catch (error) {
-    console.error('Error retrieving subscription:', error);
+    logger.error('StripeSessionService', 'Error retrieving subscription:', error);
     throw error;
   }
 }
@@ -74,7 +75,7 @@ export async function getCustomerPaymentMethods(customerId: string) {
       billing_details: pm.billing_details,
     }));
   } catch (error) {
-    console.error('Error retrieving payment methods:', error);
+    logger.error('StripeSessionService', 'Error retrieving payment methods:', error);
     throw error;
   }
 }

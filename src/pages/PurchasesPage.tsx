@@ -30,6 +30,7 @@ import { BulkJournalImportTab } from '@/components/accounting/BulkJournalImportT
 import { Plus, RefreshCw, FileText, AlertTriangle, Sparkles, Upload, ShoppingCart } from 'lucide-react';
 import { useAutoAccounting } from '@/hooks/useAutoAccounting';
 import { logger } from '@/lib/logger';
+import { ComponentErrorBoundary } from '@/components/ComponentErrorBoundary';
 export default function PurchasesPage() {
   const { t, i18n } = useTranslation();
   // Debug: force reload translations if needed
@@ -271,6 +272,7 @@ export default function PurchasesPage() {
     );
   }
   return (
+    <ComponentErrorBoundary componentName="PurchasesPage">
     <motion.div
       className="space-y-8 p-6"
       variants={containerVariants}
@@ -428,5 +430,6 @@ export default function PurchasesPage() {
         loading={formLoading}
       />
     </motion.div>
+    </ComponentErrorBoundary>
   );
 }

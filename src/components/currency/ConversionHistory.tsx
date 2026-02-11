@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { exchangeRateService, type ConversionHistory } from '@/services/exchangeRateService';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
+import { logger } from '@/lib/logger';
 import { History, Search, Download, Calendar, ArrowRightLeft } from 'lucide-react';
 import { formatCurrency, type CurrencyCode } from '@/hooks/useCompanyCurrency';
 
@@ -50,7 +51,7 @@ export const ConversionHistoryComponent: React.FC = () => {
       const data = await exchangeRateService.getConversionHistory(currentEnterprise.id, filters);
       setHistory(data);
     } catch (error) {
-      console.error('Erreur chargement historique:', error);
+      logger.error('ConversionHistory', 'Erreur chargement historique:', error);
     } finally {
       setLoading(false);
     }

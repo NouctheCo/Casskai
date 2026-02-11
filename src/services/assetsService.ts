@@ -10,6 +10,7 @@
  */
 
 import { supabase, normalizeData } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 import type {
   Asset,
   AssetCategory,
@@ -409,7 +410,7 @@ const generateDisposalJournalEntry = async (
     });
 
   if (entryError) {
-    console.error('Erreur création écriture cession:', entryError);
+    logger.error('assetsService', 'Erreur création écriture cession:', entryError);
     throw entryError;
   }
 };

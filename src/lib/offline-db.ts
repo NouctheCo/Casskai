@@ -7,6 +7,7 @@
  */
 
 import Dexie, { type Table } from 'dexie';
+import { logger } from '@/lib/logger';
 
 // ─── Types pour les stores offline ───────────────────────────────
 
@@ -205,7 +206,7 @@ export async function cleanupOfflineData(): Promise<{ deletedRecords: number }> 
       deletedRecords += oldMeta.length;
     }
   } catch (error) {
-    console.warn('[CassKai Offline] Cleanup error:', error);
+    logger.warn('OfflineDB', 'Cleanup error:', error);
   }
 
   return { deletedRecords };

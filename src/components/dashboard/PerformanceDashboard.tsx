@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 import {
   performanceMonitor,
   WebVitalsMetric,
@@ -152,7 +153,7 @@ export default function PerformanceDashboard() {
       const fullReport = performanceMonitor.generateReport();
       setReport(fullReport);
     } catch (error) {
-      console.error('Failed to load performance metrics:', error);
+      logger.error('PerformanceDashboard', 'Failed to load performance metrics:', error);
     } finally {
       setIsRefreshing(false);
     }

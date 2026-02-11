@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 export interface AutocompleteOption<T = any> {
   /**
@@ -392,7 +393,7 @@ export function useAutocomplete<T = any>(
     setSearchTime(duration);
 
     if (debug) {
-      console.log('🔍 Autocomplete search:', {
+      logger.debug('useAutocomplete', 'Autocomplete search:', {
         query,
         totalOptions: allOptions.length,
         matchedOptions: filtered.length,

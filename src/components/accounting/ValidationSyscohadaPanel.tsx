@@ -16,6 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
+import { logger } from '@/lib/logger';
 import {
   syscohadaValidationService,
   type ValidationResult
@@ -49,7 +50,7 @@ export function ValidationSyscohadaPanel() {
         );
       }
     } catch (error) {
-      console.error('Erreur validation SYSCOHADA:', error);
+      logger.error('ValidationSyscohadaPanel', 'Erreur validation SYSCOHADA:', error);
       toastError('Impossible de valider la conformité SYSCOHADA');
     } finally {
       setIsValidating(false);

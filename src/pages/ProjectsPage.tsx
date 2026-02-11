@@ -51,6 +51,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { ComponentErrorBoundary } from '@/components/ComponentErrorBoundary';
 import { projectTasksService, type ProjectTaskWithDetails } from '@/services/projectTasksService';
 import { TaskFormModal } from '@/components/projects/TaskFormModal';
 import NewClientModal from '@/components/projects/NewClientModal';
@@ -369,7 +370,8 @@ export default function ProjectsPage() {
     };
   }, [projects, activeProjects, completedProjects, totalRevenue, totalBudget, averageProgress]);
   return (
-    <motion.div 
+    <ComponentErrorBoundary componentName="ProjectsPage">
+    <motion.div
       className="space-y-8 p-6"
       variants={containerVariants}
       initial="hidden"
@@ -1795,5 +1797,6 @@ export default function ProjectsPage() {
         }}
       />
     </motion.div>
+    </ComponentErrorBoundary>
   );
 }

@@ -58,8 +58,8 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
 
   // Debug: log received data
   React.useEffect(() => {
-    console.log('[ClientsManagement] clients:', clients?.length || 0, 'contacts:', contacts?.length || 0);
-    console.log('[ClientsManagement] contacts data:', contacts);
+    logger.debug('ClientsManagement', 'clients:', { clientsCount: clients?.length || 0, contactsCount: contacts?.length || 0 });
+    logger.debug('ClientsManagement', 'contacts data:', contacts);
   }, [clients, contacts]);
 
   const [clientFormData, setClientFormData] = useState<ClientFormData>({

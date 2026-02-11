@@ -60,6 +60,7 @@ import {
   Pencil
 } from 'lucide-react';
 import type { Employee, Leave, Expense } from '@/services/hrService';
+import { ComponentErrorBoundary } from '@/components/ComponentErrorBoundary';
 
 export default function HumanResourcesPage() {
   const { t } = useTranslation();
@@ -175,7 +176,7 @@ export default function HumanResourcesPage() {
   }
 
   return (
-    <>
+    <ComponentErrorBoundary componentName="HumanResourcesPage">
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
       <motion.div
@@ -822,6 +823,6 @@ export default function HumanResourcesPage() {
         onSubmit={handleDocumentUpload}
         employees={employees}
       />
-    </>
+    </ComponentErrorBoundary>
   );
 }

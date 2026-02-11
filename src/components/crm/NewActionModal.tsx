@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
+import { logger } from '@/lib/logger';
 import { Calendar, Phone, Mail, Users, CheckSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Client, Contact, Opportunity, CommercialActionFormData } from '@/types/crm.types';
@@ -54,7 +55,7 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
   // Debug: log props
   React.useEffect(() => {
     if (open) {
-      console.log('[NewActionModal] Props received:', {
+      logger.debug('NewActionModal', 'Props received:', {
         clientsCount: clients?.length || 0,
         contactsCount: contacts?.length || 0,
         opportunitiesCount: opportunities?.length || 0,
@@ -139,7 +140,7 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
         toastError(t('crm.action.errors.createFailed'));
       }
     } catch (error) {
-      console.error('Error creating action:', error);
+      logger.error('NewActionModal', 'Error creating action:', error);
       toastError(t('crm.action.errors.createFailed'));
     } finally {
       setLoading(false);

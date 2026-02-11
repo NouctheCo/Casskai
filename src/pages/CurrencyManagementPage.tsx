@@ -27,6 +27,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { logger } from '@/lib/logger';
 
 export default function CurrencyManagementPage() {
   const { currentEnterprise } = useEnterprise();
@@ -51,7 +52,7 @@ export default function CurrencyManagementPage() {
       const data = await exchangeRateService.getCurrencyGainLoss(currentEnterprise.id);
       setGainLoss(data);
     } catch (error) {
-      console.error('Erreur chargement gains/pertes:', error);
+      logger.error('CurrencyManagementPage', 'Erreur chargement gains/pertes:', error);
     } finally {
       setLoading(false);
     }

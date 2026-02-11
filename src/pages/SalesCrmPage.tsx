@@ -48,6 +48,7 @@ import {
   OpportunityFormData,
   CommercialActionFormData
 } from '../types/crm.types';
+import { ComponentErrorBoundary } from '@/components/ComponentErrorBoundary';
 
 
 
@@ -337,6 +338,7 @@ export default function SalesCrmPage() {
 
   return (
 
+    <ComponentErrorBoundary componentName="SalesCrmPage">
     <div className="container mx-auto p-6 space-y-6">
 
       {/* Header */}
@@ -1071,6 +1073,7 @@ export default function SalesCrmPage() {
         }}
       />
     </div>
+    </ComponentErrorBoundary>
 
   );
 
