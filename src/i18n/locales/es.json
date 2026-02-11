@@ -10,6 +10,16 @@
     "8": "Clase 8 - Cuentas especiales",
     "9": "Clase 9 - Contabilidad analítica"
   },
+  "Accounting": {
+    "JournalTypes": {
+      "Purchases": "Compras",
+      "Sales": "Ventas",
+      "Bank": "Banco",
+      "Cash": "Caja",
+      "General": "General",
+      "Opening": "Apertura"
+    }
+  },
   "accountCreatedSuccess": "Cuenta creada con éxito",
   "accountDescriptionPlaceholder": "Descripción de la cuenta",
   "accountName": "Nombre de la cuenta",
@@ -648,6 +658,14 @@
     "stayTuned": "Restez à l'écoute",
     "stayTunedMessage": "Nous travaillons dur pour vous apporter cette fonctionnalité. Merci de su patience.",
     "success": "Éxito",
+    "warning": "Atención",
+    "impossible": "Imposible",
+    "confirmation": "Confirmación",
+    "deleted": "Eliminado",
+    "created": "Creado",
+    "updated": "Actualizado",
+    "operationFailed": "La operación falló",
+    "operationSuccess": "Operación exitosa",
     "suggested": "Sugerencias",
     "thirdParties": "Terceros",
     "underDevelopment": "En cours de développement",
