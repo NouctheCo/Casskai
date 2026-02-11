@@ -140,7 +140,7 @@ export default function ProjectsPage() {
           skills: emp.skills || [],
           availability: 80, // Valeur par défaut
           hourlyRate: emp.hourly_rate || 0,
-          currentProjects: [], // À calculer depuis les time entries
+          currentProjects: [] as string[], // À calculer depuis les time entries
           totalHours: 0, // À calculer
           billableHours: 0 // À calculer
         }));
@@ -270,6 +270,7 @@ export default function ProjectsPage() {
         name: projectName.trim(),
         description: projectDescription.trim(),
         client: projectClient.trim(),
+        clientId: projectClient.trim(),
         status: projectStatus as 'planning' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled',
         priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
         startDate: startDate ? startDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
@@ -278,7 +279,8 @@ export default function ProjectsPage() {
         spent: 0,
         progress: 0,
         manager: projectManager.trim() || 'Non assigné',
-        team: [],
+        managerId: projectManager.trim() || undefined,
+        team: [] as string[],
         category: 'Général',
         lastActivity: new Date().toISOString(),
         totalHours: 0,
@@ -449,7 +451,7 @@ export default function ProjectsPage() {
                       </div>
                     ) : (
                       clients.map((client) => (
-                        <SelectItem key={client.id} value={client.name}>
+                        <SelectItem key={client.id} value={client.id}>
                           {client.name}
                         </SelectItem>
                       ))
@@ -464,7 +466,7 @@ export default function ProjectsPage() {
                 id="projectDescription"
                 value={projectDescription}
                 onChange={(e) => setProjectDescription(e.target.value)}
-                className="w-full border rounded-md px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="w-full border rounded-md px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
                 rows={3}
                 placeholder={`${t('projectspage.description', { defaultValue: 'Description' })  } détaillée du projet`}
               ></textarea>
@@ -474,7 +476,7 @@ export default function ProjectsPage() {
                 <label htmlFor="projectStartDate" className="text-sm font-medium">{t('projectspage.date_de_dbut', { defaultValue: 'Date de début' })}</label>
                 <DatePicker
                   value={startDate}
-                  onChange={setStartDate}
+                  onChange={(d) => setStartDate(d ?? null)}
                   placeholder={t('projectspage.slectionnez_une_date', { defaultValue: 'Sélectionnez une date' })}
                   className=""
                 />
@@ -483,7 +485,7 @@ export default function ProjectsPage() {
                 <label htmlFor="projectEndDate" className="text-sm font-medium">{t('projectspage.date_de_fin_prvue', { defaultValue: 'Date de fin prévue' })}</label>
                 <DatePicker
                   value={endDate}
-                  onChange={setEndDate}
+                  onChange={(d) => setEndDate(d ?? null)}
                   placeholder={t('projectspage.slectionnez_une_date', { defaultValue: 'Sélectionnez une date' })}
                   className=""
                 />
@@ -526,7 +528,7 @@ export default function ProjectsPage() {
                       </div>
                     ) : (
                       resources.map((resource) => (
-                        <SelectItem key={resource.id} value={resource.name}>
+                        <SelectItem key={resource.id} value={resource.id}>
                           {resource.name} - {resource.role}
                         </SelectItem>
                       ))
@@ -542,11 +544,11 @@ export default function ProjectsPage() {
                   onChange={(e) => setProjectStatus(e.target.value)}
                   className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-white dark:bg-gray-800 dark:bg-gray-900 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <option>{t('projectspage.en_prparation', { defaultValue: 'En préparation' })}</option>
-                  <option>{t('projectspage.en_cours', { defaultValue: t('projectspage.status.inProgress') })}</option>
-                  <option>{t('projectspage.en_pause', { defaultValue: 'En pause' })}</option>
-                  <option>{t('projectspage.termin', { defaultValue: 'Terminé' })}</option>
-                  <option>{t('projectspage.annul', { defaultValue: 'Annulé' })}</option>
+                  <option value="planning">{t('projectspage.en_prparation', { defaultValue: 'En préparation' })}</option>
+                  <option value="in_progress">{t('projectspage.en_cours', { defaultValue: t('projectspage.status.inProgress') })}</option>
+                  <option value="on_hold">{t('projectspage.en_pause', { defaultValue: 'En pause' })}</option>
+                  <option value="completed">{t('projectspage.termin', { defaultValue: 'Terminé' })}</option>
+                  <option value="cancelled">{t('projectspage.annul', { defaultValue: 'Annulé' })}</option>
                 </select>
               </div>
             </div>
@@ -1700,7 +1702,7 @@ export default function ProjectsPage() {
           }));
           setClients(clientsFormatted);
           const newClient = clientsFormatted.find(c => c.id === clientId);
-          if (newClient) setProjectClient(newClient.name);
+          if (newClient) setProjectClient(newClient.id);
           toastSuccess('Client créé avec succès');
         }}
       />
@@ -1725,12 +1727,12 @@ export default function ProjectsPage() {
               skills: emp.skills || [],
               availability: 80,
               hourlyRate: emp.hourly_rate || 0,
-              currentProjects: [],
+              currentProjects: [] as string[],
               totalHours: 0,
               billableHours: 0
             }));
             setResources(employeesAsResources);
-            if (data) setProjectManager(`${data.first_name} ${data.last_name}`);
+            if (data) setProjectManager(data.id);
             toastSuccess('Employé créé avec succès');
             return true;
           } catch (error) {

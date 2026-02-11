@@ -16,7 +16,7 @@ const localeMap = {
 
 export function DatePicker({ value, onChange, placeholder, className }: {
   value?: Date | null;
-  onChange: ((date: Date | undefined) => void) | ((date: Date) => void);
+  onChange: (date: Date | undefined) => void;
   placeholder?: string;
   className?: string;
 }) {
@@ -41,7 +41,7 @@ export function DatePicker({ value, onChange, placeholder, className }: {
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
-          selected={value}
+          selected={value ?? undefined}
           onSelect={onChange}
           locale={dateLocale}
           initialFocus

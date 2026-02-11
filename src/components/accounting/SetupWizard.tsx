@@ -294,7 +294,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish }:
                 <Label htmlFor="fiscal-year-start">{t('accounting.setup.fiscalYearStart', { defaultValue: 'Fiscal Year Start' })}</Label>
                 <DatePicker
                   value={fiscalYearStart}
-                  onChange={setFiscalYearStart}
+                  onChange={(d) => d && setFiscalYearStart(d)}
                   placeholder=""
                   className=""
                 />
@@ -303,7 +303,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish }:
                 <Label htmlFor="fiscal-year-end">{t('accounting.setup.fiscalYearEnd', { defaultValue: 'Fiscal Year End' })}</Label>
                 <DatePicker
                   value={fiscalYearEnd}
-                  onChange={setFiscalYearEnd}
+                  onChange={(d) => d && setFiscalYearEnd(d)}
                   placeholder=""
                   className=""
                 />

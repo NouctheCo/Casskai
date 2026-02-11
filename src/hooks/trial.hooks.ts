@@ -72,7 +72,7 @@ export const useTrial = (): UseTrialReturn => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await createTrialSubscription(user.id, companyId);
+      const result = await createTrialSubscription(user.id, companyId ?? '');
       if (result.success) {
         // Recharger les informations après création
         await loadTrialInfo();
@@ -88,10 +88,10 @@ export const useTrial = (): UseTrialReturn => {
     }
   };
   const convertTrialToPaidAsync = async (
-    _newPlanId?: string,
+    _newPlanId: string,
     _stripeSubscriptionId?: string,
     _stripeCustomerId?: string
-  ) => {
+  ): Promise<{ success: boolean; error?: string }> => {
     if (!user?.id) {
       return { success: false, error: 'Utilisateur non connecté' };
     }
@@ -104,7 +104,7 @@ export const useTrial = (): UseTrialReturn => {
         await loadTrialInfo();
         await checkTrialEligibility();
       }
-      return result;
+      return { success: result.success, error: result.error ? String(result.error) : undefined };
     } catch (_err) {
       const errorMessage = 'Erreur lors de la conversion de l\'essai';
       setError(errorMessage);

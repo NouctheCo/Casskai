@@ -98,7 +98,7 @@ class OnboardingService {
         error: 'Aucune session d\'onboarding trouvée'
       };
     }
-    return response;
+    return { success: true, data: response.data };
   }
   /**
    * Met à jour le profil de l'entreprise avec validation

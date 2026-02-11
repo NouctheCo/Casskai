@@ -219,7 +219,7 @@ class AuditService {
             }
             logger.warn('AuditService: audit-log retry without Authorization failed', { status: fetchResponse.status });
           } catch (retryErr) {
-            logger.warn('AuditService: Exception during retry without Authorization', retryErr);
+            logger.warn('AuditService: Exception during retry without Authorization', retryErr as Record<string, unknown>);
           }
         }
 
@@ -241,7 +241,7 @@ class AuditService {
                 logger.warn('AuditService: Audit entry queued in localStorage for retry', { queued: true });
               }
             } catch (lsErr) {
-              logger.warn('AuditService: Unable to queue audit entry in localStorage', lsErr);
+              logger.warn('AuditService: Unable to queue audit entry in localStorage', lsErr as Record<string, unknown>);
             }
           }
         }

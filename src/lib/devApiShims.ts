@@ -3,7 +3,7 @@
 if (import.meta.env.DEV) {
   try {
     const originalFetch = window.fetch.bind(window);
-    window.fetch = async (input: RequestInfo, init?: RequestInit) => {
+    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       try {
         const url = typeof input === 'string' ? input : input instanceof Request ? input.url : String(input);
         const pathname = url.startsWith('/') ? url : new URL(url, window.location.origin).pathname;

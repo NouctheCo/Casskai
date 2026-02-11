@@ -45,7 +45,7 @@ if (!i18n.isInitialized) {
       returnNull: false,
       returnEmptyString: false,
       saveMissing: false,
-      missingKeyHandler: (lng: string[], ns: string, key: string) => {
+      missingKeyHandler: (lng: readonly string[], ns: string, key: string) => {
         if (process.env.NODE_ENV === 'development') {
           logger.warn('I18n-simple', `Missing translation: ${key}`);
         }

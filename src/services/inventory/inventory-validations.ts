@@ -48,18 +48,18 @@ export function validateCreateInventoryItem(input: CreateInventoryItemInput): vo
 export function validateProductData(product: {
   name: string;
   code?: string;
-  purchase_price?: number;
-  selling_price?: number;
+  purchase_price?: number | null;
+  selling_price?: number | null;
 }): void {
   if (!product.name?.trim()) {
     throw new Error('Product name is required');
   }
 
-  if (product.purchase_price !== undefined && product.purchase_price < 0) {
+  if (product.purchase_price != null && product.purchase_price < 0) {
     throw new Error('Purchase price cannot be negative');
   }
 
-  if (product.selling_price !== undefined && product.selling_price < 0) {
+  if (product.selling_price != null && product.selling_price < 0) {
     throw new Error('Selling price cannot be negative');
   }
 }
