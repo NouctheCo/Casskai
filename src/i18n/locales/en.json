@@ -812,7 +812,10 @@
     "update": "Mettre Ã  jour",
     "view": "View",
     "year": "Year",
-    "optional": "(optional)"
+    "optional": "(optional)",
+    "refresh": "Refresh",
+    "confirm": "Confirm",
+    "loading": "Loading..."
   },
   "projects": {
     "resourceModal": {
@@ -2083,13 +2086,15 @@
   },
   "goHome": "Go home",
   "header": {
-    "guestUser": "Utilisateur",
-    "help": "Aide",
-    "logout": "Se dÃ©connecter",
-    "noEmail": "pas d'email",
-    "profile": "Mon profil",
+    "guestUser": "User",
+    "help": "Help",
+    "logout": "Log out",
+    "noEmail": "no email",
+    "profile": "My profile",
     "search": "Search...",
-    "settings": "Settings"
+    "settings": "Settings",
+    "offline": "Offline",
+    "pendingSync": "{{count}} item(s) pending"
   },
   "historyBasedProjections": "Projections basÃ©es sur l'historique",
   "hr": {
@@ -5184,6 +5189,7 @@
       "editObligation": "Editing {{name}}"
     },
     "confirm": {
+      "deleteTitle": "Confirm Deletion",
       "deleteDeclaration": "Are you sure you want to delete the declaration {{name}}?",
       "deleteObligation": "Are you sure you want to delete the obligation {{name}}?"
     },

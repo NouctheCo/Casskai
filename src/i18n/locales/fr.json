@@ -2435,7 +2435,9 @@
     "noEmail": "pas d'email",
     "profile": "Mon profil",
     "search": "Rechercher...",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "offline": "Hors ligne",
+    "pendingSync": "{{count}} élément(s) en attente"
   },
   "historyBasedProjections": "Projections basées sur l'historique",
   "hr": {
@@ -5549,6 +5551,7 @@
       "editObligation": "Édition de {{name}}"
     },
     "confirm": {
+      "deleteTitle": "Confirmer la suppression",
       "deleteDeclaration": "Êtes-vous sûr de vouloir supprimer la déclaration {{name}} ?",
       "deleteObligation": "Êtes-vous sûr de vouloir supprimer l'obligation {{name}} ?"
     },
