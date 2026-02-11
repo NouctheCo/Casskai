@@ -320,7 +320,7 @@ export function getDrilldownForRow(
  */
 export function buildDrilldownURL(drilldown: DrilldownMetadata): string {
   switch (drilldown.action) {
-    case 'show_entries':
+    case 'show_entries': {
       // Navigation vers liste des écritures comptables filtrées
       const params = new URLSearchParams();
       if (drilldown.filters) {
@@ -331,6 +331,7 @@ export function buildDrilldownURL(drilldown: DrilldownMetadata): string {
         });
       }
       return `/accounting/entries?${params.toString()}`;
+    }
 
     case 'show_document':
       // Navigation vers détail du document

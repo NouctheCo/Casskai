@@ -16,7 +16,7 @@
  * - Catégorisation des résultats
  */
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -115,7 +115,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   /**
    * Commandes par défaut (navigation)
@@ -374,7 +373,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     if (isOpen) {
       setSearchQuery('');
       setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
 
@@ -439,7 +437,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         <div className="flex items-center gap-3 px-4 py-3 border-b dark:border-gray-700">
           <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" strokeWidth={2} />
           <input
-            ref={inputRef}
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -474,7 +471,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   </div>
 
                   {/* Commands */}
-                  {commands.map((command, index) => {
+                  {commands.map((command) => {
                     const globalIndex = filteredCommands.indexOf(command);
                     const isSelected = globalIndex === selectedIndex;
                     const Icon = command.icon;

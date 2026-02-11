@@ -4,7 +4,6 @@ import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
@@ -29,7 +28,6 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
   onClose,
   onSubmit,
   purchase,
-  suppliers: _suppliers,
   loading
 }) => {
   const { t } = useTranslation();

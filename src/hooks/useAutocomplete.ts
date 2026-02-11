@@ -341,7 +341,7 @@ export function useAutocomplete<T = any>(
       // Default fuzzy search
       filtered = allOptions.map((option) => {
         // Recherche dans label
-        let labelScore = fuzzyMatch
+        const labelScore = fuzzyMatch
           ? fuzzyScore(query, option.label, caseSensitive)
           : option.label.toLowerCase().includes(query.toLowerCase())
           ? 0.7

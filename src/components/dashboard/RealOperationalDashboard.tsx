@@ -31,6 +31,7 @@ import {
   Clock,
   Sparkles,
   RefreshCw,
+  WifiOff
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,11 +43,8 @@ import { useKpiRefresh } from '@/hooks/useKpiRefresh';
 import { formatCurrency, getCurrentCompanyCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { kpiCacheService } from '@/services/kpiCacheService';
-import { offlineDataService } from '@/services/offlineDataService';
-import RealtimeDashboardIndicator from '@/components/dashboard/RealtimeDashboardIndicator';
 import ThresholdAlert from '@/components/dashboard/ThresholdAlert';
 import { RealtimeStatusIndicator } from '@/components/dashboard/RealtimeStatusIndicator';
-import { WifiOff } from 'lucide-react';
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 // Helper to get currency symbol based on company settings
@@ -231,8 +229,7 @@ export const RealOperationalDashboard: React.FC = () => {
         clearTimeout(reloadTimeoutRef.current);
       }
     };
-     
-  }, [currentCompany?.id]);
+  }, [currentCompany?.id, loadDashboardData]);
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     const startTime = performance.now();

@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import {
   Search,
   Zap,
-  RefreshCw,
   CheckCircle2,
   Trash2,
   Link2,
+  RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { TransactionRow } from './TransactionRow';
@@ -61,7 +61,6 @@ interface TransactionCategorizationProps {
 }
 export const TransactionCategorization: React.FC<TransactionCategorizationProps> = ({
   bankAccountId,
-  bankAccountNumber: _bankAccountNumber,
   onRefresh,
 }) => {
   const { currentCompany } = useAuth();
@@ -587,6 +586,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
 
   // Supprimer une transaction
   const deleteTransaction = async (transactionId: string) => {
+    // eslint-disable-next-line no-alert
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette transaction ? Cette action est irréversible.')) {
       return;
     }
@@ -608,6 +608,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
   // Supprimer les transactions sélectionnées
   const deleteSelectedTransactions = async () => {
     if (selectedTransactions.size === 0) return;
+    // eslint-disable-next-line no-alert
     if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedTransactions.size} transaction(s) ? Cette action est irréversible.`)) {
       return;
     }
@@ -638,10 +639,12 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       toast.error('Aucune transaction à supprimer');
       return;
     }
+    // eslint-disable-next-line no-alert
     if (!confirm(`⚠️ ATTENTION : Voulez-vous vraiment supprimer TOUTES les ${count} transaction(s) affichées ? Cette action est IRRÉVERSIBLE.`)) {
       return;
     }
     // Double confirmation pour suppression totale
+    // eslint-disable-next-line no-alert
     if (!confirm(`Dernière confirmation : Supprimer définitivement ${count} transaction(s) ?`)) {
       return;
     }

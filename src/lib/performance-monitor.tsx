@@ -110,8 +110,8 @@ class PerformanceMonitor {
       });
 
       observer.observe({ type: 'largest-contentful-paint', buffered: true });
-    } catch (error) {
-      logger.error('PerformanceMonitor', 'LCP observation error:', error);
+    } catch (_error) {
+      logger.error('PerformanceMonitor', 'LCP observation error:', _error);
     }
   }
 
@@ -129,8 +129,8 @@ class PerformanceMonitor {
       });
 
       observer.observe({ type: 'first-input', buffered: true });
-    } catch (error) {
-      logger.error('PerformanceMonitor', 'FID observation error:', error);
+    } catch (_error) {
+      logger.error('PerformanceMonitor', 'FID observation error:', _error);
     }
   }
 
@@ -152,8 +152,8 @@ class PerformanceMonitor {
       });
 
       observer.observe({ type: 'layout-shift', buffered: true });
-    } catch (error) {
-      logger.error('PerformanceMonitor', 'CLS observation error:', error);
+    } catch (_error) {
+      logger.error('PerformanceMonitor', 'CLS observation error:', _error);
     }
   }
 
@@ -170,8 +170,8 @@ class PerformanceMonitor {
       });
 
       observer.observe({ type: 'paint', buffered: true });
-    } catch (error) {
-      logger.error('PerformanceMonitor', 'FCP observation error:', error);
+    } catch (_error) {
+      logger.error('PerformanceMonitor', 'FCP observation error:', _error);
     }
   }
 
@@ -185,8 +185,8 @@ class PerformanceMonitor {
         const ttfb = navigationEntry.responseStart - navigationEntry.requestStart;
         this.recordMetric('TTFB', ttfb);
       }
-    } catch (error) {
-      logger.error('PerformanceMonitor', 'TTFB observation error:', error);
+    } catch (_error) {
+      logger.error('PerformanceMonitor', 'TTFB observation error:', _error);
     }
   }
 
@@ -204,7 +204,7 @@ class PerformanceMonitor {
       });
 
       observer.observe({ type: 'event', buffered: true, durationThreshold: 16 });
-    } catch (error) {
+    } catch {
       // INP might not be supported in all browsers yet
       logger.debug('PerformanceMonitor', 'INP not supported in this browser');
     }
@@ -274,7 +274,7 @@ class PerformanceMonitor {
       });
 
       observer.observe({ type: 'longtask', buffered: true });
-    } catch (error) {
+    } catch {
       logger.debug('PerformanceMonitor', 'Long tasks not supported in this browser');
     }
   }
@@ -299,8 +299,8 @@ class PerformanceMonitor {
       });
 
       observer.observe({ type: 'resource', buffered: true });
-    } catch (error) {
-      logger.error('PerformanceMonitor', 'Resource observation error:', error);
+    } catch (_error) {
+      logger.error('PerformanceMonitor', 'Resource observation error:', _error);
     }
   }
 
@@ -344,8 +344,8 @@ class PerformanceMonitor {
 
         return measure.duration;
       }
-    } catch (error) {
-      logger.error('PerformanceMonitor', 'Measure error:', error);
+    } catch (_error) {
+      logger.error('PerformanceMonitor', 'Measure error:', _error);
     }
 
     return 0;
@@ -411,8 +411,8 @@ class PerformanceMonitor {
 
         navigator.sendBeacon(this.reportingEndpoint, data);
       }
-    } catch (error) {
-      logger.error('PerformanceMonitor', 'Failed to report metric:', error);
+    } catch (_error) {
+      logger.error('PerformanceMonitor', 'Failed to report metric:', _error);
     }
   }
 

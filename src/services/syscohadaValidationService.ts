@@ -121,7 +121,7 @@ class SyscohadaValidationService {
         is_valid: totalErrors === 0,
         total_errors: totalErrors,
         total_warnings: totalWarnings,
-        errors: errors,
+        errors,
         checked_at: new Date().toISOString(),
         compliance_score: complianceScore
       };
@@ -142,7 +142,7 @@ class SyscohadaValidationService {
         is_valid: false,
         total_errors: 1,
         total_warnings: 0,
-        errors: errors,
+        errors,
         checked_at: new Date().toISOString(),
         compliance_score: 0
       };

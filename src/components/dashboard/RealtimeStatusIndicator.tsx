@@ -81,9 +81,9 @@ export function RealtimeStatusIndicator({
   averageLatency,
   compact = false
 }: RealtimeStatusIndicatorProps) {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [_currentTime, setCurrentTime] = useState(new Date());
 
-  // Update current time every second
+  // Update current time every second to refresh relative time displays
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date());

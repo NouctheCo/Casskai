@@ -33,7 +33,7 @@ interface ClickableTableRowProps {
  */
 export const ClickableTableRow: React.FC<ClickableTableRowProps> = ({
   row,
-  rowIndex,
+  rowIndex: _rowIndex,
   drilldown,
   onRowClick,
   className

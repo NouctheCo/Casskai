@@ -135,12 +135,12 @@ export function useFormValidation(
   } = options;
 
   const {
-    formState: { errors, dirtyFields, touchedFields, isValid, isValidating },
+    formState: { errors, dirtyFields, touchedFields, isValid },
     trigger,
   } = form;
 
   // État local pour forcer le re-render
-  const [validationKey, setValidationKey] = useState(0);
+  const [_validationKey, setValidationKey] = useState(0);
 
   /**
    * Obtenir l'état de validation d'un champ

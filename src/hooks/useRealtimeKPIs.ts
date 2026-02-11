@@ -7,9 +7,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { realtimeService, createChannelName, createCompanyFilter, debounceRealtimeCallback } from '@/services/realtimeService';
-import { realDashboardKpiService } from '@/services/realDashboardKpiService';
+import { realDashboardKpiService, type RealKPIData } from '@/services/realDashboardKpiService';
 import { kpiCacheService } from '@/services/kpiCacheService';
-import type { RealKPIData } from '@/services/realDashboardKpiService';
 
 export interface UseRealtimeKPIsOptions {
   /**

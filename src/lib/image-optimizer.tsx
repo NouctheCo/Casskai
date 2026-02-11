@@ -65,7 +65,7 @@ export function generateSizes(breakpoints: { maxWidth: string; size: string }[])
  * Hook React pour lazy loading d'images
  */
 export function useLazyImage(imageUrl: string, placeholder?: string) {
-  const [imageSrc, setImageSrc] = React.useState(placeholder || '');
+  const [_imageSrc, setImageSrc] = React.useState(placeholder || '');
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [hasError, setHasError] = React.useState(false);
   const imgRef = React.useRef<HTMLImageElement>(null);
@@ -112,7 +112,7 @@ export function useLazyImage(imageUrl: string, placeholder?: string) {
     };
   }, [imageUrl]);
 
-  return { imgRef, imageSrc, isLoaded, hasError };
+  return { imgRef, imageSrc: _imageSrc, isLoaded, hasError };
 }
 
 /**
@@ -136,7 +136,7 @@ export function OptimizedImage({
   width,
   height,
   widths = [640, 750, 828, 1080, 1200, 1920],
-  quality = 80,
+  quality: _quality = 80,
   formats = ['webp', 'jpg'],
   lazy = true,
   placeholder,
@@ -151,7 +151,7 @@ export function OptimizedImage({
   const imgRef = React.useRef<HTMLImageElement>(null);
 
   // Lazy loading avec Intersection Observer
-  const { imageSrc, isLoaded: lazyLoaded } = useLazyImage(
+  const { imageSrc: _imageSrc, isLoaded: _lazyLoaded } = useLazyImage(
     priority ? src : '', // Si priority, charger immédiatement
     placeholder
   );
@@ -171,7 +171,7 @@ export function OptimizedImage({
   }, [onLoad]);
 
   const handleError = React.useCallback(
-    (e: React.SyntheticEvent<HTMLImageElement>) => {
+    (_e: React.SyntheticEvent<HTMLImageElement>) => {
       setHasError(true);
       const error = new Error(`Failed to load image: ${src}`);
       onError?.(error);
@@ -308,9 +308,9 @@ export function OptimizedImage({
  * Générer placeholder LQIP (Low Quality Image Placeholder)
  */
 export async function generatePlaceholder(
-  imageUrl: string,
+  _imageUrl: string,
   width = 20,
-  quality = 10
+  _quality = 10
 ): Promise<string> {
   try {
     // Dans un environnement réel, cela devrait être fait côté serveur
@@ -345,7 +345,7 @@ export function preloadImage(src: string, options?: { as?: string; type?: string
 /**
  * Hook pour précharger images au survol
  */
-export function useImagePreload(imageUrls: string[]) {
+export function useImagePreload(_imageUrls: string[]) {
   const [preloadedUrls, setPreloadedUrls] = React.useState<Set<string>>(new Set());
 
   const preload = React.useCallback(
@@ -430,7 +430,7 @@ export async function compressImage(
               logger.debug('ImageOptimizer', 'Image compressed:', {
                 originalSize: file.size,
                 compressedSize: blob.size,
-                ratio: ((blob.size / file.size) * 100).toFixed(2) + '%',
+                ratio: `${((blob.size / file.size) * 100).toFixed(2)  }%`,
               });
             } else {
               reject(new Error('Failed to compress image'));
@@ -464,7 +464,7 @@ export function getImageLoadingStats() {
 
   return {
     count: images.length,
-    totalSize: totalSize,
+    totalSize,
     totalSizeMB: (totalSize / 1024 / 1024).toFixed(2),
     avgDuration: images.length > 0 ? (totalDuration / images.length).toFixed(2) : 0,
     largestImages: images

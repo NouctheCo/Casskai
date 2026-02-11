@@ -4,7 +4,7 @@
  * Navbar de la landing page V2
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type ForwardRefExoticComponent, type RefAttributes, type SVGAttributes } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -24,7 +24,6 @@ import {
 } from 'lucide-react';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { useLocale } from '@/contexts/LocaleContext';
-import type { ForwardRefExoticComponent, RefAttributes, SVGAttributes } from 'react';
 
 interface NavItem {
   icon: ForwardRefExoticComponent<Omit<SVGAttributes<SVGSVGElement>, 'ref'> & RefAttributes<SVGSVGElement>>;

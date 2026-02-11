@@ -10,7 +10,7 @@
  * - Statistiques temps réel
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,16 +24,15 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
-  TrendingUp,
   AlertCircle,
   Zap,
   FileText,
   Calendar,
   DollarSign,
-  Target
+  Target,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getCurrentCompanyCurrency } from '@/lib/utils';
 import * as bankReconciliationService from '@/services/bankReconciliationService';
 import type {
   BankTransaction,
@@ -57,7 +56,8 @@ export default function BankReconciliationTab() {
   const [expandedTransactions, setExpandedTransactions] = useState<ExpandedTransactions>({});
   const [loadingSuggestions, setLoadingSuggestions] = useState<{ [key: string]: boolean }>({});
 
-  const currency = currentCompany?.default_currency || getCurrentCompanyCurrency();
+  // Currency not currently used in this component but available if needed
+  // const currency = currentCompany?.default_currency || getCurrentCompanyCurrency();
 
   /**
    * Charge les statistiques de rapprochement
@@ -170,7 +170,7 @@ export default function BankReconciliationTab() {
         suggestionId: suggestion.journalEntryId
       });
 
-      const { data, error } = await bankReconciliationService.createReconciliation(
+      const { error } = await bankReconciliationService.createReconciliation(
         currentCompany.id,
         transaction.bank_account_id,
         transaction.id,

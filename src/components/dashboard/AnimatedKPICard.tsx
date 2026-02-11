@@ -36,7 +36,7 @@ export interface AnimatedKPICardProps {
 }
 
 export function AnimatedKPICard({
-  id,
+  id: _id,
   label,
   value,
   unit = '',

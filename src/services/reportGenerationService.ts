@@ -1836,7 +1836,7 @@ export class ReportGenerationService {
       const table: TableData = {
         title: reportTitle,
         headers: ['Ligne', 'Libellé', 'Base HT', 'TVA'],
-        rows: rows,
+        rows,
         summary: {
           [collectedLabel]: this.formatCurrency(totalVATCollected),
           [deductibleLabel]: this.formatCurrency(totalVATDeductible),
@@ -2732,7 +2732,7 @@ export class ReportGenerationService {
         headers: ['N° Compte', 'Libellé', 'Budget', 'Réalisé', 'Écart', 'Écart %', 'Statut'],
         rows: topAccountDetails.map(acc => [
           acc.accountNumber,
-          acc.accountName.length > 40 ? acc.accountName.substring(0, 37) + '...' : acc.accountName,
+          acc.accountName.length > 40 ? `${acc.accountName.substring(0, 37)  }...` : acc.accountName,
           this.formatCurrency(acc.budgeted),
           this.formatCurrency(acc.actual),
           this.formatCurrency(acc.variance),
@@ -4787,7 +4787,7 @@ export class ReportGenerationService {
         ],
         rows: topRows.map(row => [
           row.reference,
-          row.name.length > 40 ? row.name.substring(0, 37) + '...' : row.name,
+          row.name.length > 40 ? `${row.name.substring(0, 37)  }...` : row.name,
           row.quantity.toFixed(2),
           this.formatCurrency(row.cmp_value),
           this.formatCurrency(row.fifo_value),

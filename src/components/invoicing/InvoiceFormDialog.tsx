@@ -4,12 +4,10 @@
  * Tous droits réservés - All rights reserved
  */
 import React, { useState, useEffect, useMemo } from 'react';
-import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
@@ -52,16 +50,13 @@ export interface InvoiceFormDialogProps {
   onClose: () => void;
   invoice?: InvoiceWithDetails | null;
   onSuccess?: () => void;
-  /** Optional: pre-select a project for the invoice */
-  preselectedProjectId?: string;
 }
 
 const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
   open,
   onClose,
   invoice = null,
-  onSuccess,
-  preselectedProjectId: _preselectedProjectId
+  onSuccess
 }) => {
   const { toast } = useToast();
   const { currentCompany } = useAuth();

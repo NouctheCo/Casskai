@@ -116,7 +116,7 @@ function getActionIcon(type: ActionType): LucideIcon {
 /**
  * Obtenir la couleur pour un type d'action
  */
-function getActionColor(type: ActionType): string {
+function _getActionColor(type: ActionType): string {
   if (type.startsWith('create_')) return 'text-green-600 dark:text-green-400';
   if (type.startsWith('update_')) return 'text-blue-600 dark:text-blue-400';
   if (type.startsWith('delete_')) return 'text-red-600 dark:text-red-400';
@@ -236,7 +236,6 @@ export const UndoRedoTimeline: React.FC<UndoRedoTimelineProps> = ({
           const isPast = index < currentIndex;
           const isFuture = index > currentIndex;
           const Icon = getActionIcon(action.type);
-          const colorClass = getActionColor(action.type);
 
           return (
             <div

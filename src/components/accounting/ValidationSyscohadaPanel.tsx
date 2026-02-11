@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { AlertCircle, CheckCircle2, Loader2, AlertTriangle, Sparkles, FileCheck } from 'lucide-react';
+import { CheckCircle2, Loader2, AlertTriangle, AlertCircle, Sparkles, FileCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,10 +14,12 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { syscohadaValidationService } from '@/services/syscohadaValidationService';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
-import type { ValidationResult } from '@/services/syscohadaValidationService';
+import {
+  syscohadaValidationService,
+  type ValidationResult
+} from '@/services/syscohadaValidationService';
 
 export function ValidationSyscohadaPanel() {
   const { currentEnterprise } = useEnterprise();
@@ -54,12 +56,13 @@ export function ValidationSyscohadaPanel() {
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-green-600';
-    if (score >= 75) return 'text-blue-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+  // Helper function for score color (unused in current implementation but kept for future use)
+  // const getScoreColor = (score: number) => {
+  //   if (score >= 90) return 'text-green-600';
+  //   if (score >= 75) return 'text-blue-600';
+  //   if (score >= 60) return 'text-yellow-600';
+  //   return 'text-red-600';
+  // };
 
   const getScoreBadgeVariant = (score: number): 'default' | 'secondary' | 'destructive' | 'outline' => {
     if (score >= 90) return 'default';

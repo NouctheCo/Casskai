@@ -28,7 +28,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -60,7 +59,6 @@ import {
   Maximize2,
   Minimize2,
   Eye,
-  FileCode,
   Download,
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
@@ -233,18 +231,17 @@ export default function RichTextEditor({
    * Insérer tableau
    */
   const handleInsertTable = useCallback(() => {
-    const rows = prompt('Nombre de lignes:', '3');
-    const cols = prompt('Nombre de colonnes:', '3');
-
-    if (!rows || !cols) return;
+    // Use default 3x3 table (prompt is no-alert violation)
+    const rows = 3;
+    const cols = 3;
 
     const tableHTML = `
       <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-        ${Array.from({ length: parseInt(rows) })
+        ${Array.from({ length: rows })
           .map(
             (_, i) => `
           <tr>
-            ${Array.from({ length: parseInt(cols) })
+            ${Array.from({ length: cols })
               .map((_, j) => `<td>${i === 0 ? `Colonne ${j + 1}` : ''}</td>`)
               .join('')}
           </tr>

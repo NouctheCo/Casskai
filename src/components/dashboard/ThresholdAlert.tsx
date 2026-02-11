@@ -16,7 +16,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import {
   AlertTriangle,
-  AlertCircle,
   TrendingDown,
   DollarSign,
   Clock,
@@ -175,15 +174,22 @@ function analyzeThresholds(kpiData: RealKPIData): AlertConfig[] {
  */
 export function ThresholdAlert({
   kpiData,
-  currency = 'EUR',
   className
 }: ThresholdAlertProps) {
+  // ✅ Tous les hooks AVANT tout conditional return
   const alerts = useMemo(() => analyzeThresholds(kpiData), [kpiData]);
 
-  // Séparer par sévérité
-  const criticalAlerts = alerts.filter(a => a.severity === 'critical');
-  const warningAlerts = alerts.filter(a => a.severity === 'warning');
+  const criticalAlerts = useMemo(
+    () => alerts.filter(a => a.severity === 'critical'),
+    [alerts]
+  );
 
+  const warningAlerts = useMemo(
+    () => alerts.filter(a => a.severity === 'warning'),
+    [alerts]
+  );
+
+  // Early return APRÈS tous les hooks
   if (alerts.length === 0) {
     return null; // Pas d'alertes = pas d'affichage
   }

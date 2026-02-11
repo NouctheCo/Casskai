@@ -16,7 +16,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import { useFormShortcuts, SHORTCUTS, ShortcutsHelp } from '@/hooks/useFormShortcuts';
+import { useFormShortcuts, ShortcutsHelp } from '@/hooks/useFormShortcuts';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
 import { useAccountAutocomplete, useThirdPartyAutocomplete } from '@/hooks/useAutocomplete';
 import { Button } from '@/components/ui/button';
@@ -180,7 +180,7 @@ export function PremiumJournalEntryForm({
   const handleSave = useCallback(async () => {
     if (readOnly) return;
 
-    const isValid = await handleSubmit(
+    await handleSubmit(
       async (data) => {
         setIsSaving(true);
         try {
@@ -212,7 +212,7 @@ export function PremiumJournalEntryForm({
     {
       onSave: handleSave,
       onSubmit: handleValidate,
-      onCancel: onCancel,
+      onCancel,
       onUndo: undo,
       onRedo: redo
     },

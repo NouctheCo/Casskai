@@ -16,7 +16,7 @@
  * - Icônes par type de fichier
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -101,7 +101,7 @@ function formatFileSize(bytes: number): string {
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  return `${Math.round(bytes / Math.pow(k, i) * 100) / 100  } ${  sizes[i]}`;
 }
 
 /**
@@ -478,12 +478,12 @@ export function useSupabaseUpload(bucket: string, folder: string = '') {
       // Import dynamique de supabase pour éviter erreur si pas installé
       const { supabase } = await import('@/lib/supabase');
 
-      const fileName = `${folder ? folder + '/' : ''}${Date.now()}-${file.name}`;
+      const fileName = `${folder ? `${folder  }/` : ''}${Date.now()}-${file.name}`;
 
       // Simula progress pour Supabase (pas de support natif)
       onProgress(10);
 
-      const { data, error } = await supabase.storage.from(bucket).upload(fileName, file, {
+      const { error } = await supabase.storage.from(bucket).upload(fileName, file, {
         cacheControl: '3600',
         upsert: false,
       });

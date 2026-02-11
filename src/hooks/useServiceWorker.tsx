@@ -308,8 +308,6 @@ export const OfflineIndicator = () => {
 
   // Charger les compteurs de sync queue
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-
     const loadCounts = async () => {
       try {
         const { offlineDataService } = await import('@/services/offlineDataService');
@@ -323,7 +321,7 @@ export const OfflineIndicator = () => {
     };
 
     loadCounts();
-    interval = setInterval(loadCounts, 5000);
+    const interval = setInterval(loadCounts, 5000);
     return () => clearInterval(interval);
   }, [isOnline]);
 

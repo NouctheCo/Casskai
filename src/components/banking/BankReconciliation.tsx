@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -84,11 +84,11 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   // Hook de rapprochement bancaire (remplace les données mock)
   const {
     unreconciledTransactions,
-    unreconciledEntries,
+    unreconciledEntries: _unreconciledEntries,
     matchingSuggestions,
     summary,
-    isLoading,
-    error: hookError,
+    isLoading: _isLoading,
+    error: _hookError,
     createReconciliation,
     executeAutoReconciliation,
     refreshAll
@@ -141,7 +141,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
     }
   };
 
-  const sendToCategorization = (transactionId: string) => {
+  const sendToCategorization = (_transactionId: string) => {
     // Cette fonctionnalité nécessiterait un endpoint de suppression de rapprochement
     // Pour l'instant, on affiche un message
     toast({

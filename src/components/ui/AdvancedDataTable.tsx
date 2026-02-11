@@ -16,7 +16,7 @@
  * - Search global
  */
 
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +32,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
@@ -44,7 +43,6 @@ import {
   Search,
   Download,
   MoreVertical,
-  Filter,
   X,
   ChevronLeft,
   ChevronRight,
@@ -154,7 +152,7 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<SortConfig<T>>(null);
-  const [filterConfig, setFilterConfig] = useState<FilterConfig>({});
+  const [_filterConfig, _setFilterConfig] = useState<FilterConfig>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
 
@@ -189,7 +187,7 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
     }
 
     // Filtres par colonne
-    Object.entries(filterConfig).forEach(([columnId, filterValue]) => {
+    Object.entries(_filterConfig).forEach(([columnId, filterValue]) => {
       if (!filterValue) return;
 
       const column = columns.find((c) => c.id === columnId);
@@ -202,7 +200,7 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
     });
 
     return filtered;
-  }, [data, searchQuery, filterConfig, columns, getCellValue]);
+  }, [data, searchQuery, _filterConfig, columns, getCellValue]);
 
   /**
    * Tri

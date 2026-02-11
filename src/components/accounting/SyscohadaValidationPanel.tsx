@@ -5,7 +5,7 @@
  * @module SyscohadaValidationPanel
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   AlertTriangle,
   AlertCircle,
@@ -99,41 +99,41 @@ export function SyscohadaValidationPanel({
     info: validation?.errors.filter((e) => e.severity === 'info') || [],
   };
 
-  // Icône et couleur par sévérité
-  const getSeverityIcon = (severity: 'error' | 'warning' | 'info') => {
-    switch (severity) {
-      case 'error':
-        return <AlertTriangle className="h-4 w-4" />;
-      case 'warning':
-        return <AlertCircle className="h-4 w-4" />;
-      case 'info':
-        return <Info className="h-4 w-4" />;
-    }
-  };
+  // Icône et couleur par sévérité (helpers unused in current implementation but kept for future use)
+  // const getSeverityIcon = (severity: 'error' | 'warning' | 'info') => {
+  //   switch (severity) {
+  //     case 'error':
+  //       return <AlertTriangle className="h-4 w-4" />;
+  //     case 'warning':
+  //       return <AlertCircle className="h-4 w-4" />;
+  //     case 'info':
+  //       return <Info className="h-4 w-4" />;
+  //   }
+  // };
 
-  const getSeverityColor = (severity: 'error' | 'warning' | 'info') => {
-    switch (severity) {
-      case 'error':
-        return 'text-destructive';
-      case 'warning':
-        return 'text-orange-600';
-      case 'info':
-        return 'text-blue-600';
-    }
-  };
+  // const getSeverityColor = (severity: 'error' | 'warning' | 'info') => {
+  //   switch (severity) {
+  //     case 'error':
+  //       return 'text-destructive';
+  //     case 'warning':
+  //       return 'text-orange-600';
+  //     case 'info':
+  //       return 'text-blue-600';
+  //   }
+  // };
 
-  const getSeverityBadgeVariant = (
-    severity: 'error' | 'warning' | 'info'
-  ): 'destructive' | 'default' | 'outline' => {
-    switch (severity) {
-      case 'error':
-        return 'destructive';
-      case 'warning':
-        return 'default';
-      case 'info':
-        return 'outline';
-    }
-  };
+  // const getSeverityBadgeVariant = (
+  //   severity: 'error' | 'warning' | 'info'
+  // ): 'destructive' | 'default' | 'outline' => {
+  //   switch (severity) {
+  //     case 'error':
+  //       return 'destructive';
+  //     case 'warning':
+  //       return 'default';
+  //     case 'info':
+  //       return 'outline';
+  //   }
+  // };
 
   // Loading skeleton
   if (loading && !validation) {

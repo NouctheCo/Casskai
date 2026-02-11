@@ -11,7 +11,7 @@
  * - Performance optimisée
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,6 @@ import {
   Download,
   BarChart3,
   FileText,
-  TrendingUp,
   ArrowUpRight,
   ArrowDownRight,
   Loader2,
@@ -36,8 +35,6 @@ import {
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,

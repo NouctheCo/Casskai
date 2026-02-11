@@ -34,38 +34,8 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.employee_id) newErrors.employee_id = 'Employé requis';
-    if (!formData.description.trim()) newErrors.description = 'Description requise';
-    if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      newErrors.amount = 'Montant invalide';
-    }
-    if (!formData.expense_date) newErrors.expense_date = 'Date requise';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setIsSubmitting(true);
-    try {
-      const success = await onSubmit({
-        ...formData,
-        amount: parseFloat(formData.amount),
-        status: 'pending',
-        category: formData.category as any,
-      });
-      if (success) {
-        onClose();
-      }
-    } catch (error) {
-      logger.error('ExpenseFormModal', 'Error submitting expense form:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  if (!isOpen) return null;
+
+  // Define expense categories before hooks
   const expenseCategories = {
     transport: 'Transport / Déplacement',
     meals: 'Repas',
@@ -95,7 +65,43 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
       description: undefined as string | undefined,
       category: value === 'other' ? 'Autre' : 'Catégories'
     }));
-  }, []);
+  }, [expenseCategories]);
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.employee_id) newErrors.employee_id = 'Employé requis';
+    if (!formData.description.trim()) newErrors.description = 'Description requise';
+    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+      newErrors.amount = 'Montant invalide';
+    }
+    if (!formData.expense_date) newErrors.expense_date = 'Date requise';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setIsSubmitting(true);
+    try {
+      const success = await onSubmit({
+        ...formData,
+        amount: parseFloat(formData.amount),
+        status: 'pending',
+        category: formData.category as any,
+      });
+      if (success) {
+        onClose();
+      }
+    } catch (error) {
+      logger.error('ExpenseFormModal', 'Error submitting expense form:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
