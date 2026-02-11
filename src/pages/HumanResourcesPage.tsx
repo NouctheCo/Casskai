@@ -153,10 +153,10 @@ export default function HumanResourcesPage() {
     );
 
     if (response.success) {
-      toastSuccess("Document uploadé avec succès");
+      toastSuccess(t('hr.page.documentUploadSuccess'));
       return true;
     } else {
-      toastError(response.error || "Impossible d'uploader le document");
+      toastError(response.error || t('hr.page.documentUploadError'));
       return false;
     }
   };
@@ -168,7 +168,7 @@ export default function HumanResourcesPage() {
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Aucune entreprise sélectionnée. Veuillez sélectionner une entreprise pour accéder aux RH.
+            {t('hr.page.noCompanySelected')}
           </AlertDescription>
         </Alert>
       </div>
@@ -187,11 +187,11 @@ export default function HumanResourcesPage() {
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Users className="w-8 h-8 text-blue-600" />
-            Ressources Humaines
+            {t('hr.title')}
             <BetaBadge variant="secondary" />
           </h1>
           <p className="text-muted-foreground">
-            Gérez vos employés, congés, frais et temps de travail
+            {t('hr.page.subtitle')}
             <Badge variant="outline" className="ml-2 text-xs">
               {t('common.inDevelopment', 'En développement')}
             </Badge>
@@ -206,11 +206,11 @@ export default function HumanResourcesPage() {
             disabled={loading}
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Actualiser
+            {t('common.refresh')}
           </Button>
           <Badge variant="secondary" className="px-3 py-1">
             <Sparkles className="w-3 h-3 mr-1" />
-            Intégré Supabase
+            {t('hr.page.integratedSupabase')}
           </Badge>
         </div>
       </motion.div>
@@ -239,13 +239,13 @@ export default function HumanResourcesPage() {
           <motion.div variants={itemVariants}>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Employés</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('hr.kpi.employees')}</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{metrics.total_employees}</div>
                 <p className="text-xs text-muted-foreground">
-                  {metrics.active_employees} actifs
+                  {t('hr.kpi.activeCount', { count: metrics.active_employees })}
                 </p>
               </CardContent>
             </Card>
@@ -254,13 +254,13 @@ export default function HumanResourcesPage() {
           <motion.div variants={itemVariants}>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Nouvelles Embauches</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('hr.kpi.newHires')}</CardTitle>
                 <UserPlus className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{metrics.new_hires_this_month}</div>
                 <p className="text-xs text-muted-foreground">
-                  Ce mois-ci
+                  {t('hr.kpi.thisMonth')}
                 </p>
               </CardContent>
             </Card>
@@ -269,13 +269,13 @@ export default function HumanResourcesPage() {
           <motion.div variants={itemVariants}>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Congés en Attente</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('hr.kpi.pendingLeaves')}</CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{metrics.pending_leaves}</div>
                 <p className="text-xs text-muted-foreground">
-                  {metrics.approved_leaves} approuvés
+                  {t('hr.kpi.approvedCount', { count: metrics.approved_leaves })}
                 </p>
               </CardContent>
             </Card>
@@ -284,13 +284,13 @@ export default function HumanResourcesPage() {
           <motion.div variants={itemVariants}>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Frais en Attente</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('hr.kpi.pendingExpenses')}</CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{metrics.pending_expenses}</div>
                 <p className="text-xs text-muted-foreground">
-                  {(metrics.total_expense_amount || 0).toLocaleString()} € total
+                  {t('hr.kpi.totalAmount', { amount: (metrics.total_expense_amount || 0).toLocaleString() })}
                 </p>
               </CardContent>
             </Card>
@@ -308,51 +308,51 @@ export default function HumanResourcesPage() {
           <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
-              <span className="hidden lg:inline">Analytics</span>
+              <span className="hidden lg:inline">{t('hr.tabs.analytics')}</span>
             </TabsTrigger>
             <TabsTrigger value="employees" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              <span className="hidden lg:inline">Employés</span>
+              <span className="hidden lg:inline">{t('hr.tabs.employees')}</span>
             </TabsTrigger>
             <TabsTrigger value="objectives" className="flex items-center gap-2">
               <Target className="w-4 h-4" />
-              <span className="hidden lg:inline">Objectifs</span>
+              <span className="hidden lg:inline">{t('hr.tabs.objectives')}</span>
             </TabsTrigger>
             <TabsTrigger value="reviews" className="flex items-center gap-2">
               <ClipboardCheck className="w-4 h-4" />
-              <span className="hidden lg:inline">Évaluations</span>
+              <span className="hidden lg:inline">{t('hr.tabs.reviews')}</span>
             </TabsTrigger>
             <TabsTrigger value="feedback" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
-              <span className="hidden lg:inline">Feedback</span>
+              <span className="hidden lg:inline">{t('hr.tabs.feedback')}</span>
             </TabsTrigger>
             <TabsTrigger value="training" className="flex items-center gap-2">
               <GraduationCap className="w-4 h-4" />
-              <span className="hidden lg:inline">Formations</span>
+              <span className="hidden lg:inline">{t('hr.tabs.training')}</span>
             </TabsTrigger>
             <TabsTrigger value="leaves" className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              <span className="hidden lg:inline">Congés</span>
+              <span className="hidden lg:inline">{t('hr.tabs.leaves')}</span>
             </TabsTrigger>
             <TabsTrigger value="expenses" className="flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
-              <span className="hidden lg:inline">Frais</span>
+              <span className="hidden lg:inline">{t('hr.tabs.expenses')}</span>
             </TabsTrigger>
             <TabsTrigger value="documents" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
-              <span className="hidden lg:inline">Documents</span>
+              <span className="hidden lg:inline">{t('hr.tabs.documents')}</span>
             </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <FileSignature className="w-4 h-4" />
-              <span className="hidden lg:inline">Templates</span>
+              <span className="hidden lg:inline">{t('hr.tabs.templates')}</span>
             </TabsTrigger>
             <TabsTrigger value="generation" className="flex items-center gap-2">
               <FilePlus className="w-4 h-4" />
-              <span className="hidden lg:inline">Génération</span>
+              <span className="hidden lg:inline">{t('hr.tabs.generation')}</span>
             </TabsTrigger>
             <TabsTrigger value="archives" className="flex items-center gap-2">
               <Archive className="w-4 h-4" />
-              <span className="hidden lg:inline">Archives</span>
+              <span className="hidden lg:inline">{t('hr.tabs.archives')}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -417,9 +417,9 @@ export default function HumanResourcesPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle>Gestion des Employés</CardTitle>
+                      <CardTitle>{t('hr.employeesSection.title')}</CardTitle>
                       <CardDescription>
-                        {employeesLoading ? 'Chargement...' : `${employees.length} employés`}
+                        {employeesLoading ? t('common.loading') : t('hr.employeesSection.countLabel', { count: employees.length })}
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
@@ -448,7 +448,7 @@ export default function HumanResourcesPage() {
                         onClick={() => setShowEmployeeModal(true)}
                       >
                         <UserPlus className="w-4 h-4 mr-2" />
-                        Ajouter
+                        {t('hr.employeesSection.add')}
                       </Button>
                     </div>
                   </div>
@@ -458,7 +458,7 @@ export default function HumanResourcesPage() {
                     <div className="flex items-center justify-center py-12">
                       <div className="flex items-center space-x-2">
                         <RefreshCw className="w-5 h-5 animate-spin" />
-                        <span>Chargement des employés...</span>
+                        <span>{t('hr.employeesSection.loading')}</span>
                       </div>
                     </div>
                   ) : employees.length > 0 ? (
@@ -502,14 +502,14 @@ export default function HumanResourcesPage() {
                       <div className="text-center space-y-4">
                         <Users className="w-12 h-12 mx-auto text-muted-foreground" />
                         <div>
-                          <h3 className="font-medium">Aucun employé</h3>
+                          <h3 className="font-medium">{t('hr.employeesSection.empty')}</h3>
                           <p className="text-sm text-muted-foreground">
-                            Commencez par ajouter vos premiers employés
+                            {t('hr.employeesSection.emptyDescription')}
                           </p>
                         </div>
                         <Button onClick={() => setShowEmployeeModal(true)}>
                           <UserPlus className="w-4 h-4 mr-2" />
-                          Ajouter un Employé
+                          {t('hr.employeesSection.addEmployee')}
                         </Button>
                       </div>
                     </div>
@@ -525,9 +525,9 @@ export default function HumanResourcesPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle>Gestion des Congés</CardTitle>
+                      <CardTitle>{t('hr.leavesSection.title')}</CardTitle>
                       <CardDescription>
-                        {leavesLoading ? 'Chargement...' : `${leaves.length} demandes de congés`}
+                        {leavesLoading ? t('common.loading') : t('hr.leavesSection.countLabel', { count: leaves.length })}
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
@@ -538,7 +538,7 @@ export default function HumanResourcesPage() {
                           onClick={exportLeavesToCSV}
                         >
                           <Download className="w-4 h-4 mr-2" />
-                          Exporter CSV
+                          {t('hr.leavesSection.exportCsv')}
                         </Button>
                       )}
                       <Button
@@ -546,7 +546,7 @@ export default function HumanResourcesPage() {
                         onClick={() => setShowLeaveModal(true)}
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Nouvelle Demande
+                        {t('hr.leavesSection.newRequest')}
                       </Button>
                     </div>
                   </div>
@@ -556,7 +556,7 @@ export default function HumanResourcesPage() {
                     <div className="flex items-center justify-center py-12">
                       <div className="flex items-center space-x-2">
                         <RefreshCw className="w-5 h-5 animate-spin" />
-                        <span>Chargement des congés...</span>
+                        <span>{t('hr.leavesSection.loading')}</span>
                       </div>
                     </div>
                   ) : leaves.length > 0 ? (
@@ -573,10 +573,10 @@ export default function HumanResourcesPage() {
                           <div className="space-y-1">
                             <p className="font-medium">{leave.employee_name}</p>
                             <p className="text-sm text-muted-foreground">
-                              {leave.leave_type} • {leave.days_count} jours
+                              {leave.leave_type} • {t('hr.leavesSection.days', { count: leave.days_count })}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Du {new Date(leave.start_date).toLocaleDateString()} au {new Date(leave.end_date).toLocaleDateString()}
+                              {t('hr.leavesSection.dateRange', { start: new Date(leave.start_date).toLocaleDateString(), end: new Date(leave.end_date).toLocaleDateString() })}
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
@@ -611,9 +611,9 @@ export default function HumanResourcesPage() {
                       <div className="text-center space-y-4">
                         <Calendar className="w-12 h-12 mx-auto text-muted-foreground" />
                         <div>
-                          <h3 className="font-medium">Aucune demande de congés</h3>
+                          <h3 className="font-medium">{t('hr.leavesSection.empty')}</h3>
                           <p className="text-sm text-muted-foreground">
-                            Les demandes de congés apparaîtront ici
+                            {t('hr.leavesSection.emptyDescription')}
                           </p>
                         </div>
                       </div>
@@ -630,9 +630,9 @@ export default function HumanResourcesPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle>Gestion des Frais</CardTitle>
+                      <CardTitle>{t('hr.expensesSection.title')}</CardTitle>
                       <CardDescription>
-                        {expensesLoading ? 'Chargement...' : `${expenses.length} notes de frais`}
+                        {expensesLoading ? t('common.loading') : t('hr.expensesSection.countLabel', { count: expenses.length })}
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
@@ -643,7 +643,7 @@ export default function HumanResourcesPage() {
                           onClick={exportExpensesToCSV}
                         >
                           <Download className="w-4 h-4 mr-2" />
-                          Exporter CSV
+                          {t('hr.expensesSection.exportCsv')}
                         </Button>
                       )}
                       <Button
@@ -651,7 +651,7 @@ export default function HumanResourcesPage() {
                         onClick={() => setShowExpenseModal(true)}
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Nouvelle Note de Frais
+                        {t('hr.expensesSection.newExpense')}
                       </Button>
                     </div>
                   </div>
@@ -661,7 +661,7 @@ export default function HumanResourcesPage() {
                     <div className="flex items-center justify-center py-12">
                       <div className="flex items-center space-x-2">
                         <RefreshCw className="w-5 h-5 animate-spin" />
-                        <span>Chargement des frais...</span>
+                        <span>{t('hr.expensesSection.loading')}</span>
                       </div>
                     </div>
                   ) : expenses.length > 0 ? (
@@ -718,9 +718,9 @@ export default function HumanResourcesPage() {
                       <div className="text-center space-y-4">
                         <DollarSign className="w-12 h-12 mx-auto text-muted-foreground" />
                         <div>
-                          <h3 className="font-medium">Aucune note de frais</h3>
+                          <h3 className="font-medium">{t('hr.expensesSection.empty')}</h3>
                           <p className="text-sm text-muted-foreground">
-                            Les notes de frais apparaîtront ici
+                            {t('hr.expensesSection.emptyDescription')}
                           </p>
                         </div>
                       </div>

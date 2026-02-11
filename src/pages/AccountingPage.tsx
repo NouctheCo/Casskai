@@ -242,13 +242,13 @@ const RecentAccountingActivities = () => {
           const diffDays = Math.floor(diffMs / 86400000);
           let timeAgo: string;
           if (diffMins < 1) {
-            timeAgo = 'quelques secondes';
+            timeAgo = t('accounting.activity.fewSeconds');
           } else if (diffMins < 60) {
-            timeAgo = `${diffMins} minute${diffMins > 1 ? 's' : ''}`;
+            timeAgo = t('accounting.activity.minutes', { count: diffMins });
           } else if (diffHours < 24) {
-            timeAgo = `${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+            timeAgo = t('accounting.activity.hours', { count: diffHours });
           } else {
-            timeAgo = `${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+            timeAgo = t('accounting.activity.days', { count: diffDays });
           }
           let icon: React.ComponentType<{ className?: string }>;
           let color: 'blue' | 'green' | 'purple' | 'orange';
@@ -262,11 +262,11 @@ const RecentAccountingActivities = () => {
             icon = Activity;
             color = 'blue';
           }
-          const statusLabel = entry.status === 'posted' ? 'validée' : entry.status === 'draft' ? 'brouillon' : entry.status === 'imported' ? 'importée' : entry.status;
+          const statusLabel = entry.status === 'posted' ? t('accounting.activity.entryStatus.posted') : entry.status === 'draft' ? t('accounting.activity.entryStatus.draft') : entry.status === 'imported' ? t('accounting.activity.entryStatus.imported') : entry.status;
           return {
             icon,
             color,
-            description: `Écriture ${entry.entry_number || entry.id.substring(0, 8)} ${statusLabel}: ${entry.description || 'Sans description'}`,
+            description: t('accounting.activity.entryDescription', { number: entry.entry_number || entry.id.substring(0, 8), status: statusLabel, description: entry.description || t('accounting.activity.noDescription') }),
             time: timeAgo
           };
         });
@@ -326,7 +326,7 @@ const RecentAccountingActivities = () => {
                   {activity.description}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Il y a {activity.time}
+                  {t('accounting.activity.timeAgo', { time: activity.time })}
                 </p>
               </div>
             </motion.div>
@@ -489,19 +489,19 @@ export default function AccountingPageOptimized() {
   const handleNewEntry = () => {
     // Check if subscription is expired
     if (isExpired) {
-      toast.error('Abonnement expiré. Veuillez choisir un plan pour continuer.');
+      toast.error(t('accounting.subscriptionExpired'));
       navigate('/billing');
       return;
     }
     if (!canAccessFeature('accounting_entries')) {
-      toastError('Mettez à niveau votre plan pour accéder aux écritures illimitées.');
+      toastError(t('accounting.upgradeForEntries'));
       return;
     }
     setActiveTab('entries');
   };
   const handleViewReports = () => {
     if (!canAccessFeature('advanced_reports')) {
-      toastError('Les rapports avancés sont disponibles avec le plan Professionnel.');
+      toastError(t('accounting.upgradeForReports'));
       return;
     }
     setActiveTab('reports');
@@ -611,19 +611,19 @@ export default function AccountingPageOptimized() {
         <div className="flex items-center space-x-3">
           <div>
             <label htmlFor="accounting-period-select" className="sr-only">
-              Sélectionner la période comptable
+              {t('accounting.selectPeriodLabel')}
             </label>
             <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
               <SelectTrigger id="accounting-period-select" name="accounting-period" className="w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="current-month">Mois en cours</SelectItem>
-                <SelectItem value="current-quarter">Trimestre en cours</SelectItem>
-                <SelectItem value="current-year">Année en cours</SelectItem>
-                <SelectItem value="last-month">Mois dernier</SelectItem>
-                <SelectItem value="last-year">Année N-1</SelectItem>
-                <SelectItem value="custom">Période personnalisée</SelectItem>
+                <SelectItem value="current-month">{t('accounting.periods.currentMonth')}</SelectItem>
+                <SelectItem value="current-quarter">{t('accounting.periods.currentQuarter')}</SelectItem>
+                <SelectItem value="current-year">{t('accounting.periods.currentYear')}</SelectItem>
+                <SelectItem value="last-month">{t('accounting.periods.lastMonth')}</SelectItem>
+                <SelectItem value="last-year">{t('accounting.periods.lastYear')}</SelectItem>
+                <SelectItem value="custom">{t('accounting.periods.custom')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -636,8 +636,8 @@ export default function AccountingPageOptimized() {
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
                   className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Date de début"
-                  title="Date de début de la période personnalisée"
+                  placeholder={t('accounting.customDateRange.startPlaceholder')}
+                  title={t('accounting.customDateRange.startTitle')}
                 />
               </div>
               <div className="flex flex-col">
@@ -647,8 +647,8 @@ export default function AccountingPageOptimized() {
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
                   className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Date de fin"
-                  title="Date de fin de la période personnalisée"
+                  placeholder={t('accounting.customDateRange.endPlaceholder')}
+                  title={t('accounting.customDateRange.endTitle')}
                 />
               </div>
             </div>

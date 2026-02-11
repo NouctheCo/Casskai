@@ -89,7 +89,7 @@ type ThirdPartyListItem = {
   updated_at?: string;
 };
 const ThirdPartiesPage: React.FC = () => {
-  const { t: _t } = useTranslation();
+  const { t } = useTranslation();
   const { currentEnterprise } = useEnterprise();
   // State management
   const [dashboardData, setDashboardData] = useState<ThirdPartyDashboardData | null>(null);
@@ -224,7 +224,7 @@ const ThirdPartiesPage: React.FC = () => {
       const customerNames = new Map<string, string>();
       (allThirdParties || []).filter(tp => tp.type === 'customer').forEach(tp => customerNames.set(tp.id, tp.name));
       const topClients = Array.from(revenueByClient.entries())
-        .map(([id, revenue]) => ({ id, name: customerNames.get(id) || 'Inconnu', revenue }))
+        .map(([id, revenue]) => ({ id, name: customerNames.get(id) || t('thirdParties.unknown'), revenue }))
         .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 5);
 
@@ -232,7 +232,7 @@ const ThirdPartiesPage: React.FC = () => {
       const supplierNames = new Map<string, string>();
       (allThirdParties || []).filter(tp => tp.type === 'supplier').forEach(tp => supplierNames.set(tp.id, tp.name));
       const topSuppliers = Array.from(spendingBySupplier.entries())
-        .map(([id, spending]) => ({ id, name: supplierNames.get(id) || 'Inconnu', spending }))
+        .map(([id, spending]) => ({ id, name: supplierNames.get(id) || t('thirdParties.unknown'), spending }))
         .sort((a, b) => b.spending - a.spending)
         .slice(0, 5);
 
@@ -426,7 +426,7 @@ const ThirdPartiesPage: React.FC = () => {
       setLoading(false);
     } catch (error) {
       logger.error('ThirdParties', 'Error loading third parties:', error);
-      toastError('Impossible de charger les tiers');
+      toastError(t('thirdParties.errorLoadingShort'));
       setLoading(false);
     }
   };
@@ -478,16 +478,16 @@ const ThirdPartiesPage: React.FC = () => {
       logger.debug('ThirdPartiesPage', '📤 Exporting third parties to CSV...');
 
       // Convert to CSV
-      const headers = ['Type', 'Code', 'Nom', 'Email', 'Téléphone', 'Ville', 'Pays', 'Statut'];
+      const headers = [t('thirdParties.csvHeaders.type'), t('thirdParties.csvHeaders.code'), t('thirdParties.csvHeaders.name'), t('thirdParties.csvHeaders.email'), t('thirdParties.csvHeaders.phone'), t('thirdParties.csvHeaders.city'), t('thirdParties.csvHeaders.country'), t('thirdParties.csvHeaders.status')];
       const rows = filteredThirdParties.map(tp => [
-        tp.type === 'customer' ? 'Client' : 'Fournisseur',
+        tp.type === 'customer' ? t('thirdParties.typeLabels.customer') : t('thirdParties.typeLabels.supplier'),
         tp.code || '',
         tp.name,
         tp.primary_email || '',
         tp.primary_phone || '',
         tp.billing_address?.city || '',
         tp.billing_address?.country || '',
-        tp.is_active ? 'Actif' : 'Inactif'
+        tp.is_active ? t('thirdParties.filters.active') : t('thirdParties.filters.inactive')
       ]);
 
       const csvContent = [
@@ -507,10 +507,10 @@ const ThirdPartiesPage: React.FC = () => {
       document.body.removeChild(link);
 
       logger.debug('ThirdPartiesPage', '✅ Export completed');
-      toastSuccess('Tiers exportés en CSV avec succès');
+      toastSuccess(t('thirdParties.csvExportSuccess'));
     } catch (error) {
       logger.error('ThirdPartiesPage', 'Error exporting third parties:', error);
-      toastError('Erreur lors de l\'export');
+      toastError(t('thirdParties.csvExportError'));
     }
   };
   const handleViewThirdParty = (thirdParty: ThirdPartyListItem) => {
@@ -523,7 +523,7 @@ const ThirdPartiesPage: React.FC = () => {
   };
   const handleDeleteThirdParty = async (thirdParty: ThirdPartyListItem) => {
     // eslint-disable-next-line no-alert
-    if (!window.confirm('Êtes-vous sûr de vouloir désactiver ce tiers ?')) {
+    if (!window.confirm(t('thirdParties.confirmDeactivate'))) {
       return;
     }
     try {
@@ -543,10 +543,10 @@ const ThirdPartiesPage: React.FC = () => {
       logger.debug('ThirdPartiesPage', `✅ Soft deleted ${thirdParty.type} successfully`);
       await loadThirdParties();
       await loadDashboardData();
-      toastDeleted('Le tiers');
+      toastDeleted(t('thirdParties.deletedToast'));
     } catch (error) {
       logger.error('ThirdParties', 'Error deleting third party:', error instanceof Error ? error.message : String(error));
-      toastError('Impossible de supprimer le tiers');
+      toastError(t('thirdParties.errorDeleting'));
     }
   };
   const handleCreateSuccess = () => {
@@ -573,13 +573,13 @@ const ThirdPartiesPage: React.FC = () => {
     switch (type) {
       case 'customer':
       case 'client':
-        return 'Client';
+        return t('thirdParties.typeLabels.customer');
       case 'supplier':
-        return 'Fournisseur';
+        return t('thirdParties.typeLabels.supplier');
       case 'partner':
-        return 'Partenaire';
+        return t('thirdParties.typeLabels.partner');
       case 'both':
-        return 'Client/Fournisseur';
+        return t('thirdParties.typeLabels.both');
       default:
         return type;
     }
@@ -598,7 +598,7 @@ const ThirdPartiesPage: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Chargement des tiers...</p>
+          <p className="text-gray-600 dark:text-gray-300">{t('thirdParties.loading')}</p>
         </div>
       </div>
     );
@@ -619,17 +619,17 @@ const ThirdPartiesPage: React.FC = () => {
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Gestion des Tiers
+              {t('thirdParties.pageTitle')}
             </h1>
             <Sparkles className="h-6 w-6 text-yellow-500" />
           </div>
           <div className="flex items-center space-x-2">
             <p className="text-gray-600 dark:text-gray-300">
               {currentEnterprise ? `${currentEnterprise.name} - ` : ''}
-              Gérez vos clients, fournisseurs et partenaires commerciaux
+              {t('thirdParties.pageSubtitle')}
             </p>
             <Badge variant="secondary" className="text-xs">
-              En temps réel
+              {t('thirdParties.realtime')}
             </Badge>
           </div>
         </div>
@@ -640,14 +640,14 @@ const ThirdPartiesPage: React.FC = () => {
             className="flex items-center gap-2"
           >
             <FileDown className="h-4 w-4" />
-            Exporter
+            {t('thirdParties.actions.export')}
           </Button>
           <Button
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2"
             onClick={() => setShowCreateDialog(true)}
           >
             <Plus className="h-4 w-4" />
-            Nouveau Tiers
+            {t('thirdParties.actions.newThirdParty')}
           </Button>
         </div>
       </motion.div>
@@ -655,11 +655,11 @@ const ThirdPartiesPage: React.FC = () => {
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="dashboard">Tableau de Bord</TabsTrigger>
-            <TabsTrigger value="third-parties">Tiers</TabsTrigger>
-            <TabsTrigger value="aging">Analyse d'Ancienneté</TabsTrigger>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            <TabsTrigger value="import">Import</TabsTrigger>
+            <TabsTrigger value="dashboard">{t('thirdParties.tabs.dashboard')}</TabsTrigger>
+            <TabsTrigger value="third-parties">{t('thirdParties.tabs.thirdParties')}</TabsTrigger>
+            <TabsTrigger value="aging">{t('thirdParties.tabs.agingAnalysis')}</TabsTrigger>
+            <TabsTrigger value="transactions">{t('thirdParties.tabs.transactions')}</TabsTrigger>
+            <TabsTrigger value="import">{t('thirdParties.tabs.import')}</TabsTrigger>
           </TabsList>
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
@@ -671,7 +671,7 @@ const ThirdPartiesPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Tiers</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('thirdParties.kpi.totalThirdParties')}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {dashboardData.stats.total_third_parties}
                           </p>
@@ -686,7 +686,7 @@ const ThirdPartiesPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Clients Actifs</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('thirdParties.kpi.activeClients')}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {dashboardData.stats.active_clients}
                           </p>
@@ -701,7 +701,7 @@ const ThirdPartiesPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Fournisseurs Actifs</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('thirdParties.kpi.activeSuppliers')}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {dashboardData.stats.active_suppliers}
                           </p>
@@ -716,7 +716,7 @@ const ThirdPartiesPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Nouveaux ce mois</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('thirdParties.kpi.newThisMonth')}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {dashboardData.stats.new_this_month}
                           </p>
@@ -734,7 +734,7 @@ const ThirdPartiesPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Créances</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('thirdParties.kpi.totalReceivables')}</p>
                           <p className="text-2xl font-bold text-green-600">
                             {formatCurrency(dashboardData.stats.total_receivables)}
                           </p>
@@ -747,7 +747,7 @@ const ThirdPartiesPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Dettes</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('thirdParties.kpi.totalPayables')}</p>
                           <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                             {formatCurrency(dashboardData.stats.total_payables)}
                           </p>
@@ -760,7 +760,7 @@ const ThirdPartiesPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Créances Échues</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('thirdParties.kpi.overdueReceivables')}</p>
                           <p className="text-2xl font-bold text-orange-600">
                             {formatCurrency(dashboardData.stats.overdue_receivables)}
                           </p>
@@ -773,7 +773,7 @@ const ThirdPartiesPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Dettes Échues</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('thirdParties.kpi.overduePayables')}</p>
                           <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                             {formatCurrency(dashboardData.stats.overdue_payables)}
                           </p>
@@ -787,7 +787,7 @@ const ThirdPartiesPage: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Top Clients par Chiffre d'Affaires</CardTitle>
+                      <CardTitle>{t('thirdParties.charts.topClientsByRevenue')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
@@ -809,7 +809,7 @@ const ThirdPartiesPage: React.FC = () => {
                   </Card>
                   <Card>
                     <CardHeader>
-                      <CardTitle>Top Fournisseurs par Dépenses</CardTitle>
+                      <CardTitle>{t('thirdParties.charts.topSuppliersBySpending')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
@@ -833,29 +833,29 @@ const ThirdPartiesPage: React.FC = () => {
                 {/* Alerts */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Alertes</CardTitle>
+                    <CardTitle>{t('thirdParties.alerts.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-lg">
                         <AlertCircle className="h-5 w-5 text-orange-500" />
                         <div>
-                          <p className="font-medium text-orange-800">Factures échues</p>
-                          <p className="text-sm text-orange-600">{dashboardData.alerts.overdue_invoices} factures</p>
+                          <p className="font-medium text-orange-800">{t('thirdParties.alerts.overdueInvoices')}</p>
+                          <p className="text-sm text-orange-600">{t('thirdParties.alerts.overdueInvoicesCount', { count: dashboardData.alerts.overdue_invoices })}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 p-4 bg-red-50 rounded-lg dark:bg-red-900/20">
                         <CreditCard className="h-5 w-5 text-red-500" />
                         <div>
-                          <p className="font-medium text-red-800">Limites de crédit dépassées</p>
-                          <p className="text-sm text-red-600 dark:text-red-400">{dashboardData.alerts.credit_limit_exceeded} tiers</p>
+                          <p className="font-medium text-red-800">{t('thirdParties.alerts.creditLimitExceeded')}</p>
+                          <p className="text-sm text-red-600 dark:text-red-400">{t('thirdParties.alerts.creditLimitExceededCount', { count: dashboardData.alerts.credit_limit_exceeded })}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
                         <AlertCircle className="h-5 w-5 text-blue-500" />
                         <div>
-                          <p className="font-medium text-blue-800">Informations manquantes</p>
-                          <p className="text-sm text-blue-600">{dashboardData.alerts.missing_information} tiers</p>
+                          <p className="font-medium text-blue-800">{t('thirdParties.alerts.missingInformation')}</p>
+                          <p className="text-sm text-blue-600">{t('thirdParties.alerts.missingInformationCount', { count: dashboardData.alerts.missing_information })}</p>
                         </div>
                       </div>
                     </div>
@@ -874,7 +874,7 @@ const ThirdPartiesPage: React.FC = () => {
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                       <Input
-                        placeholder="Rechercher un tiers..."
+                        placeholder={t('thirdParties.filters.searchPlaceholder')}
                         value={filters.search}
                         onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                         className="pl-10"
@@ -887,14 +887,14 @@ const ThirdPartiesPage: React.FC = () => {
                       onValueChange={(value) => setFilters(prev => ({ ...prev, type: value === 'all' ? '' : value }))}
                     >
                       <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Type" />
+                        <SelectValue placeholder={t('thirdParties.filters.typePlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tous types</SelectItem>
-                        <SelectItem value="customer">Client</SelectItem>
-                        <SelectItem value="supplier">Fournisseur</SelectItem>
-                        <SelectItem value="partner">Partenaire</SelectItem>
-                        <SelectItem value="both">Client/Fournisseur</SelectItem>
+                        <SelectItem value="all">{t('thirdParties.filters.allTypes')}</SelectItem>
+                        <SelectItem value="customer">{t('thirdParties.filters.customer')}</SelectItem>
+                        <SelectItem value="supplier">{t('thirdParties.filters.supplier')}</SelectItem>
+                        <SelectItem value="partner">{t('thirdParties.filters.partner')}</SelectItem>
+                        <SelectItem value="both">{t('thirdParties.filters.both')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <Select
@@ -902,14 +902,14 @@ const ThirdPartiesPage: React.FC = () => {
                       onValueChange={(value) => setFilters(prev => ({ ...prev, status: value === 'all' ? '' : value }))}
                     >
                       <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Statut" />
+                        <SelectValue placeholder={t('thirdParties.filters.statusPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tous</SelectItem>
-                        <SelectItem value="active">Actif</SelectItem>
-                        <SelectItem value="inactive">Inactif</SelectItem>
-                        <SelectItem value="suspended">Suspendu</SelectItem>
-                        <SelectItem value="blocked">Bloqué</SelectItem>
+                        <SelectItem value="all">{t('thirdParties.filters.allStatuses')}</SelectItem>
+                        <SelectItem value="active">{t('thirdParties.filters.active')}</SelectItem>
+                        <SelectItem value="inactive">{t('thirdParties.filters.inactive')}</SelectItem>
+                        <SelectItem value="suspended">{t('thirdParties.filters.suspended')}</SelectItem>
+                        <SelectItem value="blocked">{t('thirdParties.filters.blocked')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button
@@ -918,7 +918,7 @@ const ThirdPartiesPage: React.FC = () => {
                       className="flex items-center gap-2"
                     >
                       <Filter className="h-4 w-4" />
-                      Filtres
+                      {t('thirdParties.actions.filters')}
                     </Button>
                   </div>
                 </div>
@@ -929,14 +929,14 @@ const ThirdPartiesPage: React.FC = () => {
                       onValueChange={(value) => setFilters(prev => ({ ...prev, category: value === 'all' ? '' : value }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Catégorie" />
+                        <SelectValue placeholder={t('thirdParties.filters.categoryPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Toutes catégories</SelectItem>
-                        <SelectItem value="individual">Particulier</SelectItem>
-                        <SelectItem value="company">Entreprise</SelectItem>
-                        <SelectItem value="government">Administration</SelectItem>
-                        <SelectItem value="ngo">Association</SelectItem>
+                        <SelectItem value="all">{t('thirdParties.filters.allCategories')}</SelectItem>
+                        <SelectItem value="individual">{t('thirdParties.filters.individual')}</SelectItem>
+                        <SelectItem value="company">{t('thirdParties.filters.company')}</SelectItem>
+                        <SelectItem value="government">{t('thirdParties.filters.government')}</SelectItem>
+                        <SelectItem value="ngo">{t('thirdParties.filters.ngo')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <Select
@@ -947,13 +947,13 @@ const ThirdPartiesPage: React.FC = () => {
                       }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Solde" />
+                        <SelectValue placeholder={t('thirdParties.filters.balancePlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tous soldes</SelectItem>
-                        <SelectItem value="positive">Positif</SelectItem>
-                        <SelectItem value="negative">Négatif</SelectItem>
-                        <SelectItem value="zero">Nul</SelectItem>
+                        <SelectItem value="all">{t('thirdParties.filters.allBalances')}</SelectItem>
+                        <SelectItem value="positive">{t('thirdParties.filters.positive')}</SelectItem>
+                        <SelectItem value="negative">{t('thirdParties.filters.negative')}</SelectItem>
+                        <SelectItem value="zero">{t('thirdParties.filters.zero')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <div className="flex items-center gap-2">
@@ -968,7 +968,7 @@ const ThirdPartiesPage: React.FC = () => {
                         className="h-4 w-4"
                       />
                       <label htmlFor="has_overdue" className="text-sm">
-                        Factures échues uniquement
+                        {t('thirdParties.filters.overdueOnly')}
                       </label>
                     </div>
                   </div>
@@ -999,7 +999,7 @@ const ThirdPartiesPage: React.FC = () => {
                               {thirdParty.status}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Code: {thirdParty.code}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">{t('thirdParties.code')}: {thirdParty.code}</p>
                           <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
                             <div className="flex items-center gap-1">
                               <Mail className="h-3 w-3" />
@@ -1017,27 +1017,27 @@ const ThirdPartiesPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleViewThirdParty(thirdParty)}
-                          title="Voir les détails"
+                          title={t('thirdParties.actions.view')}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleEditThirdParty(thirdParty)}
-                          title="Modifier"
+                          title={t('thirdParties.actions.edit')}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleDeleteThirdParty(thirdParty)}
-                          title="Supprimer"
+                          title={t('thirdParties.actions.delete')}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -1046,7 +1046,7 @@ const ThirdPartiesPage: React.FC = () => {
                     {/* Financial Summary */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div className="text-center p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
-                        <p className="text-xs text-gray-600 dark:text-gray-300">Solde Actuel</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">{t('thirdParties.financial.currentBalance')}</p>
                         <p className={`font-semibold ${
                           thirdParty.current_balance > 0 ? 'text-green-600' : 
                           thirdParty.current_balance < 0 ? 'text-red-600' : 'text-gray-600'
@@ -1055,21 +1055,21 @@ const ThirdPartiesPage: React.FC = () => {
                         </p>
                       </div>
                       <div className="text-center p-3 bg-green-50 rounded-lg dark:bg-green-900/20">
-                        <p className="text-xs text-gray-600 dark:text-gray-300">Créances</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">{t('thirdParties.financial.receivables')}</p>
                         <p className="font-semibold text-green-600">
                           {formatCurrency(thirdParty.total_receivables)}
                         </p>
                       </div>
                       <div className="text-center p-3 bg-red-50 rounded-lg dark:bg-red-900/20">
-                        <p className="text-xs text-gray-600 dark:text-gray-300">Dettes</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">{t('thirdParties.financial.payables')}</p>
                         <p className="font-semibold text-red-600 dark:text-red-400">
                           {formatCurrency(thirdParty.total_payables)}
                         </p>
                       </div>
                       <div className="text-center p-3 bg-blue-50 rounded-lg dark:bg-blue-900/20">
-                        <p className="text-xs text-gray-600 dark:text-gray-300">Limite de Crédit</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">{t('thirdParties.financial.creditLimit')}</p>
                         <p className="font-semibold text-blue-600">
-                          {thirdParty.credit_limit ? formatCurrency(thirdParty.credit_limit) : 'Non définie'}
+                          {thirdParty.credit_limit ? formatCurrency(thirdParty.credit_limit) : t('thirdParties.financial.creditLimitNotSet')}
                         </p>
                       </div>
                     </div>
@@ -1086,7 +1086,7 @@ const ThirdPartiesPage: React.FC = () => {
                     {/* Last Interaction */}
                     {thirdParty.last_interaction && (
                       <div className="mt-4 text-xs text-gray-500 dark:text-gray-300">
-                        Dernière interaction: {new Date(thirdParty.last_interaction).toLocaleDateString('fr-FR')}
+                        {t('thirdParties.lastInteraction')}: {new Date(thirdParty.last_interaction).toLocaleDateString()}
                       </div>
                     )}
                   </CardContent>
@@ -1096,10 +1096,10 @@ const ThirdPartiesPage: React.FC = () => {
             {filteredThirdParties.length === 0 && (
               <EmptyList
                 icon={Users}
-                title="Aucun tiers trouvé"
-                description="Aucun tiers ne correspond aux critères de recherche actuels."
+                title={t('thirdParties.emptyList.title')}
+                description={t('thirdParties.emptyList.description')}
                 action={{
-                  label: 'Réinitialiser les filtres',
+                  label: t('thirdParties.actions.resetFilters'),
                   onClick: () => setFilters({ 
                     search: '', 
                     type: '', 

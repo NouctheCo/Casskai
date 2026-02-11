@@ -148,7 +148,7 @@ export default function ProjectsPage() {
         // Formater les clients
         const clientsFormatted = (clientsResponse.data || []).map(client => ({
           id: client.id,
-          name: client.name || client.company_name || 'Client sans nom',
+          name: client.name || client.company_name || t('projects.unknownClient', { defaultValue: 'Client sans nom' }),
           email: client.email,
           siret: client.siret
         }));
@@ -279,10 +279,10 @@ export default function ProjectsPage() {
         budget: parseFloat(projectBudget),
         spent: 0,
         progress: 0,
-        manager: projectManager.trim() || 'Non assigné',
+        manager: projectManager.trim() || t('projects.unassigned', { defaultValue: 'Non assigné' }),
         managerId: projectManager.trim() || undefined,
         team: [] as string[],
-        category: 'Général',
+        category: t('projects.general', { defaultValue: 'Général' }),
         lastActivity: new Date().toISOString(),
         totalHours: 0,
         billableHours: 0,
@@ -470,7 +470,7 @@ export default function ProjectsPage() {
                 onChange={(e) => setProjectDescription(e.target.value)}
                 className="w-full border rounded-md px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
                 rows={3}
-                placeholder={`${t('projectspage.description', { defaultValue: 'Description' })  } détaillée du projet`}
+                placeholder={t('projects.descriptionPlaceholder', { defaultValue: 'Description détaillée du projet' })}
               ></textarea>
             </div>
             <div className="grid grid-cols-3 gap-4">
@@ -626,9 +626,9 @@ export default function ProjectsPage() {
                   <div className="space-y-3">
                     {[
                       { status: t('projectspage.status.inProgress'), count: computedMetrics.activeProjects, color: 'bg-blue-500' },
-                      { status: 'Terminés', count: computedMetrics.completedProjects, color: 'bg-green-500' },
-                      { status: 'En pause', count: computedMetrics.onHoldProjects, color: 'bg-orange-500' },
-                      { status: 'Planifiés', count: projects.filter(p => p.status === 'planning').length, color: 'bg-gray-500' }
+                      { status: t('projects.status.completed_plural', { defaultValue: 'Terminés' }), count: computedMetrics.completedProjects, color: 'bg-green-500' },
+                      { status: t('projects.status.onHold_plural', { defaultValue: 'En pause' }), count: computedMetrics.onHoldProjects, color: 'bg-orange-500' },
+                      { status: t('projects.status.planned_plural', { defaultValue: 'Planifiés' }), count: projects.filter(p => p.status === 'planning').length, color: 'bg-gray-500' }
                     ].map((item) => {
                       const percentage = computedMetrics.totalProjects > 0 ? (item.count / computedMetrics.totalProjects) * 100 : 0;
                       return (
@@ -664,8 +664,8 @@ export default function ProjectsPage() {
                         </div>
                         <Badge variant={project.status === 'in_progress' ? 'default' : project.status === 'completed' ? 'secondary' : 'outline'}>
                           {project.status === 'in_progress' ? t('projectspage.status.inProgress') :
-                           project.status === 'completed' ? 'Terminé' :
-                           project.status === 'on_hold' ? 'Pause' : 'Planifié'}
+                           project.status === 'completed' ? t('projects.status.completed', { defaultValue: 'Terminé' }) :
+                           project.status === 'on_hold' ? t('projects.status.onHold_short', { defaultValue: 'Pause' }) : t('projects.status.planned', { defaultValue: 'Planifié' })}
                         </Badge>
                       </div>
                     ))}
@@ -763,11 +763,11 @@ export default function ProjectsPage() {
                         <div className="flex items-center gap-3">
                           <Badge variant={project.status === 'in_progress' ? 'default' : project.status === 'completed' ? 'secondary' : 'outline'}>
                             {project.status === 'in_progress' ? t('projectspage.status.inProgress') :
-                             project.status === 'completed' ? 'Terminé' :
-                             project.status === 'on_hold' ? 'Pause' : 'Planifié'}
+                             project.status === 'completed' ? t('projects.status.completed', { defaultValue: 'Terminé' }) :
+                             project.status === 'on_hold' ? t('projects.status.onHold_short', { defaultValue: 'Pause' }) : t('projects.status.planned', { defaultValue: 'Planifié' })}
                           </Badge>
                           <Badge variant={project.priority === 'high' ? 'destructive' : project.priority === 'medium' ? 'secondary' : 'outline'}>
-                            {project.priority === 'high' ? 'Haute' : project.priority === 'medium' ? 'Moyenne' : 'Basse'}
+                            {project.priority === 'high' ? t('projects.priority.high', { defaultValue: 'Haute' }) : project.priority === 'medium' ? t('projects.priority.medium', { defaultValue: 'Moyenne' }) : t('projects.priority.low', { defaultValue: 'Basse' })}
                           </Badge>
                         </div>
                       </motion.div>
@@ -872,7 +872,7 @@ export default function ProjectsPage() {
                           </div>
                           <p className="text-xs text-muted-foreground">{task.estimated_hours || 0}h estimées</p>
                           <Badge variant={task.priority === 'high' ? 'destructive' : task.priority === 'medium' ? 'secondary' : 'outline'} className="text-xs mt-1">
-                            {task.priority === 'high' ? 'Haute' : task.priority === 'medium' ? 'Moyenne' : 'Basse'}
+                            {task.priority === 'high' ? t('projects.priority.high', { defaultValue: 'Haute' }) : task.priority === 'medium' ? t('projects.priority.medium', { defaultValue: 'Moyenne' }) : t('projects.priority.low', { defaultValue: 'Basse' })}
                           </Badge>
                         </div>
                         <div className="flex gap-1">
@@ -935,12 +935,12 @@ export default function ProjectsPage() {
                             {(resource.user_name || resource.user_email || 'U').substring(0, 2).toUpperCase()}
                           </div>
                           <div>
-                            <h3 className="font-semibold">{resource.user_name || resource.user_email || 'Utilisateur'}</h3>
-                            <p className="text-sm text-muted-foreground">{resource.role || 'Rôle non défini'}</p>
+                            <h3 className="font-semibold">{resource.user_name || resource.user_email || t('projects.user', { defaultValue: 'Utilisateur' })}</h3>
+                            <p className="text-sm text-muted-foreground">{resource.role || t('projects.undefinedRole', { defaultValue: 'Rôle non défini' })}</p>
                             <p className="text-xs text-muted-foreground">{resource.user_email}</p>
                             <div className="flex gap-2 mt-1">
                               <Badge variant="outline" className="text-xs">
-                                {resource.project_name || 'Projet inconnu'}
+                                {resource.project_name || t('projects.unknownProject', { defaultValue: 'Projet inconnu' })}
                               </Badge>
                               {resource.start_date && (
                                 <Badge variant="outline" className="text-xs">
@@ -1078,8 +1078,8 @@ export default function ProjectsPage() {
                               <Timer className="h-5 w-5" />
                             </div>
                             <div>
-                              <h3 className="font-semibold">{timesheet.user_name || timesheet.user_email || 'Utilisateur'}</h3>
-                              <p className="text-sm text-muted-foreground">{timesheet.description || 'Aucune description'}</p>
+                              <h3 className="font-semibold">{timesheet.user_name || timesheet.user_email || t('projects.user', { defaultValue: 'Utilisateur' })}</h3>
+                              <p className="text-sm text-muted-foreground">{timesheet.description || t('projects.noDescription', { defaultValue: 'Aucune description' })}</p>
                               <div className="flex items-center gap-2 mt-1">
                                 {timesheet.project_name && (
                                   <Badge variant="outline" className="text-xs">{timesheet.project_name}</Badge>
@@ -1088,7 +1088,7 @@ export default function ProjectsPage() {
                                   <Badge variant="outline" className="text-xs">{timesheet.task_name}</Badge>
                                 )}
                                 {timesheet.is_billable && (
-                                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700">Facturable</Badge>
+                                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700">{t('projects.billable', { defaultValue: 'Facturable' })}</Badge>
                                 )}
                               </div>
                             </div>
@@ -1174,7 +1174,7 @@ export default function ProjectsPage() {
                               <p className="text-sm text-muted-foreground">{project.client}</p>
                             </div>
                             <Badge variant={project.status === 'completed' ? 'default' : 'outline'}>
-                              {project.status === 'completed' ? 'Facturable' : t('projectspage.status.inProgress')}
+                              {project.status === 'completed' ? t('projects.billable', { defaultValue: 'Facturable' }) : t('projectspage.status.inProgress')}
                             </Badge>
                           </div>
                           <div className="grid gap-4 md:grid-cols-4">
@@ -1234,7 +1234,7 @@ export default function ProjectsPage() {
                       <div className="min-w-[800px]">
                         {/* En-tête avec dates */}
                         <div className="grid grid-cols-12 gap-1 mb-4 text-xs text-center font-medium">
-                          {['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'].map((month, i) => (
+                          {[t('projects.months.jan', { defaultValue: 'Jan' }), t('projects.months.feb', { defaultValue: 'Fév' }), t('projects.months.mar', { defaultValue: 'Mar' }), t('projects.months.apr', { defaultValue: 'Avr' }), t('projects.months.may', { defaultValue: 'Mai' }), t('projects.months.jun', { defaultValue: 'Jun' }), t('projects.months.jul', { defaultValue: 'Jul' }), t('projects.months.aug', { defaultValue: 'Aoû' }), t('projects.months.sep', { defaultValue: 'Sep' }), t('projects.months.oct', { defaultValue: 'Oct' }), t('projects.months.nov', { defaultValue: 'Nov' }), t('projects.months.dec', { defaultValue: 'Déc' })].map((month, i) => (
                             <div key={i} className="p-2 bg-muted rounded">{month}</div>
                           ))}
                         </div>
@@ -1490,7 +1490,7 @@ export default function ProjectsPage() {
                                   <p className="text-sm text-muted-foreground">{project.client} • {project.category}</p>
                                 </div>
                                 <Badge variant={project.status === 'completed' ? 'default' : 'outline'}>
-                                  {project.status === 'completed' ? 'Terminé' : t('projectspage.status.inProgress')}
+                                  {project.status === 'completed' ? t('projects.status.completed', { defaultValue: 'Terminé' }) : t('projectspage.status.inProgress')}
                                 </Badge>
                               </div>
                               <div className="grid gap-4 md:grid-cols-5">
@@ -1588,15 +1588,15 @@ export default function ProjectsPage() {
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Priorité:</span>
                       <Badge variant={selectedProject.priority === 'high' ? 'destructive' : selectedProject.priority === 'medium' ? 'secondary' : 'outline'}>
-                        {selectedProject.priority === 'high' ? 'Haute' : selectedProject.priority === 'medium' ? 'Moyenne' : 'Basse'}
+                        {selectedProject.priority === 'high' ? t('projects.priority.high', { defaultValue: 'Haute' }) : selectedProject.priority === 'medium' ? t('projects.priority.medium', { defaultValue: 'Moyenne' }) : t('projects.priority.low', { defaultValue: 'Basse' })}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Statut:</span>
                       <Badge variant={selectedProject.status === 'in_progress' ? 'default' : selectedProject.status === 'completed' ? 'secondary' : 'outline'}>
                         {selectedProject.status === 'in_progress' ? t('projectspage.status.inProgress') :
-                         selectedProject.status === 'completed' ? 'Terminé' :
-                         selectedProject.status === 'on_hold' ? 'Pause' : 'Planifié'}
+                         selectedProject.status === 'completed' ? t('projects.status.completed', { defaultValue: 'Terminé' }) :
+                         selectedProject.status === 'on_hold' ? t('projects.status.onHold_short', { defaultValue: 'Pause' }) : t('projects.status.planned', { defaultValue: 'Planifié' })}
                       </Badge>
                     </div>
                   </CardContent>
@@ -1698,14 +1698,14 @@ export default function ProjectsPage() {
           const { data } = await supabase.from('third_parties').select('*').eq('company_id', currentCompany!.id).or('client_type.eq.customer,client_type.eq.prospect');
           const clientsFormatted = (data || []).map(client => ({
             id: client.id,
-            name: client.name || client.company_name || 'Client sans nom',
+            name: client.name || client.company_name || t('projects.unknownClient', { defaultValue: 'Client sans nom' }),
             email: client.email,
             siret: client.siret
           }));
           setClients(clientsFormatted);
           const newClient = clientsFormatted.find(c => c.id === clientId);
           if (newClient) setProjectClient(newClient.id);
-          toastSuccess('Client créé avec succès');
+          toastSuccess(t('projects.clientCreated', { defaultValue: 'Client créé avec succès' }));
         }}
       />
       {/* New Employee Modal */}
@@ -1735,11 +1735,11 @@ export default function ProjectsPage() {
             }));
             setResources(employeesAsResources);
             if (data) setProjectManager(data.id);
-            toastSuccess('Employé créé avec succès');
+            toastSuccess(t('projects.employeeCreated', { defaultValue: 'Employé créé avec succès' }));
             return true;
           } catch (error) {
             logger.error('Projects', 'Error creating employee:', error);
-            toastError('Erreur lors de la création de l\'employé');
+            toastError(t('projects.errorCreatingEmployee', { defaultValue: 'Erreur lors de la création de l\'employé' }));
             return false;
           }
         }}

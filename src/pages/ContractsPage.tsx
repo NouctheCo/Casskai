@@ -123,7 +123,7 @@ const ContractsPage: React.FC = () => {
         .filter((customer) => Boolean(customer.id))
         .map((customer) => ({
           id: customer.id as string,
-          name: customer.name || customer.company_name || 'Client sans nom'
+          name: customer.name || customer.company_name || t('contracts.unnamed_client', 'Client sans nom')
         }));
       setCustomerOptions(formatted);
     } catch (err) {
@@ -180,7 +180,7 @@ const ContractsPage: React.FC = () => {
         {change !== undefined && (
           <p className={`text-xs ${change >= 0 ? 'text-green-600' : 'text-red-600'} flex items-center`}>
             {change >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-            {Math.abs(change)}% par rapport au mois dernier
+            {Math.abs(change)}% {t('contracts.compared_to_last_month', 'par rapport au mois dernier')}
           </p>
         )}
       </CardContent>
@@ -270,7 +270,7 @@ const ContractsPage: React.FC = () => {
                     <div>
                       <p className="font-medium text-sm">{client.client_name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {client.contracts_count} contrat{client.contracts_count > 1 ? 's' : ''}
+                        {t('contracts.contract_count', '{{count}} contrat(s)', { count: client.contracts_count })}
                       </p>
                     </div>
                   </div>
@@ -392,7 +392,7 @@ const ContractsPage: React.FC = () => {
                     <div className="mt-3">
                       {contract.discount_config.type === 'progressive' && contract.discount_config.tiers && (
                         <div className="text-sm">
-                          <span className="text-muted-foreground">Remises par paliers : </span>
+                          <span className="text-muted-foreground">{t('contracts.discount_progressive', 'Remises par paliers')} : </span>
                           {contract.discount_config.tiers.map((tier, index) => (
                             <span key={index} className="inline-block mr-2">
                               {(tier.rate * 100).toFixed(1)}%
@@ -403,13 +403,13 @@ const ContractsPage: React.FC = () => {
                       )}
                       {contract.discount_config.type === 'fixed_percent' && (
                         <div className="text-sm">
-                          <span className="text-muted-foreground">Taux fixe : </span>
+                          <span className="text-muted-foreground">{t('contracts.discount_fixed_rate', 'Taux fixe')} : </span>
                           <span className="font-medium">{((contract.discount_config.rate || 0) * 100).toFixed(2)}%</span>
                         </div>
                       )}
                       {contract.discount_config.type === 'fixed_amount' && (
                         <div className="text-sm">
-                          <span className="text-muted-foreground">Montant fixe : </span>
+                          <span className="text-muted-foreground">{t('contracts.discount_fixed_amount', 'Montant fixe')} : </span>
                           <span className="font-medium">
                             <AmountDisplay amount={contract.discount_config.amount || 0} currency={contract.currency} />
                           </span>
@@ -463,25 +463,25 @@ const ContractsPage: React.FC = () => {
                   <p className="mt-1 text-sm text-muted-foreground">{calc.contract_name}</p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                     <div>
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">Période</p>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('contracts.period', 'Période')}</p>
                       <p className="font-medium">
                         {new Date(calc.period_start).toLocaleDateString('fr-FR')} - {new Date(calc.period_end).toLocaleDateString('fr-FR')}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">CA Réalisé</p>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('contracts.turnover_realized', 'CA Réalisé')}</p>
                       <p className="font-medium">
                         <AmountDisplay amount={calc.turnover_amount} currency={calc.currency} />
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">RFA</p>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('contracts.rfa_label', 'RFA')}</p>
                       <p className="font-medium text-blue-600">
                         <AmountDisplay amount={calc.rfa_amount} currency={calc.currency} />
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">Taux effectif</p>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('contracts.effective_rate', 'Taux effectif')}</p>
                       <p className="font-medium">
                         {((calc.rfa_amount / calc.turnover_amount) * 100).toFixed(2)}%
                       </p>
@@ -490,7 +490,7 @@ const ContractsPage: React.FC = () => {
                   {/* Détails du calcul */}
                   {calc.calculation_details.breakdown && (
                     <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/70 rounded-lg">
-                      <p className="text-sm font-medium mb-2">Détail du calcul par paliers :</p>
+                      <p className="text-sm font-medium mb-2">{t('contracts.breakdown_by_tiers', 'Détail du calcul par paliers')} :</p>
                       <div className="space-y-1">
                         {calc.calculation_details.breakdown.map((tier, index) => (
                           <div key={index} className="flex justify-between text-xs">
@@ -554,7 +554,7 @@ const ContractsPage: React.FC = () => {
               {t('contracts.subtitle', 'Gestion des contrats clients et calcul automatisé des remises de fin d\'année')}
             </p>
             <Badge variant="secondary" className="text-xs">
-              En temps réel
+              {t('contracts.realtime_badge', 'En temps réel')}
             </Badge>
           </div>
         </div>

@@ -226,7 +226,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
         if (recentInvoices) {
           for (const invoice of recentInvoices) {
             const customer = Array.isArray(invoice.customer) ? invoice.customer[0] : invoice.customer;
-            const customerName = customer?.name || 'Client inconnu';
+            const customerName = customer?.name || t('invoicing.unknownClient', 'Client inconnu');
             const amount = invoice.total_incl_tax || 0;
             const formattedAmount = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: ((invoice as any).currency as string) || getCurrentCompanyCurrency() }).format(amount).replace(/\u00A0/g, ' ');
             const timeAgo = getTimeAgo(invoice.created_at);
@@ -234,7 +234,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
             activityItems.push({
               icon: FileText,
               color: invoice.status === 'paid' ? 'green' : 'blue',
-              description: `Facture ${invoice.invoice_number} - ${customerName} (${formattedAmount})`,
+              description: t('invoicing.recentActivity.invoiceDescription', 'Facture {{number}} - {{customer}} ({{amount}})', { number: invoice.invoice_number, customer: customerName, amount: formattedAmount }),
               time: timeAgo
             });
           }
@@ -250,7 +250,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
             activityItems.push({
               icon: Receipt,
               color: 'purple',
-              description: `Devis ${quote.quote_number} (${formattedAmount})`,
+              description: t('invoicing.recentActivity.quoteDescription', 'Devis {{number}} ({{amount}})', { number: quote.quote_number, amount: formattedAmount }),
               time: timeAgo
             });
           }
@@ -272,14 +272,14 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
       const diffHours = Math.floor(diffMs / 3600000);
       const diffDays = Math.floor(diffMs / 86400000);
 
-      if (diffMins < 60) return `${diffMins} min`;
-      if (diffHours < 24) return `${diffHours}h`;
-      if (diffDays < 7) return `${diffDays}j`;
-      return date.toLocaleDateString('fr-FR');
+      if (diffMins < 60) return t('invoicing.recentActivity.minutesAgo', '{{count}} min', { count: diffMins });
+      if (diffHours < 24) return t('invoicing.recentActivity.hoursAgo', '{{count}}h', { count: diffHours });
+      if (diffDays < 7) return t('invoicing.recentActivity.daysAgo', '{{count}}j', { count: diffDays });
+      return date.toLocaleDateString();
     };
 
     loadRecentActivities();
-  }, [currentCompany]);
+  }, [currentCompany, t]);
 
   return (
     <Card className="h-full">
@@ -322,7 +322,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
                     {activity.description}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Il y a {activity.time}
+                    {t('invoicing.recentActivity.timeAgo', 'Il y a {{time}}', { time: activity.time })}
                   </p>
                 </div>
               </motion.div>
@@ -387,7 +387,7 @@ export default function InvoicingPageOptimized() {
         });
       } catch (error: unknown) {
         logger.error('Invoicing', 'Error loading invoicing data:', error);
-        setError((error instanceof Error ? error.message : 'Une erreur est survenue'));
+        setError((error instanceof Error ? error.message : t('invoicing.errors.generic', 'Une erreur est survenue')));
         toastSuccess("Action effectuée avec succès");
       } finally {
         setIsLoading(false);
@@ -440,7 +440,7 @@ export default function InvoicingPageOptimized() {
   const handleNewInvoice = async () => {
     // Check if subscription is expired
     if (isExpired) {
-      toast.error('Abonnement expiré. Veuillez choisir un plan pour continuer.');
+      toast.error(t('invoicing.errors.subscriptionExpired', 'Abonnement expiré. Veuillez choisir un plan pour continuer.'));
       navigate('/billing');
       return;
     }
@@ -462,7 +462,7 @@ export default function InvoicingPageOptimized() {
   const handleNewQuote = () => {
     // Check if subscription is expired
     if (isExpired) {
-      toast.error('Abonnement expiré. Veuillez choisir un plan pour continuer.');
+      toast.error(t('invoicing.errors.subscriptionExpired', 'Abonnement expiré. Veuillez choisir un plan pour continuer.'));
       navigate('/billing');
       return;
     }
@@ -472,7 +472,7 @@ export default function InvoicingPageOptimized() {
   const handleNewPayment = () => {
     // Check if subscription is expired
     if (isExpired) {
-      toast.error('Abonnement expiré. Veuillez choisir un plan pour continuer.');
+      toast.error(t('invoicing.errors.subscriptionExpired', 'Abonnement expiré. Veuillez choisir un plan pour continuer.'));
       navigate('/billing');
       return;
     }
@@ -547,8 +547,8 @@ export default function InvoicingPageOptimized() {
                         value={customStartDate}
                         onChange={(e) => setCustomStartDate(e.target.value)}
                         className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Sélectionner une date de début"
-                        title="Date de début de la période personnalisée"
+                        placeholder={t('invoicing.customPeriod.startDatePlaceholder', 'Sélectionner une date de début')}
+                        title={t('invoicing.customPeriod.startDateTitle', 'Date de début de la période personnalisée')}
                       />
                     </div>
                     <div className="flex flex-col">
@@ -558,8 +558,8 @@ export default function InvoicingPageOptimized() {
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
                         className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Sélectionner une date de fin"
-                        title="Date de fin de la période personnalisée"
+                        placeholder={t('invoicing.customPeriod.endDatePlaceholder', 'Sélectionner une date de fin')}
+                        title={t('invoicing.customPeriod.endDateTitle', 'Date de fin de la période personnalisée')}
                       />
                     </div>
                   </div>
@@ -686,7 +686,7 @@ export default function InvoicingPageOptimized() {
                 className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <FileText className="h-4 w-4" />
-                Configuration
+                {t('invoicing.tabs.settings', 'Configuration')}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -891,10 +891,10 @@ export default function InvoicingPageOptimized() {
                 <CardHeader>
                   <CardTitle className="text-xl flex items-center gap-2">
                     <FileText className="h-6 w-6 text-blue-600" />
-                    Configuration des Factures
+                    {t('invoicing.settings.title', 'Configuration des Factures')}
                   </CardTitle>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    Paramétrez vos mentions légales et informations obligatoires pour des factures conformes à la législation française.
+                    {t('invoicing.settings.description', 'Paramétrez vos mentions légales et informations obligatoires pour des factures conformes à la législation.')}
                   </p>
                 </CardHeader>
                 <CardContent>

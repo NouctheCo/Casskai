@@ -101,14 +101,14 @@ const CustomChartTooltip = ({ active, payload, label }: any) => {
 };
 
 // Helper to format units correctly
-const formatUnit = (unit: string) => {
+const formatUnit = (unit: string, t?: (key: string) => string) => {
   switch (unit) {
     case 'currency':
       return getCurrencySymbol();
     case 'percentage':
       return '%';
     case 'days':
-      return 'jours';
+      return t ? t('dashboard.operational.days') : 'jours';
     case 'number':
       return '';
     default:
@@ -117,7 +117,7 @@ const formatUnit = (unit: string) => {
 };
 
 export const RealOperationalDashboard: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -274,7 +274,7 @@ export const RealOperationalDashboard: React.FC = () => {
           <h1 className="text-3xl font-bold">{t('dashboard.operational.title')}</h1>
           <p className="text-muted-foreground">{t('dashboard.operational.subtitle')}</p>
         </div>
-        <Button onClick={handleRefresh} disabled={refreshing} variant="outline" aria-label="Rafraîchir le tableau de bord">
+        <Button onClick={handleRefresh} disabled={refreshing} variant="outline" aria-label={t('dashboard.operational.refreshDashboard')}>
           <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
           {t('common.refresh')}
         </Button>
@@ -334,12 +334,12 @@ export const RealOperationalDashboard: React.FC = () => {
                     ? formatCurrency(Number(metric.value ?? 0))
                     : (
                       <>
-                        {Number(metric.value ?? 0).toLocaleString('fr-FR', {
+                        {Number(metric.value ?? 0).toLocaleString(i18n.language || 'fr-FR', {
                           minimumFractionDigits: 0,
                           maximumFractionDigits: metric.unit === 'percentage' ? 1 : 0,
                         })}
                         <span className="text-sm font-normal text-muted-foreground ml-1">
-                          {formatUnit(metric.unit || '')}
+                          {formatUnit(metric.unit || '', t)}
                         </span>
                       </>
                     )
@@ -493,7 +493,7 @@ export const RealOperationalDashboard: React.FC = () => {
                         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg px-4 py-3">
                           <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">{data.name}</p>
                           <p className="text-sm text-gray-700 dark:text-gray-300">{formatCurrency(data.value)}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{percent}% du total</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{percent}% {t('dashboard.operational.ofTotal')}</p>
                         </div>
                       );
                     }}

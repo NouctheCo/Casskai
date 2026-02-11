@@ -144,7 +144,44 @@
       "totalVariance": "Écart total"
     },
     "refresh": "Actualiser",
+    "refreshSuccess": "Données actualisées",
+    "refreshError": "Erreur lors de l'actualisation",
     "newEntry": "Nouvelle écriture",
+    "subscriptionExpired": "Abonnement expiré. Veuillez choisir un plan pour continuer.",
+    "upgradeForEntries": "Mettez à niveau votre plan pour accéder aux écritures illimitées.",
+    "upgradeForReports": "Les rapports avancés sont disponibles avec le plan Professionnel.",
+    "selectPeriodLabel": "Sélectionner la période comptable",
+    "periods": {
+      "currentMonth": "Mois en cours",
+      "currentQuarter": "Trimestre en cours",
+      "currentYear": "Année en cours",
+      "lastMonth": "Mois dernier",
+      "lastYear": "Année N-1",
+      "custom": "Période personnalisée"
+    },
+    "customDateRange": {
+      "startPlaceholder": "Date de début",
+      "startTitle": "Date de début de la période personnalisée",
+      "endPlaceholder": "Date de fin",
+      "endTitle": "Date de fin de la période personnalisée"
+    },
+    "activity": {
+      "timeAgo": "Il y a {{time}}",
+      "fewSeconds": "quelques secondes",
+      "minutes_one": "{{count}} minute",
+      "minutes_other": "{{count}} minutes",
+      "hours_one": "{{count}} heure",
+      "hours_other": "{{count}} heures",
+      "days_one": "{{count}} jour",
+      "days_other": "{{count}} jours",
+      "entryStatus": {
+        "posted": "validée",
+        "draft": "brouillon",
+        "imported": "importée"
+      },
+      "entryDescription": "Écriture {{number}} {{status}}: {{description}}",
+      "noDescription": "Sans description"
+    },
     "quickActions": {
       "newEntry": "Nouvelle écriture",
       "newEntryDesc": "Créer une écriture comptable",
@@ -916,6 +953,8 @@
     },
     "export": "Exporter",
     "exporting": "Exportation...",
+    "from": "Du",
+    "to": "Au",
     "refresh": "Actualiser",
     "forecasts": "Prévisions",
     "getStarted": "Commencer",
@@ -1030,7 +1069,46 @@
       "errorCompanyName": "Le nom de l'entreprise est requis",
       "errorCreating": "Erreur lors de la création du client"
     },
-    "invoiceCreated": "Facture créée avec succès"
+    "invoiceCreated": "Facture créée avec succès",
+    "unknownClient": "Client sans nom",
+    "unassigned": "Non assigné",
+    "general": "Général",
+    "descriptionPlaceholder": "Description détaillée du projet",
+    "user": "Utilisateur",
+    "undefinedRole": "Rôle non défini",
+    "unknownProject": "Projet inconnu",
+    "noDescription": "Aucune description",
+    "billable": "Facturable",
+    "clientCreated": "Client créé avec succès",
+    "employeeCreated": "Employé créé avec succès",
+    "errorCreatingEmployee": "Erreur lors de la création de l'employé",
+    "status": {
+      "completed": "Terminé",
+      "completed_plural": "Terminés",
+      "onHold_short": "Pause",
+      "onHold_plural": "En pause",
+      "planned": "Planifié",
+      "planned_plural": "Planifiés"
+    },
+    "priority": {
+      "high": "Haute",
+      "medium": "Moyenne",
+      "low": "Basse"
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Fév",
+      "mar": "Mar",
+      "apr": "Avr",
+      "may": "Mai",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aoû",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Déc"
+    }
   },
   "company": {
     "fields": {
@@ -1279,7 +1357,19 @@
       "fixed_amount": "Montant fixe",
       "fixed_percent": "Pourcentage fixe",
       "progressive": "Paliers progressifs"
-    }
+    },
+    "unnamed_client": "Client sans nom",
+    "compared_to_last_month": "par rapport au mois dernier",
+    "contract_count": "{{count}} contrat(s)",
+    "discount_progressive": "Remises par paliers",
+    "discount_fixed_rate": "Taux fixe",
+    "discount_fixed_amount": "Montant fixe",
+    "period": "Période",
+    "turnover_realized": "CA Réalisé",
+    "rfa_label": "RFA",
+    "effective_rate": "Taux effectif",
+    "breakdown_by_tiers": "Détail du calcul par paliers",
+    "realtime_badge": "En temps réel"
   },
   "cookies": {
     "acceptAll": "Tout accepter",
@@ -1314,7 +1404,10 @@
     "tabs": {
       "import": "Import",
       "categorization": "Catégorisation",
-      "history": "Historique"
+      "history": "Historique",
+      "accounts": "Comptes bancaires",
+      "sepaTransfers": "Virements SEPA",
+      "reconciliation": "Rapprochement bancaire"
     },
     "metrics": {
       "totalTransactions": "Total Transactions",
@@ -1328,7 +1421,8 @@
       "accountLabel": "Compte bancaire",
       "noAccount": "Aucun compte (un compte sera créé automatiquement)",
       "fileLabel": "Fichier de relevé",
-      "uploading": "Import en cours..."
+      "uploading": "Import en cours...",
+      "ibanNotConfigured": "(IBAN non configuré)"
     },
     "history": {
       "title": "Transactions ({{count}})",
@@ -1346,9 +1440,13 @@
         "reconciled": "Réconcilié",
         "pending": "En attente"
       },
+      "purgeButton": "Purger l'historique",
       "actions": {
         "reconcile": "Réconcilier",
-        "retry": "Renvoyer en catégorisation"
+        "reconcileTitle": "Réconcilier",
+        "retry": "Renvoyer en catégorisation",
+        "retryTitle": "Renvoyer en catégorisation",
+        "retryFallback": "Renvoyer"
       },
       "pagination": "Affichage des {{shown}} premières transactions sur {{total}}"
     },
@@ -1428,6 +1526,24 @@
     },
     "bulkCategorization": {
       "selectAccount": "Choisir un compte pour catégorisation en masse"
+    },
+    "toasts": {
+      "migrationSuccess": "{{count}} transactions migrées depuis localStorage vers Supabase",
+      "loadError": "Impossible de charger les données",
+      "importSuccess": "{{imported}} transactions importées, {{skipped}} doublons ignorés",
+      "importError": "Impossible d'importer le fichier",
+      "reconcileSuccess": "La transaction a été marquée comme réconciliée",
+      "reconcileError": "Impossible de réconcilier la transaction",
+      "unreconcileSuccess": "La transaction a été renvoyée en catégorisation",
+      "unreconcileError": "Impossible de renvoyer la transaction en catégorisation",
+      "purgeConfirm": "Confirmez-vous la purge de l'historique pour ce compte ? Cette action est irréversible.",
+      "purgeSuccess": "Historique purgé avec succès",
+      "purgeError": "La purge a échoué. Vérifiez les droits ou contactez le support.",
+      "reconciliationComplete": "Rapprochement terminé avec succès",
+      "importFailedErrors": "{{count}} erreurs"
+    },
+    "defaults": {
+      "bankTransaction": "Transaction bancaire"
     }
   },
   "copySuffix": "(copie)",
@@ -1946,7 +2062,10 @@
       "periods": {
         "vs_previous_year": "vs année précédente",
         "month": "Mois {{month}}"
-      }
+      },
+      "refreshDashboard": "Rafraîchir le tableau de bord",
+      "ofTotal": "du total",
+      "days": "jours"
     },
     "aiAnalysis": {
       "title": "Analyse IA & Recommandations",
@@ -2330,6 +2449,66 @@
       "title": "Analytics RH",
       "totalEmployees": "Employés totaux",
       "totalExpenseAmount": "Montant total frais"
+    },
+    "page": {
+      "subtitle": "Gérez vos employés, congés, frais et temps de travail",
+      "noCompanySelected": "Aucune entreprise sélectionnée. Veuillez sélectionner une entreprise pour accéder aux RH.",
+      "integratedSupabase": "Intégré Supabase",
+      "documentUploadSuccess": "Document uploadé avec succès",
+      "documentUploadError": "Impossible d'uploader le document"
+    },
+    "tabs": {
+      "analytics": "Analytics",
+      "employees": "Employés",
+      "objectives": "Objectifs",
+      "reviews": "Évaluations",
+      "feedback": "Feedback",
+      "training": "Formations",
+      "leaves": "Congés",
+      "expenses": "Frais",
+      "documents": "Documents",
+      "templates": "Templates",
+      "generation": "Génération",
+      "archives": "Archives"
+    },
+    "kpi": {
+      "employees": "Employés",
+      "activeCount": "{{count}} actifs",
+      "newHires": "Nouvelles Embauches",
+      "thisMonth": "Ce mois-ci",
+      "pendingLeaves": "Congés en Attente",
+      "approvedCount": "{{count}} approuvés",
+      "pendingExpenses": "Frais en Attente",
+      "totalAmount": "{{amount}} total"
+    },
+    "employeesSection": {
+      "title": "Gestion des Employés",
+      "countLabel": "{{count}} employés",
+      "add": "Ajouter",
+      "addEmployee": "Ajouter un Employé",
+      "loading": "Chargement des employés...",
+      "empty": "Aucun employé",
+      "emptyDescription": "Commencez par ajouter vos premiers employés"
+    },
+    "leavesSection": {
+      "title": "Gestion des Congés",
+      "countLabel": "{{count}} demandes de congés",
+      "exportCsv": "Exporter CSV",
+      "newRequest": "Nouvelle Demande",
+      "loading": "Chargement des congés...",
+      "days": "{{count}} jours",
+      "dateRange": "Du {{start}} au {{end}}",
+      "empty": "Aucune demande de congés",
+      "emptyDescription": "Les demandes de congés apparaîtront ici"
+    },
+    "expensesSection": {
+      "title": "Gestion des Frais",
+      "countLabel": "{{count}} notes de frais",
+      "exportCsv": "Exporter CSV",
+      "newExpense": "Nouvelle Note de Frais",
+      "loading": "Chargement des frais...",
+      "empty": "Aucune note de frais",
+      "emptyDescription": "Les notes de frais apparaîtront ici"
     },
     "certifications": {
       "add": "Nouvelle certification",
@@ -5178,7 +5357,19 @@
     "taxes": "Taxes",
     "thirdparties": "Tiers",
     "thirdParties": "Tiers",
-    "tiers": "Tiers"
+    "tiers": "Tiers",
+    "favorites": "Favoris",
+    "recent": "Récents",
+    "offline": "Hors ligne",
+    "online": "En ligne",
+    "keyboardShortcuts": "Raccourcis clavier",
+    "categories": {
+      "finances": "Finances",
+      "commercial": "Commercial",
+      "management": "Gestion",
+      "analysis": "Analyse",
+      "automation": "Automatisation"
+    }
   },
   "signup": {
     "accountCreatedMessage": "Un email de confirmation a été envoyé à votre adresse. Veuillez vérifier votre boîte de réception.",
@@ -5670,21 +5861,98 @@
   "thirdParties": {
     "active": "Actif",
     "address": "Adresse",
+    "actions": {
+      "export": "Exporter",
+      "newThirdParty": "Nouveau Tiers",
+      "filters": "Filtres",
+      "view": "Voir les détails",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "resetFilters": "Réinitialiser les filtres"
+    },
+    "alerts": {
+      "title": "Alertes",
+      "overdueInvoices": "Factures échues",
+      "overdueInvoicesCount": "{{count}} factures",
+      "creditLimitExceeded": "Limites de crédit dépassées",
+      "creditLimitExceededCount": "{{count}} tiers",
+      "missingInformation": "Informations manquantes",
+      "missingInformationCount": "{{count}} tiers"
+    },
     "balance": "Solde",
+    "charts": {
+      "topClientsByRevenue": "Top Clients par Chiffre d'Affaires",
+      "topSuppliersBySpending": "Top Fournisseurs par Dépenses"
+    },
     "city": "Ville",
+    "code": "Code",
+    "confirmDeactivate": "Êtes-vous sûr de vouloir désactiver ce tiers ?",
     "contactName": "Contact principal",
     "country": "Pays",
     "createSuccess": "Tiers créé avec succès",
     "createTitle": "Créer un tiers",
+    "csvExportSuccess": "Tiers exportés en CSV avec succès",
+    "csvExportError": "Erreur lors de l'export",
+    "csvHeaders": {
+      "type": "Type",
+      "code": "Code",
+      "name": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "city": "Ville",
+      "country": "Pays",
+      "status": "Statut"
+    },
     "defaultCurrency": "Devise par défaut",
     "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer {name} ?",
     "deleteError": "Erreur lors de la suppression du tiers",
     "deleteSuccess": "Tiers supprimé avec succès",
+    "deletedToast": "Le tiers",
     "description": "Gérez vos clients et fournisseurs",
     "editTitle": "Modifier un tiers",
     "email": "Email",
+    "emptyList": {
+      "title": "Aucun tiers trouvé",
+      "description": "Aucun tiers ne correspond aux critères de recherche actuels."
+    },
     "errorLoading": "Erreur lors du chargement des tiers",
+    "errorLoadingShort": "Impossible de charger les tiers",
+    "errorDeleting": "Impossible de supprimer le tiers",
     "filterStatus": "Filtrer par statut",
+    "filters": {
+      "allTypes": "Tous types",
+      "customer": "Client",
+      "supplier": "Fournisseur",
+      "partner": "Partenaire",
+      "both": "Client/Fournisseur",
+      "allStatuses": "Tous",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "suspended": "Suspendu",
+      "blocked": "Bloqué",
+      "typePlaceholder": "Type",
+      "statusPlaceholder": "Statut",
+      "categoryPlaceholder": "Catégorie",
+      "allCategories": "Toutes catégories",
+      "individual": "Particulier",
+      "company": "Entreprise",
+      "government": "Administration",
+      "ngo": "Association",
+      "balancePlaceholder": "Solde",
+      "allBalances": "Tous soldes",
+      "positive": "Positif",
+      "negative": "Négatif",
+      "zero": "Nul",
+      "overdueOnly": "Factures échues uniquement",
+      "searchPlaceholder": "Rechercher un tiers..."
+    },
+    "financial": {
+      "currentBalance": "Solde Actuel",
+      "receivables": "Créances",
+      "payables": "Dettes",
+      "creditLimit": "Limite de Crédit",
+      "creditLimitNotSet": "Non définie"
+    },
     "formDescription": "Remplissez les informations du tiers",
     "import": {
       "errorTitle": "Erreur d'importation",
@@ -5692,16 +5960,29 @@
       "processingTitle": "Importation en cours",
       "successDesc": "{count} tiers importés avec succès"
     },
+    "kpi": {
+      "totalThirdParties": "Total Tiers",
+      "activeClients": "Clients Actifs",
+      "activeSuppliers": "Fournisseurs Actifs",
+      "newThisMonth": "Nouveaux ce mois",
+      "totalReceivables": "Total Créances",
+      "totalPayables": "Total Dettes",
+      "overdueReceivables": "Créances Échues",
+      "overduePayables": "Dettes Échues"
+    },
+    "lastInteraction": "Dernière interaction",
+    "loading": "Chargement des tiers...",
     "name": "Nom",
     "noResults": "Aucun résultat trouvé",
     "notes": "Notes",
     "notesPlaceholder": "Notes ou commentaires sur ce tiers",
-    "pageSubtitle": "Gérez vos clients et fournisseurs",
-    "pageTitle": "Gestion des tiers",
+    "pageSubtitle": "Gérez vos clients, fournisseurs et partenaires commerciaux",
+    "pageTitle": "Gestion des Tiers",
     "paymentTerms": "Conditions de paiement",
     "paymentTermsPlaceholder": "Ex: 30 jours fin de mois",
     "phone": "Téléphone",
     "postalCode": "Code postal",
+    "realtime": "En temps réel",
     "saveError": "Erreur lors de l'enregistrement du tiers",
     "searchPlaceholder": "Rechercher un {type}...",
     "selectCompany": "Sélectionnez une entreprise",
@@ -5713,8 +5994,22 @@
     "solvencyAnalysisComingSoonDetail": "L'analyse de solvabilité avec notation automatique sera bientôt disponible",
     "solvencyAnalysisSubtitle": "Analysez la santé financière de vos tiers",
     "status": "Statut",
+    "tabs": {
+      "dashboard": "Tableau de Bord",
+      "thirdParties": "Tiers",
+      "agingAnalysis": "Analyse d'Ancienneté",
+      "transactions": "Transactions",
+      "import": "Import"
+    },
     "taxNumber": "Numéro fiscal",
     "title": "Tiers",
+    "typeLabels": {
+      "customer": "Client",
+      "supplier": "Fournisseur",
+      "partner": "Partenaire",
+      "both": "Client/Fournisseur"
+    },
+    "unknown": "Inconnu",
     "unpaidTracking": "Suivi des impayés",
     "unpaidTrackingComingSoonDetail": "Le suivi automatique des impayés avec rappels sera bientôt disponible",
     "unpaidTrackingSubtitle": "Suivez et gérez vos créances impayées",
@@ -5807,6 +6102,7 @@
         "currentQuarter": "Trimestre en cours",
         "currentYear": "Année en cours",
         "lastMonth": "Mois dernier",
+        "lastYear": "Année N-1",
         "custom": "Période personnalisée"
       },
       "newInvoice": "Nouvelle facture",
@@ -5826,7 +6122,10 @@
         "invoices": "Factures",
         "quotes": "Devis",
         "clients": "Clients",
-        "payments": "Paiements"
+        "payments": "Paiements",
+        "import": "Import",
+        "late_fees": "Pénalités",
+        "settings": "Configuration"
       },
       "quickActions": {
         "newInvoice": "Nouvelle facture",
@@ -5847,7 +6146,13 @@
       },
       "recentActivity": {
         "title": "Activité récente",
-        "noActivity": "Aucune activité récente"
+        "noActivity": "Aucune activité récente",
+        "invoiceDescription": "Facture {{number}} - {{customer}} ({{amount}})",
+        "quoteDescription": "Devis {{number}} ({{amount}})",
+        "timeAgo": "Il y a {{time}}",
+        "minutesAgo": "{{count}} min",
+        "hoursAgo": "{{count}}h",
+        "daysAgo": "{{count}}j"
       },
       "stats": {
         "invoicesCreated": "Factures créées",
@@ -5856,6 +6161,21 @@
         "total": "Total",
         "averageValue": "Valeur moyenne",
         "perInvoice": "Par facture"
+      },
+      "unknownClient": "Client inconnu",
+      "errors": {
+        "generic": "Une erreur est survenue",
+        "subscriptionExpired": "Abonnement expiré. Veuillez choisir un plan pour continuer."
+      },
+      "customPeriod": {
+        "startDatePlaceholder": "Sélectionner une date de début",
+        "startDateTitle": "Date de début de la période personnalisée",
+        "endDatePlaceholder": "Sélectionner une date de fin",
+        "endDateTitle": "Date de fin de la période personnalisée"
+      },
+      "settings": {
+        "title": "Configuration des Factures",
+        "description": "Paramétrez vos mentions légales et informations obligatoires pour des factures conformes à la législation."
       }
     },
     "last": "Terminer",

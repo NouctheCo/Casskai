@@ -81,100 +81,100 @@
       "fiscalYear": "Fiscal Year",
       "fiscalYearDesc": "Define your fiscal year periods",
       "fiscalYearDialogDesc": "Define your fiscal year settings",
-    "closure": {
-      "title": "Accounting close",
-      "subtitle": "Manage your accounting periods and perform year-end closures",
-      "refresh": "Refresh",
-      "newPeriod": "New period",
-      "loading": "Loading periods...",
-      "createTitle": "Create an accounting period",
-      "createDescription": "Define a new period for your accounting year",
-      "periodNameLabel": "Period name",
-      "periodNamePlaceholder": "E.g.: Fiscal year 2025",
-      "startDateLabel": "Start date",
-      "endDateLabel": "End date",
-      "cancel": "Cancel",
-      "createPeriodCta": "Create period",
-      "periodsTitle": "Accounting periods",
-      "periodsDescription": "Review and manage all accounting periods for the selected fiscal year",
-      "periodsCount": "{{count}} period(s) recorded",
-      "noPeriodsTitle": "No accounting period defined",
-      "noPeriodsDescription": "Create your first period to get started",
-      "table": {
-        "period": "Period",
-        "startDate": "Start date",
-        "endDate": "End date",
-        "status": "Status",
-        "actions": "Actions"
-      },
-      "status": {
-        "closed": "Closed",
-        "open": "Open"
-      },
-      "tooltips": {
-        "validate": "Validate for closing",
-        "generateAN": "Generate opening entries",
-        "reopen": "Reopen period"
-      },
-      "validationTitle": "Closing validation: {{periodName}}",
-      "validationRange": "From {{start}} to {{end}}",
-      "validationState": "Validation status",
-      "balanceCheck": "Trial balance check",
-      "totalDebit": "Total debit",
-      "totalCredit": "Total credit",
-      "draftEntries": "Draft entries",
-      "unletteredEntries": "Unreconciled third-party lines",
-      "periodResultTitle": "Period result",
-      "profit": "Profit",
-      "loss": "Loss",
-      "profitLower": "profit",
-      "lossLower": "loss",
-      "chargesLabel": "Expenses (class 6)",
-      "productsLabel": "Revenue (class 7)",
-      "blockingErrors": "Blocking errors",
-      "warnings": "Warnings",
-      "actionsTitle": "Closing actions",
-      "actions": {
-        "items": {
-          "balanceAccounts": "Clear expense (class 6) and revenue (class 7) accounts",
-          "assignResult": "Allocate the result to account {{account}}",
-          "lockPeriod": "Lock the period (no further changes)",
-          "generateOpening": "Option to generate opening entries for the next period"
+      "closure": {
+        "title": "Accounting close",
+        "subtitle": "Manage your accounting periods and perform year-end closures",
+        "refresh": "Refresh",
+        "newPeriod": "New period",
+        "loading": "Loading periods...",
+        "createTitle": "Create an accounting period",
+        "createDescription": "Define a new period for your accounting year",
+        "periodNameLabel": "Period name",
+        "periodNamePlaceholder": "E.g.: Fiscal year 2025",
+        "startDateLabel": "Start date",
+        "endDateLabel": "End date",
+        "cancel": "Cancel",
+        "createPeriodCta": "Create period",
+        "periodsTitle": "Accounting periods",
+        "periodsDescription": "Review and manage all accounting periods for the selected fiscal year",
+        "periodsCount": "{{count}} period(s) recorded",
+        "noPeriodsTitle": "No accounting period defined",
+        "noPeriodsDescription": "Create your first period to get started",
+        "table": {
+          "period": "Period",
+          "startDate": "Start date",
+          "endDate": "End date",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "status": {
+          "closed": "Closed",
+          "open": "Open"
+        },
+        "tooltips": {
+          "validate": "Validate for closing",
+          "generateAN": "Generate opening entries",
+          "reopen": "Reopen period"
+        },
+        "validationTitle": "Closing validation: {{periodName}}",
+        "validationRange": "From {{start}} to {{end}}",
+        "validationState": "Validation status",
+        "balanceCheck": "Trial balance check",
+        "totalDebit": "Total debit",
+        "totalCredit": "Total credit",
+        "draftEntries": "Draft entries",
+        "unletteredEntries": "Unreconciled third-party lines",
+        "periodResultTitle": "Period result",
+        "profit": "Profit",
+        "loss": "Loss",
+        "profitLower": "profit",
+        "lossLower": "loss",
+        "chargesLabel": "Expenses (class 6)",
+        "productsLabel": "Revenue (class 7)",
+        "blockingErrors": "Blocking errors",
+        "warnings": "Warnings",
+        "actionsTitle": "Closing actions",
+        "actions": {
+          "items": {
+            "balanceAccounts": "Clear expense (class 6) and revenue (class 7) accounts",
+            "assignResult": "Allocate the result to account {{account}}",
+            "lockPeriod": "Lock the period (no further changes)",
+            "generateOpening": "Option to generate opening entries for the next period"
+          }
+        },
+        "closePeriod": "Close period",
+        "confirmTitle": "Confirm closing",
+        "confirmDescription": "Are you sure you want to close period {{periodName}}?",
+        "confirmIntro": "This action will:",
+        "confirmItems": {
+          "closingEntries": "Generate closing entries for income statement accounts",
+          "assignResult": "Allocate the result ({{resultType}} of {{amount}})",
+          "lockPeriod": "Lock the period against any changes"
+        },
+        "confirmCta": "Confirm closing",
+        "reopenTitle": "Reopen period",
+        "reopenDescription": "Reopening a closed period is exceptional and must be justified.",
+        "reopenPeriodLabel": "Selected period",
+        "reopenReasonLabel": "Reopening reason *",
+        "reopenReasonPlaceholder": "E.g.: Correction of a data entry error...",
+        "reopenAuditNote": "⚠️ This action will be logged in audit records",
+        "reopenCta": "Reopen period",
+        "errors": {
+          "fillAllFields": "Please fill in all fields",
+          "create": "Error while creating",
+          "loadPeriods": "Error loading periods",
+          "validation": "Error during validation",
+          "close": "Error while closing",
+          "generateAN": "Error generating opening entries",
+          "reopenReasonRequired": "Please provide a reason for reopening",
+          "reopen": "Error while reopening",
+          "closedPeriodOperation": "Action not allowed: the accounting period is closed. Reopen the period to modify or enter journal entries."
         }
       },
-      "closePeriod": "Close period",
-      "confirmTitle": "Confirm closing",
-      "confirmDescription": "Are you sure you want to close period {{periodName}}?",
-      "confirmIntro": "This action will:",
-      "confirmItems": {
-        "closingEntries": "Generate closing entries for income statement accounts",
-        "assignResult": "Allocate the result ({{resultType}} of {{amount}})",
-        "lockPeriod": "Lock the period against any changes"
+      "closureHistory": {
+        "title": "Closure history",
+        "empty": "No closures recorded yet"
       },
-      "confirmCta": "Confirm closing",
-      "reopenTitle": "Reopen period",
-      "reopenDescription": "Reopening a closed period is exceptional and must be justified.",
-      "reopenPeriodLabel": "Selected period",
-      "reopenReasonLabel": "Reopening reason *",
-      "reopenReasonPlaceholder": "E.g.: Correction of a data entry error...",
-      "reopenAuditNote": "⚠️ This action will be logged in audit records",
-      "reopenCta": "Reopen period",
-      "errors": {
-        "fillAllFields": "Please fill in all fields",
-        "create": "Error while creating",
-        "loadPeriods": "Error loading periods",
-        "validation": "Error during validation",
-        "close": "Error while closing",
-        "generateAN": "Error generating opening entries",
-        "reopenReasonRequired": "Please provide a reason for reopening",
-        "reopen": "Error while reopening",
-        "closedPeriodOperation": "Action not allowed: the accounting period is closed. Reopen the period to modify or enter journal entries."
-      }
-    },
-    "closureHistory": {
-      "title": "Closure history",
-      "empty": "No closures recorded yet"
-    },
       "fiscalYearEnd": "Fiscal year end",
       "fiscalYearError": "Error saving fiscal year",
       "fiscalYearSaved": "Fiscal year saved successfully",
@@ -237,7 +237,44 @@
       }
     },
     "refresh": "Refresh",
+    "refreshSuccess": "Data refreshed",
+    "refreshError": "Error while refreshing",
     "newEntry": "New entry",
+    "subscriptionExpired": "Subscription expired. Please choose a plan to continue.",
+    "upgradeForEntries": "Upgrade your plan to access unlimited entries.",
+    "upgradeForReports": "Advanced reports are available with the Professional plan.",
+    "selectPeriodLabel": "Select accounting period",
+    "periods": {
+      "currentMonth": "Current month",
+      "currentQuarter": "Current quarter",
+      "currentYear": "Current year",
+      "lastMonth": "Last month",
+      "lastYear": "Previous year",
+      "custom": "Custom period"
+    },
+    "customDateRange": {
+      "startPlaceholder": "Start date",
+      "startTitle": "Start date of the custom period",
+      "endPlaceholder": "End date",
+      "endTitle": "End date of the custom period"
+    },
+    "activity": {
+      "timeAgo": "{{time}} ago",
+      "fewSeconds": "a few seconds",
+      "minutes_one": "{{count}} minute",
+      "minutes_other": "{{count}} minutes",
+      "hours_one": "{{count}} hour",
+      "hours_other": "{{count}} hours",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "entryStatus": {
+        "posted": "posted",
+        "draft": "draft",
+        "imported": "imported"
+      },
+      "entryDescription": "Entry {{number}} {{status}}: {{description}}",
+      "noDescription": "No description"
+    },
     "quickActions": {
       "newEntry": "New entry",
       "newEntryDesc": "Create an accounting entry",
@@ -490,7 +527,48 @@
   "actions": "Actions",
   "active": "Active",
   "addInvoice": "Add invoice",
-  "aiCategorization": "CatÃ©gorisation IA",
+  "aiCategorization": {
+    "title": "AI Suggestions",
+    "loading": "Loading AI suggestions...",
+    "noSuggestions": "No suggestions available",
+    "errorLoading": "Unable to load suggestions",
+    "confidence": "Confidence",
+    "confidenceHigh": "High confidence",
+    "confidenceMedium": "Medium confidence",
+    "confidenceLow": "Low confidence",
+    "usedXTimes": "Used {count}x",
+    "recent": "Recent",
+    "reason": "Reason",
+    "basedOnHistory": "Based on history",
+    "suggestedByAI": "Suggested by AI",
+    "keywordMatch": "Keyword match",
+    "applyButton": "Apply this suggestion",
+    "appliedSuccess": "Suggested account applied",
+    "similarTo": "Similar to \"{description}\" ({similarity}%)",
+    "exactMatch": "Exact match in history",
+    "usedInHistory": "Used {count} times for similar transactions",
+    "helpText": "Suggestions based on your history and AI. Click to apply.",
+    "minCharacters": "Enter at least 3 characters to get suggestions",
+    "learnFromHistory": "Learn from history",
+    "learnFromHistoryDescription": "Analyze existing entries to create suggestions",
+    "learnFromHistorySuccess": "{count} suggestions created from history",
+    "learnFromHistoryError": "Error learning from history",
+    "stats": {
+      "title": "Auto-categorization Statistics",
+      "totalSuggestions": "Total suggestions",
+      "validatedSuggestions": "Validated suggestions",
+      "rejectedSuggestions": "Rejected suggestions",
+      "avgConfidence": "Average confidence",
+      "accuracyRate": "Accuracy rate",
+      "mostUsedAccounts": "Most suggested accounts"
+    },
+    "feedback": {
+      "validated": "Suggestion validated",
+      "rejected": "Suggestion rejected",
+      "recordedSuccess": "Feedback recorded successfully",
+      "recordedError": "Error recording feedback"
+    }
+  },
   "allAccounts": "Tous les accounts",
   "allClasses": "Toutes les classes",
   "allEntriesDeletedSuccess": "Toutes les entries ont Ã©tÃ© supprimÃ©es avec succÃ¨s.",
@@ -554,7 +632,66 @@
   "backupData": "Sauvegarder data",
   "balance": "Solde",
   "bankConnections": "Bankings",
-  "bankReconciliation": "Rapprochement bancaire",
+  "bankReconciliation": {
+    "title": "Bank Reconciliation",
+    "subtitle": "Automatically match your bank transactions with your journal entries",
+    "pending": "Pending",
+    "reconciled": "Reconciled",
+    "total": "Total",
+    "automatic": "Automatic",
+    "manual": "Manual",
+    "averageConfidence": "Average confidence",
+    "stats": "Statistics",
+    "pendingTransactions": "Pending transactions",
+    "noPendingTransactions": "No pending transactions",
+    "noPendingTransactionsDescription": "All your bank transactions are reconciled!",
+    "loadingTransactions": "Loading transactions...",
+    "bankAccount": "Bank account",
+    "allAccounts": "All accounts",
+    "date": "Date",
+    "description": "Description",
+    "amount": "Amount",
+    "suggestions": "Suggestions",
+    "noSuggestions": "No suggestions",
+    "topMatch": "Best match",
+    "confidence": "Confidence",
+    "matchReasons": "Match reasons",
+    "viewSuggestions": "View suggestions ({count})",
+    "hideSuggestions": "Hide suggestions",
+    "validateMatch": "Validate this match",
+    "validateManual": "Manual reconciliation",
+    "ignore": "Ignore",
+    "autoReconcile": "Automatic reconciliation",
+    "autoReconcileDescription": "Automatically validate all matches with confidence ≥85%",
+    "startAutoReconcile": "Start automatic reconciliation",
+    "autoReconcileInProgress": "Reconciliation in progress...",
+    "autoReconcileSuccess": "{matched} out of {processed} transactions automatically reconciled",
+    "autoReconcileError": "Error during automatic reconciliation",
+    "reconciliationCreated": "Reconciliation created successfully",
+    "reconciliationError": "Error creating reconciliation",
+    "journalEntry": "Journal entry",
+    "journalEntryNumber": "Entry number",
+    "accountCode": "Account",
+    "accountName": "Account name",
+    "entryDate": "Entry date",
+    "entryAmount": "Entry amount",
+    "reconciliationType": "Type",
+    "typeAutomatic": "Automatic",
+    "typeManual": "Manual",
+    "typePartial": "Partial",
+    "matchScore": "Score {score}%",
+    "highConfidence": "High confidence",
+    "mediumConfidence": "Medium confidence",
+    "lowConfidence": "Low confidence",
+    "filters": "Filters",
+    "applyFilters": "Apply",
+    "resetFilters": "Reset",
+    "reference": "Reference",
+    "validated": "Validated",
+    "validatedBy": "Validated by",
+    "validatedAt": "Validated on",
+    "notes": "Notes"
+  },
   "business_sectors": {
     "african": {
       "agriculture": "Agriculture et Ã©levage",
@@ -634,6 +771,8 @@
     },
     "export": "Export",
     "exporting": "Exporting...",
+    "from": "From",
+    "to": "To",
     "forecasts": "PrÃ©visions",
     "getStarted": "Commencer",
     "guest": "InvitÃ©",
@@ -699,7 +838,7 @@
     },
     "timesheetModal": {
       "title": "New Time Entry",
-      "description": "Record a time entry for a project",
+      "description": "Description",
       "project": "Project",
       "projectPlaceholder": "Select a project",
       "task": "Task",
@@ -710,7 +849,6 @@
       "date": "Date",
       "hours": "Hours",
       "hoursPlaceholder": "8.0",
-      "description": "Description",
       "descriptionPlaceholder": "Description of work performed",
       "billable": "Billable time",
       "hourlyRate": "Hourly Rate",
@@ -747,7 +885,46 @@
       "errorCompanyName": "Company name is required",
       "errorCreating": "Error creating client"
     },
-    "invoiceCreated": "Invoice created successfully"
+    "invoiceCreated": "Invoice created successfully",
+    "unknownClient": "Unnamed client",
+    "unassigned": "Unassigned",
+    "general": "General",
+    "descriptionPlaceholder": "Detailed project description",
+    "user": "User",
+    "undefinedRole": "Role not defined",
+    "unknownProject": "Unknown project",
+    "noDescription": "No description",
+    "billable": "Billable",
+    "clientCreated": "Client created successfully",
+    "employeeCreated": "Employee created successfully",
+    "errorCreatingEmployee": "Error creating employee",
+    "status": {
+      "completed": "Completed",
+      "completed_plural": "Completed",
+      "onHold_short": "On hold",
+      "onHold_plural": "On hold",
+      "planned": "Planned",
+      "planned_plural": "Planned"
+    },
+    "priority": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aug",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Dec"
+    }
   },
   "company": {
     "fields": {
@@ -990,13 +1167,25 @@
       "available_third_parties": "Available third parties",
       "available_product_groups": "Product groups"
     },
-    "title": "Contrats & RFA",
-    "top_clients": "Top clients RFA",
+    "title": "Contracts & RFA",
+    "top_clients": "Top RFA clients",
     "type": {
-      "fixed_amount": "Amount fixe",
-      "fixed_percent": "Pourcentage fixe",
-      "progressive": "Paliers progressifs"
-    }
+      "fixed_amount": "Fixed amount",
+      "fixed_percent": "Fixed percentage",
+      "progressive": "Progressive tiers"
+    },
+    "unnamed_client": "Unnamed client",
+    "compared_to_last_month": "compared to last month",
+    "contract_count": "{{count}} contract(s)",
+    "discount_progressive": "Tiered rebates",
+    "discount_fixed_rate": "Fixed rate",
+    "discount_fixed_amount": "Fixed amount",
+    "period": "Period",
+    "turnover_realized": "Revenue achieved",
+    "rfa_label": "RFA",
+    "effective_rate": "Effective rate",
+    "breakdown_by_tiers": "Calculation breakdown by tier",
+    "realtime_badge": "Real-time"
   },
   "cookies": {
     "acceptAll": "Tout accepter",
@@ -1389,7 +1578,6 @@
         "pipeline": "Pipeline",
         "timeline": "Timeline"
       },
-      "new": "New opportunity",
       "edit": "Edit opportunity",
       "created": "Opportunity created successfully",
       "updated": "Opportunity updated successfully",
@@ -1572,7 +1760,10 @@
       "periods": {
         "vs_previous_year": "vs previous year",
         "month": "Month {{month}}"
-      }
+      },
+      "refreshDashboard": "Refresh dashboard",
+      "ofTotal": "of total",
+      "days": "days"
     },
     "aiAnalysis": {
       "title": "AI Analysis & Recommendations",
@@ -1912,6 +2103,66 @@
       "title": "HR Analytics",
       "totalEmployees": "Total Employees",
       "totalExpenseAmount": "Total Expense Amount"
+    },
+    "page": {
+      "subtitle": "Manage your employees, leave, expenses and working time",
+      "noCompanySelected": "No company selected. Please select a company to access HR.",
+      "integratedSupabase": "Supabase Integrated",
+      "documentUploadSuccess": "Document uploaded successfully",
+      "documentUploadError": "Unable to upload the document"
+    },
+    "tabs": {
+      "analytics": "Analytics",
+      "employees": "Employees",
+      "objectives": "Objectives",
+      "reviews": "Reviews",
+      "feedback": "Feedback",
+      "training": "Training",
+      "leaves": "Leave",
+      "expenses": "Expenses",
+      "documents": "Documents",
+      "templates": "Templates",
+      "generation": "Generation",
+      "archives": "Archives"
+    },
+    "kpi": {
+      "employees": "Employees",
+      "activeCount": "{{count}} active",
+      "newHires": "New Hires",
+      "thisMonth": "This month",
+      "pendingLeaves": "Pending Leave",
+      "approvedCount": "{{count}} approved",
+      "pendingExpenses": "Pending Expenses",
+      "totalAmount": "{{amount}} total"
+    },
+    "employeesSection": {
+      "title": "Employee Management",
+      "countLabel": "{{count}} employees",
+      "add": "Add",
+      "addEmployee": "Add an Employee",
+      "loading": "Loading employees...",
+      "empty": "No employees",
+      "emptyDescription": "Start by adding your first employees"
+    },
+    "leavesSection": {
+      "title": "Leave Management",
+      "countLabel": "{{count}} leave requests",
+      "exportCsv": "Export CSV",
+      "newRequest": "New Request",
+      "loading": "Loading leave requests...",
+      "days": "{{count}} days",
+      "dateRange": "From {{start}} to {{end}}",
+      "empty": "No leave requests",
+      "emptyDescription": "Leave requests will appear here"
+    },
+    "expensesSection": {
+      "title": "Expense Management",
+      "countLabel": "{{count}} expense reports",
+      "exportCsv": "Export CSV",
+      "newExpense": "New Expense Report",
+      "loading": "Loading expenses...",
+      "empty": "No expense reports",
+      "emptyDescription": "Expense reports will appear here"
     },
     "certifications": {
       "add": "New certification",
@@ -4731,7 +4982,19 @@
     "taxes": "Taxes",
     "thirdParties": "Third Parties",
     "thirdparties": "Third Parties",
-    "tiers": "Third Parties"
+    "tiers": "Third Parties",
+    "favorites": "Favorites",
+    "recent": "Recent",
+    "offline": "Offline",
+    "online": "Online",
+    "keyboardShortcuts": "Keyboard shortcuts",
+    "categories": {
+      "finances": "Finance",
+      "commercial": "Sales",
+      "management": "Management",
+      "analysis": "Analytics",
+      "automation": "Automation"
+    }
   },
   "signup": {
     "accountCreatedMessage": "A confirmation email has been sent to your address. Please check your inbox.",
@@ -5233,61 +5496,165 @@
   "thirdParties": {
     "active": "Active",
     "address": "Address",
-    "balance": "Solde",
+    "actions": {
+      "export": "Export",
+      "newThirdParty": "New Third Party",
+      "filters": "Filters",
+      "view": "View details",
+      "edit": "Edit",
+      "delete": "Delete",
+      "resetFilters": "Reset filters"
+    },
+    "alerts": {
+      "title": "Alerts",
+      "overdueInvoices": "Overdue invoices",
+      "overdueInvoicesCount": "{{count}} invoices",
+      "creditLimitExceeded": "Credit limits exceeded",
+      "creditLimitExceededCount": "{{count}} third parties",
+      "missingInformation": "Missing information",
+      "missingInformationCount": "{{count}} third parties"
+    },
+    "balance": "Balance",
+    "charts": {
+      "topClientsByRevenue": "Top Clients by Revenue",
+      "topSuppliersBySpending": "Top Suppliers by Spending"
+    },
     "city": "City",
-    "contactName": "Contact principal",
+    "code": "Code",
+    "confirmDeactivate": "Are you sure you want to deactivate this third party?",
+    "contactName": "Main contact",
     "country": "Country",
-    "createSuccess": "Third Parties crÃ©Ã© avec succÃ¨s",
-    "createTitle": "Create un tiers",
-    "defaultCurrency": "Currency par dÃ©faut",
-    "deleteConfirmation": "ÃŠtes-vous sÃ»r de vouloir supprimer {name} ?",
-    "deleteError": "Error lors de la suppression du tiers",
-    "deleteSuccess": "Third Parties supprimÃ© avec succÃ¨s",
-    "description": "GÃ©rez your clients et fournisseurs",
-    "editTitle": "Edit un tiers",
+    "createSuccess": "Third party created successfully",
+    "createTitle": "Create a third party",
+    "csvExportSuccess": "Third parties exported to CSV successfully",
+    "csvExportError": "Error during export",
+    "csvHeaders": {
+      "type": "Type",
+      "code": "Code",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "city": "City",
+      "country": "Country",
+      "status": "Status"
+    },
+    "defaultCurrency": "Default currency",
+    "deleteConfirmation": "Are you sure you want to delete {name}?",
+    "deleteError": "Error deleting third party",
+    "deleteSuccess": "Third party deleted successfully",
+    "deletedToast": "The third party",
+    "description": "Manage your clients and suppliers",
+    "editTitle": "Edit third party",
     "email": "Email",
-    "errorLoading": "Error lors du chargement des tiers",
-    "filterStatus": "Filter par Status",
-    "formDescription": "Remplissez les informations du tiers",
+    "emptyList": {
+      "title": "No third parties found",
+      "description": "No third parties match the current search criteria."
+    },
+    "errorLoading": "Error loading third parties",
+    "errorLoadingShort": "Unable to load third parties",
+    "errorDeleting": "Unable to delete third party",
+    "filterStatus": "Filter by status",
+    "filters": {
+      "allTypes": "All types",
+      "customer": "Customer",
+      "supplier": "Supplier",
+      "partner": "Partner",
+      "both": "Customer/Supplier",
+      "allStatuses": "All",
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended",
+      "blocked": "Blocked",
+      "typePlaceholder": "Type",
+      "statusPlaceholder": "Status",
+      "categoryPlaceholder": "Category",
+      "allCategories": "All categories",
+      "individual": "Individual",
+      "company": "Company",
+      "government": "Government",
+      "ngo": "Non-profit",
+      "balancePlaceholder": "Balance",
+      "allBalances": "All balances",
+      "positive": "Positive",
+      "negative": "Negative",
+      "zero": "Zero",
+      "overdueOnly": "Overdue invoices only",
+      "searchPlaceholder": "Search a third party..."
+    },
+    "financial": {
+      "currentBalance": "Current Balance",
+      "receivables": "Receivables",
+      "payables": "Payables",
+      "creditLimit": "Credit Limit",
+      "creditLimitNotSet": "Not set"
+    },
+    "formDescription": "Fill in the third party information",
     "import": {
-      "errorTitle": "Error d'importation",
-      "processingDesc": "Traitement des data en cours...",
-      "processingTitle": "Importation en cours",
-      "successDesc": "{count} tiers importÃ©s avec succÃ¨s"
+      "errorTitle": "Import error",
+      "processingDesc": "Processing data...",
+      "processingTitle": "Import in progress",
+      "successDesc": "{count} third parties imported successfully"
     },
+    "kpi": {
+      "totalThirdParties": "Total Third Parties",
+      "activeClients": "Active Clients",
+      "activeSuppliers": "Active Suppliers",
+      "newThisMonth": "New this month",
+      "totalReceivables": "Total Receivables",
+      "totalPayables": "Total Payables",
+      "overdueReceivables": "Overdue Receivables",
+      "overduePayables": "Overdue Payables"
+    },
+    "lastInteraction": "Last interaction",
+    "loading": "Loading third parties...",
     "name": "Name",
-    "noResults": "No results trouvÃ©",
+    "noResults": "No results found",
     "notes": "Notes",
-    "notesPlaceholder": "Notes ou commentaires sur ce tiers",
-    "pageSubtitle": "GÃ©rez your clients et fournisseurs",
-    "pageTitle": "Gestion des tiers",
-    "paymentTerms": "Conditions de paiement",
-    "paymentTermsPlaceholder": "Ex: 30 jours fin de mois",
+    "notesPlaceholder": "Notes or comments about this third party",
+    "pageSubtitle": "Manage your clients, suppliers and business partners",
+    "pageTitle": "Third Party Management",
+    "paymentTerms": "Payment terms",
+    "paymentTermsPlaceholder": "E.g.: 30 days end of month",
     "phone": "Phone",
-    "postalCode": "Postal Code",
-    "saveError": "Error lors de l'enregistrement du tiers",
-    "searchPlaceholder": "Search un {type}...",
-    "selectCompany": "SÃ©lectionnez une entreprise",
-    "selectCompanyPrompt": "Veuillez sÃ©lectionner une entreprise",
-    "selectCompanyToViewClients": "SÃ©lectionnez une entreprise pour voir les clients",
-    "selectCompanyToViewSuppliers": "SÃ©lectionnez une entreprise pour voir les fournisseurs",
-    "selectCountry": "SÃ©lectionner un pays",
-    "solvencyAnalysis": "Analyse de solvabilitÃ©",
-    "solvencyAnalysisComingSoonDetail": "L'analyse de solvabilitÃ© avec notation automatique sera bientÃ´t disponible",
-    "solvencyAnalysisSubtitle": "Analysez la santÃ© financiÃ¨re de your tiers",
+    "postalCode": "Postal code",
+    "realtime": "Real-time",
+    "saveError": "Error saving third party",
+    "searchPlaceholder": "Search a {type}...",
+    "selectCompany": "Select a company",
+    "selectCompanyPrompt": "Please select a company",
+    "selectCompanyToViewClients": "Select a company to view clients",
+    "selectCompanyToViewSuppliers": "Select a company to view suppliers",
+    "selectCountry": "Select a country",
+    "solvencyAnalysis": "Solvency analysis",
+    "solvencyAnalysisComingSoonDetail": "Solvency analysis with automatic scoring will be available soon",
+    "solvencyAnalysisSubtitle": "Analyze the financial health of your third parties",
     "status": "Status",
-    "taxNumber": "NumÃ©ro fiscal",
-    "title": "Third Parties",
-    "unpaidTracking": "Suivi des impayÃ©s",
-    "unpaidTrackingComingSoonDetail": "Le suivi automatique des impayÃ©s avec rappels sera bientÃ´t disponible",
-    "unpaidTrackingSubtitle": "Suivez et gÃ©rez your crÃ©ances impayÃ©es",
-    "updateSuccess": "Third Parties mis Ã  jour avec succÃ¨s",
-    "validation": {
-      "emailInvalid": "Format d'email invalide",
-      "nameRequired": "Le nom est requis",
-      "websiteInvalid": "Format de site web invalide"
+    "tabs": {
+      "dashboard": "Dashboard",
+      "thirdParties": "Third Parties",
+      "agingAnalysis": "Aging Analysis",
+      "transactions": "Transactions",
+      "import": "Import"
     },
-    "website": "Site web"
+    "taxNumber": "Tax number",
+    "title": "Third Parties",
+    "typeLabels": {
+      "customer": "Customer",
+      "supplier": "Supplier",
+      "partner": "Partner",
+      "both": "Customer/Supplier"
+    },
+    "unknown": "Unknown",
+    "unpaidTracking": "Unpaid tracking",
+    "unpaidTrackingComingSoonDetail": "Automatic unpaid tracking with reminders will be available soon",
+    "unpaidTrackingSubtitle": "Track and manage your unpaid receivables",
+    "updateSuccess": "Third party updated successfully",
+    "validation": {
+      "emailInvalid": "Invalid email format",
+      "nameRequired": "Name is required",
+      "websiteInvalid": "Invalid website format"
+    },
+    "website": "Website"
   },
   "tour": {
     "accounting": {
@@ -5356,6 +5723,7 @@
         "currentQuarter": "Current quarter",
         "currentYear": "Current year",
         "lastMonth": "Last month",
+        "lastYear": "Previous year",
         "custom": "Custom period"
       },
       "newInvoice": "New invoice",
@@ -5375,7 +5743,10 @@
         "invoices": "Invoices",
         "quotes": "Quotes",
         "clients": "Clients",
-        "payments": "Payments"
+        "payments": "Payments",
+        "import": "Import",
+        "late_fees": "Late fees",
+        "settings": "Settings"
       },
       "quickActions": {
         "newInvoice": "New invoice",
@@ -5396,7 +5767,13 @@
       },
       "recentActivity": {
         "title": "Recent activity",
-        "noActivity": "No recent activity"
+        "noActivity": "No recent activity",
+        "invoiceDescription": "Invoice {{number}} - {{customer}} ({{amount}})",
+        "quoteDescription": "Quote {{number}} ({{amount}})",
+        "timeAgo": "{{time}} ago",
+        "minutesAgo": "{{count}} min",
+        "hoursAgo": "{{count}}h",
+        "daysAgo": "{{count}}d"
       },
       "stats": {
         "invoicesCreated": "Invoices created",
@@ -5405,6 +5782,21 @@
         "total": "Total",
         "averageValue": "Average value",
         "perInvoice": "Per invoice"
+      },
+      "unknownClient": "Unknown client",
+      "errors": {
+        "generic": "An error occurred",
+        "subscriptionExpired": "Subscription expired. Please choose a plan to continue."
+      },
+      "customPeriod": {
+        "startDatePlaceholder": "Select a start date",
+        "startDateTitle": "Custom period start date",
+        "endDatePlaceholder": "Select an end date",
+        "endDateTitle": "Custom period end date"
+      },
+      "settings": {
+        "title": "Invoice Settings",
+        "description": "Configure your legal notices and mandatory information for compliant invoices."
       }
     },
     "last": "Terminer",
@@ -5607,7 +5999,10 @@
     "tabs": {
       "import": "Import",
       "categorization": "Categorization",
-      "history": "History"
+      "history": "History",
+      "accounts": "Bank accounts",
+      "sepaTransfers": "SEPA transfers",
+      "reconciliation": "Bank reconciliation"
     },
     "metrics": {
       "totalTransactions": "Total Transactions",
@@ -5621,7 +6016,8 @@
       "accountLabel": "Bank account",
       "noAccount": "No account (an account will be created automatically)",
       "fileLabel": "Statement file",
-      "uploading": "Importing..."
+      "uploading": "Importing...",
+      "ibanNotConfigured": "(IBAN not configured)"
     },
     "history": {
       "title": "Transactions ({{count}})",
@@ -5639,9 +6035,13 @@
         "reconciled": "Reconciled",
         "pending": "Pending"
       },
+      "purgeButton": "Purge history",
       "actions": {
         "reconcile": "Reconcile",
-        "retry": "Send back to categorization"
+        "reconcileTitle": "Reconcile",
+        "retry": "Send back to categorization",
+        "retryTitle": "Send back to categorization",
+        "retryFallback": "Resend"
       },
       "pagination": "Showing first {{shown}} transactions out of {{total}}"
     },
@@ -5718,6 +6118,26 @@
       "noBankAccount": "⚠️ No bank account (512) found. Create one in accounting.",
       "allCategorized": "All transactions are categorized!",
       "noTransactions": "No transactions found"
+    },
+    "bulkCategorization": {
+      "selectAccount": "Choose an account for bulk categorization"
+    },
+    "toasts": {
+      "migrationSuccess": "{{count}} transactions migrated from localStorage to Supabase",
+      "loadError": "Unable to load data",
+      "importSuccess": "{{imported}} transactions imported, {{skipped}} duplicates skipped",
+      "importError": "Unable to import the file",
+      "reconcileSuccess": "The transaction has been marked as reconciled",
+      "reconcileError": "Unable to reconcile the transaction",
+      "unreconcileSuccess": "The transaction has been sent back to categorization",
+      "unreconcileError": "Unable to send the transaction back to categorization",
+      "purgeConfirm": "Do you confirm the purge of the history for this account? This action is irreversible.",
+      "purgeSuccess": "History purged successfully",
+      "purgeError": "The purge failed. Check your permissions or contact support.",
+      "reconciliationComplete": "Reconciliation completed successfully"
+    },
+    "defaults": {
+      "bankTransaction": "Bank transaction"
     }
   },
   "assets": {
@@ -6364,107 +6784,5 @@
     "total": "Total",
     "period": "Period",
     "home": "Home"
-  },
-  "bankReconciliation": {
-    "title": "Bank Reconciliation",
-    "subtitle": "Automatically match your bank transactions with your journal entries",
-    "pending": "Pending",
-    "reconciled": "Reconciled",
-    "total": "Total",
-    "automatic": "Automatic",
-    "manual": "Manual",
-    "averageConfidence": "Average confidence",
-    "stats": "Statistics",
-    "pendingTransactions": "Pending transactions",
-    "noPendingTransactions": "No pending transactions",
-    "noPendingTransactionsDescription": "All your bank transactions are reconciled!",
-    "loadingTransactions": "Loading transactions...",
-    "bankAccount": "Bank account",
-    "allAccounts": "All accounts",
-    "date": "Date",
-    "description": "Description",
-    "amount": "Amount",
-    "suggestions": "Suggestions",
-    "noSuggestions": "No suggestions",
-    "topMatch": "Best match",
-    "confidence": "Confidence",
-    "matchReasons": "Match reasons",
-    "viewSuggestions": "View suggestions ({count})",
-    "hideSuggestions": "Hide suggestions",
-    "validateMatch": "Validate this match",
-    "validateManual": "Manual reconciliation",
-    "ignore": "Ignore",
-    "autoReconcile": "Automatic reconciliation",
-    "autoReconcileDescription": "Automatically validate all matches with confidence ≥85%",
-    "startAutoReconcile": "Start automatic reconciliation",
-    "autoReconcileInProgress": "Reconciliation in progress...",
-    "autoReconcileSuccess": "{matched} out of {processed} transactions automatically reconciled",
-    "autoReconcileError": "Error during automatic reconciliation",
-    "reconciliationCreated": "Reconciliation created successfully",
-    "reconciliationError": "Error creating reconciliation",
-    "journalEntry": "Journal entry",
-    "journalEntryNumber": "Entry number",
-    "accountCode": "Account",
-    "accountName": "Account name",
-    "entryDate": "Entry date",
-    "entryAmount": "Entry amount",
-    "reconciliationType": "Type",
-    "typeAutomatic": "Automatic",
-    "typeManual": "Manual",
-    "typePartial": "Partial",
-    "matchScore": "Score {score}%",
-    "highConfidence": "High confidence",
-    "mediumConfidence": "Medium confidence",
-    "lowConfidence": "Low confidence",
-    "filters": "Filters",
-    "applyFilters": "Apply",
-    "resetFilters": "Reset",
-    "reference": "Reference",
-    "validated": "Validated",
-    "validatedBy": "Validated by",
-    "validatedAt": "Validated on",
-    "notes": "Notes"
-  },
-  "aiCategorization": {
-    "title": "AI Suggestions",
-    "loading": "Loading AI suggestions...",
-    "noSuggestions": "No suggestions available",
-    "errorLoading": "Unable to load suggestions",
-    "confidence": "Confidence",
-    "confidenceHigh": "High confidence",
-    "confidenceMedium": "Medium confidence",
-    "confidenceLow": "Low confidence",
-    "usedXTimes": "Used {count}x",
-    "recent": "Recent",
-    "reason": "Reason",
-    "basedOnHistory": "Based on history",
-    "suggestedByAI": "Suggested by AI",
-    "keywordMatch": "Keyword match",
-    "applyButton": "Apply this suggestion",
-    "appliedSuccess": "Suggested account applied",
-    "similarTo": "Similar to \"{description}\" ({similarity}%)",
-    "exactMatch": "Exact match in history",
-    "usedInHistory": "Used {count} times for similar transactions",
-    "helpText": "Suggestions based on your history and AI. Click to apply.",
-    "minCharacters": "Enter at least 3 characters to get suggestions",
-    "learnFromHistory": "Learn from history",
-    "learnFromHistoryDescription": "Analyze existing entries to create suggestions",
-    "learnFromHistorySuccess": "{count} suggestions created from history",
-    "learnFromHistoryError": "Error learning from history",
-    "stats": {
-      "title": "Auto-categorization Statistics",
-      "totalSuggestions": "Total suggestions",
-      "validatedSuggestions": "Validated suggestions",
-      "rejectedSuggestions": "Rejected suggestions",
-      "avgConfidence": "Average confidence",
-      "accuracyRate": "Accuracy rate",
-      "mostUsedAccounts": "Most suggested accounts"
-    },
-    "feedback": {
-      "validated": "Suggestion validated",
-      "rejected": "Suggestion rejected",
-      "recordedSuccess": "Feedback recorded successfully",
-      "recordedError": "Error recording feedback"
-    }
   }
 }

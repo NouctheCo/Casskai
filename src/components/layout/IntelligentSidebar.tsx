@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -33,35 +34,35 @@ import { useSyncQueue } from '@/hooks/useSyncQueue';
 // Catégories organisées de manière intuitive
 const MODULE_CATEGORIES = {
   finances: {
-    label: 'Finances',
+    label: 'sidebar.categories.finances',
     icon: Calculator,
     color: 'blue',
     modules: ['dashboard', 'accounting', 'banking', 'invoicing', 'tax', 'budget'],
     priority: 1
   },
   commercial: {
-    label: 'Commercial',
+    label: 'sidebar.categories.commercial',
     icon: Users,
     color: 'green',
     modules: ['salesCrm', 'contracts'],
     priority: 2
   },
   gestion: {
-    label: 'Gestion',
+    label: 'sidebar.categories.management',
     icon: Package,
     color: 'purple',
     modules: ['inventory', 'purchases', 'projects', 'thirdParties', 'humanResources'],
     priority: 3
   },
   analyse: {
-    label: 'Analyse',
+    label: 'sidebar.categories.analysis',
     icon: BarChart3,
     color: 'orange',
     modules: ['reports'],
     priority: 4
   },
   automation: {
-    label: 'Automatisation',
+    label: 'sidebar.categories.automation',
     icon: Zap,
     color: 'yellow',
     modules: ['automation'],
@@ -95,6 +96,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
   const { allModules, isModuleActive: _isModuleActive, activeModules, canAccessModule } = useModulesSafe();
   const { user, currentCompany: _currentCompany } = useAuth();
   const { subscription } = useSubscription();
+  const { t } = useTranslation();
   const { pendingCount: syncPending, failedCount: syncFailed } = useSyncQueue();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['finances']));
   const [searchQuery, setSearchQuery] = useState('');
@@ -195,7 +197,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
-  if (!allModules) return <div className="p-4">Chargement...</div>;
+  if (!allModules) return <div className="p-4">{t('common.loading')}</div>;
   return (
     <motion.aside 
       className={cn(
@@ -229,7 +231,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
               id="sidebar-search"
               name="sidebar-search"
               type="text"
-              placeholder="Rechercher..."
+              placeholder={t('sidebar.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoComplete="off"
@@ -250,7 +252,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
             <div className="mb-4">
               <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wide">
                 <Star className="h-3 w-3" />
-                Favoris
+                {t('sidebar.favorites')}
               </div>
               <div className="space-y-1">
                 {getFavoriteModulesData().map((module) => {
@@ -289,7 +291,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
             <div className="mb-4">
               <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wide">
                 <Clock className="h-3 w-3" />
-                Récents
+                {t('sidebar.recent')}
               </div>
               <div className="space-y-1">
                 {getRecentModulesData().map((module) => {
@@ -344,7 +346,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
                     <CategoryIcon className="h-4 w-4" />
                     {!collapsed && (
                       <>
-                        <span>{category.label}</span>
+                        <span>{t(category.label)}</span>
                         <Badge variant="secondary" className="text-xs px-1.5 py-0">
                           {categoryModules.length}
                         </Badge>
@@ -443,12 +445,12 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
             {!navigator.onLine ? (
               <>
                 <CloudOff className="h-3.5 w-3.5 text-orange-500" />
-                <span className="text-orange-600 dark:text-orange-400 font-medium">Hors ligne</span>
+                <span className="text-orange-600 dark:text-orange-400 font-medium">{t('sidebar.offline')}</span>
               </>
             ) : (
               <>
                 <Cloud className="h-3.5 w-3.5 text-blue-500" />
-                <span className="text-gray-600 dark:text-gray-400">En ligne</span>
+                <span className="text-gray-600 dark:text-gray-400">{t('sidebar.online')}</span>
               </>
             )}
             {syncPending > 0 && (
@@ -470,13 +472,13 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
         <div className="p-3 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <Button asChild className="w-full mb-2">
             <Link to={subscription ? "/settings?tab=subscription" : "/pricing"}>
-              Gérer l'abonnement
+              {t('sidebar.manageSubscription')}
             </Link>
           </Button>
           <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300 space-y-1">
             <div className="flex items-center gap-2">
               <Zap className="h-3 w-3" />
-              <span>Raccourcis clavier</span>
+              <span>{t('sidebar.keyboardShortcuts')}</span>
             </div>
             <div className="text-xs opacity-75">
               Ctrl+Shift+D → Dashboard

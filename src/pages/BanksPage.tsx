@@ -80,7 +80,7 @@ const BanksPageNew: React.FC = () => {
             account.id
           );
           if (migrationResult.success && migrationResult.migrated > 0) {
-            toastSuccess(`${migrationResult.migrated} transactions migrées depuis localStorage vers Supabase`);
+            toastSuccess(t('banking.toasts.migrationSuccess', { count: migrationResult.migrated }));
           }
         }
       }
@@ -103,8 +103,7 @@ const BanksPageNew: React.FC = () => {
       await loadMetrics();
     } catch (error) {
       logger.error('Banks', 'Error loading data:', error);
-      toastError(error instanceof Error ? error.message : "Impossible de charger les données"
-     );
+      toastError(error instanceof Error ? error.message : t('banking.toasts.loadError'));
     } finally {
       setLoading(false);
     }
@@ -150,7 +149,7 @@ const BanksPageNew: React.FC = () => {
       // Import file with error handling
       const result = await bankStorageAdapter.importFile(file, accountId, currentCompany.id);
       if (result.success) {
-        toastSuccess(`${result.imported_count} transactions importées, ${result.skipped_count} doublons ignorés`);
+        toastSuccess(t('banking.toasts.importSuccess', { imported: result.imported_count, skipped: result.skipped_count }));
         // Reload data
         await loadTransactions();
         await loadMetrics();
@@ -160,7 +159,7 @@ const BanksPageNew: React.FC = () => {
       }
     } catch (error) {
       logger.error('Banks', 'Import error:', error);
-      toastError(error instanceof Error ? error.message : "Impossible d'importer le fichier");
+      toastError(error instanceof Error ? error.message : t('banking.toasts.importError'));
     } finally {
       setUploading(false);
       // eslint-disable-next-line require-atomic-updates
@@ -184,7 +183,7 @@ const BanksPageNew: React.FC = () => {
                 transaction_date: transaction.date,
                 amount: Math.abs(transaction.amount),
                 type: transaction.amount >= 0 ? 'credit' : 'debit',
-                description: transaction.description || 'Transaction bancaire',
+                description: transaction.description || t('banking.defaults.bankTransaction'),
                 counterpart_account_id: undefined, // Sera mappé automatiquement selon le type
                 reference: transaction.reference,
               });
@@ -193,16 +192,14 @@ const BanksPageNew: React.FC = () => {
             logger.warn('Banks', 'Auto-accounting generation failed, but reconciliation succeeded:', error);
           }
         }
-        toastSuccess("La transaction a été marquée comme réconciliée"
-       );
+        toastSuccess(t('banking.toasts.reconcileSuccess'));
         // Reload
         await loadTransactions();
         await loadMetrics();
       }
     } catch (error) {
       logger.error('Banks', 'Reconciliation error:', error);
-      toastError("Impossible de réconcilier la transaction"
-     );
+      toastError(t('banking.toasts.reconcileError'));
     }
   };
   // Unreconcile (send back to categorization)
@@ -210,20 +207,20 @@ const BanksPageNew: React.FC = () => {
     try {
       const success = await bankStorageAdapter.unreconcileTransaction(transactionId);
       if (success) {
-        toastSuccess("La transaction a été renvoyée en catégorisation");
+        toastSuccess(t('banking.toasts.unreconcileSuccess'));
         await loadTransactions();
         await loadMetrics();
       }
     } catch (error) {
       logger.error('Banks', 'Unreconcile error:', error);
-      toastError("Impossible de renvoyer la transaction en catégorisation");
+      toastError(t('banking.toasts.unreconcileError'));
     }
   };
   // Purge history for selected account
   const handlePurgeHistory = async () => {
     if (!currentCompany?.id) return;
     // eslint-disable-next-line no-alert
-    const confirm = window.confirm('Confirmez-vous la purge de l\'historique pour ce compte ? Cette action est irréversible.');
+    const confirm = window.confirm(t('banking.toasts.purgeConfirm'));
     if (!confirm) return;
     try {
       let query = supabase
@@ -233,12 +230,12 @@ const BanksPageNew: React.FC = () => {
       if (selectedAccountId) query = query.eq('bank_account_id', selectedAccountId);
       const { error } = await query;
       if (error) throw error;
-      toastSuccess('Historique purgé avec succès');
+      toastSuccess(t('banking.toasts.purgeSuccess'));
       await loadTransactions();
       await loadMetrics();
     } catch (error) {
       logger.error('Banks', 'Purge history error:', error);
-      toastError("La purge a échoué. Vérifiez les droits ou contactez le support.");
+      toastError(t('banking.toasts.purgeError'));
     }
   };
   if (!user) {
@@ -311,7 +308,7 @@ const BanksPageNew: React.FC = () => {
             }`}
           >
             <CreditCard className="h-4 w-4" />
-            Comptes bancaires
+            {t('banking.tabs.accounts')}
           </button>
           <button
             onClick={() => setActiveTab('sepa-transfers')}
@@ -322,7 +319,7 @@ const BanksPageNew: React.FC = () => {
             }`}
           >
             <Banknote className="h-4 w-4" />
-            Virements SEPA
+            {t('banking.tabs.sepaTransfers')}
           </button>
           <button
             onClick={() => setActiveTab('reconciliation')}
@@ -333,7 +330,7 @@ const BanksPageNew: React.FC = () => {
             }`}
           >
             <Shuffle className="h-4 w-4" />
-            Rapprochement bancaire
+            {t('banking.tabs.reconciliation')}
           </button>
         </div>
       </div>
@@ -412,7 +409,7 @@ const BanksPageNew: React.FC = () => {
                   // Formater l'affichage de l'IBAN
                   const ibanDisplay = account.iban
                     ? `(•••• ${account.iban.replace(/\s/g, '').slice(-4)})`
-                    : '(⚠️ IBAN non configuré)';
+                    : t('banking.import.ibanNotConfigured');
                   return (
                     <option key={account.id} value={account.id}>
                       {account.bank_name} - {account.account_name} {ibanDisplay}
@@ -466,7 +463,7 @@ const BanksPageNew: React.FC = () => {
             </Button>
             <Button variant="destructive" size="sm" onClick={handlePurgeHistory}>
               <Trash2 className="h-4 w-4 mr-2" />
-              Purger l'historique
+              {t('banking.history.purgeButton')}
             </Button>
           </div>
         </CardHeader>
@@ -538,7 +535,7 @@ const BanksPageNew: React.FC = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => handleReconcile(transaction.id)}
-                            title="Réconcilier"
+                            title={t('banking.history.actions.reconcileTitle')}
                           >
                             {t('banking.history.actions.reconcile')}
                           </Button>
@@ -547,9 +544,9 @@ const BanksPageNew: React.FC = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => handleUnreconcile(transaction.id)}
-                            title="Renvoyer en catégorisation"
+                            title={t('banking.history.actions.retryTitle')}
                           >
-                            {t('banking.history.actions.retry') || 'Renvoyer'}
+                            {t('banking.history.actions.retry') || t('banking.history.actions.retryFallback')}
                           </Button>
                         )}
                       </td>
@@ -588,7 +585,7 @@ const BanksPageNew: React.FC = () => {
             // Rafraîchir les métriques après rapprochement
             loadMetrics();
             if (summary) {
-              toastSuccess('Rapprochement terminé avec succès');
+              toastSuccess(t('banking.toasts.reconciliationComplete'));
             }
           }}
         />

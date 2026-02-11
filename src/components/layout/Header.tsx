@@ -298,7 +298,7 @@ export function Header({
                 )}
                 onClick={() => syncNow()}
                 disabled={isSyncing || !navigator.onLine}
-                title={!navigator.onLine ? 'Hors ligne' : `${syncPendingCount} element(s) en attente`}
+                title={!navigator.onLine ? t('header.offline', { defaultValue: 'Hors ligne' }) : t('header.pendingSync', { defaultValue: '{{count}} élément(s) en attente', count: syncPendingCount })}
               >
                 {!navigator.onLine ? (
                   <CloudOff className="h-5 w-5" />
