@@ -10,7 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 

@@ -118,10 +118,6 @@ export const updateEmployeeSchema = createEmployeeSchema.partial();
  * Schéma de validation pour les employés (snake_case pour EmployeeFormModal)
  */
 export const employeeFormSchema = z.object({
-  employee_number: z
-    .string()
-    .min(1, 'Le matricule est obligatoire')
-    .max(50, 'Le matricule est trop long'),
   first_name: z
     .string()
     .min(2, 'Le prénom doit contenir au moins 2 caractères')
@@ -132,9 +128,7 @@ export const employeeFormSchema = z.object({
     .max(50, 'Le nom est trop long'),
   email: z
     .string()
-    .email('Adresse email invalide')
-    .optional()
-    .or(z.literal('')),
+    .email('Adresse email invalide'),
   phone: z
     .string()
     .regex(/^[\d\s+().-]+$/, 'Numéro de téléphone invalide')
@@ -159,19 +153,19 @@ export const employeeFormSchema = z.object({
     .length(3, 'Le code devise doit contenir 3 lettres')
     .default('EUR'),
   contract_type: z
-    .enum(['permanent', 'temporary', 'intern', 'freelance'], {
+    .enum(['cdi', 'cdd', 'interim', 'stage', 'apprentissage', 'freelance'], {
       errorMap: () => ({ message: 'Type de contrat invalide' }),
     }),
   status: z
-    .enum(['active', 'inactive', 'on_leave'], {
+    .enum(['active', 'inactive', 'on_leave', 'terminated'], {
       errorMap: () => ({ message: 'Statut invalide' }),
     })
     .default('active'),
   address: z.string().optional(),
   city: z.string().optional(),
   postal_code: z.string().optional(),
-  emergency_contact: z.string().optional(),
-  emergency_phone: z.string().optional(),
+  emergency_contact_name: z.string().optional(),
+  emergency_contact_phone: z.string().optional(),
 });
 
 /**

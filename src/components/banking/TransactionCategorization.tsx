@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,8 @@ import {
   Zap,
   RefreshCw,
   CheckCircle2,
+  Trash2,
+  Link2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { TransactionRow } from './TransactionRow';
@@ -38,6 +40,20 @@ interface CategorizationRule {
   is_regex: boolean;
   priority: number;
 }
+
+interface JournalEntryOption {
+  id: string;
+  entry_date: string;
+  reference_number?: string | null;
+  description: string;
+  status: string;
+  total_debit: number;
+  total_credit: number;
+  amount: number;
+  source_type?: string | null;
+  source_reference?: string | null;
+}
+
 interface TransactionCategorizationProps {
   bankAccountId: string;
   bankAccountNumber: string;
@@ -53,6 +69,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
   const [transactions, setTransactions] = useState<BankTransaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [rules, setRules] = useState<CategorizationRule[]>([]);
+  const [journalEntries, setJournalEntries] = useState<JournalEntryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'categorized'>('pending');
   const [searchTerm, setSearchTerm] = useState('');
@@ -109,6 +126,31 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
           logger.debug('TransactionCategorization', '📋 Plusieurs comptes 512 trouvés, l\'utilisateur doit choisir');
         }
       }
+
+      // Charger les écritures comptables pour le rapprochement (12 derniers mois)
+      const sinceDate = new Date();
+      sinceDate.setDate(sinceDate.getDate() - 365);
+      const sinceDateStr = sinceDate.toISOString().split('T')[0];
+      const { data: entryData, error: entryError } = await supabase
+        .from('journal_entries_with_links')
+        .select('id, entry_date, reference_number, description, status, total_debit, total_credit, source_type, source_reference')
+        .eq('company_id', currentCompany.id)
+        .gte('entry_date', sinceDateStr)
+        .order('entry_date', { ascending: false })
+        .limit(500);
+      if (entryError) throw entryError;
+      const formattedEntries = (entryData || []).map((entry) => {
+        const totalDebit = Number(entry.total_debit) || 0;
+        const totalCredit = Number(entry.total_credit) || 0;
+        return {
+          ...entry,
+          total_debit: totalDebit,
+          total_credit: totalCredit,
+          amount: Math.abs(totalDebit - totalCredit),
+        } as JournalEntryOption;
+      });
+      setJournalEntries(formattedEntries);
+
       // Charger les règles de catégorisation
       const { data: rulesData, error: rulesError } = await supabase
         .from('categorization_rules')
@@ -152,6 +194,207 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       return tx;
     });
     setTransactions(updated);
+  };
+
+  const journalEntryById = useMemo(() => {
+    return new Map(journalEntries.map((entry) => [entry.id, entry]));
+  }, [journalEntries]);
+
+  const normalizeText = (value?: string | null) => {
+    return (value || '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const hasReferenceMatch = (tx: BankTransaction, entry: JournalEntryOption) => {
+    const txRef = normalizeText(tx.reference);
+    const txDesc = normalizeText(tx.description);
+    const entryRef = normalizeText(entry.reference_number);
+    const sourceRef = normalizeText(entry.source_reference);
+
+    const matchRef = entryRef && (txRef.includes(entryRef) || txDesc.includes(entryRef));
+    const matchSource = sourceRef && (txRef.includes(sourceRef) || txDesc.includes(sourceRef));
+    return Boolean(matchRef || matchSource);
+  };
+
+  const candidateEntryMap = useMemo(() => {
+    const candidates = new Map<string, string[]>();
+    const pendingTxs = transactions.filter((t) => t.status === 'pending');
+
+    pendingTxs.forEach((tx) => {
+      const bankAmount = Math.abs(tx.amount);
+      const bankDate = new Date(tx.transaction_date);
+      const matches: Array<{ id: string; dateDiff: number; refMatch: boolean }> = [];
+
+      for (const entry of journalEntries) {
+        const entryAmount = entry.amount;
+        if (Math.abs(bankAmount - entryAmount) > 0.01) continue;
+
+        const entryDate = new Date(entry.entry_date);
+        const dateDiffDays = Math.abs(
+          (bankDate.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        if (dateDiffDays > 3) continue;
+
+        matches.push({
+          id: entry.id,
+          dateDiff: dateDiffDays,
+          refMatch: hasReferenceMatch(tx, entry),
+        });
+      }
+
+      matches.sort((a, b) => {
+        if (a.refMatch !== b.refMatch) return a.refMatch ? -1 : 1;
+        return a.dateDiff - b.dateDiff;
+      });
+
+      candidates.set(tx.id, matches.map((m) => m.id));
+    });
+
+    return candidates;
+  }, [transactions, journalEntries]);
+
+  const autoMatchMap = useMemo(() => {
+    const matches = new Map<string, string>();
+    const pendingTxs = transactions.filter((t) => t.status === 'pending');
+
+    pendingTxs.forEach((tx) => {
+      const bankAmount = Math.abs(tx.amount);
+      const bankDate = new Date(tx.transaction_date);
+      let bestMatchId: string | null = null;
+      let bestDateDiff = Number.POSITIVE_INFINITY;
+      let bestRefMatchId: string | null = null;
+      let bestRefDateDiff = Number.POSITIVE_INFINITY;
+
+      for (const entry of journalEntries) {
+        const entryAmount = entry.amount;
+        if (Math.abs(bankAmount - entryAmount) > 0.01) continue;
+
+        const entryDate = new Date(entry.entry_date);
+        const dateDiffDays = Math.abs(
+          (bankDate.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        if (dateDiffDays > 3) continue;
+
+        if (hasReferenceMatch(tx, entry)) {
+          if (dateDiffDays < bestRefDateDiff) {
+            bestRefDateDiff = dateDiffDays;
+            bestRefMatchId = entry.id;
+          }
+          continue;
+        }
+
+        if (dateDiffDays < bestDateDiff) {
+          bestDateDiff = dateDiffDays;
+          bestMatchId = entry.id;
+        }
+      }
+
+      if (bestRefMatchId) {
+        matches.set(tx.id, bestRefMatchId);
+      } else if (bestMatchId) {
+        matches.set(tx.id, bestMatchId);
+      }
+    });
+
+    return matches;
+  }, [transactions, journalEntries]);
+
+  const reconcileWithEntry = async (
+    transactionId: string,
+    journalEntryId: string,
+    reconciliationType: 'manual' | 'automatic' = 'manual',
+    confidenceScore?: number,
+    skipReload: boolean = false
+  ) => {
+    if (!currentCompany?.id) return;
+    const transaction = transactions.find((t) => t.id === transactionId);
+    const entry = journalEntryById.get(journalEntryId);
+    if (!transaction || !entry) return;
+
+    const bankAmount = Math.abs(transaction.amount);
+    const accountingAmount = entry.amount;
+    const difference = Math.abs(bankAmount - accountingAmount);
+    const reconciledAt = new Date().toISOString();
+
+    try {
+      const { error: txError } = await supabase
+        .from('bank_transactions')
+        .update({
+          status: 'reconciled',
+          is_reconciled: true,
+          matched_entry_id: journalEntryId,
+          reconciliation_date: reconciledAt,
+        })
+        .eq('id', transactionId);
+      if (txError) throw txError;
+
+      const { error: entryError } = await supabase
+        .from('journal_entries')
+        .update({
+          is_reconciled: true,
+          reconciled_at: reconciledAt,
+        })
+        .eq('id', journalEntryId);
+      if (entryError) throw entryError;
+
+      const { error: reconciliationError } = await supabase
+        .from('bank_reconciliations')
+        .upsert({
+          company_id: currentCompany.id,
+          bank_account_id: bankAccountId,
+          bank_transaction_id: transactionId,
+          journal_entry_id: journalEntryId,
+          reconciliation_type: reconciliationType,
+          confidence_score: reconciliationType === 'automatic'
+            ? Number((confidenceScore ?? 1).toFixed(2))
+            : null,
+          bank_amount: bankAmount,
+          accounting_amount: accountingAmount,
+          difference,
+        }, { onConflict: 'bank_transaction_id' });
+      if (reconciliationError) throw reconciliationError;
+
+      toast.success(t('banking.reconciliation.matchedSuccess', "Transaction rapprochée avec l'écriture comptable"));
+      if (!skipReload) {
+        await loadData();
+        onRefresh?.();
+      }
+    } catch (error) {
+      logger.error('TransactionCategorization', 'Erreur rapprochement:', error);
+      toast.error('Erreur lors du rapprochement comptable');
+    }
+  };
+
+  const runAutoMatch = async () => {
+    const pendingTxs = transactions.filter((t) => t.status === 'pending');
+    let matchedCount = 0;
+    for (const tx of pendingTxs) {
+      const entryId = autoMatchMap.get(tx.id);
+      if (!entryId) continue;
+
+      const entry = journalEntryById.get(entryId);
+      if (!entry) continue;
+
+      const bankDate = new Date(tx.transaction_date);
+      const entryDate = new Date(entry.entry_date);
+      const dateDiffDays = Math.abs(
+        (bankDate.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const dateScore = Math.max(0, 1 - (dateDiffDays / 3));
+
+      await reconcileWithEntry(tx.id, entryId, 'automatic', dateScore, true);
+      matchedCount += 1;
+    }
+
+    if (matchedCount > 0) {
+      await loadData();
+      onRefresh?.();
+      toast.success(t('banking.reconciliation.autoMatchedSuccess', '{{count}} transaction(s) rapprochée(s) automatiquement', { count: matchedCount }));
+    } else {
+      toast.error(t('banking.reconciliation.autoMatchedNone', 'Aucun rapprochement automatique trouvé'));
+    }
   };
   // Catégoriser une transaction
   const categorizeTransaction = async (
@@ -341,6 +584,92 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       toast.error(t('errors.ignore', 'Erreur lors de l\'ignorement'));
     }
   };
+
+  // Supprimer une transaction
+  const deleteTransaction = async (transactionId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette transaction ? Cette action est irréversible.')) {
+      return;
+    }
+    try {
+      const { error } = await supabase
+        .from('bank_transactions')
+        .delete()
+        .eq('id', transactionId);
+      if (error) throw error;
+      toast.success('Transaction supprimée');
+      loadData();
+      onRefresh?.();
+    } catch (error) {
+      logger.error('TransactionCategorization', 'Erreur suppression:', error);
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  // Supprimer les transactions sélectionnées
+  const deleteSelectedTransactions = async () => {
+    if (selectedTransactions.size === 0) return;
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedTransactions.size} transaction(s) ? Cette action est irréversible.`)) {
+      return;
+    }
+    const txIds = Array.from(selectedTransactions);
+    let successCount = 0;
+    for (const txId of txIds) {
+      try {
+        const { error } = await supabase
+          .from('bank_transactions')
+          .delete()
+          .eq('id', txId);
+        if (!error) successCount++;
+      } catch (error) {
+        logger.error('TransactionCategorization', 'Erreur suppression transaction:', txId, error);
+      }
+    }
+    toast.success(`${successCount} transaction(s) supprimée(s)`);
+    setSelectedTransactions(new Set());
+    loadData();
+    onRefresh?.();
+  };
+
+  // Supprimer toutes les transactions
+  const deleteAllTransactions = async () => {
+    if (!currentCompany?.id) return;
+    const count = filteredTransactions.length;
+    if (count === 0) {
+      toast.error('Aucune transaction à supprimer');
+      return;
+    }
+    if (!confirm(`⚠️ ATTENTION : Voulez-vous vraiment supprimer TOUTES les ${count} transaction(s) affichées ? Cette action est IRRÉVERSIBLE.`)) {
+      return;
+    }
+    // Double confirmation pour suppression totale
+    if (!confirm(`Dernière confirmation : Supprimer définitivement ${count} transaction(s) ?`)) {
+      return;
+    }
+    try {
+      const txIds = filteredTransactions.map(t => t.id);
+      const { error } = await supabase
+        .from('bank_transactions')
+        .delete()
+        .in('id', txIds);
+      if (error) throw error;
+      toast.success(`${count} transaction(s) supprimée(s)`);
+      setSelectedTransactions(new Set());
+      loadData();
+      onRefresh?.();
+    } catch (error) {
+      logger.error('TransactionCategorization', 'Erreur suppression globale:', error);
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const deleteDynamicTransactions = async () => {
+    if (selectedTransactions.size > 0) {
+      await deleteSelectedTransactions();
+      return;
+    }
+    await deleteAllTransactions();
+  };
+
   // Créer une règle à partir d'une transaction
   const createRuleFromTransaction = async (
     transaction: BankTransaction,
@@ -404,25 +733,26 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
   const categorizedCount = transactions.filter(
     (t) => t.status === 'categorized' || t.status === 'reconciled'
   ).length;
+  const autoMatchCount = autoMatchMap.size;
   return (
     <div className="space-y-4">
       {/* Header avec statistiques */}
       <div className="grid grid-cols-4 gap-4">
         <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
-          <div className="text-sm text-yellow-700">{t('common.pending', 'En attente')}</div>
+          <div className="text-sm text-yellow-700 dark:text-yellow-400">{t('banking.status.pending', 'En attente')}</div>
         </div>
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-blue-600">{suggestedCount}</div>
-          <div className="text-sm text-blue-700 dark:text-blue-400">{t('common.suggested', 'Suggestions')}</div>
+          <div className="text-sm text-blue-700 dark:text-blue-400">{t('banking.status.suggestions', 'Suggestions')}</div>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-green-600">{categorizedCount}</div>
-          <div className="text-sm text-green-700 dark:text-green-400">{t('common.categorized', 'Catégorisées')}</div>
+          <div className="text-sm text-green-700 dark:text-green-400">{t('banking.status.categorized', 'Catégorisées')}</div>
         </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-purple-600">{rules.length}</div>
-          <div className="text-sm text-purple-700">{t('common.rules', 'Règles actives')}</div>
+          <div className="text-sm text-purple-700 dark:text-purple-400">{t('banking.status.activeRules', 'Règles actives')}</div>
         </div>
       </div>
       {/* Barre d'outils */}
@@ -430,7 +760,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         {/* Sélection du compte bancaire 512 */}
         {bankingAccountOptions.length > 1 && (
           <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <label htmlFor="banking-account-select" className="text-sm font-medium text-blue-700 dark:text-blue-300">Compte bancaire:</label>
+            <label htmlFor="banking-account-select" className="text-sm font-medium text-blue-700 dark:text-blue-300">{t('banking.fields.bankAccount', 'Compte bancaire:')}</label>
             <select
               id="banking-account-select"
               value={selectedBankingAccount}
@@ -439,9 +769,9 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
                 const selected = bankingAccountOptions.find(a => a.id === e.target.value);
                 setBankingAccount(selected || null);
               }}
-              className="px-3 py-1 border border-blue-300 dark:border-blue-600 rounded bg-white dark:bg-gray-800 text-sm"
+              className="px-3 py-1 border border-blue-300 dark:border-blue-600 rounded bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100"
             >
-              <option value="">Sélectionner...</option>
+              <option value="">{t('banking.fields.selectAccount', 'Sélectionner...')}</option>
               {bankingAccountOptions.map((acc) => (
                 <option key={acc.id} value={acc.id}>
                   {acc.account_number} - {acc.account_name}
@@ -452,7 +782,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         )}
         {bankingAccountOptions.length === 0 && (
           <div className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
-            ⚠️ Aucun compte bancaire (512) trouvé. Créez-en un en comptabilité.
+            {t('banking.messages.noBankAccount', '⚠️ Aucun compte bancaire (512) trouvé. Créez-en un en comptabilité.')}
           </div>
         )}
         {/* Filtres */}
@@ -465,7 +795,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
                 : 'bg-gray-100 dark:bg-gray-700'
             }`}
           >
-            En attente ({pendingCount})
+            {t('banking.filters.pending', 'En attente ({{count}})', { count: pendingCount })}
           </button>
           <button
             onClick={() => setFilter('categorized')}
@@ -475,7 +805,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
                 : 'bg-gray-100 dark:bg-gray-700'
             }`}
           >
-            Catégorisées
+            {t('banking.filters.categorized', 'Catégorisées')}
           </button>
           <button
             onClick={() => setFilter('all')}
@@ -483,7 +813,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
               filter === 'all' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700'
             }`}
           >
-            Toutes
+            {t('banking.filters.all', 'Toutes')}
           </button>
         </div>
         {/* Recherche */}
@@ -491,25 +821,25 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
-            placeholder={t('searchTransactions', 'Rechercher une transaction...')}
+            placeholder={t('banking.fields.searchTransactions', 'Rechercher une transaction...')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg"
+            className="w-full pl-10 pr-4 py-2 border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
         </div>
         {/* Actions en masse */}
         {selectedTransactions.size > 0 && (
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500 dark:text-gray-300">
-              {selectedTransactions.size} sélectionnée(s)
+              {t('banking.fields.selectedCount', '{{count}} sélectionnée(s)', { count: selectedTransactions.size })}
             </span>
             <select
               aria-label={t('banking.bulkCategorization.selectAccount', 'Choisir un compte pour catégorisation en masse')}
               value={bulkAccount}
               onChange={(e) => setBulkAccount(e.target.value)}
-              className="px-3 py-2 border rounded-lg"
+              className="px-3 py-2 border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             >
-              <option value="">Choisir un compte...</option>
+              <option value="">{t('banking.fields.chooseAccount', 'Choisir un compte...')}</option>
               {Object.entries(groupedAccounts).map(([group, accs]) => (
                 <optgroup key={group} label={group}>
                   {accs.map((acc) => (
@@ -523,11 +853,35 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
             <button
               onClick={bulkCategorize}
               disabled={!bulkAccount}
-              className="px-4 py-2 bg-primary text-white rounded-lg disabled:opacity-50"
+              className="px-4 py-2 bg-primary text-white rounded-lg disabled:opacity-50 hover:bg-primary/90"
             >
-              Catégoriser
+              {t('banking.actions.categorize', 'Catégoriser')}
             </button>
           </div>
+        )}
+        {filteredTransactions.length > 0 && (
+          <button
+            onClick={deleteDynamicTransactions}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            title={selectedTransactions.size > 0
+              ? t('banking.actions.deleteSelected', 'Supprimer ({{count}})', { count: selectedTransactions.size })
+              : t('banking.actions.deleteAll', 'Tout supprimer ({{count}})', { count: filteredTransactions.length })}
+          >
+            <Trash2 className="h-4 w-4" />
+            {selectedTransactions.size > 0
+              ? t('banking.actions.deleteSelected', 'Supprimer ({{count}})', { count: selectedTransactions.size })
+              : t('banking.actions.deleteAll', 'Tout supprimer ({{count}})', { count: filteredTransactions.length })}
+          </button>
+        )}
+        {autoMatchCount > 0 && (
+          <button
+            onClick={runAutoMatch}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            title={t('banking.reconciliation.autoMatchTitle', 'Rapprochement automatique des transactions')}
+          >
+            <Link2 className="h-4 w-4" />
+            {t('banking.reconciliation.autoMatch', 'Auto-match')} ({autoMatchCount})
+          </button>
         )}
         {/* Bouton règles */}
         <button
@@ -535,7 +889,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
           className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50 dark:bg-gray-900/30"
         >
           <Zap className="h-4 w-4" />
-          Règles auto
+          {t('banking.rules.autoRules', 'Règles auto')}
         </button>
       </div>
       {/* Liste des transactions */}
@@ -546,7 +900,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
               <th className="px-4 py-3 text-left">
                 <input
                   type="checkbox"
-                  aria-label="Sélectionner toutes les transactions"
+                  aria-label={t('banking.fields.selectAll', 'Sélectionner toutes les transactions')}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setSelectedTransactions(
@@ -568,19 +922,19 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
                 />
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                Date
+                {t('banking.columns.date', 'Date')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                Description
+                {t('banking.columns.description', 'Description')}
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                Montant
+                {t('banking.columns.amount', 'Montant')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                Compte comptable
+                {t('banking.columns.accountingAccount', 'Compte comptable')}
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                Actions
+                {t('banking.columns.actions', 'Actions')}
               </th>
             </tr>
           </thead>
@@ -591,6 +945,9 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
                 transaction={tx}
                 accounts={accounts}
                 groupedAccounts={groupedAccounts}
+                journalEntries={journalEntries}
+                suggestedMatchId={autoMatchMap.get(tx.id) || ''}
+                candidateEntryIds={candidateEntryMap.get(tx.id) || []}
                 isSelected={selectedTransactions.has(tx.id)}
                 onSelect={(selected) => {
                   const newSet = new Set(selectedTransactions);
@@ -602,6 +959,8 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
                   categorizeTransaction(tx.id, accountId, description)
                 }
                 onIgnore={() => ignoreTransaction(tx.id)}
+                onDelete={() => deleteTransaction(tx.id)}
+                onMatchEntry={(entryId) => reconcileWithEntry(tx.id, entryId, 'manual')}
                 onCreateRule={(accountId, pattern) =>
                   createRuleFromTransaction(tx, accountId, pattern)
                 }
@@ -614,8 +973,8 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
             <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-green-500" />
             <p className="text-lg font-medium">
               {filter === 'pending'
-                ? 'Toutes les transactions sont catégorisées !'
-                : 'Aucune transaction trouvée'}
+                ? t('banking.messages.allCategorized', 'Toutes les transactions sont catégorisées !')
+                : t('banking.messages.noTransactions', 'Aucune transaction trouvée')}
             </p>
           </div>
         )}

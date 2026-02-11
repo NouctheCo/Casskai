@@ -18,6 +18,7 @@ import {
   validateCreateInventoryItem,
   validateProductData
 } from './inventory/inventory-validations';
+import { InventoryJournalEntryService, type StockMovement as JournalStockMovement } from './inventoryJournalEntryService';
 import { normalizeInventoryItem, normalizeStockMovement } from './inventory/inventory-normalizers';
 import {
   attachInventoryIds,
@@ -112,6 +113,7 @@ export interface StockMovement {
   company_id: string;
   created_at: string;
   movement_date: string;
+  journal_entry_id?: string;
 }
 export type StockMovementFilters = {
   itemId?: string;
@@ -483,9 +485,56 @@ export class InventoryService {
       if (!movement || !isStockMovementRow(movement)) {
         throw new Error('Unexpected stock movement payload');
       }
-      return normalizeStockMovement(movement, itemRecord.id);
+      const normalized = normalizeStockMovement(movement, itemRecord.id);
+
+      // Generate accounting entry asynchronously (don't block if it fails)
+      this.generateAccountingEntryForMovement(normalized, movement).catch((err) => {
+        logger.warn('Inventory', 'Failed to generate accounting entry:', err instanceof Error ? err.message : String(err));
+      });
+
+      return normalized;
     } catch (error) {
       logger.error('Inventory', 'Error creating stock movement:', error instanceof Error ? error.message : String(error));
+      throw error;
+    }
+  }
+
+  /**
+   * Generate accounting journal entry for a stock movement
+   * Maps inventory movement format to accounting service format
+   */
+  private static async generateAccountingEntryForMovement(
+    normalized: StockMovement,
+    rawMovement: StockMovementRow & { products?: any; warehouses?: any }
+  ): Promise<void> {
+    try {
+      // Map to accounting service format
+      const journalMovement: JournalStockMovement = {
+        id: normalized.id,
+        company_id: normalized.company_id,
+        product_id: normalized.product_id,
+        product_name: normalized.productName,
+        warehouse_id: normalized.warehouseId,
+        warehouse_name: normalized.warehouseName,
+        type: normalized.type,
+        quantity: normalized.quantity,
+        unit_price: normalized.unit_price ?? 0,
+        total_value: normalized.total_value ?? 0,
+        reason: normalized.reason,
+        reference: normalized.reference,
+        notes: normalized.notes,
+        movement_date: normalized.movement_date,
+      };
+
+      const result = await InventoryJournalEntryService.generateMovementEntry(journalMovement);
+      
+      if (result.success) {
+        logger.info('Inventory', `Accounting entry generated for movement ${normalized.id}: ${result.journal_entry_id}`);
+      } else {
+        logger.warn('Inventory', `Accounting entry generation failed: ${result.message}`);
+      }
+    } catch (error) {
+      logger.error('Inventory', 'Error in generateAccountingEntryForMovement:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }

@@ -62,7 +62,7 @@ export const enterpriseService = {
             id: company.id,
             name: company.name || 'Unnamed Enterprise',
             registrationNumber: '000000000', // Default value since not in DB
-            vatNumber: undefined,
+            vatNumber: undefined as string | undefined,
             countryCode: company.country || 'FR',
             address: {
               street: '',

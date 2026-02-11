@@ -24,8 +24,8 @@ export const dashboardService = {
         company_id: currentEnterpriseId
       });
       if (error) throw error;
-      return { data: (Array.isArray(data) ? normalizeData(data) : data) || null, error: null };
-    } catch (error) {
+      return { data: (Array.isArray(data) ? normalizeData(data) : data) || null, error: null as Error | null };
+    } catch (error: unknown) {
       logger.error('Dashboard', 'Error fetching dashboard stats:', error instanceof Error ? error.message : String(error));
       // Fallback : calculer manuellement si la fonction RPC n'est pas disponible
       return await dashboardService.calculateDashboardStatsManually(currentEnterpriseId);
@@ -101,10 +101,10 @@ export const dashboardService = {
             break;
         }
       });
-      return { data: stats, error: null };
-    } catch (error) {
+      return { data: stats, error: null as Error | null };
+    } catch (error: unknown) {
       logger.error('Dashboard', 'Error calculating dashboard stats manually:', error instanceof Error ? error.message : String(error));
-      return { data: null, error };
+      return { data: null, error: error as Error };
     }
   },
   // Obtenir le bilan comptable
@@ -119,10 +119,10 @@ export const dashboardService = {
         p_date: targetDate
       });
       if (error) throw error;
-      return { data: (Array.isArray(data) ? normalizeData(data) : data) || null, error: null };
-    } catch (error) {
+      return { data: (Array.isArray(data) ? normalizeData(data) : data) || null, error: null as Error | null };
+    } catch (error: unknown) {
       logger.error('Dashboard', 'Error fetching balance sheet:', error instanceof Error ? error.message : String(error));
-      return { data: null, error };
+      return { data: null, error: error as Error };
     }
   },
   // Obtenir le compte de résultat
@@ -139,10 +139,10 @@ export const dashboardService = {
         p_end_date: end
       });
       if (error) throw error;
-      return { data: (Array.isArray(data) ? normalizeData(data) : data) || null, error: null };
-    } catch (error) {
+      return { data: (Array.isArray(data) ? normalizeData(data) : data) || null, error: null as Error | null };
+    } catch (error: unknown) {
       logger.error('Dashboard', 'Error fetching income statement:', error instanceof Error ? error.message : String(error));
-      return { data: null, error };
+      return { data: null, error: error as Error };
     }
   },
   // Obtenir les données de cash-flow
@@ -156,8 +156,8 @@ export const dashboardService = {
         p_months: months
       });
       if (error) throw error;
-      return { data: normalizeData<any>(data) || [], error: null };
-    } catch (error) {
+      return { data: normalizeData<any>(data) || [], error: null as Error | null };
+    } catch (error: unknown) {
       logger.error('Dashboard', 'Error fetching cash flow data:', error instanceof Error ? error.message : String(error));
       // Fallback : simuler des données de cash-flow
       return await dashboardService.simulateCashFlowData(currentEnterpriseId, months);
@@ -188,10 +188,10 @@ export const dashboardService = {
           net_flow: totalBalance * 0.02 + (Math.random() - 0.5) * 200
         });
       }
-      return { data: cashFlowData, error: null };
-    } catch (error) {
+      return { data: cashFlowData, error: null as Error | null };
+    } catch (error: unknown) {
       logger.error('Dashboard', 'Error simulating cash flow data:', error instanceof Error ? error.message : String(error));
-      return { data: [], error };
+      return { data: [], error: error as Error };
     }
   },
   // Obtenir les écritures récentes pour le dashboard
@@ -216,14 +216,14 @@ export const dashboardService = {
       // Calculer le montant total pour chaque écriture
       const entriesWithAmount = rows.map(entry => {
         const totalAmount = (entry.journal_entry_lines || []).reduce(
-          (sum, item) => sum + (item.debit_amount || 0), 0
+          (sum: number, item: Record<string, unknown>) => sum + (Number(item.debit_amount) || 0), 0
         );
         return { ...entry, total_amount: totalAmount };
       });
-      return { data: entriesWithAmount, error: null };
-    } catch (error) {
+      return { data: entriesWithAmount, error: null as Error | null };
+    } catch (error: unknown) {
       logger.error('Dashboard', 'Error fetching recent journal entries:', error instanceof Error ? error.message : String(error));
-      return { data: [], error };
+      return { data: [], error: error as Error };
     }
   },
   // Obtenir les comptes avec les plus gros mouvements
@@ -268,10 +268,10 @@ export const dashboardService = {
       const topAccounts = Object.values(accountActivity)
         .sort((a: any, b: any) => b.total_movement - a.total_movement)
         .slice(0, limit);
-      return { data: topAccounts, error: null };
-    } catch (error) {
+      return { data: topAccounts, error: null as Error | null };
+    } catch (error: unknown) {
       logger.error('Dashboard', 'Error fetching top accounts by activity:', error instanceof Error ? error.message : String(error));
-      return { data: [], error };
+      return { data: [], error: error as Error };
     }
   },
   // Obtenir les alertes et notifications du dashboard
@@ -366,10 +366,10 @@ export const dashboardService = {
           });
         }
       }
-      return { data: alerts, error: null };
-    } catch (error) {
+      return { data: alerts, error: null as Error | null };
+    } catch (error: unknown) {
       logger.error('Dashboard', 'Error fetching dashboard alerts:', error instanceof Error ? error.message : String(error));
-      return { data: [], error };
+      return { data: [], error: error as Error };
     }
   },
   // Obtenir les métriques de performance
@@ -431,10 +431,10 @@ export const dashboardService = {
           .filter((p: any) => p.category === 'Capitaux propres')
           .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
       }
-      return { data: metrics, error: null };
-    } catch (error) {
+      return { data: metrics, error: null as Error | null };
+    } catch (error: unknown) {
       logger.error('Dashboard', 'Error fetching performance metrics:', error instanceof Error ? error.message : String(error));
-      return { data: null, error };
+      return { data: null, error: error as Error };
     }
   }
 };

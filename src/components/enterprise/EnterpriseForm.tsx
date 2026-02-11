@@ -91,7 +91,7 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
           type: formData.taxRegime.type as any,
           vatPeriod: formData.taxRegime.vatPeriod as any,
           corporateTaxRate: getCorporateTaxRate(formData.countryCode, formData.taxRegime.type),
-          specialRules: []
+          specialRules: [] as string[]
         },
         fiscalYearStart: formData.fiscalYearStart,
         fiscalYearEnd: formData.fiscalYearEnd,

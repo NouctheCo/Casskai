@@ -285,7 +285,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                   >
                     <div className="flex items-start gap-3">
                       <div className={`flex-shrink-0 mt-0.5 ${getNotificationColor(notification.type)}`}>
-                        {getNotificationIcon(notification.type, notification.category)}
+                        {getNotificationIcon(notification.type ?? 'info', notification.category ?? '')}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">

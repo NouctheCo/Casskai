@@ -10,6 +10,7 @@ import AccountMappingService, { ACCOUNT_MAPPING, UniversalAccountType } from './
 import { AccountingStandard } from './accountingRulesService';
 import { logger } from '@/lib/logger';
 import { formatCurrency } from '@/lib/utils';
+import { acceptedAccountingService } from './acceptedAccountingService';
 export interface RealKPIData {
   revenue_ytd: number;
   revenue_growth: number;
@@ -22,6 +23,16 @@ export interface RealKPIData {
   monthly_revenue: { month: string; amount: number }[];
   top_clients: { name: string; amount: number }[];
   expense_breakdown: { category: string; amount: number }[];
+  revenue?: number;
+  expenses?: number;
+  financialMetrics?: {
+    cashPosition: number;
+    daysOutstanding: number;
+    currentRatio: number;
+  };
+  profitabilityMetrics?: {
+    grossMargin: number;
+  };
 }
 /**
  * Service de calcul des KPIs réels depuis la base de données
@@ -94,8 +105,15 @@ export class RealDashboardKpiService {
   }
   /**
    * Calcule le chiffre d'affaires sur une période
-   * SOURCE PRIMAIRE: Factures de vente (invoices)
-   * Les écritures comptables sont utilisées en fallback
+   * 
+   * ✅ MIGRATED TO: acceptedAccountingService.calculateRevenueWithAudit()
+   * 
+   * Avantages:
+   * - Source unique de vérité pour tous les modules
+   * - Audit trail complet avec confidence scores
+   * - Support multi-standards (PCG/SYSCOHADA/IFRS/SCF)
+   * - Réconciliation automatique vs factures
+   * - Fallback management centralisé
    */
   private async calculateRevenue(
     companyId: string,
@@ -103,82 +121,57 @@ export class RealDashboardKpiService {
     endDate: string
   ): Promise<number> {
     try {
-      // Lire à la fois les factures de vente ET les comptes classe 7,
-      // puis retourner la somme des deux sources. Cela garantit que
-      // le KPI prend en compte à la fois les écritures métier
-      // (invoices) et les écritures comptables (chart_of_accounts).
-      const [invoicesResult, accountsResult] = await Promise.all([
-        supabase
-          .from('invoices')
-          .select('total_incl_tax')
-          .eq('company_id', companyId)
-          .eq('invoice_type', 'sale')
-          .in('status', ['sent', 'paid', 'partially_paid'])
-          .neq('status', 'cancelled')
-          .gte('invoice_date', startDate)
-          .lte('invoice_date', endDate),
-        supabase
-          .from('chart_of_accounts')
-          .select('current_balance')
-          .eq('company_id', companyId)
-          .eq('account_class', 7)
-          .eq('is_active', true),
-      ]);
-
-      const invoices = invoicesResult.data;
-      const invoicesError = invoicesResult.error;
-      const accounts = accountsResult.data;
-      const accountsError = accountsResult.error;
-
-      let totalFromInvoices = 0;
-      if (!invoicesError && invoices && invoices.length > 0) {
-        totalFromInvoices = invoices.reduce((sum: number, inv: any) => sum + Number(inv.total_incl_tax || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculateRevenue] From invoices: ${formatCurrency(totalFromInvoices)} (${invoices.length} factures)`);
-      }
-
-      // Try to identify sales accounts using account mapping rules per company
-      let totalFromAccounts = 0;
-      try {
-        const standard = await AccountMappingService.detectAccountingStandard(companyId) as AccountingStandard;
-        const mapping = ACCOUNT_MAPPING[standard];
-        const salesPattern = mapping?.[UniversalAccountType.SALES];
-        if (standard === AccountingStandard.PCG || standard === AccountingStandard.SYSCOHADA) {
-          const prefix = (salesPattern || '70').replace(/%/g, '');
-          const { data: salesAccounts, error: salesErr } = await supabase
-            .from('chart_of_accounts')
-            .select('current_balance')
-            .eq('company_id', companyId)
-            .ilike('account_number', `${prefix}%`)
-            .eq('is_active', true);
-          if (!salesErr && salesAccounts && salesAccounts.length > 0) {
-            totalFromAccounts = salesAccounts.reduce((sum: number, a: any) => sum + Math.abs(a.current_balance || 0), 0);
-            logger.debug('RealDashboardKpi', `[calculateRevenue] From accounts (by prefix ${prefix}): ${formatCurrency(totalFromAccounts)}`);
-          }
-        } else {
-          // IFRS/US_GAAP: fallback to account_class = 7
-          if (!accountsError && accounts && accounts.length > 0) {
-            totalFromAccounts = accounts.reduce((sum: number, account: any) => sum + Math.abs(account.current_balance || 0), 0);
-            logger.debug('RealDashboardKpi', `[calculateRevenue] From accounts (class 7 fallback): ${formatCurrency(totalFromAccounts)}`);
-          }
+      // Utiliser la source unique et centralisée
+      const { revenue, audit } = await acceptedAccountingService.calculateRevenueWithAudit(
+        companyId,
+        startDate,
+        endDate,
+        undefined, // No client filter for aggregated dashboard
+        {
+          vatTreatment: 'ttc', // Dashboard shows total billing
+          includeBreakdown: false,
+          includeReconciliation: false
         }
-      } catch (err) {
-        // If mapping fails, fallback to previous behavior
-        if (!accountsError && accounts && accounts.length > 0) {
-          totalFromAccounts = accounts.reduce((sum: number, account: any) => sum + Math.abs(account.current_balance || 0), 0);
-          logger.debug('RealDashboardKpi', `[calculateRevenue] From accounts (fallback): ${formatCurrency(totalFromAccounts)}`);
-        }
-      }
+      );
 
-      const totalRevenue = totalFromInvoices + totalFromAccounts;
-      return totalRevenue;
+      // Enregistrer l'audit asynchronement (ne pas bloquer le calcul)
+      void supabase
+        .from('accounting_calculations_audit')
+        .insert({
+          company_id: companyId,
+          calculation_type: 'revenue',
+          purpose: 'dashboard',
+          period_start: startDate,
+          period_end: endDate,
+          accounting_standard: audit.standard,
+          vat_treatment: 'ttc',
+          calculation_method: audit.calculation_method,
+          journal_entries_included: audit.journal_entries_included,
+          journal_lines_count: audit.journal_lines_count,
+          final_amount: revenue,
+          confidence_score: audit.confidence_score,
+          warnings: audit.warnings,
+          is_balanced: audit.is_balanced,
+          all_entries_posted: audit.integrity_checks.journal_entries_posted,
+          calculated_at: new Date().toISOString()
+        })
+        .then(({ error: insertError }) => {
+          if (insertError) {
+            logger.warn('RealDashboardKpi', 'Failed to record audit trail:', insertError);
+          }
+        });
+
+      logger.debug('RealDashboardKpi', `[calculateRevenue] From ${audit.calculation_method}: ${formatCurrency(revenue)} (confidence: ${audit.confidence_score})`);
+      return revenue;
     } catch (error) {
       logger.error('RealDashboardKpi', 'Exception calculating revenue:', error);
+      // Fallback: return 0 (service.calculateRevenueWithAudit already has fallbacks)
       return 0;
     }
   }
   /**
    * Calcule le total des achats/charges sur une période
-   * SOURCE PRIMAIRE: Factures d'achat ou table purchases
+   * SOURCE UNIQUE: Comptabilité (journal_entry_lines sur comptes 6x)
    */
   private async calculatePurchases(
     companyId: string,
@@ -186,85 +179,41 @@ export class RealDashboardKpiService {
     endDate: string
   ): Promise<number> {
     try {
-      // Lire les sources de charges en parallèle:
-      // - table `purchases` (si utilisée)
-      // - factures d'achat `invoices` (invoice_type = 'purchase')
-      // - comptes comptables classe 6 (chart_of_accounts)
-      const [purchasesResult, invoicesResult, accountsResult] = await Promise.all([
-        supabase
-          .from('purchases')
-          .select('total_amount')
-          .eq('company_id', companyId)
-          .gte('purchase_date', startDate)
-          .lte('purchase_date', endDate),
-        supabase
-          .from('invoices')
-          .select('total_incl_tax')
-          .eq('company_id', companyId)
-          .eq('invoice_type', 'purchase')
-          .in('status', ['sent', 'paid', 'partially_paid'])
-          .gte('invoice_date', startDate)
-          .lte('invoice_date', endDate),
-        supabase
-          .from('chart_of_accounts')
-          .select('current_balance')
-          .eq('company_id', companyId)
-          .eq('account_class', 6)
-          .eq('is_active', true),
-      ]);
-
-      const purchases = purchasesResult.data;
-      const purchasesErr = purchasesResult.error;
-      const invoices = invoicesResult.data;
-      const invoicesErr = invoicesResult.error;
-      const accounts = accountsResult.data;
-      const accountsErr = accountsResult.error;
-
-      let totalFromPurchases = 0;
-      if (!purchasesErr && purchases && purchases.length > 0) {
-        totalFromPurchases = purchases.reduce((sum: number, p: any) => sum + Number(p.total_amount || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculatePurchases] From purchases table: ${formatCurrency(totalFromPurchases)}`);
-      }
-
-      let totalFromInvoicePurchases = 0;
-      if (!invoicesErr && invoices && invoices.length > 0) {
-        totalFromInvoicePurchases = invoices.reduce((sum: number, inv: any) => sum + Number(inv.total_incl_tax || 0), 0);
-        logger.debug('RealDashboardKpi', `[calculatePurchases] From invoices: ${formatCurrency(totalFromInvoicePurchases)}`);
-      }
-
-      // Identify purchase accounts using account mapping rules
-      let totalFromAccounts = 0;
+      // 1️⃣ Détecter le préfixe des comptes de charges selon le référentiel comptable
+      let accountPrefix = '60'; // default PCG/SYSCOHADA
       try {
         const standard = await AccountMappingService.detectAccountingStandard(companyId) as AccountingStandard;
-        const mapping = ACCOUNT_MAPPING[standard];
-        const purchasesPattern = mapping?.[UniversalAccountType.PURCHASES];
-        if (standard === AccountingStandard.PCG || standard === AccountingStandard.SYSCOHADA) {
-          const prefix = (purchasesPattern || '60').replace(/%/g, '');
-          const { data: purchaseAccounts, error: purchaseAccErr } = await supabase
-            .from('chart_of_accounts')
-            .select('current_balance')
-            .eq('company_id', companyId)
-            .ilike('account_number', `${prefix}%`)
-            .eq('is_active', true);
-          if (!purchaseAccErr && purchaseAccounts && purchaseAccounts.length > 0) {
-            totalFromAccounts = purchaseAccounts.reduce((sum: number, a: any) => sum + Math.abs(a.current_balance || 0), 0);
-            logger.debug('RealDashboardKpi', `[calculatePurchases] From accounts (by prefix ${prefix}): ${formatCurrency(totalFromAccounts)}`);
-          }
-        } else {
-          // IFRS/US_GAAP: fallback to account_class = 6
-          if (!accountsErr && accounts && accounts.length > 0) {
-            totalFromAccounts = accounts.reduce((sum: number, account: any) => sum + Math.abs(account.current_balance || 0), 0);
-            logger.debug('RealDashboardKpi', `[calculatePurchases] From accounts (class 6 fallback): ${formatCurrency(totalFromAccounts)}`);
-          }
-        }
+        const mapping = ACCOUNT_MAPPING[standard as keyof typeof ACCOUNT_MAPPING];
+        const purchasesPattern = mapping?.[UniversalAccountType.PURCHASES] || '60%';
+        accountPrefix = (purchasesPattern || '60').replace(/%/g, '');
       } catch (err) {
-        if (!accountsErr && accounts && accounts.length > 0) {
-          totalFromAccounts = accounts.reduce((sum: number, account: any) => sum + Math.abs(account.current_balance || 0), 0);
-          logger.debug('RealDashboardKpi', `[calculatePurchases] From accounts (fallback): ${formatCurrency(totalFromAccounts)}`);
-        }
+        logger.warn('RealDashboardKpi', 'Unable to detect accounting standard for purchases, using default prefix 60');
       }
 
-      return totalFromPurchases + totalFromInvoicePurchases + totalFromAccounts;
+      // 2️⃣ SOURCE UNIQUE: écritures comptables (journal_entry_lines)
+      // ✅ Filtre de statut harmonisé : posted/validated uniquement
+      const { data: journalLines, error: journalErr } = await supabase
+        .from('journal_entry_lines')
+        .select('debit_amount, credit_amount, account_number, journal_entry_id, journal_entries!inner(entry_date, company_id, status)')
+        .eq('journal_entries.company_id', companyId)
+        .in('journal_entries.status', ['posted', 'validated'])
+        .ilike('account_number', `${accountPrefix}%`)
+        .gte('journal_entries.entry_date', startDate)
+        .lte('journal_entries.entry_date', endDate);
+
+      if (!journalErr && journalLines && journalLines.length > 0) {
+        // Les charges sont au DÉBIT des comptes 6x (débit - crédit)
+        const totalFromJournal = journalLines.reduce((sum: number, line: any) => {
+          const debit = Number(line.debit_amount || 0);
+          const credit = Number(line.credit_amount || 0);
+          return sum + (debit - credit);
+        }, 0);
+        logger.debug('RealDashboardKpi', `[calculatePurchases] From journal_entry_lines (${accountPrefix}xxx): ${formatCurrency(totalFromJournal)} (${journalLines.length} lignes)`);
+        return totalFromJournal;
+      }
+
+      logger.warn('RealDashboardKpi', '[calculatePurchases] Aucune écriture de charges trouvée (comptabilité)');
+      return 0;
     } catch (error) {
       logger.error('RealDashboardKpi', 'Exception calculating purchases:', error);
       return 0;
@@ -358,6 +307,9 @@ export class RealDashboardKpiService {
   }
   /**
    * Calcule le CA mensuel pour le graphique
+   *
+   * ✅ MIGRATED TO: acceptedAccountingService avec breakdown mensuel
+   * Utilise la même source unique que calculateRevenue()
    */
   private async calculateMonthlyRevenue(
     companyId: string,
@@ -366,76 +318,68 @@ export class RealDashboardKpiService {
     try {
       const startDate = `${year}-01-01`;
       const endDate = `${year}-12-31`;
-      // We must aggregate monthly revenue from the SAME source used for YTD:
-      // - invoices (invoice_type = 'sale')
-      // - accounting journal lines on accounts matching the SALES mapping (70% for PCG/SYSCOHADA)
-      // This ensures the tile and the chart use the exact same rule.
-
-      // 1) Get invoices aggregated by month
-      const { data: invoices, error: invoicesError } = await supabase
-        .from('invoices')
-        .select('total_incl_tax, invoice_date')
-        .eq('company_id', companyId)
-        .eq('invoice_type', 'sale')
-        .in('status', ['sent', 'paid', 'partially_paid'])
-        .gte('invoice_date', startDate)
-        .lte('invoice_date', endDate);
-
-      if (invoicesError) {
-        logger.error('RealDashboardKpi', 'Error fetching monthly revenue (invoices):', invoicesError);
-      }
-
-      // 2) Determine sales account prefix via AccountMappingService
-      let accountPrefix = '70'; // default
-      try {
-        const standard = await AccountMappingService.detectAccountingStandard(companyId) as AccountingStandard;
-        const mapping = ACCOUNT_MAPPING[standard];
-        const salesPattern = mapping?.[UniversalAccountType.SALES] || '70%';
-        accountPrefix = (salesPattern || '70').replace(/%/g, '');
-      } catch (err) {
-        logger.warn('RealDashboardKpi', 'Unable to detect accounting standard for monthly revenue, using default prefix 70');
-      }
-
-      // 3) Get journal_entry_lines for sales accounts and aggregate by month (use journal_entries.entry_date)
-      const { data: journalLines, error: journalErr } = await supabase
-        .from('journal_entry_lines')
-        .select('credit_amount, debit_amount, account_number, journal_entry_id, journal_entries(entry_date)')
-        .ilike('account_number', `${accountPrefix}%`)
-        .gte('journal_entries.entry_date', startDate)
-        .lte('journal_entries.entry_date', endDate);
-
-      if (journalErr) {
-        logger.error('RealDashboardKpi', 'Error fetching journal entry lines for monthly revenue:', journalErr);
-      }
 
       // Initialize months
       const monthlyData = new Map<number, number>();
       for (let i = 1; i <= 12; i++) monthlyData.set(i, 0);
 
-      // Aggregate invoices by invoice_date
-      (invoices || []).forEach((inv: any) => {
-        if (!inv || !inv.invoice_date) return;
-        const d = new Date(inv.invoice_date);
-        const m = d.getMonth() + 1;
-        monthlyData.set(m, (monthlyData.get(m) || 0) + Number(inv.total_incl_tax || 0));
-      });
+      // Récupérer les données mensualisées via le service unifié
+      const { revenue, breakdown, audit } = await acceptedAccountingService.calculateRevenueWithAudit(
+        companyId,
+        startDate,
+        endDate,
+        undefined,
+        {
+          vatTreatment: 'ttc',
+          includeBreakdown: true,
+          includeReconciliation: false
+        }
+      );
 
-      // Aggregate journal lines by journal_entries.entry_date (credit_amount considered positive revenue)
-      const retainedAccounts: string[] = [];
-      (journalLines || []).forEach((line: any) => {
-        const entryDate = line?.journal_entries?.entry_date;
-        if (!entryDate) return;
-        const d = new Date(entryDate);
-        const m = d.getMonth() + 1;
-        const credit = Number(line.credit_amount || 0);
-        const debit = Number(line.debit_amount || 0);
-        const amount = credit - debit; // revenue is usually credit
-        monthlyData.set(m, (monthlyData.get(m) || 0) + amount);
-        if (line.account_number && !retainedAccounts.includes(line.account_number)) retainedAccounts.push(line.account_number);
-      });
+      // Si le breakdown mensuel est disponible, l'utiliser
+      const monthlyBreakdown = (breakdown as { by_month?: Array<{ month: string; amount: number }> } | undefined)?.by_month;
+      if (monthlyBreakdown && monthlyBreakdown.length > 0) {
+        monthlyBreakdown.forEach((monthData) => {
+          const monthNum = parseInt(monthData.month);
+          if (!isNaN(monthNum) && monthNum >= 1 && monthNum <= 12) {
+            monthlyData.set(monthNum, monthData.amount);
+          }
+        });
 
-      // Temporary debug: list accounts retained for sales mapping
-      logger.debug('RealDashboardKpi', `[calculateMonthlyRevenue] sales accountPrefix=${accountPrefix}, retainedAccounts=${JSON.stringify(retainedAccounts)}`);
+        logger.debug('RealDashboardKpi', `[calculateMonthlyRevenue] From unified service with monthly breakdown: ${monthlyBreakdown.length} months`);
+        
+        return Array.from(monthlyData.entries())
+          .sort((a, b) => a[0] - b[0])
+          .map(([month, amount]) => ({ month: String(month), amount }));
+      }
+
+      // Fallback: Si breakdown pas disponible, faire requête directe
+      // (mais cela devrait rarement arriver avec acceptedAccountingService)
+      logger.warn('RealDashboardKpi', '[calculateMonthlyRevenue] Breakdown not available from service, using fallback');
+
+      // Récupérer les données du journal directement
+      // ✅ Toute la classe 7 (revenus), pas seulement 70x
+      const { data: journalLines, error: journalErr } = await supabase
+        .from('journal_entry_lines')
+        .select('credit_amount, debit_amount, journal_entries!inner(entry_date, company_id, status)')
+        .eq('journal_entries.company_id', companyId)
+        .ilike('account_number', '7%')
+        .in('journal_entries.status', ['posted', 'validated'])
+        .gte('journal_entries.entry_date', startDate)
+        .lte('journal_entries.entry_date', endDate);
+
+      if (!journalErr && journalLines && journalLines.length > 0) {
+        journalLines.forEach((line: any) => {
+          const entryDate = (line as any)?.journal_entries?.entry_date;
+          if (!entryDate) return;
+          const d = new Date(entryDate);
+          const m = d.getMonth() + 1;
+          const credit = Number(line.credit_amount || 0);
+          const debit = Number(line.debit_amount || 0);
+          const amount = credit - debit;
+          monthlyData.set(m, (monthlyData.get(m) || 0) + amount);
+        });
+      }
 
       return Array.from(monthlyData.entries())
         .sort((a, b) => a[0] - b[0])
@@ -450,7 +394,12 @@ export class RealDashboardKpiService {
   }
   /**
    * Récupère les top clients par CA
-   * ✅ Utilise la table customers via la FK customer_id au lieu de la VIEW third_parties
+   * 
+   * SOURCE PRIORITAIRE: Écritures comptables (comptes 411xxx avec auxiliary_account)
+   * FALLBACK: Factures de vente (invoices)
+   * 
+   * ⚠️ IMPORTANT pour les reprises comptables : les comptes auxiliaires 411xxx 
+   * permettent d'identifier les clients même sans factures dans l'application.
    */
   private async getTopClients(
     companyId: string,
@@ -458,9 +407,127 @@ export class RealDashboardKpiService {
     endDate: string
   ): Promise<{ name: string; amount: number }[]> {
     try {
-      // ✅ Utiliser la table third_parties (client side) pas customers
-      // ✅ Spécifier explicitement la relation customer_id pour éviter l'ambiguité
-      const { data, error } = await supabase
+      // 1️⃣ PRIORITÉ: Utiliser les comptes auxiliaires clients (411xxx)
+      // Agréger les mouvements DÉBIT sur période (CA client = débit 411)
+      const { data: clientLines, error: journalErr } = await supabase
+        .from('journal_entry_lines')
+        .select(`
+          debit_amount,
+          credit_amount,
+          account_number,
+          account_name,
+          auxiliary_account,
+          description,
+          journal_entry_id,
+          journal_entries!inner(entry_date, company_id)
+        `)
+        .eq('journal_entries.company_id', companyId)
+        .ilike('account_number', '411%')
+        .gte('journal_entries.entry_date', startDate)
+        .lte('journal_entries.entry_date', endDate);
+
+      if (!journalErr && clientLines && clientLines.length > 0) {
+        // Agréger par compte (account_number ou auxiliary_account)
+        const amountByAccount = new Map<string, number>();
+        const accountNumbers = new Set<string>();
+        const auxAccounts = new Set<string>();
+        
+        for (const line of clientLines) {
+          const accountKey = line.auxiliary_account || line.account_number;
+          const debit = Number(line.debit_amount || 0);
+          const credit = Number(line.credit_amount || 0);
+          const amount = debit - credit; // CA client = débit net
+
+          if (amount > 0) { // Ne garder que les débits nets positifs
+            amountByAccount.set(accountKey, (amountByAccount.get(accountKey) || 0) + amount);
+            accountNumbers.add(line.account_number);
+            if (line.auxiliary_account) auxAccounts.add(line.auxiliary_account);
+          }
+        }
+
+        if (amountByAccount.size > 0) {
+          // 🔍 Récupérer les noms en une seule requête groupée
+          const accountNumbersArray = Array.from(accountNumbers);
+          const auxAccountsArray = Array.from(auxAccounts);
+
+          // Récupérer les noms depuis third_parties (via auxiliary_account)
+          const thirdParties = auxAccountsArray.length > 0
+            ? (await supabase
+              .from('third_parties')
+              .select('auxiliary_account, name')
+              .eq('company_id', companyId)
+              .in('auxiliary_account', auxAccountsArray)).data
+            : [];
+
+          // Récupérer les noms depuis chart_of_accounts (fallback)
+          const accounts = accountNumbersArray.length > 0
+            ? (await supabase
+              .from('chart_of_accounts')
+              .select('account_number, account_name')
+              .eq('company_id', companyId)
+              .in('account_number', accountNumbersArray)).data
+            : [];
+
+          // Créer des maps pour lookup rapide
+          const thirdPartyMap = new Map<string, string>();
+          thirdParties?.forEach(tp => {
+            if (tp.auxiliary_account) thirdPartyMap.set(tp.auxiliary_account, tp.name);
+          });
+
+          const accountMap = new Map<string, string>();
+          accounts?.forEach(acc => {
+            accountMap.set(acc.account_number, acc.account_name);
+          });
+
+          // Construire le résultat final avec les noms
+          const clientList = Array.from(amountByAccount.entries()).map(([accountKey, amount]) => {
+            // Priorité 1: Nom du tiers (via auxiliary_account)
+            let clientName = thirdPartyMap.get(accountKey);
+            
+            // Priorité 2: Nom du compte (chart_of_accounts)
+            if (!clientName) {
+              clientName = accountMap.get(accountKey);
+            }
+            
+            // Priorité 3: Nom de compte sur la ligne (si disponible)
+            if (!clientName) {
+              const lineWithAccountName = clientLines.find(
+                l => (l.auxiliary_account || l.account_number) === accountKey && l.account_name
+              );
+              if (lineWithAccountName?.account_name) {
+                clientName = lineWithAccountName.account_name;
+              }
+            }
+
+            // Priorité 4: Description de ligne (si disponible)
+            if (!clientName) {
+              const lineWithDescription = clientLines.find(
+                l => (l.auxiliary_account || l.account_number) === accountKey && l.description
+              );
+              if (lineWithDescription?.description) {
+                clientName = lineWithDescription.description;
+              }
+            }
+            
+            // Fallback: Numéro de compte (en dernier recours)
+            if (!clientName) {
+              clientName = accountKey;
+            }
+
+            return { name: clientName, amount };
+          });
+
+          const topClients = clientList
+            .sort((a, b) => b.amount - a.amount)
+            .slice(0, 5);
+          
+          logger.debug('RealDashboardKpi', `[getTopClients] From journal_entry_lines (411xxx): ${topClients.length} clients`);
+          return topClients;
+        }
+      }
+
+      // 2️⃣ FALLBACK: Utiliser les factures (si comptabilité non alimentée)
+      const { data: invoices, error: invoicesError } = await supabase
         .from('invoices')
         .select(`
           total_incl_tax,
@@ -468,27 +535,31 @@ export class RealDashboardKpiService {
           third_parties!invoices_customer_id_fkey(id, name)
         `)
         .eq('company_id', companyId)
-        .eq('invoice_type', 'sale') // ✅ Seulement les factures de vente
-        .in('status', ['sent', 'paid', 'partially_paid']) // ✅ Inclure aussi 'sent'
-        .neq('status', 'cancelled') // ✅ Exclure les factures annulées
+        .eq('invoice_type', 'sale')
+        .in('status', ['sent', 'paid', 'partially_paid'])
+        .neq('status', 'cancelled')
         .gte('invoice_date', startDate)
         .lte('invoice_date', endDate);
-      if (error) {
-        logger.error('RealDashboardKpi', 'Error fetching top clients:', error);
-        return [];
+
+      if (!invoicesError && invoices && invoices.length > 0) {
+        // Agréger par client
+        const clientMap = new Map<string, number>();
+        invoices.forEach((invoice: any) => {
+          const clientName = invoice.third_parties?.name || 'Client inconnu';
+          const amount = invoice.total_incl_tax || 0;
+          clientMap.set(clientName, (clientMap.get(clientName) || 0) + amount);
+        });
+
+        const topClients = Array.from(clientMap.entries())
+          .map(([name, amount]) => ({ name, amount }))
+          .sort((a, b) => b.amount - a.amount)
+          .slice(0, 5);
+        logger.debug('RealDashboardKpi', `[getTopClients] From invoices (fallback): ${topClients.length} clients`);
+        return topClients;
       }
-      // Agréger par client
-      const clientMap = new Map<string, number>();
-      data?.forEach((invoice: any) => {
-        const clientName = invoice.customers?.name || 'Client inconnu';
-        const amount = invoice.total_incl_tax || 0;
-        clientMap.set(clientName, (clientMap.get(clientName) || 0) + amount);
-      });
-      // Convertir en tableau et trier
-      return Array.from(clientMap.entries())
-        .map(([name, amount]) => ({ name, amount }))
-        .sort((a, b) => b.amount - a.amount)
-        .slice(0, 5); // Top 5 clients
+
+      logger.warn('RealDashboardKpi', '[getTopClients] Aucune source trouvée (ni écritures 411xxx, ni factures)');
+      return [];
     } catch (error) {
       logger.error('RealDashboardKpi', 'Exception fetching top clients:', error);
       return [];

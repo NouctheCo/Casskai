@@ -197,7 +197,7 @@ export class AccountMappingService {
       // Détecter le référentiel
       const standard = await this.detectAccountingStandard(companyId);
       // Récupérer le pattern de recherche
-      const mapping = ACCOUNT_MAPPING[standard];
+      const mapping = ACCOUNT_MAPPING[standard as keyof typeof ACCOUNT_MAPPING];
       if (!mapping) {
         logger.error('AccountMapping', 'No mapping found for standard:', standard);
         return null;
@@ -231,7 +231,7 @@ export class AccountMappingService {
         const patterns = pattern.toLowerCase().split('|');
         const account = accounts.find(acc => {
           const name = (acc.account_name || '').toLowerCase();
-          return patterns.some(p => {
+          return patterns.some((p: string) => {
             const cleanPattern = p.replace(/%/g, '');
             return name.includes(cleanPattern);
           });

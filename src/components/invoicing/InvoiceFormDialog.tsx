@@ -28,6 +28,7 @@ import { logger } from '@/lib/logger';
 import { buildVatRateOptions, getDefaultVatRate, resolveCompanyCountryCode } from '@/utils/vatRateUtils';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { Plus, Trash2, FileText, Loader2 } from 'lucide-react';
+import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
 
 interface InvoiceFormData {
   clientId: string;
@@ -89,6 +90,51 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
     [countryCode, companySettings?.accounting?.defaultVatRate]
   );
 
+  // Convert articles to autocomplete options
+  const articleOptions: AutocompleteOption[] = useMemo(() => {
+    const options: AutocompleteOption[] = [
+      {
+        value: '__manual__',
+        label: '✏️ Saisie manuelle',
+        description: 'Entrer manuellement les détails',
+        category: 'Actions'
+      }
+    ];
+
+    if (articles.length > 0) {
+      options.push({
+        value: '__new__',
+        label: '+ Créer un nouvel article',
+        description: 'Ajouter au catalogue',
+        category: 'Actions'
+      });
+
+      articles.forEach(article => {
+        options.push({
+          value: article.id,
+          label: `${article.reference} - ${article.name}`,
+          description: `Prix: ${article.selling_price?.toFixed(2) || '0.00'} ${getCurrentCompanyCurrency()}`,
+          category: article.category || 'Articles',
+          metadata: article
+        });
+      });
+    }
+
+    return options;
+  }, [articles]);
+
+  // Convert VAT rates to autocomplete options
+  const vatRateAutocompleteOptions: AutocompleteOption[] = useMemo(() => {
+    return Array.from(new Set(vatRateOptions))
+      .sort((a, b) => a - b)
+      .map(rate => ({
+        value: rate.toString(),
+        label: `${rate}%`,
+        description: rate === defaultTaxRate ? 'Taux par défaut' : undefined,
+        category: rate === 0 ? 'Exonéré' : rate < 10 ? 'Taux réduit' : 'Taux normal'
+      }));
+  }, [vatRateOptions, defaultTaxRate]);
+
   const [formData, setFormData] = useState<InvoiceFormData>({
     clientId: '',
     invoiceNumber: '',
@@ -133,8 +179,26 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
     } catch (error) {
       logger.warn('InvoiceFormDialog', 'Could not load company settings:', error);
       return {
-        generalInfo: { name: '' },
-        contact: { address: {}, email: '' },
+        generalInfo: {
+          name: '',
+          commercialName: null,
+          legalForm: null,
+          siret: null,
+          vatNumber: null,
+          shareCapital: null
+        },
+        contact: {
+          address: {
+            street: null,
+            postalCode: null,
+            city: null,
+            country: null
+          },
+          correspondenceAddress: null,
+          phone: null,
+          email: null,
+          website: null
+        },
         accounting: {
           fiscalYear: { startMonth: 1, endMonth: 12 },
           taxRegime: 'real_simplified' as const,
@@ -142,18 +206,25 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
           defaultVatRate: 20
         },
         business: {
+          sector: null,
           employeesCount: 1,
+          annualRevenue: null,
           currency: getCurrentCompanyCurrency(),
           language: 'fr',
           timezone: 'Europe/Paris'
         },
         branding: {
+          logoUrl: null,
           primaryColor: '#3B82F6',
           secondaryColor: '#6B7280',
+          emailSignature: null,
+          legalMentions: null,
           defaultTermsConditions: 'Conditions de paiement : 30 jours net.'
         },
         documents: {
           templates: { invoice: 'default' as const, quote: 'default' as const },
+          headers: null,
+          footers: null,
           numbering: {
             invoicePrefix: 'FAC',
             quotePrefix: 'DEV',
@@ -161,7 +232,11 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
             counters: { invoice: 1, quote: 1 }
           }
         },
-        metadata: {}
+        ceo: null,
+        metadata: {
+          settingsCompletedAt: null,
+          onboardingCompletedAt: null
+        }
       };
     }
   };
@@ -329,14 +404,17 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
         line_order: index + 1
       }));
 
-      if (invoice) {
+      if (invoice && invoice.id) {
+        // Update existing invoice
+        const invoiceId = String(invoice.id);
+        await invoicingService.updateInvoice(invoiceId, invoiceData, items);
+
         toast({
-          title: "Fonction non implémentée",
-          description: "La modification de facture sera implémentée prochainement.",
-          variant: "destructive"
+          title: "Succès",
+          description: "Facture mise à jour avec succès"
         });
-        return;
       } else {
+        // Create new invoice
         const createdInvoice = await invoicingService.createInvoice(invoiceData, items);
 
         if (createdInvoice && currentCompany?.id) {
@@ -354,7 +432,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
               total_tax_amount: computedTotals.totalTVA,
               total_incl_tax: computedTotals.totalTTC,
               lines: formData.items.map(item => ({
-                account_id: undefined,
+                account_id: undefined as string | undefined,
                 description: item.description,
                 subtotal_excl_tax: item.quantity * item.unitPrice,
                 tax_amount: (item.quantity * item.unitPrice) * (item.taxRate / 100),
@@ -364,11 +442,6 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
             logger.warn('InvoiceFormDialog', 'Auto-accounting generation failed:', error);
           }
         }
-
-        toast({
-          title: "Succès",
-          description: "Facture créée avec succès"
-        });
       }
 
       onSuccess?.();
@@ -486,9 +559,9 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                     <div key={index} className="grid grid-cols-12 gap-4 items-center p-4 border rounded-lg">
                       <div className="col-span-4">
                         <div className="space-y-2">
-                          <Select
+                          <SmartAutocomplete
                             value={item.description && articles.some(a => a.id === item.description) ? item.description : '__manual__'}
-                            onValueChange={(value) => {
+                            onChange={(value) => {
                               if (value === '__new__') {
                                 handleOpenArticleModal();
                               } else if (value === '__manual__') {
@@ -497,26 +570,14 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                                 handleSelectArticle(index, value);
                               }
                             }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionner un article" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="__manual__">Saisie manuelle</SelectItem>
-                              {articles.length > 0 && <SelectItem value="__new__">+ Créer un nouvel article</SelectItem>}
-                              {articles.length > 0 && <div className="border-t my-1"></div>}
-                              {articles.map((article) => (
-                                <SelectItem key={article.id} value={article.id}>
-                                  {article.reference} - {article.name} (<CurrencyAmount amount={article.selling_price} />)
-                                </SelectItem>
-                              ))}
-                              {articles.length === 0 && (
-                                <div className="px-2 py-4 text-sm text-muted-foreground text-center">
-                                  Aucun article en stock.
-                                </div>
-                              )}
-                            </SelectContent>
-                          </Select>
+                            options={articleOptions}
+                            placeholder="Sélectionner un article"
+                            searchPlaceholder="Rechercher un article..."
+                            emptyMessage={articles.length === 0 ? 'Aucun article en stock' : 'Aucun résultat'}
+                            groups={true}
+                            showRecent={true}
+                            maxRecent={5}
+                          />
                           <Input
                             placeholder="Description du produit/service"
                             value={item.description}
@@ -544,23 +605,15 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                         />
                       </div>
                       <div className="col-span-2">
-                        <Select
+                        <SmartAutocomplete
                           value={item.taxRate.toString()}
-                          onValueChange={(value) => updateItem(index, 'taxRate', parseFloat(value))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from(new Set([...vatRateOptions, item.taxRate]))
-                              .sort((a, b) => a - b)
-                              .map((rate) => (
-                                <SelectItem key={rate} value={rate.toString()}>
-                                  {rate}%
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
+                          onChange={(value) => updateItem(index, 'taxRate', parseFloat(value))}
+                          options={vatRateAutocompleteOptions}
+                          placeholder="TVA"
+                          searchPlaceholder="Rechercher un taux..."
+                          groups={true}
+                          showRecent={false}
+                        />
                         <Input
                           type="number"
                           placeholder="Taux manuel (%)"

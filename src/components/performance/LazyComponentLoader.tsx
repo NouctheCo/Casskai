@@ -199,7 +199,7 @@ export function LazyComponentLoader<T = Record<string, unknown>>({
               ease: [0.25, 0.46, 0.45, 0.94]
             }}
           >
-            <LazyComponent {...(componentProps as T)} />
+            <LazyComponent {...(componentProps as T & JSX.IntrinsicAttributes)} />
           </motion.div>
         </AnimatePresence>
       </Suspense>

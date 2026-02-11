@@ -16,7 +16,7 @@ import {
   TrendingUp,
   Sparkles
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface WorkflowTemplatesProps {
   onCreateCustomTemplate?: () => void;

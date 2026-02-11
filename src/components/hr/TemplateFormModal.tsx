@@ -143,7 +143,7 @@ export function TemplateFormModal({
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value as DocumentCategory })}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
                   required
                 >
                   <option value="contract">Contrat</option>
@@ -177,7 +177,7 @@ export function TemplateFormModal({
               <textarea
                 value={formData.description || ''}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg"
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
                 rows={3}
                 placeholder="Description du template..."
               />
@@ -190,7 +190,7 @@ export function TemplateFormModal({
               <textarea
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg font-mono text-sm"
+                className="w-full px-3 py-2 border rounded-lg font-mono text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
                 rows={12}
                 required
                 placeholder="<div>Contenu du document avec {{variables}}...</div>"

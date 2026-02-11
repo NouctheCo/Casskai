@@ -46,7 +46,7 @@ export const ThirdPartyDetailView = ({ open, onOpenChange, thirdParty, formatCur
           <p><strong>{t('thirdParties.address')}:</strong> {`${thirdParty.address || ''}, ${thirdParty.city || ''} ${thirdParty.postal_code || ''}, ${thirdParty.country || ''}`.replace(/ ,|, $|^, /g, '').trim() || 'N/A'}</p>
           <p><strong>{t('thirdParties.taxNumber')}:</strong> {thirdParty.tax_number || 'N/A'}</p>
           <p><strong>{t('thirdParties.status')}:</strong> {thirdParty.is_active ? t('active') : t('inactive')}</p>
-          <p><strong>{t('thirdParties.balance')}:</strong> {formatCurrency(thirdParty.balance || 0, thirdParty.default_currency)}</p>
+          <p><strong>{t('thirdParties.balance')}:</strong> {formatCurrency(thirdParty.balance || 0, thirdParty.default_currency ?? 'EUR')}</p>
           <p><strong>{t('thirdParties.paymentTerms')}:</strong> {thirdParty.default_payment_terms || 'N/A'}</p>
           <p><strong>{t('thirdParties.defaultCurrency')}:</strong> {thirdParty.default_currency || 'N/A'}</p>
           <p><strong>{t('thirdParties.notes')}:</strong> {thirdParty.notes || 'N/A'}</p>

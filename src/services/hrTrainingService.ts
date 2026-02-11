@@ -74,6 +74,9 @@ export class HRTrainingService {
   async createTrainingCatalog(companyId: string, formData: TrainingCatalogFormData) {
     return this.createTraining(companyId, formData);
   }
+  async updateTrainingCatalog(trainingId: string, updates: Partial<TrainingCatalog>) {
+    return this.updateTraining(trainingId, updates);
+  }
   async updateTraining(trainingId: string, updates: Partial<TrainingCatalog>) {
     try {
       const { data, error } = await supabase

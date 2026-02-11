@@ -8,6 +8,10 @@
 import { supabase } from '@/lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { logger } from '@/lib/logger';
+import { getOfflineDB, isIndexedDBAvailable, OFFLINE_TTL } from '@/lib/offline-db';
+import { MemoryCache } from '@/lib/cache';
+
+/** @deprecated Use MemoryCache from @/lib/cache instead. Kept for type compatibility. */
 export interface KpiCacheEntry {
   data: any;
   timestamp: number;
@@ -41,7 +45,7 @@ export interface KpiCacheOptions {
  */
 export class KpiCacheService {
   private static instance: KpiCacheService;
-  private cache = new Map<string, KpiCacheEntry>();
+  private cache: MemoryCache<any>;
   private cacheListeners = new Map<string, Set<KpiCacheListener>>();
   private eventListeners = new Set<KpiEventListener>();
   private subscriptions = new Map<string, RealtimeChannel>();
@@ -53,6 +57,7 @@ export class KpiCacheService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private constructor() {
+    this.cache = new MemoryCache<any>(this.CACHE_TTL);
     this.setupGlobalErrorHandler();
   }
   /**
@@ -149,6 +154,136 @@ export class KpiCacheService {
       .subscribe();
     this.subscriptions.set(`journal_entries:${companyId}`, channel);
   }
+
+  /**
+   * === SOUSCRIRE AUX FACTURES (invoices) ===
+   * Temps réel pour CA, créances clients, DSO
+   */
+  subscribeToInvoices(companyId: string): void {
+    if (this.subscriptions.has(`invoices:${companyId}`)) {
+      return;
+    }
+
+    logger.debug('KpiCache', `[KpiCacheService] Souscription invoices pour ${companyId}`);
+
+    const channel = supabase
+      .channel(`invoices:${companyId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'invoices',
+          filter: `company_id=eq.${companyId}`,
+        },
+        (payload) => {
+          logger.debug('KpiCache', `[KpiCacheService] Facture modifiée:`, payload.eventType);
+
+          // Invalider cache immédiatement (impact CA, créances, DSO)
+          this.invalidateCache(companyId);
+          this.dispatchEvent({
+            type: 'cache_invalidated',
+            companyId,
+            timestamp: Date.now(),
+            message: `Facture ${payload.eventType === 'INSERT' ? 'créée' : payload.eventType === 'UPDATE' ? 'modifiée' : 'supprimée'}`,
+          });
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          logger.debug('KpiCache', `[KpiCacheService] ✅ Souscription invoices activée pour ${companyId}`);
+        }
+      });
+
+    this.subscriptions.set(`invoices:${companyId}`, channel);
+  }
+
+  /**
+   * === SOUSCRIRE AUX PAIEMENTS (payments) ===
+   * Temps réel pour trésorerie, créances, BFR
+   */
+  subscribeToPayments(companyId: string): void {
+    if (this.subscriptions.has(`payments:${companyId}`)) {
+      return;
+    }
+
+    logger.debug('KpiCache', `[KpiCacheService] Souscription payments pour ${companyId}`);
+
+    const channel = supabase
+      .channel(`payments:${companyId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'payments',
+          filter: `company_id=eq.${companyId}`,
+        },
+        (payload) => {
+          logger.debug('KpiCache', `[KpiCacheService] Paiement modifié:`, payload.eventType);
+
+          // Invalider cache (impact trésorerie, BFR)
+          this.invalidateCache(companyId);
+          this.dispatchEvent({
+            type: 'cache_invalidated',
+            companyId,
+            timestamp: Date.now(),
+            message: `Paiement ${payload.eventType === 'INSERT' ? 'enregistré' : payload.eventType === 'UPDATE' ? 'modifié' : 'supprimé'}`,
+          });
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          logger.debug('KpiCache', `[KpiCacheService] ✅ Souscription payments activée pour ${companyId}`);
+        }
+      });
+
+    this.subscriptions.set(`payments:${companyId}`, channel);
+  }
+
+  /**
+   * === SOUSCRIRE AUX TRANSACTIONS BANCAIRES (bank_transactions) ===
+   * Temps réel pour trésorerie, soldes bancaires, rapprochements
+   */
+  subscribeToBankTransactions(companyId: string): void {
+    if (this.subscriptions.has(`bank_transactions:${companyId}`)) {
+      return;
+    }
+
+    logger.debug('KpiCache', `[KpiCacheService] Souscription bank_transactions pour ${companyId}`);
+
+    const channel = supabase
+      .channel(`bank_transactions:${companyId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bank_transactions',
+          filter: `company_id=eq.${companyId}`,
+        },
+        (payload) => {
+          logger.debug('KpiCache', `[KpiCacheService] Transaction bancaire modifiée:`, payload.eventType);
+
+          // Invalider cache (impact trésorerie, soldes bancaires)
+          this.invalidateCache(companyId);
+          this.dispatchEvent({
+            type: 'cache_invalidated',
+            companyId,
+            timestamp: Date.now(),
+            message: `Transaction bancaire ${payload.eventType === 'INSERT' ? 'ajoutée' : payload.eventType === 'UPDATE' ? 'modifiée' : 'supprimée'}`,
+          });
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          logger.debug('KpiCache', `[KpiCacheService] ✅ Souscription bank_transactions activée pour ${companyId}`);
+        }
+      });
+
+    this.subscriptions.set(`bank_transactions:${companyId}`, channel);
+  }
+
   /**
    * === GESTION DU CACHE ===
    */
@@ -156,53 +291,81 @@ export class KpiCacheService {
    * Invalider le cache pour une entreprise
    */
   invalidateCache(companyId: string): void {
-    const entry = this.cache.get(companyId);
-    if (entry) {
-      entry.isValid = false;
-      entry.timestamp = Date.now() - this.CACHE_TTL; // Force expiration
-    }
+    this.cache.delete(companyId);
     this.notifyListeners(companyId);
   }
   /**
    * Stocker les données de KPI en cache
    */
   setCache(companyId: string, data: any): void {
-    this.cache.set(companyId, {
-      data,
-      timestamp: Date.now(),
-      isValid: true,
-    });
+    this.cache.set(companyId, data);
     logger.debug('KpiCache', `[KpiCacheService] Cache sauvegardé pour ${companyId}`);
+
+    // Persister dans IndexedDB pour survie au refresh
+    this.persistKpiToDexie(companyId, data);
+  }
+
+  private async persistKpiToDexie(companyId: string, data: any): Promise<void> {
+    if (!isIndexedDBAvailable()) return;
+    try {
+      const db = getOfflineDB();
+      await db.kpi_cache.put({
+        company_id: companyId,
+        data,
+        updated_at: Date.now(),
+      });
+    } catch (error) {
+      logger.warn('KpiCache', '[KpiCacheService] Dexie persist error:', error);
+    }
   }
   /**
    * Récupérer les données du cache
    */
   getCache(companyId: string): any | null {
-    const entry = this.cache.get(companyId);
-    if (!entry) {
+    return this.cache.get(companyId) ?? null;
+  }
+
+  /**
+   * Recuperer depuis Dexie si le cache in-memory est vide (apres refresh page)
+   */
+  async getCacheWithDexieFallback(companyId: string): Promise<{ data: any; fromDexie: boolean } | null> {
+    // D'abord le cache in-memory
+    const memoryData = this.getCache(companyId);
+    if (memoryData) {
+      return { data: memoryData, fromDexie: false };
+    }
+
+    // Fallback Dexie
+    if (!isIndexedDBAvailable()) return null;
+
+    try {
+      const db = getOfflineDB();
+      const cached = await db.kpi_cache.get(companyId);
+      if (!cached) return null;
+
+      // Verifier TTL
+      const isExpired = Date.now() - cached.updated_at > OFFLINE_TTL.KPI;
+      if (isExpired && navigator.onLine) {
+        // Expire et online : ne pas utiliser (refresh imminent)
+        return null;
+      }
+
+      // Restaurer dans le cache in-memory with remaining TTL
+      const age = Date.now() - cached.updated_at;
+      const remainingTTL = Math.max(this.CACHE_TTL - age, 60_000); // at least 1 min
+      this.cache.set(companyId, cached.data, remainingTTL);
+
+      return { data: cached.data, fromDexie: true };
+    } catch (error) {
+      logger.warn('KpiCache', '[KpiCacheService] Dexie fallback error:', error);
       return null;
     }
-    // Vérifier l'expiration
-    const isExpired = Date.now() - entry.timestamp > this.CACHE_TTL;
-    if (isExpired) {
-      this.cache.delete(companyId);
-      return null;
-    }
-    if (!entry.isValid) {
-      return null; // Cache marqué comme invalide
-    }
-    return entry.data;
   }
   /**
    * Vérifier si le cache est valide et fraîche
    */
   isCacheValid(companyId: string): boolean {
-    const entry = this.cache.get(companyId);
-    if (!entry || !entry.isValid) {
-      return false;
-    }
-    const isExpired = Date.now() - entry.timestamp > this.CACHE_TTL;
-    return !isExpired;
+    return this.cache.has(companyId);
   }
   /**
    * Nettoyer complètement le cache

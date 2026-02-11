@@ -25,7 +25,9 @@ import PurchasesTable from '../components/purchases/PurchasesTable';
 import PurchasesFilters from '../components/purchases/PurchasesFilters';
 import PurchaseForm from '../components/purchases/PurchaseForm';
 import { exportToCsv, generatePdfReport } from '../components/purchases/ExportUtils';
-import { Plus, RefreshCw, FileText, AlertTriangle, Sparkles } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BulkJournalImportTab } from '@/components/accounting/BulkJournalImportTab';
+import { Plus, RefreshCw, FileText, AlertTriangle, Sparkles, Upload, ShoppingCart } from 'lucide-react';
 import { useAutoAccounting } from '@/hooks/useAutoAccounting';
 import { logger } from '@/lib/logger';
 export default function PurchasesPage() {
@@ -49,6 +51,7 @@ export default function PurchasesPage() {
   // Form and dialog states
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
+  const [activeTab, setActiveTab] = useState('purchases');
   // Filters
   const [filters, setFilters] = useState<PurchaseFilters>({
     payment_status: 'all'
@@ -268,14 +271,14 @@ export default function PurchasesPage() {
     );
   }
   return (
-    <motion.div 
+    <motion.div
       className="space-y-8 p-6"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Enhanced Header with filters */}
-      <motion.div 
+      {/* Header */}
+      <motion.div
         className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0"
         variants={itemVariants}
       >
@@ -323,53 +326,95 @@ export default function PurchasesPage() {
           </Button>
         </div>
       </motion.div>
-      {/* Statistics */}
-      <motion.div variants={itemVariants}>
-        <PurchaseStatsComponent stats={stats} loading={loading} />
-      </motion.div>
-      {/* Filters */}
-      <motion.div variants={itemVariants}>
-        <PurchasesFilters
-          filters={filters}
-          suppliers={suppliers}
-          onFiltersChange={handleFiltersChange}
-          onExport={handleExportCsv}
-          onClearFilters={handleClearFilters}
-          exportLoading={exportLoading}
-        />
-      </motion.div>
-      {/* Purchases Table */}
-      <motion.div variants={itemVariants}>
-        <PurchasesTable
-          purchases={purchases}
-          loading={loading}
-          onEdit={handleEditPurchase}
-          onDelete={handleDeletePurchase}
-          onMarkAsPaid={handleMarkAsPaid}
-        />
-      </motion.div>
-      {/* Quick Actions */}
-      {purchases.length === 0 && !loading && (
-        <motion.div variants={itemVariants}>
-          <Card className="shadow-lg">
-            <CardContent className="p-8 text-center">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-2">
-                {t('purchases.noPurchases')}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-6">
-                {t('purchases.noPurchasesDescription')}
-              </p>
-              <Button
-                onClick={handleCreatePurchase}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 mx-auto"
-              >
-                <Plus className="w-4 h-4" />
-                {t('purchases.createPurchase')}
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 w-full">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-2">
+          <TabsList className="w-full flex-nowrap justify-start gap-1 bg-gray-100 dark:bg-gray-700/50 p-1 rounded-xl">
+            <TabsTrigger
+              value="purchases"
+              className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              {t('purchases.tabs.list', 'Achats')}
+            </TabsTrigger>
+            <TabsTrigger
+              value="import"
+              className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              <Upload className="h-4 w-4" />
+              {t('purchases.tabs.import', 'Import en masse')}
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        {/* Purchases Tab */}
+        <TabsContent value="purchases" className="space-y-6">
+          {/* Statistics */}
+          <motion.div variants={itemVariants}>
+            <PurchaseStatsComponent stats={stats} loading={loading} />
+          </motion.div>
+          {/* Filters */}
+          <motion.div variants={itemVariants}>
+            <PurchasesFilters
+              filters={filters}
+              suppliers={suppliers}
+              onFiltersChange={handleFiltersChange}
+              onExport={handleExportCsv}
+              onClearFilters={handleClearFilters}
+              exportLoading={exportLoading}
+            />
+          </motion.div>
+          {/* Purchases Table */}
+          <motion.div variants={itemVariants}>
+            <PurchasesTable
+              purchases={purchases}
+              loading={loading}
+              onEdit={handleEditPurchase}
+              onDelete={handleDeletePurchase}
+              onMarkAsPaid={handleMarkAsPaid}
+            />
+          </motion.div>
+          {/* Quick Actions */}
+          {purchases.length === 0 && !loading && (
+            <motion.div variants={itemVariants}>
+              <Card className="shadow-lg">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    {t('purchases.noPurchases')}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    {t('purchases.noPurchasesDescription')}
+                  </p>
+                  <Button
+                    onClick={handleCreatePurchase}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 mx-auto"
+                  >
+                    <Plus className="w-4 h-4" />
+                    {t('purchases.createPurchase')}
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </TabsContent>
+
+        {/* Import Tab */}
+        <TabsContent value="import">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <BulkJournalImportTab
+              companyId={companyId}
+              defaultJournalCode="ACH"
+              onImportComplete={loadPurchasesData}
+            />
+          </motion.div>
+        </TabsContent>
+      </Tabs>
+
       {/* Purchase Form Dialog */}
       <PurchaseForm
         isOpen={isFormOpen}
@@ -382,7 +427,6 @@ export default function PurchasesPage() {
         suppliers={suppliers}
         loading={formLoading}
       />
-      {/* Render confirmation dialog - component provided by useConfirmDialog */}
     </motion.div>
   );
 }

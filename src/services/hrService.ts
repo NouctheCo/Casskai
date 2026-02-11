@@ -16,7 +16,6 @@ import { logger } from '@/lib/logger';
 // Types pour les ressources humaines
 export interface Employee {
   id: string;
-  employee_number: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -24,16 +23,20 @@ export interface Employee {
   position: string;
   department: string;
   hire_date: string;
+  end_date?: string;
   salary?: number;
   salary_currency?: string;
-  contract_type: 'permanent' | 'temporary' | 'intern' | 'freelance';
-  status: 'active' | 'inactive' | 'on_leave';
+  contract_type: 'cdi' | 'cdd' | 'interim' | 'stage' | 'apprentissage' | 'freelance';
+  status: 'active' | 'inactive' | 'on_leave' | 'terminated';
   manager_id?: string;
   address?: string;
   city?: string;
   postal_code?: string;
-  emergency_contact?: string;
-  emergency_phone?: string;
+  country?: string;
+  social_security_number?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  notes?: string;
   company_id: string;
   created_at: string;
   updated_at: string;
@@ -43,13 +46,12 @@ export interface Leave {
   id: string;
   employee_id: string;
   employee_name?: string;
-  type: 'vacation' | 'sick' | 'personal' | 'maternity' | 'paternity' | 'other';
+  leave_type: 'paid_vacation' | 'sick_leave' | 'unpaid_leave' | 'maternity' | 'paternity' | 'rtt' | 'other';
   start_date: string;
   end_date: string;
   days_count: number;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
   reason?: string;
-  notes?: string;
   approved_by?: string;
   approved_at?: string;
   company_id: string;
@@ -60,7 +62,7 @@ export interface Expense {
   id: string;
   employee_id: string;
   employee_name?: string;
-  category: 'travel' | 'meals' | 'transport' | 'supplies' | 'training' | 'other';
+  category: 'transport' | 'meals' | 'accommodation' | 'supplies' | 'training' | 'client_entertainment' | 'other';
   description: string;
   amount: number;
   currency: string;
@@ -78,13 +80,13 @@ export interface TimeEntry {
   id: string;
   employee_id: string;
   employee_name?: string;
-  date: string;
-  hours: number;
+  work_date: string;
+  hours_worked: number;
+  break_minutes?: number;
   overtime_hours?: number;
-  description?: string;
-  project_id?: string;
-  task_id?: string;
-  status: 'draft' | 'submitted' | 'approved';
+  project?: string;
+  task_description?: string;
+  status: 'draft' | 'submitted' | 'approved' | 'rejected';
   company_id: string;
   created_at: string;
   updated_at: string;
@@ -166,15 +168,16 @@ export class HRService {
       };
     }
   }
-  async createEmployee(companyId: string, employeeData: Omit<Employee, 'id' | 'company_id' | 'created_at' | 'updated_at'>): Promise<HRServiceResponse<Employee>> {
+  async createEmployee(companyId: string, employeeData: Omit<Employee, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'full_name'>): Promise<HRServiceResponse<Employee>> {
     try {
+      // Nettoyer les données avant insertion (supprimer les champs qui n'existent pas en DB)
+      const { full_name: _fn, ...cleanData } = employeeData as any;
+
       const { data, error } = await supabase
         .from('hr_employees')
         .insert({
-          ...employeeData,
-          company_id: companyId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          ...cleanData,
+          company_id: companyId
         })
         .select()
         .single();
@@ -193,7 +196,6 @@ export class HRService {
         record_id: data.id,
         company_id: companyId,
         new_values: {
-          employee_number: data.employee_number,
           first_name: data.first_name,
           last_name: data.last_name,
           email: data.email,
@@ -202,14 +204,14 @@ export class HRService {
           contract_type: data.contract_type,
           status: data.status
         },
-        security_level: 'high', // Personal data = high
+        security_level: 'high',
         compliance_tags: ['RGPD']
       }).catch(err => logger.error('Hr', 'Audit log failed:', err));
       return {
         success: true,
         data: {
           ...data,
-          full_name: `${data.first_name} ${data.last_name}`
+          full_name: data.full_name || `${data.first_name} ${data.last_name}`
         } as Employee
       };
     } catch (error) {
@@ -325,7 +327,6 @@ export class HRService {
           record_id: employeeId,
           company_id: employeeToDelete.company_id,
           old_values: {
-            employee_number: employeeToDelete.employee_number,
             first_name: employeeToDelete.first_name,
             last_name: employeeToDelete.last_name,
             email: employeeToDelete.email,
@@ -373,7 +374,7 @@ export class HRService {
         query = query.eq('status', filters.status);
       }
       if (filters?.type) {
-        query = query.eq('type', filters.type);
+        query = query.eq('leave_type', filters.type);
       }
       if (filters?.year) {
         const startOfYear = `${filters.year}-01-01`;
@@ -409,13 +410,13 @@ export class HRService {
   }
   async createLeave(companyId: string, leaveData: Omit<Leave, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'employee_name'>): Promise<HRServiceResponse<Leave>> {
     try {
+      // Remove computed/non-DB fields before insert
+      const { employee_name: _en, ...cleanLeaveData } = leaveData as any;
       const { data, error } = await supabase
         .from('hr_leaves')
         .insert({
-          ...leaveData,
-          company_id: companyId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          ...cleanLeaveData,
+          company_id: companyId
         })
         .select()
         .single();
@@ -564,6 +565,27 @@ export class HRService {
       };
     }
   }
+  async updateExpense(expenseId: string, updates: Partial<Expense>): Promise<HRServiceResponse<Expense>> {
+    try {
+      const { data, error } = await supabase
+        .from('hr_expenses')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', expenseId)
+        .select()
+        .single();
+      if (error) {
+        logger.error('Hr', 'Error updating expense:', error);
+        return { success: false, data: null, error: error.message };
+      }
+      return { success: true, data: data as Expense };
+    } catch (error) {
+      logger.error('Hr', 'Error in updateExpense:', error);
+      return { success: false, data: null, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
   // TIME TRACKING
   async getTimeEntries(companyId: string, filters?: {
     employeeId?: string;
@@ -573,7 +595,7 @@ export class HRService {
   }): Promise<HRServiceResponse<TimeEntry[]>> {
     try {
       let query = supabase
-        .from('hr_time_entries')
+        .from('hr_time_tracking')
         .select(`
           *,
           employee:hr_employees(first_name, last_name)
@@ -584,18 +606,18 @@ export class HRService {
         query = query.eq('employee_id', filters.employeeId);
       }
       if (filters?.date) {
-        query = query.eq('date', filters.date);
+        query = query.eq('work_date', filters.date);
       }
       if (filters?.week) {
         // Week filter logic can be added here
       }
       if (filters?.month) {
-        query = query.gte('entry_date', `${filters.month}-01`);
+        query = query.gte('work_date', `${filters.month}-01`);
         const date = new Date(`${filters.month}-01`);
         date.setMonth(date.getMonth() + 1, 0);
-        query = query.lte('entry_date', date.toISOString().split('T')[0]);
+        query = query.lte('work_date', date.toISOString().split('T')[0]);
       }
-      const { data, error } = await query.order('entry_date', { ascending: false });
+      const { data, error } = await query.order('work_date', { ascending: false });
       if (error) {
         logger.error('Hr', 'Error fetching time entries:', error);
         return {
@@ -624,13 +646,12 @@ export class HRService {
   }
   async createTimeEntry(companyId: string, timeData: Omit<TimeEntry, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'employee_name'>): Promise<HRServiceResponse<TimeEntry>> {
     try {
+      const { employee_name: _en, ...cleanData } = timeData as any;
       const { data, error } = await supabase
-        .from('hr_time_entries')
+        .from('hr_time_tracking')
         .insert({
-          ...timeData,
-          company_id: companyId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          ...cleanData,
+          company_id: companyId
         })
         .select()
         .single();

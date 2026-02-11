@@ -148,7 +148,8 @@ export const PublicNavigation: React.FC<PublicNavigationProps> = ({ variant = 'l
               <img 
                 src="/logo.png" 
                 alt="CassKai Logo" 
-                className="w-10 h-10"
+                className="w-10 h-10 mix-blend-multiply dark:mix-blend-screen"
+                style={{ background: 'transparent' }}
               />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></div>
             </div>

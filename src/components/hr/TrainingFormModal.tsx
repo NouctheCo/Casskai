@@ -38,7 +38,6 @@ export function TrainingFormModal({
     objectives: '',
     provider: '',
     is_mandatory: false,
-    is_internal: true,
     is_certified: false
   });
 
@@ -59,8 +58,7 @@ export function TrainingFormModal({
         objectives: Array.isArray(training.objectives) ? training.objectives.join(', ') : (training.objectives || ''),
         provider: training.provider || '',
         is_mandatory: training.is_mandatory || false,
-        is_internal: training.is_internal ?? true,
-        is_certified: training.is_certified || false
+        is_certified: training.provides_certification || false
       });
     }
   }, [training]);
@@ -93,8 +91,7 @@ export function TrainingFormModal({
         objectives: formData.objectives.trim() || null,
         provider: formData.provider.trim() || null,
         is_mandatory: formData.is_mandatory,
-        is_internal: formData.is_internal,
-        is_certified: formData.is_certified
+        provides_certification: formData.is_certified
       };
 
       const success = await onSubmit(submitData);
@@ -282,19 +279,6 @@ export function TrainingFormModal({
               />
               <Label htmlFor="is_mandatory" className="cursor-pointer font-normal">
                 Formation obligatoire
-              </Label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="is_internal"
-                checked={formData.is_internal}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, is_internal: checked as boolean })
-                }
-              />
-              <Label htmlFor="is_internal" className="cursor-pointer font-normal">
-                Formation interne (en interne à l'entreprise)
               </Label>
             </div>
 

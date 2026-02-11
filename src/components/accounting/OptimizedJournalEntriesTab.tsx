@@ -15,7 +15,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useLocale } from '@/contexts/LocaleContext';
 import { journalEntriesService } from '@/services/journalEntriesService';
 import { journalEntryAttachmentService } from '@/services/journalEntryAttachmentService';
-import { aiDocumentAnalysisService } from '@/services/aiDocumentAnalysisService';
+import { aiDocumentAnalysisService } from '@/services/ai/documentService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useJournalEntries } from '@/hooks/useJournalEntries';
 import JournalEntryAttachments from '@/components/accounting/JournalEntryAttachments';
@@ -1085,13 +1085,29 @@ const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate: _onValidate, on
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'validated':
-        return <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800">Validée</Badge>;
+      case 'posted':
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/40 dark:text-green-300 dark:border-green-700 flex items-center space-x-1 w-fit">
+            <CheckCircle className="w-3 h-3" />
+            <span>Validée</span>
+          </Badge>
+        );
       case 'draft':
-        return <Badge variant="secondary">Brouillon</Badge>;
+        return (
+          <Badge variant="secondary" className="flex items-center space-x-1 w-fit">
+            <FileText className="w-3 h-3" />
+            <span>Brouillon</span>
+          </Badge>
+        );
       case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800">En attente</Badge>;
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-300 dark:border-yellow-700 flex items-center space-x-1 w-fit">
+            <AlertCircle className="w-3 h-3" />
+            <span>En attente</span>
+          </Badge>
+        );
       default:
-        return <Badge variant="outline">Inconnue</Badge>;
+        return <Badge variant="outline" className="w-fit">Inconnue</Badge>;
     }
   };
   return (
@@ -1406,7 +1422,7 @@ export default function OptimizedJournalEntriesTab() {
         companyId: currentCompany.id,
         entryDate: entry.date,
         description: `${entry.description || ''} (copie)`.trim(),
-        referenceNumber: undefined, // Laissez la génération automatique créer une nouvelle référence
+        referenceNumber: undefined as string | undefined, // Laissez la génération automatique créer une nouvelle référence
         status: 'draft',
         items: (entry.lines || []).map((line: any) => ({
           accountId: line.account,
@@ -1609,37 +1625,74 @@ export default function OptimizedJournalEntriesTab() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12"></TableHead>
-                  <TableHead>Référence</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Débit</TableHead>
-                  <TableHead className="text-right">Crédit</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredEntries.map((entry) => (
-                  <EntryRow
-                    key={entry.id}
-                    entry={entry}
-                    onEdit={handleEditEntry}
-                    onDelete={handleDeleteEntry}
-                    onView={handleViewEntry}
-                    onValidate={handleValidateEntry}
-                    onDuplicate={handleDuplicateEntry}
-                    companyId={currentCompany?.id || ''}
-                    onRefresh={loadEntries}
-                  />
-                ))}
-              </TableBody>
-            </Table>
+        <CardContent className="p-0">
+          {/* Enhanced scrollable table with fixed header */}
+          <div className="rounded-md border overflow-hidden">
+            {/* Fixed Header */}
+            <div className="bg-white dark:bg-slate-950 sticky top-0 z-10 border-b">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-0">
+                    <TableHead className="w-12 bg-slate-50 dark:bg-slate-900"></TableHead>
+                    <TableHead className="bg-slate-50 dark:bg-slate-900">Référence</TableHead>
+                    <TableHead className="bg-slate-50 dark:bg-slate-900">Date</TableHead>
+                    <TableHead className="bg-slate-50 dark:bg-slate-900">Description</TableHead>
+                    <TableHead className="text-right bg-slate-50 dark:bg-slate-900">Débit</TableHead>
+                    <TableHead className="text-right bg-slate-50 dark:bg-slate-900">Crédit</TableHead>
+                    <TableHead className="bg-slate-50 dark:bg-slate-900">Statut</TableHead>
+                    <TableHead className="text-right bg-slate-50 dark:bg-slate-900">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            </div>
+
+            {/* Scrollable Body with Position Indicator */}
+            <div className="relative">
+              {/* Custom Scrollable Container */}
+              <div 
+                className="overflow-y-auto max-h-[60vh]"
+                style={{
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: 'rgb(156, 163, 175) rgb(241, 245, 249)',
+                }}
+              >
+                <Table>
+                  <TableBody>
+                    {filteredEntries.length > 0 ? (
+                      filteredEntries.map((entry) => (
+                        <EntryRow
+                          key={entry.id}
+                          entry={entry}
+                          onEdit={handleEditEntry}
+                          onDelete={handleDeleteEntry}
+                          onView={handleViewEntry}
+                          onValidate={handleValidateEntry}
+                          onDuplicate={handleDuplicateEntry}
+                          companyId={currentCompany?.id || ''}
+                          onRefresh={loadEntries}
+                        />
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                          <div className="flex flex-col items-center space-y-2">
+                            <FileText className="w-8 h-8 opacity-50" />
+                            <p>Aucune écriture comptable</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Scroll Position Indicator - Bottom Right */}
+              {filteredEntries.length > 5 && (
+                <div className="absolute bottom-2 right-2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-60 hover:opacity-100 transition-opacity pointer-events-none">
+                  {filteredEntries.length} entrées
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

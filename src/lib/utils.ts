@@ -129,6 +129,17 @@ export function getCurrentCompanyCurrency(): string {
   return 'EUR';
 }
 
+export function getCurrencySymbol(currency?: string): string {
+  const resolved = currency || getCurrentCompanyCurrency();
+  try {
+    const parts = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: resolved })
+      .formatToParts(0);
+    return parts.find(part => part.type === 'currency')?.value || resolved;
+  } catch (_e) {
+    return resolved;
+  }
+}
+
 export function formatNumberForPDF(value: number, decimals = 2): string {
   return new Intl.NumberFormat('fr-FR', {
     minimumFractionDigits: decimals,

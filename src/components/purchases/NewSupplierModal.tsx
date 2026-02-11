@@ -64,7 +64,7 @@ const NewSupplierModal: React.FC<NewSupplierModalProps> = ({ isOpen, onClose, on
       const response = await crmService.createSupplier(currentCompany.id, {
         company_name: formData.company_name,
         industry: formData.industry,
-        size: formData.size || undefined,
+        size: formData.size || null,
         address: formData.address,
         city: formData.city,
         postal_code: formData.postal_code,

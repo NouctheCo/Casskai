@@ -145,7 +145,7 @@ const ModulesStep: React.FC = () => {
           <ModulesNavigation
             onPrevious={goToPreviousStep}
             onContinue={handleContinue}
-            canGoPrevious={state.currentStep && state.currentStep.order > 1}
+            canGoPrevious={!!(state.currentStep && state.currentStep.order > 1)}
             canContinue={selectedCount > 0}
           />
         </CardContent>

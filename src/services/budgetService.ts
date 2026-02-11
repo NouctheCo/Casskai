@@ -584,7 +584,7 @@ export class BudgetService {
           category: cat.category,
           subcategory: cat.subcategory,
           category_type: cat.category_type,
-          account_codes: [],
+          account_codes: [] as string[],
           monthly_amounts: [
             cat.jan, cat.feb, cat.mar, cat.apr, cat.may, cat.jun,
             cat.jul, cat.aug, cat.sep, cat.oct, cat.nov, cat.dec

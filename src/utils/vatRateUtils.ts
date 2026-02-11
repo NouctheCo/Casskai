@@ -46,13 +46,14 @@ export function resolveCompanyCountryCode({
     return companyCountryCode.trim().toUpperCase();
   }
 
-  const addressCountry = companySettings?.contact?.address?.country?.trim();
-  if (addressCountry) {
-    if (isCountryCode(addressCountry)) {
-      return addressCountry.toUpperCase();
+  const addressCountry = companySettings?.contact?.address?.country;
+  if (typeof addressCountry === 'string' && addressCountry.trim()) {
+    const trimmedCountry = addressCountry.trim();
+    if (isCountryCode(trimmedCountry)) {
+      return trimmedCountry.toUpperCase();
     }
 
-    const normalized = normalizeCountryValue(addressCountry);
+    const normalized = normalizeCountryValue(trimmedCountry);
     const match = COUNTRIES.find((country) => normalizeCountryValue(country.name) === normalized);
     if (match) {
       return match.code;

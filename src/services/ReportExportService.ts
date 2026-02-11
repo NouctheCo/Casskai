@@ -35,6 +35,26 @@ export interface ExportOptions {
     logo?: string;
   };
 }
+/**
+ * P2-3: Métadonnées de drill-down pour rapports interactifs
+ * Permet de naviguer d'une ligne de rapport vers les écritures comptables sources
+ */
+export interface DrilldownMetadata {
+  row_index: number; // Index de la ligne dans le tableau
+  type: 'account' | 'category' | 'transaction' | 'document'; // Type d'entité
+  entity_id?: string; // ID de l'entité (account_id, product_id, etc.)
+  account_number?: string; // Numéro de compte comptable
+  filters?: {
+    start_date?: string;
+    end_date?: string;
+    account_type?: string;
+    journal_type?: string;
+    [key: string]: any;
+  };
+  action: 'show_entries' | 'show_document' | 'show_details'; // Action au clic
+  label?: string; // Label descriptif pour tooltip
+}
+
 export interface TableData {
   headers: string[];
   rows: any[][];
@@ -42,6 +62,7 @@ export interface TableData {
   subtitle?: string;
   summary?: Record<string, any> | any[][];
   footer?: string[];
+  drilldown?: DrilldownMetadata[]; // P2-3: Métadonnées drill-down
 }
 export interface ChartData {
   type: 'bar' | 'line' | 'pie';
@@ -399,7 +420,7 @@ export class ReportExportService {
         Object.entries(summary).map(([key, value]) => [key, this.stripCurrencyFromValue(value)])
       );
     } else if (Array.isArray(summary)) {
-      summary = summary.map(row => row.map(cell => this.stripCurrencyFromValue(cell)));
+      summary = summary.map((row: string[]) => row.map((cell: string) => this.stripCurrencyFromValue(cell)));
     }
     return {
       ...table,

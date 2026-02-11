@@ -48,7 +48,7 @@ export const LoadingFallback: React.FC<LoadingFallbackProps> = ({ message }) => 
 
         >
 
-          <img src="/logo.png" alt="CassKai" className="h-16 w-auto" />
+          <img src="/logo.png" alt="CassKai" className="h-16 w-auto mix-blend-multiply dark:mix-blend-screen" style={{ background: 'transparent' }} />
 
         </motion.div>
 

@@ -105,7 +105,7 @@ import {
 
 // Composant d'animation au scroll
 
-const AnimatedSection = ({ children, className = "" }) => {
+const AnimatedSection = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => {
 
   const controls = useAnimation();
 

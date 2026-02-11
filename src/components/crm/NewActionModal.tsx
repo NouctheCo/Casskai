@@ -3,10 +3,8 @@
  * Intégré avec la table crm_actions de Supabase
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
 import {
   Dialog,
   DialogContent,
@@ -25,119 +23,77 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ClientSelector } from '@/components/invoicing/ClientSelector';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { Calendar, Phone, Mail, Users, CheckSquare } from 'lucide-react';
-import { devLogger } from '@/utils/devLogger';
 import { cn } from '@/lib/utils';
+import type { Client, Contact, Opportunity, CommercialActionFormData } from '@/types/crm.types';
+import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
 
 interface NewActionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
-}
-
-interface ActionFormData {
-  subject: string;
-  type: 'call' | 'email' | 'meeting' | 'task';
-  third_party_id?: string;
-  opportunity_id?: string;
-  due_date?: string;
-  due_time?: string;
-  priority: 'low' | 'medium' | 'high';
-  assigned_to?: string;
-  notes?: string;
-}
-
-interface Opportunity {
-  id: string;
-  title: string;
-  third_party_id: string;
+  clients: Client[];
+  contacts: Contact[];
+  opportunities: Opportunity[];
+  onCreateAction: (data: CommercialActionFormData) => Promise<boolean>;
 }
 
 const ACTION_TYPES = [
   { value: 'call', label: 'crm.action.types.call', icon: Phone, color: 'text-green-600 bg-green-50 border-green-200' },
   { value: 'email', label: 'crm.action.types.email', icon: Mail, color: 'text-purple-600 bg-purple-50 border-purple-200' },
   { value: 'meeting', label: 'crm.action.types.meeting', icon: Users, color: 'text-blue-600 bg-blue-50 border-blue-200' },
-  { value: 'task', label: 'crm.action.types.task', icon: CheckSquare, color: 'text-orange-600 bg-orange-50 border-orange-200' },
+  { value: 'other', label: 'crm.action.types.other', icon: CheckSquare, color: 'text-orange-600 bg-orange-50 border-orange-200' },
 ] as const;
 
 export const NewActionModal: React.FC<NewActionModalProps> = ({
   open,
   onOpenChange,
   onSuccess,
+  clients,
+  contacts,
+  opportunities,
+  onCreateAction,
 }) => {
   const { t } = useTranslation();
-  const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [loadingOpportunities, setLoadingOpportunities] = useState(false);
 
-  const [formData, setFormData] = useState<ActionFormData>({
-    subject: '',
+  // Debug: log props
+  React.useEffect(() => {
+    if (open) {
+      console.log('[NewActionModal] Props received:', {
+        clientsCount: clients?.length || 0,
+        contactsCount: contacts?.length || 0,
+        opportunitiesCount: opportunities?.length || 0,
+        clients,
+        contacts,
+        opportunities
+      });
+    }
+  }, [open, clients, contacts, opportunities]);
+
+  const [formData, setFormData] = useState<CommercialActionFormData>({
+    title: '',
     type: 'call',
-    third_party_id: '',
+    status: 'planned',
+    client_id: '',
+    contact_id: '',
     opportunity_id: '',
     due_date: '',
-    due_time: '',
     priority: 'medium',
     assigned_to: '',
-    notes: '',
+    description: '',
   });
-
-  // Charger les opportunités au démarrage
-  useEffect(() => {
-    if (currentCompany?.id) {
-      loadOpportunities();
-    }
-  }, [currentCompany?.id]);
-
-  // Filtrer les opportunités selon le client sélectionné
-  useEffect(() => {
-    if (formData.third_party_id) {
-      // Si un client est sélectionné, filtrer les opportunités
-      loadOpportunities(formData.third_party_id);
-    } else {
-      loadOpportunities();
-    }
-  }, [formData.third_party_id]);
-
-  const loadOpportunities = async (thirdPartyId?: string) => {
-    if (!currentCompany?.id) return;
-
-    setLoadingOpportunities(true);
-    try {
-      let query = supabase
-        .from('crm_opportunities')
-        .select('id, title, client_id, third_party_id:client_id')
-        .eq('company_id', currentCompany.id)
-        .eq('status', 'active')
-        .order('title', { ascending: true });
-
-      if (thirdPartyId) {
-        query = query.eq('client_id', thirdPartyId);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setOpportunities(data || []);
-    } catch (error) {
-      devLogger.error('Error loading opportunities:', error);
-    } finally {
-      setLoadingOpportunities(false);
-    }
-  };
-
-  const handleChange = (field: keyof ActionFormData, value: string) => {
+  const handleChange = <K extends keyof CommercialActionFormData>(field: K, value: CommercialActionFormData[K]) => {
     setFormData((prev) => {
       // Convertir "none" en chaîne vide pour les valeurs optionnelles
       const actualValue = value === 'none' ? '' : value;
-      const newData = { ...prev, [field]: actualValue };
+      const newData = { ...prev, [field]: actualValue as CommercialActionFormData[K] };
 
       // Si on change de client, réinitialiser l'opportunité
-      if (field === 'third_party_id') {
+      if (field === 'client_id') {
         newData.opportunity_id = '';
+        newData.contact_id = '';
       }
 
       return newData;
@@ -146,27 +102,23 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
 
   const resetForm = () => {
     setFormData({
-      subject: '',
+      title: '',
       type: 'call',
-      third_party_id: '',
+      status: 'planned',
+      client_id: '',
+      contact_id: '',
       opportunity_id: '',
       due_date: '',
-      due_time: '',
       priority: 'medium',
       assigned_to: '',
-      notes: '',
+      description: '',
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!currentCompany?.id) {
-      toastError(t('common.errors.noCompany'));
-      return;
-    }
-
-    if (!formData.subject.trim()) {
+    if (!formData.title?.trim()) {
       toastError(t('crm.action.validation.subjectRequired'));
       return;
     }
@@ -174,40 +126,107 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
     setLoading(true);
 
     try {
-      // Construire la date/heure complète si fournie
-      let dueDateTime = null;
-      if (formData.due_date) {
-        dueDateTime = formData.due_time
-          ? `${formData.due_date}T${formData.due_time}:00`
-          : `${formData.due_date}T09:00:00`;
-      }
-
-      const { error } = await supabase.from('crm_actions').insert({
-        company_id: currentCompany.id,
-        third_party_id: formData.third_party_id || null,
-        opportunity_id: formData.opportunity_id || null,
-        subject: formData.subject.trim(),
-        type: formData.type,
-        due_date: dueDateTime,
-        priority: formData.priority,
-        assigned_to: formData.assigned_to || null,
-        notes: formData.notes?.trim() || null,
-        status: 'pending',
+      const success = await onCreateAction({
+        ...formData,
+        title: formData.title?.trim() || '',
+        description: formData.description?.trim() || undefined,
+        assigned_to: formData.assigned_to?.trim() || undefined,
+        due_date: formData.due_date || undefined,
+        client_id: formData.client_id || undefined,
+        contact_id: formData.contact_id || undefined,
+        opportunity_id: formData.opportunity_id || undefined
       });
 
-      if (error) throw error;
-
-      toastSuccess(t('crm.action.created'));
-      resetForm();
-      onOpenChange(false);
-      if (onSuccess) onSuccess();
+      if (success) {
+        toastSuccess(t('crm.action.created'));
+        resetForm();
+        onOpenChange(false);
+        if (onSuccess) onSuccess();
+      } else {
+        toastError(t('crm.action.errors.createFailed'));
+      }
     } catch (error) {
-      devLogger.error('Error creating action:', error);
+      console.error('Error creating action:', error);
       toastError(t('crm.action.errors.createFailed'));
     } finally {
       setLoading(false);
     }
   };
+
+  const clientContacts = useMemo(() => {
+    if (!formData.client_id) return [];
+    return (contacts || []).filter((contact) => contact.client_id === formData.client_id);
+  }, [contacts, formData.client_id]);
+
+  const clientOpportunities = useMemo(() => {
+    if (!formData.client_id) return [];
+    return (opportunities || []).filter((opp) => opp.client_id === formData.client_id);
+  }, [opportunities, formData.client_id]);
+
+  // Options autocomplete pour clients (avec option "Aucun")
+  const clientOptions: AutocompleteOption[] = useMemo(() => {
+    const options: AutocompleteOption[] = [
+      { value: 'none', label: t('crm.action.noClient'), description: 'Aucun client associé', category: 'Aucun' }
+    ];
+    (clients || []).forEach(client => {
+      options.push({
+        value: client.id,
+        label: client.company_name || 'Sans nom',
+        description: undefined as string | undefined,
+        category: 'Client',
+        metadata: client
+      });
+    });
+    return options;
+  }, [clients, t]);
+
+  // Options autocomplete pour contacts (filtrés par client, avec option "Aucun")
+  const contactOptions: AutocompleteOption[] = useMemo(() => {
+    const options: AutocompleteOption[] = [
+      { value: 'none', label: t('crm.action.noContact'), description: 'Aucun contact associé', category: 'Aucun' }
+    ];
+    clientContacts.forEach(contact => {
+      options.push({
+        value: contact.id,
+        label: `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sans nom',
+        description: contact.email || contact.phone || undefined,
+        metadata: contact
+      });
+    });
+    return options;
+  }, [clientContacts, t]);
+
+  // Options autocomplete pour opportunités (filtrées par client, avec option "Aucun")
+  const opportunityOptions: AutocompleteOption[] = useMemo(() => {
+    const options: AutocompleteOption[] = [
+      { value: 'none', label: t('crm.action.noOpportunity'), description: 'Aucune opportunité associée', category: 'Aucun' }
+    ];
+    clientOpportunities.forEach(opp => {
+      options.push({
+        value: opp.id,
+        label: opp.title,
+        description: opp.value ? `${opp.value} €` : undefined,
+        category: opp.stage || 'Opportunité',
+        metadata: opp
+      });
+    });
+    return options;
+  }, [clientOpportunities, t]);
+
+  // Options autocomplete pour statuts d'action
+  const statusOptions: AutocompleteOption[] = useMemo(() => [
+    { value: 'planned', label: t('crm.actionStatus.planned'), description: 'À faire', category: 'Statut' },
+    { value: 'in_progress', label: t('crm.actionStatus.inProgress'), description: 'En cours', category: 'Statut' },
+    { value: 'completed', label: t('crm.actionStatus.completed'), description: 'Terminée', category: 'Statut' },
+    { value: 'cancelled', label: t('crm.actionStatus.cancelled'), description: 'Annulée', category: 'Statut' },
+  ], [t]);
+
+  // Options autocomplete pour priorités
+  const priorityOptions: AutocompleteOption[] = useMemo(() => [
+    { value: 'low', label: t('crm.priority.low'), description: 'Faible priorité', category: 'Priorité' },
+    { value: 'medium', label: t('crm.priority.medium'), description: 'Priorité moyenne', category: 'Priorité' },
+    { value: 'high', label: t('crm.priority.high'), description: 'Haute priorité', category: 'Priorité' },
+  ], [t]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -228,8 +247,8 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
               </Label>
               <Input
                 id="subject"
-                value={formData.subject}
-                onChange={(e) => handleChange('subject', e.target.value)}
+                value={formData.title}
+                onChange={(e) => handleChange('title', e.target.value)}
                 placeholder={t('crm.action.placeholders.subject')}
                 required
               />
@@ -274,40 +293,51 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <ClientSelector
-                  value={formData.third_party_id || ''}
-                  onChange={(clientId) => handleChange('third_party_id', clientId)}
-                  label={t('crm.action.fields.client')}
+                <Label>{t('crm.action.fields.client')}</Label>
+                <SmartAutocomplete
+                  value={formData.client_id || 'none'}
+                  onChange={(value) => handleChange('client_id', value)}
+                  options={clientOptions}
                   placeholder={t('crm.action.placeholders.selectClient')}
-                  required={false}
+                  searchPlaceholder="Rechercher un client..."
+                  groups={true}
+                  showRecent={true}
+                  maxRecent={5}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="contact_id">{t('crm.action.fields.contact')}</Label>
+                <SmartAutocomplete
+                  value={formData.contact_id || 'none'}
+                  onChange={(value) => handleChange('contact_id', value)}
+                  options={contactOptions}
+                  placeholder={t('crm.action.placeholders.selectContact')}
+                  searchPlaceholder="Rechercher un contact..."
+                  groups={false}
+                  showRecent={true}
+                  maxRecent={3}
+                  disabled={!formData.client_id}
                 />
               </div>
 
               <div>
                 <Label htmlFor="opportunity_id">{t('crm.action.fields.opportunity')}</Label>
-                <Select
-                  value={formData.opportunity_id}
-                  onValueChange={(value) => handleChange('opportunity_id', value)}
-                  disabled={loadingOpportunities || !formData.third_party_id}
-                >
-                  <SelectTrigger id="opportunity_id">
-                    <SelectValue placeholder={
-                      loadingOpportunities
-                        ? t('common.loading')
-                        : !formData.third_party_id
-                        ? t('crm.action.selectClientFirst')
-                        : t('crm.action.placeholders.selectOpportunity')
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none" disabled>{t('crm.action.noOpportunity')}</SelectItem>
-                    {opportunities.map((opp) => (
-                      <SelectItem key={opp.id} value={opp.id}>
-                        {opp.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SmartAutocomplete
+                  value={formData.opportunity_id || 'none'}
+                  onChange={(value) => handleChange('opportunity_id', value)}
+                  options={opportunityOptions}
+                  placeholder={
+                    !formData.client_id
+                      ? t('crm.action.selectClientFirst')
+                      : t('crm.action.placeholders.selectOpportunity')
+                  }
+                  searchPlaceholder="Rechercher une opportunité..."
+                  groups={true}
+                  showRecent={true}
+                  maxRecent={3}
+                  disabled={!formData.client_id}
+                />
               </div>
             </div>
           </div>
@@ -324,34 +354,35 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
                 <Input
                   id="due_date"
                   type="date"
-                  value={formData.due_date}
+                  value={formData.due_date || ''}
                   onChange={(e) => handleChange('due_date', e.target.value)}
                 />
               </div>
 
               <div>
-                <Label htmlFor="due_time">{t('crm.action.fields.dueTime')}</Label>
-                <Input
-                  id="due_time"
-                  type="time"
-                  value={formData.due_time}
-                  onChange={(e) => handleChange('due_time', e.target.value)}
-                  disabled={!formData.due_date}
+                <Label htmlFor="status">{t('crm.action.fields.status')}</Label>
+                <SmartAutocomplete
+                  value={formData.status}
+                  onChange={(value) => handleChange('status', value as CommercialActionFormData['status'])}
+                  options={statusOptions}
+                  placeholder="Sélectionner un statut..."
+                  searchPlaceholder="Rechercher un statut..."
+                  groups={false}
+                  showRecent={false}
                 />
               </div>
 
               <div>
                 <Label htmlFor="priority">{t('crm.action.fields.priority')}</Label>
-                <Select value={formData.priority} onValueChange={(value) => handleChange('priority', value as ActionFormData['priority'])}>
-                  <SelectTrigger id="priority">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">{t('crm.priority.low')}</SelectItem>
-                    <SelectItem value="medium">{t('crm.priority.medium')}</SelectItem>
-                    <SelectItem value="high">{t('crm.priority.high')}</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SmartAutocomplete
+                  value={formData.priority}
+                  onChange={(value) => handleChange('priority', value as CommercialActionFormData['priority'])}
+                  options={priorityOptions}
+                  placeholder="Sélectionner une priorité..."
+                  searchPlaceholder="Rechercher une priorité..."
+                  groups={false}
+                  showRecent={false}
+                />
               </div>
             </div>
           </div>
@@ -359,13 +390,13 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
           {/* Notes */}
           <div className="space-y-2">
             <Label htmlFor="notes">{t('crm.action.fields.notes')}</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
-              placeholder={t('crm.action.placeholders.notes')}
-              rows={4}
-            />
+              <Textarea
+                id="notes"
+                value={formData.description || ''}
+                onChange={(e) => handleChange('description', e.target.value)}
+                placeholder={t('crm.action.placeholders.notes')}
+                rows={3}
+              />
           </div>
 
           <DialogFooter>

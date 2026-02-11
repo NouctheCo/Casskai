@@ -1,9 +1,10 @@
 // Edge Function: create-portal-session
-// Description: Crée une session du portail client Stripe pour gérer l'abonnement
+// Description: Crï¿½e une session du portail client Stripe pour gï¿½rer l'abonnement
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 import Stripe from 'https://esm.sh/stripe@13.10.0'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.47.0'
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
   apiVersion: '2023-10-16',
@@ -12,34 +13,27 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'authorization, content-type',
-}
-
 serve(async (req) => {
-  // Gérer CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
+  // Handle CORS preflight
+  const preflightResponse = handleCorsPreflightRequest(req);
+  if (preflightResponse) return preflightResponse;
 
   try {
-    console.log('=€ Edge Function called - create-portal-session');
+    console.log('=ï¿½ Edge Function called - create-portal-session');
 
-    // Vérification de l'authentification
+    // Vï¿½rification de l'authentification
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
         {
           status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
         }
       )
     }
 
-    // Créer un client Supabase avec le token utilisateur
+    // Crï¿½er un client Supabase avec le token utilisateur
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
@@ -49,14 +43,14 @@ serve(async (req) => {
         JSON.stringify({ error: 'Unauthorized' }),
         {
           status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
         }
       )
     }
 
     console.log(`Creating portal session for user: ${user.id}`)
 
-    // Récupérer le stripe_customer_id depuis la table existante stripe_customers
+    // Rï¿½cupï¿½rer le stripe_customer_id depuis la table existante stripe_customers
     const { data: customer, error: customerError } = await supabase
       .from('stripe_customers')
       .select('stripe_customer_id')
@@ -72,14 +66,14 @@ serve(async (req) => {
         }),
         {
           status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
         }
       )
     }
 
     console.log(`Using Stripe customer: ${customer.stripe_customer_id}`)
 
-    // Créer la session portail Stripe
+    // Crï¿½er la session portail Stripe
     const origin = req.headers.get('origin') || 'https://casskai.app'
     const session = await stripe.billingPortal.sessions.create({
       customer: customer.stripe_customer_id,
@@ -95,7 +89,7 @@ serve(async (req) => {
       }),
       {
         headers: {
-          ...corsHeaders,
+          ...getCorsHeaders(req),
           'Content-Type': 'application/json',
         }
       }
@@ -110,7 +104,7 @@ serve(async (req) => {
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     )
   }

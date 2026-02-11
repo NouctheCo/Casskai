@@ -35,16 +35,12 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
     last_name: '',
     email: '',
     phone: '',
-    birth_date: '',
-    employee_number: '',
     position: '',
     department: '',
     hire_date: new Date().toISOString().split('T')[0],
     contract_type: 'cdi',
     salary: 0,
-    salary_type: 'monthly',
     manager_id: '',
-    leave_balance: 25,
     status: 'active'
   });
   useEffect(() => {
@@ -83,8 +79,8 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
       const response = await hrService.createEmployee(currentCompany.id, {
         ...formData,
         manager_id: formData.manager_id || undefined,
-        contract_type: formData.contract_type as 'permanent' | 'temporary' | 'intern' | 'freelance',
-        status: formData.status as 'active' | 'inactive' | 'on_leave'
+        contract_type: formData.contract_type as Employee['contract_type'],
+        status: formData.status as Employee['status']
       });
       if (response.success && response.data) {
         toastSuccess('Employé créé avec succès');
@@ -101,16 +97,12 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
         last_name: '',
         email: '',
         phone: '',
-        birth_date: '',
-        employee_number: '',
         position: '',
         department: '',
         hire_date: new Date().toISOString().split('T')[0],
         contract_type: 'cdi',
         salary: 0,
-        salary_type: 'monthly',
         manager_id: '',
-        leave_balance: 25,
         status: 'active'
       });
     } catch (error: any) {
@@ -122,8 +114,9 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
   const CONTRACT_TYPES = [
     { value: 'cdi', label: 'CDI' },
     { value: 'cdd', label: 'CDD' },
-    { value: 'intern', label: 'Stage' },
-    { value: 'apprentice', label: 'Apprentissage' },
+    { value: 'interim', label: 'Intérim' },
+    { value: 'stage', label: 'Stage' },
+    { value: 'apprentissage', label: 'Apprentissage' },
     { value: 'freelance', label: 'Freelance' }
   ];
   return (
@@ -189,25 +182,6 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="birth_date">Date de naissance</Label>
-                  <Input
-                    id="birth_date"
-                    type="date"
-                    value={formData.birth_date}
-                    onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="employee_number">Matricule</Label>
-                  <Input
-                    id="employee_number"
-                    type="text"
-                    value={formData.employee_number}
-                    onChange={(e) => setFormData({ ...formData, employee_number: e.target.value })}
-                    placeholder="EMP-001"
                   />
                 </div>
               </div>
@@ -304,31 +278,6 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
                     value={formData.salary || ''}
                     onChange={(e) => setFormData({ ...formData, salary: parseFloat(e.target.value) || 0 })}
                     placeholder="0"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="salary_type">Type de salaire</Label>
-                  <Select
-                    value={formData.salary_type}
-                    onValueChange={(value) => setFormData({ ...formData, salary_type: value })}
-                  >
-                    <SelectTrigger id="salary_type">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="monthly">Mensuel</SelectItem>
-                      <SelectItem value="annual">Annuel</SelectItem>
-                      <SelectItem value="hourly">Horaire</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="leave_balance">Solde congés initial</Label>
-                  <Input
-                    id="leave_balance"
-                    type="number"
-                    value={formData.leave_balance}
-                    onChange={(e) => setFormData({ ...formData, leave_balance: parseFloat(e.target.value) || 25 })}
                   />
                 </div>
               </div>

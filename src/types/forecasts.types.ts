@@ -2,10 +2,10 @@
 export interface ForecastScenario {
   id: string;
   name: string;
-  description?: string;
+  description: string | null;
   type: 'optimistic' | 'realistic' | 'pessimistic' | 'custom';
   growth_rate: number;
-  market_conditions: 'favorable' | 'stable' | 'unfavorable';
+  market_conditions: 'favorable' | 'stable' | 'unfavorable' | null;
   created_at: string;
   updated_at: string;
 }
@@ -23,21 +23,21 @@ export interface ForecastPeriod {
 export interface RevenueLineItem {
   id: string;
   category: string;
-  subcategory?: string;
-  description: string;
+  subcategory: string | null;
+  description: string | null;
   amount: number;
-  growth_rate: number;
-  seasonality_factor: number;
+  growth_rate: number | null;
+  seasonality_factor: number | null;
   confidence_level: 'high' | 'medium' | 'low';
 }
 
 export interface ExpenseLineItem {
   id: string;
   category: 'fixed' | 'variable' | 'operational' | 'exceptional';
-  subcategory?: string;
-  description: string;
+  subcategory: string | null;
+  description: string | null;
   amount: number;
-  growth_rate: number;
+  growth_rate: number | null;
   is_recurring: boolean;
   confidence_level: 'high' | 'medium' | 'low';
 }
@@ -46,10 +46,10 @@ export interface CashFlowItem {
   id: string;
   type: 'inflow' | 'outflow';
   category: string;
-  description: string;
+  description: string | null;
   amount: number;
-  timing: string; // Date when cash flow occurs
-  probability: number; // 0-100%
+  timing: string | null; // Date when cash flow occurs
+  probability: number | null; // 0-100%
 }
 
 export interface ForecastData {
@@ -78,8 +78,8 @@ export interface ForecastData {
   
   // Metadata
   status: 'draft' | 'published' | 'archived';
-  created_by: string;
-  approved_by?: string;
+  created_by: string | null;
+  approved_by: string | null;
   created_at: string;
   updated_at: string;
   
@@ -132,7 +132,7 @@ export interface ForecastReport {
     include_recommendations: boolean;
   };
   generated_at: string;
-  file_url?: string;
+  file_url?: string | null;
 }
 
 // Form data types
@@ -150,10 +150,10 @@ export interface ForecastFormData {
 
 export interface ScenarioFormData {
   name: string;
-  description?: string;
+  description: string | null;
   type: 'optimistic' | 'realistic' | 'pessimistic' | 'custom';
   growth_rate: number;
-  market_conditions: 'favorable' | 'stable' | 'unfavorable';
+  market_conditions: 'favorable' | 'stable' | 'unfavorable' | null;
 }
 
 export interface ForecastFilters {

@@ -60,19 +60,23 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
     try {
       const today = new Date();
       // Charger les factures clients impayées
+      // ✅ invoice_type = 'sale' pour les factures de vente (pas 'invoice')
       const { data: invoices, error: invError } = await supabase
         .from('invoices')
-        .select('id, invoice_date, due_date, total_incl_tax, paid_amount, status')
+        .select('id, invoice_number, invoice_date, due_date, total_incl_tax, subtotal_excl_tax, paid_amount, status, customer_id, customers!customer_id(name)')
         .eq('company_id', companyId)
-        .eq('invoice_type', 'invoice')
-        .neq('status', 'paid');
+        .eq('invoice_type', 'sale')
+        .neq('status', 'paid')
+        .neq('status', 'cancelled');
       if (invError) throw invError;
       // Charger les achats impayés (purchases n'a pas paid_amount, on utilise payment_status)
+      // ✅ Colonnes réelles : invoice_number (pas reference), supplier via relation (pas supplier_name)
       const { data: purchases, error: purchError } = await supabase
         .from('purchases')
-        .select('id, purchase_date, due_date, total_amount, payment_status')
+        .select('id, invoice_number, purchase_date, due_date, total_amount, payment_status, supplier:suppliers!supplier_id(name)')
         .eq('company_id', companyId)
-        .neq('payment_status', 'paid');
+        .neq('payment_status', 'paid')
+        .neq('payment_status', 'cancelled');
       if (purchError) {
         logger.error('AgingAnalysisTab', 'Error loading purchases:', purchError);
         throw purchError;

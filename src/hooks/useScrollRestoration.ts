@@ -16,7 +16,7 @@ import { logger } from '@/lib/logger';
  * Hook pour mémoriser et restaurer la position de scroll lors de la navigation
  * Améliore l'expérience utilisateur en évitant de perdre la position sur la page
  */
-export function useScrollRestoration() {
+export function useScrollRestoration(): null {
   const location = useLocation();
   const scrollPositions = useRef<Map<string, number>>(new Map());
   const isRestoringScroll = useRef(false);

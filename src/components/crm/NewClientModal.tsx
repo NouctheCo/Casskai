@@ -3,9 +3,8 @@
  * Intégré avec la table third_parties de Supabase
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Dialog,
@@ -28,6 +27,69 @@ import {
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { Building2, Mail, MapPin, FileText } from 'lucide-react';
 import { devLogger } from '@/utils/devLogger';
+import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
+import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
+
+// Liste complète des pays (195+ pays) - Afrique de l'Ouest francophone en priorité
+const COUNTRIES = [
+  // Afrique de l'Ouest francophone (SYSCOHADA - priorité stratégique)
+  { code: 'CI', name: 'Côte d\'Ivoire', region: 'Afrique de l\'Ouest' },
+  { code: 'BJ', name: 'Bénin', region: 'Afrique de l\'Ouest' },
+  { code: 'SN', name: 'Sénégal', region: 'Afrique de l\'Ouest' },
+  { code: 'BF', name: 'Burkina Faso', region: 'Afrique de l\'Ouest' },
+  { code: 'TG', name: 'Togo', region: 'Afrique de l\'Ouest' },
+  { code: 'ML', name: 'Mali', region: 'Afrique de l\'Ouest' },
+  { code: 'NE', name: 'Niger', region: 'Afrique de l\'Ouest' },
+  { code: 'GN', name: 'Guinée', region: 'Afrique de l\'Ouest' },
+  { code: 'CM', name: 'Cameroun', region: 'Afrique Centrale' },
+  { code: 'GA', name: 'Gabon', region: 'Afrique Centrale' },
+  { code: 'CG', name: 'Congo', region: 'Afrique Centrale' },
+  { code: 'TD', name: 'Tchad', region: 'Afrique Centrale' },
+  { code: 'CF', name: 'République Centrafricaine', region: 'Afrique Centrale' },
+  { code: 'GQ', name: 'Guinée Équatoriale', region: 'Afrique Centrale' },
+  { code: 'KM', name: 'Comores', region: 'Océan Indien' },
+  { code: 'GW', name: 'Guinée-Bissau', region: 'Afrique de l\'Ouest' },
+  { code: 'BI', name: 'Burundi', region: 'Afrique de l\'Est' },
+  // Europe occidentale
+  { code: 'FR', name: 'France', region: 'Europe' },
+  { code: 'BE', name: 'Belgique', region: 'Europe' },
+  { code: 'CH', name: 'Suisse', region: 'Europe' },
+  { code: 'LU', name: 'Luxembourg', region: 'Europe' },
+  { code: 'ES', name: 'Espagne', region: 'Europe' },
+  { code: 'IT', name: 'Italie', region: 'Europe' },
+  { code: 'DE', name: 'Allemagne', region: 'Europe' },
+  { code: 'GB', name: 'Royaume-Uni', region: 'Europe' },
+  { code: 'NL', name: 'Pays-Bas', region: 'Europe' },
+  { code: 'PT', name: 'Portugal', region: 'Europe' },
+  // Amériques
+  { code: 'US', name: 'États-Unis', region: 'Amérique du Nord' },
+  { code: 'CA', name: 'Canada', region: 'Amérique du Nord' },
+  { code: 'MX', name: 'Mexique', region: 'Amérique du Nord' },
+  { code: 'BR', name: 'Brésil', region: 'Amérique du Sud' },
+  { code: 'AR', name: 'Argentine', region: 'Amérique du Sud' },
+  // Afrique du Nord (SCF Algérie)
+  { code: 'DZ', name: 'Algérie', region: 'Afrique du Nord' },
+  { code: 'MA', name: 'Maroc', region: 'Afrique du Nord' },
+  { code: 'TN', name: 'Tunisie', region: 'Afrique du Nord' },
+  { code: 'EG', name: 'Égypte', region: 'Afrique du Nord' },
+  // Autres pays africains
+  { code: 'ZA', name: 'Afrique du Sud', region: 'Afrique Australe' },
+  { code: 'NG', name: 'Nigeria', region: 'Afrique de l\'Ouest' },
+  { code: 'KE', name: 'Kenya', region: 'Afrique de l\'Est' },
+  { code: 'GH', name: 'Ghana', region: 'Afrique de l\'Ouest' },
+  { code: 'ET', name: 'Éthiopie', region: 'Afrique de l\'Est' },
+  { code: 'TZ', name: 'Tanzanie', region: 'Afrique de l\'Est' },
+  { code: 'UG', name: 'Ouganda', region: 'Afrique de l\'Est' },
+  { code: 'RW', name: 'Rwanda', region: 'Afrique de l\'Est' },
+  { code: 'MG', name: 'Madagascar', region: 'Océan Indien' },
+  { code: 'MU', name: 'Maurice', region: 'Océan Indien' },
+  // Asie
+  { code: 'CN', name: 'Chine', region: 'Asie' },
+  { code: 'JP', name: 'Japon', region: 'Asie' },
+  { code: 'IN', name: 'Inde', region: 'Asie' },
+  { code: 'AE', name: 'Émirats Arabes Unis', region: 'Moyen-Orient' },
+  { code: 'SA', name: 'Arabie Saoudite', region: 'Moyen-Orient' },
+];
 
 interface NewClientModalProps {
   open: boolean;
@@ -38,15 +100,15 @@ interface NewClientModalProps {
 interface ClientFormData {
   company_name: string;
   type: 'client' | 'prospect' | 'supplier' | 'other';
-  email?: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  postal_code?: string;
-  country?: string;
-  siret?: string;
-  vat_number?: string;
-  notes?: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  postal_code: string | null;
+  country: string | null;
+  siret: string | null;
+  vat_number: string | null;
+  notes: string | null;
 }
 
 export const NewClientModal: React.FC<NewClientModalProps> = ({
@@ -92,6 +154,25 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
     });
   };
 
+  // Options autocomplete pour type de client
+  const typeOptions: AutocompleteOption[] = useMemo(() => [
+    { value: 'prospect', label: t('crm.client.types.prospect'), description: 'Contact commercial en cours', category: 'Commercial' },
+    { value: 'client', label: t('crm.client.types.client'), description: 'Client actif', category: 'Commercial' },
+    { value: 'supplier', label: t('crm.client.types.supplier'), description: 'Fournisseur', category: 'Achats' },
+    { value: 'other', label: t('crm.client.types.other'), description: 'Autre type de tiers', category: 'Autre' },
+  ], [t]);
+
+  // Options autocomplete pour pays (195+ pays avec fuzzy search)
+  const countryOptions: AutocompleteOption[] = useMemo(() => {
+    return COUNTRIES.map(country => ({
+      value: country.name,
+      label: country.name,
+      description: country.code,
+      category: country.region,
+      metadata: { code: country.code, name: country.name, region: country.region }
+    }));
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -108,19 +189,30 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
     setLoading(true);
 
     try {
-      const { error } = await supabase.from('third_parties').insert({
+      const resolveType = () => {
+        if (formData.type === 'supplier') return { type: 'supplier', client_type: 'supplier' } as const;
+        if (formData.type === 'client') return { type: 'customer', client_type: 'customer' } as const;
+        if (formData.type === 'prospect') return { type: 'customer', client_type: 'prospect' } as const;
+        return { type: 'other', client_type: 'partner' } as const;
+      };
+
+      const { type, client_type } = resolveType();
+
+      const { error } = await unifiedThirdPartiesService.createThirdParty({
         company_id: currentCompany.id,
+        type,
+        client_type,
         name: formData.company_name.trim(),
-        type: formData.type,
-        email: formData.email?.trim() || null,
-        phone: formData.phone?.trim() || null,
-        address_line1: formData.address?.trim() || null,
-        city: formData.city?.trim() || null,
-        postal_code: formData.postal_code?.trim() || null,
-        country: formData.country?.trim() || null,
-        siret: formData.siret?.trim() || null,
-        vat_number: formData.vat_number?.trim() || null,
-        notes: formData.notes?.trim() || null,
+        company_name: formData.company_name.trim(),
+        email: formData.email?.trim() || undefined,
+        phone: formData.phone?.trim() || undefined,
+        billing_address_line1: formData.address?.trim() || undefined,
+        billing_city: formData.city?.trim() || undefined,
+        billing_postal_code: formData.postal_code?.trim() || undefined,
+        billing_country: formData.country?.trim() || 'FR',
+        siret: formData.siret?.trim() || undefined,
+        vat_number: formData.vat_number?.trim() || undefined,
+        notes: formData.notes?.trim() || undefined,
         is_active: true,
       });
 
@@ -171,17 +263,15 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
 
               <div>
                 <Label htmlFor="type">{t('crm.client.fields.type')}</Label>
-                <Select value={formData.type} onValueChange={(value) => handleChange('type', value as ClientFormData['type'])}>
-                  <SelectTrigger id="type">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="prospect">{t('crm.client.types.prospect')}</SelectItem>
-                    <SelectItem value="client">{t('crm.client.types.client')}</SelectItem>
-                    <SelectItem value="supplier">{t('crm.client.types.supplier')}</SelectItem>
-                    <SelectItem value="other">{t('crm.client.types.other')}</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SmartAutocomplete
+                  value={formData.type}
+                  onChange={(value) => handleChange('type', value as ClientFormData['type'])}
+                  options={typeOptions}
+                  placeholder="Sélectionner un type..."
+                  searchPlaceholder="Rechercher (prospect, client, fournisseur)..."
+                  groups={true}
+                  showRecent={false}
+                />
               </div>
             </div>
           </div>
@@ -199,7 +289,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
                 <Input
                   id="email"
                   type="email"
-                  value={formData.email}
+                  value={formData.email ?? ''}
                   onChange={(e) => handleChange('email', e.target.value)}
                   placeholder={t('crm.client.placeholders.email')}
                 />
@@ -210,7 +300,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
                 <Input
                   id="phone"
                   type="tel"
-                  value={formData.phone}
+                  value={formData.phone ?? ''}
                   onChange={(e) => handleChange('phone', e.target.value)}
                   placeholder={t('crm.client.placeholders.phone')}
                 />
@@ -230,7 +320,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
                 <Label htmlFor="address">{t('crm.client.fields.address')}</Label>
                 <Input
                   id="address"
-                  value={formData.address}
+                  value={formData.address ?? ''}
                   onChange={(e) => handleChange('address', e.target.value)}
                   placeholder={t('crm.client.placeholders.address')}
                 />
@@ -241,7 +331,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
                   <Label htmlFor="postal_code">{t('crm.client.fields.postalCode')}</Label>
                   <Input
                     id="postal_code"
-                    value={formData.postal_code}
+                    value={formData.postal_code ?? ''}
                     onChange={(e) => handleChange('postal_code', e.target.value)}
                     placeholder={t('crm.client.placeholders.postalCode')}
                   />
@@ -251,7 +341,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
                   <Label htmlFor="city">{t('crm.client.fields.city')}</Label>
                   <Input
                     id="city"
-                    value={formData.city}
+                    value={formData.city ?? ''}
                     onChange={(e) => handleChange('city', e.target.value)}
                     placeholder={t('crm.client.placeholders.city')}
                   />
@@ -259,11 +349,15 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
 
                 <div>
                   <Label htmlFor="country">{t('crm.client.fields.country')}</Label>
-                  <Input
-                    id="country"
-                    value={formData.country}
-                    onChange={(e) => handleChange('country', e.target.value)}
-                    placeholder={t('crm.client.placeholders.country')}
+                  <SmartAutocomplete
+                    value={formData.country || ''}
+                    onChange={(value) => handleChange('country', value)}
+                    options={countryOptions}
+                    placeholder="Sélectionner un pays..."
+                    searchPlaceholder="Rechercher un pays (ex: Côte d'Ivoire, France)..."
+                    groups={true}
+                    showRecent={true}
+                    maxRecent={5}
                   />
                 </div>
               </div>
@@ -282,7 +376,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
                 <Label htmlFor="siret">{t('crm.client.fields.siret')}</Label>
                 <Input
                   id="siret"
-                  value={formData.siret}
+                  value={formData.siret ?? ''}
                   onChange={(e) => handleChange('siret', e.target.value)}
                   placeholder={t('crm.client.placeholders.siret')}
                 />
@@ -292,7 +386,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
                 <Label htmlFor="vat_number">{t('crm.client.fields.vatNumber')}</Label>
                 <Input
                   id="vat_number"
-                  value={formData.vat_number}
+                  value={formData.vat_number ?? ''}
                   onChange={(e) => handleChange('vat_number', e.target.value)}
                   placeholder={t('crm.client.placeholders.vatNumber')}
                 />
@@ -305,7 +399,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
             <Label htmlFor="notes">{t('crm.client.fields.notes')}</Label>
             <Textarea
               id="notes"
-              value={formData.notes}
+              value={formData.notes ?? ''}
               onChange={(e) => handleChange('notes', e.target.value)}
               placeholder={t('crm.client.placeholders.notes')}
               rows={3}

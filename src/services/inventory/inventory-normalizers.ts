@@ -189,6 +189,7 @@ export function normalizeStockMovement(row: StockMovementRow, itemId?: string | 
     user_id: row.created_by ?? undefined,
     company_id: row.company_id,
     created_at: row.created_at ?? row.movement_date,
-    movement_date: row.movement_date
+    movement_date: row.movement_date,
+    journal_entry_id: row.journal_entry_id ?? undefined
   };
 }

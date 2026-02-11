@@ -37,15 +37,15 @@ export interface GDPRRequest {
   email: string;
   first_name: string;
   last_name: string;
-  company?: string;
+  company: string | null;
   description: string;
   status: 'pending' | 'processing' | 'completed' | 'rejected';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   submitted_at: string;
-  processed_at?: string;
-  processed_by?: string;
-  response?: string;
-  attachments?: string[];
+  processed_at: string | null;
+  processed_by: string | null;
+  response: string | null;
+  attachments: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -54,7 +54,7 @@ export interface GDPRRequestCreate {
   email: string;
   firstName: string;
   lastName: string;
-  company?: string;
+  company: string | null;
   description: string;
 }
 export class GDPRService {
@@ -72,7 +72,11 @@ export class GDPRService {
           description: requestData.description,
           status: 'pending',
           priority: this.calculatePriority(requestData.type),
-          submitted_at: new Date().toISOString()
+          submitted_at: new Date().toISOString(),
+          processed_at: null,
+          processed_by: null,
+          response: null,
+          attachments: null,
         })
         .select()
         .single();
@@ -92,6 +96,10 @@ export class GDPRService {
         status: 'pending',
         priority: this.calculatePriority(requestData.type),
         submitted_at: new Date().toISOString(),
+        processed_at: null,
+        processed_by: null,
+        response: null,
+        attachments: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -206,6 +214,10 @@ export class GDPRService {
         status: 'pending',
         priority: 'medium',
         submitted_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        processed_at: null,
+        processed_by: null,
+        response: null,
+        attachments: null,
         created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
         updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
       },
@@ -215,10 +227,15 @@ export class GDPRService {
         email: 'marie@company.com',
         first_name: 'Marie',
         last_name: 'Martin',
+        company: null,
         description: 'Suppression complète de mes données',
         status: 'processing',
         priority: 'high',
         submitted_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        processed_at: null,
+        processed_by: null,
+        response: null,
+        attachments: null,
         created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
         updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
       }

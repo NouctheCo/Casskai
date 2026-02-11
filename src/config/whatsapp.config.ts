@@ -34,7 +34,7 @@ export const WHATSAPP_CONFIG = {
       thursday: { open: "09:00", close: "18:00" },
       friday: { open: "09:00", close: "18:00" },
       saturday: { open: "09:00", close: "12:00" }, // Ouvert
-      sunday: null, // Fermé
+      sunday: null as null | { open: string; close: string }, // Fermé
     }
   },
   // Tracking/Analytics

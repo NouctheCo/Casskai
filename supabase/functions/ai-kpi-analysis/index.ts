@@ -6,11 +6,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import OpenAI from 'https://esm.sh/openai@4.20.1'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
+import { checkRateLimit, rateLimitResponse, getRateLimitPreset } from '../_shared/rate-limit.ts'
 
 interface FinancialKPIs {
   revenues: number
@@ -47,8 +44,13 @@ interface KPIAnalysisRequest {
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  const preflightResponse = handleCorsPreflightRequest(req);
+  if (preflightResponse) return preflightResponse;
+
+  // Rate limiting
+  const rateLimit = checkRateLimit(req, getRateLimitPreset('ai-kpi-analysis'))
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(rateLimit.retryAfter!, getCorsHeaders(req))
   }
 
   try {
@@ -72,23 +74,32 @@ serve(async (req) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       })
     }
 
     // Verify user access to company
-    const { data: userCompany } = await supabaseClient
+    const { data: userCompany, error: accessError } = await supabaseClient
       .from('user_companies')
       .select('*')
       .eq('user_id', user.id)
       .eq('company_id', company_id)
       .eq('is_active', true)
-      .single()
+      .maybeSingle()
+
+    if (accessError) {
+      console.error('[ai-kpi-analysis] RLS error checking access:', accessError)
+      return new Response(JSON.stringify({ error: 'Access verification failed', details: accessError.message }), {
+        status: 403,
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+      })
+    }
 
     if (!userCompany) {
-      return new Response(JSON.stringify({ error: 'Access denied' }), {
+      console.warn('[ai-kpi-analysis] User access denied to company:', company_id)
+      return new Response(JSON.stringify({ error: 'Access denied to this company' }), {
         status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       })
     }
 
@@ -148,7 +159,7 @@ IMPORTANT: Réponds UNIQUEMENT au format JSON avec la structure suivante:
       })
 
     return new Response(JSON.stringify(analysis), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
     })
 
   } catch (error) {
@@ -158,7 +169,7 @@ IMPORTANT: Réponds UNIQUEMENT au format JSON avec la structure suivante:
       details: error.message
     }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
     })
   }
 })

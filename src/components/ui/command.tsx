@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
 
 const Command = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & { shouldFilter?: boolean }
+>(({ className, shouldFilter: _shouldFilter, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
@@ -23,14 +23,18 @@ Command.displayName = 'Command';
 
 const CommandInput = React.forwardRef<
   HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement>
->(({ className, ...props }, ref) => (
+  React.InputHTMLAttributes<HTMLInputElement> & { onValueChange?: (value: string) => void }
+>(({ className, onValueChange, onChange, ...props }, ref) => (
   <input
     ref={ref}
     className={cn(
       'flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
       className
     )}
+    onChange={(e) => {
+      onChange?.(e);
+      onValueChange?.(e.target.value);
+    }}
     {...props}
   />
 ));
@@ -77,11 +81,12 @@ CommandGroup.displayName = 'CommandGroup';
 
 const CommandItem = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
+  Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> & {
     value?: string;
     onSelect?: (value: string) => void;
+    disabled?: boolean;
   }
->(({ className, value, onSelect, ...props }, ref) => (
+>(({ className, value, onSelect, disabled: _disabled, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(

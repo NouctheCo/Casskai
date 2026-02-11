@@ -3,40 +3,25 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * Tous droits réservés - All rights reserved
  * 
- * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
- * Toute reproduction, distribution ou utilisation non autorisée est interdite.
- * 
+                    onCreateOpportunity={async (data) => createOpportunity(data)}
  * This software is the exclusive property of NOUTCHE CONSEIL.
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
 import React, { useState } from 'react';
-
-import { devLogger } from '@/utils/devLogger';
-
 import { useTranslation } from 'react-i18next';
-
 import { motion } from 'framer-motion';
 import { formatCurrency } from '@/lib/utils';
-
-import { useCrm } from '../hooks/useCrm';
-
-import { useCRMAnalytics } from '../hooks/useCRMAnalytics';
-
+import { devLogger } from '@/utils/devLogger';
 import { toastError, toastSuccess } from '@/lib/toast-helpers';
-
 import { useAuth } from '../contexts/AuthContext';
-
+import { useCrm } from '../hooks/useCrm';
+import { useCRMAnalytics } from '../hooks/useCRMAnalytics';
 import { Button } from '../components/ui/button';
-
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
-
 import { Badge } from '../components/ui/badge';
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-
 import { Alert, AlertDescription } from '../components/ui/alert';
-
 import CrmDashboard from '../components/crm/CrmDashboard';
 import ClientsManagement from '../components/crm/ClientsManagement';
 import OpportunitiesKanban from '../components/crm/OpportunitiesKanban';
@@ -44,43 +29,24 @@ import CommercialActions from '../components/crm/CommercialActions';
 import { NewClientModal } from '../components/crm/NewClientModal';
 import { NewOpportunityModal } from '../components/crm/NewOpportunityModal';
 import { NewActionModal } from '../components/crm/NewActionModal';
-
 import {
-
   BarChart3,
-
   Users,
-
   Target,
-
   Activity,
-
   RefreshCw,
-
   AlertTriangle,
-
   Sparkles,
-
   Download,
-
   FileText,
-
   TrendingUp,
-
   Calendar
-
 } from 'lucide-react';
-
 import {
-
   ClientFormData,
-
   ContactFormData,
-
   OpportunityFormData,
-
   CommercialActionFormData
-
 } from '../types/crm.types';
 
 
@@ -101,6 +67,8 @@ export default function SalesCrmPage() {
 
     clients,
 
+    contacts,
+
     opportunities,
 
     commercialActions,
@@ -113,13 +81,27 @@ export default function SalesCrmPage() {
 
     fetchDashboardData,
 
+    refreshAll,
+
     createClient,
+
+    updateClient,
+
+    deleteClient,
 
     createContact,
 
     createOpportunity,
 
-    createCommercialAction
+    updateOpportunity,
+
+    deleteOpportunity,
+
+    createCommercialAction,
+
+    updateCommercialAction,
+
+    deleteCommercialAction
 
   } = useCrm();
 
@@ -543,7 +525,7 @@ export default function SalesCrmPage() {
 
                     <p className="text-xs text-muted-foreground">
 
-                      {conversionMetrics.won_opportunities} gagnées / {conversionMetrics.total_opportunities} total
+                      {conversionMetrics.won_opportunities} gagnées / {conversionMetrics.closed_opportunities} clôturées
 
                     </p>
 
@@ -565,11 +547,11 @@ export default function SalesCrmPage() {
 
                   <CardContent>
 
-                    <div className="text-2xl font-bold">{salesCycleMetrics.average_days_to_close} jours</div>
+                    <div className="text-2xl font-bold">{salesCycleMetrics.average_days_to_close} {salesCycleMetrics.average_days_to_close === 1 ? 'jour' : 'jours'}</div>
 
                     <p className="text-xs text-muted-foreground">
 
-                      Médiane: {salesCycleMetrics.median_days_to_close} jours
+                      Médiane: {salesCycleMetrics.median_days_to_close} {salesCycleMetrics.median_days_to_close === 1 ? 'jour' : 'jours'}
 
                     </p>
 
@@ -844,7 +826,20 @@ export default function SalesCrmPage() {
                 <CardContent>
                   <ClientsManagement
                     clients={clients}
-                    onCreateClient={() => setShowNewClientModal(true)}
+                    contacts={contacts}
+                    loading={loading}
+                    onCreateClient={async (data) => {
+                      await createClient(data);
+                    }}
+                    onUpdateClient={async (id, data) => {
+                      await updateClient(id, data);
+                    }}
+                    onDeleteClient={async (id) => {
+                      await deleteClient(id);
+                    }}
+                    onCreateContact={async (data) => {
+                      await createContact(data);
+                    }}
                   />
                 </CardContent>
 
@@ -928,7 +923,17 @@ export default function SalesCrmPage() {
 
                     opportunities={opportunities}
 
-                    onCreateOpportunity={() => setShowNewOpportunityModal(true)}
+                    clients={clients}
+
+                    contacts={contacts}
+
+                    onCreateOpportunity={async (data) => {
+                      return await createOpportunity(data);
+                    }}
+
+                    onUpdateOpportunity={updateOpportunity}
+
+                    onDeleteOpportunity={deleteOpportunity}
 
                   />
 
@@ -994,7 +999,29 @@ export default function SalesCrmPage() {
 
                     actions={commercialActions}
 
-                    onCreateAction={() => setShowNewActionModal(true)}
+                    clients={clients}
+
+                    contacts={contacts}
+
+                    opportunities={opportunities}
+
+                    onCreateAction={async (data) => {
+
+                      await createCommercialAction(data);
+
+                    }}
+
+                    onUpdateAction={async (id, data) => {
+
+                      await updateCommercialAction(id, data);
+
+                    }}
+
+                    onDeleteAction={async (id) => {
+
+                      await deleteCommercialAction(id);
+
+                    }}
 
                   />
 
@@ -1017,12 +1044,16 @@ export default function SalesCrmPage() {
         onOpenChange={setShowNewClientModal}
         onSuccess={() => {
           fetchDashboardData();
+          refreshAll();
         }}
       />
 
       <NewOpportunityModal
         open={showNewOpportunityModal}
         onOpenChange={setShowNewOpportunityModal}
+        clients={clients}
+        contacts={contacts}
+        onCreateOpportunity={async (data) => createOpportunity(data)}
         onSuccess={() => {
           fetchDashboardData();
         }}
@@ -1031,6 +1062,10 @@ export default function SalesCrmPage() {
       <NewActionModal
         open={showNewActionModal}
         onOpenChange={setShowNewActionModal}
+        clients={clients}
+        contacts={contacts}
+        opportunities={opportunities}
+        onCreateAction={async (data) => createCommercialAction(data)}
         onSuccess={() => {
           fetchDashboardData();
         }}

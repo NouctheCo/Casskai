@@ -49,6 +49,27 @@ export async function createCompanyDirectly(
 
     devLogger.info('✅ company_users link created');
 
+    // Also insert into user_companies for compatibility
+    devLogger.debug('🔧 Creating user_companies link');
+
+    const { error: userCompanyError } = await supabase
+      .from('user_companies')
+      .insert([{
+        user_id: userId,
+        company_id: createdCompany.id,
+        role: 'owner',
+        is_default: true,
+        is_active: true,
+        status: 'active'
+      }]);
+
+    if (userCompanyError) {
+      devLogger.error('❌ user_companies insert error:', userCompanyError);
+      throw userCompanyError;
+    }
+
+    devLogger.info('✅ user_companies link created');
+
     // Create default warehouse
     devLogger.debug('🔧 Creating default warehouse');
 

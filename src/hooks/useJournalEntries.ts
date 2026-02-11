@@ -204,7 +204,7 @@ export function useJournalEntries(companyId: string) {
     }
   }, [user, companyId]);
   // Get journal entries with filters
-  const getJournalEntries = useCallback(async (filters: JournalEntryFilters = {}) => {
+  const getJournalEntries = useCallback(async (filters: JournalEntryFilters = {}): Promise<{ data: JournalEntry[]; count: number; error: string | null }> => {
     if (!user || !companyId) return { data: [], count: 0, error: null };
     const {
       page = 1,

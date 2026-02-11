@@ -15,10 +15,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { useToast } from '../ui/use-toast';
 import { useCurrency } from '../../hooks/useCurrency';
-import { ContractData, ContractFormData, ContractType } from '../../types/contracts.types';
+import { ContractData, ContractFormData, ContractType, DiscountConfig } from '../../types/contracts.types';
 import { Plus, X, DollarSign, Percent, TrendingUp } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
+import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
 // Schéma de validation Zod
 const contractSchema = z.object({
   client_id: z.string().min(1, 'Veuillez sélectionner un client'),
@@ -27,7 +28,7 @@ const contractSchema = z.object({
   start_date: z.string().min(1, 'La date de début est requise'),
   end_date: z.string().optional(),
   currency: z.string().min(1, 'La devise est requise'),
-  conditions: z.string().optional(),
+  notes: z.string().optional(),
   // Configuration des remises selon le type
   fixed_rate: z.number().min(0).max(1).optional(),
   fixed_amount: z.number().min(0).optional(),
@@ -41,6 +42,25 @@ const contractSchema = z.object({
 interface ClientOption {
   id: string;
   name: string;
+}
+
+interface ContractFormValues {
+  client_id: string;
+  contract_name: string;
+  contract_type: ContractType;
+  start_date: string;
+  end_date: string;
+  currency: string;
+  notes: string;
+  fixed_rate: number;
+  fixed_amount: number;
+  tiers: Array<{
+    id?: string;
+    min: number;
+    max: number | null;
+    rate: number;
+    description?: string;
+  }>;
 }
 interface ContractFormProps {
   contract?: ContractData;
@@ -61,7 +81,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const { currencies } = useCurrency();
-  const form = useForm({
+  const form = useForm<ContractFormValues>({
     resolver: zodResolver(contractSchema),
     defaultValues: {
       client_id: contract?.client_id || '',
@@ -70,7 +90,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
       start_date: contract?.start_date || '',
       end_date: contract?.end_date || '',
       currency: contract?.currency || getCurrentCompanyCurrency(),
-      conditions: '',
+      notes: '',
       fixed_rate: contract?.discount_config.type === 'fixed_percent' ? contract.discount_config.rate : 0.01,
       fixed_amount: contract?.discount_config.type === 'fixed_amount' ? contract.discount_config.amount : 10000,
       tiers: contract?.discount_config.type === 'progressive' ? contract.discount_config.tiers : [
@@ -97,34 +117,99 @@ export const ContractForm: React.FC<ContractFormProps> = ({
       form.setValue('client_id', clientOptions[0].id);
     }
   }, [contract, clientOptions, form]);
+
+  // Valider et corriger la devise par défaut si elle n'existe pas
+  useEffect(() => {
+    const currentCurrency = form.getValues('currency');
+    const currencyExists = currencies.some(c => c.code === currentCurrency);
+    
+    if (!currencyExists && currencies.length > 0) {
+      // Si la devise par défaut n'existe pas, utiliser la première disponible
+      logger.warn('ContractForm', `Devise "${currentCurrency}" non trouvée, utilisation de "${currencies[0].code}"`);
+      form.setValue('currency', currencies[0].code);
+    }
+  }, [currencies, form]);
   const hasClients = clientOptions.length > 0;
   const isCreateMode = !contract;
   const contractType = form.watch('contract_type');
+
+  // Options autocomplete pour clients
+  const clientAutocompleteOptions: AutocompleteOption[] = useMemo(() => {
+    return clientOptions.map(client => ({
+      value: client.id,
+      label: client.name,
+      description: undefined as string | undefined,
+      metadata: client
+    }));
+  }, [clientOptions]);
+
+  // Options autocomplete pour types de contrat
+  const contractTypeOptions: AutocompleteOption[] = useMemo(() => [
+    { value: 'progressive', label: 'Remise progressive (par paliers)', description: 'Taux varie selon montant', category: 'Types' },
+    { value: 'fixed_percent', label: 'Pourcentage fixe', description: 'Taux unique constant', category: 'Types' },
+    { value: 'fixed_amount', label: 'Montant fixe', description: 'Montant constant en €', category: 'Types' },
+  ], []);
+
+  // Options autocomplete pour devises
+  const currencyAutocompleteOptions: AutocompleteOption[] = useMemo(() => {
+    return currencies.map(currency => ({
+      value: currency.code,
+      label: `${currency.code} (${currency.symbol})`,
+      description: currency.name,
+      metadata: currency
+    }));
+  }, [currencies]);
   const { fields: tierFields, append: appendTier, remove: removeTier } = useFieldArray({
     control: form.control,
     name: 'tiers'
   });
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: ContractFormValues) => {
     try {
+      // Valider que les données requises existent
+      if (!data.client_id) {
+        throw new Error('Le client est requis');
+      }
+      if (!data.contract_name) {
+        throw new Error('Le nom du contrat est requis');
+      }
+      if (!data.currency) {
+        throw new Error('La devise est requise');
+      }
+
       // Construire la configuration des remises selon le type
-      let discount_config;
+      let discount_config: DiscountConfig;
       switch (data.contract_type) {
         case 'progressive':
+          if (!data.tiers || data.tiers.length === 0) {
+            throw new Error('Au moins un palier est requis pour les remises progressives');
+          }
           discount_config = {
             type: 'progressive' as ContractType,
-            tiers: data.tiers || []
+            tiers: data.tiers
           };
           break;
         case 'fixed_percent':
+          if (data.fixed_rate === undefined || data.fixed_rate === null) {
+            throw new Error('Le taux de remise est requis');
+          }
+          if (data.fixed_rate < 0 || data.fixed_rate > 1) {
+            throw new Error('Le taux de remise doit être entre 0% et 100%');
+          }
           discount_config = {
             type: 'fixed_percent' as ContractType,
-            rate: data.fixed_rate || 0.01
+            rate: data.fixed_rate
           };
           break;
         case 'fixed_amount':
+          if (data.fixed_amount === undefined || data.fixed_amount === null) {
+            throw new Error('Le montant fixe est requis');
+          }
+          if (data.fixed_amount < 0) {
+            throw new Error('Le montant fixe doit être positif');
+          }
           discount_config = {
             type: 'fixed_amount' as ContractType,
-            amount: data.fixed_amount || 10000
+            amount: data.fixed_amount
           };
           break;
         default:
@@ -138,7 +223,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
         start_date: data.start_date,
         end_date: data.end_date,
         currency: data.currency,
-        conditions: data.conditions
+        notes: data.notes
       };
       const success = await onSubmit(formData);
       if (success) {
@@ -170,8 +255,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   };
   return (
     <div className="max-w-4xl mx-auto">
-      <Form form={form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <Form form={form} onSubmit={handleSubmit} className="space-y-6">
           {/* Informations générales */}
           <Card>
             <CardHeader>
@@ -189,22 +273,17 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                     <FormItem>
                       <FormLabel>{t('contracts.form.client', 'Client')}</FormLabel>
                       <FormControl>
-                        <Select
+                        <SmartAutocomplete
                           value={field.value}
-                          onValueChange={field.onChange}
+                          onChange={field.onChange}
+                          options={clientAutocompleteOptions}
+                          placeholder={clientsLoading ? 'Chargement...' : 'Sélectionner un client'}
+                          searchPlaceholder="Rechercher un client..."
+                          groups={false}
+                          showRecent={true}
+                          maxRecent={5}
                           disabled={loading || clientsLoading || (isCreateMode && !hasClients)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={clientsLoading ? 'Chargement...' : 'Sélectionner un client'} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {clientOptions.map((client) => (
-                              <SelectItem key={client.id} value={client.id}>
-                                {client.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        />
                       </FormControl>
                       {!clientsLoading && !hasClients && (
                         <p className="text-sm text-muted-foreground">
@@ -240,31 +319,15 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                     <FormItem>
                       <FormLabel>{t('contracts.form.type', 'Type de remise')}</FormLabel>
                       <FormControl>
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="progressive">
-                              <div className="flex items-center">
-                                <TrendingUp className="h-4 w-4 mr-2" />
-                                Paliers progressifs
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="fixed_percent">
-                              <div className="flex items-center">
-                                <Percent className="h-4 w-4 mr-2" />
-                                Pourcentage fixe
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="fixed_amount">
-                              <div className="flex items-center">
-                                <DollarSign className="h-4 w-4 mr-2" />
-                                Montant fixe
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <SmartAutocomplete
+                          value={field.value}
+                          onChange={field.onChange}
+                          options={contractTypeOptions}
+                          placeholder="Type de remise..."
+                          searchPlaceholder="Rechercher (progressive, fixe)..."
+                          groups={true}
+                          showRecent={false}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -304,18 +367,17 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   <FormItem>
                     <FormLabel>{t('contracts.form.currency', 'Devise')}</FormLabel>
                     <FormControl>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {currencies.map((currency) => (
-                            <SelectItem key={currency.code} value={currency.code}>
-                              {currency.code} - {currency.symbol}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <SmartAutocomplete
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={currencyAutocompleteOptions}
+                        placeholder="Devise..."
+                        searchPlaceholder="Rechercher (EUR, USD)..."
+                        groups={false}
+                        showRecent={true}
+                        maxRecent={3}
+                        className="w-32"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -501,7 +563,6 @@ export const ContractForm: React.FC<ContractFormProps> = ({
               )}
             </Button>
           </div>
-        </form>
       </Form>
     </div>
   );

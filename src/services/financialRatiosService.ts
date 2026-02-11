@@ -12,6 +12,7 @@ import { getCurrentCompanyCurrency } from '@/lib/utils';
  */
 import { supabase } from '../lib/supabase';
 import { logger } from '@/lib/logger';
+import { AccountingStandardAdapter } from './accountingStandardAdapter';
 /**
  * Service de calcul des ratios financiers pour l'analyse de gestion
  * Conforme aux normes d'analyse financière PCG/IFRS
@@ -82,10 +83,12 @@ class FinancialRatiosService {
           )
         `)
         .eq('company_id', companyId)
-        .in('status', ['posted', 'validated', 'imported'])
+        .in('status', ['posted', 'validated'])
         .gte('entry_date', startDate)
         .lte('entry_date', endDate);
       if (error) throw error;
+      // Détecter le standard comptable
+      const standard = await AccountingStandardAdapter.getCompanyStandard(companyId);
       // Agréger les montants par classe de comptes
       let totalRevenue = 0;          // Classe 7
       let totalExpenses = 0;         // Classe 6
@@ -108,15 +111,15 @@ class FinancialRatiosService {
           const debit = line.debit_amount || 0;
           const credit = line.credit_amount || 0;
           const balance = credit - debit;
-          // Produits (classe 7)
-          if (account.startsWith('7')) {
+          // Produits (standard-aware: classe 7 pour PCG/SYSCOHADA/SCF, classe 6 pour IFRS)
+          if (AccountingStandardAdapter.isRevenue(account, standard)) {
             totalRevenue += balance;
-            if (account.startsWith('707')) {
+            if (account.startsWith('707') || account.startsWith('701')) {
               ventes707 += balance;
             }
           }
-          // Charges (classe 6)
-          else if (account.startsWith('6')) {
+          // Charges (standard-aware)
+          else if (AccountingStandardAdapter.isExpense(account, standard)) {
             totalExpenses += Math.abs(balance);
             if (account.startsWith('607')) {
               achats607 += Math.abs(balance);

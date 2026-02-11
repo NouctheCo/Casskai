@@ -52,17 +52,17 @@ export interface CompanySettings {
 
     name: string;
 
-    commercialName?: string;
+    commercialName: string | null;
 
-    legalForm?: LegalForm;
+    legalForm: LegalForm | null;
 
-    siret?: string;
+    siret: string | null;
 
     apeCode?: string;
 
-    vatNumber?: string;
+    vatNumber: string | null;
 
-    shareCapital?: number;
+    shareCapital: number | null;
 
   };
 
@@ -74,33 +74,33 @@ export interface CompanySettings {
 
     address: {
 
-      street?: string;
+      street: string | null;
 
-      postalCode?: string;
+      postalCode: string | null;
 
-      city?: string;
+      city: string | null;
 
-      country?: string;
-
-    };
-
-    correspondenceAddress?: {
-
-      street?: string;
-
-      postalCode?: string;
-
-      city?: string;
-
-      country?: string;
+      country: string | null;
 
     };
 
-    phone?: string;
+    correspondenceAddress: {
 
-    email?: string;
+      street: string | null;
 
-    website?: string;
+      postalCode: string | null;
+
+      city: string | null;
+
+      country: string | null;
+
+    } | null;
+
+    phone: string | null;
+
+    email: string | null;
+
+    website: string | null;
 
   };
 
@@ -154,11 +154,11 @@ export interface CompanySettings {
 
   business: {
 
-    sector?: BusinessSector;
+    sector: BusinessSector | null;
 
     employeesCount: number;
 
-    annualRevenue?: number;
+    annualRevenue: number | null;
 
     currency: string;
 
@@ -174,17 +174,17 @@ export interface CompanySettings {
 
   branding: {
 
-    logoUrl?: string;
+    logoUrl: string | null;
 
     primaryColor: string;
 
     secondaryColor: string;
 
-    emailSignature?: string;
+    emailSignature: string | null;
 
-    legalMentions?: string;
+    legalMentions: string | null;
 
-    defaultTermsConditions?: string;
+    defaultTermsConditions: string | null;
 
   };
 
@@ -196,23 +196,23 @@ export interface CompanySettings {
 
     templates: {
 
-      invoice: DocumentTemplate;
+      invoice: DocumentTemplate | null;
 
-      quote: DocumentTemplate;
+      quote: DocumentTemplate | null;
 
     };
 
-    headers?: string;
+    headers: string | null;
 
-    footers?: string;
+    footers: string | null;
 
     numbering: {
 
-      invoicePrefix: string;
+      invoicePrefix: string | null;
 
-      quotePrefix: string;
+      quotePrefix: string | null;
 
-      format: string;
+      format: string | null;
 
       counters: {
 
@@ -230,15 +230,15 @@ export interface CompanySettings {
 
   // DIRIGEANT
 
-  ceo?: {
+  ceo: {
 
-    name?: string;
+    name: string | null;
 
-    title?: string;
+    title: string | null;
 
-    email?: string;
+    email: string | null;
 
-  };
+  } | null;
 
 
 
@@ -246,9 +246,9 @@ export interface CompanySettings {
 
   metadata: {
 
-    settingsCompletedAt?: Date;
+    settingsCompletedAt: Date | null;
 
-    onboardingCompletedAt?: Date;
+    onboardingCompletedAt: Date | null;
 
   };
 
@@ -272,17 +272,17 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
       name: r.name,
 
-      commercialName: (r.commercial_name as string) || undefined,
+      commercialName: (r.commercial_name as string) ?? null,
 
-      legalForm: (r.legal_form as LegalForm) || undefined,
+      legalForm: (r.legal_form as LegalForm) ?? null,
 
-      siret: r.siret || undefined,
+      siret: r.siret ?? null,
 
       apeCode: undefined, // 'ape_code' n'existe pas
 
-      vatNumber: r.vat_number || undefined,
+      vatNumber: r.vat_number ?? null,
 
-      shareCapital: r.share_capital || undefined,
+      shareCapital: r.share_capital ?? null,
 
     },
 
@@ -290,23 +290,23 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
       address: {
 
-        street: r.address || undefined,
+        street: r.address ?? null,
 
-        postalCode: r.postal_code || undefined,
+        postalCode: r.postal_code ?? null,
 
-        city: r.city || undefined,
+        city: r.city ?? null,
 
-        country: r.country || undefined,
+        country: r.country ?? null,
 
       },
 
-      correspondenceAddress: undefined, // Pas de colonnes de correspondance en base
+      correspondenceAddress: null, // Pas de colonnes de correspondance en base
 
-      phone: r.phone || undefined,
+      phone: r.phone ?? null,
 
-      email: r.email || undefined,
+      email: r.email ?? null,
 
-      website: r.website || undefined,
+      website: r.website ?? null,
 
     },
 
@@ -316,15 +316,15 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
         startMonth: r.fiscal_year_start_month || 1,
 
-        endMonth: undefined, // 'fiscal_year_end_month' n'existe pas
+        endMonth: 12, // 'fiscal_year_end_month' n'existe pas - default to December
 
       },
 
-      taxRegime: undefined, // 'tax_regime' n'existe pas - ne pas essayer de mapper
+      taxRegime: 'real_normal' as TaxRegime, // 'tax_regime' n'existe pas - default
 
-      vatRegime: undefined, // 'vat_regime' n'existe pas
+      vatRegime: 'subject' as VATRegime, // 'vat_regime' n'existe pas - default
 
-      defaultVatRate: undefined, // 'vat_rate' n'existe pas
+      defaultVatRate: 20, // 'vat_rate' n'existe pas - default 20%
 
       accountant: undefined, // Pas de colonnes accountant en base
 
@@ -334,11 +334,11 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
     business: {
 
-      sector: (r.activity_sector as BusinessSector) || undefined, // 'activity_sector' existe
+      sector: (r.activity_sector as BusinessSector) ?? null, // 'activity_sector' existe
 
       employeesCount: parseInt(String(r.employee_count || '1'), 10) || 1, // 'employee_count' existe
 
-      annualRevenue: (r.annual_revenue as number) || undefined,
+      annualRevenue: (r.annual_revenue as number) ?? null,
 
       currency: r.default_currency || 'EUR',
 
@@ -350,17 +350,17 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
     branding: {
 
-      logoUrl: (r.logo as string) || undefined, // 'logo' existe
+      logoUrl: (r.logo as string) ?? null, // 'logo' existe
 
-      primaryColor: undefined, // 'brand_primary_color' n'existe pas
+      primaryColor: (r.brand_primary_color as string) || '#3B82F6',
 
-      secondaryColor: undefined, // 'brand_secondary_color' n'existe pas
+      secondaryColor: (r.brand_secondary_color as string) || '#1E40AF',
 
-      emailSignature: undefined, // 'email_signature' n'existe pas
+      emailSignature: null, // 'email_signature' n'existe pas
 
-      legalMentions: undefined, // 'legal_mentions' n'existe pas
+      legalMentions: null, // 'legal_mentions' n'existe pas
 
-      defaultTermsConditions: undefined, // 'default_terms_conditions' n'existe pas
+      defaultTermsConditions: null, // 'default_terms_conditions' n'existe pas
 
     },
 
@@ -368,23 +368,23 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
       templates: {
 
-        invoice: undefined, // Templates ne sont pas stockés ici
+        invoice: (r.invoice_template as DocumentTemplate) ?? null,
 
-        quote: undefined,
+        quote: (r.quote_template as DocumentTemplate) ?? null,
 
       },
 
-      headers: undefined, // 'document_header' n'existe pas
+      headers: (r.document_header as string) ?? null,
 
-      footers: undefined, // 'document_footer' n'existe pas
+      footers: (r.document_footer as string) ?? null,
 
       numbering: {
 
-        invoicePrefix: undefined, // 'invoice_prefix' n'existe pas
+        invoicePrefix: (r.invoice_prefix as string) ?? null,
 
-        quotePrefix: undefined, // 'quote_prefix' n'existe pas
+        quotePrefix: (r.quote_prefix as string) ?? null,
 
-        format: undefined, // 'numbering_format' n'existe pas
+        format: (r.numbering_format as string) ?? null,
 
         counters: {
 
@@ -398,21 +398,21 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
 
     },
 
-    ceo: r.ceo_name ? {
+    ceo: r.ceo_name || r.ceo_title || r.ceo_email ? {
 
-      name: r.ceo_name || undefined,
+      name: r.ceo_name ?? null,
 
-      title: r.ceo_title || undefined,
+      title: r.ceo_title ?? null,
 
-      email: undefined, // 'ceo_email' n'existe pas
+      email: (r.ceo_email as string) ?? null,
 
-    } : undefined,
+    } : null,
 
     metadata: {
 
-      settingsCompletedAt: (r.settings_completed_at as string) ? new Date(r.settings_completed_at as string) : undefined,
+      settingsCompletedAt: (r.settings_completed_at as string) ? new Date(r.settings_completed_at as string) : null,
 
-      onboardingCompletedAt: r.onboarding_completed_at ? new Date(r.onboarding_completed_at) : undefined,
+      onboardingCompletedAt: r.onboarding_completed_at ? new Date(r.onboarding_completed_at) : null,
 
     },
 
@@ -616,12 +616,26 @@ export const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
   generalInfo: {
 
     name: '',
+    commercialName: null,
+    legalForm: null,
+    siret: null,
+    vatNumber: null,
+    shareCapital: null,
 
   },
 
   contact: {
 
-    address: {},
+    address: {
+      street: null,
+      postalCode: null,
+      city: null,
+      country: null,
+    },
+    correspondenceAddress: null,
+    phone: null,
+    email: null,
+    website: null,
 
   },
 
@@ -645,7 +659,11 @@ export const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
 
   business: {
 
+    sector: null,
+
     employeesCount: 1,
+
+    annualRevenue: null,
 
     currency: 'EUR',
 
@@ -657,9 +675,16 @@ export const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
 
   branding: {
 
+    logoUrl: null,
     primaryColor: '#3B82F6',
 
     secondaryColor: '#1E40AF',
+
+    emailSignature: null,
+
+    legalMentions: null,
+
+    defaultTermsConditions: null,
 
   },
 
@@ -672,6 +697,10 @@ export const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
       quote: 'default',
 
     },
+
+    headers: null,
+
+    footers: null,
 
     numbering: {
 
@@ -693,6 +722,11 @@ export const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
 
   },
 
-  metadata: {},
+  ceo: null,
+
+  metadata: {
+    settingsCompletedAt: null,
+    onboardingCompletedAt: null,
+  },
 
 };

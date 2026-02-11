@@ -1,11 +1,6 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
-
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -17,13 +12,14 @@ function getBearerToken(req: Request) {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
-  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: cors });
+  const preflightResponse = handleCorsPreflightRequest(req);
+  if (preflightResponse) return preflightResponse;
+  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: getCorsHeaders(req) });
   try {
     const bearer = getBearerToken(req);
     const { data: userData, error: userErr } = await admin.auth.getUser(bearer);
     if (userErr || !userData?.user?.id) {
-      return Response.json({ error: "Unauthorized" }, { status: 401, headers: cors });
+      return Response.json({ error: "Unauthorized" }, { status: 401, headers: getCorsHeaders(req) });
     }
     const userId = userData.user.id;
 
@@ -35,10 +31,10 @@ serve(async (req) => {
       .limit(1)
       .maybeSingle();
     if (fetchErr) {
-      return Response.json({ error: fetchErr.message }, { status: 500, headers: cors });
+      return Response.json({ error: fetchErr.message }, { status: 500, headers: getCorsHeaders(req) });
     }
     if (!pending?.id) {
-      return Response.json({ error: "No pending deletion request" }, { status: 404, headers: cors });
+      return Response.json({ error: "No pending deletion request" }, { status: 404, headers: getCorsHeaders(req) });
     }
 
     const { error: updateErr } = await admin
@@ -46,11 +42,11 @@ serve(async (req) => {
       .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
       .eq("id", pending.id);
     if (updateErr) {
-      return Response.json({ error: updateErr.message }, { status: 500, headers: cors });
+      return Response.json({ error: updateErr.message }, { status: 500, headers: getCorsHeaders(req) });
     }
-    return Response.json({ ok: true }, { headers: cors });
+    return Response.json({ ok: true }, { headers: getCorsHeaders(req) });
   } catch (err) {
-    return Response.json({ error: String(err) }, { status: 500, headers: cors });
+    return Response.json({ error: String(err) }, { status: 500, headers: getCorsHeaders(req) });
   }
 });
 
@@ -64,12 +60,6 @@ serve(async (req) => {
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 interface RequestBody {
   deletion_request_id?: string;
@@ -89,9 +79,8 @@ interface SuccessResponse {
 
 serve(async (req: Request) => {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+  const preflightResponse2 = handleCorsPreflightRequest(req);
+  if (preflightResponse2) return preflightResponse2;
 
   try {
     console.log('[cancel-deletion-request] Function invoked');
@@ -111,7 +100,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
         }
       );
     }
@@ -129,7 +118,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
         }
       );
     }
@@ -155,7 +144,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
         }
       );
     }
@@ -189,7 +178,7 @@ serve(async (req: Request) => {
           } as ErrorResponse),
           {
             status: 404,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
           }
         );
       }
@@ -215,7 +204,7 @@ serve(async (req: Request) => {
           } as ErrorResponse),
           {
             status: 404,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
           }
         );
       }
@@ -232,7 +221,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
         }
       );
     }
@@ -249,7 +238,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
         }
       );
     }
@@ -282,7 +271,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
         }
       );
     }
@@ -323,7 +312,7 @@ serve(async (req: Request) => {
       } as SuccessResponse),
       {
         status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
       }
     );
 
@@ -336,7 +325,7 @@ serve(async (req: Request) => {
       } as ErrorResponse),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
       }
     );
   }

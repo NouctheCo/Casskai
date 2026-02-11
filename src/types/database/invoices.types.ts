@@ -70,6 +70,8 @@ export interface InvoiceWithDetails extends Invoice {
 
   remaining_amount: number
 
+  notes: string | null
+
   currency?: string | null
 
   service_date?: string | null

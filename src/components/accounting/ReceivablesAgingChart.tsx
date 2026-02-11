@@ -148,7 +148,7 @@ export function ReceivablesAgingChart({
 
   // Créances critiques (>90 jours)
   const criticalAmount = data?.aged_analysis.over_90 || 0;
-  const criticalCount = data?.details.filter(d => d.aging_bucket === 'over_90').length || 0;
+  const criticalCount = data?.details?.filter(d => d.aging_bucket === 'over_90').length || 0;
 
   const getBadgeVariant = (bucket: string) => {
     switch (bucket) {
@@ -337,7 +337,7 @@ export function ReceivablesAgingChart({
               </TabsTrigger>
               <TabsTrigger value="details">
                 <List className="h-4 w-4 mr-2"/>
-                Détails ({data.details.length})
+                Détails ({data.details?.length || 0})
               </TabsTrigger>
             </TabsList>
 
@@ -395,7 +395,7 @@ export function ReceivablesAgingChart({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.details.slice(0, 20).map((item) => (
+                    {(data.details || []).slice(0, 20).map((item) => (
                       <TableRow key={item.invoice_id}>
                         <TableCell className="font-medium">{item.invoice_number}</TableCell>
                         <TableCell>{item.client_name}</TableCell>
@@ -415,17 +415,17 @@ export function ReceivablesAgingChart({
                           )}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={getBadgeVariant(item.aging_bucket)} className="text-xs" style={{ backgroundColor: AGING_COLORS[item.aging_bucket] }}>
-                            {AGING_LABELS[item.aging_bucket]}
+                          <Badge variant={getBadgeVariant(item.aging_bucket)} className="text-xs" style={{ backgroundColor: (AGING_COLORS as Record<string, string>)[item.aging_bucket] }}>
+                            {(AGING_LABELS as Record<string, string>)[item.aging_bucket] || item.aging_bucket}
                           </Badge>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-                {data.details.length > 20 && (
+                {(data.details?.length || 0) > 20 && (
                   <p className="text-center text-sm text-gray-500 py-2">
-                    ... et {data.details.length - 20} autres factures
+                    ... et {(data.details?.length || 0) - 20} autres factures
                   </p>
                 )}
               </div>

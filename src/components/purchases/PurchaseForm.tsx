@@ -15,6 +15,7 @@ import { logger } from '@/lib/logger';
 import { formatCurrency } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { buildVatRateOptions, getDefaultVatRate, resolveCompanyCountryCode } from '@/utils/vatRateUtils';
+import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
 interface PurchaseFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -45,6 +46,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
     () => getDefaultVatRate(countryCode),
     [countryCode]
   );
+
   const [formData, setFormData] = useState<PurchaseFormData>({
     invoice_number: '',
     purchase_date: new Date().toISOString().split('T')[0],
@@ -55,6 +57,16 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
     due_date: '',
     attachments: []
   });
+  // Options autocomplete pour taux TVA (groupées)
+  const vatRateAutocompleteOptions: AutocompleteOption[] = useMemo(() => {
+    const uniqueRates = Array.from(new Set([...vatRateOptions, formData.tva_rate])).sort((a, b) => a - b);
+    return uniqueRates.map(rate => ({
+      value: rate.toString(),
+      label: `${rate}%`,
+      description: rate === defaultTaxRate ? 'Taux par défaut' : (undefined as string | undefined),
+      category: rate === 0 ? 'Exonéré' : rate < 10 ? 'Taux réduit' : 'Taux normal'
+    }));
+  }, [vatRateOptions, formData.tva_rate, defaultTaxRate]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [calculatedAmounts, setCalculatedAmounts] = useState({
     tva_amount: 0,
@@ -272,23 +284,15 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                   <Label htmlFor="tva_rate">
                     {t('purchases.form.tvaRate')} (%)
                   </Label>
-                  <Select
+                  <SmartAutocomplete
                     value={formData.tva_rate.toString()}
-                    onValueChange={(value) => handleInputChange('tva_rate', parseFloat(value))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from(new Set([...vatRateOptions, formData.tva_rate]))
-                        .sort((a, b) => a - b)
-                        .map((rate) => (
-                          <SelectItem key={rate} value={rate.toString()}>
-                            {rate}%
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                    onChange={(value) => handleInputChange('tva_rate', parseFloat(value))}
+                    options={vatRateAutocompleteOptions}
+                    placeholder="Sélectionner un taux TVA..."
+                    searchPlaceholder="Rechercher (0%, 5.5%, 10%, 20%)..."
+                    groups={true}
+                    showRecent={false}
+                  />
                   <Input
                     type="number"
                     placeholder="Taux manuel (%)"

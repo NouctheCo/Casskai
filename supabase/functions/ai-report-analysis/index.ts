@@ -6,11 +6,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import OpenAI from 'https://esm.sh/openai@4.20.1'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
-}
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
+import { checkRateLimit, rateLimitResponse, getRateLimitPreset } from '../_shared/rate-limit.ts'
 
 interface AIAnalysisResult {
   executiveSummary: string
@@ -31,8 +28,13 @@ interface ReportAnalysisRequest {
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  const preflightResponse = handleCorsPreflightRequest(req);
+  if (preflightResponse) return preflightResponse;
+
+  // Rate limiting
+  const rateLimit = checkRateLimit(req, getRateLimitPreset('ai-report-analysis'))
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(rateLimit.retryAfter!, getCorsHeaders(req))
   }
 
   try {
@@ -56,7 +58,7 @@ serve(async (req) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       })
     }
 
@@ -72,14 +74,14 @@ serve(async (req) => {
     if (!userCompany) {
       return new Response(JSON.stringify({ error: 'Access denied' }), {
         status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       })
     }
 
     if (!company_id) {
       return new Response(JSON.stringify({ error: 'company_id is required' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       })
     }
 
@@ -89,7 +91,7 @@ serve(async (req) => {
     if (!finalPrompt) {
       return new Response(JSON.stringify({ error: 'prompt or reportData is required' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       })
     }
 
@@ -146,7 +148,7 @@ IMPORTANT: Réponds UNIQUEMENT au format JSON avec la structure suivante:
       })
 
     return new Response(JSON.stringify(analysis), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
     })
 
   } catch (error) {
@@ -156,7 +158,7 @@ IMPORTANT: Réponds UNIQUEMENT au format JSON avec la structure suivante:
       details: error.message
     }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
     })
   }
 })

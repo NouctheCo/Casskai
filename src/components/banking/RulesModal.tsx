@@ -177,7 +177,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                   .map((rule) => (
                     <div
                       key={rule.id}
-                      className="border rounded-lg p-4 hover:shadow-md transition bg-white dark:bg-gray-800 dark:bg-gray-700"
+                      className="border dark:border-gray-600 rounded-lg p-4 hover:shadow-md transition bg-white dark:bg-gray-700"
                     >
                       <div className="flex items-start gap-4">
                         {/* Priorité */}
@@ -191,7 +191,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                                 priority: parseInt(e.target.value) || 0,
                               })
                             }
-                            className="w-16 px-2 py-1 border rounded text-center text-sm"
+                            className="w-16 px-2 py-1 border dark:border-gray-600 rounded text-center text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                             min="0"
                           />
                         </div>
@@ -207,7 +207,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                               onChange={(e) =>
                                 handleUpdateRule(rule.id, { pattern: e.target.value })
                               }
-                              className="flex-1 px-3 py-2 border rounded focus:ring-2 focus:ring-purple-500"
+                              className="flex-1 px-3 py-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500"
                               placeholder="Ex: AMAZON, EDF, LOYER..."
                             />
                             <label className="flex items-center gap-1 text-sm">
@@ -234,7 +234,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                             onChange={(e) =>
                               handleUpdateRule(rule.id, { account_id: e.target.value })
                             }
-                            className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-purple-500"
+                            className="w-full px-3 py-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500"
                           >
                             <option value="">Sélectionner...</option>
                             {accounts.map((acc) => (
@@ -267,7 +267,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                                 description_template: e.target.value || null,
                               })
                             }
-                            className="w-full px-3 py-1 border rounded text-sm"
+                            className="w-full px-3 py-1 border dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                             placeholder="Ex: Abonnement Amazon Prime"
                           />
                         </div>
@@ -306,7 +306,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         type="text"
                         value={newRule.pattern}
                         onChange={(e) => setNewRule({ ...newRule, pattern: e.target.value })}
-                        className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-3 py-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500"
                         placeholder="Ex: AMAZON"
                       />
                     </div>
@@ -318,7 +318,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         onChange={(e) =>
                           setNewRule({ ...newRule, account_id: e.target.value })
                         }
-                        className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-3 py-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500"
                       >
                         <option value="">Sélectionner...</option>
                         {accounts.map((acc) => (
@@ -338,7 +338,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         onChange={(e) =>
                           setNewRule({ ...newRule, description_template: e.target.value })
                         }
-                        className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-3 py-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500"
                         placeholder="Ex: Abonnement Amazon"
                       />
                     </div>
@@ -350,7 +350,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         onChange={(e) =>
                           setNewRule({ ...newRule, priority: parseInt(e.target.value) || 0 })
                         }
-                        className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-3 py-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500"
                         min="0"
                       />
                     </div>

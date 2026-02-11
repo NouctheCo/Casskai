@@ -721,7 +721,7 @@ export class AssetAccountingSyncService {
     else if (line.account_number?.length >= 2) score += 1;
 
     // Journal d'achat
-    if (['ACHATS', 'ACH', 'HA'].includes(entry.journal_code?.toUpperCase())) score += 1;
+    if (['ACHATS', 'ACH', 'HA'].includes(entry.journal_code?.toUpperCase() ?? '')) score += 1;
 
     // Écriture validée
     if (entry.status === 'validated' || entry.status === 'posted') score += 1;

@@ -59,8 +59,27 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
-    
+
     --radius: 0.5rem;
+
+    /* ======================================
+       CassKai Brand Colors - Charte v1.2
+       ====================================== */
+
+    /* Couleurs principales CassKai */
+    --casskai-blue-600: 217.2 91% 60%;      /* #2563EB - Primary brand */
+    --casskai-blue-500: 217.2 91% 60%;      /* #3B82F6 - Interactive */
+    --casskai-violet-500: 271 91% 65%;      /* #8B5CF6 - Accent */
+
+    /* Couleurs sémantiques CassKai */
+    --casskai-success: 142 71% 37%;         /* #16A34A - Success */
+    --casskai-error: 0 73% 50%;             /* #DC2626 - Error */
+    --casskai-warning: 31 95% 44%;          /* #D97706 - Warning */
+    --casskai-info: 217.2 91% 60%;          /* #3B82F6 - Info (same as blue-500) */
+
+    /* Dégradé signature CassKai */
+    --casskai-gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+    --casskai-gradient-hover: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
   }
  
   .dark {
@@ -91,6 +110,26 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    /* ======================================
+       CassKai Brand Colors - Charte v1.2
+       Dark Mode
+       ====================================== */
+
+    /* Couleurs principales CassKai (identiques en dark mode) */
+    --casskai-blue-600: 217.2 91% 60%;      /* #2563EB - Primary brand */
+    --casskai-blue-500: 217.2 91% 60%;      /* #3B82F6 - Interactive */
+    --casskai-violet-500: 271 91% 65%;      /* #8B5CF6 - Accent */
+
+    /* Couleurs sémantiques CassKai (identiques en dark mode) */
+    --casskai-success: 142 71% 37%;         /* #16A34A - Success */
+    --casskai-error: 0 73% 50%;             /* #DC2626 - Error */
+    --casskai-warning: 31 95% 44%;          /* #D97706 - Warning */
+    --casskai-info: 217.2 91% 60%;          /* #3B82F6 - Info */
+
+    /* Dégradé signature CassKai (identique en dark mode) */
+    --casskai-gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+    --casskai-gradient-hover: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
   }
 
   * {
@@ -175,7 +214,7 @@
 
   /* Gradient Text */
   .gradient-text {
-    background: linear-gradient(to right, rgb(59, 130, 246), rgb(99, 102, 241));
+    background: linear-gradient(135deg, rgb(59, 130, 246), rgb(139, 92, 246));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -391,6 +430,115 @@
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
+  }
+
+  /* ======================================
+     CassKai Brand Utilities - Charte v1.2
+     ====================================== */
+
+  /* Text colors */
+  .text-casskai-blue {
+    color: hsl(var(--casskai-blue-500));
+  }
+
+  .text-casskai-violet {
+    color: hsl(var(--casskai-violet-500));
+  }
+
+  .text-casskai-success {
+    color: hsl(var(--casskai-success));
+  }
+
+  .text-casskai-error {
+    color: hsl(var(--casskai-error));
+  }
+
+  .text-casskai-warning {
+    color: hsl(var(--casskai-warning));
+  }
+
+  /* Background colors */
+  .bg-casskai-blue {
+    background-color: hsl(var(--casskai-blue-500));
+  }
+
+  .bg-casskai-violet {
+    background-color: hsl(var(--casskai-violet-500));
+  }
+
+  .bg-casskai-success {
+    background-color: hsl(var(--casskai-success));
+  }
+
+  .bg-casskai-error {
+    background-color: hsl(var(--casskai-error));
+  }
+
+  .bg-casskai-warning {
+    background-color: hsl(var(--casskai-warning));
+  }
+
+  /* Border colors */
+  .border-casskai-blue {
+    border-color: hsl(var(--casskai-blue-500));
+  }
+
+  .border-casskai-violet {
+    border-color: hsl(var(--casskai-violet-500));
+  }
+
+  /* Gradient backgrounds */
+  .bg-casskai-gradient {
+    background: var(--casskai-gradient-primary);
+  }
+
+  .bg-casskai-gradient-hover {
+    background: var(--casskai-gradient-hover);
+  }
+
+  /* Gradient text - Alternative avec variables CassKai */
+  .text-casskai-gradient {
+    background: var(--casskai-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Button avec gradient CassKai */
+  .btn-casskai-gradient {
+    background: var(--casskai-gradient-primary);
+    color: white;
+    transition: all 0.3s ease;
+  }
+
+  .btn-casskai-gradient:hover {
+    background: var(--casskai-gradient-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+  }
+
+  /* Card avec bordure gradient CassKai */
+  .card-casskai-gradient {
+    position: relative;
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1px;
+  }
+
+  .card-casskai-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 0.75rem;
+    padding: 1px;
+    background: var(--casskai-gradient-primary);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .dark .card-casskai-gradient {
+    background: hsl(var(--card));
   }
 }
 

@@ -1,11 +1,7 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.47.0'
 import { cron } from 'https://deno.land/x/deno_cron@v1.0.0/cron.ts'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
 
 interface Workflow {
   id: string
@@ -29,9 +25,8 @@ interface Workflow {
 
 serve(async (req) => {
   // Handle CORS
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const preflightResponse = handleCorsPreflightRequest(req)
+  if (preflightResponse) return preflightResponse
 
   try {
     const supabaseClient = createClient(
@@ -44,25 +39,25 @@ serve(async (req) => {
 
     switch (action) {
       case 'schedule':
-        return await handleScheduleWorkflows(supabaseClient)
+        return await handleScheduleWorkflows(supabaseClient, req)
 
       case 'execute':
         const workflowId = url.searchParams.get('workflowId')
         if (!workflowId) {
           return new Response(
             JSON.stringify({ error: 'workflowId requis' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
           )
         }
-        return await handleExecuteWorkflow(supabaseClient, workflowId)
+        return await handleExecuteWorkflow(supabaseClient, workflowId, req)
 
       case 'cleanup':
-        return await handleCleanupExecutions(supabaseClient)
+        return await handleCleanupExecutions(supabaseClient, req)
 
       default:
         return new Response(
           JSON.stringify({ error: 'Action non supportée' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
         )
     }
 
@@ -75,7 +70,7 @@ serve(async (req) => {
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     )
   }
@@ -84,7 +79,7 @@ serve(async (req) => {
 /**
  * Planifie et exécute les workflows dus
  */
-async function handleScheduleWorkflows(supabaseClient: any) {
+async function handleScheduleWorkflows(supabaseClient: any, req: Request) {
   try {
     const now = new Date().toISOString()
 
@@ -164,7 +159,7 @@ async function handleScheduleWorkflows(supabaseClient: any) {
       }),
       {
         status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     )
 
@@ -177,7 +172,7 @@ async function handleScheduleWorkflows(supabaseClient: any) {
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     )
   }
@@ -186,7 +181,7 @@ async function handleScheduleWorkflows(supabaseClient: any) {
 /**
  * Exécute un workflow spécifique
  */
-async function handleExecuteWorkflow(supabaseClient: any, workflowId: string) {
+async function handleExecuteWorkflow(supabaseClient: any, workflowId: string, req: Request) {
   try {
     // Récupérer le workflow
     const { data: workflow, error } = await supabaseClient
@@ -198,14 +193,14 @@ async function handleExecuteWorkflow(supabaseClient: any, workflowId: string) {
     if (error || !workflow) {
       return new Response(
         JSON.stringify({ error: 'Workflow non trouvé' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 404, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
     if (!workflow.is_active) {
       return new Response(
         JSON.stringify({ error: 'Workflow inactif' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -223,7 +218,7 @@ async function handleExecuteWorkflow(supabaseClient: any, workflowId: string) {
       }),
       {
         status: result.success ? 200 : 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     )
 
@@ -236,7 +231,7 @@ async function handleExecuteWorkflow(supabaseClient: any, workflowId: string) {
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     )
   }
@@ -245,7 +240,7 @@ async function handleExecuteWorkflow(supabaseClient: any, workflowId: string) {
 /**
  * Nettoie les anciennes exécutions
  */
-async function handleCleanupExecutions(supabaseClient: any) {
+async function handleCleanupExecutions(supabaseClient: any, req: Request) {
   try {
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - 30) // Garder 30 jours
@@ -266,7 +261,7 @@ async function handleCleanupExecutions(supabaseClient: any) {
       }),
       {
         status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     )
 
@@ -279,7 +274,7 @@ async function handleCleanupExecutions(supabaseClient: any) {
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     )
   }

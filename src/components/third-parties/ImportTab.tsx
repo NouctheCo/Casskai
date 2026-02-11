@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import { ensureAuxiliaryAccount } from '@/services/auxiliaryAccountService';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -203,7 +204,7 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
     let errorCount = 0;
     for (const row of validRows) {
       try {
-        const { error } = await supabase.from('third_parties').insert({
+        const { data: created, error } = await supabase.from('third_parties').insert({
           company_id: companyId,
           name: row.name,
           type: row.type as 'customer' | 'supplier' | 'both' | 'prospect',
@@ -216,8 +217,19 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
           siret: row.siret || null,
           vat_number: row.vat_number || null,
           is_active: true
-        });
+        }).select('id, name, type').single();
         if (error) throw error;
+
+        // ✅ Créer automatiquement le compte auxiliaire (411xxxx / 401xxxx)
+        if (created && companyId) {
+          ensureAuxiliaryAccount(
+            companyId,
+            created.id,
+            created.type || 'customer',
+            created.name
+          ).catch(() => {}); // Non bloquant pour l'import batch
+        }
+
         successCount++;
       } catch (error) {
         logger.error('ImportTab', 'Erreur import ligne:', row.name, error);

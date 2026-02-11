@@ -211,6 +211,7 @@ export function DashboardWidgetProvider({ children }: { children: React.ReactNod
       }, 1000);
       return () => clearTimeout(timeoutId);
     }
+    return undefined;
   }, [currentLayout, user, saveLayout, editMode]);
   const value: DashboardContextType = {
     currentLayout,

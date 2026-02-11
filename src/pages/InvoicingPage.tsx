@@ -55,7 +55,8 @@ import {
   Zap as _Zap,
   DollarSign as _DollarSign,
   BarChart3 as _BarChart3,
-  Settings as _Settings
+  Settings as _Settings,
+  Upload
 } from 'lucide-react';
 // Import optimized tab components
 import OptimizedInvoicesTab from '@/components/invoicing/OptimizedInvoicesTab';
@@ -64,6 +65,7 @@ import OptimizedQuotesTab from '@/components/invoicing/OptimizedQuotesTab';
 import OptimizedPaymentsTab from '@/components/invoicing/OptimizedPaymentsTab';
 import { LateFeeCalculator } from '@/components/invoicing/LateFeeCalculator';
 import { InvoiceComplianceSettings } from '@/components/invoicing/InvoiceComplianceSettings';
+import { BulkJournalImportTab } from '@/components/accounting/BulkJournalImportTab';
 import { logger } from '@/lib/logger';
 // Invoicing KPI Card Component
 const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }: {
@@ -331,7 +333,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
   );
 };
 export default function InvoicingPageOptimized() {
-  const { user: _user } = useAuth();
+  const { user: _user, currentCompany } = useAuth();
   const { canAccessFeature } = useSubscription();
   const { isExpired } = useSubscriptionStatus();
   const { t } = useTranslation();
@@ -664,6 +666,13 @@ export default function InvoicingPageOptimized() {
                 {t('invoicing.tabs.payments', 'Paiements')}
               </TabsTrigger>
               <TabsTrigger
+                value="import"
+                className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                <Upload className="h-4 w-4" />
+                {t('invoicing.tabs.import', 'Import')}
+              </TabsTrigger>
+              <TabsTrigger
                 value="late-fees"
                 className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
@@ -843,6 +852,19 @@ export default function InvoicingPageOptimized() {
               <OptimizedPaymentsTab 
                 shouldCreateNew={shouldCreateNew === 'payment'}
                 onCreateNewCompleted={() => setShouldCreateNew(null)}
+              />
+            </motion.div>
+          </TabsContent>
+          {/* Import Tab */}
+          <TabsContent value="import">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <BulkJournalImportTab
+                companyId={currentCompany?.id || ''}
+                defaultJournalCode="VTE"
               />
             </motion.div>
           </TabsContent>

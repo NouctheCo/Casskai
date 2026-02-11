@@ -3,7 +3,6 @@
  * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
  * 
  * Onglet d'import pour les contrats RFA :
- * - Import CA (Chiffre d'Affaires) → rfa_turnover_entries
  * - Import groupes/références produits → rfa_product_groups + rfa_product_group_items
  * - Import calculs RFA → rfa_calculations
  */
@@ -25,7 +24,6 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-  DollarSign,
   Package,
   Calculator,
   Info
@@ -34,21 +32,6 @@ import ExcelJS from 'exceljs';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
-
-// Types pour l'import CA (rfa_turnover_entries)
-interface CAImportRow {
-  third_party_name: string;
-  product_group_code?: string;
-  period_start: string;
-  period_end: string;
-  amount_excl_tax: number;
-  amount_incl_tax: number;
-  isValid: boolean;
-  errors: string[];
-  // IDs résolus
-  third_party_id?: string;
-  rfa_product_group_id?: string;
-}
 
 // Types pour l'import groupes de produits (rfa_product_groups + rfa_product_group_items)
 interface ProductGroupImportRow {
@@ -80,12 +63,6 @@ interface RFAImportRow {
   contract_id?: string;
 }
 
-// Types de référence pour la validation
-interface ThirdParty {
-  id: string;
-  name: string;
-}
-
 interface ProductGroup {
   id: string;
   code: string;
@@ -98,7 +75,7 @@ interface ContractImportTabProps {
   onImportComplete?: () => void;
 }
 
-type ImportType = 'ca' | 'products' | 'rfa';
+type ImportType = 'products' | 'rfa';
 
 export const ContractImportTab: React.FC<ContractImportTabProps> = ({
   companyId,
@@ -109,18 +86,16 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [importType, setImportType] = useState<ImportType>('ca');
+  const [importType, setImportType] = useState<ImportType>('products');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
   const [importComplete, setImportComplete] = useState(false);
   const [importStats, setImportStats] = useState({ success: 0, errors: 0 });
   
   // Reference data for validation
-  const [thirdParties, setThirdParties] = useState<ThirdParty[]>([]);
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([]);
   
   // Data states pour chaque type
-  const [caData, setCAData] = useState<CAImportRow[]>([]);
   const [productData, setProductData] = useState<ProductGroupImportRow[]>([]);
   const [rfaData, setRFAData] = useState<RFAImportRow[]>([]);
 
@@ -129,17 +104,6 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
     if (!companyId) return;
 
     try {
-      // Load third parties
-      const { data: parties } = await supabase
-        .from('third_parties')
-        .select('id, name')
-        .eq('company_id', companyId)
-        .eq('is_active', true);
-      
-      if (parties) {
-        setThirdParties(parties);
-      }
-
       // Load product groups
       const { data: groups } = await supabase
         .from('rfa_product_groups')
@@ -163,7 +127,6 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
   const handleImportTypeChange = (type: ImportType) => {
     setImportType(type);
     setSelectedFile(null);
-    setCAData([]);
     setProductData([]);
     setRFAData([]);
     setImportComplete(false);
@@ -176,29 +139,6 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
   // TEMPLATES DOWNLOAD
   // ========================================
   
-  const downloadCATemplate = () => {
-    const template = [
-      {
-        third_party_name: 'Client Exemple SARL',
-        product_group_code: 'GRP-001',
-        period_start: '2024-01-01',
-        period_end: '2024-03-31',
-        amount_excl_tax: 50000,
-        amount_incl_tax: 60000
-      },
-      {
-        third_party_name: 'Autre Client SAS',
-        product_group_code: '',
-        period_start: '2024-01-01',
-        period_end: '2024-03-31',
-        amount_excl_tax: 75000,
-        amount_incl_tax: 90000
-      }
-    ];
-    void downloadTemplate(template, 'template_import_ca_rfa.xlsx', 'CA RFA');
-    toastSuccess(t('contracts.import.template_downloaded', 'Modèle téléchargé'));
-  };
-
   const downloadProductsTemplate = () => {
     const template = [
       {
@@ -319,9 +259,6 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
       });
 
       switch (importType) {
-        case 'ca':
-          parseCAData(jsonData);
-          break;
         case 'products':
           parseProductData(jsonData);
           break;
@@ -336,58 +273,6 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
       toastError(t('contracts.import.file_read_error', 'Impossible de lire le fichier'));
       setSelectedFile(null);
     }
-  };
-
-  const parseCAData = (jsonData: Record<string, unknown>[]) => {
-    const thirdPartyMap = new Map(thirdParties.map(tp => [tp.name.toLowerCase(), tp.id]));
-    const productGroupMap = new Map(productGroups.map(pg => [pg.code?.toLowerCase(), pg.id]));
-    
-    const rows: CAImportRow[] = jsonData.map(row => {
-      const errors: string[] = [];
-      const thirdPartyName = String(row.third_party_name || '').trim();
-      const productGroupCode = String(row.product_group_code || '').trim();
-      const periodStart = String(row.period_start || '').trim();
-      const periodEnd = String(row.period_end || '').trim();
-      const amountExclTax = Number(row.amount_excl_tax) || 0;
-      const amountInclTax = Number(row.amount_incl_tax) || 0;
-
-      // Validation
-      if (!thirdPartyName) {
-        errors.push(t('contracts.import.errors.third_party_required', 'Nom du tiers obligatoire'));
-      }
-      
-      const thirdPartyId = thirdPartyMap.get(thirdPartyName.toLowerCase());
-      if (thirdPartyName && !thirdPartyId) {
-        errors.push(t('contracts.import.errors.third_party_not_found', 'Tiers non trouvé'));
-      }
-
-      let productGroupId: string | undefined;
-      if (productGroupCode) {
-        productGroupId = productGroupMap.get(productGroupCode.toLowerCase());
-        if (!productGroupId) {
-          errors.push(t('contracts.import.errors.product_group_not_found', 'Groupe produit non trouvé'));
-        }
-      }
-
-      if (!periodStart) errors.push(t('contracts.import.errors.period_start_required', 'Date début obligatoire'));
-      if (!periodEnd) errors.push(t('contracts.import.errors.period_end_required', 'Date fin obligatoire'));
-      if (amountExclTax < 0) errors.push(t('contracts.import.errors.amount_positive', 'Montant HT doit être >= 0'));
-
-      return {
-        third_party_name: thirdPartyName,
-        product_group_code: productGroupCode || undefined,
-        period_start: periodStart,
-        period_end: periodEnd,
-        amount_excl_tax: amountExclTax,
-        amount_incl_tax: amountInclTax || amountExclTax * 1.2,
-        third_party_id: thirdPartyId,
-        rfa_product_group_id: productGroupId,
-        isValid: errors.length === 0,
-        errors
-      };
-    });
-
-    setCAData(rows);
   };
 
   const parseProductData = (jsonData: Record<string, unknown>[]) => {
@@ -489,9 +374,6 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
 
     try {
       switch (importType) {
-        case 'ca':
-          ({ successCount, errorCount } = await importCAData());
-          break;
         case 'products':
           ({ successCount, errorCount } = await importProductData());
           break;
@@ -513,35 +395,6 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
         toastError(`${errorCount} ${t('contracts.import.errors_occurred', 'erreur(s)')}`);
       }
     }
-  };
-
-  const importCAData = async () => {
-    const validRows = caData.filter(row => row.isValid);
-    let successCount = 0;
-    let errorCount = 0;
-
-    for (const row of validRows) {
-      try {
-        const { error } = await supabase.from('rfa_turnover_entries').insert({
-          company_id: companyId,
-          third_party_id: row.third_party_id,
-          rfa_product_group_id: row.rfa_product_group_id || null,
-          period_start: row.period_start,
-          period_end: row.period_end,
-          amount_excl_tax: row.amount_excl_tax,
-          amount_incl_tax: row.amount_incl_tax,
-          created_by: user?.id
-        });
-
-        if (error) throw error;
-        successCount++;
-      } catch (error) {
-        logger.error('ContractImportTab', 'Erreur import CA:', row.third_party_name, error);
-        errorCount++;
-      }
-    }
-
-    return { successCount, errorCount };
   };
 
   const importProductData = async () => {
@@ -663,9 +516,8 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
   // HELPERS
   // ========================================
 
-  const getCurrentData = (): (CAImportRow | ProductGroupImportRow | RFAImportRow)[] => {
+  const getCurrentData = (): (ProductGroupImportRow | RFAImportRow)[] => {
     switch (importType) {
-      case 'ca': return caData;
       case 'products': return productData;
       case 'rfa': return rfaData;
       default: return [];
@@ -677,7 +529,6 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
 
   const getDownloadFunction = () => {
     switch (importType) {
-      case 'ca': return downloadCATemplate;
       case 'products': return downloadProductsTemplate;
       case 'rfa': return downloadRFATemplate;
     }
@@ -685,14 +536,12 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
 
   const getImportLabel = () => {
     switch (importType) {
-      case 'ca': return t('contracts.import.types.ca', 'Chiffre d\'Affaires');
       case 'products': return t('contracts.import.types.products', 'Groupes Produits');
       case 'rfa': return t('contracts.import.types.rfa', 'Calculs RFA');
     }
   };
 
   const resetImport = () => {
-    setCAData([]);
     setProductData([]);
     setRFAData([]);
     setSelectedFile(null);
@@ -710,11 +559,7 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
     <div className="space-y-6">
       {/* Sélection du type d'import */}
       <Tabs value={importType} onValueChange={(v) => handleImportTypeChange(v as ImportType)}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="ca" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            {t('contracts.import.types.ca', 'CA')}
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="products" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
             {t('contracts.import.types.products', 'Produits')}
@@ -724,14 +569,6 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
             {t('contracts.import.types.rfa', 'RFA')}
           </TabsTrigger>
         </TabsList>
-
-        <TabsContent value="ca">
-          <ImportInstructions
-            title={t('contracts.import.ca_title', 'Import du Chiffre d\'Affaires')}
-            description={t('contracts.import.ca_description', 'Importez les données de CA réalisé par tiers et période pour alimenter les calculs de RFA.')}
-            columns={['third_party_name', 'product_group_code', 'period_start', 'period_end', 'amount_excl_tax', 'amount_incl_tax']}
-          />
-        </TabsContent>
 
         <TabsContent value="products">
           <ImportInstructions
@@ -751,17 +588,14 @@ export const ContractImportTab: React.FC<ContractImportTabProps> = ({
       </Tabs>
 
       {/* Info sur les données de référence */}
-      {importType === 'ca' && (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            <p className="text-sm">
-              <strong>{t('contracts.import.available_third_parties', 'Tiers disponibles')}:</strong> {thirdParties.length} | 
-              <strong className="ml-2">{t('contracts.import.available_product_groups', 'Groupes produits')}:</strong> {productGroups.length}
-            </p>
-          </AlertDescription>
-        </Alert>
-      )}
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          <p className="text-sm">
+            <strong>{t('contracts.import.available_product_groups', 'Groupes produits')}:</strong> {productGroups.length}
+          </p>
+        </AlertDescription>
+      </Alert>
 
       {/* Télécharger le modèle */}
       <Card>
@@ -936,13 +770,11 @@ const ImportInstructions: React.FC<{
 };
 
 const DataPreviewTable: React.FC<{
-  data: (CAImportRow | ProductGroupImportRow | RFAImportRow)[];
+  data: (ProductGroupImportRow | RFAImportRow)[];
   importType: ImportType;
 }> = ({ data, importType }) => {
   const getColumns = () => {
     switch (importType) {
-      case 'ca':
-        return ['Statut', 'Tiers', 'Groupe', 'Période', 'Montant HT', 'Erreurs'];
       case 'products':
         return ['Statut', 'Code Groupe', 'Nom Groupe', 'Réf. Produit', 'Nom Produit', 'Erreurs'];
       case 'rfa':
@@ -950,33 +782,7 @@ const DataPreviewTable: React.FC<{
     }
   };
 
-  const renderRow = (row: CAImportRow | ProductGroupImportRow | RFAImportRow, index: number) => {
-    if (importType === 'ca') {
-      const r = row as CAImportRow;
-      return (
-        <tr key={index} className={`border-b ${r.isValid ? 'bg-green-50 dark:bg-green-950/20' : 'bg-red-50 dark:bg-red-950/20'}`}>
-          <td className="py-2 px-3">
-            {r.isValid ? <CheckCircle className="h-4 w-4 text-green-600" /> : <AlertCircle className="h-4 w-4 text-red-600" />}
-          </td>
-          <td className="py-2 px-3 font-medium">{r.third_party_name}</td>
-          <td className="py-2 px-3">{r.product_group_code || '-'}</td>
-          <td className="py-2 px-3">{r.period_start} - {r.period_end}</td>
-          <td className="py-2 px-3">{r.amount_excl_tax.toLocaleString('fr-FR')} €</td>
-          <td className="py-2 px-3">
-            {r.errors.length > 0 ? (
-              <div className="space-y-1">
-                {r.errors.map((error, i) => (
-                  <p key={i} className="text-xs text-red-600 dark:text-red-400">{error}</p>
-                ))}
-              </div>
-            ) : (
-              <span className="text-green-600 text-xs">OK</span>
-            )}
-          </td>
-        </tr>
-      );
-    }
-
+  const renderRow = (row: ProductGroupImportRow | RFAImportRow, index: number) => {
     if (importType === 'products') {
       const r = row as ProductGroupImportRow;
       return (

@@ -6,7 +6,7 @@ import { cn } from '../../lib/utils';
 
 
 
-const AlertContext = React.createContext(undefined);
+const AlertContext = React.createContext<{ variant?: "default" | "destructive" | "warning" | "success" } | undefined>(undefined);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useAlertContext = () => {

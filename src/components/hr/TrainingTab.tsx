@@ -17,7 +17,8 @@ import {
   Award,
   BookOpen,
   CheckCircle,
-  Clock
+  Clock,
+  Pencil
 } from 'lucide-react';
 import { hrTrainingService } from '@/services/hrTrainingService';
 import type { TrainingCatalog, TrainingSession, TrainingEnrollment, Certification } from '@/types/hr-training.types';
@@ -44,6 +45,10 @@ export function TrainingTab({ companyId, employees: _employees, currentUserId: _
   const [showTrainingModal, setShowTrainingModal] = useState(false);
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [showCertificationModal, setShowCertificationModal] = useState(false);
+  // Selected entities for editing
+  const [selectedTraining, setSelectedTraining] = useState<TrainingCatalog | null>(null);
+  const [selectedSession, setSelectedSession] = useState<TrainingSession | null>(null);
+  const [selectedCertification, setSelectedCertification] = useState<Certification | null>(null);
 
   useEffect(() => {
     loadAllData();
@@ -72,6 +77,19 @@ export function TrainingTab({ companyId, employees: _employees, currentUserId: _
     if (result.success) {
       await loadAllData();
       setShowTrainingModal(false);
+      setSelectedTraining(null);
+      return true;
+    }
+    return false;
+  };
+
+  const handleUpdateTraining = async (formData: any) => {
+    if (!selectedTraining) return false;
+    const result = await hrTrainingService.updateTrainingCatalog(selectedTraining.id, formData);
+    if (result.success) {
+      await loadAllData();
+      setShowTrainingModal(false);
+      setSelectedTraining(null);
       return true;
     }
     return false;
@@ -82,6 +100,19 @@ export function TrainingTab({ companyId, employees: _employees, currentUserId: _
     if (result.success) {
       await loadAllData();
       setShowSessionModal(false);
+      setSelectedSession(null);
+      return true;
+    }
+    return false;
+  };
+
+  const handleUpdateSession = async (formData: any) => {
+    if (!selectedSession) return false;
+    const result = await hrTrainingService.updateSession(selectedSession.id, formData);
+    if (result.success) {
+      await loadAllData();
+      setShowSessionModal(false);
+      setSelectedSession(null);
       return true;
     }
     return false;
@@ -92,6 +123,19 @@ export function TrainingTab({ companyId, employees: _employees, currentUserId: _
     if (result.success) {
       await loadAllData();
       setShowCertificationModal(false);
+      setSelectedCertification(null);
+      return true;
+    }
+    return false;
+  };
+
+  const handleUpdateCertification = async (formData: any) => {
+    if (!selectedCertification) return false;
+    const result = await hrTrainingService.updateCertification(selectedCertification.id, formData);
+    if (result.success) {
+      await loadAllData();
+      setShowCertificationModal(false);
+      setSelectedCertification(null);
       return true;
     }
     return false;
@@ -286,6 +330,16 @@ export function TrainingTab({ companyId, employees: _employees, currentUserId: _
                         </div>
                         <CardTitle className="text-lg">{training.title}</CardTitle>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedTraining(training);
+                          setShowTrainingModal(true);
+                        }}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -365,6 +419,16 @@ export function TrainingTab({ companyId, employees: _employees, currentUserId: _
                           {session.end_date && ` - ${new Date(session.end_date).toLocaleDateString('fr-FR')}`}
                         </p>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedSession(session);
+                          setShowSessionModal(true);
+                        }}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -478,7 +542,19 @@ export function TrainingTab({ companyId, employees: _employees, currentUserId: _
                           <CardTitle className="text-lg">{cert.certification_name}</CardTitle>
                           <p className="text-sm text-gray-600 dark:text-gray-300">{cert.employee_name}</p>
                         </div>
-                        <Award className="w-8 h-8 text-yellow-500" />
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedCertification(cert);
+                              setShowCertificationModal(true);
+                            }}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Award className="w-8 h-8 text-yellow-500" />
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -528,24 +604,33 @@ export function TrainingTab({ companyId, employees: _employees, currentUserId: _
       {/* Modaux */}
       <TrainingFormModal
         isOpen={showTrainingModal}
-        onClose={() => setShowTrainingModal(false)}
-        onSubmit={handleCreateTraining}
-        training={null}
+        onClose={() => {
+          setShowTrainingModal(false);
+          setSelectedTraining(null);
+        }}
+        onSubmit={selectedTraining ? handleUpdateTraining : handleCreateTraining}
+        training={selectedTraining}
       />
 
       <SessionFormModal
         isOpen={showSessionModal}
-        onClose={() => setShowSessionModal(false)}
-        onSubmit={handleCreateSession}
-        session={null}
+        onClose={() => {
+          setShowSessionModal(false);
+          setSelectedSession(null);
+        }}
+        onSubmit={selectedSession ? handleUpdateSession : handleCreateSession}
+        session={selectedSession}
         trainingCatalog={trainings.map(t => ({ id: t.id, title: t.title }))}
       />
 
       <CertificationFormModal
         isOpen={showCertificationModal}
-        onClose={() => setShowCertificationModal(false)}
-        onSubmit={handleCreateCertification}
-        certification={null}
+        onClose={() => {
+          setShowCertificationModal(false);
+          setSelectedCertification(null);
+        }}
+        onSubmit={selectedCertification ? handleUpdateCertification : handleCreateCertification}
+        certification={selectedCertification}
         employees={_employees}
       />
     </div>

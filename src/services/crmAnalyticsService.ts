@@ -22,6 +22,8 @@ export interface ConversionMetrics {
   total_opportunities: number;
   won_opportunities: number;
   lost_opportunities: number;
+  closing_opportunities: number;
+  closed_opportunities: number;
   conversion_rate: number;
   win_rate_by_stage: Record<string, number>;
   average_deal_size: number;
@@ -98,7 +100,8 @@ class CRMAnalyticsService {
     const total = opportunities.length;
     const won = opportunities.filter(o => o.stage === 'won').length;
     const lost = opportunities.filter(o => o.stage === 'lost').length;
-    const active = opportunities.filter(o => !['won', 'lost'].includes(o.stage));
+    const closing = opportunities.filter(o => o.stage === 'closing').length;
+    const active = opportunities.filter(o => !['won', 'lost', 'closing'].includes(o.stage));
 
     // Win rate by stage
     const stageGroups = this.groupByStage(opportunities);
@@ -120,11 +123,15 @@ class CRMAnalyticsService {
     const totalPipelineValue = active.reduce((sum, o) => sum + o.value, 0);
     const weightedPipelineValue = active.reduce((sum, o) => sum + (o.value * o.probability / 100), 0);
 
+    const closedCount = won + lost + closing;
+
     return {
       total_opportunities: total,
       won_opportunities: won,
       lost_opportunities: lost,
-      conversion_rate: total > 0 ? (won / (won + lost)) * 100 : 0,
+      closing_opportunities: closing,
+      closed_opportunities: closedCount,
+      conversion_rate: closedCount > 0 ? (won / closedCount) * 100 : 0,
       win_rate_by_stage: winRateByStage,
       average_deal_size: averageDealSize,
       total_pipeline_value: totalPipelineValue,
@@ -137,7 +144,7 @@ class CRMAnalyticsService {
    */
   calculateSalesCycleMetrics(opportunities: Opportunity[]): SalesCycleMetrics {
     const closedOpportunities = opportunities.filter(
-      o => (o.stage === 'won' || o.stage === 'lost') && o.actual_close_date
+      o => (o.stage === 'won' || o.stage === 'lost' || o.stage === 'closing') && o.actual_close_date
     );
 
     if (closedOpportunities.length === 0) {
@@ -153,9 +160,10 @@ class CRMAnalyticsService {
 
     // Calculate days to close for each opportunity
     const daysToClose = closedOpportunities.map(opp => {
-      const created = new Date(opp.created_at);
-      const closed = new Date(opp.actual_close_date!);
-      return Math.floor((closed.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
+      // Extract date portions only (ignore time) to match SQL date subtraction
+      const createdDate = new Date(opp.created_at.split('T')[0]);
+      const closedDate = new Date(opp.actual_close_date!.split('T')[0]);
+      return Math.floor((closedDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
     }).sort((a, b) => a - b);
 
     const average = daysToClose.reduce((sum, days) => sum + days, 0) / daysToClose.length;
@@ -172,9 +180,10 @@ class CRMAnalyticsService {
       const stageDays = stageOpps
         .filter(o => o.actual_close_date)
         .map(o => {
-          const created = new Date(o.created_at);
-          const closed = new Date(o.actual_close_date!);
-          return Math.floor((closed.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
+          // Extract date portions only (ignore time) to match SQL date subtraction
+          const createdDate = new Date(o.created_at.split('T')[0]);
+          const closedDate = new Date(o.actual_close_date!.split('T')[0]);
+          return Math.floor((closedDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
         });
 
       averageByStage[stage] = stageDays.length > 0

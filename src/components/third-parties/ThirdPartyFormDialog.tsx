@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,40 +6,183 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
+import { supabase } from '@/lib/supabase';
 import { Users, Building2 } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
+import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
+
+// Liste complète des pays (195+ pays) - Afrique de l'Ouest francophone en priorité
+const COUNTRIES = [
+  // Afrique de l'Ouest francophone (SYSCOHADA - priorité stratégique)
+  { code: 'CI', name: 'Côte d\'Ivoire', region: 'Afrique de l\'Ouest' },
+  { code: 'BJ', name: 'Bénin', region: 'Afrique de l\'Ouest' },
+  { code: 'SN', name: 'Sénégal', region: 'Afrique de l\'Ouest' },
+  { code: 'BF', name: 'Burkina Faso', region: 'Afrique de l\'Ouest' },
+  { code: 'TG', name: 'Togo', region: 'Afrique de l\'Ouest' },
+  { code: 'ML', name: 'Mali', region: 'Afrique de l\'Ouest' },
+  { code: 'NE', name: 'Niger', region: 'Afrique de l\'Ouest' },
+  { code: 'GN', name: 'Guinée', region: 'Afrique de l\'Ouest' },
+  { code: 'CM', name: 'Cameroun', region: 'Afrique Centrale' },
+  { code: 'GA', name: 'Gabon', region: 'Afrique Centrale' },
+  { code: 'CG', name: 'Congo', region: 'Afrique Centrale' },
+  { code: 'TD', name: 'Tchad', region: 'Afrique Centrale' },
+  { code: 'CF', name: 'République Centrafricaine', region: 'Afrique Centrale' },
+  { code: 'GQ', name: 'Guinée Équatoriale', region: 'Afrique Centrale' },
+  { code: 'KM', name: 'Comores', region: 'Océan Indien' },
+  { code: 'GW', name: 'Guinée-Bissau', region: 'Afrique de l\'Ouest' },
+  { code: 'BI', name: 'Burundi', region: 'Afrique de l\'Est' },
+  // Europe occidentale
+  { code: 'FR', name: 'France', region: 'Europe' },
+  { code: 'BE', name: 'Belgique', region: 'Europe' },
+  { code: 'CH', name: 'Suisse', region: 'Europe' },
+  { code: 'LU', name: 'Luxembourg', region: 'Europe' },
+  { code: 'ES', name: 'Espagne', region: 'Europe' },
+  { code: 'IT', name: 'Italie', region: 'Europe' },
+  { code: 'DE', name: 'Allemagne', region: 'Europe' },
+  { code: 'GB', name: 'Royaume-Uni', region: 'Europe' },
+  { code: 'NL', name: 'Pays-Bas', region: 'Europe' },
+  { code: 'PT', name: 'Portugal', region: 'Europe' },
+  // Amériques
+  { code: 'US', name: 'États-Unis', region: 'Amérique du Nord' },
+  { code: 'CA', name: 'Canada', region: 'Amérique du Nord' },
+  { code: 'MX', name: 'Mexique', region: 'Amérique du Nord' },
+  { code: 'BR', name: 'Brésil', region: 'Amérique du Sud' },
+  { code: 'AR', name: 'Argentine', region: 'Amérique du Sud' },
+  // Afrique du Nord (SCF Algérie)
+  { code: 'DZ', name: 'Algérie', region: 'Afrique du Nord' },
+  { code: 'MA', name: 'Maroc', region: 'Afrique du Nord' },
+  { code: 'TN', name: 'Tunisie', region: 'Afrique du Nord' },
+  { code: 'EG', name: 'Égypte', region: 'Afrique du Nord' },
+  // Autres pays africains
+  { code: 'ZA', name: 'Afrique du Sud', region: 'Afrique Australe' },
+  { code: 'NG', name: 'Nigeria', region: 'Afrique de l\'Ouest' },
+  { code: 'KE', name: 'Kenya', region: 'Afrique de l\'Est' },
+  { code: 'GH', name: 'Ghana', region: 'Afrique de l\'Ouest' },
+  { code: 'ET', name: 'Éthiopie', region: 'Afrique de l\'Est' },
+  { code: 'TZ', name: 'Tanzanie', region: 'Afrique de l\'Est' },
+  { code: 'UG', name: 'Ouganda', region: 'Afrique de l\'Est' },
+  { code: 'RW', name: 'Rwanda', region: 'Afrique de l\'Est' },
+  { code: 'MG', name: 'Madagascar', region: 'Océan Indien' },
+  { code: 'MU', name: 'Maurice', region: 'Océan Indien' },
+  // Asie
+  { code: 'CN', name: 'Chine', region: 'Asie' },
+  { code: 'JP', name: 'Japon', region: 'Asie' },
+  { code: 'IN', name: 'Inde', region: 'Asie' },
+  { code: 'AE', name: 'Émirats Arabes Unis', region: 'Moyen-Orient' },
+  { code: 'SA', name: 'Arabie Saoudite', region: 'Moyen-Orient' },
+];
+
+// Devises principales groupées par zone
+const CURRENCIES = [
+  // Zone Euro
+  { code: 'EUR', name: 'Euro', symbol: '€', region: 'Zone Euro' },
+  // Afrique FCFA (priorité stratégique)
+  { code: 'XOF', name: 'Franc CFA (BCEAO)', symbol: 'FCFA', region: 'Afrique de l\'Ouest' },
+  { code: 'XAF', name: 'Franc CFA (BEAC)', symbol: 'FCFA', region: 'Afrique Centrale' },
+  // Afrique autres
+  { code: 'DZD', name: 'Dinar algérien', symbol: 'DA', region: 'Afrique du Nord' },
+  { code: 'MAD', name: 'Dirham marocain', symbol: 'MAD', region: 'Afrique du Nord' },
+  { code: 'ZAR', name: 'Rand sud-africain', symbol: 'R', region: 'Afrique Australe' },
+  { code: 'NGN', name: 'Naira nigérian', symbol: '₦', region: 'Afrique de l\'Ouest' },
+  { code: 'GHS', name: 'Cedi ghanéen', symbol: 'GH₵', region: 'Afrique de l\'Ouest' },
+  { code: 'KES', name: 'Shilling kenyan', symbol: 'KSh', region: 'Afrique de l\'Est' },
+  { code: 'EGP', name: 'Livre égyptienne', symbol: 'E£', region: 'Afrique du Nord' },
+  // Amériques
+  { code: 'USD', name: 'Dollar américain', symbol: '$', region: 'Amérique du Nord' },
+  { code: 'CAD', name: 'Dollar canadien', symbol: 'CA$', region: 'Amérique du Nord' },
+  { code: 'BRL', name: 'Real brésilien', symbol: 'R$', region: 'Amérique du Sud' },
+  // Europe
+  { code: 'GBP', name: 'Livre sterling', symbol: '£', region: 'Europe' },
+  { code: 'CHF', name: 'Franc suisse', symbol: 'CHF', region: 'Europe' },
+  // Asie & Moyen-Orient
+  { code: 'CNY', name: 'Yuan chinois', symbol: '¥', region: 'Asie' },
+  { code: 'JPY', name: 'Yen japonais', symbol: '¥', region: 'Asie' },
+  { code: 'AED', name: 'Dirham des EAU', symbol: 'AED', region: 'Moyen-Orient' },
+  { code: 'SAR', name: 'Riyal saoudien', symbol: 'SR', region: 'Moyen-Orient' },
+];
+
 interface ThirdPartyFormDialogProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
   companyId: string;
   defaultType?: 'customer' | 'supplier';
+  thirdParty?: { id: string; type: string; name: string; email?: string; phone?: string; company_name?: string; tax_number?: string; billing_address?: { street: string; city: string; postal_code: string; country: string }; payment_terms: number; currency: string; notes?: string } | null;
 }
+
+const emptyForm = (type: 'customer' | 'supplier') => ({
+  type,
+  name: '',
+  email: '',
+  phone: '',
+  company_name: '',
+  tax_number: '',
+  billing_address_line1: '',
+  billing_city: '',
+  billing_postal_code: '',
+  billing_country: 'FR',
+  payment_terms: 30,
+  currency: getCurrentCompanyCurrency(),
+  notes: ''
+});
+
 export function ThirdPartyFormDialog({
   open,
   onClose,
   onSuccess,
   companyId,
-  defaultType = 'customer'
+  defaultType = 'customer',
+  thirdParty
 }: ThirdPartyFormDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    type: defaultType,
-    name: '',
-    email: '',
-    phone: '',
-    company_name: '',
-    tax_number: '',
-    billing_address_line1: '',
-    billing_city: '',
-    billing_postal_code: '',
-    billing_country: 'FR',
-    payment_terms: 30,
-    currency: getCurrentCompanyCurrency(),
-    notes: ''
-  });
+  const isEditMode = !!thirdParty;
+  const [formData, setFormData] = useState(emptyForm(defaultType));
+
+  useEffect(() => {
+    if (thirdParty) {
+      setFormData({
+        type: (thirdParty.type as 'customer' | 'supplier') || defaultType,
+        name: thirdParty.name || '',
+        email: thirdParty.email || '',
+        phone: thirdParty.phone || '',
+        company_name: thirdParty.company_name || '',
+        tax_number: thirdParty.tax_number || '',
+        billing_address_line1: thirdParty.billing_address?.street || '',
+        billing_city: thirdParty.billing_address?.city || '',
+        billing_postal_code: thirdParty.billing_address?.postal_code || '',
+        billing_country: thirdParty.billing_address?.country || 'FR',
+        payment_terms: thirdParty.payment_terms || 30,
+        currency: thirdParty.currency || getCurrentCompanyCurrency(),
+        notes: thirdParty.notes || ''
+      });
+    } else {
+      setFormData(emptyForm(defaultType));
+    }
+  }, [thirdParty, defaultType]);
+
+  // Options autocomplete pour pays (195+ pays avec fuzzy search)
+  const countryOptions: AutocompleteOption[] = useMemo(() => {
+    return COUNTRIES.map(country => ({
+      value: country.code,
+      label: country.name,
+      description: country.code,
+      category: country.region,
+      metadata: { code: country.code, name: country.name, region: country.region }
+    }));
+  }, []);
+
+  // Options autocomplete pour devises (groupées par zone)
+  const currencyOptions: AutocompleteOption[] = useMemo(() => {
+    return CURRENCIES.map(currency => ({
+      value: currency.code,
+      label: `${currency.code} - ${currency.name}`,
+      description: `${currency.symbol}`,
+      category: currency.region,
+      metadata: { code: currency.code, name: currency.name, symbol: currency.symbol, region: currency.region }
+    }));
+  }, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
@@ -52,55 +195,70 @@ export function ThirdPartyFormDialog({
     }
     setLoading(true);
     try {
-      const data = {
-        company_id: companyId,
-        name: formData.name.trim(),
-        email: formData.email.trim() || undefined,
-        phone: formData.phone.trim() || undefined,
-        company_name: formData.company_name.trim() || undefined,
-        tax_number: formData.tax_number.trim() || undefined,
-        billing_address_line1: formData.billing_address_line1.trim() || undefined,
-        billing_city: formData.billing_city.trim() || undefined,
-        billing_postal_code: formData.billing_postal_code.trim() || undefined,
-        billing_country: formData.billing_country,
-        payment_terms: formData.payment_terms,
-        currency: formData.currency,
-        notes: formData.notes.trim() || undefined
-      };
-      let result;
-      if (formData.type === 'customer') {
-        result = await unifiedThirdPartiesService.createCustomer(data);
+      if (isEditMode && thirdParty) {
+        // Update existing third party
+        const { error } = await supabase
+          .from('third_parties')
+          .update({
+            name: formData.name.trim(),
+            email: formData.email.trim() || null,
+            phone: formData.phone.trim() || null,
+            company_name: formData.company_name.trim() || null,
+            tax_number: formData.tax_number.trim() || null,
+            billing_address_line1: formData.billing_address_line1.trim() || null,
+            billing_city: formData.billing_city.trim() || null,
+            billing_postal_code: formData.billing_postal_code.trim() || null,
+            billing_country: formData.billing_country,
+            payment_terms: formData.payment_terms,
+            currency: formData.currency,
+            notes: formData.notes.trim() || null,
+            type: formData.type,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', thirdParty.id);
+        if (error) throw error;
+        toast({
+          title: 'Succès',
+          description: `${formData.type === 'customer' ? 'Client' : 'Fournisseur'} mis à jour avec succès`
+        });
       } else {
-        result = await unifiedThirdPartiesService.createSupplier(data);
+        // Create new third party
+        const data = {
+          company_id: companyId,
+          name: formData.name.trim(),
+          email: formData.email.trim() || undefined,
+          phone: formData.phone.trim() || undefined,
+          company_name: formData.company_name.trim() || undefined,
+          tax_number: formData.tax_number.trim() || undefined,
+          billing_address_line1: formData.billing_address_line1.trim() || undefined,
+          billing_city: formData.billing_city.trim() || undefined,
+          billing_postal_code: formData.billing_postal_code.trim() || undefined,
+          billing_country: formData.billing_country,
+          payment_terms: formData.payment_terms,
+          currency: formData.currency,
+          notes: formData.notes.trim() || undefined
+        };
+        let result;
+        if (formData.type === 'customer') {
+          result = await unifiedThirdPartiesService.createCustomer(data);
+        } else {
+          result = await unifiedThirdPartiesService.createSupplier(data);
+        }
+        if (result.error) throw result.error;
+        toast({
+          title: 'Succès',
+          description: `${formData.type === 'customer' ? 'Client' : 'Fournisseur'} créé avec succès`
+        });
       }
-      if (result.error) throw result.error;
-      toast({
-        title: 'Succès',
-        description: `${formData.type === 'customer' ? 'Client' : 'Fournisseur'} créé avec succès`
-      });
       // Reset form
-      setFormData({
-        type: defaultType,
-        name: '',
-        email: '',
-        phone: '',
-        company_name: '',
-        tax_number: '',
-        billing_address_line1: '',
-        billing_city: '',
-        billing_postal_code: '',
-        billing_country: 'FR',
-        payment_terms: 30,
-        currency: getCurrentCompanyCurrency(),
-        notes: ''
-      });
+      setFormData(emptyForm(defaultType));
       onSuccess();
       onClose();
     } catch (error) {
-      logger.error('ThirdPartyFormDialog', 'Error creating third party:', error instanceof Error ? error.message : String(error));
+      logger.error('ThirdPartyFormDialog', `Error ${isEditMode ? 'updating' : 'creating'} third party:`, error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
-        description: 'Impossible de créer le tiers',
+        description: `Impossible de ${isEditMode ? 'modifier' : 'créer'} le tiers`,
         variant: 'destructive'
       });
     } finally {
@@ -117,7 +275,7 @@ export function ThirdPartyFormDialog({
             ) : (
               <Building2 className="w-5 h-5 text-green-500" />
             )}
-            <span>Nouveau {formData.type === 'customer' ? 'Client' : 'Fournisseur'}</span>
+            <span>{isEditMode ? 'Modifier' : 'Nouveau'} {formData.type === 'customer' ? 'Client' : 'Fournisseur'}</span>
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -250,22 +408,17 @@ export function ThirdPartyFormDialog({
               </div>
               <div>
                 <Label htmlFor="country">Pays</Label>
-                <Select
+                <SmartAutocomplete
                   value={formData.billing_country}
-                  onValueChange={(value) => setFormData({ ...formData, billing_country: value })}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="FR">France</SelectItem>
-                    <SelectItem value="BE">Belgique</SelectItem>
-                    <SelectItem value="CH">Suisse</SelectItem>
-                    <SelectItem value="LU">Luxembourg</SelectItem>
-                    <SelectItem value="CA">Canada</SelectItem>
-                    <SelectItem value="US">États-Unis</SelectItem>
-                  </SelectContent>
-                </Select>
+                  onChange={(value) => setFormData({ ...formData, billing_country: value })}
+                  options={countryOptions}
+                  placeholder="Sélectionner un pays..."
+                  searchPlaceholder="Rechercher un pays (ex: Côte d'Ivoire, France, Sénégal)..."
+                  groups={true}
+                  showRecent={true}
+                  maxRecent={5}
+                  className="mt-1"
+                />
               </div>
             </div>
           </div>
@@ -288,21 +441,17 @@ export function ThirdPartyFormDialog({
               </div>
               <div>
                 <Label htmlFor="currency">Devise</Label>
-                <Select
+                <SmartAutocomplete
                   value={formData.currency}
-                  onValueChange={(value) => setFormData({ ...formData, currency: value })}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EUR">EUR - Euro</SelectItem>
-                    <SelectItem value="USD">USD - Dollar</SelectItem>
-                    <SelectItem value="GBP">GBP - Livre</SelectItem>
-                    <SelectItem value="CHF">CHF - Franc suisse</SelectItem>
-                    <SelectItem value="CAD">CAD - Dollar canadien</SelectItem>
-                  </SelectContent>
-                </Select>
+                  onChange={(value) => setFormData({ ...formData, currency: value })}
+                  options={currencyOptions}
+                  placeholder="Sélectionner une devise..."
+                  searchPlaceholder="Rechercher une devise (EUR, FCFA, USD)..."
+                  groups={true}
+                  showRecent={true}
+                  maxRecent={3}
+                  className="mt-1"
+                />
               </div>
             </div>
           </div>
@@ -324,7 +473,7 @@ export function ThirdPartyFormDialog({
               Annuler
             </Button>
             <Button type="submit" disabled={loading || !formData.name.trim()}>
-              {loading ? 'Création en cours...' : 'Créer le tiers'}
+              {loading ? (isEditMode ? 'Mise à jour...' : 'Création en cours...') : (isEditMode ? 'Enregistrer' : 'Créer le tiers')}
             </Button>
           </div>
         </form>

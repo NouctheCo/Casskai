@@ -279,6 +279,7 @@ const COLUMN_MAPPINGS: Record<string, string[]> = {
     'CompteNum', 'COMPTENUM', 'NumCompte', 'NUM_COMPTE',
     'AccountCode', 'ACCOUNTCODE', 'Account', 'ACCNT',
     'NominalCode', 'GLCode', 'Compte', 'NumeroCompte',
+    'NCOMPTE', 'N_COMPTE',
   ],
   accountName: [
     'CompteLib', 'COMPTELIB', 'LibCompte', 'LIB_COMPTE',

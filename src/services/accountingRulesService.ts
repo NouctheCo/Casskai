@@ -176,7 +176,7 @@ export const JOURNAL_ENTRY_TEMPLATES = {
   },
   [JournalType.MISCELLANEOUS]: {
     description: 'Opération diverse',
-    lines: [],
+    lines: [] as { account: string; side: string; label: string }[],
   },
 };
 /**

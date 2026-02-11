@@ -21,7 +21,7 @@ import {
   Play,
   Save
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface WorkflowBuilderProps {
   workflowId?: string | null;
@@ -142,8 +142,8 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
         category: 'custom' as const,
         is_template: false,
         created_by: '',
-        last_run_at: null,
-        next_run_at: null
+        last_run_at: null as string | null,
+        next_run_at: null as string | null
       };
 
       const success = workflowId

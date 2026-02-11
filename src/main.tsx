@@ -11,7 +11,6 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import * as Sentry from '@sentry/react';
 import './i18n/i18n.ts';
 import './lib/devApiShims';
 import App from './App.tsx';
@@ -19,40 +18,9 @@ import './index.css';
 import { ConfigProvider } from './contexts/ConfigContext';
 import { trackWebVitals } from './lib/performance';
 import { logger } from '@/lib/logger';
-// Initialiser Sentry pour le suivi des erreurs
-if (import.meta.env.VITE_SENTRY_DSN && import.meta.env.PROD) {
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
-    environment: import.meta.env.VITE_APP_ENV || import.meta.env.MODE,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({
-        maskAllText: true,
-        blockAllMedia: true,
-      }),
-    ],
-    // Performance Monitoring
-    tracesSampleRate: 0.1, // 10% des transactions pour limiter les coûts
-    // Session Replay
-    replaysSessionSampleRate: 0.1, // 10% des sessions normales
-    replaysOnErrorSampleRate: 1.0, // 100% des sessions avec erreurs
-    // Filtrer les erreurs des extensions Chrome
-    beforeSend(event, hint) {
-      const error = hint.originalException;
-      if (error && typeof error === 'object') {
-        const errorStr = error.toString();
-        // Ignorer les erreurs des extensions
-        if (errorStr.includes('chrome-extension') || 
-            errorStr.includes('kwift') || 
-            errorStr.includes('elementValues')) {
-          return null;
-        }
-      }
-      return event;
-    },
-  });
-  logger.debug('Main', '✅ Sentry initialized for error tracking');
-}
+import { initializeSentry } from './lib/sentry';
+// Initialiser Sentry (config centralisée dans lib/sentry.ts)
+initializeSentry();
 // Debug des variables d'environnement au démarrage (uniquement en mode développement)
 if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
   logger.warn('Main', '🔧 Variables d\'environnement au démarrage:');

@@ -254,7 +254,7 @@ const GDPRPage = () => {
       'restriction': 'droit de limitation',
       'objection': 'droit d\'opposition'
     };
-    return typeLabels[type] || 'demande RGPD';
+    return typeLabels[type as keyof typeof typeLabels] || 'demande RGPD';
   };
   // Fonction pour gérer les changements de formulaire et effacer les erreurs
   const handleFormChange = (field: string, value: string) => {

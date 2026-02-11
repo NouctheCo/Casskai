@@ -274,7 +274,7 @@ export class HRExportService {
       const annualNet = empPayrolls.reduce((sum, p) => sum + p.net_salary, 0);
 
       return {
-        numero_securite_sociale: emp.employee_number,
+        numero_securite_sociale: emp.social_security_number || emp.id,
         nom: emp.last_name,
         prenom: emp.first_name,
         date_embauche: emp.hire_date,

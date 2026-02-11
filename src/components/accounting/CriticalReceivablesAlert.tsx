@@ -162,8 +162,8 @@ export function CriticalReceivablesAlert({
   const AlertIcon = alertLevel.icon;
 
   // Créances critiques
-  const criticalInvoices = data?.details.filter(d => d.aging_bucket === 'over_90') || [];
-  const dangerInvoices = data?.details.filter(d => d.aging_bucket === 'days_61_90') || [];
+  const criticalInvoices = data?.details?.filter(d => d.aging_bucket === 'over_90') || [];
+  const dangerInvoices = data?.details?.filter(d => d.aging_bucket === 'days_61_90') || [];
 
   if (loading) {
     return (

@@ -42,10 +42,10 @@ export async function getScenarios(enterpriseId?: string): Promise<ForecastServi
     const scenarios: ForecastScenario[] = (data || []).map(s => ({
       id: s.id,
       name: s.name,
-      description: s.description || undefined,
+      description: s.description ?? null,
       type: s.type as any,
       growth_rate: Number(s.growth_rate) || 0,
-      market_conditions: s.market_conditions || undefined,
+      market_conditions: s.market_conditions ?? null,
       created_at: s.created_at,
       updated_at: s.updated_at
     }));
@@ -82,10 +82,10 @@ export async function createScenario(
     const scenario: ForecastScenario = {
       id: data.id,
       name: data.name,
-      description: data.description || undefined,
+      description: data.description ?? null,
       type: data.type as any,
       growth_rate: Number(data.growth_rate) || 0,
-      market_conditions: data.market_conditions || undefined,
+      market_conditions: data.market_conditions ?? null,
       created_at: data.created_at,
       updated_at: data.updated_at
     };
@@ -175,11 +175,11 @@ export async function getForecasts(
         .map(item => ({
           id: item.id,
           category: item.category,
-          subcategory: item.subcategory || undefined,
-          description: item.description || undefined,
+          subcategory: item.subcategory ?? null,
+          description: item.description ?? null,
           amount: Number(item.amount) || 0,
-          growth_rate: item.growth_rate ? Number(item.growth_rate) : undefined,
-          seasonality_factor: item.seasonality_factor ? Number(item.seasonality_factor) : undefined,
+          growth_rate: item.growth_rate != null ? Number(item.growth_rate) : null,
+          seasonality_factor: item.seasonality_factor != null ? Number(item.seasonality_factor) : null,
           confidence_level: item.confidence_level as any
         }));
       const expenseItems: ExpenseLineItem[] = (lineItems || [])
@@ -187,10 +187,10 @@ export async function getForecasts(
         .map(item => ({
           id: item.id,
           category: item.category as any,
-          subcategory: item.subcategory || undefined,
-          description: item.description || undefined,
+          subcategory: item.subcategory ?? null,
+          description: item.description ?? null,
           amount: Number(item.amount) || 0,
-          growth_rate: item.growth_rate ? Number(item.growth_rate) : undefined,
+          growth_rate: item.growth_rate != null ? Number(item.growth_rate) : null,
           is_recurring: item.is_recurring || false,
           confidence_level: item.confidence_level as any
         }));
@@ -200,10 +200,10 @@ export async function getForecasts(
           id: item.id,
           type: item.cash_flow_type as any,
           category: item.category,
-          description: item.description || undefined,
+          description: item.description ?? null,
           amount: Number(item.amount) || 0,
-          timing: item.timing || undefined,
-          probability: item.probability || undefined
+          timing: item.timing ?? null,
+          probability: item.probability != null ? Number(item.probability) : null
         }));
       forecasts.push({
         id: forecast.id,
@@ -221,8 +221,8 @@ export async function getForecasts(
         net_margin: Number(forecast.net_margin) || 0,
         break_even_point: Number(forecast.break_even_point) || 0,
         status: forecast.status as any,
-        created_by: forecast.created_by || undefined,
-        approved_by: forecast.approved_by || undefined,
+        created_by: forecast.created_by ?? null,
+        approved_by: forecast.approved_by ?? null,
         created_at: forecast.created_at,
         updated_at: forecast.updated_at,
         key_assumptions: forecast.key_assumptions || [],

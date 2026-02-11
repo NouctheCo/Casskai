@@ -12,13 +12,9 @@
  * - Archivage légal des données comptables
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
 
 interface DeleteCompanyRequest {
   company_id: string;
@@ -28,9 +24,10 @@ interface DeleteCompanyRequest {
 
 serve(async (req) => {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const preflightResponse = handleCorsPreflightRequest(req)
+  if (preflightResponse) return preflightResponse
+
+  const corsH = getCorsHeaders(req)
 
   try {
     // Créer le client Supabase
@@ -43,7 +40,7 @@ serve(async (req) => {
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: 'Authorization header manquant' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...corsH, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -53,7 +50,7 @@ serve(async (req) => {
     if (authError || !user) {
       return new Response(
         JSON.stringify({ error: 'Non autorisé' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...corsH, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -67,7 +64,7 @@ serve(async (req) => {
     if (!requestData.company_id) {
       return new Response(
         JSON.stringify({ error: 'company_id manquant' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsH, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -86,7 +83,7 @@ serve(async (req) => {
           success: false,
           error: 'Vous n\'êtes pas propriétaire de cette entreprise'
         }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 403, headers: { ...corsH, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -118,7 +115,7 @@ serve(async (req) => {
             days_remaining: daysRemaining
           }
         }),
-        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 409, headers: { ...corsH, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -181,7 +178,7 @@ serve(async (req) => {
             success: false,
             error: 'Table company_deletion_requests n\'existe pas. Migration requise.'
           }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 500, headers: { ...corsH, 'Content-Type': 'application/json' } }
         )
       }
 
@@ -240,7 +237,7 @@ serve(async (req) => {
       }),
       {
         status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsH, 'Content-Type': 'application/json' }
       }
     )
 
@@ -254,7 +251,7 @@ serve(async (req) => {
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsH, 'Content-Type': 'application/json' }
       }
     )
   }

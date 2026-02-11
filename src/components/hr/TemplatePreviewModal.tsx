@@ -151,7 +151,7 @@ export function TemplatePreviewModal({ isOpen, onClose, template }: TemplatePrev
                       <select
                         value={variables[variable.name] || ''}
                         onChange={(e) => handleVariableChange(variable.name, e.target.value === 'true')}
-                        className="mt-2 w-full px-3 py-2 border rounded-lg"
+                        className="mt-2 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
                       >
                         <option value="">Sélectionner...</option>
                         <option value="true">Oui</option>

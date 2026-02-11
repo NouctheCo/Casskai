@@ -44,7 +44,9 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
       qualification: 'bg-yellow-100 text-yellow-800 border-yellow-300',
       proposal: 'bg-purple-100 text-purple-800 border-purple-300',
       negotiation: 'bg-orange-100 text-orange-800 border-orange-300',
-      closing: 'bg-green-100 text-green-800 border-green-300'
+      closing: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      won: 'bg-green-100 text-green-800 border-green-300',
+      lost: 'bg-red-100 text-red-800 border-red-300'
     };
     return colors[stage as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-300';
   };
@@ -111,13 +113,6 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
     },
-    {
-      title: t('crm.dashboard.stats.conversionRate'),
-      value: `${stats.conversion_rate.toFixed(1)}%`,
-      icon: TrendingUp,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
-    }
   ];
   return (
     <div className="space-y-6">

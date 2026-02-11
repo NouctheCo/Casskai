@@ -12,7 +12,7 @@
 // src/services/automationService.ts
 import { supabase } from '@/lib/supabase';
 import { emailService } from './emailService';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 // =====================================================
 // TYPES

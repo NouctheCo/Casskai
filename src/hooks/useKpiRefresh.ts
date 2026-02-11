@@ -108,8 +108,16 @@ export function useKpiRefresh(
     unsubscribeEventRef.current = kpiCacheService.onKpiEvent(handleKpiEvent);
     // Souscrire aux changements temps réel Supabase
     if (subscribeToRealtime) {
+      // Tables comptables de base
       kpiCacheService.subscribeToChartOfAccounts(companyId);
       kpiCacheService.subscribeToJournalEntries(companyId);
+
+      // Tables critiques pour dashboard temps réel (Phase 2)
+      kpiCacheService.subscribeToInvoices(companyId);
+      kpiCacheService.subscribeToPayments(companyId);
+      kpiCacheService.subscribeToBankTransactions(companyId);
+
+      logger.debug('UseKpiRefresh', `✅ [useKpiRefresh] 5 souscriptions temps réel activées pour ${companyId}`);
     }
     // Cleanup
     return () => {

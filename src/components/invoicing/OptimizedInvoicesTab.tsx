@@ -43,7 +43,9 @@ import {
   Copy,
   MoreHorizontal,
   Mail,
-  FileX
+  FileX,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 // Types locaux
 interface InvoiceFormData {
@@ -107,8 +109,26 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
       logger.warn('OptimizedInvoicesTab', 'Could not load company settings:', error);
       // Return default settings if failed
       return {
-        generalInfo: { name: '' },
-        contact: { address: {}, email: '' },
+        generalInfo: {
+          name: '',
+          commercialName: null,
+          legalForm: null,
+          siret: null,
+          vatNumber: null,
+          shareCapital: null
+        },
+        contact: {
+          address: {
+            street: null,
+            postalCode: null,
+            city: null,
+            country: null
+          },
+          correspondenceAddress: null,
+          phone: null,
+          email: null,
+          website: null
+        },
         accounting: {
           fiscalYear: { startMonth: 1, endMonth: 12 },
           taxRegime: 'real_simplified' as const,
@@ -116,14 +136,19 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
           defaultVatRate: 20
         },
         business: { 
+          sector: null,
           employeesCount: 1,
+          annualRevenue: null,
           currency: getCurrentCompanyCurrency(),
           language: 'fr',
           timezone: 'Europe/Paris'
         },
         branding: {
+          logoUrl: null,
           primaryColor: '#3B82F6',
           secondaryColor: '#6B7280',
+          emailSignature: null,
+          legalMentions: null,
           defaultTermsConditions: 'Conditions de paiement : 30 jours net. Paiement par virement ou chèque. Retard de paiement : 3% par mois.'
         },
         documents: {
@@ -131,6 +156,8 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
             invoice: 'default' as const,
             quote: 'default' as const
           },
+          headers: null,
+          footers: null,
           numbering: {
             invoicePrefix: 'FAC',
             quotePrefix: 'DEV',
@@ -141,7 +168,11 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
             }
           }
         },
-        metadata: {}
+        ceo: null,
+        metadata: {
+          settingsCompletedAt: null,
+          onboardingCompletedAt: null
+        }
       };
     }
   };
@@ -514,15 +545,45 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
     }
   };
   const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      draft: { label: 'Brouillon', color: 'bg-gray-100 text-gray-800' },
-      sent: { label: 'Envoyée', color: 'bg-blue-100 text-blue-800' },
-      paid: { label: 'Payée', color: 'bg-green-100 text-green-800' },
-      overdue: { label: 'En retard', color: 'bg-red-100 text-red-800' },
-      cancelled: { label: 'Annulée', color: 'bg-gray-100 text-gray-500' }
-    };
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
-    return <Badge className={config.color}>{config.label}</Badge>;
+    switch (status) {
+      case 'paid':
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 flex items-center space-x-1 w-fit">
+            <CheckCircle className="w-3 h-3" />
+            <span>Payée</span>
+          </Badge>
+        );
+      case 'sent':
+        return (
+          <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800 flex items-center space-x-1 w-fit">
+            <FileText className="w-3 h-3" />
+            <span>Envoyée</span>
+          </Badge>
+        );
+      case 'draft':
+        return (
+          <Badge variant="secondary" className="flex items-center space-x-1 w-fit">
+            <FileText className="w-3 h-3" />
+            <span>Brouillon</span>
+          </Badge>
+        );
+      case 'overdue':
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800 flex items-center space-x-1 w-fit">
+            <AlertCircle className="w-3 h-3" />
+            <span>En retard</span>
+          </Badge>
+        );
+      case 'cancelled':
+        return (
+          <Badge variant="secondary" className="bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 flex items-center space-x-1 w-fit">
+            <FileText className="w-3 h-3" />
+            <span>Annulée</span>
+          </Badge>
+        );
+      default:
+        return <Badge variant="outline" className="w-fit">Inconnue</Badge>;
+    }
   };
   // Gestion de la création d'articles depuis le formulaire de facture
   const handleOpenArticleModal = (_index: number) => {
@@ -632,25 +693,36 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         </CardHeader>
         <CardContent className="p-0">
           {filteredInvoices.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Numéro</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Échéance</TableHead>
-                    <TableHead>Montant</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredInvoices.map((invoice) => (
+            <div className="rounded-md border overflow-hidden">
+              {/* Fixed Header - stays visible while scrolling */}
+              <div className="bg-white dark:bg-slate-950 sticky top-0 z-10 border-b overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="bg-slate-50 dark:bg-slate-900">Numéro</TableHead>
+                      <TableHead className="bg-slate-50 dark:bg-slate-900">Client</TableHead>
+                      <TableHead className="bg-slate-50 dark:bg-slate-900">Date</TableHead>
+                      <TableHead className="bg-slate-50 dark:bg-slate-900">Échéance</TableHead>
+                      <TableHead className="bg-slate-50 dark:bg-slate-900">Montant</TableHead>
+                      <TableHead className="bg-slate-50 dark:bg-slate-900">Statut</TableHead>
+                      <TableHead className="bg-slate-50 dark:bg-slate-900 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                </Table>
+              </div>
+              
+              {/* Scrollable Body */}
+              <div className="overflow-y-auto max-h-[60vh]" style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgb(156, 163, 175) rgb(241, 245, 249)',
+              }}>
+                <Table>
+                  <TableBody>
+                    {filteredInvoices.map((invoice) => (
                     <TableRow key={invoice.id as string} className="hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-900/30">
                       <TableCell className="font-medium">
                         <div className="flex items-center space-x-2">
-                          <span>{invoice.invoice_number}</span>
+                          <span>{String(invoice.invoice_number ?? '')}</span>
                           {(invoice.type === 'credit_note' || invoice.invoice_type === 'credit_note') && (
                             <Badge variant="destructive" className="bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400">
                               Avoir
@@ -762,8 +834,16 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
                       </TableCell>
                     </TableRow>
                   ))}
-                </TableBody>
-              </Table>
+                  </TableBody>
+                </Table>
+              </div>
+              
+              {/* Scroll Position Indicator */}
+              {filteredInvoices.length > 5 && (
+                <div className="absolute bottom-2 right-2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-60 hover:opacity-100 transition-opacity">
+                  {filteredInvoices.length} facture(s)
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-12">
@@ -1008,14 +1088,15 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
         tax_rate: item.taxRate,
         line_order: index + 1
       }));
-      if (invoice) {
-        // For now, we'll show a message that editing is not implemented
+      if (invoice && invoice.id) {
+        // Update existing invoice
+        const invoiceId = String(invoice.id);
+        await invoicingService.updateInvoice(invoiceId, invoiceData, items);
+
         toast({
-          title: "Fonction non implémentée",
-          description: "La modification de facture sera implémentée prochainement.",
-          variant: "destructive"
+          title: "Succès",
+          description: "Facture mise à jour avec succès"
         });
-        return;
       } else {
         // Création
         const createdInvoice = await invoicingService.createInvoice(invoiceData, items);
@@ -1035,7 +1116,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
               total_tax_amount: computedTotals.totalTVA,
               total_incl_tax: computedTotals.totalTTC,
               lines: formData.items.map(item => ({
-                account_id: undefined, // Sera mappé automatiquement selon le type
+                account_id: undefined as string | undefined, // Sera mappé automatiquement selon le type
                 description: item.description,
                 subtotal_excl_tax: item.quantity * item.unitPrice,
                 tax_amount: (item.quantity * item.unitPrice) * (item.taxRate / 100),

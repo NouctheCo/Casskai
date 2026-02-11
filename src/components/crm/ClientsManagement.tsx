@@ -55,6 +55,13 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [_selectedClientForContact, setSelectedClientForContact] = useState<string>('');
   const [viewMode, setViewMode] = useState<'clients' | 'contacts'>('clients');
+
+  // Debug: log received data
+  React.useEffect(() => {
+    console.log('[ClientsManagement] clients:', clients?.length || 0, 'contacts:', contacts?.length || 0);
+    console.log('[ClientsManagement] contacts data:', contacts);
+  }, [clients, contacts]);
+
   const [clientFormData, setClientFormData] = useState<ClientFormData>({
     company_name: '',
     industry: '',
@@ -73,7 +80,9 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
     email: '',
     phone: '',
     position: '',
-    client_id: ''
+    client_id: '',
+    notes: '',
+    is_primary: false
   });
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -161,7 +170,9 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
       email: '',
       phone: '',
       position: '',
-      client_id: clientId || ''
+      client_id: clientId || '',
+      notes: '',
+      is_primary: false
     });
     setIsContactFormOpen(true);
   };
@@ -511,14 +522,14 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                 <Label htmlFor="industry">{t('crm.clientForm.industry')}</Label>
                 <Input
                   id="industry"
-                  value={clientFormData.industry}
+                  value={clientFormData.industry ?? ''}
                   onChange={(e) => setClientFormData({...clientFormData, industry: e.target.value})}
                 />
               </div>
               <div className="space-y-2">
                 <Label>{t('crm.clientForm.size')}</Label>
                 <Select
-                  value={clientFormData.size}
+                  value={clientFormData.size ?? undefined}
                   onValueChange={(value: any) => setClientFormData({...clientFormData, size: value})}
                 >
                   <SelectTrigger>
@@ -552,7 +563,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                 <Label htmlFor="city">{t('crm.clientForm.city')}</Label>
                 <Input
                   id="city"
-                  value={clientFormData.city}
+                  value={clientFormData.city ?? ''}
                   onChange={(e) => setClientFormData({...clientFormData, city: e.target.value})}
                 />
               </div>
@@ -561,7 +572,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                 <Input
                   id="website"
                   type="url"
-                  value={clientFormData.website}
+                  value={clientFormData.website ?? ''}
                   onChange={(e) => setClientFormData({...clientFormData, website: e.target.value})}
                 />
               </div>
@@ -570,7 +581,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
               <Label htmlFor="address">{t('crm.clientForm.address')}</Label>
               <Input
                 id="address"
-                value={clientFormData.address}
+                value={clientFormData.address ?? ''}
                 onChange={(e) => setClientFormData({...clientFormData, address: e.target.value})}
               />
             </div>
@@ -579,7 +590,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
               <Textarea
                 id="notes"
                 rows={3}
-                value={clientFormData.notes}
+                value={clientFormData.notes ?? ''}
                 onChange={(e) => setClientFormData({...clientFormData, notes: e.target.value})}
               />
             </div>
@@ -626,7 +637,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
               <Input
                 id="email"
                 type="email"
-                value={contactFormData.email}
+                value={contactFormData.email ?? ''}
                 onChange={(e) => setContactFormData({...contactFormData, email: e.target.value})}
                 required
               />
@@ -636,7 +647,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
               <Input
                 id="phone"
                 type="tel"
-                value={contactFormData.phone}
+                value={contactFormData.phone ?? ''}
                 onChange={(e) => setContactFormData({...contactFormData, phone: e.target.value})}
               />
             </div>
@@ -644,14 +655,14 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
               <Label htmlFor="position">{t('crm.contactForm.position')}</Label>
               <Input
                 id="position"
-                value={contactFormData.position}
+                value={contactFormData.position ?? ''}
                 onChange={(e) => setContactFormData({...contactFormData, position: e.target.value})}
               />
             </div>
             <div className="space-y-2">
               <Label>{t('crm.contactForm.client')}</Label>
               <Select
-                value={contactFormData.client_id}
+                value={contactFormData.client_id ?? undefined}
                 onValueChange={(value) => setContactFormData({...contactFormData, client_id: value})}
               >
                 <SelectTrigger>

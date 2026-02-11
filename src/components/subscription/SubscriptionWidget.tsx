@@ -148,7 +148,7 @@ const SubscriptionWidget: React.FC = () => {
               </span>
             </div>
             <span className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
-              {Math.abs(daysUntilRenewal)} jour{Math.abs(daysUntilRenewal) > 1 ? 's' : ''}
+              {Math.abs(daysUntilRenewal ?? 0)} jour{Math.abs(daysUntilRenewal ?? 0) > 1 ? 's' : ''}
             </span>
           </div>
           {/* Usage progress */}

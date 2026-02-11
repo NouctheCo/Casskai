@@ -13,6 +13,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { crmService } from '@/services/crmService';
+import { toastCreated, toastSuccess, toastError } from '@/lib/toast-helpers';
 import {
   Client,
   Contact,
@@ -63,7 +64,11 @@ interface UseCrmReturn {
 
   createContact: (contactData: ContactFormData) => Promise<boolean>;
   createOpportunity: (opportunityData: OpportunityFormData) => Promise<boolean>;
+  updateOpportunity: (opportunityId: string, opportunityData: Partial<OpportunityFormData>) => Promise<boolean>;
+  deleteOpportunity: (opportunityId: string) => Promise<boolean>;
   createCommercialAction: (actionData: CommercialActionFormData) => Promise<boolean>;
+  updateCommercialAction: (actionId: string, actionData: Partial<CommercialActionFormData>) => Promise<boolean>;
+  deleteCommercialAction: (actionId: string) => Promise<boolean>;
 
   // Utility
   refreshAll: () => Promise<void>;
@@ -130,14 +135,20 @@ export function useCrm(): UseCrmReturn {
     setError(null);
 
     try {
+      console.log('[useCrm] fetchContacts - companyId:', currentCompany.id, 'clientId:', clientId);
       const response = await crmService.getContacts(currentCompany.id, clientId);
+      console.log('[useCrm] fetchContacts response:', response);
 
       if (response.success && response.data) {
+        console.log('[useCrm] Setting contacts:', response.data.length, 'items');
         setContacts(response.data);
       } else {
-        setError(getErrorMessage(response.error) || 'Failed to fetch contacts');
+        const errorMsg = getErrorMessage(response.error) || 'Failed to fetch contacts';
+        console.error('[useCrm] fetchContacts error:', errorMsg);
+        setError(errorMsg);
       }
     } catch (err) {
+      console.error('[useCrm] fetchContacts exception:', err);
       setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setContactsLoading(false);
@@ -307,13 +318,18 @@ export function useCrm(): UseCrmReturn {
       if (response.success) {
         // Refresh contacts list
         await fetchContacts();
+        toastCreated('Contact'); // Toast notification
         return true;
       } else {
-        setError(getErrorMessage(response.error) || 'Failed to create contact');
+        const errorMsg = getErrorMessage(response.error) || 'Failed to create contact';
+        setError(errorMsg);
+        toastError(errorMsg); // Toast notification
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
+      const errorMsg = err instanceof Error ? (err as Error).message : 'Unknown error';
+      setError(errorMsg);
+      toastError(errorMsg); // Toast notification
       return false;
     }
   }, [currentCompany?.id, fetchContacts]);
@@ -322,41 +338,161 @@ export function useCrm(): UseCrmReturn {
     if (!currentCompany?.id) return false;
 
     try {
+      console.log('[useCrm] Creating opportunity:', opportunityData);
       const response = await crmService.createOpportunity(currentCompany.id, opportunityData);
+      console.log('[useCrm] Opportunity creation response:', response);
 
       if (response.success) {
+        toastSuccess('Opportunité créée avec succès');
         // Refresh opportunities list
+        console.log('[useCrm] Fetching opportunities after creation...');
         await fetchOpportunities();
+        console.log('[useCrm] Opportunities refreshed');
         return true;
       } else {
-        setError(getErrorMessage(response.error) || 'Failed to create opportunity');
+        const errorMsg = getErrorMessage(response.error) || 'Failed to create opportunity';
+        setError(errorMsg);
+        toastError(errorMsg);
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
+      console.error('[useCrm] Exception creating opportunity:', err);
+      const errorMsg = err instanceof Error ? (err as Error).message : 'Unknown error';
+      setError(errorMsg);
+      toastError(errorMsg);
       return false;
     }
   }, [currentCompany?.id, fetchOpportunities]);
+
+  const updateOpportunity = useCallback(async (opportunityId: string, opportunityData: Partial<OpportunityFormData>): Promise<boolean> => {
+    try {
+      console.log('[useCrm] Updating opportunity:', opportunityId, opportunityData);
+      const response = await crmService.updateOpportunity(opportunityId, opportunityData);
+      console.log('[useCrm] Opportunity update response:', response);
+
+      if (response.success) {
+        toastSuccess('Opportunité mise à jour avec succès');
+        // Refresh opportunities list
+        console.log('[useCrm] Fetching opportunities after update...');
+        await fetchOpportunities();
+        console.log('[useCrm] Opportunities refreshed');
+        return true;
+      } else {
+        const errorMsg = getErrorMessage(response.error) || 'Failed to update opportunity';
+        setError(errorMsg);
+        toastError(errorMsg);
+        return false;
+      }
+    } catch (err) {
+      console.error('[useCrm] Exception updating opportunity:', err);
+      const errorMsg = err instanceof Error ? (err as Error).message : 'Unknown error';
+      setError(errorMsg);
+      toastError(errorMsg);
+      return false;
+    }
+  }, [fetchOpportunities]);
+
+  const deleteOpportunity = useCallback(async (opportunityId: string): Promise<boolean> => {
+    try {
+      console.log('[useCrm] Deleting opportunity:', opportunityId);
+      const response = await crmService.deleteOpportunity(opportunityId);
+      console.log('[useCrm] Opportunity delete response:', response);
+
+      if (response.success) {
+        toastSuccess('Opportunité supprimée avec succès');
+        // Refresh opportunities list
+        console.log('[useCrm] Fetching opportunities after delete...');
+        await fetchOpportunities();
+        console.log('[useCrm] Opportunities refreshed');
+        return true;
+      } else {
+        const errorMsg = getErrorMessage(response.error) || 'Failed to delete opportunity';
+        setError(errorMsg);
+        toastError(errorMsg);
+        return false;
+      }
+    } catch (err) {
+      console.error('[useCrm] Exception deleting opportunity:', err);
+      const errorMsg = err instanceof Error ? (err as Error).message : 'Unknown error';
+      setError(errorMsg);
+      toastError(errorMsg);
+      return false;
+    }
+  }, [fetchOpportunities]);
 
   const createCommercialAction = useCallback(async (actionData: CommercialActionFormData): Promise<boolean> => {
     if (!currentCompany?.id) return false;
 
     try {
+      console.log('[useCrm] Creating commercial action:', actionData);
       const response = await crmService.createCommercialAction(currentCompany.id, actionData);
+      console.log('[useCrm] Action creation response:', response);
 
       if (response.success) {
+        toastSuccess('Action commerciale créée avec succès');
         // Refresh commercial actions list
+        console.log('[useCrm] Fetching actions after creation...');
         await fetchCommercialActions();
+        console.log('[useCrm] Actions refreshed');
         return true;
       } else {
-        setError(getErrorMessage(response.error) || 'Failed to create commercial action');
+        const errorMsg = getErrorMessage(response.error) || 'Failed to create commercial action';
+        setError(errorMsg);
+        toastError(errorMsg);
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
+      console.error('[useCrm] Exception creating action:', err);
+      const errorMsg = err instanceof Error ? (err as Error).message : 'Unknown error';
+      setError(errorMsg);
+      toastError(errorMsg);
       return false;
     }
   }, [currentCompany?.id, fetchCommercialActions]);
+
+  const updateCommercialAction = useCallback(async (actionId: string, actionData: Partial<CommercialActionFormData>): Promise<boolean> => {
+    try {
+      const response = await crmService.updateCommercialAction(actionId, actionData);
+
+      if (response.success) {
+        toastSuccess('Action commerciale mise à jour');
+        await fetchCommercialActions();
+        return true;
+      } else {
+        const errorMsg = getErrorMessage(response.error) || 'Failed to update commercial action';
+        setError(errorMsg);
+        toastError(errorMsg);
+        return false;
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? (err as Error).message : 'Unknown error';
+      setError(errorMsg);
+      toastError(errorMsg);
+      return false;
+    }
+  }, [fetchCommercialActions]);
+
+  const deleteCommercialAction = useCallback(async (actionId: string): Promise<boolean> => {
+    try {
+      const response = await crmService.deleteCommercialAction(actionId);
+
+      if (response.success) {
+        toastSuccess('Action commerciale supprimée');
+        await fetchCommercialActions();
+        return true;
+      } else {
+        const errorMsg = getErrorMessage(response.error) || 'Failed to delete commercial action';
+        setError(errorMsg);
+        toastError(errorMsg);
+        return false;
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? (err as Error).message : 'Unknown error';
+      setError(errorMsg);
+      toastError(errorMsg);
+      return false;
+    }
+  }, [fetchCommercialActions]);
 
   // Utility function to refresh all data
   const refreshAll = useCallback(async () => {
@@ -372,8 +508,9 @@ export function useCrm(): UseCrmReturn {
   useEffect(() => {
     if (currentCompany?.id) {
       fetchDashboardData();
+      refreshAll();
     }
-  }, [currentCompany?.id, fetchDashboardData]);
+  }, [currentCompany?.id, fetchDashboardData, refreshAll]);
 
   return {
     // Data
@@ -409,7 +546,11 @@ export function useCrm(): UseCrmReturn {
     deleteClient,
     createContact,
     createOpportunity,
+    updateOpportunity,
+    deleteOpportunity,
     createCommercialAction,
+    updateCommercialAction,
+    deleteCommercialAction,
 
     // Utility
     refreshAll

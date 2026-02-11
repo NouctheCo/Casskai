@@ -28,7 +28,7 @@ interface EmployeeFormData {
   position: string;
   department: string;
   hire_date: string;
-  contract_type: 'permanent' | 'temporary' | 'intern' | 'freelance';
+  contract_type: 'cdi' | 'cdd' | 'stage' | 'freelance';
 }
 const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { t } = useTranslation();
@@ -44,7 +44,7 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
     position: '',
     department: '',
     hire_date: new Date().toISOString().split('T')[0],
-    contract_type: 'permanent'
+    contract_type: 'cdi'
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const handleInputChange = (field: keyof EmployeeFormData, value: string) => {
@@ -91,7 +91,6 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
     setLoading(true);
     try {
       const response = await hrService.createEmployee(currentCompany.id, {
-        employee_number: formData.employee_number,
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email,
@@ -113,7 +112,7 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
           position: '',
           department: '',
           hire_date: new Date().toISOString().split('T')[0],
-          contract_type: 'permanent'
+          contract_type: 'cdi'
         });
         onClose();
       } else {
@@ -271,9 +270,9 @@ const NewManagerModal: React.FC<NewManagerModalProps> = ({ isOpen, onClose, onSu
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="permanent">{t('projects.managerModal.permanent', 'CDI')}</SelectItem>
-                  <SelectItem value="temporary">{t('projects.managerModal.temporary', 'CDD')}</SelectItem>
-                  <SelectItem value="intern">{t('projects.managerModal.intern', 'Stage')}</SelectItem>
+                  <SelectItem value="cdi">{t('projects.managerModal.permanent', 'CDI')}</SelectItem>
+                  <SelectItem value="cdd">{t('projects.managerModal.temporary', 'CDD')}</SelectItem>
+                  <SelectItem value="stage">{t('projects.managerModal.intern', 'Stage')}</SelectItem>
                   <SelectItem value="freelance">{t('projects.managerModal.freelance', 'Freelance')}</SelectItem>
                 </SelectContent>
               </Select>

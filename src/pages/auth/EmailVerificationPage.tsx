@@ -66,6 +66,7 @@ export default function EmailVerificationPage() {
       const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [resendCooldown]);
 
   const handleResendEmail = async () => {

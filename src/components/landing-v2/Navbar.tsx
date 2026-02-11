@@ -24,6 +24,23 @@ import {
 } from 'lucide-react';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { useLocale } from '@/contexts/LocaleContext';
+import type { ForwardRefExoticComponent, RefAttributes, SVGAttributes } from 'react';
+
+interface NavItem {
+  icon: ForwardRefExoticComponent<Omit<SVGAttributes<SVGSVGElement>, 'ref'> & RefAttributes<SVGSVGElement>>;
+  label: string;
+  description: string;
+  href: string;
+  isExternal?: boolean;
+}
+
+interface NavLink {
+  label: string;
+  href: string;
+  hasDropdown?: boolean;
+  isExternal?: boolean;
+  items?: NavItem[];
+}
 
 export function Navbar() {
   const { t } = useLocale();
@@ -31,7 +48,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-  const navLinks = [
+  const navLinks: NavLink[] = [
     {
       label: t('landing.navbar.product'),
       href: '#features',
@@ -96,7 +113,8 @@ export function Navbar() {
               <img
                 src="/logo.png"
                 alt="CassKai"
-                className="h-8 md:h-10 w-auto"
+                className="h-8 md:h-10 w-auto mix-blend-screen"
+                style={{ background: 'transparent' }}
               />
               <span className="text-xl font-bold text-white">CassKai</span>
             </Link>

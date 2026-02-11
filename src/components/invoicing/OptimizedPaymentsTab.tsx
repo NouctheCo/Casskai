@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import paymentsService from '@/services/paymentsService';
+import invoicingService, { InvoiceWithDetails } from '@/services/invoicingService';
 import ClientSelector from '@/components/invoicing/ClientSelector';
 import { logger } from '@/lib/logger';
 import {
@@ -31,12 +32,13 @@ import {
   Banknote,
   FileText
 } from 'lucide-react';
-// Types
+
 interface Payment {
   id: string | number;
   reference: string;
   clientId: string;
   clientName: string;
+  invoiceId?: string;
   invoiceNumber: string;
   date: string;
   amount: number;
@@ -49,6 +51,7 @@ interface PaymentFormData {
   reference: string;
   clientId: string;
   clientName: string;
+  invoiceId?: string;
   invoiceNumber: string;
   date: string;
   amount: string;
@@ -154,13 +157,15 @@ interface PaymentFormDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: (payment: Payment) => void;
+  invoices: InvoiceWithDetails[];
 }
-const PaymentFormDialog: React.FC<PaymentFormDialogProps> = ({ open, onClose, onSave }) => {
+const PaymentFormDialog: React.FC<PaymentFormDialogProps> = ({ open, onClose, onSave, invoices }) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState<PaymentFormData>({
     reference: `REF-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
     clientId: '',
     clientName: '',
+    invoiceId: undefined,
     invoiceNumber: '',
     date: new Date().toISOString().split('T')[0],
     amount: '',
@@ -168,11 +173,48 @@ const PaymentFormDialog: React.FC<PaymentFormDialogProps> = ({ open, onClose, on
     type: 'income',
     description: ''
   });
+
+  // Get invoices for selected client
+  const clientInvoices = formData.clientId 
+    ? invoices.filter(inv => inv.third_party_id === formData.clientId && inv.status !== 'paid')
+    : [];
+
+  const handleInvoiceSelect = (invoiceId: string) => {
+    const selectedInvoice = invoices.find(inv => inv.id === invoiceId);
+    if (selectedInvoice) {
+      const invoiceTotalAmount = selectedInvoice.total_incl_tax || 0;
+      setFormData(prev => ({
+        ...prev,
+        invoiceId: selectedInvoice.id,
+        invoiceNumber: selectedInvoice.invoice_number,
+        amount: invoiceTotalAmount.toString()
+      }));
+    }
+  };
   const handleSave = () => {
-    if ((!formData.clientId && !formData.clientName) || !formData.amount) {
+    // Validation: require invoice selection
+    if (!formData.clientId) {
       toast({
         title: "Erreur",
-        description: "Veuillez sélectionner un client et remplir tous les champs obligatoires.",
+        description: "Veuillez sélectionner un client.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.invoiceId) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner une facture pour ce client.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.amount) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir le montant du paiement.",
         variant: "destructive"
       });
       return;
@@ -181,7 +223,8 @@ const PaymentFormDialog: React.FC<PaymentFormDialogProps> = ({ open, onClose, on
       id: Date.now(),
       reference: formData.reference,
       clientId: formData.clientId,
-      clientName: formData.clientName,
+      clientName: formData.clientName || 'Client', // Fallback to 'Client' if not set
+      invoiceId: formData.invoiceId,
       invoiceNumber: formData.invoiceNumber,
       date: formData.date,
       amount: parseFloat(formData.amount),
@@ -201,6 +244,7 @@ const PaymentFormDialog: React.FC<PaymentFormDialogProps> = ({ open, onClose, on
       reference: `REF-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
       clientId: '',
       clientName: '',
+      invoiceId: undefined,
       invoiceNumber: '',
       date: new Date().toISOString().split('T')[0],
       amount: '',
@@ -226,20 +270,48 @@ const PaymentFormDialog: React.FC<PaymentFormDialogProps> = ({ open, onClose, on
           </div>
           <ClientSelector
             value={formData.clientId}
-            onChange={(clientId) => setFormData(prev => ({ ...prev, clientId }))}
+            onChange={(clientId) => {
+              // Reset invoice selection when client changes
+              setFormData(prev => ({ 
+                ...prev, 
+                clientId,
+                invoiceId: undefined,
+                invoiceNumber: '',
+                amount: ''
+              }));
+            }}
             label="Client"
             placeholder="Sélectionner un client"
             required
           />
           {formData.clientId && <p className="text-xs text-gray-500 dark:text-gray-300">Client sélectionné</p>}
           <div>
-            <Label htmlFor="invoiceNumber">Numéro de facture</Label>
-            <Input
-              id="invoiceNumber"
-              value={formData.invoiceNumber}
-              onChange={(e) => setFormData(prev => ({ ...prev, invoiceNumber: e.target.value }))}
-              placeholder="F-2024-001"
-            />
+            <Label htmlFor="invoiceNumber">Numéro de facture *</Label>
+            {clientInvoices.length > 0 ? (
+              <Select value={formData.invoiceId || ''} onValueChange={handleInvoiceSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une facture" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clientInvoices.map(invoice => (
+                    <SelectItem key={invoice.id} value={invoice.id}>
+                      {invoice.invoice_number} - {invoice.total_incl_tax.toFixed(2)} € - {invoice.status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : formData.clientId ? (
+              <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-sm text-yellow-700 dark:text-yellow-300">
+                Aucune facture en attente pour ce client. Veuillez d'abord créer une facture.
+              </div>
+            ) : (
+              <Input
+                id="invoiceNumber"
+                value={formData.invoiceNumber}
+                placeholder="Sélectionnez d'abord un client"
+                disabled
+              />
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -463,16 +535,18 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
   const { toast } = useToast();
   const { currentCompany } = useAuth();
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [invoices, setInvoices] = useState<InvoiceWithDetails[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false);
   const [previewPayment, setPreviewPayment] = useState<Payment | null>(null);
-  // Charger les paiements depuis Supabase
+  // Charger les paiements et factures depuis Supabase
   useEffect(() => {
     if (currentCompany?.id) {
       loadPayments();
+      loadInvoices();
     }
   }, [currentCompany]);
   const loadPayments = async () => {
@@ -512,6 +586,18 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
       setLoading(false);
     }
   };
+  const loadInvoices = async () => {
+    try {
+      const allInvoices = await invoicingService.getInvoices({
+        limit: 1000,
+        orderDirection: 'desc'
+      });
+      setInvoices(allInvoices);
+    } catch (error) {
+      logger.error('OptimizedPaymentsTab', 'Error loading invoices:', error instanceof Error ? error.message : String(error));
+      setInvoices([]);
+    }
+  };
   // Ouvrir automatiquement le formulaire si shouldCreateNew est true
   React.useEffect(() => {
     if (shouldCreateNew) {
@@ -548,8 +634,36 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
   const handleNewPayment = () => {
     setShowPaymentForm(true);
   };
-  const handleSavePayment = (newPayment: Payment) => {
-    setPayments(prev => [...prev, newPayment]);
+  const handleSavePayment = async (newPayment: Payment) => {
+    try {
+      // Save to database via paymentsService
+      await paymentsService.createPayment({
+        reference: newPayment.reference,
+        invoice_id: newPayment.invoiceId,
+        third_party_id: newPayment.clientId,
+        payment_date: newPayment.date,
+        amount: newPayment.amount,
+        payment_method: newPayment.method,
+        type: newPayment.type,
+        description: newPayment.description
+      });
+      
+      // Add to local state
+      setPayments(prev => [...prev, newPayment]);
+      
+      toast({
+        title: "Succès",
+        description: `Le paiement ${newPayment.reference} a été enregistré et les écritures comptables générées.`,
+        variant: "default"
+      });
+    } catch (error) {
+      logger.error('OptimizedPaymentsTab', 'Error saving payment:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite lors de l'enregistrement du paiement.",
+        variant: "destructive"
+      });
+    }
   };
   const handleExportPayments = () => {
     // Vérifier s'il y a des paiements à exporter
@@ -848,6 +962,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
         open={showPaymentForm}
         onClose={() => setShowPaymentForm(false)}
         onSave={handleSavePayment}
+        invoices={invoices}
       />
       <PaymentPreviewDialog
         open={!!previewPayment}

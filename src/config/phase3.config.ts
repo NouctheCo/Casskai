@@ -204,7 +204,7 @@ export const PHASE3_CONFIG = {
     LOG_CALCULATIONS: true,
     LOG_VALIDATIONS: true,
     LOG_EXPORTS: true,
-    EXTERNAL_LOGGER: null, // Can be set to external logger instance
+    EXTERNAL_LOGGER: null as null | Record<string, unknown>, // Can be set to external logger instance
   },
 
   // Error handling
@@ -296,7 +296,7 @@ export function isCountryEnabled(countryCode: string): boolean {
 export function getEnabledCountries() {
   return Object.entries(PHASE3_CONFIG.COUNTRIES)
     .filter(([, config]) => config.enabled)
-    .map(([code, config]) => ({ code, ...config }));
+    .map(([, config]) => ({ ...config }));
 }
 
 /**

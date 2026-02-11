@@ -25,8 +25,11 @@ import {
   Zap,
   Crown,
   Sparkles,
-  Command
+  Command,
+  Cloud,
+  CloudOff,
 } from 'lucide-react';
+import { useSyncQueue } from '@/hooks/useSyncQueue';
 // Catégories organisées de manière intuitive
 const MODULE_CATEGORIES = {
   finances: {
@@ -92,6 +95,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
   const { allModules, isModuleActive: _isModuleActive, activeModules, canAccessModule } = useModulesSafe();
   const { user, currentCompany: _currentCompany } = useAuth();
   const { subscription } = useSubscription();
+  const { pendingCount: syncPending, failedCount: syncFailed } = useSyncQueue();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['finances']));
   const [searchQuery, setSearchQuery] = useState('');
   const [recentModules, setRecentModules] = useState<string[]>([]);
@@ -209,9 +213,10 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
             src="/logo.png" 
             alt="CassKai" 
             className={cn(
-              "transition-all duration-300",
+              "transition-all duration-300 mix-blend-multiply dark:mix-blend-screen",
               collapsed ? "h-8 w-8" : "h-10 w-auto"
             )}
+            style={{ background: 'transparent' }}
           />
         </Link>
       </div>
@@ -431,6 +436,35 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
           })}
         </div>
       </div>
+      {/* Indicateur sync offline */}
+      {(syncPending > 0 || syncFailed > 0 || !navigator.onLine) && !collapsed && (
+        <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2 text-xs">
+            {!navigator.onLine ? (
+              <>
+                <CloudOff className="h-3.5 w-3.5 text-orange-500" />
+                <span className="text-orange-600 dark:text-orange-400 font-medium">Hors ligne</span>
+              </>
+            ) : (
+              <>
+                <Cloud className="h-3.5 w-3.5 text-blue-500" />
+                <span className="text-gray-600 dark:text-gray-400">En ligne</span>
+              </>
+            )}
+            {syncPending > 0 && (
+              <Badge variant="secondary" className="text-xs px-1.5 py-0 bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
+                {syncPending}
+              </Badge>
+            )}
+            {syncFailed > 0 && (
+              <Badge variant="destructive" className="text-xs px-1.5 py-0">
+                {syncFailed}
+              </Badge>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Footer avec raccourcis */}
       {!collapsed && (
         <div className="p-3 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">

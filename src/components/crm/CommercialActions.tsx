@@ -7,8 +7,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Textarea } from '../ui/textarea';
+import { NewActionModal } from './NewActionModal';
 import { 
   Activity, 
   Plus, 
@@ -57,22 +56,8 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
 }) => {
   const { t } = useTranslation();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingAction, setEditingAction] = useState<CommercialAction | null>(null);
-  const [formData, setFormData] = useState<CommercialActionFormData>({
-    type: 'call',
-    title: '',
-    description: '',
-    client_id: '',
-    contact_id: '',
-    opportunity_id: '',
-    status: 'planned',
-    due_date: '',
-    assigned_to: '',
-    priority: 'medium',
-    outcome: '',
-    follow_up_required: false,
-    follow_up_date: ''
-  });
+  const [_editingAction, setEditingAction] = useState<CommercialAction | null>(null);
+
   const actionTypes = [
     { key: 'call', label: t('crm.actionTypes.call'), icon: Phone, color: 'bg-blue-100 text-blue-800' },
     { key: 'email', label: t('crm.actionTypes.email'), icon: Mail, color: 'bg-green-100 text-green-800' },
@@ -82,15 +67,15 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
     { key: 'demo', label: t('crm.actionTypes.demo'), icon: Target, color: 'bg-indigo-100 text-indigo-800' },
     { key: 'proposal', label: t('crm.actionTypes.proposal'), icon: FileText, color: 'bg-yellow-100 text-yellow-800' }
   ];
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR');
   };
-  // const formatDateTime = (dateString: string) => {
-  //   return new Date(dateString).toLocaleString('fr-FR');
-  // };
+
   const getActionTypeInfo = (type: string) => {
     return actionTypes.find(t => t.key === type) || actionTypes[0];
   };
+
   const getStatusColor = (status: string) => {
     const colors = {
       planned: 'bg-blue-100 text-blue-800 border-blue-300',
@@ -99,6 +84,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
     };
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-300';
   };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
@@ -109,6 +95,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
         return <Clock className="w-3 h-3" />;
     }
   };
+
   const getPriorityColor = (priority: string) => {
     const colors = {
       high: 'bg-red-100 text-red-800 border-red-300',
@@ -117,76 +104,30 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
     };
     return colors[priority as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-300';
   };
+
   const isOverdue = (action: CommercialAction) => {
     return action.status === 'planned' && 
            action.due_date && 
            new Date(action.due_date) < new Date();
   };
+
   const handleFilterChange = (key: keyof CrmFilters, value: string) => {
     onFiltersChange?.({
       ...filters,
       [key]: value || undefined
     });
   };
+
   const handleCreateAction = () => {
     setEditingAction(null);
-    setFormData({
-      type: 'call',
-      title: '',
-      description: '',
-      client_id: 'none',
-      contact_id: 'none',
-      opportunity_id: 'none',
-      status: 'planned',
-      due_date: '',
-      assigned_to: '',
-      priority: 'medium',
-      outcome: '',
-      follow_up_required: false,
-      follow_up_date: ''
-    });
     setIsFormOpen(true);
   };
+
   const handleEditAction = (action: CommercialAction) => {
     setEditingAction(action);
-    setFormData({
-      type: action.type,
-      title: action.title,
-      description: action.description || '',
-      client_id: action.client_id || 'none',
-      contact_id: action.contact_id || 'none',
-      opportunity_id: action.opportunity_id || 'none',
-      status: action.status,
-      due_date: action.due_date ? action.due_date.split('T')[0] : '',
-      assigned_to: action.assigned_to || '',
-      priority: action.priority,
-      outcome: action.outcome || '',
-      follow_up_required: action.follow_up_required || false,
-      follow_up_date: action.follow_up_date || ''
-    });
     setIsFormOpen(true);
   };
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const submitData = {
-        ...formData,
-        client_id: formData.client_id === 'none' ? undefined : formData.client_id,
-        contact_id: formData.contact_id === 'none' ? undefined : formData.contact_id,
-        opportunity_id: formData.opportunity_id === 'none' ? undefined : formData.opportunity_id,
-        due_date: formData.due_date ? new Date(formData.due_date).toISOString() : undefined
-      };
-      if (editingAction) {
-        await onUpdateAction?.(editingAction.id, submitData);
-      } else {
-        await onCreateAction?.(submitData);
-      }
-      setIsFormOpen(false);
-      setEditingAction(null);
-    } catch (error) {
-      logger.error('CommercialActions', 'Error submitting action form:', error instanceof Error ? error.message : String(error));
-    }
-  };
+
   const handleMarkAsCompleted = async (actionId: string) => {
     try {
       await onUpdateAction?.(actionId, {
@@ -197,18 +138,15 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
       logger.error('CommercialActions', 'Error marking action as completed:', error instanceof Error ? error.message : String(error));
     }
   };
-  const getClientContacts = (clientId: string) => {
-    return (contacts || []).filter(contact => contact.client_id === clientId);
-  };
-  const getClientOpportunities = (clientId: string) => {
-    return (opportunities || []).filter(opp => opp.client_id === clientId);
-  };
+
   const hasActiveFilters = Object.values(filters || {}).some(value => value && value !== 'all');
+
   // Calculate stats
   const totalActions = actions.length;
   const completedActions = actions.filter(a => a.status === 'completed').length;
   const plannedActions = actions.filter(a => a.status === 'planned').length;
   const overdueActions = actions.filter(a => isOverdue(a)).length;
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -528,187 +466,25 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
         </CardContent>
       </Card>
       {/* Action Form Dialog */}
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingAction ? t('crm.actionForm.editTitle') : t('crm.actionForm.createTitle')}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleFormSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t('crm.actionForm.type')} *</Label>
-                <Select
-                  value={formData.type}
-                  onValueChange={(value: any) => setFormData({...formData, type: value})}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {actionTypes.map((type) => (
-                      <SelectItem key={type.key} value={type.key}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>{t('crm.actionForm.status')}</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value: any) => setFormData({...formData, status: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="planned">{t('crm.actionStatus.planned')}</SelectItem>
-                    <SelectItem value="completed">{t('crm.actionStatus.completed')}</SelectItem>
-                    <SelectItem value="cancelled">{t('crm.actionStatus.cancelled')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="title">{t('crm.actionForm.title')} *</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">{t('crm.actionForm.description')}</Label>
-              <Textarea
-                id="description"
-                rows={3}
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t('crm.actionForm.client')}</Label>
-                <Select
-                  value={formData.client_id || 'none'}
-                  onValueChange={(value) => setFormData({...formData, client_id: value === 'none' ? '' : value, contact_id: '', opportunity_id: ''})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('crm.actionForm.selectClient')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t('crm.actionForm.noClient')}</SelectItem>
-                    {(clients || []).map((client) => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.company_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>{t('crm.actionForm.contact')}</Label>
-                <Select
-                  value={formData.contact_id || 'none'}
-                  onValueChange={(value) => setFormData({...formData, contact_id: value === 'none' ? '' : value})}
-                  disabled={!formData.client_id}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('crm.actionForm.selectContact')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t('crm.actionForm.noContact')}</SelectItem>
-                    {getClientContacts(formData.client_id || '').map((contact) => (
-                      <SelectItem key={contact.id} value={contact.id}>
-                        {contact.first_name} {contact.last_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>{t('crm.actionForm.opportunity')}</Label>
-                <Select
-                  value={formData.opportunity_id || 'none'}
-                  onValueChange={(value) => setFormData({...formData, opportunity_id: value === 'none' ? '' : value})}
-                  disabled={!formData.client_id}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('crm.actionForm.selectOpportunity')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t('crm.actionForm.noOpportunity')}</SelectItem>
-                    {getClientOpportunities(formData.client_id || '').map((opportunity) => (
-                      <SelectItem key={opportunity.id} value={opportunity.id}>
-                        {opportunity.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>{t('crm.actionForm.priority')}</Label>
-                <Select
-                  value={formData.priority}
-                  onValueChange={(value: any) => setFormData({...formData, priority: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">{t('crm.priority.low')}</SelectItem>
-                    <SelectItem value="medium">{t('crm.priority.medium')}</SelectItem>
-                    <SelectItem value="high">{t('crm.priority.high')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="due_date">{t('crm.actionForm.dueDate')}</Label>
-                <Input
-                  id="due_date"
-                  type="date"
-                  value={formData.due_date}
-                  onChange={(e) => setFormData({...formData, due_date: e.target.value})}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="assigned_to">{t('crm.actionForm.assignedTo')}</Label>
-                <Input
-                  id="assigned_to"
-                  value={formData.assigned_to}
-                  onChange={(e) => setFormData({...formData, assigned_to: e.target.value})}
-                />
-              </div>
-            </div>
-            {formData.status === 'completed' && (
-              <div className="space-y-2">
-                <Label htmlFor="outcome">{t('crm.actionForm.outcome')}</Label>
-                <Textarea
-                  id="outcome"
-                  rows={3}
-                  value={formData.outcome}
-                  onChange={(e) => setFormData({...formData, outcome: e.target.value})}
-                />
-              </div>
-            )}
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button type="submit">
-                {editingAction ? t('common.update') : t('common.create')}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <NewActionModal
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        clients={clients || []}
+        contacts={contacts || []}
+        opportunities={opportunities || []}
+        onCreateAction={async (data) => {
+          try {
+            await onCreateAction?.(data);
+            return true;
+          } catch (error) {
+            logger.error('CommercialActions', 'Failed to create action:', error);
+            return false;
+          }
+        }}
+        onSuccess={() => {
+          setEditingAction(null);
+        }}
+      />
     </div>
   );
 };

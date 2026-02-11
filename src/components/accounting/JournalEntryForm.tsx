@@ -22,9 +22,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CalendarIcon, AlertCircle, Loader2, PlusCircle, Trash2, Sparkles, Upload } from 'lucide-react';
 import JournalEntryAttachments from '@/components/accounting/JournalEntryAttachments';
+import { AccountSuggestions } from '@/components/accounting/AccountSuggestions';
+import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
 import { useAuth } from '@/contexts/AuthContext';
 import { journalEntriesService } from '@/services/journalEntriesService';
-import { aiDocumentAnalysisService } from '@/services/aiDocumentAnalysisService';
+import { aiDocumentAnalysisService } from '@/services/ai/documentService';
 import type {
   JournalEntryFormInitialValues,
   JournalEntryFormValues,
@@ -126,6 +128,20 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   // AI Analysis states
   const [aiAnalyzing, setAiAnalyzing] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<JournalEntryExtracted | null>(null);
+
+  // AI Account Suggestions popover state
+  const [suggestionPopoverOpen, setSuggestionPopoverOpen] = useState<number | null>(null);
+
+  // Convert accounts to autocomplete options
+  const accountOptions: AutocompleteOption[] = useMemo(() => {
+    return localAccounts.map(account => ({
+      value: account.id,
+      label: `${account.account_number} - ${account.account_name}`,
+      description: account.account_type || undefined,
+      category: account.account_class?.toString() || undefined,
+      metadata: { accountNumber: account.account_number, accountName: account.account_name }
+    }));
+  }, [localAccounts]);
 
   const isSupabaseConfigured = useMemo(() => {
     const url = import.meta.env.VITE_SUPABASE_URL;
@@ -644,38 +660,23 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
                   return (
                     <tr className="border-b" key={fieldItem.id}>
                       <td className="py-2 pr-2 align-top">
-                        <Select
+                        <SmartAutocomplete
                           value={item.accountId}
-                          onValueChange={(value) => setValue(`items.${index}.accountId`, value, {
+                          onChange={(value) => setValue(`items.${index}.accountId`, value, {
                             shouldDirty: true,
                             shouldValidate: true,
                           })}
+                          options={accountOptions}
+                          placeholder={t('allAccounts')}
+                          searchPlaceholder="Rechercher un compte..."
+                          emptyMessage={loadingDropdowns ? 'Chargement...' : t('journal_entries.no_accounts_found', {
+                            defaultValue: 'Aucun compte trouvé',
+                          })}
                           disabled={loadingDropdowns || localAccounts.length === 0}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder={t('allAccounts')} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px] overflow-y-auto">
-                            {loadingDropdowns ? (
-                              <div className="flex items-center justify-center p-4 text-sm">
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                {t('common.loading')}
-                              </div>
-                            ) : localAccounts.length === 0 ? (
-                              <div className="p-4 text-center text-muted-foreground text-sm">
-                                {t('journal_entries.no_accounts_found', {
-                                  defaultValue: 'Aucun compte trouvé',
-                                })}
-                              </div>
-                            ) : (
-                              localAccounts.map((account) => (
-                                <SelectItem key={account.id} value={account.id}>
-                                  {account.account_number} - {account.account_name}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
+                          groups={true}
+                          showRecent={true}
+                          maxRecent={5}
+                        />
                       </td>
                       <td className="py-2 pr-2 align-top">
                         <Input
@@ -709,16 +710,59 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
                         />
                       </td>
                       <td className="py-2 text-center align-top">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          type="button"
-                          onClick={() => handleRemoveLine(index)}
-                          disabled={fields.length <= 2}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          {t('journal_entries.remove_item')}
-                        </Button>
+                        <div className="flex items-center gap-2 justify-center">
+                          {/* Bouton suggestions IA */}
+                          <Popover
+                            open={suggestionPopoverOpen === index}
+                            onOpenChange={(open) => setSuggestionPopoverOpen(open ? index : null)}
+                          >
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                type="button"
+                                title="Suggestions IA"
+                                disabled={!item.description || item.description.length < 3}
+                              >
+                                <Sparkles className="h-4 w-4 text-primary" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[400px]" align="start">
+                              <AccountSuggestions
+                                companyId={currentCompanyId!}
+                                description={item.description || ''}
+                                onSelectSuggestion={(code, name) => {
+                                  // Trouver l'ID du compte depuis le code
+                                  const account = localAccounts.find(a => a.account_number === code);
+                                  if (account) {
+                                    form.setValue(`items.${index}.accountId`, account.id, {
+                                      shouldDirty: true,
+                                      shouldValidate: true,
+                                    });
+                                    setSuggestionPopoverOpen(null);
+                                    toast({
+                                      title: '✅ Compte suggéré appliqué',
+                                      description: `${code} - ${name}`,
+                                    });
+                                  }
+                                }}
+                                disabled={!item.description || item.description.length < 3}
+                              />
+                            </PopoverContent>
+                          </Popover>
+
+                          {/* Bouton delete existant */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            type="button"
+                            onClick={() => handleRemoveLine(index)}
+                            disabled={fields.length <= 2}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            {t('journal_entries.remove_item')}
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );

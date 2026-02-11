@@ -47,15 +47,15 @@ export type InvoicePdfInput = {
   issueDate?: string | null;
   number?: string | null;
   date?: string | null;
-  due_date?: string | null;
+  due_date: string;
   service_date?: string | null;
   delivery_date?: string | null;
   currency?: string | null;
-  notes?: string | null;
+  notes: string | null;
   terms?: string | null;
   vat_exemption_reason?: string | null;
-  paid_amount?: number | null;
-  remaining_amount?: number | null;
+  paid_amount: number;
+  remaining_amount: number;
   // Totals - DB naming
   total_ht?: number | null;
   total_tva?: number | null;
@@ -80,29 +80,29 @@ declare module 'jspdf' {
   }
 }
 export interface CompanyInfo {
-  name?: string;
-  address?: string;
-  city?: string;
-  postalCode?: string;
-  country?: string;
-  phone?: string;
-  email?: string;
-  website?: string;
-  siret?: string;
-  vatNumber?: string;
-  legalForm?: string;
-  shareCapital?: number | string;
-  rcsCity?: string;
-  rcsNumber?: string;
-  legalMentions?: string;
-  defaultTerms?: string;
-  vatNote?: string;
-  mainBankName?: string;
-  mainBankIban?: string;
-  mainBankBic?: string;
-  paymentInstructions?: string;
-  currency?: string;
-  logo?: string;
+  name?: string | null;
+  address?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
+  country?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  website?: string | null;
+  siret?: string | null;
+  vatNumber?: string | null;
+  legalForm?: string | null;
+  shareCapital?: number | string | null;
+  rcsCity?: string | null;
+  rcsNumber?: string | null;
+  legalMentions?: string | null;
+  defaultTerms?: string | null;
+  vatNote?: string | null;
+  mainBankName?: string | null;
+  mainBankIban?: string | null;
+  mainBankBic?: string | null;
+  paymentInstructions?: string | null;
+  currency?: string | null;
+  logo?: string | null;
 }
 export class InvoicePdfService {
   private static getInvoiceNumber(invoice: InvoicePdfInput): string {
@@ -233,13 +233,11 @@ export class InvoicePdfService {
       doc.text(new Date(serviceDate).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
       yPos += 6;
     }
-    if (invoice.due_date) {
-      doc.setFont('helvetica', 'bold');
-      doc.text('Échéance:', invoiceInfoX, yPos);
-      doc.setFont('helvetica', 'normal');
-      doc.text(new Date(invoice.due_date as any).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
-      yPos += 6;
-    }
+    doc.setFont('helvetica', 'bold');
+    doc.text('Échéance:', invoiceInfoX, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(new Date(invoice.due_date).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
+    yPos += 6;
     // Informations client (colonne gauche)
     const resolvedClient = invoice.client || invoice.third_party;
     if (resolvedClient) {
@@ -446,15 +444,13 @@ export class InvoicePdfService {
       });
     }
     const legalTerms: string[] = [];
-    const dueDateText = invoice.due_date
-      ? new Date(invoice.due_date as string).toLocaleDateString('fr-FR')
-      : undefined;
+    const dueDateText = new Date(invoice.due_date).toLocaleDateString('fr-FR');
     
     // ✅ NOUVEAU: Utiliser les conditions conformes à la devise
     const currency = _currency || getCurrentCompanyCurrency();
     const complianceTerms = paymentTermsComplianceService.buildPaymentTermsText(
       currency,
-      invoice.terms || companyData?.defaultTerms
+      invoice.terms || companyData?.defaultTerms || undefined
     );
     
     const providedTermsRaw = invoice.terms || companyData?.defaultTerms || '';
@@ -466,11 +462,11 @@ export class InvoicePdfService {
     const vatNoteShouldShow = typeof invoice.total_tva === 'number' && invoice.total_tva === 0;
     const vatNote = vatNoteShouldShow
       ? invoice.vat_exemption_reason || companyData?.vatNote || 'TVA non applicable, art. 293 B du CGI.'
-      : undefined;
+      : null;
     const serviceDate = (invoice.service_date as string) || (invoice.delivery_date as string);
     const serviceDateText = serviceDate
       ? `Date de prestation/livraison: ${new Date(serviceDate).toLocaleDateString('fr-FR')}`
-      : undefined;
+      : null;
     if (dueDateText) {
       legalTerms.push(`Échéance: ${dueDateText}`);
     }
@@ -511,7 +507,7 @@ export class InvoicePdfService {
     // Informations légales
     const legalInfo: string[] = [];
     if (companyData?.legalForm) legalInfo.push(companyData.legalForm);
-    if (companyData?.shareCapital !== undefined) {
+    if (companyData?.shareCapital != null) {
       const capitalValue =
         typeof companyData.shareCapital === 'number'
           ? this.formatCurrency(companyData.shareCapital, companyData.currency || currency || getCurrentCompanyCurrency())

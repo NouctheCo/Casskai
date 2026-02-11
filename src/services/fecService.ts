@@ -280,7 +280,7 @@ export class FECService {
             // Créer le compte s'il n'existe pas
             const accountClass = Number(entry.CompteNum?.charAt(0)) || null;
             // const accountType = this.mapAccountClassToType(accountClass);
-            const accountType = null; // Simplified for now
+            const accountType: string | null = null; // Simplified for now
             const { data: newAccount, error: accountError } = await supabase
               .from('chart_of_accounts')
               .insert({

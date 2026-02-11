@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, X, MessageCircle, Loader2, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
-import { aiService } from '@/services/aiService';
+import { aiService } from '@/services/ai/chatService';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 

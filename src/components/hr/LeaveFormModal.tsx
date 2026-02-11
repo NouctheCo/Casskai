@@ -25,11 +25,10 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
   useBodyScrollLock(isOpen);
   const [formData, setFormData] = useState({
     employee_id: leave?.employee_id || '',
-    type: leave?.type || 'vacation' as const,
+    leave_type: (leave as any)?.leave_type || 'paid_vacation' as const,
     start_date: leave?.start_date || '',
     end_date: leave?.end_date || '',
     reason: leave?.reason || '',
-    notes: leave?.notes || '',
   });
   const [daysCount, setDaysCount] = useState(leave?.days_count || 0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,11 +64,14 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
     setIsSubmitting(true);
     try {
       const success = await onSubmit({
-        ...formData,
+        employee_id: formData.employee_id,
+        leave_type: formData.leave_type,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
         days_count: daysCount,
+        reason: formData.reason || null,
         status: 'pending',
-        type: formData.type as any,
-      });
+      } as any);
       if (success) {
         onClose();
       }
@@ -81,11 +83,12 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
   };
   if (!isOpen) return null;
   const leaveTypes = {
-    vacation: 'Congés payés',
-    sick: 'Arrêt maladie',
-    personal: 'Congé personnel',
+    paid_vacation: 'Congés payés',
+    sick_leave: 'Arrêt maladie',
+    unpaid_leave: 'Congé sans solde',
     maternity: 'Congé maternité',
     paternity: 'Congé paternité',
+    rtt: 'RTT',
     other: 'Autre'
   };
   return (
@@ -141,8 +144,8 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
             <div>
               <Label htmlFor="type">Type de congé *</Label>
               <Select
-                value={formData.type}
-                onValueChange={value => setFormData({ ...formData, type: value as any })}
+                value={formData.leave_type}
+                onValueChange={value => setFormData({ ...formData, leave_type: value as any })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -202,17 +205,6 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
                 onChange={e => setFormData({ ...formData, reason: e.target.value })}
                 placeholder="Motif de la demande de congé..."
                 rows={3}
-              />
-            </div>
-            {/* Notes */}
-            <div>
-              <Label htmlFor="notes">Notes internes</Label>
-              <Textarea
-                id="notes"
-                value={formData.notes}
-                onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Notes additionnelles (optionnel)..."
-                rows={2}
               />
             </div>
             {/* Info */}

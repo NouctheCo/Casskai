@@ -59,6 +59,7 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
       }, 2000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [priority, isInView]);
   return (
     <div ref={ref}>

@@ -32,10 +32,12 @@ import {
   Tag,
   CreditCard,
   Banknote,
-  Trash2
+  Trash2,
+  Shuffle
 } from 'lucide-react';
 import { BankAccountsTab } from '@/components/banking/BankAccountsTab';
 import { SepaPaymentGenerator } from '@/components/banking/SepaPaymentGenerator';
+import BankReconciliation from '@/components/banking/BankReconciliation';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 const BanksPageNew: React.FC = () => {
@@ -48,7 +50,7 @@ const BanksPageNew: React.FC = () => {
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'import' | 'categorization' | 'history' | 'accounts' | 'sepa-transfers'>('import');
+  const [activeTab, setActiveTab] = useState<'import' | 'categorization' | 'history' | 'accounts' | 'sepa-transfers' | 'reconciliation'>('import');
   const [metrics, setMetrics] = useState({
     totalTransactions: 0,
     reconciledTransactions: 0,
@@ -322,6 +324,17 @@ const BanksPageNew: React.FC = () => {
             <Banknote className="h-4 w-4" />
             Virements SEPA
           </button>
+          <button
+            onClick={() => setActiveTab('reconciliation')}
+            className={`flex items-center gap-2 px-6 py-3 font-medium transition ${
+              activeTab === 'reconciliation'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Shuffle className="h-4 w-4" />
+            Rapprochement bancaire
+          </button>
         </div>
       </div>
       {/* Metrics Cards */}
@@ -565,6 +578,20 @@ const BanksPageNew: React.FC = () => {
       {/* Tab Content: SEPA Transfers */}
       {activeTab === 'sepa-transfers' && (
         <SepaPaymentGenerator onNavigateToAccounts={() => setActiveTab('accounts')} />
+      )}
+      {/* Tab Content: Rapprochement bancaire */}
+      {activeTab === 'reconciliation' && (
+        <BankReconciliation
+          currentEnterprise={currentCompany}
+          bankAccounts={bankAccounts}
+          onReconciliationComplete={(summary) => {
+            // Rafraîchir les métriques après rapprochement
+            loadMetrics();
+            if (summary) {
+              toastSuccess('Rapprochement terminé avec succès');
+            }
+          }}
+        />
       )}
     </div>
   );

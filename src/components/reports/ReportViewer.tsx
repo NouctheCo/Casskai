@@ -9,7 +9,7 @@ import { Calendar, Download, FileText, Table, BarChart3, Loader2 } from 'lucide-
 import { useAuth } from '@/contexts/AuthContext';
 import { reportGenerationService } from '@/services/reportGenerationService';
 import { reportExportService } from '@/services/ReportExportService';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { logger } from '@/lib/logger';

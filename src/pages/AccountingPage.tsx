@@ -57,6 +57,8 @@ import JournalDistributionChart from '@/components/accounting/JournalDistributio
 import { AnomalyDetectionDashboard } from '@/components/accounting/AnomalyDetectionDashboard';
 import { AccountingImportDialog } from '@/components/accounting/AccountingImportDialog';
 import { PeriodClosurePanel } from '@/components/accounting/PeriodClosurePanel';
+import { SyscohadaValidationPanel } from '@/components/accounting/SyscohadaValidationPanel';
+import { AccountingStandardAdapter } from '@/services/accountingStandardAdapter';
 import { logger } from '@/lib/logger';
 // Types
 interface AccountingKPICardProps {
@@ -350,6 +352,7 @@ export default function AccountingPageOptimized() {
   const [customEndDate, setCustomEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [currentCompanyId, setCurrentCompanyId] = useState<string | undefined>(undefined);
+  const [accountingStandard, setAccountingStandard] = useState<string | null>(null);
   const [accountingData, setAccountingData] = useState<AccountingData>({
     totalBalance: 0,
     totalDebit: 0,
@@ -407,6 +410,15 @@ export default function AccountingPageOptimized() {
         }
         const companyId = companies[0].id;
         setCurrentCompanyId(companyId);
+
+        // Charger la norme comptable de l'entreprise
+        try {
+          const standard = await AccountingStandardAdapter.getCompanyStandard(companyId);
+          setAccountingStandard(standard);
+        } catch (error) {
+          logger.error('AccountingPage', 'Erreur chargement norme comptable:', error);
+        }
+
         // Calculate period dates
         const now = new Date();
         let periodStart: string;
@@ -763,6 +775,17 @@ export default function AccountingPageOptimized() {
             {/* Budget vs Réel */}
             {currentCompanyId && <BudgetVsActualChart companyId={currentCompanyId} />}
           </div>
+
+          {/* Validation SYSCOHADA (OHADA - 17 pays Afrique de l'Ouest) */}
+          {/* Affichage conditionnel: uniquement si norme comptable = SYSCOHADA */}
+          {currentCompanyId && accountingStandard === 'SYSCOHADA' && (
+            <SyscohadaValidationPanel
+              companyId={currentCompanyId}
+              fiscalYear={new Date().getFullYear()}
+              autoRefresh={false}
+            />
+          )}
+
           <div className="grid gap-6 lg:grid-cols-3">
             <RecentAccountingActivities />
           </div>

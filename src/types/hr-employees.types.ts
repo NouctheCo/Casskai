@@ -20,8 +20,8 @@ export type Employee = {
   city?: string;
   postal_code?: string;
   country?: string;
-  emergency_contact?: string;
-  emergency_phone?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
   contract_type?: 'cdi' | 'cdd' | 'intern' | 'contractor' | 'temporary';
   employment_status?: 'active' | 'on_leave' | 'terminated' | 'suspended';
   salary?: number;

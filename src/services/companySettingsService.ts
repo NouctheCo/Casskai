@@ -162,7 +162,8 @@ export class CompanySettingsService {
   static async markSettingsCompleted(companyId: string): Promise<CompanySettings> {
     return this.updateCompanySettings(companyId, {
       metadata: {
-        settingsCompletedAt: new Date()
+        settingsCompletedAt: new Date(),
+        onboardingCompletedAt: null
       }
     });
   }

@@ -56,8 +56,10 @@ import {
   BarChart3,
   FileSignature,
   Archive,
-  FilePlus
+  FilePlus,
+  Pencil
 } from 'lucide-react';
+import type { Employee, Leave, Expense } from '@/services/hrService';
 
 export default function HumanResourcesPage() {
   const { t } = useTranslation();
@@ -82,8 +84,11 @@ export default function HumanResourcesPage() {
     fetchMetrics: _fetchMetrics,
     refreshAll,
     createEmployee,
+    updateEmployee,
     createLeave,
-    createExpense
+    updateLeave,
+    createExpense,
+    updateExpense
   } = useHR();
 
   // Use payroll and export hook
@@ -107,6 +112,10 @@ export default function HumanResourcesPage() {
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
+  // Selected entities for editing
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedLeave, setSelectedLeave] = useState<Leave | null>(null);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
 
   // Animation variants
   const containerVariants = {
@@ -138,7 +147,7 @@ export default function HumanResourcesPage() {
 
     const response = await hrDocumentsService.uploadDocument(
       currentCompany.id,
-      currentCompany.owner_id,
+      currentCompany.owner_id ?? '',
       formData
     );
 
@@ -453,25 +462,39 @@ export default function HumanResourcesPage() {
                     </div>
                   ) : employees.length > 0 ? (
                     <div className="space-y-4">
-                      {employees.slice(0, 5).map((employee) => (
-                        <div key={employee.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      {employees.map((employee) => (
+                        <div
+                          key={employee.id}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 cursor-pointer transition-colors"
+                          onClick={() => {
+                            setSelectedEmployee(employee);
+                            setShowEmployeeModal(true);
+                          }}
+                        >
                           <div className="space-y-1">
                             <p className="font-medium">{employee.full_name}</p>
                             <p className="text-sm text-muted-foreground">
                               {employee.position} • {employee.department}
                             </p>
                           </div>
-                          <Badge variant={employee.status === 'active' ? 'default' : 'secondary'}>
-                            {employee.status}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedEmployee(employee);
+                                setShowEmployeeModal(true);
+                              }}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Badge variant={employee.status === 'active' ? 'default' : 'secondary'}>
+                              {employee.status}
+                            </Badge>
+                          </div>
                         </div>
                       ))}
-
-                      {employees.length > 5 && (
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          Et {employees.length - 5} autres employés...
-                        </p>
-                      )}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center py-12">
@@ -537,36 +560,50 @@ export default function HumanResourcesPage() {
                     </div>
                   ) : leaves.length > 0 ? (
                     <div className="space-y-4">
-                      {leaves.slice(0, 5).map((leave) => (
-                        <div key={leave.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      {leaves.map((leave) => (
+                        <div
+                          key={leave.id}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 cursor-pointer transition-colors"
+                          onClick={() => {
+                            setSelectedLeave(leave);
+                            setShowLeaveModal(true);
+                          }}
+                        >
                           <div className="space-y-1">
                             <p className="font-medium">{leave.employee_name}</p>
                             <p className="text-sm text-muted-foreground">
-                              {leave.type} • {leave.days_count} jours
+                              {leave.leave_type} • {leave.days_count} jours
                             </p>
                             <p className="text-xs text-muted-foreground">
                               Du {new Date(leave.start_date).toLocaleDateString()} au {new Date(leave.end_date).toLocaleDateString()}
                             </p>
                           </div>
-                          <Badge
-                            variant={
-                              leave.status === 'approved' ? 'default' :
-                              leave.status === 'pending' ? 'secondary' :
-                              'destructive'
-                            }
-                          >
-                            {leave.status === 'approved' && <CheckCircle className="w-3 h-3 mr-1" />}
-                            {leave.status === 'rejected' && <XCircle className="w-3 h-3 mr-1" />}
-                            {leave.status}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedLeave(leave);
+                                setShowLeaveModal(true);
+                              }}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Badge
+                              variant={
+                                leave.status === 'approved' ? 'default' :
+                                leave.status === 'pending' ? 'secondary' :
+                                'destructive'
+                              }
+                            >
+                              {leave.status === 'approved' && <CheckCircle className="w-3 h-3 mr-1" />}
+                              {leave.status === 'rejected' && <XCircle className="w-3 h-3 mr-1" />}
+                              {leave.status}
+                            </Badge>
+                          </div>
                         </div>
                       ))}
-
-                      {leaves.length > 5 && (
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          Et {leaves.length - 5} autres demandes...
-                        </p>
-                      )}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center py-12">
@@ -628,8 +665,15 @@ export default function HumanResourcesPage() {
                     </div>
                   ) : expenses.length > 0 ? (
                     <div className="space-y-4">
-                      {expenses.slice(0, 5).map((expense) => (
-                        <div key={expense.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      {expenses.map((expense) => (
+                        <div
+                          key={expense.id}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 cursor-pointer transition-colors"
+                          onClick={() => {
+                            setSelectedExpense(expense);
+                            setShowExpenseModal(true);
+                          }}
+                        >
                           <div className="space-y-1">
                             <p className="font-medium">{expense.employee_name}</p>
                             <p className="text-sm text-muted-foreground">
@@ -639,27 +683,34 @@ export default function HumanResourcesPage() {
                               {new Date(expense.expense_date).toLocaleDateString()}
                             </p>
                           </div>
-                          <div className="text-right">
-                            <p className="font-medium">{expense.amount} {expense.currency}</p>
-                            <Badge
-                              variant={
-                                expense.status === 'approved' ? 'default' :
-                                expense.status === 'pending' ? 'secondary' :
-                                expense.status === 'reimbursed' ? 'outline' :
-                                'destructive'
-                              }
+                          <div className="flex items-center gap-3">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedExpense(expense);
+                                setShowExpenseModal(true);
+                              }}
                             >
-                              {expense.status}
-                            </Badge>
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <div className="text-right">
+                              <p className="font-medium">{expense.amount} {expense.currency}</p>
+                              <Badge
+                                variant={
+                                  expense.status === 'approved' ? 'default' :
+                                  expense.status === 'pending' ? 'secondary' :
+                                  expense.status === 'reimbursed' ? 'outline' :
+                                  'destructive'
+                                }
+                              >
+                                {expense.status}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
                       ))}
-
-                      {expenses.length > 5 && (
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          Et {expenses.length - 5} autres frais...
-                        </p>
-                      )}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center py-12">
@@ -720,25 +771,49 @@ export default function HumanResourcesPage() {
       {/* Real Form Modals */}
       <EmployeeFormModal
         isOpen={showEmployeeModal}
-        onClose={() => setShowEmployeeModal(false)}
-        onSubmit={createEmployee}
-        employee={null}
+        onClose={() => {
+          setShowEmployeeModal(false);
+          setSelectedEmployee(null);
+        }}
+        onSubmit={async (data) => {
+          if (selectedEmployee) {
+            return updateEmployee(selectedEmployee.id, data);
+          }
+          return createEmployee(data);
+        }}
+        employee={selectedEmployee}
       />
 
       <LeaveFormModal
         isOpen={showLeaveModal}
-        onClose={() => setShowLeaveModal(false)}
-        onSubmit={createLeave}
+        onClose={() => {
+          setShowLeaveModal(false);
+          setSelectedLeave(null);
+        }}
+        onSubmit={async (data) => {
+          if (selectedLeave) {
+            return updateLeave(selectedLeave.id, data as any);
+          }
+          return createLeave(data);
+        }}
         employees={employees}
-        leave={null}
+        leave={selectedLeave}
       />
 
       <ExpenseFormModal
         isOpen={showExpenseModal}
-        onClose={() => setShowExpenseModal(false)}
-        onSubmit={createExpense}
+        onClose={() => {
+          setShowExpenseModal(false);
+          setSelectedExpense(null);
+        }}
+        onSubmit={async (data) => {
+          if (selectedExpense) {
+            return updateExpense(selectedExpense.id, data as any);
+          }
+          return createExpense(data);
+        }}
         employees={employees}
-        expense={null}
+        expense={selectedExpense}
       />
 
       <DocumentUploadModal

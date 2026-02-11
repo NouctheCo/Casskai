@@ -213,6 +213,7 @@ export const useOptimizedDebounce = <T>(
       }, options.maxWait);
       return () => clearTimeout(maxHandler);
     }
+    return undefined;
   }, [value, options?.maxWait]);
   return {
     debouncedValue,

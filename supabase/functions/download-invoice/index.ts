@@ -6,15 +6,10 @@
  * Date: 6 décembre 2025
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import Stripe from 'https://esm.sh/stripe@14.11.0?target=deno';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
 interface RequestBody {
   invoice_id: string;
@@ -37,9 +32,10 @@ interface SuccessResponse {
 
 serve(async (req: Request) => {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+  const preflightResponse = handleCorsPreflightRequest(req);
+  if (preflightResponse) return preflightResponse;
+
+  const corsH = getCorsHeaders(req);
 
   try {
     console.log('[download-invoice] Function invoked');
@@ -60,7 +56,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsH, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -78,7 +74,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsH, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -104,7 +100,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsH, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -125,7 +121,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsH, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -139,7 +135,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsH, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -166,7 +162,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsH, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -197,7 +193,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsH, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -214,7 +210,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 403,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsH, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -231,7 +227,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsH, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -272,7 +268,7 @@ serve(async (req: Request) => {
       return new Response(null, {
         status: 302,
         headers: {
-          ...corsHeaders,
+          ...corsH,
           'Location': invoice.invoice_pdf
         },
       });
@@ -290,7 +286,7 @@ serve(async (req: Request) => {
         } as SuccessResponse),
         {
           status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsH, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -307,7 +303,7 @@ serve(async (req: Request) => {
         } as ErrorResponse),
         {
           status: error.statusCode || 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsH, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -319,7 +315,7 @@ serve(async (req: Request) => {
       } as ErrorResponse),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsH, 'Content-Type': 'application/json' },
       }
     );
   }

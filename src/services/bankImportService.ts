@@ -68,8 +68,9 @@ class BankImportService {
    */
   async importCSV(file: File, accountId: string, companyId: string, mapping?: CSVMapping): Promise<ImportResult> {
     try {
-      const companyCurrency = await this.getCompanyCurrency(companyId);
-      const text = await file.text();
+      const companyCurrency = await this.getAccountCurrency(accountId);
+      // Read file with proper encoding detection (UTF-8 vs Windows-1252)
+      const text = await this.readFileWithEncoding(file);
       const lines = text.split('\n');
       if (lines.length < 2) {
         return {
@@ -82,15 +83,23 @@ class BankImportService {
           errors: ['Fichier CSV vide ou invalide']
         };
       }
-      const headers = this.parseCSVLine(lines[0]);
+      // Auto-detect CSV delimiter (comma or semicolon)
+      const delimiter = this.detectDelimiter(lines[0]);
+      logger.info('BankImport', `🔧 CSV Delimiter detected: "${delimiter}"`);
+      
+      const headers = this.parseCSVLine(lines[0], delimiter);
+      logger.info('BankImport', `📋 CSV Headers detected: ${headers.join(' | ')}`);
+      
       const dataLines = lines.slice(1).filter(line => line.trim());
       // Auto-détection du mapping si non fourni
       const finalMapping = mapping || this.detectCSVMapping(headers);
+      logger.info('BankImport', `🔍 CSV Mapping: date=${finalMapping.date}, amount=${finalMapping.amount}, debit=${finalMapping.debit}, credit=${finalMapping.credit}, description=${finalMapping.description}`);
+      
       const transactions: BankTransaction[] = [];
       const errors: string[] = [];
       for (let i = 0; i < dataLines.length; i++) {
         try {
-          const values = this.parseCSVLine(dataLines[i]);
+          const values = this.parseCSVLine(dataLines[i], delimiter);
           if (values.length < headers.length / 2) continue; // Skip incomplete lines
           const transaction = this.parseCSVTransaction(values, finalMapping, accountId, companyId, companyCurrency);
           if (transaction) {
@@ -100,6 +109,8 @@ class BankImportService {
           errors.push(`Ligne ${i + 2}: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
         }
       }
+      logger.info('BankImport', `✅ Parsed ${transactions.length} transactions from ${dataLines.length} data lines`);
+      
       // Sauvegarde en base
       const saveResult = await this.saveTransactions(transactions);
       
@@ -140,7 +151,7 @@ class BankImportService {
    */
   async importOFX(file: File, accountId: string, companyId: string): Promise<ImportResult> {
     try {
-      const companyCurrency = await this.getCompanyCurrency(companyId);
+      const companyCurrency = await this.getAccountCurrency(accountId);
       const text = await file.text();
       // Parse OFX format
       const transactions = await this.parseOFXTransactions(text, accountId, companyId, companyCurrency);
@@ -181,7 +192,7 @@ class BankImportService {
    */
   async importQIF(file: File, accountId: string, companyId: string): Promise<ImportResult> {
     try {
-      const companyCurrency = await this.getCompanyCurrency(companyId);
+      const companyCurrency = await this.getAccountCurrency(accountId);
       const text = await file.text();
       const transactions = await this.parseQIFTransactions(text, accountId, companyId, companyCurrency);
       if (transactions.length === 0) {
@@ -507,7 +518,53 @@ class BankImportService {
   /**
    * Utilitaires de parsing
    */
-  private parseCSVLine(line: string): string[] {
+  private async readFileWithEncoding(file: File): Promise<string> {
+    const arrayBuffer = await file.arrayBuffer();
+    
+    // Try UTF-8 first
+    try {
+      const utf8Decoder = new TextDecoder('utf-8', { fatal: true });
+      const text = utf8Decoder.decode(arrayBuffer);
+      // Check for replacement characters which indicate encoding issues
+      if (!text.includes('�')) {
+        logger.info('BankImport', '📝 Encoding: UTF-8');
+        return text;
+      }
+    } catch (e) {
+      // UTF-8 decode failed, will try Windows-1252
+    }
+    
+    // Fallback to Windows-1252 (common for French CSV files)
+    try {
+      const win1252Decoder = new TextDecoder('windows-1252');
+      const text = win1252Decoder.decode(arrayBuffer);
+      logger.info('BankImport', '📝 Encoding: Windows-1252 (caractères accentués français)');
+      return text;
+    } catch (e) {
+      // Last resort: ISO-8859-1
+      const isoDecoder = new TextDecoder('iso-8859-1');
+      const text = isoDecoder.decode(arrayBuffer);
+      logger.info('BankImport', '📝 Encoding: ISO-8859-1 (fallback)');
+      return text;
+    }
+  }
+
+  private detectDelimiter(line: string): string {
+    // Count occurrences of common delimiters (ignore quoted content)
+    const semicolonCount = (line.match(/;/g) || []).length;
+    const commaCount = (line.match(/,/g) || []).length;
+    const tabCount = (line.match(/\t/g) || []).length;
+    
+    // Return most common delimiter
+    if (semicolonCount > commaCount && semicolonCount > tabCount) {
+      return ';';
+    } else if (tabCount > commaCount && tabCount > semicolonCount) {
+      return '\t';
+    }
+    return ','; // Default to comma
+  }
+
+  private parseCSVLine(line: string, delimiter: string = ','): string[] {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
@@ -515,7 +572,7 @@ class BankImportService {
       const char = line[i];
       if (char === '"') {
         inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
+      } else if (char === delimiter && !inQuotes) {
         result.push(current.trim());
         current = '';
       } else {
@@ -530,17 +587,34 @@ class BankImportService {
       date: -1,
       amount: -1,
       description: -1,
-      reference: -1
+      reference: -1,
+      debit: -1,
+      credit: -1
     };
     headers.forEach((header, index) => {
-      const lower = header.toLowerCase();
-      if (lower.includes('date') || lower.includes('jour')) {
+      const lower = header.toLowerCase().replace(/[^a-z0-9]/g, '');
+      // DATE column: exact match or contains "date" but not "journal" (avoid matching "JOURNAL")
+      if (lower === 'date' || (lower.includes('date') && !lower.includes('journal'))) {
         mapping.date = index;
-      } else if (lower.includes('montant') || lower.includes('amount') || lower.includes('crédit') || lower.includes('débit')) {
+      } 
+      // AMOUNT column (single amount column)
+      else if (lower.includes('montant') || lower.includes('amount')) {
         mapping.amount = index;
-      } else if (lower.includes('libellé') || lower.includes('description') || lower.includes('memo')) {
+      } 
+      // DEBIT column
+      else if (lower === 'debit' || lower === 'débit' || lower.includes('debit')) {
+        mapping.debit = index;
+      } 
+      // CREDIT column
+      else if (lower === 'credit' || lower === 'crédit' || lower.includes('credit')) {
+        mapping.credit = index;
+      } 
+      // DESCRIPTION column
+      else if (lower.includes('libellé') || lower.includes('description') || lower.includes('memo') || lower.includes('libelle')) {
         mapping.description = index;
-      } else if (lower.includes('référence') || lower.includes('ref') || lower.includes('numéro')) {
+      } 
+      // REFERENCE column
+      else if (lower.includes('référence') || lower.includes('ref') || lower.includes('numéro') || lower.includes('reference')) {
         mapping.reference = index;
       }
     });
@@ -549,16 +623,34 @@ class BankImportService {
   private parseCSVTransaction(values: string[], mapping: CSVMapping, accountId: string, companyId: string, companyCurrency: string): BankTransaction | null {
     try {
       const dateStr = values[mapping.date]?.trim();
-      const amountStr = values[mapping.amount]?.trim();
       const description = values[mapping.description]?.trim() || 'Transaction importée';
       const reference = mapping.reference >= 0 ? values[mapping.reference]?.trim() : undefined;
-      if (!dateStr || !amountStr) return null;
+
+      if (!dateStr) return null;
+
       // Parse date (formats français courants)
       const date = this.parseDate(dateStr);
       if (!date) return null;
-      // Parse amount
-      const amount = parseFloat(amountStr.replace(',', '.').replace(/[^\d.-]/g, ''));
-      if (isNaN(amount)) return null;
+
+      // Parse amount: prefer DEBIT/CREDIT columns if available, else use single MONTANT column
+      let amount: number | null = null;
+
+      if (mapping.debit !== undefined && mapping.debit >= 0 && mapping.credit !== undefined && mapping.credit >= 0) {
+        // French accounting format: DEBIT and CREDIT are separate
+        const debitStr = values[mapping.debit]?.trim() || '0';
+        const creditStr = values[mapping.credit]?.trim() || '0';
+        const debit = parseFloat(debitStr.replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
+        const credit = parseFloat(creditStr.replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
+        // Amount = DEBIT (positive) - CREDIT (negative)
+        amount = debit > 0 ? debit : -credit;
+      } else if (mapping.amount >= 0) {
+        // Alternative: single MONTANT column
+        const amountStr = values[mapping.amount]?.trim();
+        if (!amountStr) return null;
+        amount = parseFloat(amountStr.replace(',', '.').replace(/[^\d.-]/g, ''));
+      }
+
+      if (amount === null || isNaN(amount)) return null;
       return {
         bank_account_id: accountId,
         company_id: companyId,
@@ -586,6 +678,22 @@ class BankImportService {
       return (data && (data as any).currency) ? (data as any).currency : getCurrentCompanyCurrency();
     } catch (_err) {
       return getCurrentCompanyCurrency();
+    }
+  }
+
+  private async getAccountCurrency(accountId: string): Promise<string> {
+    try {
+      const { data, error } = await supabase
+        .from('bank_accounts')
+        .select('currency')
+        .eq('id', accountId)
+        .single();
+      if (error || !data) {
+        return getCurrentCompanyCurrency();
+      }
+      return (data as any).currency || 'EUR';
+    } catch (_err) {
+      return 'EUR';
     }
   }
   private parseDate(dateStr: string): string | null {
@@ -716,6 +824,8 @@ export interface CSVMapping {
   amount: number;
   description: number;
   reference: number;
+  debit?: number;
+  credit?: number;
 }
 export const bankImportService = new BankImportService();
 export default bankImportService;

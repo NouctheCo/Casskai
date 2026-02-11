@@ -146,6 +146,10 @@ export function useCRMAnalytics({
 
         lost_opportunities: 0,
 
+        closing_opportunities: 0,
+
+        closed_opportunities: 0,
+
         conversion_rate: 0,
 
         win_rate_by_stage: {},

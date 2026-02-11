@@ -1,11 +1,6 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
-
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -49,18 +44,19 @@ async function sendInviteEmail(to: string, companyName: string, role: string, in
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
-  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: cors });
+  const preflightResponse = handleCorsPreflightRequest(req);
+  if (preflightResponse) return preflightResponse;
+  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: getCorsHeaders(req) });
   try {
     const { companyId, inviteeEmail, role = "member", expiresInDays = 7 } = await req.json();
     if (!companyId || !inviteeEmail) {
-      return Response.json({ error: "Missing companyId or inviteeEmail" }, { status: 400, headers: cors });
+      return Response.json({ error: "Missing companyId or inviteeEmail" }, { status: 400, headers: getCorsHeaders(req) });
     }
 
     const token = getBearerToken(req);
     const { data: userData, error: userErr } = await admin.auth.getUser(token);
     if (userErr || !userData?.user?.id) {
-      return Response.json({ error: "Unauthorized" }, { status: 401, headers: cors });
+      return Response.json({ error: "Unauthorized" }, { status: 401, headers: getCorsHeaders(req) });
     }
 
     const inviterId = userData.user.id;
@@ -74,7 +70,7 @@ serve(async (req) => {
       .maybeSingle();
 
     if (!inviterRole || !["owner", "admin"].includes(inviterRole.role)) {
-      return Response.json({ error: "Insufficient permissions" }, { status: 403, headers: cors });
+      return Response.json({ error: "Insufficient permissions" }, { status: 403, headers: getCorsHeaders(req) });
     }
 
     const invitationToken = crypto.randomUUID();
@@ -95,7 +91,7 @@ serve(async (req) => {
       .single();
 
     if (error) {
-      return Response.json({ error: error.message }, { status: 500, headers: cors });
+      return Response.json({ error: error.message }, { status: 500, headers: getCorsHeaders(req) });
     }
 
     const { data: company } = await admin.from("companies").select("name").eq("id", companyId).maybeSingle();
@@ -106,8 +102,8 @@ serve(async (req) => {
       console.error("Invitation email error:", emailResult.error);
     }
 
-    return Response.json({ id: invite.id, token: invite.token, email_sent: !emailResult.error }, { headers: cors });
+    return Response.json({ id: invite.id, token: invite.token, email_sent: !emailResult.error }, { headers: getCorsHeaders(req) });
   } catch (err) {
-    return Response.json({ error: String(err) }, { status: 500, headers: cors });
+    return Response.json({ error: String(err) }, { status: 500, headers: getCorsHeaders(req) });
   }
 });

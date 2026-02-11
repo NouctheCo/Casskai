@@ -15,6 +15,7 @@ import { devLogger } from '@/utils/devLogger';
 import { Enterprise, EnterpriseTaxConfiguration } from '../types/enterprise.types';
 import { useToast } from '../components/ui/use-toast';
 import { supabase } from '../lib/supabase';
+import { offlineDataService } from '@/services/offlineDataService';
 
 interface EnterpriseContextType {
   enterprises: Enterprise[];
@@ -206,6 +207,14 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     hasLoadedOnce.current = true;
     isLoadingRef.current = false;
     devLogger.info('✅ Enterprises loaded from localStorage');
+
+    // Pre-charger les donnees de reference pour le mode offline
+    const activeId = savedCurrentId && enterpriseList.find(e => e.id === savedCurrentId)
+      ? savedCurrentId
+      : enterpriseList[0]?.id;
+    if (activeId) {
+      offlineDataService.preloadReferenceData(activeId).catch(() => {});
+    }
   };
 
   useEffect(() => {
@@ -335,7 +344,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     devLogger.info('🔄 Changement d\'entreprise:', enterpriseId);
     setCurrentEnterpriseId(enterpriseId);
     localStorage.setItem('casskai_current_enterprise', enterpriseId);
-    
+
     const enterprise = enterprises.find(e => e.id === enterpriseId);
     if (enterprise) {
       toast({
@@ -343,6 +352,11 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         description: `Vous travaillez maintenant sur ${enterprise.name}`
       });
     }
+
+    // Pre-charger les donnees de reference en arriere-plan pour le mode offline
+    offlineDataService.preloadReferenceData(enterpriseId).catch(() => {
+      // Silencieux - le pre-chargement est optionnel
+    });
   };
 
   const getEnterpriseTaxConfig = (enterpriseId: string): EnterpriseTaxConfiguration | null => {

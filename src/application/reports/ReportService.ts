@@ -324,7 +324,11 @@ export class ReportService {
 
     // For now, return basic insights based on report type
 
-    const insights = {
+    const insights: {
+      trends: string[];
+      alerts: string[];
+      recommendations: string[];
+    } = {
 
       trends: [],
 

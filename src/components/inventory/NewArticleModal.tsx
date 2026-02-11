@@ -29,6 +29,7 @@ import { ChartOfAccountsService } from '@/services/chartOfAccountsService';
 import { useToast } from '@/hooks/useToast';
 import { logger } from '@/lib/logger';
 import { buildVatRateOptions, getDefaultVatRate, resolveCompanyCountryCode } from '@/utils/vatRateUtils';
+import { getCurrencySymbol } from '@/lib/utils';
 
 export interface NewArticleModalProps {
   isOpen: boolean;
@@ -187,6 +188,7 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
     let cancelled = false;
 
     async function loadFormData() {
+      if (!currentCompany) return;
       setDataLoading(true);
       logger.debug('NewArticleModal', '📦 Chargement des données du formulaire...');
 
@@ -474,7 +476,7 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="purchase_price">
-                  {t('inventory.articleModal.purchasePrice', 'Prix d\'achat (€)')}
+                  {t('inventory.articleModal.purchasePrice', `Prix d'achat (${getCurrencySymbol()})`)}
                 </Label>
                 <Input
                   id="purchase_price"
@@ -488,7 +490,7 @@ const NewArticleModal: React.FC<NewArticleModalProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="selling_price">
-                  {t('inventory.articleModal.sellingPrice', 'Prix de vente (€)')}
+                  {t('inventory.articleModal.sellingPrice', `Prix de vente (${getCurrencySymbol()})`)}
                 </Label>
                 <Input
                   id="selling_price"

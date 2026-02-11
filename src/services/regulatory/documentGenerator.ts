@@ -261,7 +261,7 @@ function calculateFields(
           // Extract variables from formula to validate they exist
           const variableMatches = formulaExpression.match(/[a-zA-Z_][a-zA-Z0-9_]*/g) || [];
           const undefinedVariables = variableMatches.filter(
-            (v) => !['SUM', 'ABS', 'IF', 'MAX', 'MIN'].includes(v) && result[v] === undefined
+            (v: string) => !['SUM', 'ABS', 'IF', 'MAX', 'MIN'].includes(v) && result[v] === undefined
           );
           if (undefinedVariables.length > 0) {
             logger.warn('documentGenerator', 

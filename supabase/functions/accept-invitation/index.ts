@@ -1,11 +1,6 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
-
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -17,18 +12,19 @@ function getBearerToken(req: Request) {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
-  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: cors });
+  const preflightResponse = handleCorsPreflightRequest(req);
+  if (preflightResponse) return preflightResponse;
+  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: getCorsHeaders(req) });
   try {
     const { token } = await req.json();
     if (!token) {
-      return Response.json({ error: "Missing token" }, { status: 400, headers: cors });
+      return Response.json({ error: "Missing token" }, { status: 400, headers: getCorsHeaders(req) });
     }
 
     const bearer = getBearerToken(req);
     const { data: userData, error: userErr } = await admin.auth.getUser(bearer);
     if (userErr || !userData?.user?.id) {
-      return Response.json({ error: "Unauthorized" }, { status: 401, headers: cors });
+      return Response.json({ error: "Unauthorized" }, { status: 401, headers: getCorsHeaders(req) });
     }
 
     const userId = userData.user.id;
@@ -41,26 +37,26 @@ serve(async (req) => {
       .single();
 
     if (inviteErr || !invite) {
-      return Response.json({ error: "Invitation not found" }, { status: 404, headers: cors });
+      return Response.json({ error: "Invitation not found" }, { status: 404, headers: getCorsHeaders(req) });
     }
 
     if (invite.status !== "pending") {
-      return Response.json({ error: "Invitation is not pending" }, { status: 400, headers: cors });
+      return Response.json({ error: "Invitation is not pending" }, { status: 400, headers: getCorsHeaders(req) });
     }
 
     if (invite.expires_at && new Date(invite.expires_at).getTime() < Date.now()) {
-      return Response.json({ error: "Invitation expired" }, { status: 400, headers: cors });
+      return Response.json({ error: "Invitation expired" }, { status: 400, headers: getCorsHeaders(req) });
     }
 
     if (invite.email && invite.email.toLowerCase() !== userEmail.toLowerCase()) {
-      return Response.json({ error: "Email mismatch" }, { status: 403, headers: cors });
+      return Response.json({ error: "Email mismatch" }, { status: 403, headers: getCorsHeaders(req) });
     }
 
     const { error: upsertErr } = await admin
       .from("user_companies")
       .upsert({ company_id: invite.company_id, user_id: userId, role: invite.role, is_active: true }, { onConflict: "company_id,user_id" });
     if (upsertErr) {
-      return Response.json({ error: upsertErr.message }, { status: 500, headers: cors });
+      return Response.json({ error: upsertErr.message }, { status: 500, headers: getCorsHeaders(req) });
     }
 
     const { error: updateErr } = await admin
@@ -68,12 +64,12 @@ serve(async (req) => {
       .update({ status: "accepted", accepted_at: new Date().toISOString(), accepted_by: userId })
       .eq("id", invite.id);
     if (updateErr) {
-      return Response.json({ error: updateErr.message }, { status: 500, headers: cors });
+      return Response.json({ error: updateErr.message }, { status: 500, headers: getCorsHeaders(req) });
     }
 
-    return Response.json({ ok: true }, { headers: cors });
+    return Response.json({ ok: true }, { headers: getCorsHeaders(req) });
   } catch (err) {
-    return Response.json({ error: String(err) }, { status: 500, headers: cors });
+    return Response.json({ error: String(err) }, { status: 500, headers: getCorsHeaders(req) });
   }
 });
 
@@ -81,15 +77,9 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@14.21.0'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const preflightResponse = handleCorsPreflightRequest(req)
+  if (preflightResponse) return preflightResponse
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -103,7 +93,7 @@ serve(async (req) => {
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: 'Non autorisé' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -116,7 +106,7 @@ serve(async (req) => {
     if (userError || !user) {
       return new Response(
         JSON.stringify({ error: 'Utilisateur non authentifié' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -133,7 +123,7 @@ serve(async (req) => {
     if (invError || !invitation) {
       return new Response(
         JSON.stringify({ error: 'Invitation invalide ou expirée' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -146,7 +136,7 @@ serve(async (req) => {
 
       return new Response(
         JSON.stringify({ error: 'Cette invitation a expiré' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -156,7 +146,7 @@ serve(async (req) => {
         JSON.stringify({ 
           error: `Cette invitation est destinée à ${invitation.email}. Connectez-vous avec ce compte.` 
         }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -171,7 +161,7 @@ serve(async (req) => {
     if (!subscription) {
       return new Response(
         JSON.stringify({ error: 'Aucun abonnement actif pour cette entreprise' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -222,7 +212,7 @@ serve(async (req) => {
       console.error('Erreur ajout user_companies:', ucError)
       return new Response(
         JSON.stringify({ error: 'Erreur lors de l\'ajout à l\'entreprise' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 500, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -251,14 +241,14 @@ serve(async (req) => {
         company_name: invitation.companies?.name,
         role: invitation.role
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
     console.error('Erreur:', error)
     return new Response(
       JSON.stringify({ error: 'Erreur serveur' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   }
 })

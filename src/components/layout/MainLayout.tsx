@@ -174,7 +174,7 @@ export function MainLayout() {
 
         <div className="flex items-center space-x-2">
 
-          <img src="/logo.png" alt="CassKai" className="w-16 h-16 animate-pulse" />
+          <img src="/logo.png" alt="CassKai" className="w-16 h-16 animate-pulse mix-blend-multiply dark:mix-blend-screen" style={{ background: 'transparent' }} />
 
           <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">
 

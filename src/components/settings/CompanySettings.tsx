@@ -331,7 +331,7 @@ export function CompanySettings() {
                 value={settings.generalInfo.shareCapital || ''}
                 onChange={(e) => setSettings(prev => prev ? ({
                   ...prev,
-                  generalInfo: { ...prev.generalInfo, shareCapital: parseFloat(e.target.value) || undefined }
+                  generalInfo: { ...prev.generalInfo, shareCapital: parseFloat(e.target.value) || null }
                 }) : prev)}
                 placeholder="10000"
               />

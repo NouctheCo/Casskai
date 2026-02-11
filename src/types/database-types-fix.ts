@@ -30,15 +30,93 @@ export interface Company {
 
   updated_at: string
 
-  stripe_customer_id?: string
+  stripe_customer_id: string | null
 
-  stripe_subscription_id?: string
+  stripe_subscription_id: string | null
 
-  country?: string
+  address: string | null
 
-  default_currency?: string
+  city: string | null
+
+  country: string | null
+
+  email: string | null
+
+  legal_form: string | null
+
+  logo_url: string | null
+
+  phone: string | null
+
+  postal_code: string | null
+
+  siren: string | null
+
+  siret: string | null
+
+  vat_number: string | null
+
+  website: string | null
+
+  default_currency: string | null
 
   is_active: boolean
+
+}
+
+// Types de factures
+export interface InvoiceRow {
+
+  [key: string]: unknown
+
+  id: string
+
+  company_id: string
+
+  due_date: string
+
+  notes: string | null
+
+  paid_amount: number
+
+  paid_at: string | null
+
+  remaining_amount: number
+
+}
+
+// Types de tiers (clients/fournisseurs)
+export interface ThirdPartyRow {
+
+  [key: string]: unknown
+
+  id: string
+
+  company_id: string
+
+  city: string | null
+
+  country: string | null
+
+  credit_limit: number | null
+
+  discount_rate: number | null
+
+  email: string | null
+
+  notes: string | null
+
+  payment_terms: number | null
+
+  phone: string | null
+
+  postal_code: string | null
+
+  siret: string | null
+
+  vat_number: string | null
+
+  website: string | null
 
 }
 
@@ -304,7 +382,7 @@ export interface Database {
 
       invoices: {
 
-        Row: Record<string, unknown>
+        Row: InvoiceRow
 
         Insert: Record<string, unknown>
 
@@ -324,7 +402,7 @@ export interface Database {
 
       third_parties: {
 
-        Row: Record<string, unknown>
+        Row: ThirdPartyRow
 
         Insert: Record<string, unknown>
 

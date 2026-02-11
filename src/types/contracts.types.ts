@@ -183,7 +183,7 @@ export interface ContractFormData {
   start_date: string;
   end_date?: string;
   currency: string;
-  conditions?: string;
+  notes?: string;
 }
 
 export interface RFAFormData {

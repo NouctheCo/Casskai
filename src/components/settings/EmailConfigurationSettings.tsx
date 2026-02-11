@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { emailService, EmailConfiguration } from '@/services/emailService';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 import { supabase } from '@/lib/supabase';
 export function EmailConfigurationSettings() {

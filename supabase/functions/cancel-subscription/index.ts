@@ -9,12 +9,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import Stripe from 'https://esm.sh/stripe@14.11.0?target=deno';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
 interface RequestBody {
   subscriptionId?: string;
@@ -36,9 +31,8 @@ interface SuccessResponse {
 
 serve(async (req: Request) => {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+  const preflightResponse = handleCorsPreflightRequest(req);
+  if (preflightResponse) return preflightResponse;
 
   try {
     console.log('[cancel-subscription] Function invoked');
@@ -57,7 +51,7 @@ serve(async (req: Request) => {
           error: 'Server configuration error',
           details: 'Missing required environment variables'
         } as ErrorResponse),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 500, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       );
     }
 
@@ -75,7 +69,7 @@ serve(async (req: Request) => {
           error: 'Unauthorized',
           details: 'No authorization header provided'
         } as ErrorResponse),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       );
     }
 
@@ -90,7 +84,7 @@ serve(async (req: Request) => {
           error: 'Unauthorized',
           details: 'Invalid or expired token'
         } as ErrorResponse),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       );
     }
 
@@ -129,7 +123,7 @@ serve(async (req: Request) => {
             error: 'Company not found',
             details: 'Unable to find company with provided ID'
           } as ErrorResponse),
-          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 404, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
         );
       }
 
@@ -143,7 +137,7 @@ serve(async (req: Request) => {
           error: 'Missing subscription ID',
           details: 'Either subscriptionId or enterpriseId must be provided'
         } as ErrorResponse),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       );
     }
 
@@ -208,7 +202,7 @@ serve(async (req: Request) => {
       } as SuccessResponse),
       {
         status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     );
 
@@ -221,7 +215,7 @@ serve(async (req: Request) => {
       } as ErrorResponse),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     );
   }

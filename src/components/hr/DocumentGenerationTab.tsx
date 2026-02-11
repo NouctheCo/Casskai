@@ -259,7 +259,7 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
               aria-label="Filtrer les documents par statut"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border rounded-lg"
+              className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
             >
               <option value="all">Tous statuts</option>
               <option value="draft">Brouillons</option>

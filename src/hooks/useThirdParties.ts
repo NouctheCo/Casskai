@@ -13,6 +13,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import { ensureAuxiliaryAccount } from '@/services/auxiliaryAccountService';
 type ThirdParty = any;
 export interface ThirdPartyFilters {
   type?: 'customer' | 'supplier' | 'partner' | 'employee' | 'ALL';
@@ -53,7 +54,7 @@ export function useThirdParties(companyId: string) {
     return term.replace(/[%_\\]/g, '\\$&').replace(/'/g, "''");
   }, []);
   // Fetch third parties with optional filters
-  const fetchThirdParties = useCallback(async (filters: ThirdPartyFilters = {}) => {
+  const fetchThirdParties = useCallback(async (filters: ThirdPartyFilters = {}): Promise<{ data: ThirdParty[]; count: number; error: string | null } | void> => {
     if (!user || !companyId) return;
     const { 
       type = 'ALL', 
@@ -127,6 +128,17 @@ export function useThirdParties(companyId: string) {
         .select()
         .single();
       if (insertError) throw insertError;
+
+      // ✅ Créer automatiquement le compte auxiliaire (411xxxx / 401xxxx)
+      if (newThirdParty && companyId) {
+        ensureAuxiliaryAccount(
+          companyId,
+          newThirdParty.id,
+          newThirdParty.type || 'customer',
+          newThirdParty.name
+        ).catch(err => logger.warn('UseThirdParties', 'Erreur création compte auxiliaire (non bloquant):', err));
+      }
+
       setThirdParties(prev => [newThirdParty, ...prev]);
       return newThirdParty;
     } catch (err) {

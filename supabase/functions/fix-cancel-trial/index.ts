@@ -1,10 +1,6 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.47.0'
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://smtdtgrymuzwvctattmx.supabase.co'
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtdGR0Z3J5bXV6d3ZjdGF0dG14Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDU3NjAyMywiZXhwIjoyMDcwMTUyMDIzfQ.7SefKj_zSbmaYNbrai9sKeGqcPZtcaXENdA4bNrXa5I'
@@ -12,14 +8,15 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const preflightResponse = handleCorsPreflightRequest(req)
+  if (preflightResponse) return preflightResponse
+
+  const corsH = getCorsHeaders(req)
 
   if (req.method !== 'POST') {
     return new Response('Method not allowed', {
       status: 405,
-      headers: corsHeaders
+      headers: corsH
     })
   }
 
@@ -66,13 +63,13 @@ $$;`
       console.error('Error executing SQL:', error);
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsH, 'Content-Type': 'application/json' }
       });
     }
 
     return new Response(JSON.stringify({ success: true, data }), {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...corsH, 'Content-Type': 'application/json' }
     });
 
   } catch (err) {
@@ -80,7 +77,7 @@ $$;`
     console.error('Function error:', errorMessage);
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...corsH, 'Content-Type': 'application/json' }
     });
   }
 })

@@ -154,6 +154,8 @@ export const FeedbackToast: React.FC<FeedbackProps> = ({
 
     }
 
+    return undefined;
+
   }, [isVisible, duration, onClose]);
 
 

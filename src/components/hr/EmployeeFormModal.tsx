@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
 type EmployeeFormData = z.infer<typeof employeeFormSchema>;
 interface EmployeeFormModalProps {
   isOpen: boolean;
@@ -31,7 +32,6 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
     resolver: zodResolver(employeeFormSchema),
     mode: 'onChange',
     defaultValues: {
-      employee_number: employee?.employee_number || '',
       first_name: employee?.first_name || '',
       last_name: employee?.last_name || '',
       email: employee?.email || '',
@@ -41,20 +41,19 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
       hire_date: employee?.hire_date || new Date().toISOString().split('T')[0],
       salary: employee?.salary?.toString() || '',
       salary_currency: employee?.salary_currency || getCurrentCompanyCurrency(),
-      contract_type: employee?.contract_type || 'permanent',
+      contract_type: employee?.contract_type || 'cdi',
       status: employee?.status || 'active',
       address: employee?.address || '',
       city: employee?.city || '',
       postal_code: employee?.postal_code || '',
-      emergency_contact: employee?.emergency_contact || '',
-      emergency_phone: employee?.emergency_phone || '',
+      emergency_contact_name: employee?.emergency_contact_name || '',
+      emergency_contact_phone: employee?.emergency_contact_phone || '',
     },
   });
   // Reset form when employee changes
   useEffect(() => {
     if (employee) {
       form.reset({
-        employee_number: employee.employee_number || '',
         first_name: employee.first_name || '',
         last_name: employee.last_name || '',
         email: employee.email || '',
@@ -64,21 +63,68 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
         hire_date: employee.hire_date || new Date().toISOString().split('T')[0],
         salary: employee.salary?.toString() || '',
         salary_currency: employee.salary_currency || getCurrentCompanyCurrency(),
-        contract_type: employee.contract_type || 'permanent',
+        contract_type: employee.contract_type || 'cdi',
         status: employee.status || 'active',
         address: employee.address || '',
         city: employee.city || '',
         postal_code: employee.postal_code || '',
-        emergency_contact: employee.emergency_contact || '',
-        emergency_phone: employee.emergency_phone || '',
+        emergency_contact_name: employee.emergency_contact_name || '',
+        emergency_contact_phone: employee.emergency_contact_phone || '',
       });
     }
   }, [employee, form]);
+
+  // Options autocomplete pour départements
+  const departmentOptions: AutocompleteOption[] = useMemo(() => [
+    { value: 'Direction', label: 'Direction', category: 'Départements' },
+    { value: 'Ressources Humaines', label: 'Ressources Humaines', category: 'Départements' },
+    { value: 'Finance', label: 'Finance', category: 'Départements' },
+    { value: 'Commercial', label: 'Commercial', category: 'Départements' },
+    { value: 'Marketing', label: 'Marketing', category: 'Départements' },
+    { value: 'IT', label: 'IT', category: 'Départements' },
+    { value: 'Production', label: 'Production', category: 'Départements' },
+    { value: 'Logistique', label: 'Logistique', category: 'Départements' },
+    { value: 'Service Client', label: 'Service Client', category: 'Départements' },
+  ], []);
+
+  // Options autocomplete pour devises (Afrique prioritaire)
+  const currencyOptions: AutocompleteOption[] = useMemo(() => [
+    { value: 'EUR', label: 'EUR (€) - Euro', category: 'Europe' },
+    { value: 'XOF', label: 'XOF (FCFA) - Franc CFA BCEAO', category: 'Afrique de l\'Ouest' },
+    { value: 'XAF', label: 'XAF (FCFA) - Franc CFA BEAC', category: 'Afrique Centrale' },
+    { value: 'USD', label: 'USD ($) - Dollar US', category: 'Amérique' },
+    { value: 'GBP', label: 'GBP (£) - Livre Sterling', category: 'Europe' },
+    { value: 'CHF', label: 'CHF (Fr) - Franc Suisse', category: 'Europe' },
+    { value: 'MAD', label: 'MAD (د.م.) - Dirham Marocain', category: 'Afrique du Nord' },
+    { value: 'TND', label: 'TND (د.ت) - Dinar Tunisien', category: 'Afrique du Nord' },
+    { value: 'DZD', label: 'DZD (د.ج) - Dinar Algérien', category: 'Afrique du Nord' },
+    { value: 'EGP', label: 'EGP (£) - Livre Égyptienne', category: 'Afrique du Nord' },
+    { value: 'ZAR', label: 'ZAR (R) - Rand Sud-Africain', category: 'Afrique Australe' },
+    { value: 'KES', label: 'KES (KSh) - Shilling Kenyan', category: 'Afrique de l\'Est' },
+    { value: 'GHS', label: 'GHS (₵) - Cedi Ghanéen', category: 'Afrique de l\'Ouest' },
+    { value: 'MUR', label: 'MUR (₨) - Roupie Mauricienne', category: 'Océan Indien' },
+  ], []);
+
+  // Options autocomplete pour types de contrat
+  const contractTypeOptions: AutocompleteOption[] = useMemo(() => [
+    { value: 'cdi', label: 'CDI', description: 'Contrat à Durée Indéterminée', category: 'Contrats' },
+    { value: 'cdd', label: 'CDD', description: 'Contrat à Durée Déterminée', category: 'Contrats' },
+    { value: 'interim', label: 'Intérim', description: 'Contrat Intérimaire', category: 'Contrats' },
+    { value: 'stage', label: 'Stage', description: 'Convention de stage', category: 'Autres' },
+    { value: 'apprentissage', label: 'Apprentissage', description: 'Contrat d\'apprentissage', category: 'Autres' },
+    { value: 'freelance', label: 'Freelance', description: 'Prestataire indépendant', category: 'Autres' },
+  ], []);
+
+  // Options autocomplete pour statuts
+  const statusOptions: AutocompleteOption[] = useMemo(() => [
+    { value: 'active', label: 'Actif', description: 'Employé en activité', category: 'Statuts' },
+    { value: 'inactive', label: 'Inactif', description: 'Employé non actif', category: 'Statuts' },
+    { value: 'on_leave', label: 'En congé', description: 'Employé en congé', category: 'Statuts' },
+  ], []);
   const handleFormSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
     try {
       const success = await onSubmit({
-        employee_number: data.employee_number,
         first_name: data.first_name,
         last_name: data.last_name,
         email: data.email || '',
@@ -93,8 +139,8 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
         address: data.address,
         city: data.city,
         postal_code: data.postal_code,
-        emergency_contact: data.emergency_contact,
-        emergency_phone: data.emergency_phone,
+        emergency_contact_name: data.emergency_contact_name,
+        emergency_contact_phone: data.emergency_contact_phone,
       });
       if (success) {
         form.reset();
@@ -109,45 +155,34 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
   if (!isOpen) return null;
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto flex flex-col"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl my-auto flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b px-6 py-4 flex items-center justify-between rounded-t-lg shrink-0">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {employee ? 'Modifier l\'employé' : 'Nouvel Employé'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors dark:text-gray-300"
+            className="text-gray-400 hover:text-gray-600 transition-colors dark:text-gray-300"
             aria-label="Fermer"
           >
-            <X className="h-6 w-6" aria-hidden="true" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
         {/* Form */}
-        <form onSubmit={handleFormSubmit} className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={handleFormSubmit} className="p-6 overflow-y-auto max-h-[calc(100vh-8rem)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Section Informations Personnelles */}
-            <div className="col-span-2">
+            <div className="col-span-full">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Informations Personnelles
               </h3>
-            </div>
-            <div>
-              <Label htmlFor="employee_number">Matricule *</Label>
-              <Input
-                id="employee_number"
-                {...form.register('employee_number')}
-                className={form.formState.errors.employee_number ? 'border-red-500' : ''}
-              />
-              {form.formState.errors.employee_number && (
-                <p className="text-sm text-red-500 mt-1">{form.formState.errors.employee_number.message}</p>
-              )}
             </div>
             <div>
               <Label htmlFor="first_name">Prénom *</Label>
@@ -192,7 +227,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               />
             </div>
             {/* Section Professionnelle */}
-            <div className="col-span-2 mt-4">
+            <div className="col-span-full mt-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Informations Professionnelles
               </h3>
@@ -210,25 +245,17 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
             </div>
             <div>
               <Label htmlFor="department">Département *</Label>
-              <Select
+              <SmartAutocomplete
                 value={form.watch('department')}
-                onValueChange={value => form.setValue('department', value, { shouldValidate: true })}
-              >
-                <SelectTrigger className={form.formState.errors.department ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Sélectionner un département" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Direction">Direction</SelectItem>
-                  <SelectItem value="Ressources Humaines">Ressources Humaines</SelectItem>
-                  <SelectItem value="Finance">Finance</SelectItem>
-                  <SelectItem value="Commercial">Commercial</SelectItem>
-                  <SelectItem value="Marketing">Marketing</SelectItem>
-                  <SelectItem value="IT">IT</SelectItem>
-                  <SelectItem value="Production">Production</SelectItem>
-                  <SelectItem value="Logistique">Logistique</SelectItem>
-                  <SelectItem value="Service Client">Service Client</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={value => form.setValue('department', value, { shouldValidate: true })}
+                options={departmentOptions}
+                placeholder="Sélectionner un département"
+                searchPlaceholder="Rechercher (Direction, Finance, IT)..."
+                groups={true}
+                showRecent={true}
+                maxRecent={3}
+                className={form.formState.errors.department ? 'border-red-500' : ''}
+              />
               {form.formState.errors.department && (
                 <p className="text-sm text-red-500 mt-1">{form.formState.errors.department.message}</p>
               )}
@@ -256,72 +283,48 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
             </div>
             <div>
               <Label htmlFor="salary_currency">Devise du salaire</Label>
-              <Select
+              <SmartAutocomplete
                 value={form.watch('salary_currency')}
-                onValueChange={value => form.setValue('salary_currency', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="EUR">EUR (€) - Euro</SelectItem>
-                  <SelectItem value="USD">USD ($) - Dollar US</SelectItem>
-                  <SelectItem value="GBP">GBP (£) - Livre Sterling</SelectItem>
-                  <SelectItem value="CHF">CHF (Fr) - Franc Suisse</SelectItem>
-                  <SelectItem value="XOF">XOF (CFA) - Franc CFA BCEAO</SelectItem>
-                  <SelectItem value="XAF">XAF (FCFA) - Franc CFA BEAC</SelectItem>
-                  <SelectItem value="MAD">MAD (د.م.) - Dirham Marocain</SelectItem>
-                  <SelectItem value="TND">TND (د.ت) - Dinar Tunisien</SelectItem>
-                  <SelectItem value="DZD">DZD (د.ج) - Dinar Algérien</SelectItem>
-                  <SelectItem value="EGP">EGP (£) - Livre Égyptienne</SelectItem>
-                  <SelectItem value="ZAR">ZAR (R) - Rand Sud-Africain</SelectItem>
-                  <SelectItem value="NGN">NGN (₦) - Naira Nigérian</SelectItem>
-                  <SelectItem value="KES">KES (KSh) - Shilling Kenyan</SelectItem>
-                  <SelectItem value="GHS">GHS (₵) - Cedi Ghanéen</SelectItem>
-                  <SelectItem value="MUR">MUR (₨) - Roupie Mauricienne</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={value => form.setValue('salary_currency', value)}
+                options={currencyOptions}
+                placeholder="Sélectionner une devise..."
+                searchPlaceholder="Rechercher (EUR, FCFA, USD)..."
+                groups={true}
+                showRecent={true}
+                maxRecent={3}
+              />
             </div>
             <div>
               <Label htmlFor="contract_type">Type de contrat</Label>
-              <Select
+              <SmartAutocomplete
                 value={form.watch('contract_type')}
-                onValueChange={value => form.setValue('contract_type', value as any)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="permanent">CDI</SelectItem>
-                  <SelectItem value="temporary">CDD</SelectItem>
-                  <SelectItem value="intern">Stage</SelectItem>
-                  <SelectItem value="freelance">Freelance</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={value => form.setValue('contract_type', value as any)}
+                options={contractTypeOptions}
+                placeholder="Sélectionner un type de contrat..."
+                searchPlaceholder="Rechercher (CDI, CDD, Stage)..."
+                groups={true}
+                showRecent={false}
+              />
             </div>
             <div>
               <Label htmlFor="status">Statut</Label>
-              <Select
+              <SmartAutocomplete
                 value={form.watch('status')}
-                onValueChange={value => form.setValue('status', value as any)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Actif</SelectItem>
-                  <SelectItem value="inactive">Inactif</SelectItem>
-                  <SelectItem value="on_leave">En congé</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={value => form.setValue('status', value as any)}
+                options={statusOptions}
+                placeholder="Sélectionner un statut..."
+                searchPlaceholder="Rechercher (Actif, Inactif)..."
+                groups={false}
+                showRecent={false}
+              />
             </div>
             {/* Section Adresse */}
-            <div className="col-span-2 mt-4">
+            <div className="col-span-full mt-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Adresse
               </h3>
             </div>
-            <div className="col-span-2">
+            <div className="col-span-full">
               <Label htmlFor="address">Adresse</Label>
               <Input
                 id="address"
@@ -343,24 +346,24 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               />
             </div>
             {/* Section Contact d'urgence */}
-            <div className="col-span-2 mt-4">
+            <div className="col-span-full mt-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Contact d'urgence
               </h3>
             </div>
             <div>
-              <Label htmlFor="emergency_contact">Nom du contact</Label>
+              <Label htmlFor="emergency_contact_name">Nom du contact</Label>
               <Input
-                id="emergency_contact"
-                {...form.register('emergency_contact')}
+                id="emergency_contact_name"
+                {...form.register('emergency_contact_name')}
               />
             </div>
             <div>
-              <Label htmlFor="emergency_phone">Téléphone d'urgence</Label>
+              <Label htmlFor="emergency_contact_phone">Téléphone d'urgence</Label>
               <Input
-                id="emergency_phone"
+                id="emergency_contact_phone"
                 type="tel"
-                {...form.register('emergency_phone')}
+                {...form.register('emergency_contact_phone')}
               />
             </div>
           </div>

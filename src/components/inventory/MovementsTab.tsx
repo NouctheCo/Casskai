@@ -1,5 +1,5 @@
 import { FC, useMemo } from 'react';
-import { Activity, ArrowDown, ArrowUp, Calendar, ListFilter, PlusCircle, Search } from 'lucide-react';
+import { Activity, ArrowDown, ArrowUp, Calendar, ListFilter, PlusCircle, Search, FileCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -124,9 +124,17 @@ const MovementsTableView: FC<{ rows: StockMovement[]; loading: boolean; onViewDe
               </TableCell>
               <TableCell className="hidden md:table-cell font-mono text-xs">{movement.reference || '—'}</TableCell>
               <TableCell>
-                <Badge variant="outline" className={TYPE_COLORS[movement.type]}>
-                  {TYPE_LABELS[movement.type]}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className={TYPE_COLORS[movement.type]}>
+                    {TYPE_LABELS[movement.type]}
+                  </Badge>
+                  {movement.journal_entry_id && (
+                    <FileCheck 
+                      className="h-4 w-4 text-green-600" 
+                      aria-label="Ecriture comptable generee automatiquement"
+                    />
+                  )}
+                </div>
               </TableCell>
               <TableCell className="font-semibold">
                 <div className="flex items-center gap-2">

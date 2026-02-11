@@ -96,6 +96,7 @@ export interface StockMovementRow {
   created_at?: string | null;
   total_cost?: number | null;
   movement_date: string;
+  journal_entry_id?: string | null;
 
   products: InventoryProductRow | null;
   product_variants: InventoryProductVariantRow | null;

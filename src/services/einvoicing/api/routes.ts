@@ -56,9 +56,9 @@ const authenticate = async (req: AuthenticatedRequest, res: Response, next: Next
       id: 'user_123', // Would come from JWT
       email: 'user@example.com'
     };
-    next();
+    return next();
   } catch (_error) {
-    res.status(401).json({
+    return res.status(401).json({
       success: false,
       error: 'Invalid authentication',
       timestamp: new Date().toISOString(),
@@ -78,7 +78,7 @@ const extractCompanyId = (req: AuthenticatedRequest, res: Response, next: NextFu
     });
   }
   req.companyId = companyId as string;
-  next();
+  return next();
 };
 // Middleware for request validation
 const validateSubmissionRequest = (req: Request, res: Response, next: NextFunction) => {
@@ -91,7 +91,7 @@ const validateSubmissionRequest = (req: Request, res: Response, next: NextFuncti
       request_id: `req_${Date.now()}`
     });
   }
-  next();
+  return next();
 };
 // Error handler middleware
 const handleAPIResponse = (apiCall: (req: any, res: Response) => Promise<APIResponse<any>>) => {

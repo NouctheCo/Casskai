@@ -2,7 +2,7 @@
 import React from 'react';
 
 // Stub hook - useTenant not available
-const useTenant = () => ({ isReady: true, tenant: null, error: null, isLoading: false, currentTenant: null });
+const useTenant = (): { isReady: boolean; tenant: string | null; error: string | null; isLoading: boolean; currentTenant: string | null } => ({ isReady: true, tenant: null, error: null, isLoading: false, currentTenant: null });
 
 interface TenantGuardProps {
   children: React.ReactNode;

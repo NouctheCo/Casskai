@@ -1,11 +1,16 @@
 {
-  "name": "CassKai - Comptabilité Modulaire",
+  "name": "CassKai - Gestion Financière Intelligente",
   "short_name": "CassKai",
-  "description": "Solution comptable modulaire pour entreprises",
+  "description": "Plateforme SaaS de gestion d'entreprise pour PME. Comptabilité PCG/SYSCOHADA/IFRS/SCF, facturation, CRM, trésorerie, IA intégrée.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "categories": ["business", "finance", "productivity"],
   "icons": [
     {
       "src": "/favicon.ico",
@@ -30,5 +35,38 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Accéder au tableau de bord",
+      "url": "/dashboard",
+      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
+    },
+    {
+      "name": "Factures",
+      "short_name": "Factures",
+      "description": "Gérer vos factures",
+      "url": "/invoicing",
+      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
+    },
+    {
+      "name": "Comptabilité",
+      "short_name": "Compta",
+      "description": "Écritures comptables",
+      "url": "/accounting",
+      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
+    },
+    {
+      "name": "Trésorerie",
+      "short_name": "Trésorerie",
+      "description": "Consulter votre trésorerie",
+      "url": "/banking",
+      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
+    }
+  ],
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

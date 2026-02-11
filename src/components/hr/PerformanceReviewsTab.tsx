@@ -17,7 +17,8 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  Eye
+  Eye,
+  Pencil
 } from 'lucide-react';
 import { hrPerformanceService } from '@/services/hrPerformanceService';
 import { ReviewFormModal } from './ReviewFormModal';
@@ -61,6 +62,19 @@ export function PerformanceReviewsTab({
     if (response.success) {
       await loadReviews();
       setShowModal(false);
+      setSelectedReview(null);
+      return true;
+    }
+    return false;
+  };
+
+  const handleUpdateReview = async (formData: any) => {
+    if (!selectedReview) return false;
+    const response = await hrPerformanceService.updateReview(selectedReview.id, formData);
+    if (response.success) {
+      await loadReviews();
+      setShowModal(false);
+      setSelectedReview(null);
       return true;
     }
     return false;
@@ -214,7 +228,7 @@ export function PerformanceReviewsTab({
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+              className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
             >
               <option value="all">Tous les types</option>
               <option value="self">Auto-évaluation</option>
@@ -229,7 +243,7 @@ export function PerformanceReviewsTab({
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+              className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
             >
               <option value="all">Tous les statuts</option>
               <option value="draft">Brouillon</option>
@@ -382,8 +396,19 @@ export function PerformanceReviewsTab({
                   </div>
                 )}
 
-                {/* Bouton voir détails */}
-                <div className="flex justify-end pt-4 border-t">
+                {/* Boutons actions */}
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedReview(review);
+                      setShowModal(true);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Modifier
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -407,7 +432,7 @@ export function PerformanceReviewsTab({
             setShowModal(false);
             setSelectedReview(null);
           }}
-          onSubmit={handleCreateReview}
+          onSubmit={selectedReview ? handleUpdateReview : handleCreateReview}
           employees={employees}
           review={selectedReview}
         />

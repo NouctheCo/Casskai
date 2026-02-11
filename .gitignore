@@ -223,3 +223,20 @@ src/services/nul
 
 # Archive de documentation technique (non versionnée)
 _archive/
+
+# ============================================================================
+# SKILLS & AGENTS EXTERNES (installés via npx skills add)
+# ============================================================================
+.agents/
+.claude/skills/
+
+# ============================================================================
+# ARTEFACTS DE BUILD / FICHIERS TEMPORAIRES
+# ============================================================================
+build-output.txt
+lint-output.txt
+type-check-output.txt
+DEPLOYMENT_FINAL_STATUS.txt
+README_AUDIT_QUICK.txt
+create_skills.py
+gen.cjs

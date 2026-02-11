@@ -212,7 +212,7 @@ export class InventoryJournalEntryService {
 
       // Mettre à jour le mouvement avec l'ID de l'écriture
       await supabase
-        .from('stock_movements')
+        .from('inventory_movements')
         .update({ journal_entry_id: journalEntry.id })
         .eq('id', movement.id);
 

@@ -15,10 +15,13 @@
  * - CA actuel, projeté, fin d'année, fin de contrat
  * - Calcul RFA selon barème progressif
  * - Intégration devis pondérés par taux de conversion
+ * 
+ * ✅ MIGRATED TO: acceptedAccountingService pour calcul revenue client
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import { formatCurrency } from '@/lib/utils';
+import { acceptedAccountingService } from './acceptedAccountingService';
 export interface RFABracket {
   min: number;
   max: number | null;
@@ -79,6 +82,191 @@ export interface ContractRFAData {
   }[];
 }
 export const rfaCalculationService = {
+  async getVatCollectedAccountIds(companyId: string): Promise<string[]> {
+    const { data: numberAccounts, error: numberError } = await supabase
+      .from('chart_of_accounts')
+      .select('id')
+      .eq('company_id', companyId)
+      .eq('is_active', true)
+      .like('account_number', '4457%');
+
+    if (numberError) {
+      throw numberError;
+    }
+
+    if (numberAccounts && numberAccounts.length > 0) {
+      return numberAccounts.map((acc) => acc.id);
+    }
+
+    const { data: nameAccounts, error: nameError } = await supabase
+      .from('chart_of_accounts')
+      .select('id')
+      .eq('company_id', companyId)
+      .eq('is_active', true)
+      .ilike('account_name', '%tva%collect%');
+
+    if (nameError) {
+      throw nameError;
+    }
+
+    return (nameAccounts || []).map((acc) => acc.id);
+  },
+
+  async getMissingClientRevenueLinesCount(
+    companyId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<number> {
+    const revenueAccountIds = await this.getRevenueAccountIds(companyId);
+    if (revenueAccountIds.length === 0) {
+      return 0;
+    }
+
+    const { data: entries, error: entriesError } = await supabase
+      .from('journal_entries')
+      .select('id')
+      .eq('company_id', companyId)
+      .gte('entry_date', startDate)
+      .lte('entry_date', endDate);
+
+    if (entriesError) {
+      throw entriesError;
+    }
+
+    const entryIds = (entries || []).map((entry) => entry.id);
+    if (entryIds.length === 0) {
+      return 0;
+    }
+
+    const { data: lines, error: linesError } = await supabase
+      .from('journal_entry_lines')
+      .select('id')
+      .in('journal_entry_id', entryIds)
+      .in('account_id', revenueAccountIds);
+
+    if (linesError) {
+      throw linesError;
+    }
+
+    return lines?.length ?? 0;
+  },
+
+  async getRevenueFromAccounting(
+    companyId: string,
+    clientId: string,
+    startDate: string,
+    endDate: string,
+    includeVatCollected: boolean
+  ): Promise<number> {
+    try {
+      // ✅ MIGRATED: Utiliser acceptedAccountingService pour la source unique  
+      // Passer clientId directement pour filtrer par client
+      const { revenue } = await acceptedAccountingService.calculateRevenueWithAudit(
+        companyId,
+        startDate,
+        endDate,
+        clientId, // IMPORTANT: Filter revenue for this client only
+        {
+          vatTreatment: includeVatCollected ? 'ttc' : 'ht',
+          includeBreakdown: false,
+          includeReconciliation: false
+        }
+      );
+
+      logger.debug('RfaCalculation', `[getRevenueFromAccounting] Client ${clientId}: ${formatCurrency(revenue)} (${includeVatCollected ? 'TTC' : 'HT'})`);
+      return revenue;
+    } catch (error) {
+      logger.error('RfaCalculation', 'Failed to calculate client revenue from acceptedAccountingService, using fallback', error);
+      
+      // Fallback: Direct journal query (safety net)
+      try {
+        const revenueAccountIds = await this.getRevenueAccountIds(companyId);
+        if (revenueAccountIds.length === 0) {
+          logger.warn('RfaCalculation', 'Aucun compte de produits (classe 7) trouvé pour le CA');
+          return 0;
+        }
+
+        const vatAccountIds = includeVatCollected
+          ? await this.getVatCollectedAccountIds(companyId)
+          : [];
+
+        const accountIds = [...new Set([...revenueAccountIds, ...vatAccountIds])];
+        if (accountIds.length === 0) {
+          return 0;
+        }
+
+        const { data: entries, error: entriesError } = await supabase
+          .from('journal_entries')
+          .select('id')
+          .eq('company_id', companyId)
+          .gte('entry_date', startDate)
+          .lte('entry_date', endDate);
+
+        if (entriesError) {
+          throw entriesError;
+        }
+
+        const entryIds = (entries || []).map((entry) => entry.id);
+        if (entryIds.length === 0) {
+          return 0;
+        }
+
+        const { data: lines, error: linesError } = await supabase
+          .from('journal_entry_lines')
+          .select(`
+            debit_amount,
+            credit_amount,
+            journal_entries!inner(company_id)
+          `)
+          .eq('journal_entries.company_id', companyId)
+          .in('journal_entry_id', entryIds)
+          .in('account_id', accountIds);
+
+        if (linesError) {
+          throw linesError;
+        }
+
+        return (lines || []).reduce((sum, line) => {
+          const credit = Number(line.credit_amount || 0);
+          const debit = Number(line.debit_amount || 0);
+          return sum + (credit - debit);
+        }, 0);
+      } catch (fallbackError) {
+        logger.error('RfaCalculation', 'Fallback revenue calculation also failed', fallbackError);
+        return 0;
+      }
+    }
+  },
+  async getRevenueAccountIds(companyId: string): Promise<string[]> {
+    const { data: classAccounts, error: classError } = await supabase
+      .from('chart_of_accounts')
+      .select('id')
+      .eq('company_id', companyId)
+      .eq('is_active', true)
+      .eq('account_class', 7);
+
+    if (classError) {
+      throw classError;
+    }
+
+    if (classAccounts && classAccounts.length > 0) {
+      return classAccounts.map((acc) => acc.id);
+    }
+
+    const { data: numberAccounts, error: numberError } = await supabase
+      .from('chart_of_accounts')
+      .select('id')
+      .eq('company_id', companyId)
+      .eq('is_active', true)
+      .like('account_number', '7%');
+
+    if (numberError) {
+      throw numberError;
+    }
+
+    return (numberAccounts || []).map((acc) => acc.id);
+  },
+
   // Barème RFA par défaut
   DEFAULT_BRACKETS: [
     { min: 0, max: 100000, rate: 0 },
@@ -129,8 +317,14 @@ export const rfaCalculationService = {
     const { data: contract, error: contractError } = await supabase
       .from('contracts')
       .select(`
-        *,
-        third_parties!contracts_third_party_id_fkey(id, name)
+        id,
+        contract_name,
+        contract_number,
+        client_id,
+        start_date,
+        end_date,
+        rfa_brackets,
+        rfa_calculation_base
       `)
       .eq('id', contractId)
       .eq('company_id', companyId)
@@ -139,44 +333,35 @@ export const rfaCalculationService = {
       logger.error('RfaCalculation', 'Contrat non trouvé:', contractError);
       return null;
     }
+    if (!contract.client_id) {
+      logger.warn('RfaCalculation', 'Contrat sans client_id - calcul RFA ignore');
+      return null;
+    }
+    const { data: client } = await supabase
+      .from('third_parties')
+      .select('id, name')
+      .eq('id', contract.client_id)
+      .maybeSingle();
+
     const startDate = new Date(contract.start_date);
-    const endDate = new Date(contract.end_date);
+    const endDate = contract.end_date ? new Date(contract.end_date) : new Date();
     const today = new Date();
     const yearStart = new Date(today.getFullYear(), 0, 1);
     const _yearEnd = new Date(today.getFullYear(), 11, 31);
-    // 2. Récupérer les factures du client sur la période du contrat
-    const { data: invoices } = await supabase
-      .from('invoices')
-      .select('id, total_ht, total_ttc, status, invoice_date, paid_amount')
-      .eq('company_id', companyId)
-      .eq('third_party_id', contract.third_party_id)
-      .gte('invoice_date', contract.start_date)
-      .lte('invoice_date', today.toISOString().split('T')[0])
-      .in('status', ['sent', 'paid', 'partial']);
-    // 3. Récupérer les devis en attente
-    const { data: quotes } = await supabase
-      .from('quotes')
-      .select('id, total_ht, total_ttc, status, created_at')
-      .eq('company_id', companyId)
-      .eq('customer_id', contract.third_party_id)
-      .eq('status', 'sent'); // Devis envoyés mais pas encore acceptés
-    // 4. Calculer le taux de conversion historique des devis
-    const { data: historicalQuotes } = await supabase
-      .from('quotes')
-      .select('status')
-      .eq('company_id', companyId)
-      .eq('customer_id', contract.third_party_id)
-      .in('status', ['accepted', 'rejected', 'expired']);
-    const acceptedCount = historicalQuotes?.filter(q => q.status === 'accepted').length || 0;
-    const totalHistorical = historicalQuotes?.length || 0;
-    const conversionRate = totalHistorical > 0 ? acceptedCount / totalHistorical : 0.5;
-    // 5. Calculs des montants
+    // 2. Récupérer le CA client depuis la comptabilité (écritures produits)
     const base = (contract.rfa_calculation_base as 'ht' | 'ttc') || 'ht';
-    const invoicedAmount = invoices?.reduce((sum, inv) =>
-      sum + (base === 'ht' ? (inv.total_ht || 0) : (inv.total_ttc || 0)), 0) || 0;
-    const paidAmount = invoices?.reduce((sum, inv) => sum + (inv.paid_amount || 0), 0) || 0;
-    const pendingQuotesTotal = quotes?.reduce((sum, q) =>
-      sum + (base === 'ht' ? (q.total_ht || 0) : (q.total_ttc || 0)), 0) || 0;
+    const includeVatCollected = base === 'ttc';
+    const accountingRevenue = await this.getRevenueFromAccounting(
+      companyId,
+      contract.client_id,
+      contract.start_date,
+      today.toISOString().split('T')[0],
+      includeVatCollected
+    );
+    const invoicedAmount = accountingRevenue;
+    const paidAmount = accountingRevenue;
+    const pendingQuotesTotal = 0;
+    const conversionRate = 0;
     // 6. Calcul du prorata temporis
     const daysElapsedInPeriod = Math.max(0, Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
     const totalDaysInPeriod = Math.max(1, Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
@@ -204,9 +389,9 @@ export const rfaCalculationService = {
     return {
       contract: {
         id: contract.id,
-        name: contract.name || `Contrat ${contract.reference || contract.id.slice(0, 8)}`,
-        client_id: contract.third_party_id,
-        client_name: contract.third_parties?.name || 'Client inconnu',
+        name: contract.contract_name || `Contrat ${contract.contract_number || contract.id.slice(0, 8)}`,
+        client_id: contract.client_id,
+        client_name: client?.name || 'Client inconnu',
         start_date: startDate,
         end_date: endDate,
         rfa_brackets: brackets,
@@ -217,9 +402,9 @@ export const rfaCalculationService = {
       paidAmount,
       pendingQuotes: {
         total: pendingQuotesTotal,
-        count: quotes?.length || 0,
+        count: 0,
         conversionRate,
-        weightedAmount: weightedQuotes
+        weightedAmount: 0
       },
       periodProgress: {
         daysElapsed: daysElapsedInPeriod,

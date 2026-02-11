@@ -173,7 +173,7 @@ export class HRPayrollService {
     try {
       // Récupérer tous les employés actifs
       const { data: employees, error: empError } = await supabase
-        .from('employees')
+        .from('hr_employees')
         .select('*')
         .eq('company_id', companyId)
         .eq('status', 'active');

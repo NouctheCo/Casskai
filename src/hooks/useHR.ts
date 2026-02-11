@@ -51,6 +51,7 @@ interface UseHRReturn {
   createLeave: (leaveData: Omit<Leave, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'employee_name'>) => Promise<boolean>;
   updateLeave: (leaveId: string, updates: Partial<Leave>) => Promise<boolean>;
   createExpense: (expenseData: Omit<Expense, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'employee_name'>) => Promise<boolean>;
+  updateExpense: (expenseId: string, updates: Partial<Expense>) => Promise<boolean>;
   createTimeEntry: (timeData: Omit<TimeEntry, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'employee_name'>) => Promise<boolean>;
   // Utility
   refreshAll: () => Promise<void>;
@@ -285,6 +286,22 @@ export function useHR(): UseHRReturn {
       return false;
     }
   }, [currentCompany?.id, fetchExpenses, fetchMetrics]);
+  const updateExpense = useCallback(async (expenseId: string, updates: Partial<Expense>): Promise<boolean> => {
+    try {
+      const response = await hrService.updateExpense(expenseId, updates);
+      if (response.success) {
+        await fetchExpenses();
+        await fetchMetrics();
+        return true;
+      } else {
+        setError(response.error || 'Failed to update expense');
+        return false;
+      }
+    } catch (err) {
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
+      return false;
+    }
+  }, [fetchExpenses, fetchMetrics]);
   const createTimeEntry = useCallback(async (timeData: Omit<TimeEntry, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'employee_name'>): Promise<boolean> => {
     if (!currentCompany?.id) return false;
     try {
@@ -351,6 +368,7 @@ export function useHR(): UseHRReturn {
     createLeave,
     updateLeave,
     createExpense,
+    updateExpense,
     createTimeEntry,
     // Utility
     refreshAll

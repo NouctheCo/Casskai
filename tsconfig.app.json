@@ -6,9 +6,9 @@
     "skipLibCheck": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noImplicitReturns": false,
-    "strictNullChecks": false
+    "strictNullChecks": true
   },
   "include": ["src"],
   "exclude": [

@@ -1,11 +1,13 @@
 /**
- * Composant Select Fournisseur avec création à la volée
+ * Composant Select Fournisseur avec création via le formulaire tiers complet
  * Utilisé dans le formulaire d'achat
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SelectWithCreate } from '../common/SelectWithCreate';
+import { ThirdPartyFormDialog } from '../third-parties/ThirdPartyFormDialog';
 import { useSuppliers } from '@/hooks/useSuppliers';
+import { useAuth } from '@/contexts/AuthContext';
 import { Label } from '../ui/label';
 
 interface SupplierSelectWithCreateProps {
@@ -23,7 +25,16 @@ export const SupplierSelectWithCreate: React.FC<SupplierSelectWithCreateProps> =
   required = true,
   className = ''
 }) => {
-  const { suppliers, loading, createSupplier } = useSuppliers();
+  const { currentCompany } = useAuth();
+  const { suppliers, loading, refreshSuppliers } = useSuppliers();
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+  const handleCreateSuccess = async () => {
+    // Recharger la liste des fournisseurs après création
+    await refreshSuppliers();
+    // Note: on ne peut pas auto-sélectionner le nouveau fournisseur ici car
+    // ThirdPartyFormDialog ne retourne pas l'ID créé. L'utilisateur le sélectionnera dans la liste.
+  };
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -41,12 +52,22 @@ export const SupplierSelectWithCreate: React.FC<SupplierSelectWithCreateProps> =
         placeholder="Sélectionnez un fournisseur"
         searchPlaceholder="Rechercher un fournisseur..."
         createLabel="Créer un nouveau fournisseur"
-        onCreate={createSupplier}
+        onCreateClick={() => setShowCreateDialog(true)}
         isLoading={loading}
-        className={error ? 'border-red-500' : ''}
       />
       {error && (
         <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      )}
+
+      {/* Formulaire de création de tiers complet */}
+      {currentCompany?.id && (
+        <ThirdPartyFormDialog
+          open={showCreateDialog}
+          onClose={() => setShowCreateDialog(false)}
+          onSuccess={handleCreateSuccess}
+          companyId={currentCompany.id}
+          defaultType="supplier"
+        />
       )}
     </div>
   );

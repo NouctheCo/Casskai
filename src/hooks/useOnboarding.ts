@@ -11,7 +11,7 @@
  */
 
 import { useContext } from 'react';
-import { OnboardingContext } from '../contexts/OnboardingContextNew';
+import { OnboardingContext } from '../contexts/OnboardingContext';
 
 export const useOnboarding = () => {
   const context = useContext(OnboardingContext);

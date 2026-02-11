@@ -487,8 +487,8 @@ export class AutomaticLetterageService {
     // Malus pour correspondances multiples
     if (debits.length > 1 || credits.length > 1) confidence -= 0.1;
     return {
-      debitEntries: debits.map(d => d.id),
-      creditEntries: credits.map(c => c.id),
+      debitEntries: debits.map(d => d.id).filter((id): id is string => id !== undefined),
+      creditEntries: credits.map(c => c.id).filter((id): id is string => id !== undefined),
       difference,
       confidence: Math.min(1, Math.max(0, confidence)),
       letterCode: this.generateLetterCode()

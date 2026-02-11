@@ -137,7 +137,7 @@ const CookiesPolicyPage = () => {
     if (cookieType === 'essential') return; // Cannot toggle essential cookies
     setCookieSettings(prev => ({
       ...prev,
-      [cookieType]: !prev[cookieType]
+      [cookieType]: !prev[cookieType as keyof typeof prev]
     }));
   };
   const savePreferences = async () => {
@@ -258,7 +258,7 @@ const CookiesPolicyPage = () => {
                         </Badge>
                       ) : (
                         <Switch
-                          checked={cookieSettings[type.id]}
+                          checked={cookieSettings[type.id as keyof typeof cookieSettings]}
                           onCheckedChange={() => handleCookieToggle(type.id)}
                           disabled={isLoading || isSaving}
                         />

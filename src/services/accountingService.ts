@@ -220,7 +220,7 @@ export class AccountingService {
         account_name: account.name,
         account_type: this.mapPCGTypeToDBType(account.type),
         account_class: parseInt(account.code.charAt(0), 10) || null,
-        parent_account_id: null,
+        parent_account_id: null as string | null,
         description: account.description || null,
         is_active: account.isActive ?? true,
         is_detail_account: true

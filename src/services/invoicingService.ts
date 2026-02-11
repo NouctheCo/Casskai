@@ -16,19 +16,21 @@ import { autoAuditService } from './autoAuditService';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { kpiCacheService } from './kpiCacheService';
+import { acceptedAccountingService } from './acceptedAccountingService';
+import { offlineDataService } from './offlineDataService';
 export interface Invoice {
   id: string;
   company_id: string;
   third_party_id: string;
-  journal_entry_id?: string;
-  customer_id?: string;
-  quote_id?: string;
+  journal_entry_id: string | null;
+  customer_id: string | null;
+  quote_id: string | null;
   invoice_number: string;
   invoice_type: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
-  title?: string;
+  title: string | null;
   invoice_date: string;
   due_date: string;
-  payment_date?: string;
+  payment_date: string | null;
   subtotal_excl_tax: number;
   total_tax_amount: number;
   total_incl_tax: number;
@@ -36,16 +38,16 @@ export interface Invoice {
   remaining_amount: number;
   status: 'draft' | 'sent' | 'viewed' | 'paid' | 'partial' | 'overdue' | 'cancelled';
   currency: string;
-  notes?: string;
-  internal_notes?: string;
-  tax_rate?: number;
-  payment_terms?: number;
-  discount_amount?: number;
-  created_by?: string;
+  notes: string | null;
+  internal_notes: string | null;
+  tax_rate: number | null;
+  payment_terms: number | null;
+  discount_amount: number | null;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
-  sent_at?: string;
-  paid_at?: string;
+  sent_at: string | null;
+  paid_at: string | null;
 }
 export interface InvoiceItem {
   id: string;
@@ -64,12 +66,12 @@ export interface InvoiceWithDetails extends Invoice {
   third_party?: {
     id: string;
     name: string;
-    email?: string;
-    phone?: string;
-    address_line1?: string;
-    city?: string;
-    postal_code?: string;
-    country?: string;
+    email: string | null;
+    phone: string | null;
+    address_line1: string | null;
+    city: string | null;
+    postal_code: string | null;
+    country: string | null;
   };
   invoice_items?: InvoiceItem[];
 }
@@ -208,6 +210,11 @@ class InvoicingService {
     }
   }
   async createInvoice(invoiceData: CreateInvoiceData, items: CreateInvoiceLineData[] = []): Promise<InvoiceWithDetails> {
+    // Mode offline : stocker en brouillon local
+    if (!navigator.onLine) {
+      return this.createInvoiceOffline(invoiceData, items);
+    }
+
     try {
       const companyId = await this.getCurrentCompanyId();
       const { data: { user } } = await supabase.auth.getUser();
@@ -535,10 +542,10 @@ class InvoicingService {
         invoice_date: new Date().toISOString().split('T')[0],
         due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         currency: originalInvoice.currency,
-        notes: originalInvoice.notes
+        notes: originalInvoice.notes ?? undefined
       };
       const newLines: CreateInvoiceLineData[] = (originalInvoice.invoice_items || []).map(item => ({
-        description: item.name || item.description,
+        description: item.name || item.description || '',
         quantity: item.quantity,
         unit_price: item.unit_price,
         discount_percent: item.discount_rate,
@@ -615,14 +622,28 @@ class InvoicingService {
       const invoicesList = invoices || [];
       const clientsList = clients || [];
       const quotesList = quotes || [];
-      // Calculate statistics
-      // ✅ Seulement les factures de vente (pas les avoirs), avec montant TTC
 
-      // CA total = Factures émises (sent, paid, partially_paid)
-      // En comptabilité française, le CA est reconnu dès l'émission, pas seulement au paiement
-      const totalRevenue = invoicesList
-        .filter(inv => ['sent', 'paid', 'partially_paid'].includes(inv.status) && inv.invoice_type === 'sale')
-        .reduce((sum, inv) => sum + (inv.total_incl_tax || inv.total_amount || 0), 0);
+      // ✅ CA total = Source comptable (acceptedAccountingService) = Source Unique de Vérité
+      // La comptabilité fait foi : écritures de journal > chart of accounts > factures (fallback)
+      let totalRevenue = 0;
+      try {
+        const startDate = params?.periodStart || `${new Date().getFullYear()}-01-01`;
+        const endDate = params?.periodEnd || new Date().toISOString().split('T')[0];
+        const { revenue } = await acceptedAccountingService.calculateRevenueWithAudit(
+          companyId,
+          startDate,
+          endDate,
+          undefined,
+          { vatTreatment: 'ttc', includeBreakdown: false, includeReconciliation: false }
+        );
+        totalRevenue = revenue;
+      } catch (error) {
+        // Fallback sur les factures si la comptabilité n'est pas disponible
+        logger.warn('Invoicing', 'Failed to get revenue from accounting, using invoices fallback');
+        totalRevenue = invoicesList
+          .filter(inv => ['sent', 'paid', 'partially_paid'].includes(inv.status) && inv.invoice_type === 'sale')
+          .reduce((sum, inv) => sum + (inv.total_incl_tax || inv.total_amount || 0), 0);
+      }
 
       // Montant des factures payées (en €)
       const paidInvoices = invoicesList
@@ -868,6 +889,187 @@ class InvoicingService {
       logger.error('InvoicingService', 'Error in createCreditNote:', error);
       throw error;
     }
+  }
+
+  async updateInvoice(invoiceId: string, invoiceData: Partial<CreateInvoiceData>, items: CreateInvoiceLineData[] = []): Promise<InvoiceWithDetails> {
+    try {
+      const companyId = await this.getCurrentCompanyId();
+
+      // Récupérer la facture existante
+      const existingInvoice = await this.getInvoiceById(invoiceId);
+      if (!existingInvoice) {
+        throw new Error('Invoice not found');
+      }
+
+      // Vérifier que la facture est en brouillon (draft uniquement)
+      if (existingInvoice.status !== 'draft') {
+        throw new Error('Only draft invoices can be modified');
+      }
+
+      // Préparer les données de mise à jour
+      const updateData: any = {
+        updated_at: new Date().toISOString()
+      };
+
+      // Mets à jour les champs fournis
+      if (invoiceData.customer_id) updateData.customer_id = invoiceData.customer_id;
+      if (invoiceData.third_party_id) updateData.third_party_id = invoiceData.third_party_id;
+      if (invoiceData.invoice_number) updateData.invoice_number = invoiceData.invoice_number;
+      if (invoiceData.invoice_date) updateData.invoice_date = invoiceData.invoice_date;
+      if (invoiceData.due_date) updateData.due_date = invoiceData.due_date;
+      if (invoiceData.notes !== undefined) updateData.notes = invoiceData.notes;
+      if (invoiceData.currency) updateData.currency = invoiceData.currency;
+
+      // Calculate totals from new items
+      const subtotal = items.reduce((sum, item) => {
+        const lineTotal = item.quantity * item.unit_price * (1 - (item.discount_percent || 0) / 100);
+        return sum + lineTotal;
+      }, 0);
+      const tax_amount = items.reduce((sum, item) => {
+        const lineTotal = item.quantity * item.unit_price * (1 - (item.discount_percent || 0) / 100);
+        return sum + (lineTotal * (item.tax_rate || 0) / 100);
+      }, 0);
+      const total_amount = subtotal + tax_amount;
+
+      updateData.subtotal_excl_tax = subtotal;
+      updateData.total_tax_amount = tax_amount;
+      updateData.total_incl_tax = total_amount;
+      updateData.remaining_amount = total_amount; // Reset remaining amount
+
+      // Mets à jour la facture
+      const { error: updateError } = await supabase
+        .from('invoices')
+        .update(updateData)
+        .eq('id', invoiceId)
+        .eq('company_id', companyId);
+      if (updateError) {
+        throw new Error(`Failed to update invoice: ${updateError.message}`);
+      }
+
+      // Supprime les anciennes lignes
+      const { error: deleteError } = await supabase
+        .from('invoice_items')
+        .delete()
+        .eq('invoice_id', invoiceId);
+      if (deleteError) {
+        throw new Error(`Failed to delete invoice items: ${deleteError.message}`);
+      }
+
+      // Crée les nouvelles lignes
+      if (items.length > 0) {
+        const invoiceItems = items.map((item, index) => ({
+          invoice_id: invoiceId,
+          name: item.description || 'Article',
+          description: item.description || null,
+          quantity: item.quantity || 1,
+          unit_price: item.unit_price || 0,
+          tax_rate: item.tax_rate || 20,
+          discount_rate: item.discount_percent || 0,
+          line_order: item.line_order || index + 1
+        }));
+        const { error: itemsError } = await supabase
+          .from('invoice_items')
+          .insert(invoiceItems);
+        if (itemsError) {
+          throw new Error(`Failed to create invoice items: ${itemsError.message}`);
+        }
+      }
+
+      // Récupère la facture mise à jour
+      const updatedInvoice = await this.getInvoiceById(invoiceId);
+      if (!updatedInvoice) {
+        throw new Error('Failed to retrieve updated invoice');
+      }
+
+      // Audit trail
+      auditService.logAsync({
+        event_type: 'UPDATE',
+        table_name: 'invoices',
+        record_id: invoiceId,
+        company_id: companyId,
+        new_values: {
+          invoice_number: invoiceData.invoice_number,
+          total_amount,
+          items_count: items.length
+        },
+        security_level: 'standard',
+        compliance_tags: ['SOC2', 'ISO27001']
+      });
+
+      // Invalider le cache KPI
+      kpiCacheService.invalidateCache(companyId);
+
+      return updatedInvoice;
+    } catch (error) {
+      logger.error('InvoicingService: Error in updateInvoice:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Creer une facture en mode offline (brouillon local)
+   */
+  private async createInvoiceOffline(invoiceData: CreateInvoiceData, items: CreateInvoiceLineData[]): Promise<InvoiceWithDetails> {
+    const localId = crypto.randomUUID();
+    const today = new Date().toISOString().split('T')[0];
+    const invoiceDate = invoiceData.invoice_date || today;
+
+    // Calculer les totaux
+    const subtotal = items.reduce((sum, item) => {
+      const lineTotal = item.quantity * item.unit_price * (1 - (item.discount_percent || 0) / 100);
+      return sum + lineTotal;
+    }, 0);
+    const taxAmount = items.reduce((sum, item) => {
+      const lineTotal = item.quantity * item.unit_price * (1 - (item.discount_percent || 0) / 100);
+      return sum + (lineTotal * (item.tax_rate || 0) / 100);
+    }, 0);
+    const totalAmount = subtotal + taxAmount;
+
+    const offlineInvoice = {
+      company_id: localStorage.getItem('casskai_current_enterprise') || '',
+      invoice_number: `DRAFT-${Date.now()}`,
+      invoice_type: invoiceData.invoice_type || 'sale',
+      status: 'draft',
+      invoice_date: invoiceDate,
+      due_date: invoiceData.due_date || invoiceDate,
+      subtotal_excl_tax: subtotal,
+      total_tax_amount: taxAmount,
+      total_incl_tax: totalAmount,
+      paid_amount: 0,
+      remaining_amount: totalAmount,
+      currency: invoiceData.currency || getCurrentCompanyCurrency(),
+      notes: invoiceData.notes,
+      customer_id: invoiceData.customer_id,
+      third_party_id: invoiceData.third_party_id || invoiceData.customer_id,
+    };
+
+    // Mettre dans la queue offline
+    const companyId = offlineInvoice.company_id;
+    const userId = (await supabase.auth.getUser().catch((): { data: { user: null } } => ({ data: { user: null } }))).data.user?.id || 'offline';
+
+    await offlineDataService.insert('invoices', offlineInvoice, userId, companyId);
+
+    logger.info('InvoicingService', `Facture brouillon creee offline (local_id: ${localId})`);
+
+    // Retourner un objet compatible InvoiceWithDetails
+    return {
+      ...offlineInvoice,
+      id: localId,
+      _offline: true,
+      items: items.map((item, index) => ({
+        id: crypto.randomUUID(),
+        invoice_id: localId,
+        name: item.description || 'Article',
+        description: item.description || null,
+        quantity: item.quantity || 1,
+        unit_price: item.unit_price || 0,
+        tax_rate: item.tax_rate || 20,
+        discount_rate: item.discount_percent || 0,
+        line_order: item.line_order || index + 1,
+      })),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as unknown as InvoiceWithDetails;
   }
 }
 export const invoicingService = new InvoicingService();

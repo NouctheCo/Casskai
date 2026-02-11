@@ -1,11 +1,6 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
-
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -17,14 +12,15 @@ function getBearerToken(req: Request) {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
-  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: cors });
+  const preflightResponse = handleCorsPreflightRequest(req);
+  if (preflightResponse) return preflightResponse;
+  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: getCorsHeaders(req) });
   try {
     const { reason } = await req.json().catch(() => ({ reason: null }));
     const bearer = getBearerToken(req);
     const { data: userData, error: userErr } = await admin.auth.getUser(bearer);
     if (userErr || !userData?.user?.id) {
-      return Response.json({ error: "Unauthorized" }, { status: 401, headers: cors });
+      return Response.json({ error: "Unauthorized" }, { status: 401, headers: getCorsHeaders(req) });
     }
     const userId = userData.user.id;
 
@@ -34,7 +30,7 @@ serve(async (req) => {
       .eq("user_id", userId)
       .eq("status", "pending");
     if ((pending ?? []).length > 0) {
-      return Response.json({ error: "Existing pending deletion request" }, { status: 400, headers: cors });
+      return Response.json({ error: "Existing pending deletion request" }, { status: 400, headers: getCorsHeaders(req) });
     }
 
     const ip = req.headers.get("x-forwarded-for") ?? undefined;
@@ -56,11 +52,11 @@ serve(async (req) => {
       .single();
 
     if (error) {
-      return Response.json({ error: error.message }, { status: 500, headers: cors });
+      return Response.json({ error: error.message }, { status: 500, headers: getCorsHeaders(req) });
     }
-    return Response.json({ id: data.id, scheduled_deletion_date: data.scheduled_deletion_date }, { headers: cors });
+    return Response.json({ id: data.id, scheduled_deletion_date: data.scheduled_deletion_date }, { headers: getCorsHeaders(req) });
   } catch (err) {
-    return Response.json({ error: String(err) }, { status: 500, headers: cors });
+    return Response.json({ error: String(err) }, { status: 500, headers: getCorsHeaders(req) });
   }
 });
 
@@ -82,11 +78,6 @@ serve(async (req) => {
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
 interface DeleteAccountRequest {
   reason?: string;
   ownership_transfers?: Array<{
@@ -97,9 +88,8 @@ interface DeleteAccountRequest {
 
 serve(async (req) => {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const preflightResponse2 = handleCorsPreflightRequest(req)
+  if (preflightResponse2) return preflightResponse2
 
   try {
     // Créer le client Supabase
@@ -112,7 +102,7 @@ serve(async (req) => {
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: 'Authorization header manquant' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -122,7 +112,7 @@ serve(async (req) => {
     if (authError || !user) {
       return new Response(
         JSON.stringify({ error: 'Non autorisé' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -161,7 +151,7 @@ serve(async (req) => {
             days_remaining: daysRemaining
           }
         }),
-        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 409, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -185,7 +175,7 @@ serve(async (req) => {
           message: 'Vous possédez des entreprises. Vous devez transférer la propriété avant de supprimer votre compte.',
           owned_companies: ownedCompanies
         }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -268,7 +258,7 @@ serve(async (req) => {
                 days_until_deletion: 30
               }
             }),
-            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
           )
         }
 
@@ -325,7 +315,7 @@ serve(async (req) => {
         }),
         {
           status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
         }
       )
 
@@ -352,7 +342,7 @@ serve(async (req) => {
         }),
         {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
         }
       )
     }
@@ -367,7 +357,7 @@ serve(async (req) => {
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     )
   }

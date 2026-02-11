@@ -15,6 +15,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { hrDocumentsService } from '@/services/hrDocumentsService';
+import { DocumentUploadModal } from '@/components/hr/DocumentUploadModal';
 import type { EmployeeDocument, DocumentType, DocumentStatus } from '@/types/hr-documents.types';
 import type { Employee } from '@/services/hrService';
 
@@ -375,18 +376,22 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
         </div>
       )}
 
-      {/* TODO: Add DocumentUploadModal component */}
-      {showUploadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Upload de document</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Le formulaire d'upload sera implémenté dans la prochaine étape
-            </p>
-            <Button onClick={() => setShowUploadModal(false)}>Fermer</Button>
-          </div>
-        </div>
-      )}
+      <DocumentUploadModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onSubmit={async (formData) => {
+          const response = await hrDocumentsService.uploadDocument(companyId, currentUserId, formData);
+          if (response.success) {
+            toast({ title: "Succès", description: "Document ajouté avec succès" });
+            loadDocuments();
+            return true;
+          } else {
+            toast({ title: "Erreur", description: response.error || "Erreur lors de l'upload", variant: "destructive" });
+            return false;
+          }
+        }}
+        employees={employees}
+      />
     </div>
   );
 };

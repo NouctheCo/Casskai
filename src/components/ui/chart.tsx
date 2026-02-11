@@ -155,7 +155,7 @@ export function Chart({
   return (
     <div className={cn("w-full h-full", className)}>
       <ResponsiveContainer width="100%" height={height}>
-        {renderChart()}
+        {renderChart() ?? <></>}
       </ResponsiveContainer>
     </div>
   );

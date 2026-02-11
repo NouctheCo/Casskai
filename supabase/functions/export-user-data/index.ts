@@ -1,11 +1,6 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
-
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -17,13 +12,14 @@ function getBearerToken(req: Request) {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
-  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: cors });
+  const preflightResponse = handleCorsPreflightRequest(req);
+  if (preflightResponse) return preflightResponse;
+  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: getCorsHeaders(req) });
   try {
     const bearer = getBearerToken(req);
     const { data: userData, error: userErr } = await admin.auth.getUser(bearer);
     if (userErr || !userData?.user?.id) {
-      return Response.json({ error: "Unauthorized" }, { status: 401, headers: cors });
+      return Response.json({ error: "Unauthorized" }, { status: 401, headers: getCorsHeaders(req) });
     }
     const userId = userData.user.id;
 
@@ -38,9 +34,9 @@ serve(async (req) => {
     const { data: deletionRequests } = await admin.from("account_deletion_requests").select("status, requested_at, scheduled_deletion_date, processed_at, cancelled_at, reason").eq("user_id", userId);
     results.deletion_requests = deletionRequests ?? [];
 
-    return Response.json({ user_id: userId, exported_at: new Date().toISOString(), data: results }, { headers: cors });
+    return Response.json({ user_id: userId, exported_at: new Date().toISOString(), data: results }, { headers: getCorsHeaders(req) });
   } catch (err) {
-    return Response.json({ error: String(err) }, { status: 500, headers: cors });
+    return Response.json({ error: String(err) }, { status: 500, headers: getCorsHeaders(req) });
   }
 });
 
@@ -58,19 +54,13 @@ serve(async (req) => {
  * - Email de confirmation (optionnel)
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
 
 serve(async (req) => {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const preflightResponse2 = handleCorsPreflightRequest(req)
+  if (preflightResponse2) return preflightResponse2
 
   try {
     // Créer le client Supabase avec les credentials service_role
@@ -83,7 +73,7 @@ serve(async (req) => {
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: 'Authorization header manquant' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -94,7 +84,7 @@ serve(async (req) => {
       console.error('Erreur authentification:', authError)
       return new Response(
         JSON.stringify({ error: 'Non autorisé' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -127,7 +117,7 @@ serve(async (req) => {
             nextAllowedAt: nextAllowedAt.toISOString(),
             hoursRemaining: (24 - hoursSinceLastExport).toFixed(1)
           }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 429, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
         )
       }
     }
@@ -318,7 +308,7 @@ serve(async (req) => {
         {
           status: 200,
           headers: {
-            ...corsHeaders,
+            ...getCorsHeaders(req),
             'Content-Type': 'application/json',
             'Content-Disposition': `attachment; filename="casskai-export-${user.id}-${Date.now()}.json"`
           }
@@ -348,7 +338,7 @@ serve(async (req) => {
         }),
         {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
         }
       )
     }
@@ -363,7 +353,7 @@ serve(async (req) => {
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       }
     )
   }

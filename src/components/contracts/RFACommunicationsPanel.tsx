@@ -22,6 +22,7 @@ import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import CompanySettingsService from '@/services/companySettingsService';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
+import { createSafeHTML } from '@/utils/sanitize';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -77,9 +78,8 @@ import {
 
 interface Contract {
   id: string;
-  name?: string;
   contract_name?: string;
-  third_party_id?: string;
+  client_id?: string;
 }
 
 interface ThirdParty {
@@ -170,9 +170,9 @@ export const RFACommunicationsPanel: React.FC<RFACommunicationsPanelProps> = ({
         unifiedThirdPartiesService.getSuppliers(companyId)
       ]);
       const allThirdParties = [
-        ...customersData.map(c => ({ id: c.id, name: c.name || c.company_name || 'Sans nom', email: c.email })),
-        ...suppliersData.map(s => ({ id: s.id, name: s.name || s.company_name || 'Sans nom', email: s.email }))
-      ];
+        ...customersData.map(c => ({ id: c.id ?? '', name: c.name || c.company_name || 'Sans nom', email: c.email ?? undefined })),
+        ...suppliersData.map(s => ({ id: s.id ?? '', name: s.name || s.company_name || 'Sans nom', email: s.email ?? undefined }))
+      ].filter(tp => tp.id !== '');
       // Remove duplicates by id
       const uniqueThirdParties = Array.from(new Map(allThirdParties.map(tp => [tp.id, tp])).values());
       setThirdParties(uniqueThirdParties);
@@ -180,7 +180,7 @@ export const RFACommunicationsPanel: React.FC<RFACommunicationsPanelProps> = ({
       // Charger les contrats
       const { data: contractsData } = await supabase
         .from('contracts')
-        .select('id, name, third_party_id')
+        .select('id, contract_name, client_id')
         .eq('company_id', companyId)
         .eq('status', 'active');
       setContracts(contractsData || []);
@@ -216,8 +216,8 @@ export const RFACommunicationsPanel: React.FC<RFACommunicationsPanelProps> = ({
     if (propContracts && propContracts.length > 0) {
       setContracts(propContracts.map(c => ({
         id: c.id,
-        name: c.name || c.contract_name,
-        third_party_id: c.third_party_id
+        contract_name: c.contract_name,
+        client_id: c.client_id
       })));
     }
   }, [propContracts]);
@@ -275,11 +275,11 @@ export const RFACommunicationsPanel: React.FC<RFACommunicationsPanelProps> = ({
       // Générer le contenu de l'email
       const templateData: RFAEmailTemplateData = {
         company_name: companySettings?.generalInfo?.name || currentCompany?.name || 'Entreprise',
-        company_email: companySettings?.contact?.email,
-        company_phone: companySettings?.contact?.phone,
-        company_address: companySettings?.contact?.address?.street,
+        company_email: companySettings?.contact?.email ?? undefined,
+        company_phone: companySettings?.contact?.phone ?? undefined,
+        company_address: companySettings?.contact?.address?.street ?? undefined,
         third_party_name: thirdParty?.name || formData.recipient_name || 'Client',
-        contract_name: contract?.name,
+        contract_name: contract?.contract_name,
         calculation_period: rfaCalc?.calculation_period,
         period_start: rfaCalc?.period_start,
         period_end: rfaCalc?.period_end,
@@ -403,18 +403,18 @@ export const RFACommunicationsPanel: React.FC<RFACommunicationsPanelProps> = ({
         if (!rfaCalc) continue;
         
         const contract = contracts.find(c => c.id === rfaCalc.contract_id);
-        if (!contract?.third_party_id) continue;
+        if (!contract?.client_id) continue;
         
-        const thirdParty = thirdParties.find(tp => tp.id === contract.third_party_id);
+        const thirdParty = thirdParties.find(tp => tp.id === contract.client_id);
         if (!thirdParty?.email) continue;
         
         try {
           const templateData: RFAEmailTemplateData = {
             company_name: companySettings?.generalInfo?.name || 'Entreprise',
-            company_email: companySettings?.contact?.email,
-            company_phone: companySettings?.contact?.phone,
+            company_email: companySettings?.contact?.email ?? undefined,
+            company_phone: companySettings?.contact?.phone ?? undefined,
             third_party_name: thirdParty.name,
-            contract_name: contract.name,
+            contract_name: contract.contract_name,
             calculation_period: rfaCalc.calculation_period,
             period_start: rfaCalc.period_start,
             period_end: rfaCalc.period_end,
@@ -776,8 +776,8 @@ export const RFACommunicationsPanel: React.FC<RFACommunicationsPanelProps> = ({
                     <TableBody>
                       {rfaCalculations.map((calc) => {
                         const contract = contracts.find(c => c.id === calc.contract_id);
-                        const thirdParty = contract?.third_party_id 
-                          ? thirdParties.find(tp => tp.id === contract.third_party_id)
+                        const thirdParty = contract?.client_id 
+                          ? thirdParties.find(tp => tp.id === contract.client_id)
                           : null;
                         const hasEmail = !!thirdParty?.email;
                         
@@ -797,7 +797,7 @@ export const RFACommunicationsPanel: React.FC<RFACommunicationsPanelProps> = ({
                               />
                             </TableCell>
                             <TableCell>{calc.calculation_period}</TableCell>
-                            <TableCell>{contract?.name || '-'}</TableCell>
+                            <TableCell>{contract?.contract_name || '-'}</TableCell>
                             <TableCell>
                               <div>
                                 <p>{thirdParty?.name || '-'}</p>
@@ -940,7 +940,7 @@ export const RFACommunicationsPanel: React.FC<RFACommunicationsPanelProps> = ({
                     <SelectItem value="">Aucun</SelectItem>
                     {contracts.map(c => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.name || c.contract_name}
+                        {c.contract_name || 'Contrat'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1065,7 +1065,7 @@ export const RFACommunicationsPanel: React.FC<RFACommunicationsPanelProps> = ({
                 </div>
                 <div 
                   className="p-4 bg-white"
-                  dangerouslySetInnerHTML={{ __html: selectedCommunication.body_html }}
+                  dangerouslySetInnerHTML={createSafeHTML(selectedCommunication.body_html)}
                 />
               </div>
             </div>

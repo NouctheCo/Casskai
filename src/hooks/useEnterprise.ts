@@ -72,7 +72,7 @@ export function useEnterprise() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Get all enterprises for the current user
-  const getUserEnterprises = useCallback(async () => {
+  const getUserEnterprises = useCallback(async (): Promise<{ data: Enterprise[]; error: string | null }> => {
     if (!user) return { data: [], error: null };
     setLoading(true);
     setError(null);
@@ -352,7 +352,7 @@ export function useEnterprise() {
       admin: 4,
       owner: 5
     };
-    const userRoleLevel = roleHierarchy[enterprise.userRole] || 0;
+    const userRoleLevel = roleHierarchy[enterprise.userRole as keyof typeof roleHierarchy] || 0;
     const requiredRoleLevel = roleHierarchy[requiredRole] || 0;
     return userRoleLevel >= requiredRoleLevel;
   }, [enterprises]);

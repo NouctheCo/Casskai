@@ -85,7 +85,7 @@ class DataMigrationService {
       const moduleStates = JSON.parse(localStorage.getItem('casskai-module-states') || '{}');
       const defaultModules = ['dashboard', 'settings', 'users', 'security'];
       // Modules à insérer
-      const modulesToInsert = [];
+      const modulesToInsert: { company_id: string; module_key: string; module_name: string; is_enabled: boolean }[] = [];
       // Ajouter les modules par défaut
       defaultModules.forEach(moduleKey => {
         modulesToInsert.push({

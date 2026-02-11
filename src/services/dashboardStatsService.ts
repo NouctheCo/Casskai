@@ -11,10 +11,13 @@
  */
 /**
  * Service pour calculer les statistiques du dashboard à partir des données réelles
+ * 
+ * ✅ MIGRATED TO: acceptedAccountingService pour la cohérence globale
  */
 import { supabase } from '@/lib/supabase';
 import { startOfYear, endOfYear, startOfMonth, endOfMonth } from 'date-fns';
 import { logger } from '@/lib/logger';
+import { acceptedAccountingService } from './acceptedAccountingService';
 export interface DashboardStats {
   revenue: number;
   expenses: number;
@@ -75,10 +78,72 @@ class DashboardStatsService {
   }
   /**
    * Récupère les données financières d'une période
+   * 
+   * ✅ REVENUE: Utilise acceptedAccountingService pour cohérence globa
+   * ✅ EXPENSES: Utilise still journal_entry_lines (source unique, pas de variation)
    */
   private async getFinancialData(companyId: string, startDate: string, endDate: string) {
-    // Utiliser journal_entry_lines avec join à chart_of_accounts
-    // ✅ Inclure 'posted', 'validated' ET 'imported' (pour import FEC)
+    // 1️⃣ REVENUE: Utiliser la source unique (acceptedAccountingService)
+    let revenue = 0;
+    try {
+      const { revenue: calculatedRevenue, audit } = await acceptedAccountingService.calculateRevenueWithAudit(
+        companyId,
+        startDate,
+        endDate,
+        undefined,
+        {
+          vatTreatment: 'ttc', // Dashboard uses total (with VAT)
+          includeBreakdown: false,
+          includeReconciliation: false
+        }
+      );
+      revenue = calculatedRevenue;
+
+      // Async audit trail
+      void supabase
+        .from('accounting_calculations_audit')
+        .insert({
+          company_id: companyId,
+          calculation_type: 'revenue',
+          purpose: 'dashboard_stats',
+          period_start: startDate,
+          period_end: endDate,
+          accounting_standard: audit.standard,
+          vat_treatment: 'ttc',
+          calculation_method: audit.calculation_method,
+          journal_lines_count: audit.journal_lines_count,
+          final_amount: revenue,
+          confidence_score: audit.confidence_score,
+          warnings: audit.warnings,
+          calculated_at: new Date().toISOString()
+        })
+        .then(({ error: insertError }) => {
+          if (insertError) {
+            logger.warn('DashboardStats', 'Failed to record audit trail:', insertError);
+          }
+        });
+    } catch (error) {
+      logger.warn('DashboardStats', 'Failed to calculate revenue from acceptedAccountingService, using fallback');
+      // Fallback: Direct journal_entry_lines query (safety net)
+      // ✅ Statuts harmonisés : posted/validated uniquement (les écritures 'imported' doivent être validées)
+      const { data: lines } = await supabase
+        .from('journal_entry_lines')
+        .select('credit_amount, debit_amount, chart_of_accounts!inner(account_number), journal_entries!inner(status)')
+        .eq('journal_entries.company_id', companyId)
+        .in('journal_entries.status', ['posted', 'validated'])
+        .gte('journal_entries.entry_date', startDate)
+        .lte('journal_entries.entry_date', endDate);
+
+      if (lines) {
+        revenue = Math.abs(
+          lines
+            .filter((line: any) => line.chart_of_accounts?.account_number?.charAt(0) === '7')
+            .reduce((sum: number, line: any) => sum + ((line.credit_amount || 0) - (line.debit_amount || 0)), 0)
+        );
+      }
+    }
+
+    // 2️⃣ EXPENSES: Utiliser journal_entry_lines (source unique, pas d'ambiguïté)
     const { data: lines, error } = await supabase
       .from('journal_entry_lines')
       .select(`
@@ -94,14 +159,15 @@ class DashboardStatsService {
         )
       `)
       .eq('journal_entries.company_id', companyId)
-      .in('journal_entries.status', ['posted', 'validated', 'imported'])
+      .in('journal_entries.status', ['posted', 'validated'])
       .gte('journal_entries.entry_date', startDate)
       .lte('journal_entries.entry_date', endDate);
+
     if (error) {
-      logger.error('DashboardStats', 'Error fetching journal entry lines:', error);
-      return { revenue: 0, expenses: 0, netIncome: 0, netMargin: 0 };
+      logger.error('DashboardStats', 'Error fetching journal entry lines for expenses:', error);
+      return { revenue, expenses: 0, netIncome: revenue, netMargin: 0 };
     }
-    let revenue = 0;
+
     let expenses = 0;
     lines?.forEach(line => {
       const accountNumber = (line as any).chart_of_accounts?.account_number;
@@ -109,17 +175,16 @@ class DashboardStatsService {
       const accountClass = accountNumber.charAt(0);
       const debit = (line as any).debit_amount || 0;
       const credit = (line as any).credit_amount || 0;
-      // Classe 7 = Produits (revenues)
-      if (accountClass === '7') {
-        revenue += credit - debit;
-      }
+
       // Classe 6 = Charges (expenses)
       if (accountClass === '6') {
         expenses += debit - credit;
       }
     });
+
     const netIncome = revenue - expenses;
     const netMargin = revenue > 0 ? (netIncome / revenue) * 100 : 0;
+
     return {
       revenue: Math.abs(revenue),
       expenses: Math.abs(expenses),

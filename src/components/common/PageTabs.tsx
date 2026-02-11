@@ -34,9 +34,9 @@ export const PageTabs: React.FC<PageTabsProps> = ({
 }) => {
   const colorClasses = {
     primary: {
-      active: 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30',
+      active: 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/30',
       inactive: 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50',
-      border: 'border-indigo-500'
+      border: 'border-blue-500'
     },
     emerald: {
       active: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30',
@@ -44,7 +44,7 @@ export const PageTabs: React.FC<PageTabsProps> = ({
       border: 'border-emerald-500'
     },
     blue: {
-      active: 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/30',
+      active: 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/30',
       inactive: 'text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20',
       border: 'border-blue-500'
     },

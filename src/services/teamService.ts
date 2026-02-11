@@ -16,7 +16,7 @@ export interface TeamMember {
   user_id: string;
   email: string;
   display_name?: string;
-  avatar_url?: string;
+  avatar_url: string | null;
   role: 'owner' | 'admin' | 'manager' | 'member' | 'viewer';
   allowed_modules: string[];
   is_active: boolean;
@@ -89,7 +89,7 @@ class TeamService {
         .order('created_at', { ascending: true });
       if (error) throw error;
       return (data || []).map(member => {
-        const profile = member.profiles as unknown as { email?: string; full_name?: string; avatar_url?: string } | null;
+        const profile = member.profiles as unknown as { email?: string; full_name?: string; avatar_url?: string | null } | null;
         return {
           id: member.id,
           user_id: member.user_id,

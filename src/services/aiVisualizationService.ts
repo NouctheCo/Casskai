@@ -251,7 +251,7 @@ class AIVisualizationService {
   // Couleur des nœuds
   private getNodeColor(name: string, sourceField: string, targetField: string): string {
     const category = this.inferNodeCategory(name, sourceField, targetField);
-    const colorMap = {
+    const colorMap: Record<string, string> = {
       account: '#3B82F6',
       food: '#10B981',
       transport: '#F59E0B',
@@ -358,7 +358,7 @@ class AIVisualizationService {
   // Couleur par catégorie
   private getCategoryColor(category?: string): string {
     if (!category) return '#6B7280';
-    const colorMap = {
+    const colorMap: Record<string, string> = {
       'Alimentaire': '#10B981',
       'Transport': '#F59E0B',
       'Logement': '#8B5CF6',

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 
-import { Menu, Settings, Bell, User, Search, ChevronDown, Shield } from 'lucide-react';
+import { Menu, Settings, Bell, User, Search, ChevronDown, Shield, CloudOff, RefreshCw } from 'lucide-react';
+
+import { useSyncQueue } from '@/hooks/useSyncQueue';
 
 import { Button } from '@/components/ui/button';
 
@@ -75,6 +77,9 @@ export function Header({
   // Utiliser le hook pour les notifications
 
   const { isOpen: isNotificationOpen, setIsOpen: setNotificationOpen, unreadCount } = useNotificationCenter();
+
+  // Sync queue offline
+  const { pendingCount: syncPendingCount, failedCount: syncFailedCount, isSyncing, syncNow } = useSyncQueue();
 
 
 
@@ -278,6 +283,45 @@ export function Header({
 
 
 
+          {/* Bouton Sync Offline (visible si pending > 0 ou offline) */}
+          {(syncPendingCount > 0 || syncFailedCount > 0 || !navigator.onLine) && (
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "relative hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation dark:bg-gray-800",
+                  !navigator.onLine && "text-orange-500"
+                )}
+                onClick={() => syncNow()}
+                disabled={isSyncing || !navigator.onLine}
+                title={!navigator.onLine ? 'Hors ligne' : `${syncPendingCount} element(s) en attente`}
+              >
+                {!navigator.onLine ? (
+                  <CloudOff className="h-5 w-5" />
+                ) : (
+                  <RefreshCw className={cn("h-5 w-5", isSyncing && "animate-spin")} />
+                )}
+                {(syncPendingCount + syncFailedCount) > 0 && (
+                  <motion.span
+                    className={cn(
+                      "absolute -top-1 -right-1 h-5 w-5 rounded-full text-xs text-white flex items-center justify-center font-medium",
+                      syncFailedCount > 0 ? "bg-red-500" : "bg-orange-500"
+                    )}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  >
+                    {syncPendingCount + syncFailedCount}
+                  </motion.span>
+                )}
+              </Button>
+            </motion.div>
+          )}
+
           {/* Notifications with animated badge */}
 
           <motion.div
@@ -410,7 +454,7 @@ export function Header({
 
                 <Button variant="ghost" className="flex items-center space-x-2 hover:bg-white/20 dark:hover:bg-gray-800/20 px-3 dark:bg-gray-800">
 
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
 
                     <User className="h-4 w-4 text-white" />
 

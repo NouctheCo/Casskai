@@ -411,7 +411,7 @@ const NotificationCenter: React.FC<{ config: NotificationCenterConfig }> = ({ co
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: index * 0.1 }}
         >
-          {getNotificationIcon(notification.type)}
+          {getNotificationIcon(notification.type ?? 'info')}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white truncate">
               {notification.title}

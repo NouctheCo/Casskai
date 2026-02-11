@@ -27,19 +27,19 @@ export interface Contact {
 
   last_name: string;
 
-  email?: string;
+  email: string | null;
 
-  phone?: string;
+  phone: string | null;
 
-  position?: string;
+  position: string | null;
 
-  client_id?: string;
+  client_id: string | null;
 
-  company_id?: string;
+  company_id: string | null;
 
-  notes?: string;
+  notes: string | null;
 
-  is_primary?: boolean;
+  is_primary: boolean | null;
 
   created_at: string;
 
@@ -55,21 +55,21 @@ export interface Client {
 
   company_name: string;
 
-  industry?: string;
+  industry: string | null;
 
-  size?: 'small' | 'medium' | 'large';
+  size: 'small' | 'medium' | 'large' | null;
 
-  address?: string;
+  address: string | null;
 
-  city?: string;
+  city: string | null;
 
-  postal_code?: string;
+  postal_code: string | null;
 
-  country?: string;
+  country: string | null;
 
-  website?: string;
+  website: string | null;
 
-  notes?: string;
+  notes: string | null;
 
   status: 'prospect' | 'active' | 'inactive' | 'lost';
 
@@ -83,7 +83,9 @@ export interface Client {
 
   total_revenue?: number;
 
-  last_interaction?: string;
+  contact_count?: number; // Nombre de contacts liés
+
+  last_interaction: string | null;
 
 }
 
@@ -249,21 +251,21 @@ export interface ClientFormData {
 
   company_name: string;
 
-  industry?: string;
+  industry: string | null;
 
-  size?: 'small' | 'medium' | 'large';
+  size: 'small' | 'medium' | 'large' | null;
 
-  address?: string;
+  address: string | null;
 
-  city?: string;
+  city: string | null;
 
-  postal_code?: string;
+  postal_code: string | null;
 
-  country?: string;
+  country: string | null;
 
-  website?: string;
+  website: string | null;
 
-  notes?: string;
+  notes: string | null;
 
   status: 'prospect' | 'active' | 'inactive' | 'lost';
 
@@ -277,17 +279,17 @@ export interface ContactFormData {
 
   last_name: string;
 
-  email?: string;
+  email: string | null;
 
-  phone?: string;
+  phone: string | null;
 
-  position?: string;
+  position: string | null;
 
-  client_id?: string;
+  client_id: string | null;
 
-  notes?: string;
+  notes: string | null;
 
-  is_primary?: boolean;
+  is_primary: boolean | null;
 
 }
 

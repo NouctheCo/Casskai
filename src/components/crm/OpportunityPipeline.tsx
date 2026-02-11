@@ -76,7 +76,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
         const errorMessage = typeof response.error === 'string' ? response.error : response.error.message;
         throw new Error(errorMessage);
       }
-      setOpportunities(response.data);
+      setOpportunities(response.data ?? []);
     } catch (error) {
       devLogger.error('Error loading opportunities:', error instanceof Error ? error.message : String(error));
       toast({

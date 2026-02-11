@@ -40,7 +40,7 @@ export function useJournals(companyId: string) {
     return term.replace(/[%_\\]/g, '\\$&').replace(/'/g, "''");
   }, []);
   // Fetch journals with optional filters
-  const fetchJournals = useCallback(async (filters: JournalFilters = {}) => {
+  const fetchJournals = useCallback(async (filters: JournalFilters = {}): Promise<{ data: Journal[]; count: number; error: string | null } | void> => {
     if (!user || !companyId) return;
     const { 
       type, 

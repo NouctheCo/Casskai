@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
+import { ensureAuxiliaryAccount } from '@/services/auxiliaryAccountService';
 interface Supplier {
   id: string;
   name: string;
@@ -62,11 +63,23 @@ export const useSuppliers = () => {
           company_id: currentCompany.id,
           name,
           type: 'supplier',
-          status: 'active'
+          status: 'active',
+          is_active: true
         })
         .select()
         .single();
       if (error) throw error;
+
+      // Créer automatiquement le compte auxiliaire fournisseur (401xxxx)
+      if (data && currentCompany.id) {
+        ensureAuxiliaryAccount(
+          currentCompany.id,
+          data.id,
+          'supplier',
+          name
+        ).catch(err => logger.warn('UseSuppliers', 'Erreur création compte auxiliaire (non bloquant):', err));
+      }
+
       // Ajouter à la liste locale
       setSuppliers(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
       toast.success(`Fournisseur "${name}" créé avec succès`);

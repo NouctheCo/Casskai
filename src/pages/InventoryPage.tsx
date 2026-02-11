@@ -23,6 +23,7 @@ import SuppliersTab from '@/components/inventory/SuppliersTab';
 import AlertsTab from '@/components/inventory/AlertsTab';
 import InventoryDialogs from '@/components/inventory/InventoryDialogs';
 import NewArticleModal from '@/components/inventory/NewArticleModal';
+import InventorySettings from '@/components/inventory/InventorySettings';
 import { ThirdPartyFormDialog } from '@/components/third-parties/ThirdPartyFormDialog';
 import { useInventoryPageController } from '@/hooks/useInventoryPageController';
 import { useAuth } from '@/contexts/AuthContext';
@@ -56,13 +57,14 @@ export default function InventoryPage() {
       <InventoryStats {...statsProps} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="dashboard">{t("common.dashboard", "Dashboard")}</TabsTrigger>
           <TabsTrigger value="products">{t("inventorypage.produits", "Produits")}</TabsTrigger>
           <TabsTrigger value="movements">{t("inventorypage.mouvements", "Mouvements")}</TabsTrigger>
           <TabsTrigger value="production">{t("inventorypage.production", "Production")}</TabsTrigger>
           <TabsTrigger value="suppliers">{t("inventorypage.fournisseurs", "Fournisseurs")}</TabsTrigger>
           <TabsTrigger value="alerts">{t("inventorypage.alertes", "Alertes")}</TabsTrigger>
+          <TabsTrigger value="settings">{t("common.settings", "Paramètres")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
@@ -87,6 +89,12 @@ export default function InventoryPage() {
 
         <TabsContent value="alerts">
           <AlertsTab {...alertsProps} />
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <div className="space-y-6">
+            <InventorySettings />
+          </div>
         </TabsContent>
       </Tabs>
 

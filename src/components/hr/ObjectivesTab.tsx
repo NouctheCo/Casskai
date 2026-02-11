@@ -16,7 +16,8 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
+  Pencil
 } from 'lucide-react';
 import { hrPerformanceService } from '@/services/hrPerformanceService';
 import { ObjectiveFormModal } from './ObjectiveFormModal';
@@ -54,6 +55,19 @@ export function ObjectivesTab({ companyId, employees, currentUserId: _currentUse
     if (response.success) {
       await loadObjectives();
       setShowModal(false);
+      setSelectedObjective(null);
+      return true;
+    }
+    return false;
+  };
+
+  const handleUpdateObjective = async (formData: any) => {
+    if (!selectedObjective) return false;
+    const response = await hrPerformanceService.updateObjective(selectedObjective.id, formData);
+    if (response.success) {
+      await loadObjectives();
+      setShowModal(false);
+      setSelectedObjective(null);
       return true;
     }
     return false;
@@ -211,7 +225,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId: _currentUse
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+                className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
               >
                 <option value="all">Tous les statuts</option>
                 <option value="not_started">Non démarré</option>
@@ -263,7 +277,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId: _currentUse
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant="outline" className="text-xs">
-                        {getTypeLabel(objective.type)}
+                        {getTypeLabel(objective.type ?? '')}
                       </Badge>
                       <Badge className={`${getStatusColor(objective.status)} text-xs flex items-center gap-1`}>
                         {getStatusIcon(objective.status)}
@@ -278,6 +292,16 @@ export function ObjectivesTab({ companyId, employees, currentUserId: _currentUse
                     <CardTitle className="text-lg mb-1">{objective.title}</CardTitle>
                     <p className="text-sm text-gray-600 dark:text-gray-300">{objective.employee_name}</p>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedObjective(objective);
+                      setShowModal(true);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -356,7 +380,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId: _currentUse
             setShowModal(false);
             setSelectedObjective(null);
           }}
-          onSubmit={handleCreateObjective}
+          onSubmit={selectedObjective ? handleUpdateObjective : handleCreateObjective}
           employees={employees}
           objective={selectedObjective}
         />

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mode Hors Ligne - CassKai</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 48px 32px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: #ffffff;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 32px;
+      color: #3B82F6;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon-wifi-off {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 24px;
+      opacity: 0.9;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #ffffff;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 24px;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 12px 20px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 32px;
+    }
+
+    .pulse {
+      width: 10px;
+      height: 10px;
+      background: #EF4444;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .btn {
+      display: inline-block;
+      background: #ffffff;
+      color: #3B82F6;
+      padding: 14px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .features {
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .features h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .feature-list {
+      list-style: none;
+      text-align: left;
+    }
+
+    .feature-list li {
+      padding: 8px 0;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.85);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .feature-list li::before {
+      content: "✓";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      background: rgba(16, 185, 129, 0.3);
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 32px 24px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">CK</div>
+
+    <svg class="icon-wifi-off" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+
+    <h1>Vous êtes hors ligne</h1>
+
+    <p>
+      Aucune connexion Internet détectée. Vérifiez votre connexion et réessayez.
+    </p>
+
+    <div class="status-indicator">
+      <span class="pulse"></span>
+      <span>Mode hors ligne actif</span>
+    </div>
+
+    <button class="btn" onclick="window.location.reload()">
+      Réessayer
+    </button>
+
+    <div class="features">
+      <h2>Fonctionnalités disponibles hors ligne</h2>
+      <ul class="feature-list">
+        <li>Consultation des données en cache</li>
+        <li>Consultation des rapports téléchargés</li>
+        <li>Brouillons sauvegardés localement</li>
+        <li>Synchronisation automatique au retour en ligne</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Auto-reload quand revient en ligne
+    window.addEventListener('online', () => {
+      console.log('[CassKai] Connexion rétablie, rechargement...');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    });
+
+    // Afficher statut dans console
+    console.log('[CassKai] Mode hors ligne - Offline page chargée');
+    console.log('[CassKai] Waiting for connection...');
+
+    // Vérifier connexion périodiquement
+    setInterval(() => {
+      if (navigator.onLine) {
+        console.log('[CassKai] Connexion détectée !');
+        window.location.reload();
+      }
+    }, 5000); // Vérifier toutes les 5 secondes
+  </script>
+</body>
+</html>

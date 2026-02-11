@@ -344,7 +344,7 @@ export const TrialStatistics: React.FC = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
-            {statistics.map((stat, index) => (
+            {statistics.map((stat: { metric: string; value: string | number }, index: number) => (
 
               <div key={index} className="text-center">
 

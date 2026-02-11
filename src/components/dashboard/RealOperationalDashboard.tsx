@@ -37,11 +37,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { realDashboardKpiService, type RealKPIData } from '@/services/realDashboardKpiService';
-import { aiDashboardAnalysisService, type AIAnalysisResult } from '@/services/aiDashboardAnalysisService';
+import { aiDashboardAnalysisService, type AIAnalysisResult } from '@/services/ai/dashboardService';
 import { useKpiRefresh } from '@/hooks/useKpiRefresh';
 import { formatCurrency, getCurrentCompanyCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { kpiCacheService } from '@/services/kpiCacheService';
+import { offlineDataService } from '@/services/offlineDataService';
+import RealtimeDashboardIndicator from '@/components/dashboard/RealtimeDashboardIndicator';
+import ThresholdAlert from '@/components/dashboard/ThresholdAlert';
+import { RealtimeStatusIndicator } from '@/components/dashboard/RealtimeStatusIndicator';
+import { WifiOff } from 'lucide-react';
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 // Helper to get currency symbol based on company settings
@@ -59,6 +64,42 @@ const getCurrencySymbol = () => {
     'TND': 'TND'
   };
   return symbols[currency] || currency;
+};
+
+/**
+ * Formate les valeurs de l'axe Y de manière compacte et lisible
+ * Ex: 1 500 000 → "1,5M", 300 000 → "300k", 1 500 → "1 500"
+ */
+const formatYAxisTick = (value: number): string => {
+  if (value === 0) return '0';
+  const abs = Math.abs(value);
+  const sign = value < 0 ? '-' : '';
+  if (abs >= 1_000_000) {
+    const millions = abs / 1_000_000;
+    return `${sign}${millions % 1 === 0 ? millions.toFixed(0) : millions.toFixed(1)}M`;
+  }
+  if (abs >= 1_000) {
+    const thousands = abs / 1_000;
+    return `${sign}${thousands % 1 === 0 ? thousands.toFixed(0) : thousands.toFixed(1)}k`;
+  }
+  return `${sign}${Math.round(abs).toLocaleString('fr-FR')}`;
+};
+
+/**
+ * Tooltip personnalisé pour les graphiques du dashboard
+ */
+const CustomChartTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg px-4 py-3">
+      <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">{label}</p>
+      {payload.map((entry: any, index: number) => (
+        <p key={index} className="text-sm" style={{ color: entry.color || entry.stroke }}>
+          {formatCurrency(entry.value)}
+        </p>
+      ))}
+    </div>
+  );
 };
 
 // Helper to format units correctly
@@ -86,6 +127,9 @@ export const RealOperationalDashboard: React.FC = () => {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [refreshCount, setRefreshCount] = useState(0);
+  const [isRealtimeEnabled, setIsRealtimeEnabled] = useState(true);
+  const [averageLatency, setAverageLatency] = useState<number | undefined>();
   // Ref pour éviter les rechargements multiples de timers
   const reloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   // 🎯 OPTIMISATION: Détecter quand l'utilisateur revient sur la page
@@ -137,7 +181,16 @@ export const RealOperationalDashboard: React.FC = () => {
       // Charger l'analyse IA en parallèle
       loadAIAnalysis(data);
     } catch (_error) {
-      // swallow errors silently in UI; handled by services
+      // Fallback : tenter le cache Dexie si l'appel réseau échoue
+      try {
+        const cached = await kpiCacheService.getCacheWithDexieFallback(currentCompany.id);
+        if (cached?.data) {
+          setKpiData(cached.data as RealKPIData);
+          setLastUpdate(new Date());
+        }
+      } catch {
+        // Silencieux
+      }
     } finally {
       setLoading(false);
     }
@@ -149,7 +202,8 @@ export const RealOperationalDashboard: React.FC = () => {
       const analysis = await aiDashboardAnalysisService.analyzeKPIs(
         data,
         currentCompany.name,
-        currentCompany.industry_type || currentCompany.sector || 'general'
+        currentCompany.industry_type || currentCompany.sector || 'general',
+        currentCompany.id
       );
       setAiAnalysis(analysis);
     } catch (error) {
@@ -181,16 +235,30 @@ export const RealOperationalDashboard: React.FC = () => {
   }, [currentCompany?.id]);
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
+    const startTime = performance.now();
+
     try {
       // Invalider le cache avant de recharger
       if (currentCompany?.id) {
         kpiCacheService.invalidateCache(currentCompany.id);
       }
       await loadDashboardData();
+
+      // Mesurer latence
+      const latency = Math.round(performance.now() - startTime);
+      setAverageLatency(latency);
+
+      // Incrémenter compteur
+      setRefreshCount(prev => prev + 1);
     } finally {
       setRefreshing(false);
     }
   }, [loadDashboardData, currentCompany?.id]);
+
+  const handleToggleRealtime = useCallback((enabled: boolean) => {
+    setIsRealtimeEnabled(enabled);
+    logger.info('RealOperationalDashboard', `Temps réel ${enabled ? 'activé' : 'désactivé'}`);
+  }, []);
   if (loading || !kpiData) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -200,6 +268,7 @@ export const RealOperationalDashboard: React.FC = () => {
   }
   const metrics = realDashboardKpiService.generateMetrics(kpiData, t);
   const charts = realDashboardKpiService.generateCharts(kpiData, t);
+  const expenseTotal = charts[2]?.data?.reduce((sum, item) => sum + ((item as { value: number }).value || 0), 0) || 0;
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -207,18 +276,47 @@ export const RealOperationalDashboard: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold">{t('dashboard.operational.title')}</h1>
           <p className="text-muted-foreground">{t('dashboard.operational.subtitle')}</p>
-          {/* 🎯 NOUVEAU: Afficher l'heure de dernière mise à jour */}
-          {lastUpdate && (
-            <p className="text-xs text-gray-500 mt-1">
-              Mis à jour à {lastUpdate.toLocaleTimeString('fr-FR')}
-            </p>
-          )}
         </div>
         <Button onClick={handleRefresh} disabled={refreshing} variant="outline">
           <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
           {t('common.refresh')}
         </Button>
       </div>
+
+      {/* 🎯 Indicateur Temps Réel (Nouveau composant amélioré) */}
+      <RealtimeStatusIndicator
+        lastUpdate={lastUpdate}
+        isRefreshing={refreshing}
+        refreshCount={refreshCount}
+        onRefresh={handleRefresh}
+        isRealtimeEnabled={isRealtimeEnabled}
+        onToggleRealtime={handleToggleRealtime}
+        isConnected={true}
+        averageLatency={averageLatency}
+        compact={false}
+      />
+
+      {/* Indicateur mode offline */}
+      {!navigator.onLine && lastUpdate && (
+        <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
+          <WifiOff className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-700 dark:text-orange-300 text-sm">
+            {t('dashboard.offlineData', {
+              defaultValue: 'Donnees hors ligne',
+            })}
+            {' — '}
+            {t('dashboard.lastSynced', {
+              defaultValue: 'Derniere mise a jour',
+            })}
+            {': '}
+            {lastUpdate.toLocaleTimeString()}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* 🚨 Alertes visuelles sur seuils critiques */}
+      <ThresholdAlert kpiData={kpiData} />
+
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {metrics.map((metric) => (
@@ -235,13 +333,20 @@ export const RealOperationalDashboard: React.FC = () => {
             <CardContent>
               <div className="space-y-2">
                 <div className="text-2xl font-bold">
-                  {(metric.value ?? 0).toLocaleString('fr-FR', {
-                    minimumFractionDigits: metric.unit === 'currency' ? 2 : 0,
-                    maximumFractionDigits: metric.unit === 'currency' ? 2 : 0,
-                  })}
-                  <span className="text-sm font-normal text-muted-foreground ml-1">
-                    {formatUnit(metric.unit)}
-                  </span>
+                  {metric.unit === 'currency'
+                    ? formatCurrency(Number(metric.value ?? 0))
+                    : (
+                      <>
+                        {Number(metric.value ?? 0).toLocaleString('fr-FR', {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: metric.unit === 'percentage' ? 1 : 0,
+                        })}
+                        <span className="text-sm font-normal text-muted-foreground ml-1">
+                          {formatUnit(metric.unit || '')}
+                        </span>
+                      </>
+                    )
+                  }
                 </div>
                 {metric.change !== undefined && metric.period && (
                   <div className="flex items-center gap-2 text-xs">
@@ -284,21 +389,29 @@ export const RealOperationalDashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={charts[0].data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="label" />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value: number) =>
-                      formatCurrency(value)
-                    }
+                <LineChart data={charts[0].data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 12, fill: '#6b7280' }}
+                    tickLine={false}
                   />
+                  <YAxis
+                    tickFormatter={formatYAxisTick}
+                    allowDecimals={false}
+                    tick={{ fontSize: 12, fill: '#6b7280' }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={65}
+                  />
+                  <Tooltip content={<CustomChartTooltip />} />
                   <Line
                     type="monotone"
                     dataKey="value"
                     stroke={charts[0].color}
                     strokeWidth={2}
                     dot={{ fill: charts[0].color, r: 4 }}
+                    activeDot={{ r: 6, strokeWidth: 2 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -316,16 +429,27 @@ export const RealOperationalDashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={charts[1].data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="label" angle={-45} textAnchor="end" height={100} />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value: number) =>
-                      formatCurrency(value)
-                    }
+                <BarChart data={charts[1].data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    angle={-35}
+                    textAnchor="end"
+                    height={80}
+                    tick={{ fontSize: 11, fill: '#6b7280' }}
+                    tickLine={false}
+                    interval={0}
                   />
-                  <Bar dataKey="value" fill={charts[1].color} />
+                  <YAxis
+                    tickFormatter={formatYAxisTick}
+                    allowDecimals={false}
+                    tick={{ fontSize: 12, fill: '#6b7280' }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={65}
+                  />
+                  <Tooltip content={<CustomChartTooltip />} />
+                  <Bar dataKey="value" fill={charts[1].color} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -341,7 +465,7 @@ export const RealOperationalDashboard: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
                   <Pie
                     data={charts[2].data}
@@ -349,19 +473,39 @@ export const RealOperationalDashboard: React.FC = () => {
                     nameKey="label"
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
-                    label={(entry) => `${entry.label} (${((entry.value / kpiData.total_purchases) * 100).toFixed(0)}%)`}
+                    outerRadius={110}
+                    innerRadius={40}
+                    paddingAngle={2}
+                    label={(entry) => {
+                      const total = expenseTotal;
+                      const percent = total > 0 ? (entry.value / total) * 100 : 0;
+                      return `${percent.toFixed(0)}%`;
+                    }}
+                    labelLine={{ strokeWidth: 1 }}
                   >
-                    {charts[2].data.map((entry, index) => (
+                    {charts[2].data.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) =>
-                      formatCurrency(value)
-                    }
+                    content={({ active, payload }: any) => {
+                      if (!active || !payload || !payload.length) return null;
+                      const data = payload[0];
+                      const percent = expenseTotal > 0 ? ((data.value / expenseTotal) * 100).toFixed(1) : '0';
+                      return (
+                        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg px-4 py-3">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">{data.name}</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300">{formatCurrency(data.value)}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{percent}% du total</p>
+                        </div>
+                      );
+                    }}
                   />
-                  <Legend />
+                  <Legend
+                    formatter={(value: string) => (
+                      <span className="text-xs text-gray-700 dark:text-gray-300">{value}</span>
+                    )}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>

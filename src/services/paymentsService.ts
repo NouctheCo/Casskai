@@ -11,6 +11,8 @@
  */
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { generatePaymentJournalEntry } from './paymentJournalEntryService';
+import { offlineDataService } from './offlineDataService';
 export interface Payment {
   id: string;
   company_id: string;
@@ -19,7 +21,7 @@ export interface Payment {
   reference: string;
   amount: number;
   payment_date: string;
-  payment_method: 'card' | 'bank_transfer' | 'cash' | 'check' | 'other';
+  payment_method: 'card' | 'bank_transfer' | 'cash' | 'check' | 'sepa' | 'other';
   status: 'completed' | 'pending' | 'failed' | 'cancelled';
   type: 'income' | 'expense';
   description?: string;
@@ -188,42 +190,101 @@ class PaymentsService {
     }
   }
   async createPayment(paymentData: CreatePaymentData): Promise<PaymentWithDetails> {
+    // Mode offline : stocker en attente locale
+    if (!navigator.onLine) {
+      return this.createPaymentOffline(paymentData);
+    }
+
     try {
       const companyId = await this.getCurrentCompanyId();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
+
+      // Validate required fields
+      if (!paymentData.invoice_id) {
+        throw new Error('Invoice ID is required for payment');
+      }
+      if (!paymentData.third_party_id) {
+        throw new Error('Third party (customer) ID is required for payment');
+      }
+
       // Generate reference if not provided
       const reference = paymentData.reference || await this.generatePaymentReference();
+      
+      // Map payment_method from form values to database format
+      const paymentMethodMapping: Record<string, string> = {
+        'card': 'card',
+        'bank_transfer': 'transfer',
+        'cash': 'cash',
+        'check': 'check',
+        'sepa': 'transfer',
+        'other': 'other'
+      };
+      const dbPaymentMethod = paymentMethodMapping[paymentData.payment_method] || 'other';
+
+      // Map type from form values to database format
+      const typeMapping: Record<string, string> = {
+        'income': 'incoming',
+        'expense': 'outgoing'
+      };
+      const dbType = typeMapping[paymentData.type] || 'incoming';
+
       // Create the payment
+      // The 'customer_id' column in the database is the same as 'third_party_id'
       const { data: payment, error: paymentError } = await supabase
         .from('payments')
         .insert({
           company_id: companyId,
           invoice_id: paymentData.invoice_id,
+          customer_id: paymentData.third_party_id, // Map third_party_id to customer_id for database
           third_party_id: paymentData.third_party_id,
           reference,
           amount: paymentData.amount,
           payment_date: paymentData.payment_date,
-          payment_method: paymentData.payment_method,
-          type: paymentData.type,
+          payment_method: dbPaymentMethod,
+          type: dbType,
           status: 'completed', // Default to completed for manual entries
           description: paymentData.description,
           created_by: user.id
         })
         .select()
         .single();
+
       if (paymentError) {
         throw new Error(`Failed to create payment: ${paymentError.message}`);
       }
+
       // If payment is for an invoice, update the invoice paid amount
-      if (paymentData.invoice_id && paymentData.type === 'income') {
+      if (paymentData.invoice_id && dbType === 'incoming') {
         await this.updateInvoicePaidAmount(paymentData.invoice_id);
       }
+
       // Retrieve the complete payment
       const createdPayment = await this.getPaymentById(payment.id);
       if (!createdPayment) {
         throw new Error('Failed to retrieve created payment');
       }
+
+      // ✅ Générer automatiquement l'écriture comptable (fire-and-forget)
+      // Ne bloque pas la création du paiement si l'écriture échoue
+      try {
+        await generatePaymentJournalEntry({
+          id: payment.id,
+          company_id: companyId,
+          third_party_id: paymentData.third_party_id || '',
+          reference,
+          amount: paymentData.amount,
+          payment_date: paymentData.payment_date,
+          payment_method: paymentData.payment_method,
+          type: paymentData.type,
+          description: paymentData.description
+        });
+        logger.info('Payments', `Journal entry created for payment ${reference}`);
+      } catch (journalError) {
+        // Log l'erreur mais ne bloque pas la création du paiement
+        logger.error('Payments', 'Failed to generate journal entry for payment:', journalError);
+      }
+
       return createdPayment;
     } catch (error) {
       logger.error('Payments', 'Error in createPayment:', error instanceof Error ? error.message : String(error));
@@ -374,6 +435,41 @@ class PaymentsService {
       // Fallback
       return `PAY-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
     }
+  }
+
+  /**
+   * Creer un paiement en mode offline (en attente locale)
+   */
+  private async createPaymentOffline(paymentData: CreatePaymentData): Promise<PaymentWithDetails> {
+    const localId = crypto.randomUUID();
+    const companyId = localStorage.getItem('casskai_current_enterprise') || '';
+
+    const offlinePayment = {
+      company_id: companyId,
+      invoice_id: paymentData.invoice_id,
+      third_party_id: paymentData.third_party_id,
+      customer_id: paymentData.third_party_id,
+      reference: paymentData.reference || `DRAFT-PAY-${Date.now()}`,
+      amount: paymentData.amount,
+      payment_date: paymentData.payment_date,
+      payment_method: paymentData.payment_method,
+      type: paymentData.type === 'income' ? 'incoming' : 'outgoing',
+      status: 'pending',
+      description: paymentData.description,
+    };
+
+    const userId = (await supabase.auth.getUser().catch((): { data: { user: null } } => ({ data: { user: null } }))).data.user?.id || 'offline';
+    await offlineDataService.insert('payments', offlinePayment, userId, companyId);
+
+    logger.info('Payments', `Paiement en attente cree offline (local_id: ${localId})`);
+
+    return {
+      ...offlinePayment,
+      id: localId,
+      _offline: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as unknown as PaymentWithDetails;
   }
 }
 export const paymentsService = new PaymentsService();

@@ -626,7 +626,7 @@ const ContractsPage: React.FC = () => {
               contracts={contracts.map(c => ({
                 id: c.id,
                 contract_name: c.contract_name,
-                third_party_id: c.client_id
+                client_id: c.client_id
               }))}
             />
           ) : (

@@ -2,7 +2,7 @@
  * Modal de création/édition de compte bancaire
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,11 +10,13 @@ import { Label } from '@/components/ui/label';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { SUPPORTED_CURRENCIES } from '@/utils/countries';
+import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
 
 interface BankAccountFormData {
   account_name: string;
   bank_name: string;
-  account_number?: string;
+  account_number: string;
   iban: string;
   bic: string;
   currency: string;
@@ -47,6 +49,19 @@ export function BankAccountFormModal({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+
+  // Options autocomplete pour devises (triées par priorité)
+  const currencyOptions: AutocompleteOption[] = useMemo(() => {
+    return SUPPORTED_CURRENCIES
+      .slice()
+      .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999))
+      .map(currency => ({
+        value: currency.value,
+        label: currency.label,
+        description: currency.value,
+        metadata: { ...currency }
+      }));
+  }, []);
 
   useEffect(() => {
     if (account) {
@@ -119,6 +134,10 @@ export function BankAccountFormModal({
       newErrors.bank_name = 'Nom de la banque requis';
     }
 
+    if (!formData.account_number.trim()) {
+      newErrors.account_number = 'Numéro de compte requis';
+    }
+
     if (!formData.iban.trim()) {
       newErrors.iban = 'IBAN requis';
     } else if (!validateIBAN(formData.iban)) {
@@ -149,7 +168,7 @@ export function BankAccountFormModal({
         ...formData,
         iban: formData.iban.replace(/\s/g, '').toUpperCase(),
         bic: formData.bic.replace(/\s/g, '').toUpperCase(),
-        account_number: formData.account_number?.trim() || undefined
+        account_number: formData.account_number.trim()
       };
 
       const success = await onSubmit(submitData);
@@ -209,15 +228,19 @@ export function BankAccountFormModal({
             )}
           </div>
 
-          {/* Numéro de compte (optionnel) */}
+          {/* Numéro de compte */}
           <div>
-            <Label htmlFor="account_number">Numéro de compte (optionnel)</Label>
+            <Label htmlFor="account_number">Numéro de compte *</Label>
             <Input
               id="account_number"
               value={formData.account_number}
               onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
               placeholder="Ex: 12345678901"
+              className={errors.account_number ? 'border-red-500' : ''}
             />
+            {errors.account_number && (
+              <p className="text-red-500 text-sm mt-1">{errors.account_number}</p>
+            )}
           </div>
 
           {/* IBAN */}
@@ -262,20 +285,16 @@ export function BankAccountFormModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="currency">Devise *</Label>
-              <Select
+              <SmartAutocomplete
                 value={formData.currency}
-                onValueChange={(value) => setFormData({ ...formData, currency: value })}
-              >
-                <SelectTrigger id="currency">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="EUR">EUR (€)</SelectItem>
-                  <SelectItem value="USD">USD ($)</SelectItem>
-                  <SelectItem value="GBP">GBP (£)</SelectItem>
-                  <SelectItem value="CHF">CHF (Fr)</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={(value) => setFormData({ ...formData, currency: value })}
+                options={currencyOptions}
+                placeholder="Sélectionner une devise..."
+                searchPlaceholder="Rechercher (EUR, USD, FCFA)..."
+                groups={false}
+                showRecent={true}
+                maxRecent={3}
+              />
             </div>
 
             <div>

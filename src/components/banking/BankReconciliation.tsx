@@ -9,6 +9,8 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
+import { useBankReconciliation } from '@/hooks/useBankReconciliation';
+import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import {
   Shuffle, 
@@ -29,191 +31,163 @@ import {
   Database,
   Zap
 } from 'lucide-react';
-type BankTransaction = {
+/** Extended transaction type for display purposes, adding reconciliation status
+ * on top of the hook's UnreconciledBankTransaction */
+interface DisplayBankTransaction {
   id: string;
-  date: string;
-  amount: number;
+  bank_account_id: string;
+  transaction_date: string;
+  value_date: string;
   description: string;
+  amount: number;
+  transaction_type: string;
   reference: string;
+  created_at: string;
+  /** Display-only: whether this transaction is reconciled */
   is_reconciled: boolean;
+  /** Display-only: suggested match entry IDs */
   suggested_matches?: string[];
+  /** Display-only: matched entry ID if reconciled */
   matched_entry_id?: string;
-};
+  /** Alias for transaction_date, used in date display */
+  date: string;
+}
+
+interface BankAccount {
+  id: string;
+  bank_name: string;
+  account_name: string;
+}
+
 interface BankReconciliationProps {
   currentEnterprise: unknown;
-  bankAccounts: unknown[];
+  bankAccounts: BankAccount[];
   onReconciliationComplete?: (summary?: unknown) => void;
 }
 const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccounts, onReconciliationComplete }: BankReconciliationProps) => {
   const { toast } = useToast();
-  // États
+  const { currentCompany } = useAuth();
+  const companyId = currentCompany?.id || '';
+
+  // États UI
   const [selectedAccount, setSelectedAccount] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [isReconciling, setIsReconciling] = useState(false);
-  const [_reconciliationData, _setReconciliationData] = useState(null);
-  const [pendingMatches, setPendingMatches] = useState<any[]>([]);
-  const [autoMatches, setAutoMatches] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showDetails, setShowDetails] = useState(false);
-  const [reconciliationSummary, setReconciliationSummary] = useState<any>(null);
   const [reconciliationInProgress, setReconciliationInProgress] = useState<{[key: string]: boolean}>({});
-  const [reconciledTransactions, setReconciledTransactions] = useState<Set<string>>(new Set());
-  // Données simulées pour les transactions bancaires et écritures comptables
-  const [bankTransactions, setBankTransactions] = useState<BankTransaction[]>([
-    {
-      id: 'bt_1',
-      date: '2024-01-15',
-      amount: -1250.00,
-      description: 'PAIEMENT CB AMAZON FR',
-      reference: 'CB****1234',
-      is_reconciled: false,
-      suggested_matches: ['ae_5', 'ae_12']
-    },
-    {
-      id: 'bt_2', 
-      date: '2024-01-14',
-      amount: 2500.00,
-      description: 'VIR CLIENT ABC SARL',
-      reference: 'VIR240114001',
-      is_reconciled: false,
-      suggested_matches: ['ae_3']
-    },
-    {
-      id: 'bt_3',
-      date: '2024-01-13',
-      amount: -450.75,
-      description: 'CHEQUE N°1234567',
-      reference: 'CHQ1234567',
-      is_reconciled: true,
-      matched_entry_id: 'ae_8'
-    },
-    {
-      id: 'bt_4',
-      date: '2024-01-12',
-      amount: -89.90,
-      description: 'PRLV ELECTRICITE DE FRANCE',
-      reference: 'PRLV240112EDF',
-      is_reconciled: false,
-      suggested_matches: ['ae_15']
-    }
-  ]);
-  const [accountingEntries] = useState([
-    {
-      id: 'ae_3',
-      date: '2024-01-14',
-      amount: 2500.00,
-      description: 'Facture ABC-2024-001',
-      account: '411000 - Clients',
-      reference: 'FAC-001',
-      reconciled: false
-    },
-    {
-      id: 'ae_5',
-      date: '2024-01-15',
-      amount: -1250.00,
-      description: 'Achat matériel informatique',
-      account: '606000 - Achats',
-      reference: 'ACH-2024-015',
-      reconciled: false
-    },
-    {
-      id: 'ae_8',
-      date: '2024-01-13',
-      amount: -450.75,
-      description: 'Règlement fournisseur XYZ',
-      account: '401000 - Fournisseurs',
-      reference: 'REG-XYZ-001',
-      reconciled: true,
-      matched_transaction_id: 'bt_3'
-    },
-    {
-      id: 'ae_12',
-      date: '2024-01-15',
-      amount: -1249.99,
-      description: 'Matériel bureau Amazon',
-      account: '606100 - Fournitures',
-      reference: 'ACH-AMZ-001',
-      reconciled: false
-    },
-    {
-      id: 'ae_15',
-      date: '2024-01-12',
-      amount: -89.90,
-      description: 'Électricité janvier 2024',
-      account: '606300 - Énergie',
-      reference: 'EDF-JAN-2024',
-      reconciled: false
-    }
-  ]);
-  // Calculs des statistiques
+
+  // États pour le suivi des transactions réconciliées (Set pour performance O(1))
+  const [reconciledTransactionIds, setReconciledTransactionIds] = useState<Set<string>>(new Set());
+
+  // Hook de rapprochement bancaire (remplace les données mock)
+  const {
+    unreconciledTransactions,
+    unreconciledEntries,
+    matchingSuggestions,
+    summary,
+    isLoading,
+    error: hookError,
+    createReconciliation,
+    executeAutoReconciliation,
+    refreshAll
+  } = useBankReconciliation(companyId, selectedAccount || undefined);
+  // Les données réelles sont fournies par le hook useBankReconciliation
+  // Plus besoin de données mock !
+  // Statistiques depuis le hook (résumé fourni par la RPC)
   const reconciliationStats = useMemo(() => {
-    const totalBankTransactions = bankTransactions.length;
-    const reconciledTransactions = bankTransactions.filter(t => t.is_reconciled).length;
-    const pendingTransactions = totalBankTransactions - reconciledTransactions;
-    const reconciliationRate = totalBankTransactions > 0 ? (reconciledTransactions / totalBankTransactions) * 100 : 0;
-    const totalAmount = bankTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    const reconciledAmount = bankTransactions
-      .filter(t => t.is_reconciled)
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    const pendingAmount = totalAmount - reconciledAmount;
+    if (summary) {
+      return {
+        totalBankTransactions: summary.total_transactions,
+        reconciledTransactions: summary.reconciled_transactions,
+        pendingTransactions: summary.unreconciled_transactions,
+        reconciliationRate: summary.reconciliation_rate,
+        totalAmount: Math.abs(summary.bank_balance),
+        reconciledAmount: Math.abs(summary.bank_balance) - Math.abs(summary.accounting_balance),
+        pendingAmount: Math.abs(summary.difference)
+      };
+    }
+
+    // Fallback si pas de résumé
     return {
-      totalBankTransactions,
-      reconciledTransactions,
-      pendingTransactions,
-      reconciliationRate,
-      totalAmount,
-      reconciledAmount,
-      pendingAmount
+      totalBankTransactions: unreconciledTransactions.length,
+      reconciledTransactions: 0,
+      pendingTransactions: unreconciledTransactions.length,
+      reconciliationRate: 0,
+      totalAmount: unreconciledTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0),
+      reconciledAmount: 0,
+      pendingAmount: unreconciledTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0)
     };
-  }, [bankTransactions]);
-  const markTransactionAsReconciled = (transactionId: string, matchedEntryId?: string) => {
-    setReconciledTransactions(prev => new Set([...prev, transactionId]));
-    setBankTransactions(prev => prev.map(tx =>
-      tx.id === transactionId
-        ? { ...tx, is_reconciled: true, matched_entry_id: matchedEntryId ?? tx.matched_entry_id }
-        : tx
-    ));
+  }, [summary, unreconciledTransactions]);
+  // Fonctions de rapprochement (utilisent le hook)
+  const markTransactionAsReconciled = async (transactionId: string, entryLineId: string) => {
+    if (!entryLineId) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner une écriture comptable",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const result = await createReconciliation(transactionId, entryLineId, 'Rapprochement manuel');
+    if (result) {
+      // Le hook rafraîchit automatiquement les données
+      toast({
+        title: "✅ Transaction rapprochée",
+        description: "Le rapprochement a été créé avec succès"
+      });
+    }
   };
+
   const sendToCategorization = (transactionId: string) => {
-    // Remet la transaction dans l'état "En attente" pour la recatégoriser
-    setReconciledTransactions(prev => {
-      const clone = new Set([...prev]);
-      clone.delete(transactionId);
-      return clone;
-    });
-    setBankTransactions(prev => prev.map(tx =>
-      tx.id === transactionId
-        ? { ...tx, is_reconciled: false, matched_entry_id: undefined }
-        : tx
-    ));
+    // Cette fonctionnalité nécessiterait un endpoint de suppression de rapprochement
+    // Pour l'instant, on affiche un message
     toast({
-      title: "Transaction renvoyée en catégorisation",
-      description: "Vous pouvez la recatégoriser dans l'onglet Catégorisation",
+      title: "Fonction à venir",
+      description: "Utilisez l'onglet Rapprochements pour annuler un rapprochement existant",
     });
   };
-  // Filtrage des transactions
-  const filteredTransactions = useMemo(() => {
-    let filtered = bankTransactions;
+  // Filtrage des transactions (utilise données du hook)
+  // Map UnreconciledBankTransaction to DisplayBankTransaction adding display-only fields
+  const filteredTransactions: DisplayBankTransaction[] = useMemo(() => {
+    let displayTransactions: DisplayBankTransaction[] = unreconciledTransactions.map(t => {
+      const txSuggestions = matchingSuggestions
+        .filter(s => s.bank_transaction_id === t.id)
+        .map(s => s.entry_line_id);
+      return {
+        ...t,
+        date: t.transaction_date,
+        is_reconciled: reconciledTransactionIds.has(t.id),
+        suggested_matches: txSuggestions.length > 0 ? txSuggestions : undefined,
+        matched_entry_id: undefined as string | undefined,
+      };
+    });
+
     if (searchTerm) {
-      filtered = filtered.filter(t => 
+      displayTransactions = displayTransactions.filter(t =>
         t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.reference.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
+
     if (filterStatus !== 'all') {
-      filtered = filtered.filter(t => {
+      displayTransactions = displayTransactions.filter(t => {
         switch (filterStatus) {
-          case 'reconciled': return t.is_reconciled;
           case 'pending': return !t.is_reconciled;
-          case 'suggested': return !t.is_reconciled && t.suggested_matches && t.suggested_matches.length > 0;
+          case 'suggested': {
+            return (t.suggested_matches?.length ?? 0) > 0;
+          }
+          case 'reconciled': return t.is_reconciled;
           default: return true;
         }
       });
     }
-    return filtered;
-  }, [bankTransactions, searchTerm, filterStatus]);
-  // Lancement de la réconciliation automatique
+
+    return displayTransactions;
+  }, [unreconciledTransactions, searchTerm, filterStatus, matchingSuggestions, reconciledTransactionIds]);
+  // Lancement de la réconciliation automatique (utilise le hook)
   const runAutoReconciliation = async () => {
     if (!selectedAccount) {
       toast({
@@ -223,46 +197,30 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       });
       return;
     }
+
     setIsReconciling(true);
     try {
-      // Simulation d'un appel au service de réconciliation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const mockMatches = [
-        {
-          bank_transaction_id: 'bt_2',
-          accounting_entry_id: 'ae_3',
-          confidence: 0.95,
-          match_reason: 'Amount and date exact match',
-          amount_difference: 0
-        },
-        {
-          bank_transaction_id: 'bt_4',
-          accounting_entry_id: 'ae_15',
-          confidence: 0.98,
-          match_reason: 'Amount, date and description match',
-          amount_difference: 0
-        },
-        {
-          bank_transaction_id: 'bt_1',
-          accounting_entry_id: 'ae_12',
-          confidence: 0.85,
-          match_reason: 'Similar amount and date',
-          amount_difference: -0.01
+      // Exécuter le rapprochement automatique avec score de confiance minimum 80%
+      const result = await executeAutoReconciliation(80.0);
+
+      if (result && result.count > 0) {
+        toast({
+          title: "✅ Réconciliation automatique terminée",
+          description: `${result.count} correspondances créées avec succès`,
+          variant: "default"
+        });
+
+        if (onReconciliationComplete) {
+          onReconciliationComplete(summary);
         }
-      ];
-      setAutoMatches(mockMatches);
-      toast({
-        title: "Réconciliation automatique terminée",
-        description: `${mockMatches.length} correspondances trouvées`,
-        variant: "default"
-      });
+      } else {
+        toast({
+          title: "Aucune correspondance trouvée",
+          description: "Aucune transaction ne correspond aux critères automatiques",
+        });
+      }
     } catch (error) {
       logger.error('BankReconciliation', 'Erreur lors de la réconciliation automatique:', error instanceof Error ? error.message : String(error));
-      toast({
-        title: "Erreur",
-        description: "Échec de la réconciliation automatique",
-        variant: "destructive"
-      });
     } finally {
       setIsReconciling(false);
     }
@@ -280,10 +238,8 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
         description: `Transaction ${bankTransactionId} réconciliée avec l'écriture ${accountingEntryId}`,
         variant: "default"
       });
-      // Retirer de la liste des matches automatiques
-      setAutoMatches(prev => prev.filter(m =>
-        m.bank_transaction_id !== bankTransactionId || m.accounting_entry_id !== accountingEntryId
-      ));
+      // Rafraîchir les données après validation
+      await refreshAll();
     } catch (error) {
       logger.error('BankReconciliation', 'Erreur lors de la validation:', error instanceof Error ? error.message : String(error));
       toast({
@@ -303,15 +259,36 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   const reconcileTransaction = async (transactionId: string) => {
     try {
       setReconciliationInProgress(prev => ({ ...prev, [transactionId]: true }));
-      // Simulation d'un appel au service de réconciliation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // Marquer la transaction comme réconciliée (mise à jour des compteurs et des listes)
-      markTransactionAsReconciled(transactionId);
-      toast({
-        title: "✅ Réconciliation réussie",
-        description: `La transaction a été réconciliée avec succès`,
-        variant: "default"
-      });
+
+      // Trouver une suggestion de correspondance pour cette transaction
+      const suggestion = matchingSuggestions.find(s => s.bank_transaction_id === transactionId);
+
+      if (!suggestion) {
+        toast({
+          title: "Aucune correspondance",
+          description: "Aucune écriture comptable correspondante trouvée. Utilisez l'onglet Manuel.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Créer le rapprochement avec l'écriture suggérée
+      const result = await createReconciliation(
+        transactionId,
+        suggestion.entry_line_id,
+        'Rapprochement automatique'
+      );
+
+      if (result) {
+        // Ajouter à la liste des transactions réconciliées
+        setReconciledTransactionIds(prev => new Set(prev).add(transactionId));
+
+        toast({
+          title: "✅ Réconciliation réussie",
+          description: `Transaction réconciliée avec l'écriture ${suggestion.entry_line_id}`,
+          variant: "default"
+        });
+      }
     } catch (error) {
       logger.error('BankReconciliation', 'Erreur lors de la réconciliation:', error instanceof Error ? error.message : String(error));
       toast({
@@ -330,19 +307,10 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   // Récupération du résumé de réconciliation
   const fetchReconciliationSummary = async () => {
     try {
-      const summary = {
-        total_bank_transactions: reconciliationStats.totalBankTransactions,
-        reconciled_transactions: reconciliationStats.reconciledTransactions,
-        pending_transactions: reconciliationStats.pendingTransactions,
-        reconciliation_rate: reconciliationStats.reconciliationRate,
-        total_amount: reconciliationStats.totalAmount,
-        reconciled_amount: reconciliationStats.reconciledAmount,
-        pending_amount: reconciliationStats.pendingAmount,
-        last_reconciliation: new Date().toISOString(),
-        period: selectedPeriod
-      };
-      setReconciliationSummary(summary);
-      if (onReconciliationComplete) {
+      // Rafraîchir les données depuis le hook
+      await refreshAll();
+
+      if (onReconciliationComplete && summary) {
         onReconciliationComplete(summary);
       }
     } catch (error) {
@@ -474,7 +442,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
           <CardContent>
             <div className="space-y-1">
               <div className="text-2xl font-bold text-purple-600">
-                {autoMatches.length}
+                {matchingSuggestions.length}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-300">
                 Correspondances trouvées
@@ -501,7 +469,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                     <SelectValue placeholder="Sélectionnez un compte" />
                   </SelectTrigger>
                   <SelectContent>
-                    {bankAccounts.map((account: any) => (
+                    {bankAccounts.map((account) => (
                       <SelectItem key={account.id} value={account.id}>
                         {account.bank_name} - {account.account_name}
                       </SelectItem>
@@ -580,7 +548,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                     Correspondances en attente
                   </div>
                   <div className="text-2xl font-bold text-blue-600">
-                    {pendingMatches.length}
+                    {matchingSuggestions.length}
                   </div>
                   <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
                     Nécessitent validation manuelle
@@ -591,21 +559,21 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                     Résumé de réconciliation
                   </div>
                   <div className="text-2xl font-bold text-blue-600">
-                    {reconciliationSummary ? 'Disponible' : 'Non calculé'}
+                    {summary ? 'Disponible' : 'Non calculé'}
                   </div>
                   <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                    {reconciliationSummary ? 'Données à jour' : 'Cliquez sur Actualiser'}
+                    {summary ? 'Données à jour' : 'Cliquez sur Actualiser'}
                   </p>
                 </div>
                 <div className="flex items-center justify-center">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
-                    onClick={() => {
-                      setPendingMatches(autoMatches.slice(0, 3));
+                    onClick={async () => {
+                      await refreshAll();
                       toast({
                         title: "Détails mis à jour",
-                        description: `${autoMatches.length} correspondances disponibles`,
+                        description: `${matchingSuggestions.length} correspondances disponibles`,
                       });
                     }}
                     className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-blue-400"
@@ -623,12 +591,12 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       <Tabs defaultValue="matches" className="space-y-4">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-2">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger 
-              value="matches" 
+            <TabsTrigger
+              value="matches"
               className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
             >
               <Link className="h-4 w-4" />
-              Correspondances ({autoMatches.length})
+              Correspondances ({matchingSuggestions.length})
             </TabsTrigger>
             <TabsTrigger 
               value="transactions" 
@@ -664,14 +632,13 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {autoMatches.length > 0 ? (
+                {matchingSuggestions.length > 0 ? (
                   <div className="space-y-4">
-                    {autoMatches.map((match, index) => {
-                      const bankTx = bankTransactions.find(t => t.id === match.bank_transaction_id);
-                      const accountingEntry = accountingEntries.find(e => e.id === match.accounting_entry_id);
+                    {matchingSuggestions.map((match, index) => {
+                      const confidenceNormalized = match.confidence_score / 100; // Convertir 0-100 en 0-1
                       return (
                         <motion.div
-                          key={`${match.bank_transaction_id}-${match.accounting_entry_id}`}
+                          key={`${match.bank_transaction_id}-${match.entry_line_id}`}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
@@ -679,9 +646,9 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                         >
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-3">
-                              {getConfidenceIcon(match.confidence)}
+                              {getConfidenceIcon(confidenceNormalized)}
                               <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400">
-                                {(match.confidence * 100).toFixed(0)}% de confiance
+                                {match.confidence_score.toFixed(0)}% de confiance
                               </Badge>
                             </div>
                             <div className="flex space-x-2">
@@ -689,13 +656,15 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                                 size="sm"
                                 variant="outline"
                                 className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:bg-red-900/20 dark:text-red-400"
+                                disabled
+                                title="Fonction à venir"
                               >
                                 <XCircle className="h-4 w-4 mr-2" />
                                 Rejeter
                               </Button>
                               <Button
                                 size="sm"
-                                onClick={() => validateMatch(match.bank_transaction_id, match.accounting_entry_id)}
+                                onClick={() => validateMatch(match.bank_transaction_id, match.entry_line_id)}
                                 className="bg-green-600 hover:bg-green-700 text-white"
                               >
                                 <CheckCircle className="h-4 w-4 mr-2" />
@@ -713,21 +682,17 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                               <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
                                   <span className="text-gray-600 dark:text-gray-300">Date:</span>
-                                  <span>{bankTx?.date}</span>
+                                  <span>{new Date(match.bank_date).toLocaleDateString('fr-FR')}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-gray-600 dark:text-gray-300">Montant:</span>
-                                  <span className={`font-medium ${(bankTx?.amount ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {formatAmount(bankTx?.amount || 0)}
+                                  <span className={`font-medium ${match.bank_amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatAmount(match.bank_amount)}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-gray-600 dark:text-gray-300">Description:</span>
-                                  <span className="truncate ml-2">{bankTx?.description}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-300">Référence:</span>
-                                  <span className="font-mono text-xs">{bankTx?.reference}</span>
+                                  <span className="truncate ml-2">{match.bank_description}</span>
                                 </div>
                               </div>
                             </div>
@@ -740,35 +705,37 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                               <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
                                   <span className="text-gray-600 dark:text-gray-300">Date:</span>
-                                  <span>{accountingEntry?.date}</span>
+                                  <span>{new Date(match.entry_date).toLocaleDateString('fr-FR')}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-gray-600 dark:text-gray-300">Montant:</span>
-                                  <span className={`font-medium ${(accountingEntry?.amount ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {formatAmount(accountingEntry?.amount || 0)}
+                                  <span className={`font-medium ${match.entry_amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatAmount(match.entry_amount)}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-gray-600 dark:text-gray-300">Description:</span>
-                                  <span className="truncate ml-2">{accountingEntry?.description}</span>
+                                  <span className="truncate ml-2">{match.entry_description}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-300">Compte:</span>
-                                  <span className="text-xs">{accountingEntry?.account}</span>
+                                  <span className="text-gray-600 dark:text-gray-300">N° écriture:</span>
+                                  <span className="text-xs font-mono">{match.entry_number}</span>
                                 </div>
                               </div>
                             </div>
                           </div>
                           {/* Détails de la correspondance */}
                           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-                            <p className="text-sm text-blue-800 dark:text-blue-300">
-                              <strong>Raison:</strong> {match.match_reason}
-                            </p>
-                            {match.amount_difference !== 0 && (
-                              <p className="text-sm text-orange-800 dark:text-orange-300 mt-1">
-                                <strong>Différence:</strong> {formatAmount(match.amount_difference)}
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm text-blue-800 dark:text-blue-300">
+                                <strong>Écart de dates:</strong> {match.days_difference} jour{Math.abs(match.days_difference) > 1 ? 's' : ''}
                               </p>
-                            )}
+                              {match.amount_difference !== 0 && (
+                                <p className="text-sm text-orange-800 dark:text-orange-300">
+                                  <strong>Différence:</strong> {formatAmount(match.amount_difference)}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </motion.div>
                       );
@@ -874,7 +841,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                             {transaction.suggested_matches?.length} suggestion{(transaction.suggested_matches?.length ?? 0) > 1 ? 's' : ''}
                           </Badge>
                         )}
-                        {!reconciledTransactions.has(transaction.id) && !transaction.is_reconciled && (
+                        {!reconciledTransactionIds.has(transaction.id) && !transaction.is_reconciled && (
                           <Button 
                             variant="outline"
                             size="sm"
@@ -896,7 +863,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                             )}
                           </Button>
                         )}
-                        {(reconciledTransactions.has(transaction.id) || transaction.is_reconciled) && (
+                        {(reconciledTransactionIds.has(transaction.id) || transaction.is_reconciled) && (
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
                               <CheckCircle className="h-3 w-3 mr-1" />

@@ -28,6 +28,7 @@ import {
   Package
 } from 'lucide-react';
 import { reportGenerationService } from '@/services/reportGenerationService';
+import { financialReportsService } from '@/services/financialReportsService';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
 import { DEFAULT_REPORT_TEMPLATES } from '@/data/reportTemplates';
 import type { FinancialReport, ReportFormData } from '@/types/reports.types';
@@ -455,47 +456,27 @@ export default function OptimizedReportsTab() {
         };
     }
   };
-  // Chargement des rapports récents (simulation)
+  // Chargement des rapports récents depuis la base de données
   const loadRecentReports = async () => {
+    if (!currentCompany?.id) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
-    // Simulation d'un appel API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const mockReports: FinancialReport[] = [
-      {
-        id: '1',
-        company_id: 'comp-1',
-        name: 'Bilan comptable - Décembre 2024',
-        type: 'balance_sheet',
-        format: 'detailed',
-        period_start: '2024-12-01',
-        period_end: '2024-12-31',
-        status: 'ready',
-        file_url: '/reports/balance-sheet-dec-2024.pdf',
-        file_format: 'pdf',
-        file_size: 2457600,
-        generated_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '2',
-        company_id: 'comp-1',
-        name: 'Compte de résultat - Décembre 2024',
-        type: 'income_statement',
-        format: 'detailed',
-        period_start: '2024-12-01',
-        period_end: '2024-12-31',
-        status: 'ready',
-        file_url: '/reports/income-statement-dec-2024.pdf',
-        file_format: 'pdf',
-        file_size: 1843200,
-        generated_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+    try {
+      const result = await financialReportsService.getReports(currentCompany.id);
+      if (result.data && result.data.length > 0) {
+        // Prendre les 10 derniers rapports
+        setRecentReports(result.data.slice(0, 10) as FinancialReport[]);
+      } else {
+        setRecentReports([]);
       }
-    ];
-    setRecentReports(mockReports);
-    setIsLoading(false);
+    } catch (error) {
+      logger.error('OptimizedReportsTab', 'Error loading recent reports:', error);
+      setRecentReports([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
   // Gestionnaire pour consulter un rapport - génère puis ouvre
   const handleViewReport = async (reportType: string, reportName: string) => {

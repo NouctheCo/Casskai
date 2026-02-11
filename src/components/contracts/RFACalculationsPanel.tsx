@@ -12,6 +12,7 @@ import {
   Info
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
@@ -21,6 +22,7 @@ export const RFACalculationsPanel: React.FC = () => {
   const [contractsData, setContractsData] = useState<ContractRFAData[]>([]);
   const [expandedContract, setExpandedContract] = useState<string | null>(null);
   const [selectedYear] = useState(new Date().getFullYear());
+  const [missingClientLines, setMissingClientLines] = useState<number>(0);
   useEffect(() => {
     if (currentCompany?.id) {
       loadData();
@@ -30,9 +32,18 @@ export const RFACalculationsPanel: React.FC = () => {
     if (!currentCompany?.id) return;
     setLoading(true);
     try {
-      const data = await rfaCalculationService.calculateAllContractsRFA(currentCompany.id);
+      const [data, missingCount] = await Promise.all([
+        rfaCalculationService.calculateAllContractsRFA(currentCompany.id),
+        rfaCalculationService.getMissingClientRevenueLinesCount(
+          currentCompany.id,
+          `${selectedYear}-01-01`,
+          `${selectedYear}-12-31`
+        )
+      ]);
       setContractsData(data);
+      setMissingClientLines(missingCount);
     } catch (error) {
+      setMissingClientLines(0);
       logger.error('RFACalculationsPanel', 'Erreur chargement RFA:', error);
     } finally {
       setLoading(false);
@@ -57,6 +68,10 @@ export const RFACalculationsPanel: React.FC = () => {
     rfaProjected: contractsData.reduce((sum, c) => sum + c.rfa.projectedEndOfYear, 0),
     pendingQuotes: contractsData.reduce((sum, c) => sum + c.pendingQuotes.total, 0)
   };
+
+  const hasTtcContracts = contractsData.some(
+    (contract) => contract.contract.rfa_calculation_base === 'ttc'
+  );
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -67,6 +82,15 @@ export const RFACalculationsPanel: React.FC = () => {
   }
   return (
     <div className="space-y-6">
+      {missingClientLines > 0 && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            {missingClientLines} ligne{missingClientLines > 1 ? 's' : ''} de produits sans client
+            associe{missingClientLines > 1 ? 's' : ''} en {selectedYear}. Elles ne sont pas
+            prises en compte dans les calculs RFA.
+          </AlertDescription>
+        </Alert>
+      )}
       {/* En-tête avec KPIs globaux */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
@@ -76,7 +100,7 @@ export const RFACalculationsPanel: React.FC = () => {
               CA Actuel
             </div>
             <div className="text-2xl font-bold">{formatCurrency(totals.currentRevenue)}</div>
-            <div className="text-xs text-blue-200 mt-1">Facturé à date</div>
+            <div className="text-xs text-blue-200 mt-1">Comptabilisé à date</div>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
@@ -167,10 +191,13 @@ export const RFACalculationsPanel: React.FC = () => {
             Méthodologie de calcul
           </h4>
           <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-            <li>• <strong>CA Actuel</strong> : Somme des factures validées depuis le début du contrat</li>
-            <li>• <strong>CA Projeté</strong> : CA actuel extrapolé au prorata temporis + devis pondérés par le taux de conversion historique</li>
-            <li>• <strong>RFA</strong> : Calculée selon le barème progressif défini dans chaque contrat</li>
-            <li>• <strong>Projection Fin d'Année</strong> : Basée sur le rythme de facturation quotidien moyen</li>
+            <li>• <strong>CA Actuel</strong> : Somme des écritures de produits (comptabilite) liees au client</li>
+            <li>• <strong>CA Projete</strong> : CA actuel extrapole au prorata temporis</li>
+            <li>• <strong>RFA</strong> : Calculee selon le bareme progressif defini dans chaque contrat</li>
+            <li>• <strong>Projection Fin d'Annee</strong> : Basee sur le rythme comptable quotidien moyen</li>
+            {hasTtcContracts && (
+              <li>• <strong>Mode TTC</strong> : Inclut la TVA collectee dans le CA comptabilise</li>
+            )}
           </ul>
         </CardContent>
       </Card>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { X, DollarSign, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Expense, Employee } from '@/services/hrService';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
+import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
 interface ExpenseFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -66,13 +67,35 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
   };
   if (!isOpen) return null;
   const expenseCategories = {
-    travel: 'Déplacement',
+    transport: 'Transport / Déplacement',
     meals: 'Repas',
-    transport: 'Transport',
+    accommodation: 'Hébergement',
     supplies: 'Fournitures',
     training: 'Formation',
+    client_entertainment: 'Frais de réception client',
     other: 'Autre'
   };
+
+  // Options autocomplete pour employés
+  const employeeOptions: AutocompleteOption[] = useMemo(() => {
+    return employees.map(emp => ({
+      value: emp.id,
+      label: `${emp.first_name} ${emp.last_name}`,
+      description: emp.position,
+      category: emp.department || 'Non assigné',
+      metadata: emp
+    }));
+  }, [employees]);
+
+  // Options autocomplete pour catégories de dépense
+  const categoryOptions: AutocompleteOption[] = useMemo(() => {
+    return Object.entries(expenseCategories).map(([value, label]) => ({
+      value,
+      label,
+      description: undefined as string | undefined,
+      category: value === 'other' ? 'Autre' : 'Catégories'
+    }));
+  }, []);
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
@@ -103,21 +126,17 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
             {/* Employé */}
             <div>
               <Label htmlFor="employee_id">Employé *</Label>
-              <Select
+              <SmartAutocomplete
                 value={formData.employee_id}
-                onValueChange={value => setFormData({ ...formData, employee_id: value })}
-              >
-                <SelectTrigger className={errors.employee_id ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Sélectionner un employé" />
-                </SelectTrigger>
-                <SelectContent>
-                  {employees.map(emp => (
-                    <SelectItem key={emp.id} value={emp.id}>
-                      {emp.first_name} {emp.last_name} - {emp.position}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={value => setFormData({ ...formData, employee_id: value })}
+                options={employeeOptions}
+                placeholder="Sélectionner un employé"
+                searchPlaceholder="Rechercher un employé..."
+                groups={true}
+                showRecent={true}
+                maxRecent={5}
+                className={errors.employee_id ? 'border-red-500' : ''}
+              />
               {errors.employee_id && (
                 <p className="text-sm text-red-500 mt-1">{errors.employee_id}</p>
               )}
@@ -126,21 +145,15 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="category">Catégorie *</Label>
-                <Select
+                <SmartAutocomplete
                   value={formData.category}
-                  onValueChange={value => setFormData({ ...formData, category: value as any })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(expenseCategories).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={value => setFormData({ ...formData, category: value as any })}
+                  options={categoryOptions}
+                  placeholder="Sélectionner une catégorie..."
+                  searchPlaceholder="Rechercher (transport, repas, hébergement)..."
+                  groups={true}
+                  showRecent={false}
+                />
               </div>
               <div>
                 <Label htmlFor="expense_date">Date *</Label>

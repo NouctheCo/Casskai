@@ -584,7 +584,7 @@ export class CurrencyService {
   private async saveExchangeRateToDB(rate: ExchangeRate): Promise<void> {
     try {
       // const client = supabase; // Commenté pour la compatibilité de build
-      const client = null;
+      const client: any = null;
       if (!client) {
         logger.warn('Currency', 'Supabase client non disponible, sauvegarde ignorée');
         return;

@@ -334,7 +334,7 @@ export default function PricingPage() {
                     <>
                       <div className="flex items-center gap-2">
                         <span className="text-lg line-through text-gray-400 dark:text-gray-500">
-                          {formatPriceWithCurrency(plan.priceOriginal, currentPricing.currency)}
+                          {formatPriceWithCurrency(plan.priceOriginal ?? 0, currentPricing.currency)}
                         </span>
                         <span className="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 text-xs px-2 py-0.5 rounded-full font-medium">
                           -{plan.discount}%
@@ -342,7 +342,7 @@ export default function PricingPage() {
                       </div>
                       {billingPeriod === 'year' && (
                         <div className="text-sm text-green-600 dark:text-green-400 mt-2">
-                          Soit {formatPriceWithCurrency(plan.priceYearly, currentPricing.currency)}/an • Économie 20%
+                          Soit {formatPriceWithCurrency(plan.priceYearly ?? 0, currentPricing.currency)}/an • Économie 20%
                         </div>
                       )}
                     </>

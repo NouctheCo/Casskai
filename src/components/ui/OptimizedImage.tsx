@@ -186,12 +186,12 @@ export const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
         {/* Image de fallback */}
         <img
           ref={(node) => {
-            imgRef.current = node;
+            (imgRef as React.MutableRefObject<HTMLImageElement | null>).current = node;
             if (ref) {
               if (typeof ref === 'function') {
                 ref(node);
               } else {
-                ref.current = node;
+                (ref as React.MutableRefObject<HTMLImageElement | null>).current = node;
               }
             }
           }}

@@ -6,21 +6,17 @@
  * pour éviter les crashes côté client
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import Stripe from 'https://esm.sh/stripe@14.21.0?target=deno';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-};
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+  const preflightResponse = handleCorsPreflightRequest(req);
+  if (preflightResponse) return preflightResponse;
+
+  const corsH = getCorsHeaders(req);
 
   try {
     console.log('[get-invoices] Function invoked');
@@ -37,7 +33,7 @@ serve(async (req: Request) => {
         JSON.stringify({ invoices: [] }),
         {
           status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsH, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -52,7 +48,7 @@ serve(async (req: Request) => {
         JSON.stringify({ invoices: [] }),
         {
           status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsH, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -72,7 +68,7 @@ serve(async (req: Request) => {
         JSON.stringify({ invoices: [] }),
         {
           status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsH, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -111,7 +107,7 @@ serve(async (req: Request) => {
         JSON.stringify({ invoices: [] }),
         {
           status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsH, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -176,7 +172,7 @@ serve(async (req: Request) => {
       }),
       {
         status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsH, 'Content-Type': 'application/json' }
       }
     );
 
@@ -191,7 +187,7 @@ serve(async (req: Request) => {
       }),
       {
         status: 200, // Status 200 pour éviter les rejets de promesse
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsH, 'Content-Type': 'application/json' }
       }
     );
   }

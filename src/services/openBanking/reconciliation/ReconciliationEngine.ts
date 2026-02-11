@@ -469,11 +469,11 @@ export class ReconciliationEngine {
       averageConfidence: matches.length > 0 
         ? matches.reduce((sum, m) => sum + m.confidence, 0) / matches.length 
         : 0,
-      statusDistribution: {}
+      statusDistribution: {} as Record<string, number>
     };
     // Distribution des statuts
     for (const match of matches) {
-      stats.statusDistribution[match.status] = 
+      stats.statusDistribution[match.status] =
         (stats.statusDistribution[match.status] || 0) + 1;
     }
     return stats;

@@ -219,7 +219,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
     }
   };
 
-  const handleAction = (action: AIMessage['actions'][number]) => {
+  const handleAction = (action: NonNullable<AIMessage['actions']>[number]) => {
     if (!action) return;
     if ((action.type === 'navigate' || action.type === 'create') && action.payload?.path) {
       navigate(action.payload.path);

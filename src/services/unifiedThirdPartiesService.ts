@@ -26,6 +26,7 @@
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
+import { ensureAuxiliaryAccount } from '@/services/auxiliaryAccountService';
 
 export type ThirdPartyType = 'customer' | 'supplier' | 'both' | 'other';
 export type ClientType = 'customer' | 'prospect' | 'supplier' | 'partner';
@@ -293,6 +294,17 @@ class UnifiedThirdPartiesService {
         .single();
 
       if (error) throw error;
+
+      // ✅ Créer automatiquement le compte auxiliaire (411xxxx / 401xxxx)
+      if (created) {
+        ensureAuxiliaryAccount(
+          companyId,
+          created.id,
+          created.type || type,
+          created.name
+        ).catch(err => logger.warn('UnifiedThirdParties', 'Erreur création compte auxiliaire (non bloquant):', err));
+      }
+
       return { data: created, error: null };
     } catch (error) {
       logger.error('UnifiedThirdParties', 'Error creating third party:', error instanceof Error ? error.message : String(error));
@@ -421,6 +433,18 @@ class UnifiedThirdPartiesService {
         .select()
         .single();
       if (error) throw error;
+
+      // ✅ Créer automatiquement le compte auxiliaire client (411xxxx)
+      if (created) {
+        const companyIdForAccount = data.company_id || companyId;
+        ensureAuxiliaryAccount(
+          companyIdForAccount,
+          created.id,
+          'customer',
+          created.name
+        ).catch(err => logger.warn('UnifiedThirdParties', 'Erreur création compte auxiliaire client (non bloquant):', err));
+      }
+
       return { data: created, error: null };
     } catch (error) {
       logger.error('UnifiedThirdParties', 'Error creating customer:', error instanceof Error ? error.message : String(error));
@@ -523,6 +547,18 @@ class UnifiedThirdPartiesService {
         .select()
         .single();
       if (error) throw error;
+
+      // ✅ Créer automatiquement le compte auxiliaire fournisseur (401xxxx)
+      if (created) {
+        const companyIdForAccount = data.company_id || companyId;
+        ensureAuxiliaryAccount(
+          companyIdForAccount,
+          created.id,
+          'supplier',
+          created.name
+        ).catch(err => logger.warn('UnifiedThirdParties', 'Erreur création compte auxiliaire fournisseur (non bloquant):', err));
+      }
+
       return { data: created, error: null };
     } catch (error) {
       logger.error('UnifiedThirdParties', 'Error creating supplier:', error instanceof Error ? error.message : String(error));

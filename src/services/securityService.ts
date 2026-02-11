@@ -10,16 +10,17 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import { 
-  SecuritySettings, 
-  PrivacySettings, 
-  SecurityIncident, 
-  AuditLog, 
+import {
+  SecuritySettings,
+  PrivacySettings,
+  SecurityIncident,
+  AuditLog,
   GDPRRequest,
   CookieConsent,
   ComplianceReport,
+  ComplianceFinding,
   DATA_RETENTION_PERIODS,
-  GDPR_RESPONSE_TIMES 
+  GDPR_RESPONSE_TIMES
 } from '@/types/security.types';
 
 class SecurityService {
@@ -384,9 +385,9 @@ class SecurityService {
             }
           },
           accountingData: {
-            invoices: [],
-            transactions: [],
-            reports: []
+            invoices: [] as Record<string, unknown>[],
+            transactions: [] as Record<string, unknown>[],
+            reports: [] as Record<string, unknown>[]
           },
           auditLogs: JSON.parse(localStorage.getItem('casskai_audit_logs') || '[]')
             .filter((log: AuditLog) => log.userId === userId),
@@ -458,7 +459,7 @@ class SecurityService {
         const incidents = JSON.parse(localStorage.getItem('casskai_security_incidents') || '[]');
         const _gdprRequests = JSON.parse(localStorage.getItem('casskai_gdpr_requests') || '[]');
 
-        const findings = [];
+        const findings: ComplianceFinding[] = [];
         let score = 100;
 
         // Check 2FA

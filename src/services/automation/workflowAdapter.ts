@@ -107,7 +107,7 @@ export function fromWorkflowDB(dbWorkflow: WorkflowDB): Workflow {
     execution_count: dbWorkflow.execution_count || 0,
     last_executed_at: dbWorkflow.last_execution_at,
     success_rate: dbWorkflow.success_rate,
-    created_by: dbWorkflow.created_by,
+    created_by: dbWorkflow.created_by ?? '',
     created_at: dbWorkflow.created_at,
     updated_at: dbWorkflow.updated_at,
   };

@@ -10,10 +10,15 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import React, { createContext, useState, useCallback, useMemo, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+/* eslint-disable */
+import React, { createContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { devLogger } from '@/utils/devLogger';
+import { createCompanyDirectly } from '@/helpers/createCompanyHelper';
+import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
-import { logger } from '@/lib/logger';
+import { getCurrentCompanyCurrency } from '@/lib/utils';
+import { useSupabase } from '@/hooks/useSupabase';
 import {
   OnboardingContextType,
   OnboardingState,
@@ -53,10 +58,12 @@ const initialData: OnboardingData = {
 };
 
 export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, refreshUserCompanies } = useAuth();
   const [state, setState] = useState<OnboardingState>(initialState);
   const progressService = useMemo(() => new OnboardingProgressService(), []);
   const storageService = useMemo(() => new OnboardingStorageService(), []);
+  const { create: createCompany } = useSupabase('companies');
+  const { create: createUserCompany } = useSupabase('user_companies');
 
   // Initialize onboarding
   useEffect(() => {
@@ -71,10 +78,13 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setState(prev => ({ ...prev, isLoading: true }));
 
     try {
-      // Load existing data
       const response = await storageService.getOnboardingData(user.id);
       const savedData = response.success ? response.data : null;
-      const data = savedData || { ...initialData, userId: user.id };
+      const data = savedData ? { ...savedData, userId: user.id } : { ...initialData, userId: user.id };
+
+      if (!savedData) {
+        await storageService.saveOnboardingData(user.id, data);
+      }
 
       // Initialize steps
       const steps = progressService.getStepsWithStatus(data);
@@ -90,7 +100,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         progress: data.progress
       });
     } catch (error) {
-      logger.error('Onboarding', 'Failed to initialize onboarding', error);
+      devLogger.error('Failed to initialize onboarding:', error);
       setState(prev => ({
         ...prev,
         isLoading: false,
@@ -111,9 +121,8 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         lastSavedAt: new Date().toISOString()
       };
 
-      // Save asynchronously without blocking
       if (user?.id) {
-        storageService.saveOnboardingData(user.id, updatedData);
+        void storageService.saveOnboardingData(user.id, updatedData);
       }
 
       return {
@@ -153,9 +162,8 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         lastSavedAt: new Date().toISOString()
       };
 
-      // Save asynchronously without blocking
       if (user?.id) {
-        storageService.saveOnboardingData(user.id, updatedData);
+        void storageService.saveOnboardingData(user.id, updatedData);
       }
 
       return {
@@ -175,9 +183,8 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         lastSavedAt: new Date().toISOString()
       };
 
-      // Save asynchronously without blocking
       if (user?.id) {
-        storageService.saveOnboardingData(user.id, updatedData);
+        void storageService.saveOnboardingData(user.id, updatedData);
       }
 
       return {
@@ -197,9 +204,8 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         lastSavedAt: new Date().toISOString()
       };
 
-      // Save asynchronously without blocking
       if (user?.id) {
-        storageService.saveOnboardingData(user.id, updatedData);
+        void storageService.saveOnboardingData(user.id, updatedData);
       }
 
       return {
@@ -222,9 +228,8 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         lastSavedAt: new Date().toISOString()
       };
 
-      // Save asynchronously without blocking
       if (user?.id) {
-        storageService.saveOnboardingData(user.id, updatedData);
+        void storageService.saveOnboardingData(user.id, updatedData);
       }
 
       return {
@@ -283,7 +288,6 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       lastSavedAt: new Date().toISOString()
     };
 
-    // Save asynchronously
     if (user?.id) {
       await storageService.saveOnboardingData(user.id, updatedData);
     }
@@ -295,77 +299,757 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }));
   }, [state.currentStep, state.data, progressService, storageService, user?.id]);
 
+  // ============================================
+  // FONCTIONS HELPER ENTERPRISE - PHASE 2
+  // ============================================
+
+  // Configuration métier intelligente pour les modules
+  const getModuleCategory = (moduleId: string): string => {
+    const categoryMap: Record<string, string> = {
+      'dashboard': 'CORE',
+      'settings': 'ADMINISTRATION',
+      'users': 'ADMINISTRATION',
+      'security': 'ADMINISTRATION',
+      'accounting': 'FINANCE',
+      'banking': 'FINANCE',
+      'invoicing': 'FINANCE',
+      'purchases': 'FINANCE',
+      'reports': 'ANALYTICS',
+      'inventory': 'OPERATIONS',
+      'crm': 'SALES',
+      'projects': 'PROJECT_MANAGEMENT'
+    };
+    return categoryMap[moduleId] || 'BUSINESS';
+  };
+
+  const getModuleLicenseType = (moduleId: string): string => {
+    const baseModules = ['dashboard', 'settings', 'users', 'security'];
+    if (baseModules.includes(moduleId)) return 'core';
+
+    const proModules = ['reports', 'projects', 'crm'];
+    if (proModules.includes(moduleId)) return 'professional';
+
+    return 'standard';
+  };
+
+  const getModuleUserLimit = (moduleId: string): number | null => {
+    const limits: Record<string, number | null> = {
+      'dashboard': null, // Illimité pour tous
+      'settings': null,
+      'users': null,
+      'security': null,
+      'accounting': 50,
+      'banking': 20,
+      'invoicing': 100,
+      'reports': 25,
+      'crm': 500,
+      'projects': 50,
+      'inventory': 25
+    };
+    return limits[moduleId] ?? 10; // Défaut 10 utilisateurs
+  };
+
+  const getModuleStorageQuota = (moduleId: string): number => {
+    const quotas: Record<string, number> = {
+      'dashboard': 1,
+      'settings': 0.5,
+      'users': 0.5,
+      'security': 2,
+      'accounting': 20,
+      'banking': 10,
+      'invoicing': 15,
+      'reports': 5,
+      'crm': 30,
+      'projects': 25,
+      'inventory': 20
+    };
+    return quotas[moduleId] || 10; // Défaut 10 GB
+  };
+
+  const getModuleDependencies = (moduleId: string): string[] => {
+    const dependencies: Record<string, string[]> = {
+      'reports': ['accounting', 'banking'],
+      'invoicing': ['accounting'],
+      'projects': ['users'],
+      'crm': ['users', 'invoicing']
+    };
+    return dependencies[moduleId] || [];
+  };
+
+  const getModuleFeatureSet = (moduleId: string): string[] => {
+    const features: Record<string, string[]> = {
+      'dashboard': ['widgets', 'analytics', 'real_time_updates'],
+      'accounting': ['journal_entries', 'reconciliation', 'financial_statements'],
+      'banking': ['bank_sync', 'transaction_import', 'reconciliation'],
+      'invoicing': ['invoice_creation', 'payment_tracking', 'templates'],
+      'crm': ['contact_management', 'pipeline', 'email_integration'],
+      'reports': ['custom_reports', 'scheduled_reports', 'data_export'],
+      'inventory': ['stock_tracking', 'inventory_valuation', 'low_stock_alerts'],
+      'projects': ['task_management', 'time_tracking', 'project_reports']
+    };
+    return features[moduleId] || ['basic_functionality'];
+  };
+
+  const getModuleComplianceRules = (moduleId: string): Record<string, any> => {
+    const complianceRules: Record<string, Record<string, any>> = {
+      'accounting': {
+        gdpr_compliant: true,
+        data_retention_years: 10,
+        audit_trail_required: true,
+        financial_regulation: 'EU_GAAP'
+      },
+      'banking': {
+        pci_dss_required: true,
+        encryption_level: 'AES-256',
+        transaction_monitoring: true
+      },
+      'crm': {
+        gdpr_compliant: true,
+        data_subject_rights: true,
+        consent_management: true
+      }
+    };
+    return complianceRules[moduleId] || { basic_compliance: true };
+  };
+
+  // Protection contre les appels multiples de finalisation
+  const finalizationInProgress = useRef(false);
+
   // Finalization
   const finalizeOnboarding = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
     if (!state.data || !user?.id) return { success: false, error: 'No onboarding data or user' };
-
+    
+    // Protection contre les appels multiples
+    if (finalizationInProgress.current) {
+      devLogger.warn('Finalisation déjà en cours, appel ignoré');
+      return { success: false, error: 'Finalisation déjà en cours' };
+    }
+    
+    finalizationInProgress.current = true;
+    
     try {
-      // Create company in database
-      const { data: company, error } = await supabase
+      // Vérifier que la session est toujours valide
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        return { success: false, error: 'Session expirée. Veuillez vous reconnecter.' };
+      }
+
+      const activeSessionResponse = await storageService.getActiveSession(user.id);
+      const activeSession = activeSessionResponse.success ? activeSessionResponse.data : null;
+      const sessionToken = activeSession?.sessionToken || (
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `session_${Date.now()}`
+      );
+      const sessionStartedAt = activeSession?.sessionData?.startedAt
+        || state.data.startedAt
+        || new Date().toISOString();
+
+      devLogger.debug('🔍 Préparation création entreprise:', state.data.companyProfile.name?.trim());
+
+      // ============================================
+      // PART C: Only reuse companies that are NOT already completed
+      // Query for companies where owner_id = user.id AND onboarding_completed_at IS NULL
+      // This prevents onboarding from attaching to a random old company
+      // ============================================
+      const { data: existingCompany, error: existingCompanyError } = await supabase
         .from('companies')
-        .insert({
+        .select('id, status, owner_id, onboarding_completed_at')
+        .eq('owner_id', user.id)
+        .is('onboarding_completed_at', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existingCompanyError) {
+        devLogger.error('❌ Impossible de vérifier les entreprises existantes:', existingCompanyError);
+        throw new Error('Impossible de vérifier les entreprises existantes');
+      }
+
+      const companyAlreadyExists = !!existingCompany?.id;
+      const existingCompanyId = existingCompany?.id ?? null;
+      if (companyAlreadyExists && !existingCompanyId) {
+        throw new Error('Entreprise existante détectée sans identifiant valide.');
+      }
+
+      if (companyAlreadyExists) {
+        devLogger.info('ℹ️ Found existing incomplete company (onboarding_completed_at IS NULL), will reuse:', existingCompanyId);
+      } else {
+        devLogger.info('ℹ️ No incomplete companies found, will create a new one');
+      }
+
+      const companyId = existingCompanyId
+        ?? (
+          typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+            ? crypto.randomUUID()
+            : `company_${Date.now()}`
+        );
+
+      if (companyAlreadyExists) {
+        devLogger.info('ℹ️ Entreprise déjà existante détectée, réutilisation de l’ID:', companyId);
+      }
+
+    // ============================================
+      // SAUVEGARDE COMPLÈTE COMPANIES - 8 NOUVELLES COLONNES
+      // ============================================
+
+    // SOLUTION NATIVE: Utiliser Supabase directement (triggers corrigés)
+    devLogger.debug('🔧 [OnboardingContextNew] Creating company via Supabase native client');
+    const companyData = {
+          id: companyId,
           name: state.data.companyProfile.name,
           country: state.data.companyProfile.country,
-          default_currency: state.data.companyProfile.currency,
-          siret: state.data.companyProfile.registrationNumber,
-          vat_number: state.data.companyProfile.vatNumber,
-          address: state.data.companyProfile.street,
-          city: state.data.companyProfile.city,
-          postal_code: state.data.companyProfile.postalCode,
-          phone: state.data.companyProfile.phone,
-          email: state.data.companyProfile.email,
-          website: state.data.companyProfile.website,
-          fiscal_year_start: state.data.companyProfile.fiscalYearStart,
+            default_currency: state.data.companyProfile.currency || (
+            state.data.companyProfile.country === 'FR' ? 'EUR' :
+            ['SN', 'CI', 'ML', 'BF'].includes(state.data.companyProfile.country || '') ? 'XOF' :
+            state.data.companyProfile.country === 'MA' ? 'MAD' :
+            state.data.companyProfile.country === 'TN' ? 'TND' :
+            state.data.companyProfile.country === 'CM' ? 'XAF' :
+            getCurrentCompanyCurrency()
+          ),
+
+          // ========== ADRESSE COMPLÈTE ==========
+          address: state.data.companyProfile.address || null,
+          city: state.data.companyProfile.city || null,
+          postal_code: state.data.companyProfile.postalCode || null,
+
+          // ========== IDENTIFIANTS FISCAUX ==========
+          siret: state.data.companyProfile.siret || null,
+          siren: state.data.companyProfile.siren || null,
+          vat_number: state.data.companyProfile.vatNumber || null,
+          tax_number: state.data.companyProfile.taxNumber || null,
+          legal_form: state.data.companyProfile.legalForm || null,
+
+          // ========== NOUVELLES COLONNES PHASE 1 ==========
+          // CompanyStep - 8 colonnes auparavant perdues !
+          timezone: state.data.companyProfile.timezone || 'Europe/Paris',
+          share_capital: state.data.companyProfile.shareCapital ? parseFloat(state.data.companyProfile.shareCapital) : null,
+          ceo_name: state.data.companyProfile.ceoName || null,
+          sector: state.data.companyProfile.sector || null,
+          // Si ceoTitle est renseigné, on l'envoie. Sinon on envoie null (pas de chaîne vide)
+          ceo_title: state.data.companyProfile.ceoTitle?.trim() || null,
+          industry_type: state.data.companyProfile.industryType || null,
+          company_size: state.data.companyProfile.companySize || null,
+          registration_date: state.data.companyProfile.registrationDate ? new Date(state.data.companyProfile.registrationDate).toISOString().split('T')[0] : null,
+
+          // ========== COMPTABILITÉ ==========
+          accounting_standard: state.data.companyProfile.accountingStandard || null,
+          accounting_method: state.data.companyProfile.accountingMethod || 'accrual',
+          fiscal_year_type: state.data.companyProfile.fiscalYearType || 'calendar',
+          fiscal_year_start_month: state.data.companyProfile.fiscalYearStartMonth || state.data.companyProfile.fiscalYearStart || 1,
+          fiscal_year_start_day: state.data.companyProfile.fiscalYearStartDay || 1,
+
+          // Colonnes optionnelles communes et sûres
+          ...(state.data.companyProfile?.contact?.phone && {
+            phone: state.data.companyProfile.contact.phone
+          }),
+          ...(state.data.companyProfile.phone && {
+            phone: state.data.companyProfile.phone
+          }),
+          ...(state.data.companyProfile.email && {
+            email: state.data.companyProfile.email
+          }),
+          ...(state.data.companyProfile.website && {
+            website: state.data.companyProfile.website
+          }),
+
+          // Propriétaire
+          owner_id: user.id,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .select()
-        .single();
+          updated_at: new Date().toISOString(),
+          status: 'active'
+        };
 
-      if (error) throw error;
+    devLogger.debug('📤 [OnboardingContextNew] Company data to insert via Supabase:', companyData);
 
-      // Create user-company relationship
-      await supabase
-        .from('user_companies')
-        .insert({
-          user_id: user.id,
-          company_id: company.id,
-          role: 'admin',
-          is_active: true
-        });
+    if (!companyAlreadyExists) {
+      try {
+        // Some reverse proxies can drop the Authorization header; create a short-lived client
+        // with an explicit Bearer token to ensure the RPC sees the authenticated user.
+        // authedClient no longer needed
+
+        const { success, companyId: createdCompanyId, error: createError } = await createCompanyDirectly(user.id, companyData);
+
+        if (!success || !createdCompanyId) {
+          throw new Error(createError || 'Failed to create company');
+        }
+
+        devLogger.info('✅ Company and user_companies created successfully:', createdCompanyId)
+      } catch (err: any) {
+        devLogger.error('❌ [OnboardingContextNew] Company creation failed:', err);
+        throw new Error(`Failed to create company: ${err.message}`);
+      }
+    } else {
+      devLogger.info('⏭️ Création d’entreprise ignorée (déjà existante).');
+    }
+
+    const company = companyData;
+
 
       // Create company modules
-      if (state.data.selectedModules.length > 0) {
-        const modulesToInsert = state.data.selectedModules.map(moduleId => ({
+      const selectedModules = state.data.selectedModules || [];
+      const baseModules = ['dashboard', 'settings', 'users', 'security'];
+      const enabledModules = Array.from(new Set([...baseModules, ...selectedModules]));
+
+      if (!companyAlreadyExists && enabledModules.length > 0) {
+        const moduleNames = {
+          'dashboard': 'Tableau de Bord',
+          'settings': 'Paramètres',
+          'accounting': 'Comptabilité',
+          'invoicing': 'Facturation',
+          'banking': 'Banque',
+          'inventory': 'Stock & Inventaire',
+          'crm': 'CRM',
+          'reports': 'Rapports'
+        };
+
+        const modulesToInsert = enabledModules.map(moduleId => ({
           company_id: company.id,
           module_key: moduleId,
-          is_enabled: true
+          module_name: moduleNames[moduleId as keyof typeof moduleNames] || moduleId,
+          is_enabled: true,
+
+          // ============================================
+          // NOUVELLES COLONNES ENTERPRISE PHASE 2
+          // ============================================
+
+          // Priorité et configuration
+          module_priority: baseModules.includes(moduleId) ? 1 : 0, // Modules core = priorité 1
+          custom_settings: {
+            enabled_by_user: selectedModules.includes(moduleId),
+            enabled_date: new Date().toISOString(),
+            module_category: getModuleCategory(moduleId),
+            user_selection: true
+          },
+
+          // Contrôle d'accès et licences
+          access_level: baseModules.includes(moduleId) ? 'administrator' : 'standard',
+          license_type: getModuleLicenseType(moduleId),
+          user_limit: getModuleUserLimit(moduleId),
+          storage_quota_gb: getModuleStorageQuota(moduleId),
+
+          // Configuration business
+          auto_activation: baseModules.includes(moduleId),
+          dependency_rules: getModuleDependencies(moduleId),
+          feature_set: getModuleFeatureSet(moduleId),
+          integration_config: {},
+
+          // Gestion et monitoring
+          maintenance_mode: false,
+          health_status: 'active',
+          performance_metrics: {
+            initialization_time: 0,
+            last_health_check: new Date().toISOString(),
+            resource_usage: 0
+          },
+
+          // Audit et conformité
+          compliance_rules: getModuleComplianceRules(moduleId),
+          audit_settings: {
+            log_user_actions: true,
+            data_retention_days: 365,
+            compliance_level: 'standard'
+          },
+
+          // Métadonnées
+          module_version: '1.0.0',
+          last_config_update: new Date().toISOString()
         }));
 
         await supabase
           .from('company_modules')
           .insert(modulesToInsert);
+      } else if (companyAlreadyExists) {
+        devLogger.info('ℹ️ Modules déjà configurés pour cette entreprise, saut de l’insertion.');
       }
 
-      // Mark onboarding as completed
+      // Journaux créés automatiquement par le trigger SQL create_journals_for_new_company
+      devLogger.info('ℹ️ Journaux créés automatiquement par trigger SQL');
+
+      // ============================================
+      // SAUVEGARDE USER_PREFERENCES - NOUVELLES DONNÉES PHASE 1
+      // ============================================
+
+      // Sauvegarder les préférences utilisateur (auparavant ENTIÈREMENT perdues !)
+      if (!companyAlreadyExists && state.data.preferences && Object.keys(state.data.preferences).length > 0) {
+        devLogger.debug('💾 Sauvegarde préférences utilisateur:', state.data.preferences);
+
+        try {
+          await supabase
+            .from('user_preferences')
+            .insert({
+              user_id: user.id,
+              company_id: companyId,
+
+              // Notifications (PreferencesStep)
+              email_notifications: state.data.preferences.emailNotifications ?? true,
+              push_notifications: state.data.preferences.pushNotifications ?? true,
+              sms_notifications: state.data.preferences.smsNotifications ?? false,
+              notification_frequency: state.data.preferences.notificationFrequency || 'immediate',
+
+              // Langue et formats (PreferencesStep)
+              language: state.data.preferences.language || 'fr',
+              currency: state.data.preferences.currency || getCurrentCompanyCurrency(),
+              date_format: state.data.preferences.dateFormat || 'DD/MM/YYYY',
+              number_format: state.data.preferences.numberFormat || 'FR',
+              timezone: state.data.preferences.timezone || 'Europe/Paris',
+
+              // Paramètres métier (PreferencesStep)
+              fiscal_year_start: state.data.preferences.fiscalYearStart || '01/01',
+              default_payment_terms: parseInt(state.data.preferences.defaultPaymentTerms || '30'),
+              auto_backup: state.data.preferences.autoBackup ?? true,
+
+              // Préférences UI
+              theme: state.data.preferences.theme || 'light',
+              compact_view: state.data.preferences.compactView ?? false,
+              show_tooltips: state.data.preferences.showTooltips ?? true,
+              auto_save: state.data.preferences.autoSave ?? true
+            });
+
+          devLogger.info('✅ Préférences utilisateur sauvegardées avec succès');
+        } catch (prefError) {
+          devLogger.error('❌ Erreur sauvegarde préférences:', prefError);
+          // Ne pas faire échouer tout l'onboarding pour les préférences
+        }
+      } else if (companyAlreadyExists) {
+        devLogger.info('ℹ️ Préférences utilisateur déjà enregistrées, saut de l’insertion.');
+      }
+
+      // ============================================
+      // SAUVEGARDE COMPANY_FEATURES - NOUVELLES DONNÉES PHASE 2
+      // ============================================
+
+      // Sauvegarder les features explorées et activées (auparavant ENTIÈREMENT perdues !)
+      if (!companyAlreadyExists && state.data.featuresExploration && Object.keys(state.data.featuresExploration).length > 0) {
+        devLogger.debug('💾 Sauvegarde features exploration:', state.data.featuresExploration);
+
+        try {
+          const featuresToInsert = Object.entries(state.data.featuresExploration).map(([featureId, featureData]) => ({
+            company_id: companyId,
+            feature_name: featureId,
+            feature_category: 'general', // À affiner selon vos besoins
+            is_enabled: (featureData as any).completed || (featureData as any).viewed || false,
+            configuration: {
+              explored: (featureData as any).viewed || false,
+              time_spent: (featureData as any).timeSpent || 0,
+              expanded: (featureData as any).expanded || false,
+              completed: (featureData as any).completed || false,
+              exploration_data: featureData
+            },
+            usage_limit: null as number | null,
+            current_usage: 0,
+            license_tier: 'free', // Par défaut
+            enabled_at: (featureData as any).completed ? new Date().toISOString() : null
+          }));
+
+          if (featuresToInsert.length > 0) {
+            await supabase
+              .from('company_features')
+              .insert(featuresToInsert);
+
+            devLogger.info(`✅ ${featuresToInsert.length} features sauvegardées avec succès`);
+          }
+        } catch (featuresError) {
+          devLogger.error('❌ Erreur sauvegarde features:', featuresError);
+          // Ne pas faire échouer tout l'onboarding pour les features
+        }
+      } else if (companyAlreadyExists) {
+        devLogger.info('ℹ️ Features déjà enregistrées pour cette entreprise, saut de l’insertion.');
+      }
+
+      const { data: userCompanyLink, error: userCompanyError } = await supabase
+        .from('user_companies')
+        .select('id, role, is_active, is_default')
+        .eq('user_id', user.id)
+        .eq('company_id', companyId)
+        .maybeSingle();
+
+      if (userCompanyError) {
+        devLogger.error('❌ Impossible de vérifier user_companies:', userCompanyError);
+        throw new Error('Impossible de vérifier le lien utilisateur-entreprise');
+      }
+
+      if (!userCompanyLink) {
+        const { error: insertUserCompanyError } = await supabase
+          .from('user_companies')
+          .insert({
+            user_id: user.id,
+            company_id: companyId,
+            role: 'owner',
+            is_active: true,
+            is_default: true
+          });
+
+        if (insertUserCompanyError) {
+          devLogger.error('❌ Impossible de créer user_companies:', insertUserCompanyError);
+          throw new Error('Impossible de créer le lien utilisateur-entreprise');
+        }
+
+        devLogger.info('🔗 Relation user_companies créée pour garantir les accès.');
+      } else if (userCompanyLink.role !== 'owner' || !userCompanyLink.is_active || !userCompanyLink.is_default) {
+        const { error: updateUserCompanyError } = await supabase
+          .from('user_companies')
+          .update({
+            role: 'owner',
+            is_active: true,
+            is_default: true
+          })
+          .eq('id', userCompanyLink.id);
+
+        if (updateUserCompanyError) {
+          devLogger.error('❌ Impossible de corriger user_companies:', updateUserCompanyError);
+          throw new Error('Impossible de corriger le lien utilisateur-entreprise');
+        }
+
+        devLogger.info('🔗 Relation user_companies mise à jour pour rester cohérente.');
+      }
+
+      // ============================================
+      // MARQUER L'ONBOARDING COMME TERMINÉ DANS LA BDD
+      // ============================================
+      const completionTimestamp = new Date().toISOString();
+
+      // Mettre à jour onboarding_completed_at dans la table companies
+      const { error: updateCompanyError } = await supabase
+        .from('companies')
+        .update({ onboarding_completed_at: completionTimestamp })
+        .eq('id', companyId);
+
+      if (updateCompanyError) {
+        devLogger.error('❌ Erreur mise à jour onboarding_completed_at:', updateCompanyError);
+        // Ne pas bloquer pour cette erreur, continuer
+      } else {
+        devLogger.info('✅ onboarding_completed_at mis à jour dans companies');
+      }
+
+      // ============================================
+      // SAUVEGARDER LES PRÉFÉRENCES UTILISATEUR (PHASE 1)
+      // ============================================
+      // Persister la langue choisie lors de l'onboarding
+      try {
+        const userPreferences = {
+          language: state.data.preferences?.language || 'fr',
+          currency: state.data.preferences?.currency || getCurrentCompanyCurrency(),
+          timezone: state.data.preferences?.timezone || 'Europe/Paris',
+          dateFormat: state.data.preferences?.dateFormat || 'DD/MM/YYYY',
+          theme: state.data.preferences?.theme || 'system',
+          notifications: state.data.preferences?.notifications || {
+            email: true,
+            push: false,
+            marketing: false
+          }
+        };
+
+        // Mettre à jour user_metadata avec les préférences
+        const { error: updateAuthError } = await supabase.auth.updateUser({
+          data: {
+            preferences: userPreferences,
+            onboarding_completed_at: completionTimestamp
+          }
+        });
+
+        if (updateAuthError) {
+          devLogger.warn('⚠️ Erreur mise à jour user_metadata:', updateAuthError);
+          // Non bloquant - continuer
+        } else {
+          devLogger.info('✅ Préférences utilisateur sauvegardées (langue:', userPreferences.language, ')');
+        }
+      } catch (preferencesError) {
+        devLogger.warn('⚠️ Erreur sauvegarde préférences:', preferencesError);
+        // Non bloquant
+      }
+
+      const completedSteps = Array.from(new Set([...(state.data.completedSteps || []), 'complete']));
       const completedData = {
         ...state.data,
-        completedAt: new Date().toISOString(),
+        completedSteps,
+        completedAt: completionTimestamp,
         progress: 100
+      } as OnboardingData;
+
+      const totalTimeSpentMs = Math.max(0, Date.now() - new Date(sessionStartedAt).getTime());
+      const totalSteps = Math.max(completedSteps.length, 6);
+      const sessionInitialData = activeSession?.sessionData
+        ? undefined
+        : {
+            startedAt: sessionStartedAt,
+            userAgent: navigator.userAgent,
+            screenResolution: `${screen.width}x${screen.height}`
+          };
+
+      const sessionUpsertPayload: Record<string, unknown> = {
+        session_token: sessionToken,
+        user_id: user.id,
+        company_id: companyId,
+        session_data: completedData,
+        current_step: 'complete',
+        completed_steps: completedSteps.length,
+        total_steps: totalSteps,
+        progress: 100,
+        final_status: 'completed',
+        started_at: sessionStartedAt,
+        completed_at: completionTimestamp,
+        last_saved_at: completionTimestamp,
+        updated_at: completionTimestamp,
+        is_active: false,
+        final_data: {
+          companyId,
+          completedAt: completionTimestamp,
+          totalTimeSpent: totalTimeSpentMs
+        }
       };
 
-      await storageService.saveOnboardingData(user.id, completedData);
+      if (activeSession?.id) {
+        sessionUpsertPayload.id = activeSession.id;
+      }
 
+      if (sessionInitialData) {
+        sessionUpsertPayload.initial_data = sessionInitialData;
+      }
+
+      // ✅ ENABLED: Mise à jour de la session onboarding
+      const { error: sessionUpsertError } = await supabase
+        .from('onboarding_sessions')
+        .upsert(sessionUpsertPayload, { onConflict: 'session_token' });
+
+      if (sessionUpsertError) {
+        devLogger.error('❌ Erreur mise à jour session onboarding:', sessionUpsertError);
+        // Ne pas bloquer l'onboarding pour cette erreur
+      } else {
+        devLogger.info('✅ Session onboarding marquée comme complétée');
+      }
+
+      try {
+        const steps = [
+          { name: 'welcome', order: 1, data: {} },
+          { name: 'company', order: 2, data: completedData.companyProfile },
+          { name: 'modules', order: 3, data: { selectedModules: completedData.selectedModules } },
+          { name: 'preferences', order: 4, data: completedData.preferences },
+          { name: 'features', order: 5, data: completedData.featuresExploration },
+          { name: 'complete', order: 6, data: { companyId } }
+        ];
+
+        const averageStepDurationSeconds = Math.max(1, Math.floor(totalTimeSpentMs / Math.max(steps.length, 1) / 1000));
+
+        const historyEntries = steps.map(step => ({
+          company_id: companyId,
+          user_id: user.id,
+          session_id: sessionToken,
+          step_name: step.name,
+          step_order: step.order,
+          step_data: step.data || {},
+          completion_status: 'completed',
+          completion_time: completionTimestamp,
+          validation_errors: [] as string[],
+          retry_count: 0,
+          time_spent_seconds: averageStepDurationSeconds,
+          user_agent: navigator.userAgent,
+          screen_resolution: `${screen.width}x${screen.height}`,
+          device_type: /Mobile|Android|iPhone|iPad/.test(navigator.userAgent) ? 'mobile' : 'desktop'
+        }));
+
+        await supabase
+          .from('onboarding_history')
+          .insert(historyEntries);
+      } catch (historyError) {
+        devLogger.error('❌ Erreur sauvegarde historique:', historyError);
+      }
+
+      await storageService.clearOnboardingData(user.id, { finalStatus: 'completed' });
+
+      // ============================================
+      // MISE À JOUR ÉTAT LOCAL - ONBOARDING TERMINÉ
+      // ============================================
+      // Réutiliser completedData déjà défini plus haut (ligne 771)
+      // et completionTimestamp déjà défini plus haut (ligne 769)
+
+      // Marquer l'onboarding comme terminé dans l'état local
       setState(prev => ({
         ...prev,
         isCompleted: true,
         data: completedData
       }));
 
+      // ============================================
+      // NETTOYAGE COMPLET DU CACHE ONBOARDING
+      // ============================================
+      // Marquer dans localStorage pour éviter les reprises d'onboarding
+      // Note: AuthContext manages onboarding_completed_${userId} as source of truth
+      localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
+      localStorage.setItem(`onboarding_completed_at_${user.id}`, completionTimestamp);
+
+      // Nettoyer TOUS les anciens flags de bannières
+      localStorage.removeItem(`tour-banner-dismissed-${user.id}`);
+      localStorage.removeItem('onboarding_current_step');
+      localStorage.removeItem('onboarding_company_data');
+      localStorage.removeItem('onboarding_modules');
+
+      devLogger.info('✅ Onboarding terminé avec succès - État local mis à jour');
+
+      // ============================================
+      // REFRESH AUTHCONTEXT - CRITICAL FOR ROUTING
+      // ============================================
+      // After successful onboarding, refresh AuthContext to ensure userCompanies
+      // and currentCompany are up to date, preventing infinite redirect loops
+      try {
+        devLogger.info('🔄 Refreshing AuthContext after onboarding completion...');
+
+        // Refresh user companies list - this also handles setting currentCompany internally
+        const refreshedCompanies = await refreshUserCompanies(user.id);
+
+        devLogger.info('✅ AuthContext refreshed successfully:', {
+          companiesCount: refreshedCompanies.length,
+          currentCompanyId: companyId
+        });
+      } catch (refreshError) {
+        devLogger.error('❌ Error refreshing AuthContext after onboarding:', refreshError);
+        // Fallback: force page reload if refresh fails
+        devLogger.warn('⚠️ Falling back to page reload due to refresh error');
+        window.location.assign('/dashboard');
+        return { success: true };
+      }
+
       return { success: true };
     } catch (error) {
-      logger.error('Onboarding', 'Failed to finalize onboarding', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      devLogger.error('Failed to finalize onboarding - Detailed error:', error);
+      devLogger.error('Error type:', typeof error);
+      devLogger.error('Error constructor:', error?.constructor?.name);
+      devLogger.error('Error keys:', error && typeof error === 'object' ? Object.keys(error) : 'not object');
+      
+      // Gestion spécifique des erreurs
+      if (error && typeof error === 'object' && 'code' in error) {
+        const supabaseError = error as { code: string; message: string; details?: string; hint?: string };
+        devLogger.error('Supabase error details:', {
+          code: supabaseError.code,
+          message: supabaseError.message,
+          details: supabaseError.details,
+          hint: supabaseError.hint
+        });
+        
+        if (supabaseError.code === '42501') {
+          return { success: false, error: 'Erreur de permissions. Veuillez vous reconnecter et réessayer.' };
+        }
+        
+        if (supabaseError.code === 'PGRST301' || supabaseError.message?.includes('JWT')) {
+          return { success: false, error: 'Session expirée. Veuillez vous reconnecter.' };
+        }
+        
+        if (supabaseError.code === '23502') {
+          return { success: false, error: `Champ requis manquant: ${supabaseError.message}` };
+        }
+        
+        if (supabaseError.code === '23505') {
+          return { success: false, error: 'Cette entreprise existe déjà. Veuillez choisir un nom différent.' };
+        }
+        
+        return { success: false, error: `Erreur base de données (${supabaseError.code}): ${supabaseError.message}` };
+      }
+      
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      devLogger.error('Generic error message:', errorMessage);
+      return { success: false, error: `Erreur lors de la finalisation: ${errorMessage}` };
+    } finally {
+      finalizationInProgress.current = false;
     }
   }, [state.data, user?.id, storageService]);
 
@@ -432,14 +1116,15 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     loadProgress: initializeOnboarding,
     clearProgress: () => {
       if (user?.id) {
-        storageService.clearOnboardingData(user.id);
+        void storageService.clearOnboardingData(user.id);
       }
       setState(initialState);
     },
     finalizeOnboarding,
     skipOnboarding: async () => {
-      // Implementation for skipping onboarding
-      return Promise.resolve();
+      // PART D: Onboarding skip is disabled to ensure proper company setup
+      // Skipping onboarding would leave the user in an inconsistent state
+      throw new Error('Onboarding cannot be skipped. Please complete all required steps to ensure proper account setup.');
     },
     getStepByIndex: (index) => state.steps[index] || null,
     getStepById: (stepId) => state.steps.find(s => s.id === stepId) || null,

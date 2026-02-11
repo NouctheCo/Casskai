@@ -39,7 +39,7 @@ export class MarketService {
     return fetch('https://ipapi.co/json/')
       .then(response => response.json())
       .then(data => this.detectMarketFromCountry(data.country_code))
-      .catch(() => MARKET_CONFIGS.find(m => m.id === 'france')); // Fallback France
+      .catch(() => MARKET_CONFIGS.find(m => m.id === 'france') ?? null); // Fallback France
   }
 
   setCurrentMarket(marketId: string): boolean {

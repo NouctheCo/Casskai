@@ -3,10 +3,8 @@
  * Intégré avec la table opportunities de Supabase
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
 import {
   Dialog,
   DialogContent,
@@ -25,86 +23,182 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ClientSelector } from '@/components/invoicing/ClientSelector';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { Target, Calendar, DollarSign, TrendingUp } from 'lucide-react';
-import { devLogger } from '@/utils/devLogger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
+import type { Client, Contact, OpportunityFormData, Opportunity } from '@/types/crm.types';
+import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
 
 interface NewOpportunityModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
-}
-
-interface OpportunityFormData {
-  title: string;
-  third_party_id: string;
-  amount: string;
-  probability: string;
-  stage: 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost';
-  priority: 'low' | 'medium' | 'high';
-  expected_close_date?: string;
-  notes?: string;
+  clients: Client[];
+  contacts: Contact[];
+  onCreateOpportunity: (data: OpportunityFormData) => Promise<boolean>;
+  onUpdateOpportunity?: (opportunityId: string, data: Partial<OpportunityFormData>) => Promise<boolean>;
+  editingOpportunity?: Opportunity | null;
 }
 
 export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
   open,
   onOpenChange,
   onSuccess,
+  clients,
+  contacts,
+  onCreateOpportunity,
+  onUpdateOpportunity,
+  editingOpportunity,
 }) => {
   const { t } = useTranslation();
-  const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(false);
+  const isEditing = !!editingOpportunity;
+
+  // Debug: log props
+  React.useEffect(() => {
+    if (open) {
+      console.log('[NewOpportunityModal] Props received:', {
+        clientsCount: clients?.length || 0,
+        contactsCount: contacts?.length || 0,
+        isEditing: !!editingOpportunity,
+        clients,
+        contacts
+      });
+    }
+  }, [open, clients, contacts, editingOpportunity]);
 
   const [formData, setFormData] = useState<OpportunityFormData>({
     title: '',
-    third_party_id: '',
-    amount: '',
-    probability: '50',
-    stage: 'lead',
-    priority: 'medium',
+    description: '',
+    client_id: '',
+    contact_id: '',
+    stage: 'prospecting',
+    value: 0,
+    probability: 50,
     expected_close_date: '',
-    notes: '',
+    source: '',
+    assigned_to: '',
+    priority: 'medium',
+    tags: [],
+    next_action: '',
+    next_action_date: ''
   });
 
-  const handleChange = (field: keyof OpportunityFormData, value: string) => {
+  // Initialize form when editing or modal opens
+  React.useEffect(() => {
+    if (editingOpportunity) {
+      setFormData({
+        title: editingOpportunity.title || '',
+        description: editingOpportunity.description || '',
+        client_id: editingOpportunity.client_id || '',
+        contact_id: editingOpportunity.contact_id || '',
+        stage: editingOpportunity.stage || 'prospecting',
+        value: editingOpportunity.value || 0,
+        probability: editingOpportunity.probability || 50,
+        expected_close_date: editingOpportunity.expected_close_date || '',
+        source: editingOpportunity.source || '',
+        assigned_to: editingOpportunity.assigned_to || '',
+        priority: editingOpportunity.priority || 'medium',
+        tags: editingOpportunity.tags || [],
+        next_action: editingOpportunity.next_action || '',
+        next_action_date: editingOpportunity.next_action_date || ''
+      });
+    } else {
+      resetForm();
+    }
+  }, [editingOpportunity, open]);
+
+  const stages = useMemo(() => ([
+    { key: 'prospecting', label: t('crm.stages.prospecting') },
+    { key: 'qualification', label: t('crm.stages.qualification') },
+    { key: 'proposal', label: t('crm.stages.proposal') },
+    { key: 'negotiation', label: t('crm.stages.negotiation') },
+    { key: 'closing', label: t('crm.stages.closing') },
+    { key: 'won', label: t('crm.stages.won') },
+    { key: 'lost', label: t('crm.stages.lost') }
+  ]), [t]);
+
+  const handleChange = <K extends keyof OpportunityFormData>(field: K, value: OpportunityFormData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const resetForm = () => {
     setFormData({
       title: '',
-      third_party_id: '',
-      amount: '',
-      probability: '50',
-      stage: 'lead',
-      priority: 'medium',
+      description: '',
+      client_id: '',
+      contact_id: '',
+      stage: 'prospecting',
+      value: 0,
+      probability: 50,
       expected_close_date: '',
-      notes: '',
+      source: '',
+      assigned_to: '',
+      priority: 'medium',
+      tags: [],
+      next_action: '',
+      next_action_date: ''
     });
   };
 
   const calculateWeightedAmount = () => {
-    const amount = parseFloat(formData.amount) || 0;
-    const probability = parseFloat(formData.probability) || 0;
+    const amount = Number(formData.value) || 0;
+    const probability = Number(formData.probability) || 0;
     return (amount * probability) / 100;
   };
 
+  const clientContacts = useMemo(() => {
+    if (!formData.client_id) return [];
+    return (contacts || []).filter((contact) => contact.client_id === formData.client_id);
+  }, [contacts, formData.client_id]);
+
+  // Options autocomplete pour clients
+  const clientOptions: AutocompleteOption[] = useMemo(() => {
+    return (clients || []).map(client => ({
+      value: client.id,
+      label: client.company_name || 'Sans nom',
+      description: undefined as string | undefined,
+      category: 'Client',
+      metadata: client
+    }));
+  }, [clients]);
+
+  // Options autocomplete pour contacts (filtrés par client)
+  const contactOptions: AutocompleteOption[] = useMemo(() => {
+    return clientContacts.map(contact => ({
+      value: contact.id,
+      label: `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sans nom',
+      description: contact.email || contact.phone || undefined,
+      metadata: contact
+    }));
+  }, [clientContacts]);
+
+  // Options autocomplete pour stages/étapes
+  const stageOptions: AutocompleteOption[] = useMemo(() => {
+    return stages.map(stage => ({
+      value: stage.key,
+      label: stage.label,
+      description: undefined as string | undefined,
+      category: stage.key === 'won' || stage.key === 'lost' ? 'Terminées' : 'En cours'
+    }));
+  }, [stages]);
+
+  // Options autocomplete pour priorités
+  const priorityOptions: AutocompleteOption[] = useMemo(() => [
+    { value: 'low', label: t('crm.priority.low'), description: 'Faible priorité', category: 'Priorité' },
+    { value: 'medium', label: t('crm.priority.medium'), description: 'Priorité moyenne', category: 'Priorité' },
+    { value: 'high', label: t('crm.priority.high'), description: 'Haute priorité', category: 'Priorité' },
+  ], [t]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!currentCompany?.id) {
-      toastError(t('common.errors.noCompany'));
-      return;
-    }
 
     if (!formData.title.trim()) {
       toastError(t('crm.opportunity.validation.titleRequired'));
       return;
     }
 
-    if (!formData.third_party_id) {
+    if (!formData.client_id) {
       toastError(t('crm.opportunity.validation.clientRequired'));
       return;
     }
@@ -112,33 +206,44 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
     setLoading(true);
 
     try {
-      const amount = parseFloat(formData.amount) || 0;
-      const probability = parseFloat(formData.probability) || 0;
-      const weightedAmount = calculateWeightedAmount();
-
-      const { error } = await supabase.from('crm_opportunities').insert({
-        company_id: currentCompany.id,
-        client_id: formData.third_party_id,
+      const dataToSubmit = {
+        ...formData,
         title: formData.title.trim(),
-        value: amount,
-        probability,
-        weighted_amount: weightedAmount,
-        stage: formData.stage,
-        priority: formData.priority,
-        expected_close_date: formData.expected_close_date || null,
-        notes: formData.notes?.trim() || null,
-        status: 'active',
-      });
+        description: formData.description?.trim() || undefined,
+        source: formData.source?.trim() || undefined,
+        assigned_to: formData.assigned_to?.trim() || undefined,
+        expected_close_date: formData.expected_close_date || ''
+      };
 
-      if (error) throw error;
+      let success = false;
 
-      toastSuccess(t('crm.opportunity.created'));
-      resetForm();
-      onOpenChange(false);
-      if (onSuccess) onSuccess();
+      if (isEditing && editingOpportunity && onUpdateOpportunity) {
+        console.log('[NewOpportunityModal] Updating opportunity:', editingOpportunity.id, dataToSubmit);
+        success = await onUpdateOpportunity(editingOpportunity.id, dataToSubmit);
+        if (success) {
+          toastSuccess(t('crm.opportunity.updated') || 'Opportunité mise à jour');
+        } else {
+          toastError(t('crm.opportunity.errors.updateFailed') || 'Erreur lors de la mise à jour');
+        }
+      } else {
+        console.log('[NewOpportunityModal] Creating new opportunity:', dataToSubmit);
+        success = await onCreateOpportunity(dataToSubmit);
+        if (success) {
+          toastSuccess(t('crm.opportunity.created'));
+        } else {
+          toastError(t('crm.opportunity.errors.createFailed'));
+        }
+      }
+
+      if (success) {
+        resetForm();
+        onOpenChange(false);
+        if (onSuccess) onSuccess();
+      }
     } catch (error) {
-      devLogger.error('Error creating opportunity:', error);
-      toastError(t('crm.opportunity.errors.createFailed'));
+      console.error('Error submitting opportunity:', error);
+      const errorMsg = isEditing ? t('crm.opportunity.errors.updateFailed') : t('crm.opportunity.errors.createFailed');
+      toastError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -150,7 +255,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Target className="w-5 h-5" />
-            {t('crm.opportunity.new')}
+            {isEditing ? t('crm.opportunity.edit') || 'Modifier l\'opportunité' : t('crm.opportunity.new')}
           </DialogTitle>
         </DialogHeader>
 
@@ -171,12 +276,31 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
             </div>
 
             <div>
-              <ClientSelector
-                value={formData.third_party_id}
-                onChange={(clientId) => handleChange('third_party_id', clientId)}
-                label={t('crm.opportunity.fields.client')}
+              <Label>{t('crm.opportunity.fields.client')} <span className="text-red-500">*</span></Label>
+              <SmartAutocomplete
+                value={formData.client_id}
+                onChange={(value) => handleChange('client_id', value)}
+                options={clientOptions}
                 placeholder={t('crm.opportunity.placeholders.selectClient')}
-                required
+                searchPlaceholder="Rechercher un client..."
+                groups={true}
+                showRecent={true}
+                maxRecent={5}
+              />
+            </div>
+
+            <div>
+              <Label>{t('crm.opportunity.fields.contact')}</Label>
+              <SmartAutocomplete
+                value={formData.contact_id}
+                onChange={(value) => handleChange('contact_id', value)}
+                options={contactOptions}
+                placeholder={t('crm.opportunity.placeholders.selectContact')}
+                searchPlaceholder="Rechercher un contact..."
+                groups={false}
+                showRecent={true}
+                maxRecent={3}
+                disabled={!formData.client_id || contactOptions.length === 0}
               />
             </div>
           </div>
@@ -196,8 +320,8 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
                   type="number"
                   step="0.01"
                   min="0"
-                  value={formData.amount}
-                  onChange={(e) => handleChange('amount', e.target.value)}
+                  value={formData.value || ''}
+                  onChange={(e) => handleChange('value', Number(e.target.value) || 0)}
                   placeholder={t('crm.opportunity.placeholders.amount')}
                 />
               </div>
@@ -211,7 +335,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
                     min="0"
                     max="100"
                     value={formData.probability}
-                    onChange={(e) => handleChange('probability', e.target.value)}
+                    onChange={(e) => handleChange('probability', Number(e.target.value) || 0)}
                   />
                   <span className="text-sm text-gray-500 dark:text-gray-400">%</span>
                 </div>
@@ -219,7 +343,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
             </div>
 
             {/* Weighted Amount Display */}
-            {formData.amount && (
+            {formData.value && (
               <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 dark:bg-blue-900/20">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
@@ -246,33 +370,28 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="stage">{t('crm.opportunity.fields.stage')}</Label>
-                <Select value={formData.stage} onValueChange={(value) => handleChange('stage', value as OpportunityFormData['stage'])}>
-                  <SelectTrigger id="stage">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="lead">{t('crm.stages.lead')}</SelectItem>
-                    <SelectItem value="qualified">{t('crm.stages.qualified')}</SelectItem>
-                    <SelectItem value="proposal">{t('crm.stages.proposal')}</SelectItem>
-                    <SelectItem value="negotiation">{t('crm.stages.negotiation')}</SelectItem>
-                    <SelectItem value="won">{t('crm.stages.won')}</SelectItem>
-                    <SelectItem value="lost">{t('crm.stages.lost')}</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SmartAutocomplete
+                  value={formData.stage}
+                  onChange={(value) => handleChange('stage', value as OpportunityFormData['stage'])}
+                  options={stageOptions}
+                  placeholder="Sélectionner une étape..."
+                  searchPlaceholder="Rechercher une étape..."
+                  groups={true}
+                  showRecent={false}
+                />
               </div>
 
               <div>
                 <Label htmlFor="priority">{t('crm.opportunity.fields.priority')}</Label>
-                <Select value={formData.priority} onValueChange={(value) => handleChange('priority', value as OpportunityFormData['priority'])}>
-                  <SelectTrigger id="priority">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">{t('crm.priority.low')}</SelectItem>
-                    <SelectItem value="medium">{t('crm.priority.medium')}</SelectItem>
-                    <SelectItem value="high">{t('crm.priority.high')}</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SmartAutocomplete
+                  value={formData.priority}
+                  onChange={(value) => handleChange('priority', value as OpportunityFormData['priority'])}
+                  options={priorityOptions}
+                  placeholder="Sélectionner une priorité..."
+                  searchPlaceholder="Rechercher une priorité..."
+                  groups={false}
+                  showRecent={false}
+                />
               </div>
             </div>
           </div>
@@ -300,8 +419,8 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
             <Label htmlFor="notes">{t('crm.opportunity.fields.notes')}</Label>
             <Textarea
               id="notes"
-              value={formData.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
+              value={formData.description}
+              onChange={(e) => handleChange('description', e.target.value)}
               placeholder={t('crm.opportunity.placeholders.notes')}
               rows={3}
             />
@@ -317,7 +436,11 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
               {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? t('common.action.saving') : t('common.action.create')}
+              {loading 
+                ? t('common.action.saving') 
+                : isEditing 
+                  ? t('common.action.update') || 'Mettre à jour'
+                  : t('common.action.create')}
             </Button>
           </DialogFooter>
         </form>

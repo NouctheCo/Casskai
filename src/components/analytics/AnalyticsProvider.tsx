@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 import { usePlausibleAnalytics, usePrivacyCompliantTracking } from '@/hooks/usePlausibleAnalytics';
 
-import { PlausibleEventProps } from '@/types/ai.types';
+type PlausibleEventProps = Record<string, string | number | boolean>;
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 

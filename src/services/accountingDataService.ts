@@ -302,6 +302,10 @@ export class AccountingDataService {
   }
   /**
    * Analyse l'évolution des créances clients
+   *
+   * ✅ IMPLÉMENTATION RÉELLE basée sur les factures de vente impayées
+   * Source primaire : table invoices (factures émises non réglées)
+   * Source secondaire (vérification) : comptes 411/413/416 du plan comptable
    */
   async analyzeReceivables(
     companyId: string,
@@ -317,21 +321,134 @@ export class AccountingDataService {
       over_90: number;
     };
     average_collection_period: number;
+    details?: ReceivablesAgingDetail[];
   }> {
-    // TODO: Implémenter l'analyse détaillée des créances avec dates d'échéance
+    try {
+      const today = new Date();
+
+      // 1️⃣ Récupérer les factures de vente impayées
+      const { data: invoices, error: invError } = await supabase
+        .from('invoices')
+        .select('id, invoice_number, invoice_date, due_date, total_incl_tax, paid_amount, status, customers!customer_id(name)')
+        .eq('company_id', companyId)
+        .eq('invoice_type', 'sale')
+        .neq('status', 'paid')
+        .neq('status', 'cancelled')
+        .gte('issue_date', startDate)
+        .lte('issue_date', endDate);
+
+      if (invError) {
+        logger.error('AccountingData', 'Error fetching invoices for aging:', invError);
+        // Fallback sur les soldes comptables
+        return this.analyzeReceivablesFallback(companyId, startDate, endDate);
+      }
+
+      // 2️⃣ Classer chaque facture dans un bucket d'ancienneté
+      const aging = { current: 0, days_1_30: 0, days_31_60: 0, days_61_90: 0, over_90: 0 };
+      const details: ReceivablesAgingDetail[] = [];
+      let totalDaysWeighted = 0;
+      let totalReceivables = 0;
+
+      (invoices || []).forEach((inv: any) => {
+        const balance = (inv.total_incl_tax || 0) - (inv.paid_amount || 0);
+        if (balance <= 0) return;
+
+        totalReceivables += balance;
+
+        // Calcul des jours d'échéance
+        const dueDate = inv.due_date ? new Date(inv.due_date) : new Date(inv.invoice_date);
+        const daysOverdue = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        // Pondération pour le délai moyen de recouvrement
+        const invoiceDate = new Date(inv.invoice_date);
+        const daysOutstanding = Math.max(0, Math.floor((today.getTime() - invoiceDate.getTime()) / (1000 * 60 * 60 * 24)));
+        totalDaysWeighted += daysOutstanding * balance;
+
+        // Bucket d'ancienneté (clés alignées avec ReceivablesAgingChart)
+        let bucket: string;
+        if (daysOverdue <= 0) {
+          aging.current += balance;
+          bucket = 'current';
+        } else if (daysOverdue <= 30) {
+          aging.days_1_30 += balance;
+          bucket = 'days_1_30';
+        } else if (daysOverdue <= 60) {
+          aging.days_31_60 += balance;
+          bucket = 'days_31_60';
+        } else if (daysOverdue <= 90) {
+          aging.days_61_90 += balance;
+          bucket = 'days_61_90';
+        } else {
+          aging.over_90 += balance;
+          bucket = 'over_90';
+        }
+
+        // Détail de la facture
+        details.push({
+          invoice_id: inv.id,
+          invoice_number: inv.invoice_number || inv.id.substring(0, 8),
+          client_name: inv.customers?.name || 'Client inconnu',
+          amount: balance,
+          due_date: inv.due_date || inv.invoice_date,
+          days_overdue: Math.max(0, daysOverdue),
+          aging_bucket: bucket
+        });
+      });
+
+      // Délai moyen de recouvrement pondéré
+      const averageCollectionPeriod = totalReceivables > 0
+        ? Math.round(totalDaysWeighted / totalReceivables)
+        : 0;
+
+      // Trier les détails par jours de retard décroissant
+      details.sort((a, b) => b.days_overdue - a.days_overdue);
+
+      return {
+        total_receivables: totalReceivables,
+        aged_analysis: aging,
+        average_collection_period: averageCollectionPeriod,
+        details
+      };
+    } catch (error) {
+      logger.error('AccountingData', 'Error in analyzeReceivables:', error);
+      return this.analyzeReceivablesFallback(companyId, startDate, endDate);
+    }
+  }
+
+  /**
+   * Fallback : analyse basée sur les soldes comptables (comptes 411/413/416)
+   * Utilisé si la table invoices est indisponible
+   */
+  private async analyzeReceivablesFallback(
+    companyId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<{
+    total_receivables: number;
+    aged_analysis: {
+      current: number;
+      days_1_30: number;
+      days_31_60: number;
+      days_61_90: number;
+      over_90: number;
+    };
+    average_collection_period: number;
+  }> {
     const balances = await this.getAccountBalances(companyId, startDate, endDate);
     const totalReceivables = this.sumAccountsByPattern(balances, ['411', '413', '416']);
-    // Simulation de l'analyse par âge (à remplacer par une vraie analyse)
+
+    // Avec seulement les soldes comptables, on ne peut pas ventiler par ancienneté
+    // On met tout en "current" pour ne pas induire en erreur
     return {
       total_receivables: totalReceivables,
       aged_analysis: {
-        current: totalReceivables * 0.6,
-        days_1_30: totalReceivables * 0.25,
-        days_31_60: totalReceivables * 0.1,
-        days_61_90: totalReceivables * 0.04,
-        over_90: totalReceivables * 0.01
+        current: totalReceivables,
+        days_1_30: 0,
+        days_31_60: 0,
+        days_61_90: 0,
+        over_90: 0
       },
-      average_collection_period: 35 // Jours moyens de recouvrement
+      average_collection_period: 0
     };
   }
   /**
@@ -604,11 +721,11 @@ export class AccountingDataService {
         postedEntriesCount: 0,
         accountsCount: 0,
         journalsCount: 0,
-        totalBalanceTrend: undefined,
-        totalDebitTrend: undefined,
-        totalCreditTrend: undefined,
-        entriesCountTrend: undefined,
-        pendingEntriesCountTrend: undefined
+        totalBalanceTrend: undefined as number | undefined,
+        totalDebitTrend: undefined as number | undefined,
+        totalCreditTrend: undefined as number | undefined,
+        entriesCountTrend: undefined as number | undefined,
+        pendingEntriesCountTrend: undefined as number | undefined
       };
     }
   }
@@ -699,6 +816,192 @@ export class AccountingDataService {
       throw new Error('No active company found');
     }
     return userCompanies.company_id;
+  }
+
+  /**
+   * Get trial balance (balance générale) for all accounts
+   * Used for interactive drill-down reports
+   */
+  async getTrialBalance(
+    companyId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<{
+    data: Array<{
+      account_code: string;
+      account_name: string;
+      total_debit: number;
+      total_credit: number;
+      balance: number;
+    }> | null;
+    error: Error | null;
+  }> {
+    try {
+      logger.debug('AccountingData', '📊 Getting trial balance:', { companyId, startDate, endDate });
+
+      // 1. Get all accounts from chart of accounts
+      const { data: accounts, error: accountsError } = await supabase
+        .from('chart_of_accounts')
+        .select('account_number, account_name')
+        .eq('company_id', companyId)
+        .eq('is_active', true)
+        .order('account_number');
+
+      if (accountsError) {
+        logger.error('AccountingData', 'Error fetching accounts:', accountsError);
+        return { data: null, error: accountsError };
+      }
+
+      // 2. Get all journal entry lines for the period
+      const { data: journalEntries, error: entriesError } = await supabase
+        .from('journal_entry_lines')
+        .select(`
+          account_code,
+          debit_amount,
+          credit_amount,
+          journal_entries!inner(entry_date, company_id, status)
+        `)
+        .eq('journal_entries.company_id', companyId)
+        .gte('journal_entries.entry_date', startDate)
+        .lte('journal_entries.entry_date', endDate)
+        .in('journal_entries.status', ['validated', 'posted', 'imported']);
+
+      if (entriesError) {
+        logger.error('AccountingData', 'Error fetching journal entries:', entriesError);
+        return { data: null, error: entriesError };
+      }
+
+      // 3. Aggregate balances by account
+      const balanceMap = new Map<string, { debit: number; credit: number }>();
+
+      (journalEntries || []).forEach((line: any) => {
+        const accountCode = line.account_code;
+        if (!balanceMap.has(accountCode)) {
+          balanceMap.set(accountCode, { debit: 0, credit: 0 });
+        }
+        const balance = balanceMap.get(accountCode)!;
+        balance.debit += Number(line.debit_amount) || 0;
+        balance.credit += Number(line.credit_amount) || 0;
+      });
+
+      // 4. Build trial balance data
+      const trialBalanceData = (accounts || [])
+        .map((account: any) => {
+          const accountCode = account.account_number;
+          const balance = balanceMap.get(accountCode) || { debit: 0, credit: 0 };
+          return {
+            account_code: accountCode,
+            account_name: account.account_name,
+            total_debit: balance.debit,
+            total_credit: balance.credit,
+            balance: balance.debit - balance.credit
+          };
+        })
+        .filter(acc => acc.total_debit !== 0 || acc.total_credit !== 0); // Only accounts with movements
+
+      logger.debug('AccountingData', '✅ Trial balance calculated:', {
+        totalAccounts: trialBalanceData.length
+      });
+
+      return { data: trialBalanceData, error: null };
+    } catch (error) {
+      logger.error('AccountingData', 'Error in getTrialBalance:', error);
+      return {
+        data: null,
+        error: error instanceof Error ? error : new Error('Unknown error')
+      };
+    }
+  }
+
+  /**
+   * Get all journal entries for a specific account
+   * Used for drill-down from trial balance to account detail
+   */
+  async getAccountEntries(
+    companyId: string,
+    accountCode: string,
+    startDate: string,
+    endDate: string
+  ): Promise<{
+    data: Array<{
+      id: string;
+      journal_entry_number: string;
+      entry_date: string;
+      description: string;
+      reference: string | null;
+      debit: number;
+      credit: number;
+      balance: number;
+    }> | null;
+    error: Error | null;
+  }> {
+    try {
+      logger.debug('AccountingData', '📋 Getting account entries:', {
+        companyId,
+        accountCode,
+        startDate,
+        endDate
+      });
+
+      // Get journal entry lines for this account
+      const { data: lines, error: linesError } = await supabase
+        .from('journal_entry_lines')
+        .select(`
+          id,
+          account_code,
+          debit_amount,
+          credit_amount,
+          description,
+          journal_entries!inner(
+            id,
+            entry_number,
+            entry_date,
+            description,
+            reference,
+            company_id,
+            status
+          )
+        `)
+        .eq('account_code', accountCode)
+        .eq('journal_entries.company_id', companyId)
+        .gte('journal_entries.entry_date', startDate)
+        .lte('journal_entries.entry_date', endDate)
+        .in('journal_entries.status', ['validated', 'posted', 'imported'])
+        .order('journal_entries.entry_date', { ascending: true });
+
+      if (linesError) {
+        logger.error('AccountingData', 'Error fetching account entries:', linesError);
+        return { data: null, error: linesError };
+      }
+
+      // Transform to entries format
+      const entries = (lines || []).map((line: any) => {
+        const je = line.journal_entries;
+        return {
+          id: line.id,
+          journal_entry_number: je.entry_number || je.id.substring(0, 8),
+          entry_date: je.entry_date,
+          description: line.description || je.description || '',
+          reference: je.reference,
+          debit: Number(line.debit_amount) || 0,
+          credit: Number(line.credit_amount) || 0,
+          balance: (Number(line.debit_amount) || 0) - (Number(line.credit_amount) || 0)
+        };
+      });
+
+      logger.debug('AccountingData', '✅ Account entries fetched:', {
+        accountCode,
+        entriesCount: entries.length
+      });
+
+      return { data: entries, error: null };
+    } catch (error) {
+      logger.error('AccountingData', 'Error in getAccountEntries:', error);
+      return {
+        data: null,
+        error: error instanceof Error ? error : new Error('Unknown error')
+      };
+    }
   }
 }
 export const accountingDataService = AccountingDataService.getInstance();

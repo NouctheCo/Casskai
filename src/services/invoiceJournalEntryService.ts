@@ -275,18 +275,15 @@ async function getThirdPartyAccount(
 }
 /**
  * Génère un numéro de compte auxiliaire unique
+ * Format unifié : préfixe 3 chiffres + séquentiel 4 chiffres (ex: 4110001)
+ * Compatible avec auxiliaryAccountService.ts
  */
 async function generateAuxiliaryAccountNumber(
   companyId: string,
   prefix: string,
-  thirdPartyCode: string
+  _thirdPartyCode: string
 ): Promise<string> {
-  // Format: 411XXX ou 401XXX où XXX = code tiers ou numéro séquentiel
-  const cleanCode = thirdPartyCode.replace(/[^0-9]/g, '').slice(0, 5);
-  if (cleanCode.length >= 3) {
-    return `${prefix}${cleanCode.padStart(5, '0')}`;
-  }
-  // Sinon, numéro séquentiel
+  // Numéro séquentiel basé sur le dernier compte existant
   const { data: accounts } = await supabase
     .from('chart_of_accounts')
     .select('account_number')
@@ -294,11 +291,12 @@ async function generateAuxiliaryAccountNumber(
     .like('account_number', `${prefix}%`)
     .order('account_number', { ascending: false })
     .limit(1);
+
   if (accounts && accounts.length > 0) {
-    const lastNumber = parseInt(accounts[0].account_number.substring(3));
-    return `${prefix}${String(lastNumber + 1).padStart(5, '0')}`;
+    const lastNumber = parseInt(accounts[0].account_number.substring(prefix.length));
+    return `${prefix}${String(lastNumber + 1).padStart(4, '0')}`;
   }
-  return `${prefix}00001`;
+  return `${prefix}0001`;
 }
 /**
  * Hook : Génère automatiquement l'écriture après création/validation d'une facture

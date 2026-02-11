@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase';
 import { AIInsight, SmartAlert, CashFlowPrediction, TaxOptimization, AnomalyDetection } from '@/types/ai.types';
 import { logger } from '@/lib/logger';
 import { formatCurrency } from '@/lib/utils';
+import { aiCacheService } from '@/lib/ai-cache';
 interface AIServiceResponse<T = any> {
   data?: T;
   error?: string;
@@ -68,6 +69,26 @@ type TransactionWithLines = {
   }>;
   [key: string]: unknown;
 };
+
+function isDataSensitiveQuery(
+  query: string,
+  contextType?: 'dashboard' | 'accounting' | 'invoicing' | 'reports' | 'general'
+): boolean {
+  if (!query) return false;
+  if (contextType && contextType !== 'general') return true;
+
+  const q = query.toLowerCase();
+  const keywords = [
+    'facture', 'facturation', 'devis', 'paiement', 'payment', 'encaissement',
+    'impayé', 'impaye', 'overdue', 'paid', 'unpaid',
+    'solde', 'trésorerie', 'tresorerie', 'kpi', 'kpis', 'montant', 'total',
+    'revenu', 'chiffre', 'dépense', 'depense', 'bilan', 'résultat', 'resultat',
+    'journal', 'écriture', 'ecriture', 'compte', 'banque', 'bank', 'clients',
+    'fournisseurs', 'invoice', 'quote'
+  ];
+  const questionSignals = ['combien', 'nombre', 'quel est', 'quelle est', 'statut', 'restant', 'en retard'];
+  return keywords.some(k => q.includes(k)) || questionSignals.some(k => q.includes(k));
+}
 export class OpenAIService {
   private static instance: OpenAIService;
   private baseUrl: string;
@@ -80,7 +101,7 @@ export class OpenAIService {
     }
     return OpenAIService.instance;
   }
-  // 🤖 Assistant conversationnel
+  // 🤖 Assistant conversationnel (avec caching)
   async chat(request: ChatRequest): Promise<AIServiceResponse<{ response: string; sources: string[]; suggestions?: string[] }>> {
     const startTime = performance.now();
     try {
@@ -88,6 +109,32 @@ export class OpenAIService {
       if (!session) {
         return { success: false, error: 'Authentication required' };
       }
+
+      const isSensitive = isDataSensitiveQuery(request.query, request.context_type);
+      if (!isSensitive) {
+        // 1️⃣ Vérifier le cache pour requêtes similaires
+        const cacheKey = {
+          query: request.query,
+          context_type: request.context_type || 'general'
+        };
+
+        const cached = await aiCacheService.get<{ response: string; sources: string[]; suggestions?: string[] }>(
+          request.company_id,
+          'chat',
+          cacheKey
+        );
+
+        if (cached) {
+          logger.info('[OpenAI] Chat result from cache', { query: request.query.substring(0, 30) });
+          return {
+            success: true,
+            data: cached,
+            processingTime: performance.now() - startTime
+          };
+        }
+      }
+
+      // 2️⃣ Pas en cache → appeler OpenAI
       const response = await fetch(`${this.baseUrl}/ai-assistant`, {
         method: 'POST',
         headers: {
@@ -100,6 +147,22 @@ export class OpenAIService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
+
+      // 3️⃣ Cacher le résultat pour les requêtes futures similaires (si non sensible)
+      if (!isSensitive) {
+        const cacheKey = {
+          query: request.query,
+          context_type: request.context_type || 'general'
+        };
+        await aiCacheService.set(
+          request.company_id,
+          'chat',
+          cacheKey,
+          data,
+          { question: request.query.substring(0, 100) }
+        );
+      }
+
       const processingTime = performance.now() - startTime;
       return {
         success: true,
@@ -115,7 +178,7 @@ export class OpenAIService {
     }
   }
 
-  // 🤖 Assistant conversationnel (multi-tours)
+  // 🤖 Assistant conversationnel multi-tours (avec caching optionnel)
   async chatWithMessages(
     request: ChatWithMessagesRequest
   ): Promise<AIServiceResponse<AIAssistantEdgeResponse>> {
@@ -124,6 +187,35 @@ export class OpenAIService {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         return { success: false, error: 'Authentication required' };
+      }
+
+      // Pour les conversations multi-tours, on cache moins agressivement
+      // Seulement si la dernière question n'est pas sensible aux données
+      const lastMessage = request.messages?.[request.messages.length - 1];
+      const lastQuery = lastMessage?.role === 'user' ? lastMessage.content : '';
+      const contextType = request.context?.contextType || 'general';
+      const isSensitive = isDataSensitiveQuery(lastQuery, contextType);
+
+      if (!isSensitive && lastMessage?.role === 'user' && request.context?.companyId) {
+        const cacheKey = {
+          lastQuery: lastMessage.content,
+          contextType
+        };
+
+        const cached = await aiCacheService.get(
+          request.context.companyId,
+          'chat',
+          cacheKey
+        );
+
+        if (cached) {
+          logger.info('[OpenAI] Multi-turn chat result from cache');
+          return {
+            success: true,
+            data: cached,
+            processingTime: performance.now() - startTime
+          };
+        }
       }
 
       const response = await fetch(`${this.baseUrl}/ai-assistant`, {
@@ -136,10 +228,34 @@ export class OpenAIService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorMsg = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.error || errorMsg;
+        } catch {
+          // Si pas de JSON, utiliser le status text
+          errorMsg = response.statusText || errorMsg;
+        }
+        throw new Error(errorMsg);
       }
 
       const data: AIAssistantEdgeResponse = await response.json();
+      
+      // Cacher la dernière réponse (optionnel, non sensible)
+      if (!isSensitive && lastMessage?.role === 'user' && request.context?.companyId) {
+        const cacheKey = {
+          lastQuery: lastMessage.content,
+          contextType
+        };
+        await aiCacheService.set(
+          request.context.companyId,
+          'chat',
+          cacheKey,
+          data,
+          { question: lastMessage.content.substring(0, 100) }
+        );
+      }
+
       const processingTime = performance.now() - startTime;
       return {
         success: true,
@@ -544,13 +660,13 @@ export class OpenAIService {
           confidence: Math.min(score, 1),
           resolved: false,
           transaction: {
-            id: transaction.id,
+            id: transaction.id ?? '',
             date: new Date(transaction.entry_date),
             amount: transaction.total_amount,
             description: transaction.description || '',
             type: transaction.total_amount > 0 ? 'income' : 'expense',
             account: transaction.journal_entry_lines?.[0]?.account_number || '',
-            reference: transaction.reference
+            reference: transaction.reference ?? ''
           },
           score,
           reasons,

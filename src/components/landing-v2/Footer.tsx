@@ -132,8 +132,9 @@ export function Footer() {
             <div className="flex items-center gap-3 mb-4">
               <img
                 src="/logo.png"
+                style={{ background: 'transparent' }}
                 alt="CassKai"
-                className="h-10 w-auto"
+                className="h-10 w-auto mix-blend-screen"
               />
               <span className="text-xl font-bold text-white">CassKai</span>
             </div>

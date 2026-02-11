@@ -1,4 +1,4 @@
-import type { AccountPlan } from '@/types/accounting';
+import type { AccountPlan, Account } from '@/types/accounting';
 
 // Plan Comptable Général (PCG) - Structure comptable française
 // Ce fichier définit la structure hiérarchique du plan comptable selon les normes françaises
@@ -721,7 +721,7 @@ const PCG_FRANCE: AccountPlan = {
         name: acc.name,
         type: acc.type as 'immobilisations' | 'stocks' | 'creances' | 'tresorerie' | 'dettes' | 'capitaux' | 'charges' | 'produits',
         isDebitNormal: acc.type === 'asset' || acc.type === 'expense',
-        subAccounts: []
+        subAccounts: [] as Account[]
       }))
   }))
 };

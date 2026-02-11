@@ -366,7 +366,7 @@ class FinancialReportsService {
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) {
       logger.error('FinancialReports', 'Error fetching reports:', error);
-      return { data: [], error };
+      return { data: [] as NonNullable<typeof data>, error };
     }
     return { data: data || [], error: null };
   }

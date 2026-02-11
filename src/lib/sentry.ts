@@ -146,12 +146,12 @@ export function addBreadcrumb(message: string, category: string = 'custom', data
 /**
  * Start a performance transaction
  */
-export function startTransaction(name: string, op: string = 'custom') {
+export function startTransaction(name: string, op: string = 'custom'): { end: () => void } {
   // Sentry v8+: startTransaction may not be available on @sentry/react.
   // Prefer startInactiveSpan if available to get a span handle that can be ended manually.
   type SentryCompat = {
-    startInactiveSpan?: (options: { name: string; op?: string }) => { end?: () => void };
-    startSpan?: (options: { name: string; op?: string }, cb: () => void) => void;
+    startInactiveSpan?: (options: { name: string; op?: string }) => { end: () => void };
+    startSpan?: (options: { name: string; op?: string }, cb: () => void) => void | undefined;
   };
   const anySentry = Sentry as unknown as SentryCompat;
   if (typeof anySentry.startInactiveSpan === 'function') {
@@ -159,7 +159,7 @@ export function startTransaction(name: string, op: string = 'custom') {
   }
   if (typeof anySentry.startSpan === 'function') {
     // startSpan executes a callback; return a minimal span-like shim
-    const span = { end: () => void 0 } as const;
+    const span: { end: () => void } = { end: () => void 0 };
     anySentry.startSpan({ name, op }, () => {
       // we cannot return span from here; provide a no-op shim
     });

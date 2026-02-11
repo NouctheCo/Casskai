@@ -28,6 +28,99 @@ import {
   DiscountConfig,
   ContractAlert
 } from '../types/contracts.types';
+
+const seedDefaultContractTypes = async (companyId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('contract_types')
+    .upsert([
+      {
+        company_id: companyId,
+        code: 'COMMERCIAL',
+        name: 'Contrat commercial',
+        description: 'Contrat commercial standard avec clients',
+        category: 'commercial',
+        default_duration_months: 12,
+        is_active: true
+      },
+      {
+        company_id: companyId,
+        code: 'SERVICE',
+        name: 'Contrat de service',
+        description: 'Contrat de prestation de services',
+        category: 'service',
+        default_duration_months: 24,
+        requires_legal_review: true,
+        is_active: true
+      },
+      {
+        company_id: companyId,
+        code: 'PARTNERSHIP',
+        name: 'Accord de partenariat',
+        description: 'Accord de partenariat strategique',
+        category: 'partnership',
+        auto_renewal: true,
+        is_active: true
+      }
+    ], { onConflict: 'company_id,code' });
+
+  if (error) {
+    throw new Error('Impossible de creer les types de contrat par defaut. Verifiez les permissions RLS.');
+  }
+};
+
+const getDefaultContractTypeId = async (companyId: string): Promise<string> => {
+  const { data: preferredType, error: preferredError } = await supabase
+    .from('contract_types')
+    .select('id')
+    .eq('company_id', companyId)
+    .eq('code', 'COMMERCIAL')
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (preferredError) {
+    throw preferredError;
+  }
+
+  if (preferredType?.id) {
+    return preferredType.id;
+  }
+
+  const { data: fallbackType, error: fallbackError } = await supabase
+    .from('contract_types')
+    .select('id')
+    .eq('company_id', companyId)
+    .eq('is_active', true)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (fallbackError) {
+    throw fallbackError;
+  }
+
+  if (!fallbackType?.id) {
+    await seedDefaultContractTypes(companyId);
+    const { data: seededType, error: seededError } = await supabase
+      .from('contract_types')
+      .select('id')
+      .eq('company_id', companyId)
+      .eq('code', 'COMMERCIAL')
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (seededError) {
+      throw seededError;
+    }
+
+    if (seededType?.id) {
+      return seededType.id;
+    }
+
+    throw new Error('Aucun type de contrat actif n\'est disponible pour cette entreprise.');
+  }
+
+  return fallbackType.id;
+};
 // Helpers -------------------------------------------------------------------
 const getCurrentUserId = async (): Promise<string | null> => {
   try {
@@ -231,6 +324,7 @@ export async function createContract(
 ): Promise<ContractServiceResponse<ContractData>> {
   try {
     await assertNoOverlap(enterpriseId, contractData.client_id, contractData.start_date, contractData.end_date);
+    const contractTypeId = await getDefaultContractTypeId(enterpriseId);
     const { data, error } = await supabase
       .from('contracts')
       .insert({
@@ -238,6 +332,7 @@ export async function createContract(
         client_id: contractData.client_id,
         contract_name: contractData.contract_name,
         contract_number: `CTR-${Date.now()}`,
+        contract_type_id: contractTypeId,
         rfa_calculation_type: contractData.contract_type,
         rfa_base_percentage: contractData.discount_config.rate ? contractData.discount_config.rate * 100 : 0,
         rfa_tiers: contractData.discount_config.tiers || [],

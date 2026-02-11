@@ -1,11 +1,8 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.47.0'
 import Stripe from 'https://esm.sh/stripe@12.9.0'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
-}
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
+import { checkRateLimit, rateLimitResponse, getRateLimitPreset } from '../_shared/rate-limit.ts'
 
 // Validation stricte des variables d'environnement - Fail-fast security
 const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
@@ -35,14 +32,19 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  const preflightResponse = handleCorsPreflightRequest(req)
+  if (preflightResponse) return preflightResponse
+
+  // Rate limiting
+  const rateLimit = checkRateLimit(req, getRateLimitPreset('stripe-webhook'))
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(rateLimit.retryAfter!, getCorsHeaders(req))
   }
 
   if (req.method !== 'POST') {
     return new Response('Method not allowed', {
       status: 405,
-      headers: corsHeaders
+      headers: getCorsHeaders(req)
     })
   }
 
@@ -54,7 +56,7 @@ serve(async (req) => {
     console.error('❌ Security: Missing stripe-signature header')
     return new Response('Unauthorized: Missing webhook signature', {
       status: 401,
-      headers: corsHeaders
+      headers: getCorsHeaders(req)
     })
   }
 
@@ -69,7 +71,7 @@ serve(async (req) => {
     console.error('❌ Webhook signature verification failed:', errorMessage)
     return new Response(`Webhook Error: Invalid signature - ${errorMessage}`, {
       status: 401, // 401 au lieu de 400 pour indiquer un problème d'authentification
-      headers: corsHeaders
+      headers: getCorsHeaders(req)
     })
   }
 
@@ -106,7 +108,7 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ received: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
       status: 200,
     })
   } catch (error) {
@@ -114,7 +116,7 @@ serve(async (req) => {
     console.error('Error processing webhook:', errorMessage)
     return new Response(`Webhook error: ${errorMessage}`, {
       status: 500,
-      headers: corsHeaders
+      headers: getCorsHeaders(req)
     })
   }
 })

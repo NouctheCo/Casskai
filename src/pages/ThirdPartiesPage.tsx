@@ -19,7 +19,7 @@ import { EmptyList } from '../components/ui/EmptyState';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { toastError, toastSuccess, toastDeleted, toastUpdated } from '@/lib/toast-helpers';
+import { toastError, toastSuccess, toastDeleted } from '@/lib/toast-helpers';
 import { useEnterprise } from '../contexts/EnterpriseContext';
 import { supabase } from '@/lib/supabase';
 import { ThirdPartyFormDialog } from '@/components/third-parties/ThirdPartyFormDialog';
@@ -97,9 +97,10 @@ const ThirdPartiesPage: React.FC = () => {
   const [_agingReport, setAgingReport] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [_selectedThirdParty, setSelectedThirdParty] = useState<ThirdPartyListItem | null>(null);
+  const [selectedThirdParty, setSelectedThirdParty] = useState<ThirdPartyListItem | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -145,47 +146,128 @@ const ThirdPartiesPage: React.FC = () => {
   }, [thirdParties, filters]);
   const loadDashboardData = async () => {
     try {
-      logger.debug('ThirdPartiesPage', '📊 Loading dashboard data for company:', currentEnterprise!.id);
+      const companyId = currentEnterprise!.id;
+      logger.debug('ThirdPartiesPage', '📊 Loading dashboard data for company:', companyId);
 
-      // Count active customers and suppliers directly from third_parties
-      const { data: thirdPartiesStats, error: statsError } = await supabase
+      // Count active customers and suppliers + new_this_month
+      const { data: allThirdParties, error: statsError } = await supabase
         .from('third_parties')
-        .select('type')
-        .eq('company_id', currentEnterprise!.id)
-        .eq('is_active', true);
+        .select('id, type, name, is_active, email, phone, tax_number, credit_limit, current_balance, created_at')
+        .eq('company_id', companyId);
 
       if (statsError) {
         logger.error('ThirdPartiesPage', 'Error counting third parties:', statsError);
       }
 
-      const activeCustomers = (thirdPartiesStats || []).filter(tp => tp.type === 'customer').length;
-      const activeSuppliers = (thirdPartiesStats || []).filter(tp => tp.type === 'supplier').length;
+      const activeTP = (allThirdParties || []).filter(tp => tp.is_active);
+      const activeCustomers = activeTP.filter(tp => tp.type === 'customer').length;
+      const activeSuppliers = activeTP.filter(tp => tp.type === 'supplier').length;
 
-      const totalCustomers = activeCustomers || 0;
-      const totalSuppliers = activeSuppliers || 0;
+      // Nouveaux ce mois
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const newThisMonth = (allThirdParties || []).filter(tp => tp.created_at && tp.created_at >= startOfMonth).length;
 
-      logger.debug('ThirdPartiesPage', `✅ Stats: ${totalCustomers} customers, ${totalSuppliers} suppliers`);
+      // Charger factures ventes (CA clients)
+      const { data: saleInvoices } = await supabase
+        .from('invoices')
+        .select('customer_id, total_incl_tax, paid_amount, status, due_date')
+        .eq('company_id', companyId)
+        .eq('invoice_type', 'sale')
+        .neq('status', 'cancelled');
+
+      // Charger factures achats (dépenses fournisseurs)
+      const { data: purchaseInvoices } = await supabase
+        .from('invoices')
+        .select('third_party_id, total_incl_tax, paid_amount, status, due_date')
+        .eq('company_id', companyId)
+        .eq('invoice_type', 'purchase')
+        .neq('status', 'cancelled');
+
+      // Calcul CA par client et totaux créances
+      let totalReceivables = 0;
+      let overdueReceivables = 0;
+      let overdueInvoiceCount = 0;
+      const revenueByClient = new Map<string, number>();
+
+      (saleInvoices || []).forEach(inv => {
+        const remaining = (inv.total_incl_tax || 0) - (inv.paid_amount || 0);
+        totalReceivables += remaining;
+        if (inv.customer_id) {
+          revenueByClient.set(inv.customer_id, (revenueByClient.get(inv.customer_id) || 0) + (inv.total_incl_tax || 0));
+        }
+        if (remaining > 0 && inv.due_date && new Date(inv.due_date) < now) {
+          overdueReceivables += remaining;
+          overdueInvoiceCount++;
+        }
+      });
+
+      // Calcul dépenses par fournisseur et totaux dettes
+      let totalPayables = 0;
+      let overduePayables = 0;
+      const spendingBySupplier = new Map<string, number>();
+
+      (purchaseInvoices || []).forEach(inv => {
+        const remaining = (inv.total_incl_tax || 0) - (inv.paid_amount || 0);
+        totalPayables += remaining;
+        if (inv.third_party_id) {
+          spendingBySupplier.set(inv.third_party_id, (spendingBySupplier.get(inv.third_party_id) || 0) + (inv.total_incl_tax || 0));
+        }
+        if (remaining > 0 && inv.due_date && new Date(inv.due_date) < now) {
+          overduePayables += remaining;
+          overdueInvoiceCount++;
+        }
+      });
+
+      // Top 5 clients par CA
+      const customerNames = new Map<string, string>();
+      (allThirdParties || []).filter(tp => tp.type === 'customer').forEach(tp => customerNames.set(tp.id, tp.name));
+      const topClients = Array.from(revenueByClient.entries())
+        .map(([id, revenue]) => ({ id, name: customerNames.get(id) || 'Inconnu', revenue }))
+        .sort((a, b) => b.revenue - a.revenue)
+        .slice(0, 5);
+
+      // Top 5 fournisseurs par dépenses
+      const supplierNames = new Map<string, string>();
+      (allThirdParties || []).filter(tp => tp.type === 'supplier').forEach(tp => supplierNames.set(tp.id, tp.name));
+      const topSuppliers = Array.from(spendingBySupplier.entries())
+        .map(([id, spending]) => ({ id, name: supplierNames.get(id) || 'Inconnu', spending }))
+        .sort((a, b) => b.spending - a.spending)
+        .slice(0, 5);
+
+      // Alertes: limites de crédit dépassées
+      const creditLimitExceeded = activeTP.filter(tp =>
+        tp.type === 'customer' && tp.credit_limit && tp.credit_limit > 0 &&
+        (revenueByClient.get(tp.id) || 0) - ((saleInvoices || [])
+          .filter(inv => inv.customer_id === tp.id)
+          .reduce((sum, inv) => sum + (inv.paid_amount || 0), 0)) > tp.credit_limit
+      ).length;
+
+      // Alertes: infos manquantes (pas d'email ou pas de téléphone ou pas de numéro TVA)
+      const missingInfo = activeTP.filter(tp => !tp.email || !tp.phone || !tp.tax_number).length;
+
+      logger.debug('ThirdPartiesPage', `✅ Stats: ${activeCustomers} customers, ${activeSuppliers} suppliers, receivables: ${totalReceivables}, payables: ${totalPayables}`);
 
       setDashboardData({
         stats: {
-          total_third_parties: totalCustomers + totalSuppliers,
-          active_clients: totalCustomers,
-          active_suppliers: totalSuppliers,
-          new_this_month: 0,
-          total_receivables: 0,
-          total_payables: 0,
-          overdue_receivables: 0,
-          overdue_payables: 0,
-          top_clients_by_revenue: [],
-          top_suppliers_by_spending: []
+          total_third_parties: activeCustomers + activeSuppliers,
+          active_clients: activeCustomers,
+          active_suppliers: activeSuppliers,
+          new_this_month: newThisMonth,
+          total_receivables: totalReceivables,
+          total_payables: totalPayables,
+          overdue_receivables: overdueReceivables,
+          overdue_payables: overduePayables,
+          top_clients_by_revenue: topClients,
+          top_suppliers_by_spending: topSuppliers
         },
         recent_third_parties: [],
         aging_summary: [],
         recent_transactions: [],
         alerts: {
-          overdue_invoices: 0,
-          credit_limit_exceeded: 0,
-          missing_information: 0
+          overdue_invoices: overdueInvoiceCount,
+          credit_limit_exceeded: creditLimitExceeded,
+          missing_information: missingInfo
         }
       });
     } catch (error) {
@@ -432,13 +514,11 @@ const ThirdPartiesPage: React.FC = () => {
   };
   const handleViewThirdParty = (thirdParty: ThirdPartyListItem) => {
     setSelectedThirdParty(thirdParty);
-    toastSuccess(`Affichage des détails de ${thirdParty.name}`);
-    // TODO: Open modal or navigate to detail view
+    setShowEditDialog(true);
   };
   const handleEditThirdParty = (thirdParty: ThirdPartyListItem) => {
     setSelectedThirdParty(thirdParty);
-    toastUpdated(`Édition de ${thirdParty.name}`);
-    // TODO: Open edit modal or navigate to edit form
+    setShowEditDialog(true);
   };
   const handleDeleteThirdParty = async (thirdParty: ThirdPartyListItem) => {
     // eslint-disable-next-line no-alert
@@ -809,7 +889,7 @@ const ThirdPartiesPage: React.FC = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tous types</SelectItem>
-                        <SelectItem value="client">Client</SelectItem>
+                        <SelectItem value="customer">Client</SelectItem>
                         <SelectItem value="supplier">Fournisseur</SelectItem>
                         <SelectItem value="partner">Partenaire</SelectItem>
                         <SelectItem value="both">Client/Fournisseur</SelectItem>
@@ -1052,6 +1132,16 @@ const ThirdPartiesPage: React.FC = () => {
           onSuccess={handleCreateSuccess}
           companyId={currentEnterprise.id}
           defaultType="customer"
+        />
+      )}
+      {/* Dialog d'édition */}
+      {currentEnterprise && selectedThirdParty && (
+        <ThirdPartyFormDialog
+          open={showEditDialog}
+          onClose={() => { setShowEditDialog(false); setSelectedThirdParty(null); }}
+          onSuccess={handleCreateSuccess}
+          companyId={currentEnterprise.id}
+          thirdParty={selectedThirdParty}
         />
       )}
     </motion.div>

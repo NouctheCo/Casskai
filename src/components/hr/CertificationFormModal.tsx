@@ -7,7 +7,6 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Certification } from '@/types/hr-training.types';
@@ -35,12 +34,7 @@ export function CertificationFormModal({
     expiry_date: '',
     credential_id: '',
     credential_url: '',
-    verification_url: '',
-    description: '',
-    skills_acquired: '',
-    is_active: true,
-    requires_renewal: false,
-    renewal_period_months: ''
+    is_active: true
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -56,12 +50,7 @@ export function CertificationFormModal({
         expiry_date: certification.expiry_date?.split('T')[0] || '',
         credential_id: certification.credential_id || '',
         credential_url: certification.credential_url || '',
-        verification_url: certification.verification_url || '',
-        description: certification.description || '',
-        skills_acquired: certification.skills_acquired || '',
-        is_active: certification.is_active ?? true,
-        requires_renewal: certification.requires_renewal || false,
-        renewal_period_months: certification.renewal_period_months?.toString() || ''
+        is_active: certification.is_active ?? true
       });
     }
   }, [certification]);
@@ -74,9 +63,6 @@ export function CertificationFormModal({
     if (!formData.issue_date) newErrors.issue_date = 'Date d\'obtention requise';
     if (formData.credential_url && !formData.credential_url.match(/^https?:\/\/.+/)) {
       newErrors.credential_url = 'URL invalide';
-    }
-    if (formData.verification_url && !formData.verification_url.match(/^https?:\/\/.+/)) {
-      newErrors.verification_url = 'URL invalide';
     }
 
     setErrors(newErrors);
@@ -97,12 +83,7 @@ export function CertificationFormModal({
         expiry_date: formData.expiry_date || null,
         credential_id: formData.credential_id.trim() || null,
         credential_url: formData.credential_url.trim() || null,
-        verification_url: formData.verification_url.trim() || null,
-        description: formData.description.trim() || null,
-        skills_acquired: formData.skills_acquired.trim() || null,
-        is_active: formData.is_active,
-        requires_renewal: formData.requires_renewal,
-        renewal_period_months: formData.renewal_period_months ? parseInt(formData.renewal_period_months) : null
+        is_active: formData.is_active
       };
 
       const success = await onSubmit(submitData);
@@ -239,75 +220,10 @@ export function CertificationFormModal({
               )}
             </div>
 
-            <div>
-              <Label htmlFor="verification_url">URL de vérification</Label>
-              <Input
-                id="verification_url"
-                type="url"
-                value={formData.verification_url}
-                onChange={(e) => setFormData({ ...formData, verification_url: e.target.value })}
-                placeholder="https://..."
-                className={errors.verification_url ? 'border-red-500' : ''}
-              />
-              {errors.verification_url && (
-                <p className="text-red-500 text-sm mt-1">{errors.verification_url}</p>
-              )}
-            </div>
           </div>
 
-          {/* Description */}
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3}
-              placeholder="Description de la certification..."
-            />
-          </div>
-
-          {/* Compétences acquises */}
-          <div>
-            <Label htmlFor="skills_acquired">Compétences acquises</Label>
-            <Textarea
-              id="skills_acquired"
-              value={formData.skills_acquired}
-              onChange={(e) => setFormData({ ...formData, skills_acquired: e.target.value })}
-              rows={3}
-              placeholder="Liste des compétences ou domaines couverts..."
-            />
-          </div>
-
-          {/* Renouvellement */}
+          {/* Options */}
           <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="requires_renewal"
-                checked={formData.requires_renewal}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, requires_renewal: checked as boolean })
-                }
-              />
-              <Label htmlFor="requires_renewal" className="cursor-pointer font-normal">
-                Nécessite un renouvellement
-              </Label>
-            </div>
-
-            {formData.requires_renewal && (
-              <div className="ml-6">
-                <Label htmlFor="renewal_period_months">Période de renouvellement (mois)</Label>
-                <Input
-                  id="renewal_period_months"
-                  type="number"
-                  min="1"
-                  value={formData.renewal_period_months}
-                  onChange={(e) => setFormData({ ...formData, renewal_period_months: e.target.value })}
-                  placeholder="Ex: 12, 24, 36"
-                />
-              </div>
-            )}
-
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="is_active"

@@ -17,6 +17,7 @@ export interface Project {
   name: string;
   description?: string;
   client: string;
+  clientId?: string;
   status: 'planning' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
   priority: 'low' | 'medium' | 'high' | 'critical';
   startDate: string;
@@ -25,6 +26,7 @@ export interface Project {
   spent: number;
   progress: number;
   manager: string;
+  managerId?: string;
   team: string[];
   category: string;
   lastActivity?: string;
@@ -160,13 +162,38 @@ export class ProjectsService {
       }
       // Calculate computed fields
       const enrichedProjects = (data || []).map(project => {
-        const profit = (project.revenue || 0) - (project.spent || 0);
-        const progressPercentage = Math.min(100, Math.max(0, project.progress || 0));
+        const budget = Number(project.budget_amount || 0);
+        const spent = Number(project.actual_cost || 0);
+        const revenue = Number(project.invoiced_amount || 0);
+        const profit = revenue - spent;
+        const progressPercentage = Math.min(100, Math.max(0, Number(project.progress || 0)));
         return {
-          ...project,
+          id: project.id,
+          name: project.name,
+          description: project.description || '',
+          client: project.client_name || project.client || project.customer_name || project.third_party_id || '',
+          clientId: project.third_party_id || project.customer_id || undefined,
+          status: project.status,
+          priority: project.priority || 'medium',
+          startDate: project.start_date || '',
+          endDate: project.end_date || '',
+          budget,
+          spent,
+          progress: progressPercentage,
+          manager: project.manager_name || project.manager || project.manager_id || '',
+          managerId: project.manager_id || undefined,
+          team: project.team || [],
+          category: project.category || 'Général',
+          lastActivity: project.updated_at || project.created_at || undefined,
+          totalHours: project.total_hours || project.totalHours || 0,
+          billableHours: project.billable_hours || project.billableHours || 0,
+          hourlyRate: Number(project.hourly_rate || project.hourlyRate || 0),
+          revenue,
           profit,
-          progress: progressPercentage
-        };
+          company_id: project.company_id,
+          created_at: project.created_at,
+          updated_at: project.updated_at
+        } as Project;
       });
       return {
         success: true,
@@ -183,10 +210,38 @@ export class ProjectsService {
   }
   async createProject(companyId: string, projectData: Omit<Project, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'profit'>): Promise<ProjectsServiceResponse<Project>> {
     try {
+      const normalizeStatusForDb = (status: Project['status']) => {
+        if (status === 'in_progress') return 'active';
+        return status;
+      };
+      const normalizePriorityForDb = (priority: Project['priority']) => {
+        if (priority === 'critical') return 'urgent';
+        return priority;
+      };
+      const isUuid = (value?: string) => !!value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+      const projectNumber = `PRJ-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+      const insertPayload = {
+        project_number: projectNumber,
+        name: projectData.name,
+        description: projectData.description || null,
+        start_date: projectData.startDate || null,
+        end_date: projectData.endDate || null,
+        budget_amount: Number.isFinite(projectData.budget) ? projectData.budget : 0,
+        budget_currency: 'EUR',
+        status: normalizeStatusForDb(projectData.status),
+        priority: normalizePriorityForDb(projectData.priority),
+        manager_id: isUuid(projectData.managerId ?? projectData.manager) ? (projectData.managerId ?? projectData.manager) : null,
+        third_party_id: isUuid(projectData.clientId ?? projectData.client) ? (projectData.clientId ?? projectData.client) : null,
+        hourly_rate: Number.isFinite(projectData.hourlyRate) ? projectData.hourlyRate : 0,
+        billing_type: 'fixed',
+        is_billable: true,
+        color: '#3B82F6',
+        tags: [] as string[]
+      };
       const { data, error } = await supabase
         .from('projects')
         .insert({
-          ...projectData,
+          ...insertPayload,
           company_id: companyId,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()

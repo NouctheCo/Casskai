@@ -11,7 +11,7 @@
  */
 import React, { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LocaleProvider } from '@/contexts/LocaleContext';
 import { ConfigProvider } from '@/contexts/ConfigContext';
@@ -70,7 +70,7 @@ function App() {
                           <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
                             <AppRouter />
                           </Suspense>
-                          <Toaster />
+                          <Toaster position="top-right" richColors closeButton duration={4000} />
                           <UpdateNotification />
                           <OfflineIndicator />
                           <CookieConsentBanner />
@@ -83,7 +83,7 @@ function App() {
                             <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
                               <AppRouter />
                             </Suspense>
-                            <Toaster />
+                            <Toaster position="top-right" richColors closeButton duration={4000} />
                             <UpdateNotification />
                             <OfflineIndicator />
                             <CookieConsentBanner />

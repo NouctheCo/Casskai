@@ -186,7 +186,7 @@ export class FECParser {
     if (!headerValidation.valid) {
       errors.push({
         row: 1,
-        message: headerValidation.message,
+        message: headerValidation.message ?? 'Format FEC invalide',
         type: 'format',
         severity: 'error'
       });

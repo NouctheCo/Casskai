@@ -14,7 +14,8 @@ import {
   ThumbsUp,
   AlertCircle,
   Lightbulb,
-  Award
+  Award,
+  Pencil
 } from 'lucide-react';
 import { hrPerformanceService } from '@/services/hrPerformanceService';
 import { FeedbackFormModal } from './FeedbackFormModal';
@@ -32,6 +33,7 @@ export function FeedbackTab({ companyId, employees, currentUserId: _currentUserI
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [showModal, setShowModal] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
 
   useEffect(() => {
     loadFeedbacks();
@@ -51,6 +53,24 @@ export function FeedbackTab({ companyId, employees, currentUserId: _currentUserI
     if (response.success) {
       await loadFeedbacks();
       setShowModal(false);
+      setSelectedFeedback(null);
+      return true;
+    }
+    return false;
+  };
+
+  const handleUpdateFeedback = async (formData: any) => {
+    if (!selectedFeedback) return false;
+    // Update feedback content via Supabase directly
+    const { supabase } = await import('@/lib/supabase');
+    const { error } = await supabase
+      .from('hr_feedback')
+      .update(formData)
+      .eq('id', selectedFeedback.id);
+    if (!error) {
+      await loadFeedbacks();
+      setShowModal(false);
+      setSelectedFeedback(null);
       return true;
     }
     return false;
@@ -183,7 +203,7 @@ export function FeedbackTab({ companyId, employees, currentUserId: _currentUserI
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+              className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
             >
               <option value="all">Tous les types</option>
               <option value="praise">Éloge</option>
@@ -257,6 +277,16 @@ export function FeedbackTab({ companyId, employees, currentUserId: _currentUserI
                       {new Date(feedback.feedback_date).toLocaleDateString('fr-FR')}
                     </p>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedFeedback(feedback);
+                      setShowModal(true);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
                 </div>
               </CardHeader>
 
@@ -286,9 +316,13 @@ export function FeedbackTab({ companyId, employees, currentUserId: _currentUserI
       {showModal && (
         <FeedbackFormModal
           isOpen={showModal}
-          onClose={() => setShowModal(false)}
-          onSubmit={handleCreateFeedback}
+          onClose={() => {
+            setShowModal(false);
+            setSelectedFeedback(null);
+          }}
+          onSubmit={selectedFeedback ? handleUpdateFeedback : handleCreateFeedback}
           employees={employees}
+          feedback={selectedFeedback}
         />
       )}
     </div>

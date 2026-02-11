@@ -18,7 +18,7 @@ export { EnterpriseProvider, useEnterprise } from './EnterpriseContext';
 export { ThemeProvider } from './ThemeContext';
 export { LocaleProvider } from './LocaleContext';
 export { SubscriptionProvider, useSubscription } from './SubscriptionContext';
-export { OnboardingProvider } from './OnboardingContextNew';
+export { OnboardingProvider } from './OnboardingContext';
 export { useOnboarding } from '../hooks/useOnboarding';
 
 // Export des hooks de modules depuis le fichier séparé

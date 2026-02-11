@@ -110,7 +110,7 @@ export class SampleDataService {
         { code: '702', name: 'Ventes de produits finis', type: 'revenue', level: 2 }
       ]
     };
-    return baseAccounts[config.standard] || baseAccounts.PCG;
+    return baseAccounts[config.standard as keyof typeof baseAccounts] || baseAccounts.PCG;
   }
   // Données d'exemple pour clients
   private getSampleCustomers(config: ChartOfAccountsConfig) {

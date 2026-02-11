@@ -52,8 +52,10 @@ chown -R www-data:www-data casskai.app && \
 chmod -R 755 casskai.app && \
 echo 'Deploy OK'
 '@
+# Strip Windows CR to avoid bash parsing issues on the remote host
+$deployScript = $deployScript -replace "`r",""
 
-ssh "${VPS_USER}@${VPS_HOST}" "$deployScript"
+ssh "${VPS_USER}@${VPS_HOST}" $deployScript
 
 # 5. Verification (pas besoin de redemarrer Nginx - sert directement les fichiers)
 Write-Host "[INFO] Fichiers deployes - Nginx les sert automatiquement" -ForegroundColor Green

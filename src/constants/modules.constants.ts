@@ -1,5 +1,5 @@
 import { moduleService } from '@/services/moduleService';
-import { ModuleDefinition } from '@/types/modules.types';
+import { ModuleDefinition, ModuleChangelogEntry } from '@/types/modules.types';
 
 // Fonction utilitaire pour obtenir la couleur selon la catégorie
 export const getColorForCategory = (category: string): string => {
@@ -117,18 +117,18 @@ export const convertToModuleDefinitions = (modules: typeof ALL_MODULES): ModuleD
       defaultValues: {}
     },
     permissions: ['*'],
-    dependencies: [],
-    conflicts: [],
+    dependencies: [] as string[],
+    conflicts: [] as string[],
     pricing: ['dashboard', 'settings', 'users', 'security'].includes(module.key) ? undefined : {
       type: 'subscription' as const,
       price: 0,
       currency: 'EUR',
-      features: []
+      features: [] as string[]
     },
     author: 'CassKai',
-    documentation: undefined,
-    supportUrl: undefined,
-    changelog: []
+    documentation: undefined as string | undefined,
+    supportUrl: undefined as string | undefined,
+    changelog: [] as ModuleChangelogEntry[]
   }));
 };
 

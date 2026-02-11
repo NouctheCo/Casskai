@@ -54,8 +54,6 @@ export interface TrainingCatalog {
   materials_url?: string;
   status: TrainingStatus;
   is_mandatory: boolean;
-  is_internal?: boolean;
-  is_certified?: boolean;
   company_id: string;
   created_at: string;
   updated_at: string;
@@ -129,15 +127,10 @@ export interface Certification {
   expiry_date?: string;
   credential_id?: string;
   credential_url?: string;
-  verification_url?: string;
-  description?: string;
-  skills_acquired?: string;
-  verification_status: CertificationVerificationStatus;
+  verification_status?: CertificationVerificationStatus;
   training_enrollment_id?: string;
   certificate_url?: string;
   is_active: boolean;
-  requires_renewal?: boolean;
-  renewal_period_months?: number;
   company_id: string;
   created_at: string;
   updated_at: string;

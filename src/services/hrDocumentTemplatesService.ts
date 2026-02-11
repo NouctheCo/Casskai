@@ -22,6 +22,7 @@ import type {
   GenerateDocumentRequest,
   DocumentArchive as _DocumentArchive,
   ArchiveStats,
+  ArchiveType,
   DocumentPreview,
   TemplateVariable
 } from '@/types/hr-document-templates.types';
@@ -373,9 +374,10 @@ export class HRDocumentTemplatesService {
       };
       const oneYearFromNow = new Date();
       oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
-      data.forEach((doc: any) => {
+      data.forEach((doc: { archive_type: ArchiveType; file_size_bytes: number | null; retention_until: string | null; can_be_destroyed: boolean }) => {
         // Count by type
-        stats.by_type[doc.archive_type] = (stats.by_type[doc.archive_type] || 0) + 1;
+        const archiveType = doc.archive_type as ArchiveType;
+        stats.by_type[archiveType] = (stats.by_type[archiveType] || 0) + 1;
         // Total size
         if (doc.file_size_bytes) {
           stats.total_size_mb += doc.file_size_bytes / (1024 * 1024);

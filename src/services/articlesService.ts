@@ -14,7 +14,7 @@ export interface Article {
   description?: string;
   category?: string;
   unit: string;
-  purchase_price: number;
+  purchase_price: number | null;
   selling_price: number;
   tva_rate: number;
   stock_quantity: number;
@@ -42,7 +42,7 @@ export interface CreateArticleInput {
   description?: string;
   category?: string;
   unit: string;
-  purchase_price: number;
+  purchase_price: number | null;
   selling_price: number;
   tva_rate: number;
   stock_quantity: number;
@@ -61,7 +61,7 @@ export interface UpdateArticleInput {
   description?: string;
   category?: string;
   unit?: string;
-  purchase_price?: number;
+  purchase_price?: number | null;
   selling_price?: number;
   tva_rate?: number;
   stock_quantity?: number;
@@ -359,7 +359,7 @@ class ArticlesService {
       active: articles.filter(a => a.is_active).length,
       lowStock: articles.filter(a => a.stock_quantity <= a.stock_min).length,
       outOfStock: articles.filter(a => a.stock_quantity === 0).length,
-      totalValue: articles.reduce((sum, a) => sum + (a.stock_quantity * a.purchase_price), 0)
+      totalValue: articles.reduce((sum, a) => sum + (a.stock_quantity * (a.purchase_price ?? 0)), 0)
     };
     return stats;
   }

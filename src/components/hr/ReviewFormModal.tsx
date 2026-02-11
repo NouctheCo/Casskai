@@ -40,7 +40,6 @@ export function ReviewFormModal({
     reviewer_id: '',
     review_type: 'manager' as 'self' | 'manager' | 'peer' | '360' | 'probation' | 'mid_year' | 'annual',
     review_date: new Date().toISOString().split('T')[0],
-    review_period: '',
     overall_rating: 3,
     competency_ratings: {} as Record<string, number>,
     strengths: '',
@@ -64,7 +63,6 @@ export function ReviewFormModal({
         reviewer_id: review.reviewer_id,
         review_type: review.review_type,
         review_date: review.review_date,
-        review_period: review.review_date, // Use review_date as review_period
         overall_rating: review.overall_rating || 3,
         competency_ratings: (review.competencies_ratings || {}) as any,
         strengths: review.strengths || '',
@@ -102,9 +100,8 @@ export function ReviewFormModal({
         reviewer_id: formData.reviewer_id,
         review_type: formData.review_type,
         review_date: formData.review_date,
-        review_period: formData.review_period || null,
         overall_rating: formData.overall_rating,
-        competency_ratings: Object.keys(formData.competency_ratings).length > 0
+        competencies_ratings: Object.keys(formData.competency_ratings).length > 0
           ? formData.competency_ratings
           : null,
         strengths: formData.strengths.trim() || null,
@@ -164,7 +161,7 @@ export function ReviewFormModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white dark:bg-gray-800 border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             {review ? 'Modifier l\'évaluation' : 'Nouvelle évaluation'}
           </h2>
           <button
@@ -184,7 +181,7 @@ export function ReviewFormModal({
                 id="employee_id"
                 value={formData.employee_id}
                 onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
-                className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Sélectionner</option>
                 {employees.map((emp) => (
@@ -204,7 +201,7 @@ export function ReviewFormModal({
                 id="reviewer_id"
                 value={formData.reviewer_id}
                 onChange={(e) => setFormData({ ...formData, reviewer_id: e.target.value })}
-                className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Sélectionner</option>
                 {employees.map((emp) => (
@@ -220,14 +217,14 @@ export function ReviewFormModal({
           </div>
 
           {/* Type et Date */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="review_type">Type d'évaluation *</Label>
               <select
                 id="review_type"
                 value={formData.review_type}
                 onChange={(e) => setFormData({ ...formData, review_type: e.target.value as any })}
-                className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="self">Auto-évaluation</option>
                 <option value="manager">Manager</option>
@@ -246,16 +243,6 @@ export function ReviewFormModal({
                 type="date"
                 value={formData.review_date}
                 onChange={(e) => setFormData({ ...formData, review_date: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="review_period">Période</Label>
-              <Input
-                id="review_period"
-                value={formData.review_period}
-                onChange={(e) => setFormData({ ...formData, review_period: e.target.value })}
-                placeholder="Ex: Q1 2025"
               />
             </div>
           </div>
@@ -322,7 +309,7 @@ export function ReviewFormModal({
               value={formData.strengths}
               onChange={(e) => setFormData({ ...formData, strengths: e.target.value })}
               rows={3}
-              className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Décrivez les points forts de l'employé..."
             />
           </div>
@@ -335,7 +322,7 @@ export function ReviewFormModal({
               value={formData.areas_for_improvement}
               onChange={(e) => setFormData({ ...formData, areas_for_improvement: e.target.value })}
               rows={3}
-              className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Décrivez les axes d'amélioration..."
             />
           </div>
@@ -348,7 +335,7 @@ export function ReviewFormModal({
               value={formData.development_plan}
               onChange={(e) => setFormData({ ...formData, development_plan: e.target.value })}
               rows={3}
-              className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Décrivez le plan de développement..."
             />
           </div>
@@ -361,7 +348,7 @@ export function ReviewFormModal({
               value={formData.manager_comments}
               onChange={(e) => setFormData({ ...formData, manager_comments: e.target.value })}
               rows={3}
-              className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Commentaires additionnels..."
             />
           </div>

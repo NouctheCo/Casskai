@@ -791,7 +791,7 @@ const DocumentationCategoryPage = () => {
 
 
 
-  const category = categoryId ? categoriesData[categoryId] : undefined;
+  const category = categoryId ? categoriesData[categoryId as keyof typeof categoriesData] : undefined;
 
 
 

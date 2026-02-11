@@ -30,7 +30,8 @@ export class AIDashboardAnalysisService {
   async analyzeKPIs(
     kpiData: RealKPIData,
     companyName: string,
-    industryType?: string
+    industryType?: string,
+    companyId?: string
   ): Promise<AIAnalysisResult> {
     // En production, utiliser la Edge Function sécurisée
     if (shouldUseEdgeFunction('dashboardAnalysis')) {
@@ -38,9 +39,12 @@ export class AIDashboardAnalysisService {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return this.getFallbackAnalysis(kpiData);
-        const prompt = this.buildAnalysisPrompt(kpiData, companyName, industryType);
+        if (!companyId) {
+          logger.warn('AiDashboardAnalysis', 'Missing companyId for Edge Function dashboardAnalysis call.');
+          return this.getFallbackAnalysis(kpiData);
+        }
         const response = await supabase.functions.invoke(fnName, {
-          body: { prompt, companyName, industryType }
+          body: { kpiData, companyName, company_id: companyId, industryType }
         });
         if (response.error) {
           logger.error('AiDashboardAnalysis', 'Edge Function dashboardAnalysis error:', response.error);

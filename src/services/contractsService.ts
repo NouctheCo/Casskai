@@ -212,12 +212,12 @@ export const contractsService = {
       const calculations = rfaResult.data || [];
 
       // Calculer les totaux
-      const totalTurnover = calculations.reduce((sum, c) => sum + c.turnover_amount, 0);
-      const totalRFA = calculations.reduce((sum, c) => sum + c.rfa_amount, 0);
+      const totalTurnover = calculations.reduce((sum: number, c: RFACalculation) => sum + c.turnover_amount, 0);
+      const totalRFA = calculations.reduce((sum: number, c: RFACalculation) => sum + c.rfa_amount, 0);
       const averageRate = totalTurnover > 0 ? (totalRFA / totalTurnover) * 100 : 0;
 
       // Construire les détails
-      const details = calculations.map(calc => ({
+      const details = calculations.map((calc: RFACalculation) => ({
         client_name: calc.client_name || contract.client_name || 'N/A',
         contract_name: calc.contract_name || contract.contract_name,
         turnover_amount: calc.turnover_amount,
@@ -360,7 +360,7 @@ export const contractsService = {
         action_type: item.action_type as ContractHistory['action_type'],
         changes: item.changes || {},
         user_id: item.user_id,
-        user_name: undefined, // Pourrait être enrichi avec une jointure sur users
+        user_name: undefined as string | undefined, // Pourrait être enrichi avec une jointure sur users
         created_at: item.created_at
       }));
 

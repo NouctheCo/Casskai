@@ -184,6 +184,7 @@
       "cancel": "Annuler",
       "createPeriodCta": "Créer la période",
       "periodsTitle": "Périodes comptables",
+      "periodsDescription": "Consultez et gérez toutes les périodes comptables de l'exercice sélectionné",
       "periodsCount": "{{count}} période(s) enregistrée(s)",
       "noPeriodsTitle": "Aucune période comptable définie",
       "noPeriodsDescription": "Créez votre première période pour commencer",
@@ -257,6 +258,10 @@
         "reopen": "Erreur lors de la réouverture",
         "closedPeriodOperation": "Action impossible : la période comptable est clôturée. Réouvrez la période pour modifier ou saisir des écritures."
       }
+    },
+    "closureHistory": {
+      "title": "Historique des clôtures",
+      "empty": "Aucun historique de clôture"
     },
     "tabs": {
       "overview": "Vue d'ensemble",
@@ -887,6 +892,7 @@
       "save": "Enregistrer",
       "delete": "Supprimer",
       "edit": "Modifier",
+      "update": "Mettre à jour",
       "close": "Fermer",
       "confirm": "Confirmer",
       "saving": "Enregistrement...",
@@ -1337,6 +1343,83 @@
         "retry": "Renvoyer en catégorisation"
       },
       "pagination": "Affichage des {{shown}} premières transactions sur {{total}}"
+    },
+    "reconciliation": {
+      "title": "Rapprochement comptable",
+      "selectEntry": "Sélectionner une écriture comptable",
+      "selectPlaceholder": "Sélectionner une écriture...",
+      "button": "Rapprocher",
+      "autoSuggestion": "Suggestion auto disponible",
+      "autoMatch": "Auto-match",
+      "autoMatchTitle": "Rapprochement automatique des transactions",
+      "suggestionsGroup": "Suggestions",
+      "allEntriesGroup": "Toutes les écritures",
+      "matchedSuccess": "Transaction rapprochée avec l'écriture comptable",
+      "autoMatchedSuccess": "{{count}} transaction(s) rapprochée(s) automatiquement",
+      "autoMatchedNone": "Aucun rapprochement automatique trouvé"
+    },
+    "labels": {
+      "accountingLabel": "Libellé comptable",
+      "editLabel": "Modifier le libellé...",
+      "labelHint": "Ce libellé apparaîtra dans l'écriture comptable"
+    },
+    "rules": {
+      "create": "Créer une règle automatique",
+      "pattern": "Motif (ex: AMAZON)",
+      "createButton": "Créer la règle",
+      "hint": "Les futures transactions contenant ce motif seront suggérées automatiquement",
+      "autoRules": "Règles auto"
+    },
+    "preview": {
+      "title": "Aperçu écriture",
+      "selectAccount": "Sélectionnez un compte pour voir l'aperçu",
+      "debitShort": "D:",
+      "creditShort": "C:",
+      "balanced": "Équilibre: D = C ="
+    },
+    "actions": {
+      "validate": "Valider",
+      "details": "Détails",
+      "ignore": "Ignorer",
+      "delete": "Supprimer",
+      "categorize": "Catégoriser",
+      "deleteSelected": "Supprimer ({{count}})",
+      "deleteAll": "Tout supprimer ({{count}})"
+    },
+    "status": {
+      "pending": "En attente",
+      "categorized": "Catégorisée",
+      "reconciled": "Rapprochée",
+      "suggestions": "Suggestions",
+      "activeRules": "Règles actives"
+    },
+    "filters": {
+      "pending": "En attente ({{count}})",
+      "categorized": "Catégorisées",
+      "all": "Toutes"
+    },
+    "fields": {
+      "bankAccount": "Compte bancaire:",
+      "selectAccount": "Sélectionner...",
+      "chooseAccount": "Choisir un compte...",
+      "searchTransactions": "Rechercher une transaction...",
+      "selectedCount": "{{count}} sélectionnée(s)",
+      "selectAll": "Sélectionner toutes les transactions"
+    },
+    "columns": {
+      "date": "Date",
+      "description": "Description",
+      "amount": "Montant",
+      "accountingAccount": "Compte comptable",
+      "actions": "Actions"
+    },
+    "messages": {
+      "noBankAccount": "⚠️ Aucun compte bancaire (512) trouvé. Créez-en un en comptabilité.",
+      "allCategorized": "Toutes les transactions sont catégorisées !",
+      "noTransactions": "Aucune transaction trouvée"
+    },
+    "bulkCategorization": {
+      "selectAccount": "Choisir un compte pour catégorisation en masse"
     }
   },
   "copySuffix": "(copie)",
@@ -1469,6 +1552,7 @@
     "actionStatus": {
       "pending": "En attente",
       "planned": "Planifiée",
+      "inProgress": "En cours",
       "completed": "Terminée",
       "cancelled": "Annulée"
     },
@@ -1658,6 +1742,7 @@
         "address": "Adresse complète",
         "postalCode": "75001",
         "city": "Paris",
+        "country": "France",
         "siret": "123 456 789 00012",
         "vatNumber": "FR12345678901",
         "notes": "Notes sur le client..."
@@ -1683,7 +1768,9 @@
       "fields": {
         "title": "Titre",
         "client": "Client",
+        "contact": "Contact",
         "amount": "Montant",
+        "weightedAmount": "Montant pondéré",
         "probability": "Probabilité",
         "stage": "Étape",
         "priority": "Priorité",
@@ -1693,6 +1780,7 @@
       "placeholders": {
         "title": "Titre de l'opportunité",
         "selectClient": "Sélectionner un client",
+        "selectContact": "Sélectionner un contact",
         "amount": "0.00",
         "notes": "Notes sur l'opportunité..."
       },
@@ -1701,9 +1789,13 @@
         "pipeline": "Pipeline",
         "timeline": "Échéances"
       },
+      "new": "Nouvelle opportunité",
+      "edit": "Modifier l'opportunité",
       "created": "Opportunité créée avec succès",
+      "updated": "Opportunité mise à jour avec succès",
       "errors": {
-        "createFailed": "Erreur lors de la création de l'opportunité"
+        "createFailed": "Erreur lors de la création de l'opportunité",
+        "updateFailed": "Erreur lors de la mise à jour de l'opportunité"
       },
       "validation": {
         "titleRequired": "Le titre est requis",
@@ -1716,7 +1808,9 @@
         "subject": "Sujet",
         "type": "Type",
         "client": "Client",
+        "contact": "Contact",
         "opportunity": "Opportunité",
+        "status": "Statut",
         "dueDate": "Date d'échéance",
         "dueTime": "Heure",
         "priority": "Priorité",
@@ -1726,6 +1820,7 @@
       "placeholders": {
         "subject": "Sujet de l'action",
         "selectClient": "Sélectionner un client",
+        "selectContact": "Sélectionner un contact",
         "selectOpportunity": "Sélectionner une opportunité",
         "notes": "Notes sur l'action..."
       },
@@ -1737,9 +1832,11 @@
         "call": "Appel",
         "email": "Email",
         "meeting": "Réunion",
-        "task": "Tâche"
+        "task": "Tâche",
+        "other": "Autre"
       },
       "noClient": "Aucun client",
+      "noContact": "Aucun contact",
       "noOpportunity": "Aucune opportunité",
       "selectClientFirst": "Sélectionnez d'abord un client",
       "created": "Action créée avec succès",
@@ -2689,7 +2786,8 @@
       "quotes": "Devis",
       "clients": "Clients",
       "payments": "Paiements",
-      "late_fees": "Pénalités"
+      "late_fees": "Pénalités",
+      "import": "Import"
     },
     "quickActions": {
       "newInvoice": "Nouvelle facture",
@@ -4149,13 +4247,24 @@
     "termin": "Terminé"
   },
   "purchases": {
+    "tabs": {
+      "list": "Achats",
+      "import": "Import en masse"
+    },
     "actions": {
       "refresh": "Actualiser",
       "export": "Exporter",
       "generateReport": "Générer rapport PDF",
       "markAsPaid": "Marquer comme payé"
     },
-    "status": "Statut",
+    "status": {
+      "label": "Statut",
+      "paid": "Payé",
+      "pending": "En attente",
+      "overdue": "En retard",
+      "partial": "Partiellement payé",
+      "realTime": "Temps réel"
+    },
     "createPurchase": "Nouvel achat",
     "description": "Description",
     "filters": {
@@ -5488,6 +5597,67 @@
     "subtitle": "Conditions régissant l'utilisation de la plateforme CassKai",
     "title": "Conditions Générales d'Utilisation"
   },
+  "bulkImport": {
+    "title": "Import en masse d'écritures comptables",
+    "description": "Importez vos écritures comptables depuis un fichier Excel. Téléchargez d'abord le modèle, remplissez-le, puis importez-le.",
+    "step1": "Télécharger le modèle",
+    "step2": "Charger votre fichier",
+    "step3": "Vérification et import",
+    "downloadTemplate": "Télécharger le modèle Excel",
+    "templateDownloaded": "Modèle téléchargé",
+    "selectFile": "Sélectionner un fichier",
+    "dropzone": "Glissez-déposez votre fichier ici ou cliquez pour sélectionner",
+    "formats": "Format accepté : .xlsx",
+    "importing": "Import en cours...",
+    "importButton": "Importer les lignes valides",
+    "reset": "Réinitialiser",
+    "newImport": "Nouvel import",
+    "error": "Erreur lors de l'import",
+    "totalLines": "Lignes totales",
+    "validLines": "Lignes valides",
+    "invalidLines": "Lignes invalides",
+    "balancedPieces": "Pièces équilibrées",
+    "unbalancedWarning": "Les pièces suivantes sont déséquilibrées et ne seront pas importées :",
+    "unbalancedSkipped": "Les pièces déséquilibrées seront ignorées",
+    "errorDetails": "Détail des erreurs :",
+    "columns": {
+      "date": "Date",
+      "journalCode": "Code Journal",
+      "pieceNumber": "N° Pièce",
+      "accountNumber": "N° Compte",
+      "label": "Libellé",
+      "debit": "Débit",
+      "credit": "Crédit",
+      "status": "Statut"
+    },
+    "validation": {
+      "noSheet": "Feuille Excel introuvable",
+      "noData": "Aucune donnée trouvée dans le fichier",
+      "noValidData": "Aucune ligne valide à importer",
+      "parseError": "Erreur lors de la lecture du fichier",
+      "dateRequired": "Date obligatoire",
+      "journalRequired": "Code journal obligatoire",
+      "pieceRequired": "N° pièce obligatoire",
+      "accountRequired": "N° compte obligatoire",
+      "accountFormat": "N° compte invalide (3 à 10 chiffres)",
+      "amountRequired": "Un montant débit ou crédit est requis",
+      "bothAmounts": "Une ligne ne peut pas avoir débit ET crédit"
+    },
+    "results": {
+      "title": "Résultats de l'import",
+      "entriesCreated": "Écritures créées",
+      "journalsCreated": "Journaux créés",
+      "accountsCreated": "Comptes créés",
+      "errors": "Erreurs"
+    },
+    "help": {
+      "title": "Format du fichier",
+      "columns": "Colonnes : Date, Code Journal, N° Pièce, N° Compte, Libellé, Débit, Crédit",
+      "date": "Date au format JJ/MM/AAAA ou AAAA-MM-JJ",
+      "balance": "Chaque pièce (même N° Pièce) doit être équilibrée (Total Débit = Total Crédit)",
+      "accounts": "Les journaux et comptes manquants seront créés automatiquement"
+    }
+  },
   "theme": "Thème",
   "thirdParties": {
     "active": "Actif",
@@ -5599,6 +5769,20 @@
           "reconcile": "Réconcilier"
         },
         "pagination": "Affichage des {{shown}} premières transactions sur {{total}}"
+      },
+      "reconciliation": {
+        "title": "Rapprochement comptable",
+        "selectEntry": "Sélectionner une écriture comptable",
+        "selectPlaceholder": "Sélectionner une écriture...",
+        "button": "Rapprocher",
+        "autoSuggestion": "Suggestion auto disponible",
+        "autoMatch": "Auto-match",
+        "autoMatchTitle": "Rapprochement automatique des transactions",
+        "suggestionsGroup": "Suggestions",
+        "allEntriesGroup": "Toutes les écritures",
+        "matchedSuccess": "Transaction rapprochée avec l'écriture comptable",
+        "autoMatchedSuccess": "{{count}} transaction(s) rapprochée(s) automatiquement",
+        "autoMatchedNone": "Aucun rapprochement automatique trouvé"
       }
     },
     "close": "Fermer",
@@ -6112,5 +6296,229 @@
     "new_conversation": "Nouvelle conversation",
     "context_enriched": "Contexte enrichi avec données entreprise",
     "personalized_suggestions": "Suggestions personnalisées"
+  },
+  "premiumForm": {
+    "title": "Nouvelle écriture comptable",
+    "unsaved": "Non sauvegardé",
+    "undo": "Annuler",
+    "undoTooltip": "Annuler (Ctrl+Z)",
+    "redo": "Rétablir",
+    "redoTooltip": "Rétablir (Ctrl+Y)",
+    "showShortcuts": "Afficher les raccourcis clavier",
+    "date": "Date",
+    "dateRequired": "La date est requise",
+    "reference": "Référence",
+    "referenceRequired": "La référence est requise",
+    "referencePlaceholder": "Ex: FAC-2024-001",
+    "accountCode": "Compte comptable",
+    "accountCodeRequired": "Le compte est requis",
+    "accountCodePlaceholder": "Tapez pour rechercher... (ex: 411, clients)",
+    "thirdParty": "Tiers (optionnel)",
+    "thirdPartyPlaceholder": "Tapez pour rechercher un client ou fournisseur...",
+    "label": "Libellé",
+    "labelRequired": "Le libellé est requis",
+    "labelMin": "Le libellé doit faire au moins 3 caractères",
+    "labelPlaceholder": "Ex: Facture client ABC",
+    "debit": "Débit (€)",
+    "credit": "Crédit (€)",
+    "debitPositive": "Le débit doit être positif",
+    "creditPositive": "Le crédit doit être positif",
+    "debitOrCreditRequired": "Le débit ou le crédit doit être renseigné",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "saveSuccess": "Écriture enregistrée avec succès",
+    "saveError": "Erreur lors de l'enregistrement",
+    "validationError": "Veuillez corriger les erreurs du formulaire",
+    "searchTime": "Recherche en {time}ms",
+    "scorePercent": "{score}%",
+    "required": "*"
+  },
+  "shortcuts": {
+    "title": "Raccourcis clavier",
+    "save": "Sauvegarder",
+    "submit": "Valider",
+    "cancel": "Annuler",
+    "undo": "Annuler la dernière action",
+    "redo": "Rétablir",
+    "duplicate": "Dupliquer",
+    "delete": "Supprimer",
+    "print": "Imprimer/Prévisualiser",
+    "saved": "Sauvegardé",
+    "submitted": "Validé",
+    "cancelled": "Annulé",
+    "undone": "Annulation",
+    "redone": "Rétablir",
+    "duplicated": "Dupliqué",
+    "saveErrorShort": "Erreur de sauvegarde",
+    "submitErrorShort": "Erreur de validation"
+  },
+  "pwa": {
+    "updateAvailable": "Mise à jour disponible",
+    "updateMessage": "Une nouvelle version de CassKai est prête.",
+    "updateNow": "Mettre à jour",
+    "updateLater": "Plus tard",
+    "offline": "Mode hors ligne",
+    "offlineMessage": "Vous êtes hors ligne",
+    "actionsP ending": "{count} en attente",
+    "offlineTitle": "Vous êtes hors ligne",
+    "offlineDescription": "Aucune connexion Internet détectée. Vérifiez votre connexion et réessayez.",
+    "offlineStatus": "Mode hors ligne actif",
+    "retry": "Réessayer",
+    "offlineFeatures": "Fonctionnalités disponibles hors ligne",
+    "offlineFeature1": "Consultation des données en cache",
+    "offlineFeature2": "Consultation des rapports téléchargés",
+    "offlineFeature3": "Brouillons sauvegardés localement",
+    "offlineFeature4": "Synchronisation automatique au retour en ligne"
+  },
+  "interactiveReports": {
+    "balanceSheet": "Bilan",
+    "entries": "Écritures",
+    "entriesCount": "{count} écritures",
+    "back": "Retour",
+    "exportExcel": "Export Excel",
+    "exporting": "Export...",
+    "topAccountsChart": "Top 10 Comptes (par solde)",
+    "monthlyEvolutionChart": "Évolution Mensuelle",
+    "chronologicalMovementsChart": "Mouvements Chronologiques",
+    "debit": "Débit",
+    "credit": "Crédit",
+    "balance": "Solde",
+    "balanceSheetTitle": "Bilan Comptable - Tous les Comptes",
+    "accountsCount": "{count} comptes",
+    "loadingBalanceSheet": "Chargement du bilan...",
+    "asset": "Actif",
+    "liability": "Passif",
+    "accountDetail": "Compte",
+    "openingBalance": "Solde d'ouverture",
+    "totalDebit": "Total Débit",
+    "totalCredit": "Total Crédit",
+    "closingBalance": "Solde de clôture",
+    "journalEntries": "Écritures comptables",
+    "viewAllEntries": "Voir toutes les écritures",
+    "viewMoreEntries": "Voir {count} écritures supplémentaires",
+    "reference": "Référence",
+    "entryDetails": "Détail des Écritures",
+    "errorLoadingBalanceSheet": "Impossible de charger le bilan",
+    "errorLoadingAccountDetail": "Impossible de charger le détail du compte",
+    "errorLoadingAccountEntries": "Impossible de charger les écritures du compte",
+    "exportSuccess": "Export Excel réussi avec formules interactives",
+    "exportError": "Erreur lors de l'export Excel",
+    "interactiveBalanceSheetExport": "Bilan Interactif - {date}",
+    "debitShort": "(D)",
+    "creditShort": "(C)",
+    "account": "Compte",
+    "description": "Description",
+    "date": "Date",
+    "amount": "Montant",
+    "chartDebit": "Débit",
+    "chartCredit": "Crédit",
+    "chartBalance": "Solde",
+    "month": "Mois",
+    "total": "Total",
+    "period": "Période",
+    "home": "Accueil"
+  },
+  "bankReconciliation": {
+    "title": "Rapprochement Bancaire",
+    "subtitle": "Rapprochez automatiquement vos transactions bancaires avec vos écritures comptables",
+    "pending": "En attente",
+    "reconciled": "Rapprochés",
+    "total": "Total",
+    "automatic": "Automatique",
+    "manual": "Manuel",
+    "averageConfidence": "Confiance moyenne",
+    "stats": "Statistiques",
+    "pendingTransactions": "Transactions en attente",
+    "noPendingTransactions": "Aucune transaction en attente",
+    "noPendingTransactionsDescription": "Toutes vos transactions bancaires sont rapprochées !",
+    "loadingTransactions": "Chargement des transactions...",
+    "bankAccount": "Compte bancaire",
+    "allAccounts": "Tous les comptes",
+    "date": "Date",
+    "description": "Description",
+    "amount": "Montant",
+    "suggestions": "Suggestions",
+    "noSuggestions": "Aucune suggestion",
+    "topMatch": "Meilleur match",
+    "confidence": "Confiance",
+    "matchReasons": "Raisons du match",
+    "viewSuggestions": "Voir les suggestions ({count})",
+    "hideSuggestions": "Masquer les suggestions",
+    "validateMatch": "Valider ce rapprochement",
+    "validateManual": "Rapprochement manuel",
+    "ignore": "Ignorer",
+    "autoReconcile": "Rapprochement automatique",
+    "autoReconcileDescription": "Valider automatiquement tous les rapprochements avec une confiance ≥85%",
+    "startAutoReconcile": "Lancer le rapprochement automatique",
+    "autoReconcileInProgress": "Rapprochement en cours...",
+    "autoReconcileSuccess": "{matched} sur {processed} transactions rapprochées automatiquement",
+    "autoReconcileError": "Erreur lors du rapprochement automatique",
+    "reconciliationCreated": "Rapprochement créé avec succès",
+    "reconciliationError": "Erreur lors de la création du rapprochement",
+    "journalEntry": "Écriture comptable",
+    "journalEntryNumber": "N° écriture",
+    "accountCode": "Compte",
+    "accountName": "Libellé compte",
+    "entryDate": "Date écriture",
+    "entryAmount": "Montant écriture",
+    "reconciliationType": "Type",
+    "typeAutomatic": "Automatique",
+    "typeManual": "Manuel",
+    "typePartial": "Partiel",
+    "matchScore": "Score {score}%",
+    "highConfidence": "Haute confiance",
+    "mediumConfidence": "Confiance moyenne",
+    "lowConfidence": "Faible confiance",
+    "filters": "Filtres",
+    "applyFilters": "Appliquer",
+    "resetFilters": "Réinitialiser",
+    "reference": "Référence",
+    "validated": "Validé",
+    "validatedBy": "Validé par",
+    "validatedAt": "Validé le",
+    "notes": "Notes"
+  },
+  "aiCategorization": {
+    "title": "Suggestions IA",
+    "loading": "Recherche de suggestions IA...",
+    "noSuggestions": "Aucune suggestion disponible",
+    "errorLoading": "Impossible de charger les suggestions",
+    "confidence": "Confiance",
+    "confidenceHigh": "Haute confiance",
+    "confidenceMedium": "Confiance moyenne",
+    "confidenceLow": "Faible confiance",
+    "usedXTimes": "Utilisé {count}x",
+    "recent": "Récent",
+    "reason": "Raison",
+    "basedOnHistory": "Basé sur historique",
+    "suggestedByAI": "Suggéré par IA",
+    "keywordMatch": "Correspondance mot-clé",
+    "applyButton": "Appliquer cette suggestion",
+    "appliedSuccess": "Compte suggéré appliqué",
+    "similarTo": "Similaire à \"{description}\" ({similarity}%)",
+    "exactMatch": "Correspondance exacte dans l'historique",
+    "usedInHistory": "Utilisé {count} fois pour des transactions similaires",
+    "helpText": "Suggestions basées sur votre historique et l'IA. Cliquez pour appliquer.",
+    "minCharacters": "Entrez au moins 3 caractères pour obtenir des suggestions",
+    "learnFromHistory": "Apprentissage depuis l'historique",
+    "learnFromHistoryDescription": "Analyser les écritures existantes pour créer des suggestions",
+    "learnFromHistorySuccess": "{count} suggestions créées depuis l'historique",
+    "learnFromHistoryError": "Erreur lors de l'apprentissage depuis l'historique",
+    "stats": {
+      "title": "Statistiques Auto-catégorisation",
+      "totalSuggestions": "Suggestions totales",
+      "validatedSuggestions": "Suggestions validées",
+      "rejectedSuggestions": "Suggestions rejetées",
+      "avgConfidence": "Confiance moyenne",
+      "accuracyRate": "Taux de précision",
+      "mostUsedAccounts": "Comptes les plus suggérés"
+    },
+    "feedback": {
+      "validated": "Suggestion validée",
+      "rejected": "Suggestion rejetée",
+      "recordedSuccess": "Feedback enregistré avec succès",
+      "recordedError": "Erreur lors de l'enregistrement du feedback"
+    }
   }
 }

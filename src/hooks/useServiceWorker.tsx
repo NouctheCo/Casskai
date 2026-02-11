@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { devLogger } from '@/utils/devLogger';
 
 interface ServiceWorkerState {
@@ -151,12 +152,26 @@ export const useServiceWorker = (): [ServiceWorkerState, ServiceWorkerActions] =
     const handleOnline = () => setState(prev => ({ ...prev, isOnline: true }));
     const handleOffline = () => setState(prev => ({ ...prev, isOnline: false }));
 
+    // Ecouter les messages de Background Sync depuis le SW
+    const handleSWMessage = async (event: MessageEvent) => {
+      if (event.data?.type === 'SYNC_NOW') {
+        try {
+          const { offlineDataService } = await import('@/services/offlineDataService');
+          await offlineDataService.syncAll();
+        } catch {
+          // Silencieux
+        }
+      }
+    };
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+    navigator.serviceWorker?.addEventListener('message', handleSWMessage);
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      navigator.serviceWorker?.removeEventListener('message', handleSWMessage);
     };
   }, []);
 
@@ -245,6 +260,7 @@ export const useOfflineStatus = () => {
 
 // Composant de notification de mise à jour
 export const UpdateNotification = () => {
+  const { t } = useTranslation();
   const { showNotification, acceptUpdate, dismissUpdate } = useUpdateNotification();
 
   if (!showNotification) return null;
@@ -258,22 +274,22 @@ export const UpdateNotification = () => {
           </svg>
         </div>
         <div className="flex-1">
-          <h4 className="text-sm font-medium">Mise à jour disponible</h4>
-          <p className="text-sm opacity-90 mt-1">Une nouvelle version de CassKai est prête.</p>
+          <h4 className="text-sm font-medium">{t('pwa.updateAvailable')}</h4>
+          <p className="text-sm opacity-90 mt-1">{t('pwa.updateMessage')}</p>
           <div className="flex space-x-2 mt-3">
             <button
               type="button"
               onClick={acceptUpdate}
               className="px-3 py-1 bg-white dark:bg-gray-800 text-blue-500 text-sm rounded hover:bg-opacity-90 transition-colors"
             >
-              Mettre à jour
+              {t('pwa.updateNow')}
             </button>
             <button
               type="button"
               onClick={dismissUpdate}
               className="px-3 py-1 text-sm border border-white border-opacity-50 rounded hover:bg-white dark:bg-gray-800 hover:bg-opacity-10 transition-colors"
             >
-              Plus tard
+              {t('pwa.updateLater')}
             </button>
           </div>
         </div>
@@ -282,28 +298,122 @@ export const UpdateNotification = () => {
   );
 };
 
-// Composant d'indicateur offline
+// Composant d'indicateur offline enrichi avec sync queue
 export const OfflineIndicator = () => {
-  const { isOnline, offlineActions } = useOfflineStatus();
+  const { t } = useTranslation();
+  const { isOnline } = useOfflineStatus();
+  const [pendingCount, setPendingCount] = useState(0);
+  const [failedCount, setFailedCount] = useState(0);
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  if (isOnline) return null;
+  // Charger les compteurs de sync queue
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
 
-  return (
-    <div
-      data-testid="offline-indicator"
-      role="status"
-      aria-live="polite"
-      className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center space-x-2"
-    >
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span className="text-sm font-medium">Mode hors ligne</span>
-      {offlineActions.length > 0 && (
-        <span className="bg-orange-600 text-xs px-2 py-1 rounded-full">
-          {offlineActions.length} en attente
+    const loadCounts = async () => {
+      try {
+        const { offlineDataService } = await import('@/services/offlineDataService');
+        const status = await offlineDataService.getSyncStatus();
+        setPendingCount(status.pendingCount);
+        setFailedCount(status.failedCount);
+        setIsSyncing(status.isSyncing);
+      } catch {
+        // Silencieux
+      }
+    };
+
+    loadCounts();
+    interval = setInterval(loadCounts, 5000);
+    return () => clearInterval(interval);
+  }, [isOnline]);
+
+  // Auto-sync au retour en ligne
+  useEffect(() => {
+    if (isOnline && pendingCount > 0) {
+      const sync = async () => {
+        try {
+          const { offlineDataService } = await import('@/services/offlineDataService');
+          setIsSyncing(true);
+          await offlineDataService.syncAll();
+          const status = await offlineDataService.getSyncStatus();
+          setPendingCount(status.pendingCount);
+          setFailedCount(status.failedCount);
+        } catch {
+          // Silencieux
+        } finally {
+          setIsSyncing(false);
+        }
+      };
+      sync();
+    }
+  }, [isOnline]);
+
+  // Mode syncing
+  if (isOnline && isSyncing) {
+    return (
+      <div
+        data-testid="sync-indicator"
+        role="status"
+        aria-live="polite"
+        className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center space-x-2"
+      >
+        <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span className="text-sm font-medium">{t('pwa.syncing', { defaultValue: 'Synchronisation...' })}</span>
+      </div>
+    );
+  }
+
+  // Mode offline
+  if (!isOnline) {
+    return (
+      <div
+        data-testid="offline-indicator"
+        role="status"
+        aria-live="polite"
+        className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center space-x-2"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span className="text-sm font-medium">{t('pwa.offline', { defaultValue: 'Mode hors ligne' })}</span>
+        {pendingCount > 0 && (
+          <span className="bg-orange-600 text-xs px-2 py-1 rounded-full">
+            {t('pwa.draftsPending', { count: pendingCount, defaultValue: `${pendingCount} brouillon(s) en attente` })}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  // Mode online avec echecs de sync
+  if (failedCount > 0) {
+    return (
+      <div
+        data-testid="sync-failed-indicator"
+        role="status"
+        aria-live="polite"
+        className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center space-x-2"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span className="text-sm font-medium">
+          {t('pwa.syncFailed', { count: failedCount, defaultValue: `${failedCount} element(s) en echec` })}
         </span>
-      )}
-    </div>
-  );
+        <button
+          onClick={async () => {
+            const { offlineDataService } = await import('@/services/offlineDataService');
+            await offlineDataService.retryFailed();
+          }}
+          className="bg-red-600 hover:bg-red-700 text-xs px-2 py-1 rounded transition-colors"
+        >
+          {t('pwa.retry', { defaultValue: 'Reessayer' })}
+        </button>
+      </div>
+    );
+  }
+
+  return null;
 };
