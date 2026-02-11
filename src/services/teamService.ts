@@ -177,7 +177,7 @@ class TeamService {
       // Récupérer l'invitation
       const { data: invitation, error: fetchError } = await supabase
         .from('company_invitations')
-        .select('email, role')
+        .select('email, role, company_id')
         .eq('id', invitationId)
         .single();
       if (fetchError || !invitation) {
@@ -185,11 +185,11 @@ class TeamService {
       }
       // Annuler l'ancienne invitation
       await this.cancelInvitation(invitationId);
-      // Créer une nouvelle invitation
+      // Créer une nouvelle invitation avec le même rôle
       await this.sendInvitation(companyId, {
         email: invitation.email,
-        role: invitation.role,
-        allowed_modules: invitation.allowed_modules || []
+        role: invitation.role as 'admin' | 'manager' | 'member' | 'viewer',
+        allowed_modules: []
       });
     } catch (error) {
       logger.error('Team', 'Error resending invitation:', error);
