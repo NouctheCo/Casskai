@@ -10,6 +10,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import Stripe from 'https://esm.sh/stripe@14.11.0?target=deno';
 import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
+import { checkRateLimit, rateLimitResponse, getRateLimitPreset } from '../_shared/rate-limit.ts';
 
 interface RequestBody {
   subscriptionId?: string;
@@ -33,6 +34,12 @@ serve(async (req: Request) => {
   // Handle CORS preflight
   const preflightResponse = handleCorsPreflightRequest(req);
   if (preflightResponse) return preflightResponse;
+
+  // Rate limiting
+  const rateLimit = checkRateLimit(req, getRateLimitPreset('cancel-subscription'))
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(rateLimit.retryAfter!, getCorsHeaders(req))
+  }
 
   try {
     console.log('[cancel-subscription] Function invoked');

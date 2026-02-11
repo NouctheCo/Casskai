@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { bankImportService, BankTransaction, BankAccount, ImportResult } from '@/services/bankImportService';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { toastCreated, toastDeleted, toastSuccess, toastError } from '@/lib/toast-helpers';
 interface UseBankingReturn {
   // State
   bankAccounts: BankAccount[];
@@ -164,10 +165,12 @@ export function useBanking(): UseBankingReturn {
       if (insertError) throw insertError;
       // Reload accounts
       await loadBankAccounts();
+      toastCreated(`Compte bancaire ${data.account_name} créé avec succès`);
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create bank account';
       setError(errorMessage);
+      toastError(`Erreur lors de la création : ${errorMessage}`);
       logger.error('UseBanking', 'Error creating bank account:', err);
       return null;
     } finally {
@@ -187,10 +190,12 @@ export function useBanking(): UseBankingReturn {
       if (updateError) throw updateError;
       // Reload accounts
       await loadBankAccounts();
+      toastDeleted('Compte bancaire supprimé');
       return true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete bank account';
       setError(errorMessage);
+      toastError(`Erreur lors de la suppression : ${errorMessage}`);
       logger.error('UseBanking', 'Error deleting bank account:', err);
       return false;
     } finally {
@@ -209,10 +214,12 @@ export function useBanking(): UseBankingReturn {
       if (updateError) throw updateError;
       // Reload transactions
       await loadTransactions();
+      toastSuccess('Transaction rapprochée avec succès');
       return true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to reconcile transaction';
       setError(errorMessage);
+      toastError(`Erreur lors du rapprochement : ${errorMessage}`);
       logger.error('UseBanking', 'Error reconciling transaction:', err);
       return false;
     } finally {

@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import i18n from '@/i18n/i18n';
+import { toastCreated, toastUpdated, toastDeleted, toastError } from '@/lib/toast-helpers';
 import type {
   JournalEntry,
   Account,
@@ -193,10 +194,12 @@ export function useJournalEntries(companyId: string) {
         logger.warn('UseJournalEntries', 'Balance update function not available:', err);
       }
       setJournalEntries(prev => [entry, ...prev]);
+      toastCreated('Écriture comptable créée avec succès');
       return entry;
     } catch (err) {
       const errorMessage = mapClosedPeriodError(err, 'Failed to create journal entry');
       setError(errorMessage);
+      toastError(`Erreur lors de la création : ${errorMessage}`);
       logger.error('UseJournalEntries', '...', error);
       throw new Error(errorMessage);
     } finally {
@@ -313,9 +316,11 @@ export function useJournalEntries(companyId: string) {
         .eq('company_id', companyId);
       if (entryError) throw entryError;
       setJournalEntries(prev => prev.filter(entry => entry.id !== entryId));
+      toastDeleted('Écriture comptable supprimée');
     } catch (err) {
       const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to delete journal entry';
       setError(errorMessage);
+      toastError(`Erreur lors de la suppression : ${errorMessage}`);
       logger.error('UseJournalEntries', '...', error);
       throw new Error(errorMessage);
     } finally {
@@ -348,12 +353,14 @@ export function useJournalEntries(companyId: string) {
       } catch (err) {
         logger.warn('UseJournalEntries', 'Balance update function not available:', err);
       }
-      setJournalEntries(prev => prev.map(entry => 
+      setJournalEntries(prev => prev.map(entry =>
         entry.id === entryId ? updatedEntry : entry
       ));
+      toastUpdated('Écriture comptable validée');
     } catch (err) {
       const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to post journal entry';
       setError(errorMessage);
+      toastError(`Erreur lors de la validation : ${errorMessage}`);
       logger.error('UseJournalEntries', '...', error);
       throw new Error(errorMessage);
     } finally {

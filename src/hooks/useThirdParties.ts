@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import { ensureAuxiliaryAccount } from '@/services/auxiliaryAccountService';
+import { toastCreated, toastUpdated, toastDeleted, toastError } from '@/lib/toast-helpers';
 type ThirdParty = any;
 export interface ThirdPartyFilters {
   type?: 'customer' | 'supplier' | 'partner' | 'employee' | 'ALL';
@@ -140,10 +141,12 @@ export function useThirdParties(companyId: string) {
       }
 
       setThirdParties(prev => [newThirdParty, ...prev]);
+      toastCreated(`Tiers ${newThirdParty.name} créé avec succès`);
       return newThirdParty;
     } catch (err) {
       const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create third party';
       setError(errorMessage);
+      toastError(`Erreur lors de la création : ${errorMessage}`);
       logger.error('UseThirdParties', '...', error);
       throw new Error(errorMessage);
     } finally {
@@ -167,13 +170,15 @@ export function useThirdParties(companyId: string) {
         .select()
         .single();
       if (updateError) throw updateError;
-      setThirdParties(prev => prev.map(tp => 
+      setThirdParties(prev => prev.map(tp =>
         tp.id === id ? updatedThirdParty : tp
       ));
+      toastUpdated(`Tiers ${updatedThirdParty.name} mis à jour`);
       return updatedThirdParty;
     } catch (err) {
       const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to update third party';
       setError(errorMessage);
+      toastError(`Erreur lors de la mise à jour : ${errorMessage}`);
       logger.error('UseThirdParties', '...', error);
       throw new Error(errorMessage);
     } finally {
@@ -193,9 +198,11 @@ export function useThirdParties(companyId: string) {
         .eq('company_id', companyId);
       if (deleteError) throw deleteError;
       setThirdParties(prev => prev.filter(tp => tp.id !== id));
+      toastDeleted('Tiers supprimé');
     } catch (err) {
       const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to delete third party';
       setError(errorMessage);
+      toastError(`Erreur lors de la suppression : ${errorMessage}`);
       logger.error('UseThirdParties', '...', error);
       throw new Error(errorMessage);
     } finally {

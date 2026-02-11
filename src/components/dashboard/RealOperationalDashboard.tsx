@@ -274,7 +274,7 @@ export const RealOperationalDashboard: React.FC = () => {
           <h1 className="text-3xl font-bold">{t('dashboard.operational.title')}</h1>
           <p className="text-muted-foreground">{t('dashboard.operational.subtitle')}</p>
         </div>
-        <Button onClick={handleRefresh} disabled={refreshing} variant="outline">
+        <Button onClick={handleRefresh} disabled={refreshing} variant="outline" aria-label="Rafraîchir le tableau de bord">
           <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
           {t('common.refresh')}
         </Button>
@@ -315,7 +315,7 @@ export const RealOperationalDashboard: React.FC = () => {
       <ThresholdAlert kpiData={kpiData} />
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="region" aria-label="Indicateurs clés de performance">
         {metrics.map((metric) => (
           <Card key={metric.id} className="relative overflow-hidden">
             <CardHeader className="pb-3">

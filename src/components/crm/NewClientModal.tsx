@@ -251,6 +251,8 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
                   onChange={(e) => handleChange('company_name', e.target.value)}
                   placeholder={t('crm.client.placeholders.companyName')}
                   required
+                  aria-required="true"
+                  aria-invalid={!formData.company_name.trim()}
                 />
               </div>
 

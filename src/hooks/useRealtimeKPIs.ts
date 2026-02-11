@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { realtimeService, createChannelName, createCompanyFilter, debounceRealtimeCallback } from '@/services/realtimeService';
 import { realDashboardKpiService, type RealKPIData } from '@/services/realDashboardKpiService';
 import { kpiCacheService } from '@/services/kpiCacheService';
+import { logger } from '@/lib/logger';
 
 export interface UseRealtimeKPIsOptions {
   /**
@@ -133,12 +134,12 @@ export function useRealtimeKPIs(
    */
   const fetchKPIs = useCallback(async () => {
     if (!companyId) {
-      if (enableLogging) console.warn('useRealtimeKPIs: No companyId provided');
+      if (enableLogging) logger.warn('useRealtimeKPIs', 'No companyId provided');
       return;
     }
 
     try {
-      if (enableLogging) console.log('🔄 Fetching KPIs...', { companyId, refreshCount });
+      if (enableLogging) logger.debug('useRealtimeKPIs', 'Fetching KPIs...', { companyId, refreshCount });
 
       // Si offline, tenter le cache Dexie
       if (!navigator.onLine) {
@@ -147,7 +148,7 @@ export function useRealtimeKPIs(
           setKpis(cached.data as RealKPIData);
           setLastUpdate(new Date());
           setError(null);
-          if (enableLogging) console.log('📦 KPIs loaded from offline cache');
+          if (enableLogging) logger.debug('useRealtimeKPIs', 'KPIs loaded from offline cache');
           return;
         }
       }
@@ -161,7 +162,7 @@ export function useRealtimeKPIs(
         setRefreshCount(prev => prev + 1);
 
         if (enableLogging) {
-          console.log('✅ KPIs updated', {
+          logger.debug('useRealtimeKPIs', 'KPIs updated', {
             revenue: stats.revenue_ytd,
             pending: stats.pending_invoices,
             lastUpdate: new Date().toISOString()
@@ -174,14 +175,14 @@ export function useRealtimeKPIs(
       if (cached && isMountedRef.current) {
         setKpis(cached.data as RealKPIData);
         setLastUpdate(new Date());
-        if (enableLogging) console.log('📦 KPIs fallback from Dexie cache after error');
+        if (enableLogging) logger.debug('useRealtimeKPIs', 'KPIs fallback from Dexie cache after error');
         return;
       }
 
       if (isMountedRef.current) {
         const error = err instanceof Error ? err : new Error('Unknown error');
         setError(error);
-        console.error('❌ Error fetching KPIs:', error);
+        logger.error('useRealtimeKPIs', 'Error fetching KPIs:', error);
       }
     } finally {
       if (isMountedRef.current) {
@@ -219,7 +220,7 @@ export function useRealtimeKPIs(
    */
   const toggleRealtime = useCallback((enabled: boolean) => {
     if (enableLogging) {
-      console.log(`🔄 Realtime ${enabled ? 'enabled' : 'disabled'}`);
+      logger.info('useRealtimeKPIs', `Realtime ${enabled ? 'enabled' : 'disabled'}`);
     }
     setIsRealtimeEnabled(enabled);
   }, [enableLogging]);
@@ -234,7 +235,7 @@ export function useRealtimeKPIs(
     const filter = createCompanyFilter(companyId);
 
     if (enableLogging) {
-      console.log('🔌 Setting up Realtime subscriptions...', {
+      logger.debug('useRealtimeKPIs', 'Setting up Realtime subscriptions...', {
         channelName,
         filter,
         watchTables
@@ -249,7 +250,7 @@ export function useRealtimeKPIs(
         filter,
         callback: (payload) => {
           if (enableLogging) {
-            console.log(`🔔 Realtime event: ${payload.table} ${payload.eventType}`, {
+            logger.debug('useRealtimeKPIs', `Realtime event: ${payload.table} ${payload.eventType}`, {
               new: payload.new,
               old: payload.old
             });
@@ -265,7 +266,7 @@ export function useRealtimeKPIs(
     // Cleanup
     return () => {
       if (enableLogging) {
-        console.log('🔌 Cleaning up Realtime subscriptions...');
+        logger.debug('useRealtimeKPIs', 'Cleaning up Realtime subscriptions...');
       }
       subscription.unsubscribe();
     };
@@ -278,7 +279,7 @@ export function useRealtimeKPIs(
     if (!companyId || refreshInterval === null) return;
 
     if (enableLogging) {
-      console.log('⏱️ Setting up automatic refresh...', {
+      logger.debug('useRealtimeKPIs', 'Setting up automatic refresh...', {
         interval: refreshInterval,
         intervalMinutes: refreshInterval / 1000 / 60
       });
@@ -290,7 +291,7 @@ export function useRealtimeKPIs(
     // Refresh périodique
     refreshTimerRef.current = setInterval(() => {
       if (enableLogging) {
-        console.log('⏱️ Automatic refresh triggered');
+        logger.debug('useRealtimeKPIs', 'Automatic refresh triggered');
       }
       refresh();
     }, refreshInterval);

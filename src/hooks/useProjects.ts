@@ -12,6 +12,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import { toastCreated, toastUpdated, toastDeleted, toastError } from '@/lib/toast-helpers';
 import {
   projectsService,
   Project,
@@ -175,13 +176,16 @@ export function useProjects(): UseProjectsReturn {
         await fetchMetrics();
         await fetchCategories();
         await fetchManagers();
+        toastCreated(`Projet ${projectData.name} créé avec succès`);
         return true;
       } else {
         setError(response.error || 'Failed to create project');
+        toastError(`Erreur lors de la création : ${response.error || 'Erreur inconnue'}`);
         return false;
       }
     } catch (err) {
       setError(err instanceof Error ? (err as Error).message : 'Unknown error');
+      toastError(`Erreur lors de la création : ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
       return false;
     }
   }, [currentCompany?.id, fetchProjects, fetchMetrics, fetchCategories, fetchManagers]);
@@ -191,13 +195,16 @@ export function useProjects(): UseProjectsReturn {
       if (response.success) {
         await fetchProjects();
         await fetchMetrics();
+        toastUpdated('Projet mis à jour');
         return true;
       } else {
         setError(response.error || 'Failed to update project');
+        toastError(`Erreur lors de la mise à jour : ${response.error || 'Erreur inconnue'}`);
         return false;
       }
     } catch (err) {
       setError(err instanceof Error ? (err as Error).message : 'Unknown error');
+      toastError(`Erreur lors de la mise à jour : ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
       return false;
     }
   }, [fetchProjects, fetchMetrics]);
@@ -207,13 +214,16 @@ export function useProjects(): UseProjectsReturn {
       if (response.success) {
         await fetchProjects();
         await fetchMetrics();
+        toastDeleted('Projet supprimé');
         return true;
       } else {
         setError(response.error || 'Failed to delete project');
+        toastError(`Erreur lors de la suppression : ${response.error || 'Erreur inconnue'}`);
         return false;
       }
     } catch (err) {
       setError(err instanceof Error ? (err as Error).message : 'Unknown error');
+      toastError(`Erreur lors de la suppression : ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
       return false;
     }
   }, [fetchProjects, fetchMetrics]);
@@ -223,13 +233,16 @@ export function useProjects(): UseProjectsReturn {
       const response = await projectsService.createTask(currentCompany.id, taskData);
       if (response.success) {
         await fetchProjectTasks(taskData.project_id);
+        toastCreated('Tâche créée avec succès');
         return true;
       } else {
         setError(response.error || 'Failed to create task');
+        toastError(`Erreur lors de la création : ${response.error || 'Erreur inconnue'}`);
         return false;
       }
     } catch (err) {
       setError(err instanceof Error ? (err as Error).message : 'Unknown error');
+      toastError(`Erreur lors de la création : ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
       return false;
     }
   }, [currentCompany?.id, fetchProjectTasks]);
@@ -240,13 +253,16 @@ export function useProjects(): UseProjectsReturn {
       if (response.success) {
         await fetchTimeEntries();
         await fetchMetrics();
+        toastCreated('Saisie de temps enregistrée avec succès');
         return true;
       } else {
         setError(response.error || 'Failed to create time entry');
+        toastError(`Erreur lors de l'enregistrement : ${response.error || 'Erreur inconnue'}`);
         return false;
       }
     } catch (err) {
       setError(err instanceof Error ? (err as Error).message : 'Unknown error');
+      toastError(`Erreur lors de l'enregistrement : ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
       return false;
     }
   }, [currentCompany?.id, fetchTimeEntries, fetchMetrics]);

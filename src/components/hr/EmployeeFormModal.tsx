@@ -156,6 +156,9 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="employee-modal-title"
     >
       <div
         className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl my-auto flex flex-col"
@@ -163,7 +166,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
       >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b px-6 py-4 flex items-center justify-between rounded-t-lg shrink-0">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+          <h2 id="employee-modal-title" className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {employee ? 'Modifier l\'employé' : 'Nouvel Employé'}
           </h2>
           <button
@@ -189,9 +192,12 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 id="first_name"
                 {...form.register('first_name')}
                 className={form.formState.errors.first_name ? 'border-red-500' : ''}
+                aria-required="true"
+                aria-invalid={!!form.formState.errors.first_name}
+                aria-describedby={form.formState.errors.first_name ? 'first_name-error' : undefined}
               />
               {form.formState.errors.first_name && (
-                <p className="text-sm text-red-500 mt-1">{form.formState.errors.first_name.message}</p>
+                <p id="first_name-error" className="text-sm text-red-500 mt-1" role="alert">{form.formState.errors.first_name.message}</p>
               )}
             </div>
             <div>
@@ -200,9 +206,12 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 id="last_name"
                 {...form.register('last_name')}
                 className={form.formState.errors.last_name ? 'border-red-500' : ''}
+                aria-required="true"
+                aria-invalid={!!form.formState.errors.last_name}
+                aria-describedby={form.formState.errors.last_name ? 'last_name-error' : undefined}
               />
               {form.formState.errors.last_name && (
-                <p className="text-sm text-red-500 mt-1">{form.formState.errors.last_name.message}</p>
+                <p id="last_name-error" className="text-sm text-red-500 mt-1" role="alert">{form.formState.errors.last_name.message}</p>
               )}
             </div>
             <div>
@@ -212,9 +221,12 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 type="email"
                 {...form.register('email')}
                 className={form.formState.errors.email ? 'border-red-500' : ''}
+                aria-required="true"
+                aria-invalid={!!form.formState.errors.email}
+                aria-describedby={form.formState.errors.email ? 'email-error' : undefined}
               />
               {form.formState.errors.email && (
-                <p className="text-sm text-red-500 mt-1">{form.formState.errors.email.message}</p>
+                <p id="email-error" className="text-sm text-red-500 mt-1" role="alert">{form.formState.errors.email.message}</p>
               )}
             </div>
             <div>
@@ -237,9 +249,12 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 id="position"
                 {...form.register('position')}
                 className={form.formState.errors.position ? 'border-red-500' : ''}
+                aria-required="true"
+                aria-invalid={!!form.formState.errors.position}
+                aria-describedby={form.formState.errors.position ? 'position-error' : undefined}
               />
               {form.formState.errors.position && (
-                <p className="text-sm text-red-500 mt-1">{form.formState.errors.position.message}</p>
+                <p id="position-error" className="text-sm text-red-500 mt-1" role="alert">{form.formState.errors.position.message}</p>
               )}
             </div>
             <div>

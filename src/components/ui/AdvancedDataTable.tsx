@@ -374,11 +374,13 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
+                aria-label="Rechercher dans le tableau"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                  aria-label="Effacer la recherche"
                 >
                   <X className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                 </button>
@@ -447,6 +449,7 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
                         paginatedData.length > 0 && selectedRows.size === paginatedData.length
                       }
                       onCheckedChange={handleSelectAll}
+                      aria-label="Sélectionner toutes les lignes"
                     />
                   </th>
                 )}
@@ -464,6 +467,15 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
                     )}
                     style={{ width: column.width }}
                     onClick={() => column.sortable && handleSort(column.id)}
+                    aria-sort={
+                      column.sortable && sortConfig?.key === column.id
+                        ? sortConfig.direction === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : column.sortable
+                        ? 'none'
+                        : undefined
+                    }
                   >
                     <div className="flex items-center justify-between">
                       <span>{column.label}</span>
@@ -506,6 +518,7 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
                           <Checkbox
                             checked={isSelected}
                             onCheckedChange={() => handleSelectRow(rowId)}
+                            aria-label={`Sélectionner la ligne ${rowId}`}
                           />
                         </td>
                       )}
@@ -530,7 +543,7 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
                         <td className="px-4 py-3">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label="Actions de la ligne">
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -585,6 +598,7 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
               size="sm"
               onClick={() => goToPage(1)}
               disabled={currentPage === 1}
+              aria-label="Première page"
             >
               <ChevronsLeft className="w-4 h-4" />
             </Button>
@@ -593,6 +607,7 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
               size="sm"
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
+              aria-label="Page précédente"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
@@ -606,6 +621,7 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
               size="sm"
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
+              aria-label="Page suivante"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
@@ -614,6 +630,7 @@ export default function AdvancedDataTable<T extends Record<string, any>>({
               size="sm"
               onClick={() => goToPage(totalPages)}
               disabled={currentPage === totalPages}
+              aria-label="Dernière page"
             >
               <ChevronsRight className="w-4 h-4" />
             </Button>

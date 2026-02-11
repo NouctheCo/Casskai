@@ -8,6 +8,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
 import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
+import { checkRateLimit, rateLimitResponse, getRateLimitPreset } from '../_shared/rate-limit.ts'
 
 interface ApprovalRequest {
   deletion_request_id: string;
@@ -18,6 +19,12 @@ interface ApprovalRequest {
 serve(async (req) => {
   const preflightResponse = handleCorsPreflightRequest(req)
   if (preflightResponse) return preflightResponse
+
+  // Rate limiting
+  const rateLimit = checkRateLimit(req, getRateLimitPreset('approve-company-deletion'))
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(rateLimit.retryAfter!, getCorsHeaders(req))
+  }
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!

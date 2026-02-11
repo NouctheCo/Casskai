@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.47.0'
 import { cron } from 'https://deno.land/x/deno_cron@v1.0.0/cron.ts'
 import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
+import { checkRateLimit, rateLimitResponse, getRateLimitPreset } from '../_shared/rate-limit.ts'
 
 interface Workflow {
   id: string
@@ -28,11 +29,41 @@ serve(async (req) => {
   const preflightResponse = handleCorsPreflightRequest(req)
   if (preflightResponse) return preflightResponse
 
+  // Rate limiting
+  const rateLimit = checkRateLimit(req, getRateLimitPreset('workflow-scheduler'))
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(rateLimit.retryAfter!, getCorsHeaders(req))
+  }
+
   try {
+    // Authentication check - require service role key or valid JWT
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Missing Authorization header' }),
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      )
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
+
+    // Verify authentication (either service role or valid user JWT)
+    const token = authHeader.replace('Bearer ', '')
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+    if (token !== serviceRoleKey) {
+      // If not service role key, verify it's a valid user JWT
+      const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
+      if (authError || !user) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Invalid token' }),
+          { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+        )
+      }
+    }
 
     const url = new URL(req.url)
     const action = url.searchParams.get('action') || 'schedule'

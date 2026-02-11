@@ -14,6 +14,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { crmService } from '@/services/crmService';
 import { toastCreated, toastSuccess, toastError } from '@/lib/toast-helpers';
+import { logger } from '@/lib/logger';
 import {
   Client,
   Contact,
@@ -135,20 +136,20 @@ export function useCrm(): UseCrmReturn {
     setError(null);
 
     try {
-      console.log('[useCrm] fetchContacts - companyId:', currentCompany.id, 'clientId:', clientId);
+      logger.debug('useCrm', 'fetchContacts - companyId:', { companyId: currentCompany.id, clientId });
       const response = await crmService.getContacts(currentCompany.id, clientId);
-      console.log('[useCrm] fetchContacts response:', response);
+      logger.debug('useCrm', 'fetchContacts response:', response);
 
       if (response.success && response.data) {
-        console.log('[useCrm] Setting contacts:', response.data.length, 'items');
+        logger.debug('useCrm', 'Setting contacts:', { count: response.data.length });
         setContacts(response.data);
       } else {
         const errorMsg = getErrorMessage(response.error) || 'Failed to fetch contacts';
-        console.error('[useCrm] fetchContacts error:', errorMsg);
+        logger.error('useCrm', 'fetchContacts error:', errorMsg);
         setError(errorMsg);
       }
     } catch (err) {
-      console.error('[useCrm] fetchContacts exception:', err);
+      logger.error('useCrm', 'fetchContacts exception:', err);
       setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setContactsLoading(false);
@@ -338,16 +339,16 @@ export function useCrm(): UseCrmReturn {
     if (!currentCompany?.id) return false;
 
     try {
-      console.log('[useCrm] Creating opportunity:', opportunityData);
+      logger.debug('useCrm', 'Creating opportunity:', opportunityData);
       const response = await crmService.createOpportunity(currentCompany.id, opportunityData);
-      console.log('[useCrm] Opportunity creation response:', response);
+      logger.debug('useCrm', 'Opportunity creation response:', response);
 
       if (response.success) {
         toastSuccess('Opportunité créée avec succès');
         // Refresh opportunities list
-        console.log('[useCrm] Fetching opportunities after creation...');
+        logger.debug('useCrm', 'Fetching opportunities after creation...');
         await fetchOpportunities();
-        console.log('[useCrm] Opportunities refreshed');
+        logger.debug('useCrm', 'Opportunities refreshed');
         return true;
       } else {
         const errorMsg = getErrorMessage(response.error) || 'Failed to create opportunity';
@@ -356,7 +357,7 @@ export function useCrm(): UseCrmReturn {
         return false;
       }
     } catch (err) {
-      console.error('[useCrm] Exception creating opportunity:', err);
+      logger.error('useCrm', 'Exception creating opportunity:', err);
       const errorMsg = err instanceof Error ? (err as Error).message : 'Unknown error';
       setError(errorMsg);
       toastError(errorMsg);
@@ -366,16 +367,16 @@ export function useCrm(): UseCrmReturn {
 
   const updateOpportunity = useCallback(async (opportunityId: string, opportunityData: Partial<OpportunityFormData>): Promise<boolean> => {
     try {
-      console.log('[useCrm] Updating opportunity:', opportunityId, opportunityData);
+      logger.debug('useCrm', 'Updating opportunity:', { opportunityId, opportunityData });
       const response = await crmService.updateOpportunity(opportunityId, opportunityData);
-      console.log('[useCrm] Opportunity update response:', response);
+      logger.debug('useCrm', 'Opportunity update response:', response);
 
       if (response.success) {
         toastSuccess('Opportunité mise à jour avec succès');
         // Refresh opportunities list
-        console.log('[useCrm] Fetching opportunities after update...');
+        logger.debug('useCrm', 'Fetching opportunities after update...');
         await fetchOpportunities();
-        console.log('[useCrm] Opportunities refreshed');
+        logger.debug('useCrm', 'Opportunities refreshed');
         return true;
       } else {
         const errorMsg = getErrorMessage(response.error) || 'Failed to update opportunity';
@@ -384,7 +385,7 @@ export function useCrm(): UseCrmReturn {
         return false;
       }
     } catch (err) {
-      console.error('[useCrm] Exception updating opportunity:', err);
+      logger.error('useCrm', 'Exception updating opportunity:', err);
       const errorMsg = err instanceof Error ? (err as Error).message : 'Unknown error';
       setError(errorMsg);
       toastError(errorMsg);
@@ -394,16 +395,16 @@ export function useCrm(): UseCrmReturn {
 
   const deleteOpportunity = useCallback(async (opportunityId: string): Promise<boolean> => {
     try {
-      console.log('[useCrm] Deleting opportunity:', opportunityId);
+      logger.debug('useCrm', 'Deleting opportunity:', { opportunityId });
       const response = await crmService.deleteOpportunity(opportunityId);
-      console.log('[useCrm] Opportunity delete response:', response);
+      logger.debug('useCrm', 'Opportunity delete response:', response);
 
       if (response.success) {
         toastSuccess('Opportunité supprimée avec succès');
         // Refresh opportunities list
-        console.log('[useCrm] Fetching opportunities after delete...');
+        logger.debug('useCrm', 'Fetching opportunities after delete...');
         await fetchOpportunities();
-        console.log('[useCrm] Opportunities refreshed');
+        logger.debug('useCrm', 'Opportunities refreshed');
         return true;
       } else {
         const errorMsg = getErrorMessage(response.error) || 'Failed to delete opportunity';
@@ -412,7 +413,7 @@ export function useCrm(): UseCrmReturn {
         return false;
       }
     } catch (err) {
-      console.error('[useCrm] Exception deleting opportunity:', err);
+      logger.error('useCrm', 'Exception deleting opportunity:', err);
       const errorMsg = err instanceof Error ? (err as Error).message : 'Unknown error';
       setError(errorMsg);
       toastError(errorMsg);
@@ -424,16 +425,16 @@ export function useCrm(): UseCrmReturn {
     if (!currentCompany?.id) return false;
 
     try {
-      console.log('[useCrm] Creating commercial action:', actionData);
+      logger.debug('useCrm', 'Creating commercial action:', actionData);
       const response = await crmService.createCommercialAction(currentCompany.id, actionData);
-      console.log('[useCrm] Action creation response:', response);
+      logger.debug('useCrm', 'Action creation response:', response);
 
       if (response.success) {
         toastSuccess('Action commerciale créée avec succès');
         // Refresh commercial actions list
-        console.log('[useCrm] Fetching actions after creation...');
+        logger.debug('useCrm', 'Fetching actions after creation...');
         await fetchCommercialActions();
-        console.log('[useCrm] Actions refreshed');
+        logger.debug('useCrm', 'Actions refreshed');
         return true;
       } else {
         const errorMsg = getErrorMessage(response.error) || 'Failed to create commercial action';
@@ -442,7 +443,7 @@ export function useCrm(): UseCrmReturn {
         return false;
       }
     } catch (err) {
-      console.error('[useCrm] Exception creating action:', err);
+      logger.error('useCrm', 'Exception creating action:', err);
       const errorMsg = err instanceof Error ? (err as Error).message : 'Unknown error';
       setError(errorMsg);
       toastError(errorMsg);

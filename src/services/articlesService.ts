@@ -118,10 +118,10 @@ class ArticlesService {
     query = query.order('name', { ascending: true });
     const { data, error } = await query;
 
-    logger.debug('📦 [articlesService] Query result - data count:', data?.length || 0);
-    logger.debug('📦 [articlesService] Query result - error:', error);
+    logger.debug('articlesService', 'Query result - data count:', { count: data?.length || 0 });
+    logger.debug('articlesService', 'Query result - error:', error);
     if (error) {
-      console.error('❌ [articlesService] FULL ERROR OBJECT:', JSON.stringify(error, null, 2));
+      logger.error('articlesService', 'FULL ERROR OBJECT:', JSON.stringify(error, null, 2));
       logger.error('Articles', 'Error fetching articles:', error);
       throw error;
     }
@@ -189,13 +189,13 @@ class ArticlesService {
     logger.debug('  - articleData:', articleData);
 
     // Check if reference already exists
-    logger.debug('🔍 Checking if reference already exists:', articleData.reference);
+    logger.debug('articlesService', 'Checking if reference already exists:', articleData.reference);
     const existingArticle = await this.getArticleByReference(companyId, articleData.reference);
     if (existingArticle) {
-      console.error('❌ Reference already exists:', existingArticle.id);
+      logger.error('articlesService', 'Reference already exists:', { existingId: existingArticle.id });
       throw new Error(`Un article avec la référence "${articleData.reference}" existe déjà`);
     }
-    logger.debug('✅ Reference is unique');
+    logger.debug('articlesService', 'Reference is unique');
 
     const dataToInsert = {
       company_id: companyId,
@@ -216,7 +216,7 @@ class ArticlesService {
     logger.debug('  - error:', error);
 
     if (error) {
-      console.error('❌ Database error:', JSON.stringify(error, null, 2));
+      logger.error('articlesService', 'Database error:', JSON.stringify(error, null, 2));
       logger.error('Articles', 'Error creating article:', error);
       // Handle unique constraint violations
       if (error.code === '23505') {

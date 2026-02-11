@@ -6,6 +6,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export type RealtimeTable =
@@ -48,7 +49,7 @@ class RealtimeService {
    *   event: '*',
    *   filter: 'company_id=eq.123',
    *   callback: (payload) => {
-   *     console.log('Invoice changed:', payload);
+   *     logger.debug('Realtime', 'Invoice changed:', payload);
    *   }
    * });
    *
@@ -72,7 +73,7 @@ class RealtimeService {
 
     // Vérifier si channel existe déjà
     if (this.activeChannels.has(channelName)) {
-      console.warn(`Channel ${channelName} already exists, reusing it`);
+      logger.warn('RealtimeService', `Channel ${channelName} already exists, reusing it`);
       return {
         channel: this.activeChannels.get(channelName)!,
         unsubscribe: () => this.unsubscribe(channelName)
@@ -106,11 +107,11 @@ class RealtimeService {
     // Subscribe au channel
     subscription.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
-        console.log(`✅ Subscribed to ${table} (channel: ${channelName})`);
+        logger.info('RealtimeService', `Subscribed to ${table} (channel: ${channelName})`);
       } else if (status === 'CHANNEL_ERROR') {
-        console.error(`❌ Error subscribing to ${table}`);
+        logger.error('RealtimeService', `Error subscribing to ${table}`);
       } else if (status === 'TIMED_OUT') {
-        console.error(`⏱️ Timeout subscribing to ${table}`);
+        logger.error('RealtimeService', `Timeout subscribing to ${table}`);
       }
     });
 
@@ -143,7 +144,7 @@ class RealtimeService {
   ): RealtimeSubscription {
     // Vérifier si channel existe déjà
     if (this.activeChannels.has(channelName)) {
-      console.warn(`Channel ${channelName} already exists, reusing it`);
+      logger.warn('RealtimeService', `Channel ${channelName} already exists, reusing it`);
       return {
         channel: this.activeChannels.get(channelName)!,
         unsubscribe: () => this.unsubscribe(channelName)
@@ -179,11 +180,11 @@ class RealtimeService {
     // Subscribe au channel
     channel.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
-        console.log(`✅ Subscribed to ${subscriptions.length} tables (channel: ${channelName})`);
+        logger.info('RealtimeService', `Subscribed to ${subscriptions.length} tables (channel: ${channelName})`);
       } else if (status === 'CHANNEL_ERROR') {
-        console.error(`❌ Error subscribing to multiple tables`);
+        logger.error('RealtimeService', 'Error subscribing to multiple tables');
       } else if (status === 'TIMED_OUT') {
-        console.error(`⏱️ Timeout subscribing to multiple tables`);
+        logger.error('RealtimeService', 'Timeout subscribing to multiple tables');
       }
     });
 
@@ -205,9 +206,9 @@ class RealtimeService {
     if (channel) {
       supabase.removeChannel(channel);
       this.activeChannels.delete(channelName);
-      console.log(`🔌 Unsubscribed from ${channelName}`);
+      logger.info('RealtimeService', `Unsubscribed from ${channelName}`);
     } else {
-      console.warn(`Channel ${channelName} not found`);
+      logger.warn('RealtimeService', `Channel ${channelName} not found`);
     }
   }
 
@@ -217,7 +218,7 @@ class RealtimeService {
   unsubscribeAll(): void {
     this.activeChannels.forEach((channel, channelName) => {
       supabase.removeChannel(channel);
-      console.log(`🔌 Unsubscribed from ${channelName}`);
+      logger.info('RealtimeService', `Unsubscribed from ${channelName}`);
     });
 
     this.activeChannels.clear();

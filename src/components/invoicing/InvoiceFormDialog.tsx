@@ -502,6 +502,8 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                     placeholder="Ex: FAC-2024-001"
                     value={formData.invoiceNumber}
                     onChange={(e) => setFormData(prev => ({ ...prev, invoiceNumber: e.target.value }))}
+                    aria-required="true"
+                    aria-invalid={!formData.invoiceNumber}
                   />
                 </div>
               </div>
@@ -513,6 +515,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                     type="date"
                     value={formData.issueDate}
                     onChange={(e) => setFormData(prev => ({ ...prev, issueDate: e.target.value }))}
+                    aria-label="Date d'émission de la facture"
                   />
                 </div>
                 <div className="space-y-2">
@@ -587,6 +590,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                           min="1"
                           value={item.quantity}
                           onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value) || 1)}
+                          aria-label={`Quantité pour l'article ${index + 1}`}
                         />
                       </div>
                       <div className="col-span-2">
@@ -597,6 +601,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                           step="0.01"
                           value={item.unitPrice}
                           onChange={(e) => updateItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                          aria-label={`Prix unitaire HT pour l'article ${index + 1}`}
                         />
                       </div>
                       <div className="col-span-2">

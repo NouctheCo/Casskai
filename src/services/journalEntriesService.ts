@@ -528,14 +528,14 @@ class JournalEntriesService {
         const offset = (page - 1) * limit;
         query = query.range(offset, offset + limit - 1);
       }
-      // Emit a console log so Playwright can capture the request context
+      // Emit a log so Playwright can capture the request context
       try {
-        console.log('[journalEntriesService] getJournalEntries calling Supabase for companyId:', companyId, 'filters:', { page, limit, dateFrom, dateTo, journalId, accountId, reference, description, status, sortBy, sortOrder });
+        logger.debug('JournalEntries', 'getJournalEntries calling Supabase for companyId:', { companyId, filters: { page, limit, dateFrom, dateTo, journalId, accountId, reference, description, status, sortBy, sortOrder } });
       } catch (_e) { /* ignore logging errors */ }
       const { data, error, count } = await query;
       // Log raw result for browser debugging
       try {
-        console.log('[journalEntriesService] getJournalEntries raw result:', { rows: (data || []).length, count });
+        logger.debug('JournalEntries', 'getJournalEntries raw result:', { rows: (data || []).length, count });
       } catch (_e) { /* ignore logging errors */ }
       if (error) {
         throw error;

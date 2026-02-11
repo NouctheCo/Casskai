@@ -182,15 +182,16 @@ export function BankAccountFormModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="bank-account-modal-title">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden">
         <div className="shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">
+          <h2 id="bank-account-modal-title" className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">
             {account ? 'Modifier le compte bancaire' : 'Nouveau compte bancaire'}
           </h2>
           <button
             onClick={onClose}
             className="text-gray-400 dark:text-gray-300 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            aria-label="Fermer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -206,9 +207,12 @@ export function BankAccountFormModal({
               onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
               placeholder="Ex: Compte courant principal"
               className={errors.account_name ? 'border-red-500' : ''}
+              aria-required="true"
+              aria-invalid={!!errors.account_name}
+              aria-describedby={errors.account_name ? 'account_name-error' : undefined}
             />
             {errors.account_name && (
-              <p className="text-red-500 text-sm mt-1">{errors.account_name}</p>
+              <p id="account_name-error" className="text-red-500 text-sm mt-1" role="alert">{errors.account_name}</p>
             )}
           </div>
 
@@ -252,11 +256,14 @@ export function BankAccountFormModal({
               placeholder="FR76 1234 5678 9012 3456 7890 123"
               className={errors.iban ? 'border-red-500' : ''}
               maxLength={34}
+              aria-required="true"
+              aria-invalid={!!errors.iban}
+              aria-describedby={errors.iban ? 'iban-error iban-help' : 'iban-help'}
             />
             {errors.iban && (
-              <p className="text-red-500 text-sm mt-1">{errors.iban}</p>
+              <p id="iban-error" className="text-red-500 text-sm mt-1" role="alert">{errors.iban}</p>
             )}
-            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300 mt-1">
+            <p id="iban-help" className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300 mt-1">
               Format: 2 lettres pays + 2 chiffres + code bancaire (espaces automatiques)
             </p>
           </div>

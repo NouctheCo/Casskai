@@ -14,6 +14,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { toastCreated, toastUpdated, toastDeleted, toastError } from '@/lib/toast-helpers';
 
 import {
   InventoryService,
@@ -361,11 +362,15 @@ export function useInventory(): UseInventoryReturn {
 
       await fetchCategories();
 
+      toastCreated(`Article ${itemData.productName} créé avec succès`);
+
       return true;
 
     } catch (err) {
 
       setError(err instanceof Error ? err.message : 'Unknown error');
+
+      toastError(`Erreur lors de la création : ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
 
       return false;
 
@@ -406,11 +411,15 @@ export function useInventory(): UseInventoryReturn {
 
       await fetchMetrics();
 
+      toastUpdated('Article mis à jour');
+
       return true;
 
     } catch (err) {
 
       setError(err instanceof Error ? err.message : 'Unknown error');
+
+      toastError(`Erreur lors de la mise à jour : ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
 
       return false;
 
@@ -436,11 +445,15 @@ export function useInventory(): UseInventoryReturn {
 
       await fetchMetrics();
 
+      toastDeleted('Article supprimé');
+
       return true;
 
     } catch (err) {
 
       setError(err instanceof Error ? err.message : 'Unknown error');
+
+      toastError(`Erreur lors de la suppression : ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
 
       return false;
 
@@ -466,11 +479,15 @@ export function useInventory(): UseInventoryReturn {
 
       await fetchMetrics();
 
+      toastCreated('Mouvement de stock créé avec succès');
+
       return true;
 
     } catch (err) {
 
       setError(err instanceof Error ? err.message : 'Unknown error');
+
+      toastError(`Erreur lors de la création du mouvement : ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
 
       return false;
 
