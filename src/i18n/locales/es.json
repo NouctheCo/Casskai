@@ -463,6 +463,96 @@
       "totalBudget": "Presupuesto total",
       "totalActual": "Real total",
       "totalVariance": "Desviación total"
+    },
+    "closure": {
+      "title": "Cierre contable",
+      "subtitle": "Gestione sus períodos contables y realice cierres de ejercicio",
+      "refresh": "Actualizar",
+      "newPeriod": "Nuevo período",
+      "loading": "Cargando períodos...",
+      "createTitle": "Crear un período contable",
+      "createDescription": "Defina un nuevo período para su ejercicio contable",
+      "periodNameLabel": "Nombre del período",
+      "periodNamePlaceholder": "Ej.: Ejercicio 2025",
+      "startDateLabel": "Fecha de inicio",
+      "endDateLabel": "Fecha de fin",
+      "cancel": "Cancelar",
+      "createPeriodCta": "Crear período",
+      "periodsTitle": "Períodos contables",
+      "periodsDescription": "Revise y gestione todos los períodos contables del ejercicio seleccionado",
+      "periodsCount": "{{count}} período(s) registrado(s)",
+      "noPeriodsTitle": "No hay períodos contables definidos",
+      "noPeriodsDescription": "Cree su primer período para comenzar",
+      "table": {
+        "period": "Período",
+        "startDate": "Fecha inicio",
+        "endDate": "Fecha fin",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "status": {
+        "closed": "Cerrado",
+        "open": "Abierto"
+      },
+      "tooltips": {
+        "validate": "Validar para cierre",
+        "generateAN": "Generar asientos de apertura",
+        "reopen": "Reabrir período"
+      },
+      "validationTitle": "Validación de cierre: {{periodName}}",
+      "validationRange": "Del {{start}} al {{end}}",
+      "validationState": "Estado de validación",
+      "balanceCheck": "Balance de comprobación",
+      "totalDebit": "Total débito",
+      "totalCredit": "Total crédito",
+      "draftEntries": "Asientos en borrador",
+      "unletteredEntries": "Líneas de terceros sin conciliación",
+      "periodResultTitle": "Resultado del período",
+      "profit": "Beneficio",
+      "loss": "Pérdida",
+      "profitLower": "beneficio",
+      "lossLower": "pérdida",
+      "chargesLabel": "Gastos (clase 6)",
+      "productsLabel": "Ingresos (clase 7)",
+      "blockingErrors": "Errores bloqueantes",
+      "warnings": "Advertencias",
+      "actionsTitle": "Acciones de cierre",
+      "actions": {
+        "items": {
+          "balanceAccounts": "Saldar cuentas de gastos (clase 6) e ingresos (clase 7)",
+          "assignResult": "Asignar el resultado a la cuenta {{account}}",
+          "lockPeriod": "Bloquear el período (sin cambios posteriores)",
+          "generateOpening": "Posibilidad de generar asientos de apertura para el siguiente período"
+        }
+      },
+      "closePeriod": "Cerrar período",
+      "confirmTitle": "Confirmar cierre",
+      "confirmDescription": "¿Seguro que desea cerrar el período {{periodName}}?",
+      "confirmIntro": "Esta acción va a:",
+      "confirmItems": {
+        "closingEntries": "Generar asientos de cierre para cuentas de resultados",
+        "assignResult": "Asignar el resultado ({{resultType}} de {{amount}})",
+        "lockPeriod": "Bloquear el período contra cualquier modificación"
+      },
+      "confirmCta": "Confirmar cierre",
+      "reopenTitle": "Reapertura de período",
+      "reopenDescription": "Reabrir un período cerrado es una acción excepcional y debe justificarse.",
+      "reopenPeriodLabel": "Período seleccionado",
+      "reopenReasonLabel": "Motivo de reapertura *",
+      "reopenReasonPlaceholder": "Ej.: Corrección de un error de registro...",
+      "reopenAuditNote": "⚠️ Esta acción se registrará en los logs de auditoría",
+      "reopenCta": "Reabrir período",
+      "errors": {
+        "fillAllFields": "Por favor, complete todos los campos",
+        "create": "Error al crear",
+        "loadPeriods": "Error al cargar períodos",
+        "validation": "Error durante la validación",
+        "close": "Error al cerrar",
+        "generateAN": "Error al generar asientos de apertura",
+        "reopenReasonRequired": "Por favor indique el motivo de reapertura",
+        "reopen": "Error al reabrir",
+        "closedPeriodOperation": "Acción no permitida: el período contable está cerrado. Reabra el período para modificar o registrar asientos."
+      }
     }
   },
   "accountingEntries": "Asientos contables",
@@ -626,7 +716,8 @@
       "pending_title": "Email no verificado",
       "pending_description": "Por favor, verifica tu email antes de continuar. Se ha enviado un correo de confirmación.",
       "go_to_verification": "Ir a verificación"
-    }
+    },
+    "pleaseLogin": "Inicie sesión para acceder a esta página"
   },
   "backupAndExport": "Copia de seguridad y exportación",
   "backupData": "Guardar datos",
@@ -754,13 +845,13 @@
       "confirm": "Confirmar",
       "loading": "Cargando..."
     },
-    "back": "Retour",
-    "backToDashboard": "Retour au tableau de bord",
+    "back": "Volver",
+    "backToDashboard": "Volver al panel de control",
     "beta": "Beta",
     "cancel": "Cancelar",
     "categorized": "Categorizadas",
-    "comingSoon": "Bientôt disponible",
-    "configure": "Configurer",
+    "comingSoon": "Próximamente",
+    "configure": "Configurar",
     "create": "Crear",
     "dashboard": "Panel de Control",
     "delete": "Eliminar",
@@ -771,29 +862,29 @@
     },
     "export": "Exportar",
     "exporting": "Exportando...",
-    "forecasts": "Prévisions",
-    "getStarted": "Commencer",
-    "guest": "Invité",
+    "forecasts": "Previsiones",
+    "getStarted": "Comenzar",
+    "guest": "Invitado",
     "humanResources": "Recursos Humanos",
     "inDevelopment": "En Desarrollo",
     "inventory": "Inventario",
     "loading": "Cargando...",
-    "month": "Mois",
-    "newFeatures": "Nouvelles fonctionnalités",
+    "month": "Mes",
+    "newFeatures": "Nuevas funcionalidades",
     "noCompanySelected": "Ninguna empresa seleccionada",
-    "noCompanySelectedTitle": "Aucune entreprise sélectionnée",
+    "noCompanySelectedTitle": "Ninguna empresa seleccionada",
     "pending": "Pendiente",
     "projects": "Proyectos",
     "purchases": "Compras",
     "quarter": "Trimestre",
     "rules": "Reglas activas",
-    "salesCrm": "Ventes & CRM",
+    "salesCrm": "Ventas & CRM",
     "save": "Guardar",
-    "saving": "Enregistrement...",
+    "saving": "Guardando...",
     "search": "Buscar",
     "settings": "Configuración",
-    "stayTuned": "Restez à l'écoute",
-    "stayTunedMessage": "Nous travaillons dur pour vous apporter cette fonctionnalité. Merci de su patience.",
+    "stayTuned": "Manténgase informado",
+    "stayTunedMessage": "Estamos trabajando para ofrecerle esta función. Gracias por su paciencia.",
     "success": "Éxito",
     "warning": "Atención",
     "impossible": "Imposible",
@@ -805,16 +896,17 @@
     "operationSuccess": "Operación exitosa",
     "suggested": "Sugerencias",
     "thirdParties": "Terceros",
-    "underDevelopment": "En cours de développement",
-    "underDevelopmentMessage": "Ce module est actuellement en cours de développement. Il sera bientôt disponible.",
-    "update": "Mettre à jour",
+    "underDevelopment": "En desarrollo",
+    "underDevelopmentMessage": "Este módulo está actualmente en desarrollo. Estará disponible pronto.",
+    "update": "Actualizar",
     "view": "Ver",
-    "year": "Année",
+    "year": "Año",
     "optional": "(opcional)",
     "refresh": "Actualizar",
     "confirm": "Confirmar",
     "from": "Desde",
-    "to": "Hasta"
+    "to": "Hasta",
+    "clear": "Borrar"
   },
   "company": {
     "fields": {
@@ -1676,7 +1768,9 @@
         "medium": "Importante",
         "low": "A Planificar"
       }
-    }
+    },
+    "offlineData": "Datos sin conexión",
+    "lastSynced": "Última sincronización: {{time}}"
   },
   "date": "Fecha",
   "dateFrom": "Fecha de inicio",
@@ -4976,7 +5070,8 @@
       "management": "Gestión",
       "analysis": "Análisis",
       "automation": "Automatización"
-    }
+    },
+    "assets": "Activos fijos"
   },
   "signup": {
     "accountCreatedMessage": "Un email de confirmation a été envoyé à su adresse. Veuillez vérifier su boîte de réception.",
@@ -6101,7 +6196,8 @@
       "purgeConfirm": "¿Confirma la purga del historial para esta cuenta? Esta acción es irreversible.",
       "purgeSuccess": "Historial purgado con éxito",
       "purgeError": "La purga falló. Verifique los permisos o contacte al soporte.",
-      "reconciliationComplete": "Conciliación completada con éxito"
+      "reconciliationComplete": "Conciliación completada con éxito",
+      "importFailedErrors": "Importación fallida: {{errors}}"
     },
     "defaults": {
       "bankTransaction": "Transacción bancaria"

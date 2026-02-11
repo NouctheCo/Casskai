@@ -463,6 +463,96 @@
       "totalBudget": "Total budget",
       "totalActual": "Total actual",
       "totalVariance": "Total variance"
+    },
+    "closure": {
+      "title": "Accounting close",
+      "subtitle": "Manage your accounting periods and perform year-end closures",
+      "refresh": "Refresh",
+      "newPeriod": "New period",
+      "loading": "Loading periods...",
+      "createTitle": "Create an accounting period",
+      "createDescription": "Define a new period for your accounting year",
+      "periodNameLabel": "Period name",
+      "periodNamePlaceholder": "E.g.: Fiscal year 2025",
+      "startDateLabel": "Start date",
+      "endDateLabel": "End date",
+      "cancel": "Cancel",
+      "createPeriodCta": "Create period",
+      "periodsTitle": "Accounting periods",
+      "periodsDescription": "Review and manage all accounting periods for the selected fiscal year",
+      "periodsCount": "{{count}} period(s) recorded",
+      "noPeriodsTitle": "No accounting period defined",
+      "noPeriodsDescription": "Create your first period to get started",
+      "table": {
+        "period": "Period",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "closed": "Closed",
+        "open": "Open"
+      },
+      "tooltips": {
+        "validate": "Validate for closing",
+        "generateAN": "Generate opening entries",
+        "reopen": "Reopen period"
+      },
+      "validationTitle": "Closing validation: {{periodName}}",
+      "validationRange": "From {{start}} to {{end}}",
+      "validationState": "Validation status",
+      "balanceCheck": "Trial balance check",
+      "totalDebit": "Total debit",
+      "totalCredit": "Total credit",
+      "draftEntries": "Draft entries",
+      "unletteredEntries": "Unreconciled third-party lines",
+      "periodResultTitle": "Period result",
+      "profit": "Profit",
+      "loss": "Loss",
+      "profitLower": "profit",
+      "lossLower": "loss",
+      "chargesLabel": "Expenses (class 6)",
+      "productsLabel": "Revenue (class 7)",
+      "blockingErrors": "Blocking errors",
+      "warnings": "Warnings",
+      "actionsTitle": "Closing actions",
+      "actions": {
+        "items": {
+          "balanceAccounts": "Clear expense (class 6) and revenue (class 7) accounts",
+          "assignResult": "Allocate the result to account {{account}}",
+          "lockPeriod": "Lock the period (no further changes)",
+          "generateOpening": "Option to generate opening entries for the next period"
+        }
+      },
+      "closePeriod": "Close period",
+      "confirmTitle": "Confirm closing",
+      "confirmDescription": "Are you sure you want to close period {{periodName}}?",
+      "confirmIntro": "This action will:",
+      "confirmItems": {
+        "closingEntries": "Generate closing entries for income statement accounts",
+        "assignResult": "Allocate the result ({{resultType}} of {{amount}})",
+        "lockPeriod": "Lock the period against any changes"
+      },
+      "confirmCta": "Confirm closing",
+      "reopenTitle": "Reopen period",
+      "reopenDescription": "Reopening a closed period is exceptional and must be justified.",
+      "reopenPeriodLabel": "Selected period",
+      "reopenReasonLabel": "Reopening reason *",
+      "reopenReasonPlaceholder": "E.g.: Correction of a data entry error...",
+      "reopenAuditNote": "⚠️ This action will be logged in audit records",
+      "reopenCta": "Reopen period",
+      "errors": {
+        "fillAllFields": "Please fill in all fields",
+        "create": "Error while creating",
+        "loadPeriods": "Error loading periods",
+        "validation": "Error during validation",
+        "close": "Error while closing",
+        "generateAN": "Error generating opening entries",
+        "reopenReasonRequired": "Please provide a reason for reopening",
+        "reopen": "Error while reopening",
+        "closedPeriodOperation": "Action not allowed: the accounting period is closed. Reopen the period to modify or enter journal entries."
+      }
     }
   },
   "accountingEntries": "Accounting entries",
@@ -626,7 +716,8 @@
       "pending_title": "Email not verified",
       "pending_description": "Please verify your email before continuing. A confirmation email has been sent.",
       "go_to_verification": "Go to verification"
-    }
+    },
+    "pleaseLogin": "Please log in to access this page"
   },
   "backupAndExport": "Sauvegarde et Export",
   "backupData": "Sauvegarder data",
@@ -754,13 +845,13 @@
       "confirm": "Confirm",
       "loading": "Loading..."
     },
-    "back": "Retour",
-    "backToDashboard": "Retour au tableau de bord",
+    "back": "Back",
+    "backToDashboard": "Back to dashboard",
     "beta": "Beta",
     "cancel": "Cancel",
     "categorized": "Categorized",
-    "comingSoon": "BientÃ´t disponible",
-    "configure": "Configurer",
+    "comingSoon": "Coming soon",
+    "configure": "Configure",
     "create": "Create",
     "dashboard": "Dashboard",
     "delete": "Delete",
@@ -773,29 +864,29 @@
     "exporting": "Exporting...",
     "from": "From",
     "to": "To",
-    "forecasts": "PrÃ©visions",
-    "getStarted": "Commencer",
-    "guest": "InvitÃ©",
+    "forecasts": "Forecasts",
+    "getStarted": "Get started",
+    "guest": "Guest",
     "humanResources": "Human Resources",
     "inDevelopment": "In Development",
     "inventory": "Inventory",
     "loading": "Loading...",
-    "month": "Mois",
-    "newFeatures": "Nouvelles fonctionnalitÃ©s",
+    "month": "Month",
+    "newFeatures": "New features",
     "noCompanySelected": "No company selected",
-    "noCompanySelectedTitle": "Aucune entreprise sÃ©lectionnÃ©e",
+    "noCompanySelectedTitle": "No company selected",
     "pending": "Pending",
     "projects": "Projects",
     "purchases": "Purchases",
-    "quarter": "Trimestre",
+    "quarter": "Quarter",
     "rules": "Active rules",
-    "salesCrm": "Ventes & CRM",
+    "salesCrm": "Sales & CRM",
     "save": "Save",
-    "saving": "Enregistrement...",
+    "saving": "Saving...",
     "search": "Search",
     "settings": "Settings",
-    "stayTuned": "Restez Ã  l'Ã©coute",
-    "stayTunedMessage": "Nous travaillons dur pour vous apporter cette fonctionnalitÃ©. Merci de your patience.",
+    "stayTuned": "Stay tuned",
+    "stayTunedMessage": "We are working hard to bring you this feature. Thank you for your patience.",
     "success": "Success",
     "warning": "Warning",
     "impossible": "Impossible",
@@ -807,15 +898,15 @@
     "operationSuccess": "Operation successful",
     "suggested": "Suggested",
     "thirdParties": "Third Parties",
-    "underDevelopment": "En cours de dÃ©veloppement",
-    "underDevelopmentMessage": "Ce module est actuellement en cours de dÃ©veloppement. Il sera bientÃ´t disponible.",
-    "update": "Mettre Ã  jour",
+    "underDevelopment": "Under development",
+    "underDevelopmentMessage": "This module is currently under development. It will be available soon.",
+    "update": "Update",
     "view": "View",
     "year": "Year",
     "optional": "(optional)",
     "refresh": "Refresh",
     "confirm": "Confirm",
-    "loading": "Loading..."
+    "clear": "Clear"
   },
   "projects": {
     "resourceModal": {
@@ -1783,7 +1874,9 @@
         "medium": "Important",
         "low": "To Plan"
       }
-    }
+    },
+    "offlineData": "Offline data",
+    "lastSynced": "Last synced: {{time}}"
   },
   "date": "Date",
   "dateFrom": "Date de dÃ©but",
@@ -4999,7 +5092,8 @@
       "management": "Management",
       "analysis": "Analytics",
       "automation": "Automation"
-    }
+    },
+    "assets": "Fixed Assets"
   },
   "signup": {
     "accountCreatedMessage": "A confirmation email has been sent to your address. Please check your inbox.",
@@ -6140,7 +6234,8 @@
       "purgeConfirm": "Do you confirm the purge of the history for this account? This action is irreversible.",
       "purgeSuccess": "History purged successfully",
       "purgeError": "The purge failed. Check your permissions or contact support.",
-      "reconciliationComplete": "Reconciliation completed successfully"
+      "reconciliationComplete": "Reconciliation completed successfully",
+      "importFailedErrors": "Import failed: {{errors}}"
     },
     "defaults": {
       "bankTransaction": "Bank transaction"
