@@ -87,6 +87,34 @@ const MODULE_ICONS = {
   thirdParties: Users,
   automation: Zap
 };
+
+// Helper function to get category colors (fixes Tailwind JIT purge issue)
+const getCategoryColors = (color: string) => {
+  const colorMap: Record<string, { active: string }> = {
+    blue: {
+      active: 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 shadow-sm'
+    },
+    green: {
+      active: 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 shadow-sm'
+    },
+    purple: {
+      active: 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 shadow-sm'
+    },
+    orange: {
+      active: 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 shadow-sm'
+    },
+    yellow: {
+      active: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 shadow-sm'
+    },
+    red: {
+      active: 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 shadow-sm'
+    },
+    indigo: {
+      active: 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 shadow-sm'
+    },
+  };
+  return colorMap[color] || colorMap.blue;
+};
 interface IntelligentSidebarProps {
   collapsed?: boolean;
   onToggle?: () => void;
@@ -388,7 +416,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
                               className={cn(
                                 "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200",
                                 isActive(module.path)
-                                  ? `bg-${category.color}-100 dark:bg-${category.color}-900/50 text-${category.color}-700 dark:text-${category.color}-300 shadow-sm`
+                                  ? getCategoryColors(category.color).active
                                   : canAccess
                                   ? "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                                   : "text-gray-400 dark:text-gray-600 cursor-not-allowed"

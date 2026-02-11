@@ -8,12 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 import { Badge } from '@/components/ui/badge';
 
-import { AlertTriangle, CheckCircle, Clock, Users } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Users, Zap } from 'lucide-react';
+
+import { toastSuccess, toastError } from '@/lib/toast-helpers';
+import { Progress } from '@/components/ui/progress';
 
 
 
 export const TrialManager: React.FC = () => {
-
   const {
 
     trialInfo,
@@ -47,12 +49,16 @@ export const TrialManager: React.FC = () => {
     const result = await createTrial();
 
     if (result.success) {
-      // eslint-disable-next-line no-alert
-      alert('Essai créé avec succès !');
+      toastSuccess({
+        title: 'Essai créé avec succès !',
+        description: 'Vous bénéficiez maintenant de 30 jours d\'essai gratuit'
+      });
 
     } else {
-      // eslint-disable-next-line no-alert
-      alert(`Erreur: ${result.error}`);
+      toastError({
+        title: 'Erreur lors de la création de l\'essai',
+        description: result.error || 'Une erreur est survenue'
+      });
 
     }
 
@@ -65,12 +71,16 @@ export const TrialManager: React.FC = () => {
     const result = await convertTrialToPaid('starter');
 
     if (result.success) {
-      // eslint-disable-next-line no-alert
-      alert('Conversion réussie !');
+      toastSuccess({
+        title: 'Conversion réussie !',
+        description: 'Votre abonnement a été activé avec succès'
+      });
 
     } else {
-      // eslint-disable-next-line no-alert
-      alert(`Erreur: ${result.error}`);
+      toastError({
+        title: 'Erreur de conversion',
+        description: result.error || 'Impossible de convertir l\'essai'
+      });
 
     }
 
@@ -83,12 +93,16 @@ export const TrialManager: React.FC = () => {
     const result = await cancelTrial('Annulé par l\'utilisateur');
 
     if (result.success) {
-      // eslint-disable-next-line no-alert
-      alert('Essai annulé !');
+      toastSuccess({
+        title: 'Essai annulé',
+        description: 'Votre période d\'essai a été annulée'
+      });
 
     } else {
-      // eslint-disable-next-line no-alert
-      alert(`Erreur: ${result.error}`);
+      toastError({
+        title: 'Erreur d\'annulation',
+        description: result.error || 'Impossible d\'annuler l\'essai'
+      });
 
     }
 
@@ -103,6 +117,31 @@ export const TrialManager: React.FC = () => {
   }
 
 
+
+  // Calculate trial progress
+  const trialDuration = 30; // 30 days total
+  const daysElapsed = trialDuration - daysRemaining;
+  const progressPercentage = (daysElapsed / trialDuration) * 100;
+
+  // Get urgency badge based on days remaining
+  const getUrgencyBadge = () => {
+    if (daysRemaining <= 3) {
+      return (
+        <Badge variant="destructive" className="animate-pulse">
+          <Zap className="h-3 w-3 mr-1" />
+          ⏰ {daysRemaining} jour{daysRemaining > 1 ? 's' : ''} restant{daysRemaining > 1 ? 's' : ''} !
+        </Badge>
+      );
+    } else if (daysRemaining <= 7) {
+      return (
+        <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-300">
+          <Clock className="h-3 w-3 mr-1" />
+          {daysRemaining} jours restants
+        </Badge>
+      );
+    }
+    return null;
+  };
 
   return (
 
@@ -134,7 +173,7 @@ export const TrialManager: React.FC = () => {
 
           {trialInfo ? (
 
-            <div className="space-y-3">
+            <div className="space-y-4">
 
               <div className="flex items-center justify-between">
 
@@ -148,13 +187,27 @@ export const TrialManager: React.FC = () => {
 
               </div>
 
-
+              {/* Trial Progress Bar */}
+              {isActive && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Jour {daysElapsed} / {trialDuration}
+                    </span>
+                    {getUrgencyBadge()}
+                  </div>
+                  <Progress
+                    value={progressPercentage}
+                    className="h-2"
+                  />
+                </div>
+              )}
 
               <div className="flex items-center justify-between">
 
                 <span>Jours restants:</span>
 
-                <span className={`font-semibold ${daysRemaining <= 3 ? 'text-red-600' : 'text-green-600'}`}>
+                <span className={`font-semibold ${daysRemaining <= 3 ? 'text-red-600' : daysRemaining <= 7 ? 'text-orange-600' : 'text-green-600'}`}>
 
                   {daysRemaining} jour(s)
 
@@ -408,11 +461,11 @@ export const ExpiringTrialsAlert: React.FC = () => {
 
   return (
 
-    <Card className="border-orange-200 bg-orange-50">
+    <Card className="border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
 
       <CardHeader>
 
-        <CardTitle className="flex items-center gap-2 text-orange-800">
+        <CardTitle className="flex items-center gap-2 text-orange-800 dark:text-orange-400">
 
           <AlertTriangle className="h-5 w-5" />
 
@@ -462,4 +515,80 @@ export const ExpiringTrialsAlert: React.FC = () => {
 
   );
 
+};
+
+// Composant banner trial avec gamification - Pour affichage dans le header/layout
+export const TrialBanner: React.FC = () => {
+  const { daysRemaining, isActive } = useTrial();
+
+  // Ne rien afficher si pas d'essai actif
+  if (!isActive) {
+    return null;
+  }
+
+  const trialDuration = 30;
+  const daysElapsed = trialDuration - daysRemaining;
+  const progressPercentage = (daysElapsed / trialDuration) * 100;
+
+  // Déterminer le style et le message selon l'urgence
+  const getUrgencyStyle = () => {
+    if (daysRemaining <= 3) {
+      return {
+        bgColor: 'bg-gradient-to-r from-red-500 to-red-600',
+        textColor: 'text-white',
+        icon: <Zap className="h-4 w-4 animate-pulse" />,
+        message: `⚡ URGENT : Plus que ${daysRemaining} jour${daysRemaining > 1 ? 's' : ''} d'essai !`,
+        cta: 'Souscrire maintenant'
+      };
+    } else if (daysRemaining <= 7) {
+      return {
+        bgColor: 'bg-gradient-to-r from-orange-500 to-orange-600',
+        textColor: 'text-white',
+        icon: <Clock className="h-4 w-4" />,
+        message: `${daysRemaining} jours d'essai restants`,
+        cta: 'Découvrir nos offres'
+      };
+    }
+    return {
+      bgColor: 'bg-gradient-to-r from-blue-500 to-purple-600',
+      textColor: 'text-white',
+      icon: <CheckCircle className="h-4 w-4" />,
+      message: `Essai gratuit : ${daysRemaining} jours restants`,
+      cta: 'Voir les tarifs'
+    };
+  };
+
+  const urgencyStyle = getUrgencyStyle();
+
+  return (
+    <div className={`${urgencyStyle.bgColor} ${urgencyStyle.textColor} px-4 py-2 shadow-md`}>
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 flex-1">
+          {urgencyStyle.icon}
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm">{urgencyStyle.message}</p>
+            <div className="mt-1">
+              <div className="flex items-center gap-2 text-xs opacity-90">
+                <span>Jour {daysElapsed}/{trialDuration}</span>
+                <div className="flex-1 bg-white/20 rounded-full h-1.5 max-w-[120px]">
+                  <div
+                    className="bg-white rounded-full h-1.5 transition-all duration-500"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Button
+          size="sm"
+          variant="secondary"
+          className="bg-white text-gray-900 hover:bg-gray-100 font-semibold shrink-0"
+          onClick={() => window.location.href = '/pricing'}
+        >
+          {urgencyStyle.cta}
+        </Button>
+      </div>
+    </div>
+  );
 };

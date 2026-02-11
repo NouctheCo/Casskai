@@ -143,6 +143,60 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Poppins for headings - Charte Graphique v1.2 */
+  h1, h2, h3, .font-heading {
+    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+  }
+
+  /* ======================================
+     Accessibility: Focus Visible
+     WCAG 2.1 AA Compliance
+     ====================================== */
+
+  /* Global focus-visible ring for all interactive elements */
+  :focus-visible {
+    outline: 2px solid hsl(var(--casskai-blue-500));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Remove default outline for mouse users */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Skip link for keyboard navigation */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: hsl(var(--casskai-blue-600));
+    color: white;
+    padding: 8px 16px;
+    z-index: 9999;
+    font-weight: 500;
+    border-radius: 0 0 8px 0;
+    transition: top 0.2s;
+  }
+
+  .skip-link:focus {
+    top: 0;
+  }
+}
+
+/* ======================================
+   Accessibility: Reduced Motion
+   ====================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer components {
@@ -205,6 +259,12 @@
 
   .btn-primary:hover:not(:disabled) {
     background-color: rgb(37, 99, 235);
+  }
+
+  .btn-primary:focus-visible {
+    outline: 2px solid rgb(59, 130, 246);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
   }
 
   .btn-primary:disabled {
@@ -539,6 +599,64 @@
 
   .dark .card-casskai-gradient {
     background: hsl(var(--card));
+  }
+
+  /* ======================================
+     AI Typing Indicator
+     ====================================== */
+  .ai-typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: hsl(var(--casskai-blue-500));
+    animation: aiTypingBounce 1.2s infinite ease-in-out;
+  }
+
+  .ai-typing-dot:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  .ai-typing-dot:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  @keyframes aiTypingBounce {
+    0%, 60%, 100% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+    30% {
+      transform: translateY(-8px);
+      opacity: 1;
+    }
+  }
+
+  /* ======================================
+     Skeleton Shimmer (upgraded from pulse)
+     ====================================== */
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background: rgb(229 231 235);
+    border-radius: 0.5rem;
+  }
+
+  .skeleton-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .dark .skeleton-shimmer {
+    background: rgb(55 65 81);
+  }
+
+  .dark .skeleton-shimmer::after {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    background-size: 200% 100%;
   }
 }
 
