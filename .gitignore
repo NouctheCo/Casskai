@@ -223,6 +223,7 @@ src/services/nul
 
 # Archive de documentation technique (non versionnée)
 _archive/
+docs/archive/
 
 # ============================================================================
 # SKILLS & AGENTS EXTERNES (installés via npx skills add)
@@ -240,3 +241,15 @@ DEPLOYMENT_FINAL_STATUS.txt
 README_AUDIT_QUICK.txt
 create_skills.py
 gen.cjs
+
+# Scripts d'intégration/test temporaires
+start-ia-integration.*
+test-ai-*.ps1
+test-ai-*.sh
+
+# Rapports d'accessibilité/audit générés
+ACCESSIBILITY_AUDIT_REPORT.md
+ACCESSIBILITY_CHECKLIST.md
+
+# Fichiers de configuration bundle analyzer
+vite.config.bundle-analyzer.ts

@@ -2,6 +2,7 @@
  * Onglet de gestion des comptes bancaires
  */
 import React, { useState } from 'react';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +22,7 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
   accounts,
   onRefresh
 }) => {
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   const [showModal, setShowModal] = useState(false);
   const [editingAccount, setEditingAccount] = useState<any | null>(null);
   const handleCreate = () => {
@@ -67,8 +69,14 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
     }
   };
   const handleDelete = async (accountId: string) => {
-    // eslint-disable-next-line no-alert
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce compte bancaire ?')) {
+    const confirmed = await confirmDialog({
+      title: 'Supprimer le compte bancaire',
+      description: 'Êtes-vous sûr de vouloir supprimer ce compte bancaire ?',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive',
+    });
+    if (!confirmed) {
       return;
     }
     try {
@@ -217,6 +225,7 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
         onSubmit={handleSubmit}
         account={editingAccount}
       />
+      <ConfirmDialogComponent />
     </>
   );
 };

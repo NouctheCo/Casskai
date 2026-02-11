@@ -33,6 +33,7 @@ import {
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency, formatCurrency } from '@/lib/utils';
 import { ComponentErrorBoundary } from '@/components/ComponentErrorBoundary';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
   Users,
   Building2,
@@ -91,6 +92,7 @@ type ThirdPartyListItem = {
 const ThirdPartiesPage: React.FC = () => {
   const { t } = useTranslation();
   const { currentEnterprise } = useEnterprise();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   // State management
   const [dashboardData, setDashboardData] = useState<ThirdPartyDashboardData | null>(null);
   const [thirdParties, setThirdParties] = useState<ThirdPartyListItem[]>([]);
@@ -522,8 +524,14 @@ const ThirdPartiesPage: React.FC = () => {
     setShowEditDialog(true);
   };
   const handleDeleteThirdParty = async (thirdParty: ThirdPartyListItem) => {
-    // eslint-disable-next-line no-alert
-    if (!window.confirm(t('thirdParties.confirmDeactivate'))) {
+    const confirmed = await confirmDialog({
+      title: t('thirdParties.actions.delete'),
+      description: t('thirdParties.confirmDeactivate'),
+      confirmText: t('common.confirm') || 'Confirmer',
+      cancelText: t('common.cancel') || 'Annuler',
+      variant: 'destructive'
+    });
+    if (!confirmed) {
       return;
     }
     try {
@@ -1146,6 +1154,7 @@ const ThirdPartiesPage: React.FC = () => {
           thirdParty={selectedThirdParty}
         />
       )}
+      <ConfirmDialogComponent />
     </motion.div>
     </ComponentErrorBoundary>
   );

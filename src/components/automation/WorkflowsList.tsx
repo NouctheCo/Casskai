@@ -1,5 +1,6 @@
 import { Play, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -16,6 +17,7 @@ interface WorkflowsListProps {
 export default function WorkflowsList({ workflows, onRefresh }: WorkflowsListProps) {
   const { showToast } = useToast();
   const { t } = useTranslation();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
 
   const handleToggle = async (workflow: Workflow) => {
     try {
@@ -28,8 +30,14 @@ export default function WorkflowsList({ workflows, onRefresh }: WorkflowsListPro
   };
 
   const handleDelete = async (workflow: Workflow) => {
-    // eslint-disable-next-line no-alert
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce workflow ?')) return;
+    const confirmed = await confirmDialog({
+      title: 'Supprimer le workflow',
+      description: 'Êtes-vous sûr de vouloir supprimer ce workflow ?',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive',
+    });
+    if (!confirmed) return;
 
     try {
       await deleteWorkflow(workflow.id);
@@ -63,6 +71,7 @@ export default function WorkflowsList({ workflows, onRefresh }: WorkflowsListPro
 
   return (
     <div className="space-y-4">
+      <ConfirmDialogComponent />
       {workflows.map((workflow) => (
         <Card key={workflow.id} className="p-4">
           <div className="flex items-start justify-between">

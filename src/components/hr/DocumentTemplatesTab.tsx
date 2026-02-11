@@ -17,12 +17,14 @@ import { DOCUMENT_TYPE_LABELS, DEFAULT_HR_TEMPLATES } from '@/data/hr-document-t
 import type { DocumentTemplate, DocumentCategory } from '@/types/hr-document-templates.types';
 import { TemplateFormModal } from './TemplateFormModal';
 import { TemplatePreviewModal } from './TemplatePreviewModal';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface DocumentTemplatesTabProps {
   companyId: string;
 }
 
 export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,8 +85,14 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
   };
 
   const handleDeleteTemplate = async (templateId: string) => {
-    // eslint-disable-next-line no-alert
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce template ?')) return;
+    const confirmed = await confirmDialog({
+      title: 'Confirmer la suppression',
+      description: 'Êtes-vous sûr de vouloir supprimer ce template ?',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+    if (!confirmed) return;
 
     const response = await hrDocumentTemplatesService.deleteTemplate(templateId);
     if (response.success) {
@@ -102,8 +110,14 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
   };
 
   const handleImportDefaults = async () => {
-    // eslint-disable-next-line no-alert
-    if (!confirm('Importer les templates par défaut ? Cela créera 5 nouveaux templates.')) return;
+    const confirmed = await confirmDialog({
+      title: 'Importer les templates par défaut',
+      description: 'Importer les templates par défaut ? Cela créera 5 nouveaux templates.',
+      confirmText: 'Importer',
+      cancelText: 'Annuler',
+      variant: 'default'
+    });
+    if (!confirmed) return;
 
     for (const defaultTemplate of DEFAULT_HR_TEMPLATES) {
       await hrDocumentTemplatesService.createTemplate(companyId, defaultTemplate);
@@ -445,6 +459,8 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
           template={selectedTemplate}
         />
       )}
+
+      <ConfirmDialogComponent />
     </>
   );
 }

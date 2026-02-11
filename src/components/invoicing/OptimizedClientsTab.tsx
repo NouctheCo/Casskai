@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
 import { logger } from '@/lib/logger';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
   Plus,
   Search,
@@ -413,6 +414,7 @@ const ClientRow: React.FC<ClientRowProps> = ({ client, onEdit, onDelete, onView 
 export default function OptimizedClientsTab() {
   const { toast } = useToast();
   const { currentCompany } = useAuth();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -526,8 +528,14 @@ export default function OptimizedClientsTab() {
     setShowClientForm(true);
   };
   const handleDeleteClient = async (client: Client) => {
-    // eslint-disable-next-line no-alert
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
+    const confirmed = await confirmDialog({
+      title: 'Confirmer la suppression',
+      description: 'Êtes-vous sûr de vouloir supprimer ce client ?',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+    if (!confirmed) {
       return;
     }
     try {
@@ -692,6 +700,7 @@ export default function OptimizedClientsTab() {
         onClose={() => setPreviewClient(null)}
         client={previewClient}
       />
+      <ConfirmDialogComponent />
     </div>
   );
 }

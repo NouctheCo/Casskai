@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useAppState } from '../../hooks';
 import SupabaseSetupWizard from '../setup/SupabaseSetupWizard';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,6 +12,7 @@ interface ConfigGuardProps {
   fallback?: React.ReactNode;
 }
 const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   const appState = useAppState();
   const { config, supabase } = appState;
   const isReady = (appState as any).isReady;
@@ -31,9 +33,15 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
     }
   };
   // Reset complet de la configuration
-  const handleReset = () => {
-    // eslint-disable-next-line no-alert
-    if (confirm('Êtes-vous sûr de vouloir réinitialiser la configuration ? Cette action est irréversible.')) {
+  const handleReset = async () => {
+    const confirmed = await confirmDialog({
+      title: 'Réinitialiser la configuration',
+      description: 'Êtes-vous sûr de vouloir réinitialiser la configuration ? Cette action est irréversible.',
+      confirmText: 'Réinitialiser',
+      cancelText: 'Annuler',
+      variant: 'destructive',
+    });
+    if (confirmed) {
       config.resetConfig();
       window.location.reload();
     }
@@ -62,6 +70,7 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
   if (hasError) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center p-4">
+        <ConfirmDialogComponent />
         <Card className="w-full max-w-2xl">
           <CardContent className="p-8">
             <div className="text-center mb-6">

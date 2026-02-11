@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -65,6 +66,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
 }) => {
   const { currentCompany } = useAuth();
   const { t } = useTranslation();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   const [transactions, setTransactions] = useState<BankTransaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [rules, setRules] = useState<CategorizationRule[]>([]);
@@ -586,8 +588,14 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
 
   // Supprimer une transaction
   const deleteTransaction = async (transactionId: string) => {
-    // eslint-disable-next-line no-alert
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette transaction ? Cette action est irréversible.')) {
+    const confirmed = await confirmDialog({
+      title: 'Supprimer la transaction',
+      description: 'Êtes-vous sûr de vouloir supprimer cette transaction ? Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive',
+    });
+    if (!confirmed) {
       return;
     }
     try {
@@ -608,8 +616,14 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
   // Supprimer les transactions sélectionnées
   const deleteSelectedTransactions = async () => {
     if (selectedTransactions.size === 0) return;
-    // eslint-disable-next-line no-alert
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedTransactions.size} transaction(s) ? Cette action est irréversible.`)) {
+    const confirmed = await confirmDialog({
+      title: 'Supprimer les transactions sélectionnées',
+      description: `Êtes-vous sûr de vouloir supprimer ${selectedTransactions.size} transaction(s) ? Cette action est irréversible.`,
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive',
+    });
+    if (!confirmed) {
       return;
     }
     const txIds = Array.from(selectedTransactions);
@@ -639,13 +653,25 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       toast.error('Aucune transaction à supprimer');
       return;
     }
-    // eslint-disable-next-line no-alert
-    if (!confirm(`⚠️ ATTENTION : Voulez-vous vraiment supprimer TOUTES les ${count} transaction(s) affichées ? Cette action est IRRÉVERSIBLE.`)) {
+    const firstConfirm = await confirmDialog({
+      title: 'Supprimer toutes les transactions',
+      description: `ATTENTION : Voulez-vous vraiment supprimer TOUTES les ${count} transaction(s) affichees ? Cette action est IRREVERSIBLE.`,
+      confirmText: 'Continuer',
+      cancelText: 'Annuler',
+      variant: 'destructive',
+    });
+    if (!firstConfirm) {
       return;
     }
     // Double confirmation pour suppression totale
-    // eslint-disable-next-line no-alert
-    if (!confirm(`Dernière confirmation : Supprimer définitivement ${count} transaction(s) ?`)) {
+    const secondConfirm = await confirmDialog({
+      title: 'Derniere confirmation',
+      description: `Supprimer definitivement ${count} transaction(s) ?`,
+      confirmText: 'Supprimer definitivement',
+      cancelText: 'Annuler',
+      variant: 'destructive',
+    });
+    if (!secondConfirm) {
       return;
     }
     try {
@@ -991,6 +1017,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
           onSave={loadData}
         />
       )}
+      <ConfirmDialogComponent />
     </div>
   );
 };

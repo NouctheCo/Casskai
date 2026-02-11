@@ -40,10 +40,12 @@ import { SepaPaymentGenerator } from '@/components/banking/SepaPaymentGenerator'
 import BankReconciliation from '@/components/banking/BankReconciliation';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 const BanksPageNew: React.FC = () => {
   const { user, currentCompany } = useAuth();
   const { t } = useTranslation();
   const { generateFromBankTransaction } = useAutoAccounting();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   // State
   const [bankAccounts, setBankAccounts] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<BankStorageTransaction[]>([]);
@@ -219,9 +221,14 @@ const BanksPageNew: React.FC = () => {
   // Purge history for selected account
   const handlePurgeHistory = async () => {
     if (!currentCompany?.id) return;
-    // eslint-disable-next-line no-alert
-    const confirm = window.confirm(t('banking.toasts.purgeConfirm'));
-    if (!confirm) return;
+    const confirmed = await confirmDialog({
+      title: t('banking.history.purgeButton'),
+      description: t('banking.toasts.purgeConfirm'),
+      confirmText: t('common.confirm') || 'Confirmer',
+      cancelText: t('common.cancel') || 'Annuler',
+      variant: 'destructive'
+    });
+    if (!confirmed) return;
     try {
       let query = supabase
         .from('bank_transactions')
@@ -590,6 +597,7 @@ const BanksPageNew: React.FC = () => {
           }}
         />
       )}
+      <ConfirmDialogComponent />
     </div>
   );
 };

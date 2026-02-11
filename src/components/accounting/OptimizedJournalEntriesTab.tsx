@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import AccountingRulesService from '@/services/accountingRulesService';
 import { CurrencyAmount } from '@/components/ui/CurrencyAmount';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1193,6 +1194,7 @@ const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate: _onValidate, on
 };
 export default function OptimizedJournalEntriesTab() {
   const { toast } = useToast();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   const { currentCompany } = useAuth();
   const { loading: _hookLoading, error: _hookError, getAccountsList } = useJournalEntries(currentCompany?.id || '');
   const [entries, setEntries] = useState<any[]>([]);
@@ -1451,8 +1453,14 @@ export default function OptimizedJournalEntriesTab() {
   };
   const handleDeleteEntry = async (entry: any) => {
     // Confirmation
-    // eslint-disable-next-line no-alert
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette écriture ? Cette action est irréversible.')) {
+    const confirmed = await confirmDialog({
+      title: 'Supprimer l\'écriture',
+      description: 'Êtes-vous sûr de vouloir supprimer cette écriture ? Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive',
+    });
+    if (!confirmed) {
       return;
     }
     if (!currentCompany?.id) {
@@ -1713,6 +1721,7 @@ export default function OptimizedJournalEntriesTab() {
         onClose={() => setPreviewEntry(null)}
         entry={previewEntry}
       />
+      <ConfirmDialogComponent />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { hrDocumentsService } from '@/services/hrDocumentsService';
 import { DocumentUploadModal } from '@/components/hr/DocumentUploadModal';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import type { EmployeeDocument, DocumentType, DocumentStatus } from '@/types/hr-documents.types';
 import type { Employee } from '@/services/hrService';
 
@@ -31,6 +32,7 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
   employees
 }) => {
   const { toast } = useToast();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
 
   // State
   const [_documents, setDocuments] = useState<EmployeeDocument[]>([]);
@@ -149,8 +151,14 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
 
   // Archive document
   const handleArchive = async (doc: EmployeeDocument) => {
-    // eslint-disable-next-line no-alert
-    if (!confirm('Êtes-vous sûr de vouloir archiver ce document ?')) return;
+    const confirmed = await confirmDialog({
+      title: 'Confirmer l\'archivage',
+      description: 'Êtes-vous sûr de vouloir archiver ce document ?',
+      confirmText: 'Archiver',
+      cancelText: 'Annuler',
+      variant: 'default'
+    });
+    if (!confirmed) return;
 
     const response = await hrDocumentsService.archiveDocument(doc.id);
     if (response.success) {
@@ -170,8 +178,14 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
 
   // Delete document
   const handleDelete = async (doc: EmployeeDocument) => {
-    // eslint-disable-next-line no-alert
-    if (!confirm('Êtes-vous sûr de vouloir supprimer définitivement ce document ?')) return;
+    const confirmed = await confirmDialog({
+      title: 'Confirmer la suppression',
+      description: 'Êtes-vous sûr de vouloir supprimer définitivement ce document ?',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+    if (!confirmed) return;
 
     const response = await hrDocumentsService.deleteDocument(doc.id);
     if (response.success) {
@@ -392,6 +406,7 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
         }}
         employees={employees}
       />
+      <ConfirmDialogComponent />
     </div>
   );
 };

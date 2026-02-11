@@ -28,6 +28,7 @@ import type { ThirdParty } from '@/types/third-parties.types';
 import type { CompanySettings } from '@/types/company-settings.types';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
   Plus,
   Search,
@@ -73,6 +74,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
   const { toast } = useToast();
   const { currentCompany } = useAuth();
   const { sendInvoiceByEmail, isSending } = useInvoiceEmail();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   // États
   const [invoices, setInvoices] = useState<InvoiceWithDetails[]>([]);
   const [clients, setClients] = useState<ThirdParty[]>([]);
@@ -231,8 +233,14 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
     setShowForm(true);
   };
   const handleDeleteInvoice = async (invoiceId: string) => {
-    // eslint-disable-next-line no-alert
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette facture ?')) {
+    const confirmed = await confirmDialog({
+      title: 'Confirmer la suppression',
+      description: 'Êtes-vous sûr de vouloir supprimer cette facture ?',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+    if (confirmed) {
       try {
         await invoicingService.deleteInvoice(invoiceId);
         await loadData(); // Recharger les données
@@ -428,8 +436,14 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
       });
       return;
     }
-    // eslint-disable-next-line no-alert
-    if (confirm(`Envoyer la facture ${invoice.invoice_number} à ${email} ?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Envoyer la facture',
+      description: `Envoyer la facture ${invoice.invoice_number} à ${email} ?`,
+      confirmText: 'Envoyer',
+      cancelText: 'Annuler',
+      variant: 'default'
+    });
+    if (confirmed) {
       await sendInvoiceByEmail(invoice.id as string);
       // Recharger les données pour mettre à jour le statut si nécessaire
       await loadData();
@@ -520,8 +534,14 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
       return;
     }
 
-    // eslint-disable-next-line no-alert
-    if (!confirm(`Voulez-vous créer un avoir pour annuler la facture ${invoice.invoice_number} ?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Annuler la facture',
+      description: `Voulez-vous créer un avoir pour annuler la facture ${invoice.invoice_number} ?`,
+      confirmText: 'Créer un avoir',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -891,6 +911,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         }}
         onSuccess={handleArticleCreated}
       />
+      <ConfirmDialogComponent />
     </div>
   );
 };

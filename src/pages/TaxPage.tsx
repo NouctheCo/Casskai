@@ -28,6 +28,7 @@ import { formatCurrency } from '@/lib/utils';
 import { useEnterprise } from '../contexts/EnterpriseContext';
 import { taxService } from '../services/taxService';
 import { TaxCompliancePanel } from '../components/fiscal/TaxCompliancePanel';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { FiscalCalendarTab } from '../components/fiscal/FiscalCalendarTab';
 import { AutoVATDeclarationButton } from '../components/fiscal/AutoVATDeclarationButton';
 import { FECExportButton } from '../components/fiscal/FECExportButton';
@@ -78,6 +79,7 @@ const _localizer = dateFnsLocalizer({
 const TaxPage: React.FC = () => {
   const { t } = useTranslation();
   const { currentEnterprise } = useEnterprise();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   // State management
   const [dashboardData, setDashboardData] = useState<TaxDashboardData | null>(null);
   const [declarations, setDeclarations] = useState<TaxDeclaration[]>([]);
@@ -358,10 +360,14 @@ const TaxPage: React.FC = () => {
   };
 
   const handleDeleteDeclaration = async (declarationId: string, declarationName: string) => {
-    // eslint-disable-next-line no-alert
-    if (!window.confirm(t('tax.confirm.deleteDeclaration', { name: declarationName }))) {
-      return;
-    }
+    const confirmed = await confirmDialog({
+      title: t('tax.confirm.deleteTitle', { defaultValue: 'Confirmer la suppression' }),
+      description: t('tax.confirm.deleteDeclaration', { name: declarationName }),
+      confirmText: t('common.delete', { defaultValue: 'Supprimer' }),
+      cancelText: t('common.cancel', { defaultValue: 'Annuler' }),
+      variant: 'destructive'
+    });
+    if (!confirmed) return;
     try {
       const result = await taxService.deleteDeclaration(declarationId);
       if (result.error) {
@@ -402,10 +408,14 @@ const TaxPage: React.FC = () => {
     await loadObligations();
   };
   const handleDeleteObligation = async (obligationId: string, obligationName: string) => {
-    // eslint-disable-next-line no-alert
-    if (!window.confirm(t('tax.confirm.deleteObligation', { name: obligationName }))) {
-      return;
-    }
+    const confirmed = await confirmDialog({
+      title: t('tax.confirm.deleteTitle', { defaultValue: 'Confirmer la suppression' }),
+      description: t('tax.confirm.deleteObligation', { name: obligationName }),
+      confirmText: t('common.delete', { defaultValue: 'Supprimer' }),
+      cancelText: t('common.cancel', { defaultValue: 'Annuler' }),
+      variant: 'destructive'
+    });
+    if (!confirmed) return;
     try {
       const result = await taxService.deleteObligation(obligationId);
       if (result.error) {
@@ -468,7 +478,8 @@ const TaxPage: React.FC = () => {
     );
   }
   return (
-    <motion.div 
+    <>
+    <motion.div
       className="space-y-8 p-6"
       variants={containerVariants}
       initial="hidden"
@@ -1494,6 +1505,8 @@ const TaxPage: React.FC = () => {
         </div>
       )}
     </motion.div>
+    <ConfirmDialogComponent />
+    </>
   );
 };
 export default TaxPage;

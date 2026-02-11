@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +45,7 @@ export function AutomationDashboard() {
     fetchWorkflowExecutions: _fetchWorkflowExecutions
   } = useAutomation();
 
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   const [activeTab, setActiveTab] = useState('overview');
   const [showWorkflowBuilder, setShowWorkflowBuilder] = useState(false);
   const [editingWorkflow, setEditingWorkflow] = useState<string | null>(null);
@@ -59,8 +61,14 @@ export function AutomationDashboard() {
   };
 
   const handleDeleteWorkflow = async (workflowId: string) => {
-    // eslint-disable-next-line no-alert
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce workflow ?')) {
+    const confirmed = await confirmDialog({
+      title: 'Supprimer le workflow',
+      description: 'Êtes-vous sûr de vouloir supprimer ce workflow ?',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive',
+    });
+    if (confirmed) {
       const success = await deleteWorkflow(workflowId);
       if (success) {
         toast.success('Workflow supprimé avec succès');
@@ -574,6 +582,7 @@ export function AutomationDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+      <ConfirmDialogComponent />
     </div>
   );
 }

@@ -4,6 +4,7 @@
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -41,6 +42,7 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
   readOnly = false
 }) => {
   const { toast } = useToast();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   const [attachments, setAttachments] = useState<JournalEntryAttachment[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -121,8 +123,14 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
   }, []);
   // Handle delete
   const handleDelete = async (attachment: JournalEntryAttachment) => {
-    // eslint-disable-next-line no-alert
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette pièce jointe ?')) {
+    const confirmed = await confirmDialog({
+      title: 'Supprimer la pièce jointe',
+      description: 'Êtes-vous sûr de vouloir supprimer cette pièce jointe ?',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive',
+    });
+    if (!confirmed) {
       return;
     }
     try {
@@ -376,6 +384,7 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
           </DialogContent>
         </Dialog>
       )}
+      <ConfirmDialogComponent />
     </>
   );
 };

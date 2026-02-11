@@ -10,11 +10,13 @@ import { TaxAuthorityService } from '@/services/taxAuthorityService';
 import { FormatterUtils } from '@/utils/taxAuthorityUtils';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/useToast';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 interface CredentialsManagerProps {
   companyId: string;
 }
 export function CredentialsManager({ companyId }: CredentialsManagerProps) {
   const { showToast } = useToast();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
   const [credentials, setCredentials] = useState<TaxAuthorityCredentials[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -97,8 +99,14 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
     }
   };
   const handleDeleteCredentials = async (credentialId: string) => {
-    // eslint-disable-next-line no-alert
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ces identifiants ?')) {
+    const confirmed = await confirmDialog({
+      title: 'Confirmer la suppression',
+      description: 'Êtes-vous sûr de vouloir supprimer ces identifiants ?',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+    if (!confirmed) {
       return;
     }
     try {
@@ -267,6 +275,7 @@ export function CredentialsManager({ companyId }: CredentialsManagerProps) {
           ))}
         </div>
       )}
+      <ConfirmDialogComponent />
     </div>
   );
 }

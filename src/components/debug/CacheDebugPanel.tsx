@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
+
 import { AlertTriangle, RefreshCw, Trash2, Info, CheckCircle, XCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +15,8 @@ import { CacheManager } from '@/utils/cacheManager';
 
 
 export const CacheDebugPanel: React.FC = () => {
+
+  const { ConfirmDialog: ConfirmDialogComponent, confirm: confirmDialog } = useConfirmDialog();
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -32,9 +36,15 @@ export const CacheDebugPanel: React.FC = () => {
 
 
 
-  const handleClearCache = () => {
-    // eslint-disable-next-line no-alert
-    if (confirm('Êtes-vous sûr de vouloir nettoyer le cache ? Cela nécessitera de vous reconnecter.')) {
+  const handleClearCache = async () => {
+    const confirmed = await confirmDialog({
+      title: 'Nettoyer le cache',
+      description: 'Êtes-vous sûr de vouloir nettoyer le cache ? Cela nécessitera de vous reconnecter.',
+      confirmText: 'Nettoyer',
+      cancelText: 'Annuler',
+      variant: 'destructive',
+    });
+    if (confirmed) {
 
       CacheManager.clearAndReload();
 
@@ -355,6 +365,8 @@ export const CacheDebugPanel: React.FC = () => {
         </CardContent>
 
       </Card>
+
+      <ConfirmDialogComponent />
 
     </div>
 
