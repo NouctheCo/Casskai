@@ -10,7 +10,6 @@ import { logger } from '@/lib/logger';
 import type {
   DocumentAnalysisResult,
   JournalEntryExtracted,
-  JournalEntryLine,
   DocumentType,
 } from '@/types/ai-document.types';
 
@@ -328,13 +327,13 @@ class AIDocumentAnalysisService {
         // Mettre à jour les lignes d'écriture si facture d'achat
         if (corrected.lines && corrected.lines.length >= 2) {
           // Chercher la ligne de TVA pour mettre à jour son montant
-          const tvaLine = corrected.lines.find((l: JournalEntryLine) => l.account_class?.toString().startsWith('445') || l.account_class?.toString().startsWith('44'));
+          const tvaLine = corrected.lines.find((l: { account_class?: string | number; debit_amount?: number; credit_amount?: number }) => l.account_class?.toString().startsWith('445') || l.account_class?.toString().startsWith('44'));
           if (tvaLine) {
             tvaLine.debit_amount = va;
             tvaLine.credit_amount = 0;
           }
           // Chercher la ligne de fournisseurs/clients et mettre à jour TTC
-          const creditorLine = corrected.lines.find((l: JournalEntryLine) => l.account_class?.toString().startsWith('40') || l.account_class?.toString().startsWith('41'));
+          const creditorLine = corrected.lines.find((l: { account_class?: string | number; credit_amount?: number }) => l.account_class?.toString().startsWith('40') || l.account_class?.toString().startsWith('41'));
           if (creditorLine && creditorLine.credit_amount === 0) {
             creditorLine.credit_amount = sum;
           }

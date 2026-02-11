@@ -116,7 +116,7 @@ export class CurrencyRegistry {
    * Calculer les gains/pertes de change
    * UTILISE: exchangeRateService (qui a l'historique)
    */
-  async calculateCurrencyGainLoss(companyId: string, fiscalYear: number): Promise<{ realized: number; unrealized: number } | unknown[]> {
+  async calculateCurrencyGainLoss(companyId: string, fiscalYear: number) {
     try {
       return await exchangeRateService.calculateCurrencyGainLoss(companyId, fiscalYear);
     } catch (error) {

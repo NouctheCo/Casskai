@@ -91,8 +91,8 @@ class FinancialReportsService {
    */
   private async calculateAccountBalances(filters: ReportFilters): Promise<AccountBalance[]> {
     const { companyId, startDate, endDate } = filters;
-    const periodStart = startDate || startOfYear(new Date()).toISOString().split('T')[0];
-    const periodEnd = endDate || endOfYear(new Date()).toISOString().split('T')[0];
+    const periodStart = startDate || format(startOfYear(new Date()), 'yyyy-MM-dd');
+    const periodEnd = endDate || format(endOfYear(new Date()), 'yyyy-MM-dd');
     // Récupérer tous les comptes de l'entreprise
     const { data: accounts, error: accountsError } = await supabase
       .from('chart_of_accounts')
@@ -321,8 +321,8 @@ class FinancialReportsService {
         default:
           return { success: false, error: 'Type de rapport non supporté' };
       }
-      const periodStart = filters.startDate || startOfYear(new Date()).toISOString().split('T')[0];
-      const periodEnd = filters.endDate || endOfYear(new Date()).toISOString().split('T')[0];
+      const periodStart = filters.startDate || format(startOfYear(new Date()), 'yyyy-MM-dd');
+      const periodEnd = filters.endDate || format(endOfYear(new Date()), 'yyyy-MM-dd');
       // Sauvegarder dans la table financial_reports
       const { data, error } = await supabase
         .from('financial_reports')

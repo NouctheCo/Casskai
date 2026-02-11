@@ -4,7 +4,7 @@
  * Navbar de la landing page V2
  */
 
-import { useState, useEffect, type ForwardRefExoticComponent, type RefAttributes, type SVGAttributes } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -25,29 +25,13 @@ import {
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { useLocale } from '@/contexts/LocaleContext';
 
-interface NavItem {
-  icon: ForwardRefExoticComponent<Omit<SVGAttributes<SVGSVGElement>, 'ref'> & RefAttributes<SVGSVGElement>>;
-  label: string;
-  description: string;
-  href: string;
-  isExternal?: boolean;
-}
-
-interface NavLink {
-  label: string;
-  href: string;
-  hasDropdown?: boolean;
-  isExternal?: boolean;
-  items?: NavItem[];
-}
-
 export function Navbar() {
   const { t } = useLocale();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-  const navLinks: NavLink[] = [
+  const navLinks = [
     {
       label: t('landing.navbar.product'),
       href: '#features',
@@ -167,7 +151,7 @@ export function Navbar() {
                           <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl p-4 min-w-[320px]">
                             <div className="grid grid-cols-2 gap-2">
                               {link.items?.map((item) => (
-                                item.isExternal ? (
+                                ('isExternal' in item && item.isExternal) ? (
                                   <Link
                                     key={item.label}
                                     to={item.href}
@@ -237,8 +221,6 @@ export function Navbar() {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
-              aria-label="Menu de navigation"
-              aria-expanded={isMobileMenuOpen}
             >
               {isMobileMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -285,7 +267,7 @@ export function Navbar() {
                     {link.items && (
                       <div className="pl-4 space-y-2 mt-2">
                         {link.items.map((item) => (
-                          item.isExternal ? (
+                          ('isExternal' in item && item.isExternal) ? (
                             <Link
                               key={item.label}
                               to={item.href}

@@ -44,8 +44,8 @@ serve(async (req) => {
 
     const { data: invite, error: inviteErr } = await admin
       .from("company_invitations")
-      .select("id, company_id, email, role, allowed_modules, invited_by, status, expires_at")
-      .eq("token", token)
+      .select("id, company_id, email, role, status, expires_at, invited_by")
+      .eq("invitation_token", token)
       .single();
 
     if (inviteErr || !invite) {

@@ -72,7 +72,7 @@ export const useTrial = (): UseTrialReturn => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await createTrialSubscription(user.id, companyId ?? '');
+      const result = await createTrialSubscription(user.id, companyId || '');
       if (result.success) {
         // Recharger les informations après création
         await loadTrialInfo();

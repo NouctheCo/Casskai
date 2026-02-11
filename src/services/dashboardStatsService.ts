@@ -15,7 +15,7 @@
  * ✅ MIGRATED TO: acceptedAccountingService pour la cohérence globale
  */
 import { supabase } from '@/lib/supabase';
-import { startOfYear, endOfYear, startOfMonth, endOfMonth } from 'date-fns';
+import { startOfYear, endOfYear, startOfMonth, endOfMonth, format } from 'date-fns';
 import { logger } from '@/lib/logger';
 import { acceptedAccountingService } from './acceptedAccountingService';
 export interface DashboardStats {
@@ -44,8 +44,8 @@ class DashboardStatsService {
     startDate?: string,
     endDate?: string
   ): Promise<DashboardStats> {
-    const periodStart = startDate || startOfYear(new Date()).toISOString().split('T')[0];
-    const periodEnd = endDate || endOfYear(new Date()).toISOString().split('T')[0];
+    const periodStart = startDate || format(startOfYear(new Date()), 'yyyy-MM-dd');
+    const periodEnd = endDate || format(endOfYear(new Date()), 'yyyy-MM-dd');
     // Calcul de la période précédente pour les tendances (même durée)
     const previousPeriodEnd = new Date(periodStart);
     previousPeriodEnd.setDate(previousPeriodEnd.getDate() - 1);
@@ -57,8 +57,8 @@ class DashboardStatsService {
     // Récupérer les écritures de la période précédente
     const previousPeriodData = await this.getFinancialData(
       companyId,
-      previousPeriodStart.toISOString().split('T')[0],
-      previousPeriodEnd.toISOString().split('T')[0]
+      format(previousPeriodStart, 'yyyy-MM-dd'),
+      format(previousPeriodEnd, 'yyyy-MM-dd')
     );
     // Calculer les tendances
     const revenueTrend = this.calculateTrend(currentPeriodData.revenue, previousPeriodData.revenue);
@@ -183,7 +183,7 @@ class DashboardStatsService {
     });
 
     const netIncome = revenue - expenses;
-    const netMargin = revenue > 0 ? (netIncome / revenue) * 100 : 0;
+    const netMargin = revenue > 0 ? Math.round(((netIncome / revenue) * 100) * 100) / 100 : 0;
 
     return {
       revenue: Math.abs(revenue),
@@ -205,16 +205,16 @@ class DashboardStatsService {
    * Calcule les statistiques pour le mois en cours
    */
   async getCurrentMonthStats(companyId: string): Promise<DashboardStats> {
-    const startDate = startOfMonth(new Date()).toISOString().split('T')[0];
-    const endDate = endOfMonth(new Date()).toISOString().split('T')[0];
+    const startDate = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(new Date()), 'yyyy-MM-dd');
     return this.calculateStats(companyId, startDate, endDate);
   }
   /**
    * Calcule les statistiques pour l'année en cours
    */
   async getCurrentYearStats(companyId: string): Promise<DashboardStats> {
-    const startDate = startOfYear(new Date()).toISOString().split('T')[0];
-    const endDate = endOfYear(new Date()).toISOString().split('T')[0];
+    const startDate = format(startOfYear(new Date()), 'yyyy-MM-dd');
+    const endDate = format(endOfYear(new Date()), 'yyyy-MM-dd');
     return this.calculateStats(companyId, startDate, endDate);
   }
   /**
@@ -225,8 +225,8 @@ class DashboardStatsService {
     const now = new Date();
     for (let i = 5; i >= 0; i--) {
       const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const startDate = startOfMonth(monthDate).toISOString().split('T')[0];
-      const endDate = endOfMonth(monthDate).toISOString().split('T')[0];
+      const startDate = format(startOfMonth(monthDate), 'yyyy-MM-dd');
+      const endDate = format(endOfMonth(monthDate), 'yyyy-MM-dd');
       const data = await this.getFinancialData(companyId, startDate, endDate);
       // Format month name
       const monthName = monthDate.toLocaleDateString('fr-FR', { month: 'short' });
@@ -241,8 +241,8 @@ class DashboardStatsService {
    * Récupère les dépenses par catégorie (classes comptables)
    */
   async getExpensesByCategory(companyId: string): Promise<Array<{ name: string; value: number; color: string }>> {
-    const startDate = startOfYear(new Date()).toISOString().split('T')[0];
-    const endDate = endOfYear(new Date()).toISOString().split('T')[0];
+    const startDate = format(startOfYear(new Date()), 'yyyy-MM-dd');
+    const endDate = format(endOfYear(new Date()), 'yyyy-MM-dd');
     const { data: lines, error } = await supabase
       .from('journal_entry_lines')
       .select(`

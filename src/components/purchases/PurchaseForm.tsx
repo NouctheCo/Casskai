@@ -28,6 +28,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
   onClose,
   onSubmit,
   purchase,
+  suppliers: _suppliers,
   loading
 }) => {
   const { t } = useTranslation();
@@ -55,13 +56,14 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
     due_date: '',
     attachments: []
   });
+
   // Options autocomplete pour taux TVA (groupées)
   const vatRateAutocompleteOptions: AutocompleteOption[] = useMemo(() => {
     const uniqueRates = Array.from(new Set([...vatRateOptions, formData.tva_rate])).sort((a, b) => a - b);
     return uniqueRates.map(rate => ({
       value: rate.toString(),
       label: `${rate}%`,
-      description: rate === defaultTaxRate ? 'Taux par défaut' : (undefined as string | undefined),
+      description: rate === defaultTaxRate ? 'Taux par défaut' : undefined,
       category: rate === 0 ? 'Exonéré' : rate < 10 ? 'Taux réduit' : 'Taux normal'
     }));
   }, [vatRateOptions, formData.tva_rate, defaultTaxRate]);

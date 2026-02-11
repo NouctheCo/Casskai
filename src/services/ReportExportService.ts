@@ -405,8 +405,8 @@ export class ReportExportService {
   private stripCurrencyFromValue(value: any): any {
     if (typeof value !== 'string') return value;
     const trimmed = value.trim();
-    // Remplacer l'espace insecable (U+00A0) par espace normal d'abord
-    const normalized = trimmed.replace(/\u00A0/g, ' ');
+    // Remplacer les espaces insécables (U+00A0, U+202F) par des espaces normaux
+    const normalized = trimmed.replace(/[\u00A0\u202F]/g, ' ');
     const currencyRegex = /(€|EUR|XOF|XAF|FCFA|F\s*\/?\/\s*CFA)\s*$/i;
     if (!currencyRegex.test(normalized)) return normalized;
     const withoutCurrency = normalized.replace(currencyRegex, '').replace(/\s{2,}/g, ' ').trim();
@@ -452,8 +452,8 @@ export class ReportExportService {
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
     Object.entries(summary).forEach(([key, value]) => {
-      // Normaliser les espaces insécables (U+00A0) en espaces normaux pour jsPDF
-      const normalizedValue = String(value).replace(/\u00A0/g, ' ');
+      // Normaliser les espaces insécables (U+00A0, U+202F) en espaces normaux pour jsPDF
+      const normalizedValue = String(value).replace(/[\u00A0\u202F]/g, ' ');
       pdf.text(`${key}: ${normalizedValue}`, 25, yPos);
       yPos += 5;
     });

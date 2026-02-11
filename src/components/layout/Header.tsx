@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-import { Menu, Settings, Bell, User, Search, ChevronDown, Shield, CloudOff, RefreshCw } from 'lucide-react';
-
-import { useSyncQueue } from '@/hooks/useSyncQueue';
+import { Menu, Settings, Bell, User, Search, ChevronDown, Shield } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -38,8 +36,6 @@ import { Link } from 'react-router-dom';
 
 import { NotificationCenter, useNotificationCenter } from '@/components/notifications/NotificationCenter';
 
-import { CommandPalette } from '@/components/ui/CommandPalette';
-
 
 
 interface HeaderProps {
@@ -74,29 +70,11 @@ export function Header({
 
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-
 
 
   // Utiliser le hook pour les notifications
 
   const { isOpen: isNotificationOpen, setIsOpen: setNotificationOpen, unreadCount } = useNotificationCenter();
-
-  // Sync queue offline
-  const { pendingCount: syncPendingCount, failedCount: syncFailedCount, isSyncing, syncNow } = useSyncQueue();
-
-  // Keyboard shortcut for command palette (Ctrl+K / Cmd+K)
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-        event.preventDefault();
-        setIsCommandPaletteOpen(true);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
 
 
@@ -222,15 +200,11 @@ export function Header({
 
               placeholder={t('header.search', { defaultValue: 'Rechercher...' })}
 
-              className="w-full pl-10 pr-12 py-2 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm transition-all duration-200 cursor-pointer"
+              className="w-full pl-10 pr-12 py-2 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm transition-all duration-200"
 
               onFocus={() => setSearchFocused(true)}
 
               onBlur={() => setSearchFocused(false)}
-
-              onClick={() => setIsCommandPaletteOpen(true)}
-
-              readOnly
 
             />
 
@@ -292,12 +266,7 @@ export function Header({
 
             >
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation dark:bg-gray-800"
-                onClick={() => setIsCommandPaletteOpen(true)}
-              >
+              <Button variant="ghost" size="icon" className="hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation dark:bg-gray-800">
 
                 <Search className="h-5 w-5" />
 
@@ -308,45 +277,6 @@ export function Header({
           </div>
 
 
-
-          {/* Bouton Sync Offline (visible si pending > 0 ou offline) */}
-          {(syncPendingCount > 0 || syncFailedCount > 0 || !navigator.onLine) && (
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "relative hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation dark:bg-gray-800",
-                  !navigator.onLine && "text-orange-500"
-                )}
-                onClick={() => syncNow()}
-                disabled={isSyncing || !navigator.onLine}
-                title={!navigator.onLine ? t('header.offline', { defaultValue: 'Hors ligne' }) : t('header.pendingSync', { defaultValue: '{{count}} élément(s) en attente', count: syncPendingCount })}
-              >
-                {!navigator.onLine ? (
-                  <CloudOff className="h-5 w-5" />
-                ) : (
-                  <RefreshCw className={cn("h-5 w-5", isSyncing && "animate-spin")} />
-                )}
-                {(syncPendingCount + syncFailedCount) > 0 && (
-                  <motion.span
-                    className={cn(
-                      "absolute -top-1 -right-1 h-5 w-5 rounded-full text-xs text-white flex items-center justify-center font-medium",
-                      syncFailedCount > 0 ? "bg-red-500" : "bg-orange-500"
-                    )}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  >
-                    {syncPendingCount + syncFailedCount}
-                  </motion.span>
-                )}
-              </Button>
-            </motion.div>
-          )}
 
           {/* Notifications with animated badge */}
 
@@ -635,16 +565,6 @@ export function Header({
         isOpen={isNotificationOpen}
 
         onClose={() => setNotificationOpen(false)}
-
-      />
-
-      {/* Command Palette */}
-
-      <CommandPalette
-
-        isOpen={isCommandPaletteOpen}
-
-        onClose={() => setIsCommandPaletteOpen(false)}
 
       />
 

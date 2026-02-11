@@ -6,8 +6,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import OpenAI from 'https://esm.sh/openai@4.20.1'
-import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
-import { checkRateLimit, rateLimitResponse, getRateLimitPreset } from '../_shared/rate-limit.ts'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
+}
 
 interface RealKPIData {
   financial: {
@@ -61,13 +64,8 @@ interface DashboardAnalysisRequest {
 }
 
 serve(async (req) => {
-  const preflightResponse = handleCorsPreflightRequest(req);
-  if (preflightResponse) return preflightResponse;
-
-  // Rate limiting
-  const rateLimit = checkRateLimit(req, getRateLimitPreset('ai-dashboard-analysis'))
-  if (!rateLimit.allowed) {
-    return rateLimitResponse(rateLimit.retryAfter!, getCorsHeaders(req))
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
@@ -91,7 +89,7 @@ serve(async (req) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
@@ -110,7 +108,7 @@ serve(async (req) => {
         console.error('[ai-dashboard-analysis] Error resolving company_id:', companyError)
         return new Response(JSON.stringify({ error: 'Failed to resolve company', details: companyError.message }), {
           status: 403,
-          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })
       }
       
@@ -120,7 +118,7 @@ serve(async (req) => {
     if (!company_id) {
       return new Response(JSON.stringify({ error: 'Company not provided' }), {
         status: 400,
-        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
@@ -137,7 +135,7 @@ serve(async (req) => {
       console.error('[ai-dashboard-analysis] RLS error checking access:', accessError)
       return new Response(JSON.stringify({ error: 'Access verification failed', details: accessError.message }), {
         status: 403,
-        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
@@ -145,7 +143,7 @@ serve(async (req) => {
       console.warn('[ai-dashboard-analysis] User access denied to company:', company_id)
       return new Response(JSON.stringify({ error: 'Access denied to this company' }), {
         status: 403,
-        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
@@ -164,7 +162,7 @@ serve(async (req) => {
       console.error('[ai-dashboard-analysis] Missing both kpiData and prompt')
       return new Response(JSON.stringify({ error: 'Missing prompt or kpiData' }), {
         status: 400,
-        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
@@ -180,7 +178,7 @@ serve(async (req) => {
           details: promptError instanceof Error ? promptError.message : String(promptError)
         }), {
           status: 400,
-          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })
       }
     }
@@ -188,7 +186,7 @@ serve(async (req) => {
     if (!prompt) {
       return new Response(JSON.stringify({ error: 'No valid prompt could be generated' }), {
         status: 400,
-        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
@@ -247,7 +245,7 @@ IMPORTANT: Réponds UNIQUEMENT au format JSON avec la structure suivante:
       })
 
     return new Response(JSON.stringify(analysis), {
-      headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
 
   } catch (error) {
@@ -257,7 +255,7 @@ IMPORTANT: Réponds UNIQUEMENT au format JSON avec la structure suivante:
       details: error.message
     }), {
       status: 500,
-      headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
   }
 })

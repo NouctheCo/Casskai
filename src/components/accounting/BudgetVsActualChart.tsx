@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { startOfYear, endOfYear } from 'date-fns';
+import { startOfYear, endOfYear, format } from 'date-fns';
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
 interface BudgetVsActualData {
@@ -29,8 +29,8 @@ const BudgetVsActualChart: React.FC<BudgetVsActualChartProps> = ({ companyId }) 
     const loadBudgetVsActual = async () => {
       try {
         setLoading(true);
-        const startDate = startOfYear(new Date()).toISOString().split('T')[0];
-        const endDate = endOfYear(new Date()).toISOString().split('T')[0];
+        const startDate = format(startOfYear(new Date()), 'yyyy-MM-dd');
+        const endDate = format(endOfYear(new Date()), 'yyyy-MM-dd');
         // 1. Récupérer les catégories budgétaires avec leur budget annuel
         const { data: budgetCategories, error: budgetError } = await supabase
           .from('budget_categories')

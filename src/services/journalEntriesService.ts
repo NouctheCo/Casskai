@@ -25,7 +25,6 @@ import { AccountingStandardAdapter, type AccountingStandard } from './accounting
 import { kpiCacheService } from './kpiCacheService';
 import { logger } from '@/lib/logger';
 import i18n from '@/i18n/i18n';
-import { offlineDataService } from './offlineDataService';
 type JournalEntryInsert = Database['public']['Tables']['journal_entries']['Insert'];
 type JournalEntryUpdate = Database['public']['Tables']['journal_entries']['Update'];
 type JournalEntryLineInsert = Database['public']['Tables']['journal_entry_lines']['Insert'];
@@ -90,12 +89,6 @@ class JournalEntriesService {
   }
   async createJournalEntry(payload: JournalEntryPayload): Promise<ServiceResult<JournalEntryWithItems>> {
     logger.debug('JournalEntries', '[JournalEntriesService] createJournalEntry called with:', payload);
-
-    // Mode offline : creer un brouillon local
-    if (!navigator.onLine) {
-      return this.createJournalEntryOffline(payload);
-    }
-
     try {
       this.ensureBalanced(payload.items);
       // Si journal_id n'est pas fourni, récupérer le premier journal actif de la company
@@ -528,14 +521,14 @@ class JournalEntriesService {
         const offset = (page - 1) * limit;
         query = query.range(offset, offset + limit - 1);
       }
-      // Emit a log so Playwright can capture the request context
+      // Emit a console log so Playwright can capture the request context
       try {
-        logger.debug('JournalEntries', 'getJournalEntries calling Supabase for companyId:', { companyId, filters: { page, limit, dateFrom, dateTo, journalId, accountId, reference, description, status, sortBy, sortOrder } });
+        console.log('[journalEntriesService] getJournalEntries calling Supabase for companyId:', companyId, 'filters:', { page, limit, dateFrom, dateTo, journalId, accountId, reference, description, status, sortBy, sortOrder });
       } catch (_e) { /* ignore logging errors */ }
       const { data, error, count } = await query;
       // Log raw result for browser debugging
       try {
-        logger.debug('JournalEntries', 'getJournalEntries raw result:', { rows: (data || []).length, count });
+        console.log('[journalEntriesService] getJournalEntries raw result:', { rows: (data || []).length, count });
       } catch (_e) { /* ignore logging errors */ }
       if (error) {
         throw error;
@@ -866,48 +859,6 @@ class JournalEntriesService {
         error: errorMessage
       };
     }
-  }
-
-  /**
-   * Creer une ecriture comptable en mode offline (brouillon local)
-   */
-  private async createJournalEntryOffline(payload: JournalEntryPayload): Promise<ServiceResult<JournalEntryWithItems>> {
-    const localId = crypto.randomUUID();
-
-    const offlineEntry = {
-      company_id: payload.companyId,
-      entry_date: payload.entryDate,
-      description: payload.description,
-      reference_number: payload.referenceNumber || `DRAFT-${Date.now()}`,
-      journal_id: payload.journalId || null,
-      status: 'draft',
-      entry_number: payload.entryNumber || `OFF-${Date.now()}`,
-    };
-
-    const userResult = await supabase.auth.getUser().catch((): { data: { user: { id: string } | null } } => ({ data: { user: null } }));
-    const userId = userResult.data.user?.id || 'offline';
-    await offlineDataService.insert('journal_entries', offlineEntry, userId, payload.companyId);
-
-    logger.info('JournalEntries', `Ecriture comptable brouillon creee offline (local_id: ${localId})`);
-
-    const result: JournalEntryWithItems = {
-      id: localId,
-      ...offlineEntry,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      _offline: true,
-      items: payload.items.map((item, index) => ({
-        id: crypto.randomUUID(),
-        journal_entry_id: localId,
-        account_id: item.accountId,
-        debit_amount: item.debitAmount || 0,
-        credit_amount: item.creditAmount || 0,
-        description: item.description || '',
-        line_order: index + 1,
-      })),
-    } as unknown as JournalEntryWithItems;
-
-    return { success: true, data: result };
   }
 }
 export const journalEntriesService = new JournalEntriesService();

@@ -6,7 +6,6 @@
  */
 
 import { supabase } from '@/lib/supabase';
-import { logger } from '@/lib/logger';
 
 export interface TrialStatus {
   hasActiveTrial: boolean;
@@ -29,7 +28,7 @@ export async function getUserTrialStatus(userId: string): Promise<TrialStatus> {
       .limit(1);
 
     if (error) {
-      logger.error('trialService', 'Error checking trial status:', error);
+      console.error('Error checking trial status:', error);
       return { hasActiveTrial: false, hasUsedTrial: false };
     }
 
@@ -55,7 +54,7 @@ export async function getUserTrialStatus(userId: string): Promise<TrialStatus> {
       hasUsedTrial: true, // L'utilisateur a déjà utilisé un essai
     };
   } catch (error) {
-    logger.error('trialService', 'Error in getUserTrialStatus:', error);
+    console.error('Error in getUserTrialStatus:', error);
     return { hasActiveTrial: false, hasUsedTrial: false };
   }
 }
@@ -75,7 +74,7 @@ export async function createUserTrial(userId: string, planId: string, daysToAdd:
       .limit(1);
 
     if (checkError) {
-      logger.error('trialService', 'Error checking existing trials:', checkError);
+      console.error('Error checking existing trials:', checkError);
       throw checkError;
     }
 
@@ -102,7 +101,7 @@ export async function createUserTrial(userId: string, planId: string, daysToAdd:
       .single();
 
     if (createError) {
-      logger.error('trialService', 'Error creating trial:', createError);
+      console.error('Error creating trial:', createError);
       throw createError;
     }
 
@@ -112,7 +111,7 @@ export async function createUserTrial(userId: string, planId: string, daysToAdd:
       daysRemaining: daysToAdd,
     };
   } catch (error) {
-    logger.error('trialService', 'Error in createUserTrial:', error);
+    console.error('Error in createUserTrial:', error);
     throw error;
   }
 }
@@ -125,7 +124,7 @@ export async function canCreateTrial(userId: string): Promise<boolean> {
     const status = await getUserTrialStatus(userId);
     return !status.hasUsedTrial;
   } catch (error) {
-    logger.error('trialService', 'Error checking if can create trial:', error);
+    console.error('Error checking if can create trial:', error);
     return false;
   }
 }
@@ -147,7 +146,7 @@ export async function createTrialSubscription(
       daysRemaining: result.daysRemaining,
     };
   } catch (error) {
-    logger.error('trialService', 'Error creating trial subscription:', error);
+    console.error('Error creating trial subscription:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -169,7 +168,7 @@ export async function getUserTrialInfo(userId: string) {
       hasUsedTrial: status.hasUsedTrial,
     };
   } catch (error) {
-    logger.error('trialService', 'Error getting trial info:', error);
+    console.error('Error getting trial info:', error);
     return null;
   }
 }
@@ -194,7 +193,7 @@ export async function getTrialStatistics() {
       }).length || 0,
     };
   } catch (error) {
-    logger.error('trialService', 'Error getting trial statistics:', error);
+    console.error('Error getting trial statistics:', error);
     return { totalTrials: 0, activeTrials: 0 };
   }
 }
@@ -220,7 +219,7 @@ export async function getExpiringTrials(daysAhead: number = 3) {
       return endDate <= cutoff && endDate > now;
     }) || [];
   } catch (error) {
-    logger.error('trialService', 'Error getting expiring trials:', error);
+    console.error('Error getting expiring trials:', error);
     return [];
   }
 }
@@ -244,7 +243,7 @@ export async function convertTrialToPaid(userId: string, reason?: string) {
     if (error) throw error;
     return { success: true };
   } catch (error) {
-    logger.error('trialService', 'Error converting trial to paid:', error);
+    console.error('Error converting trial to paid:', error);
     return { success: false, error };
   }
 }
@@ -270,13 +269,13 @@ export async function cancelTrial(userId: string, reason?: string) {
       .eq('status', 'trial');
 
     if (error) {
-      logger.error('trialService', 'Error cancelling trial:', error);
+      console.error('Error cancelling trial:', error);
       throw error;
     }
 
     return { success: true };
   } catch (error) {
-    logger.error('trialService', 'Error in cancelTrial:', error);
+    console.error('Error in cancelTrial:', error);
     throw error;
   }
 }
@@ -316,7 +315,7 @@ export async function sendTrialExpiringEmail(
 
     return response.ok;
   } catch (error) {
-    logger.error('trialService', 'Error sending trial expiring email:', error);
+    console.error('Error sending trial expiring email:', error);
     return false;
   }
 }

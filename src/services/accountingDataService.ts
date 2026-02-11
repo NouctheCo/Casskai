@@ -721,11 +721,11 @@ export class AccountingDataService {
         postedEntriesCount: 0,
         accountsCount: 0,
         journalsCount: 0,
-        totalBalanceTrend: undefined as number | undefined,
-        totalDebitTrend: undefined as number | undefined,
-        totalCreditTrend: undefined as number | undefined,
-        entriesCountTrend: undefined as number | undefined,
-        pendingEntriesCountTrend: undefined as number | undefined
+        totalBalanceTrend: undefined,
+        totalDebitTrend: undefined,
+        totalCreditTrend: undefined,
+        entriesCountTrend: undefined,
+        pendingEntriesCountTrend: undefined
       };
     }
   }

@@ -67,7 +67,6 @@ import { LateFeeCalculator } from '@/components/invoicing/LateFeeCalculator';
 import { InvoiceComplianceSettings } from '@/components/invoicing/InvoiceComplianceSettings';
 import { BulkJournalImportTab } from '@/components/accounting/BulkJournalImportTab';
 import { logger } from '@/lib/logger';
-import { ComponentErrorBoundary } from '@/components/ComponentErrorBoundary';
 // Invoicing KPI Card Component
 const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }: {
   title: string;
@@ -226,7 +225,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
         if (recentInvoices) {
           for (const invoice of recentInvoices) {
             const customer = Array.isArray(invoice.customer) ? invoice.customer[0] : invoice.customer;
-            const customerName = customer?.name || t('invoicing.unknownClient', 'Client inconnu');
+            const customerName = customer?.name || 'Client inconnu';
             const amount = invoice.total_incl_tax || 0;
             const formattedAmount = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: ((invoice as any).currency as string) || getCurrentCompanyCurrency() }).format(amount).replace(/\u00A0/g, ' ');
             const timeAgo = getTimeAgo(invoice.created_at);
@@ -234,7 +233,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
             activityItems.push({
               icon: FileText,
               color: invoice.status === 'paid' ? 'green' : 'blue',
-              description: t('invoicing.recentActivity.invoiceDescription', 'Facture {{number}} - {{customer}} ({{amount}})', { number: invoice.invoice_number, customer: customerName, amount: formattedAmount }),
+              description: `Facture ${invoice.invoice_number} - ${customerName} (${formattedAmount})`,
               time: timeAgo
             });
           }
@@ -250,7 +249,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
             activityItems.push({
               icon: Receipt,
               color: 'purple',
-              description: t('invoicing.recentActivity.quoteDescription', 'Devis {{number}} ({{amount}})', { number: quote.quote_number, amount: formattedAmount }),
+              description: `Devis ${quote.quote_number} (${formattedAmount})`,
               time: timeAgo
             });
           }
@@ -272,14 +271,14 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
       const diffHours = Math.floor(diffMs / 3600000);
       const diffDays = Math.floor(diffMs / 86400000);
 
-      if (diffMins < 60) return t('invoicing.recentActivity.minutesAgo', '{{count}} min', { count: diffMins });
-      if (diffHours < 24) return t('invoicing.recentActivity.hoursAgo', '{{count}}h', { count: diffHours });
-      if (diffDays < 7) return t('invoicing.recentActivity.daysAgo', '{{count}}j', { count: diffDays });
-      return date.toLocaleDateString();
+      if (diffMins < 60) return `${diffMins} min`;
+      if (diffHours < 24) return `${diffHours}h`;
+      if (diffDays < 7) return `${diffDays}j`;
+      return date.toLocaleDateString('fr-FR');
     };
 
     loadRecentActivities();
-  }, [currentCompany, t]);
+  }, [currentCompany]);
 
   return (
     <Card className="h-full">
@@ -292,12 +291,8 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
       <CardContent>
         <div className="space-y-3">
           {activities.length === 0 ? (
-            <div className="flex flex-col items-center justify-center text-center py-8">
-              <div className="mb-3 flex items-center justify-center rounded-full bg-muted/50 p-3">
-                <Activity className="w-10 h-10 text-muted-foreground/50" strokeWidth={1.5} />
-              </div>
-              <p className="text-sm font-medium text-muted-foreground">{t('invoicing.recentActivity.noActivity', 'Aucune activité récente')}</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">{t('invoicing.recentActivity.noActivityHint', 'Les factures et devis récents apparaitront ici')}</p>
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <p>{t('invoicing.recentActivity.noActivity', 'Aucune activité récente')}</p>
             </div>
           ) : (
             activities.map((activity, index) => (
@@ -326,7 +321,7 @@ const RecentInvoicingActivities = ({ t }: { t: any }) => {
                     {activity.description}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {t('invoicing.recentActivity.timeAgo', 'Il y a {{time}}', { time: activity.time })}
+                    Il y a {activity.time}
                   </p>
                 </div>
               </motion.div>
@@ -391,7 +386,7 @@ export default function InvoicingPageOptimized() {
         });
       } catch (error: unknown) {
         logger.error('Invoicing', 'Error loading invoicing data:', error);
-        setError((error instanceof Error ? error.message : t('invoicing.errors.generic', 'Une erreur est survenue')));
+        setError((error instanceof Error ? error.message : 'Une erreur est survenue'));
         toastSuccess("Action effectuée avec succès");
       } finally {
         setIsLoading(false);
@@ -444,7 +439,7 @@ export default function InvoicingPageOptimized() {
   const handleNewInvoice = async () => {
     // Check if subscription is expired
     if (isExpired) {
-      toast.error(t('invoicing.errors.subscriptionExpired', 'Abonnement expiré. Veuillez choisir un plan pour continuer.'));
+      toast.error('Abonnement expiré. Veuillez choisir un plan pour continuer.');
       navigate('/billing');
       return;
     }
@@ -466,7 +461,7 @@ export default function InvoicingPageOptimized() {
   const handleNewQuote = () => {
     // Check if subscription is expired
     if (isExpired) {
-      toast.error(t('invoicing.errors.subscriptionExpired', 'Abonnement expiré. Veuillez choisir un plan pour continuer.'));
+      toast.error('Abonnement expiré. Veuillez choisir un plan pour continuer.');
       navigate('/billing');
       return;
     }
@@ -476,7 +471,7 @@ export default function InvoicingPageOptimized() {
   const handleNewPayment = () => {
     // Check if subscription is expired
     if (isExpired) {
-      toast.error(t('invoicing.errors.subscriptionExpired', 'Abonnement expiré. Veuillez choisir un plan pour continuer.'));
+      toast.error('Abonnement expiré. Veuillez choisir un plan pour continuer.');
       navigate('/billing');
       return;
     }
@@ -488,45 +483,12 @@ export default function InvoicingPageOptimized() {
   };
   if (isLoading) {
     return (
-      <div className="space-y-8 p-6" role="status" aria-label="Loading">
-        {/* Header skeleton */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="skeleton-shimmer h-12 w-12 rounded-xl" />
-              <div className="space-y-2">
-                <div className="skeleton-shimmer h-8 w-56 rounded-lg" />
-                <div className="skeleton-shimmer h-4 w-40 rounded" />
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <div className="skeleton-shimmer h-10 w-36 rounded-lg" />
-              <div className="skeleton-shimmer h-10 w-28 rounded-lg" />
-              <div className="skeleton-shimmer h-10 w-40 rounded-lg" />
-            </div>
-          </div>
-        </div>
-        {/* KPI cards skeleton - 4 columns matching the real layout */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="skeleton-shimmer h-12 w-12 rounded-xl" />
-                <div className="skeleton-shimmer h-6 w-16 rounded-full" />
-              </div>
-              <div className="space-y-2">
-                <div className="skeleton-shimmer h-4 w-24 rounded" />
-                <div className="skeleton-shimmer h-7 w-32 rounded" />
-                <div className="skeleton-shimmer h-3 w-20 rounded" />
-              </div>
-            </div>
-          ))}
-        </div>
-        {/* Tab navigation skeleton */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-2">
-          <div className="flex gap-2 p-1">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="skeleton-shimmer h-9 w-28 rounded-lg" />
+      <div className="space-y-8 p-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-4"></div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
             ))}
           </div>
         </div>
@@ -534,7 +496,6 @@ export default function InvoicingPageOptimized() {
     );
   }
   return (
-    <ComponentErrorBoundary componentName="InvoicingPage">
     <PageContainer variant="default" className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header professionnel */}
@@ -584,8 +545,8 @@ export default function InvoicingPageOptimized() {
                         value={customStartDate}
                         onChange={(e) => setCustomStartDate(e.target.value)}
                         className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder={t('invoicing.customPeriod.startDatePlaceholder', 'Sélectionner une date de début')}
-                        title={t('invoicing.customPeriod.startDateTitle', 'Date de début de la période personnalisée')}
+                        placeholder="Sélectionner une date de début"
+                        title="Date de début de la période personnalisée"
                       />
                     </div>
                     <div className="flex flex-col">
@@ -595,8 +556,8 @@ export default function InvoicingPageOptimized() {
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
                         className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder={t('invoicing.customPeriod.endDatePlaceholder', 'Sélectionner une date de fin')}
-                        title={t('invoicing.customPeriod.endDateTitle', 'Date de fin de la période personnalisée')}
+                        placeholder="Sélectionner une date de fin"
+                        title="Date de fin de la période personnalisée"
                       />
                     </div>
                   </div>
@@ -723,7 +684,7 @@ export default function InvoicingPageOptimized() {
                 className="flex items-center gap-2 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <FileText className="h-4 w-4" />
-                {t('invoicing.tabs.settings', 'Configuration')}
+                Configuration
               </TabsTrigger>
             </TabsList>
           </div>
@@ -777,12 +738,8 @@ export default function InvoicingPageOptimized() {
                           ];
                           if (totalAmount === 0) {
                             return (
-                              <div className="flex flex-col items-center justify-center text-center py-8">
-                                <div className="mb-3 flex items-center justify-center rounded-full bg-muted/50 p-3">
-                                  <PieChart className="w-10 h-10 text-muted-foreground/50" strokeWidth={1.5} />
-                                </div>
-                                <p className="text-sm font-medium text-muted-foreground">{t('invoicing.revenueBreakdown.noData', 'Aucune donnée de revenus disponible')}</p>
-                                <p className="text-xs text-muted-foreground/70 mt-1">{t('invoicing.revenueBreakdown.noDataHint', 'Creez des factures pour voir la repartition ici')}</p>
+                              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                <p>{t('invoicing.revenueBreakdown.noData', 'Aucune donnée de revenus disponible pour la période sélectionnée')}</p>
                               </div>
                             );
                           }
@@ -932,10 +889,10 @@ export default function InvoicingPageOptimized() {
                 <CardHeader>
                   <CardTitle className="text-xl flex items-center gap-2">
                     <FileText className="h-6 w-6 text-blue-600" />
-                    {t('invoicing.settings.title', 'Configuration des Factures')}
+                    Configuration des Factures
                   </CardTitle>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    {t('invoicing.settings.description', 'Paramétrez vos mentions légales et informations obligatoires pour des factures conformes à la législation.')}
+                    Paramétrez vos mentions légales et informations obligatoires pour des factures conformes à la législation française.
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -947,6 +904,5 @@ export default function InvoicingPageOptimized() {
         </Tabs>
       </div>
     </PageContainer>
-    </ComponentErrorBoundary>
   );
 }

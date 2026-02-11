@@ -335,7 +335,7 @@ export default function FECImportTab() {
 
         entriesCreated: analysisResult.statistics.totalEntries,
 
-        errors: [] as string[]
+        errors: []
 
       };
 

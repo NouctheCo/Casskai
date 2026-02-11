@@ -114,7 +114,7 @@ class TeamService {
   async getPendingInvitations(companyId: string): Promise<Invitation[]> {
     try {
       const { data, error } = await supabase
-        .from('user_invitations')
+        .from('company_invitations')
         .select('*')
         .eq('company_id', companyId)
         .eq('status', 'pending')
@@ -160,7 +160,7 @@ class TeamService {
   async cancelInvitation(invitationId: string): Promise<void> {
     try {
       const { error } = await supabase
-        .from('user_invitations')
+        .from('company_invitations')
         .update({ status: 'cancelled' })
         .eq('id', invitationId);
       if (error) throw error;
@@ -176,8 +176,8 @@ class TeamService {
     try {
       // Récupérer l'invitation
       const { data: invitation, error: fetchError } = await supabase
-        .from('user_invitations')
-        .select('email, role, allowed_modules')
+        .from('company_invitations')
+        .select('email, role')
         .eq('id', invitationId)
         .single();
       if (fetchError || !invitation) {

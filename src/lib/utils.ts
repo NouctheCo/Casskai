@@ -114,7 +114,7 @@ export function formatCurrencyForPDF(amount: number, currency?: string): string 
     currency: resolved,
     minimumFractionDigits: resolved === 'XOF' || resolved === 'XAF' ? 0 : 2,
     maximumFractionDigits: resolved === 'XOF' || resolved === 'XAF' ? 0 : 2
-  }).format(amount).replace(/\u00A0/g, ' ');
+  }).format(amount).replace(/[\u00A0\u202F]/g, ' ');
 }
 
 export function getCurrentCompanyCurrency(): string {
@@ -144,6 +144,6 @@ export function formatNumberForPDF(value: number, decimals = 2): string {
   return new Intl.NumberFormat('fr-FR', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
-  }).format(value).replace(/\u00A0/g, ' ');
+  }).format(value).replace(/[\u00A0\u202F]/g, ' ');
 }
 

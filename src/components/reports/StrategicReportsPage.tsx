@@ -23,7 +23,7 @@ import {
   AlertCircle,
   ArrowRight
 } from 'lucide-react';
-import { startOfYear, endOfYear, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { startOfYear, endOfYear, subMonths, startOfMonth, endOfMonth, format } from 'date-fns';
 
 const strategicReports = [
   {
@@ -97,8 +97,8 @@ export const StrategicReportsPage: React.FC = () => {
   const [_loading, _setLoading] = useState(false);
   const [datePreset, setDatePreset] = useState('current_year');
   const [dateRange, setDateRange] = useState({
-    start: startOfYear(new Date()).toISOString().split('T')[0],
-    end: endOfYear(new Date()).toISOString().split('T')[0]
+    start: format(startOfYear(new Date()), 'yyyy-MM-dd'),
+    end: format(endOfYear(new Date()), 'yyyy-MM-dd')
   });
 
   const handleDatePresetChange = (value: string) => {
@@ -106,8 +106,8 @@ export const StrategicReportsPage: React.FC = () => {
     const preset = datePresets.find(p => p.value === value);
     if (preset && preset.start && preset.end) {
       setDateRange({
-        start: preset.start.toISOString().split('T')[0],
-        end: preset.end.toISOString().split('T')[0]
+        start: format(preset.start, 'yyyy-MM-dd'),
+        end: format(preset.end, 'yyyy-MM-dd')
       });
     }
   };

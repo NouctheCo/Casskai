@@ -45,8 +45,8 @@ export interface ProjectFormData {
 }
 
 export function ProjectForm({ onCancel, onSubmit }: ProjectFormProps) {
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [projectName, setProjectName] = useState('');
   const [projectClient, setProjectClient] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
@@ -96,8 +96,8 @@ export function ProjectForm({ onCancel, onSubmit }: ProjectFormProps) {
         setProjectBudget('');
         setProjectManager('');
         setProjectStatus('planning');
-        setStartDate(null);
-        setEndDate(null);
+        setStartDate(undefined);
+        setEndDate(undefined);
 
         toastSuccess("Projet créé avec succès");
       }
@@ -151,7 +151,7 @@ export function ProjectForm({ onCancel, onSubmit }: ProjectFormProps) {
             <label htmlFor="projectStartDate" className="text-sm font-medium">{t('projectspage.date_de_dbut', { defaultValue: 'Date de début' })}</label>
             <DatePicker
               value={startDate}
-              onChange={(d) => setStartDate(d ?? null)}
+              onChange={setStartDate}
               placeholder={t('projectspage.slectionnez_une_date', { defaultValue: 'Sélectionnez une date' })}
               className=""
             />
@@ -160,7 +160,7 @@ export function ProjectForm({ onCancel, onSubmit }: ProjectFormProps) {
             <label htmlFor="projectEndDate" className="text-sm font-medium">{t('projectspage.date_de_fin_prvue', { defaultValue: 'Date de fin prévue' })}</label>
             <DatePicker
               value={endDate}
-              onChange={(d) => setEndDate(d ?? null)}
+              onChange={setEndDate}
               placeholder={t('projectspage.slectionnez_une_date', { defaultValue: 'Sélectionnez une date' })}
               className=""
             />

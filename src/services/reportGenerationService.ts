@@ -2732,7 +2732,7 @@ export class ReportGenerationService {
         headers: ['N° Compte', 'Libellé', 'Budget', 'Réalisé', 'Écart', 'Écart %', 'Statut'],
         rows: topAccountDetails.map(acc => [
           acc.accountNumber,
-          acc.accountName.length > 40 ? `${acc.accountName.substring(0, 37)  }...` : acc.accountName,
+          acc.accountName.length > 40 ? `${acc.accountName.substring(0, 37)}...` : acc.accountName,
           this.formatCurrency(acc.budgeted),
           this.formatCurrency(acc.actual),
           this.formatCurrency(acc.variance),
@@ -4350,8 +4350,8 @@ export class ReportGenerationService {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals
     }).format(amount);
-    // Remplacer l'espace insécable par un espace normal pour les PDF
-    return formatted.replace(/\u00A0/g, ' ');
+    // Remplacer les espaces insécables par des espaces normaux pour les PDF
+    return formatted.replace(/[\u00A0\u202F]/g, ' ');
   }
   /**
    * Génération du Rapport d'Analyse de Gestion (Ratios Financiers)
@@ -4787,7 +4787,7 @@ export class ReportGenerationService {
         ],
         rows: topRows.map(row => [
           row.reference,
-          row.name.length > 40 ? `${row.name.substring(0, 37)  }...` : row.name,
+          row.name.length > 40 ? `${row.name.substring(0, 37)}...` : row.name,
           row.quantity.toFixed(2),
           this.formatCurrency(row.cmp_value),
           this.formatCurrency(row.fifo_value),

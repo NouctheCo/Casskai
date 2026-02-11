@@ -28,6 +28,7 @@ import type { Company } from '../types/database/company.types';
 
 import { logger } from '@/lib/logger';
 import { getCurrentCompanyCurrency } from '@/lib/utils';
+import { setSentryUser, clearSentryUser } from '@/lib/sentry';
 
 
 
@@ -146,6 +147,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
     const { error } = await supabase.auth.signOut();
+
+    // Clear Sentry user context on logout
+    clearSentryUser();
 
     // Audit trail - Logout
     if (userId) {
@@ -417,7 +421,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setIsAuthenticated(true);
 
-
+    // Set Sentry user context for error tracking
+    setSentryUser({ id: currentUser.id, email: currentUser.email });
 
     // ✅ SÉCURITÉ: Charger le profil depuis public.users (pas auth.users)
 

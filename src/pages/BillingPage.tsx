@@ -25,7 +25,6 @@ import {
   CheckCircle,
   Clock,
   ExternalLink,
-  Settings,
   FileText,
   RefreshCw,
   ArrowUpCircle
@@ -47,8 +46,6 @@ const BillingPage: React.FC = () => {
     plan,
     isLoading,
     invoices,
-    paymentMethods,
-    defaultPaymentMethod: _defaultPaymentMethod,
     subscribe: _subscribe,
     updateSubscription: _updateSubscription,
     refreshSubscription,
@@ -90,41 +87,7 @@ const BillingPage: React.FC = () => {
       navigate('/billing', { replace: true });
     }
   }, [searchParams, navigate, refreshSubscription]);
-  const handleAddPaymentMethod = async () => {
-    if (!subscription) {
-      toastError(t('billingPage.toasts.needSubscription'));
-      return;
-    }
-    try {
-      const result = await openBillingPortal();
-      if (!result.success) {
-        toastError(result.error || t('billingPage.toasts.portalError'));
-      }
-      // If successful, the portal will open in a new tab
-    } catch (error) {
-      logger.error('Billing', 'Error opening billing portal:', error instanceof Error ? error.message : String(error));
-      toastError(t('billingPage.toasts.unexpectedError'));
-    }
-  };
-  const handleManagePaymentMethod = async (_methodId: string) => {
-    if (!subscription) {
-      toastError(t('billingPage.toasts.needActiveSubscription'));
-      return;
-    }
-    try {
-      // Ouvrir le portail de facturation Stripe pour gérer cette méthode spécifique
-      const result = await openBillingPortal();
-      if (!result.success) {
-        toastError(result.error || t('billingPage.toasts.paymentManagementError'));
-      } else {
-        toastSuccess(t('billingPage.toasts.paymentPortalOpening'));
-      }
-      // Si succès, le portail s'ouvrira dans un nouvel onglet
-    } catch (error) {
-      logger.error('Billing', 'Error managing payment method:', error instanceof Error ? error.message : String(error));
-      toastError(t('billingPage.toasts.paymentMethodError'));
-    }
-  };
+
   const handleDownloadPDF = async (invoice: any) => {
     try {
       if (!invoice.pdfUrl) {
@@ -232,15 +195,12 @@ const BillingPage: React.FC = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {/* Cleaner, responsive tab bar */}
         <div className="sticky top-0 z-20 bg-transparent">
-          <TabsList className="w-full overflow-x-auto flex gap-2 md:grid md:grid-cols-4 bg-transparent p-0 border-b border-gray-200 dark:border-gray-800 rounded-none">
+          <TabsList className="w-full overflow-x-auto flex gap-2 md:grid md:grid-cols-3 bg-transparent p-0 border-b border-gray-200 dark:border-gray-800 rounded-none">
             <TabsTrigger value="overview" className="text-sm md:text-base px-3 md:px-4 py-2 whitespace-nowrap">
               {t('billingPage.tabs.overview')}
             </TabsTrigger>
             <TabsTrigger value="plans" className="text-sm md:text-base px-3 md:px-4 py-2 whitespace-nowrap">
               {t('billingPage.tabs.plans')}
-            </TabsTrigger>
-            <TabsTrigger value="payment" className="text-sm md:text-base px-3 md:px-4 py-2 whitespace-nowrap">
-              {t('billingPage.tabs.payment')}
             </TabsTrigger>
             <TabsTrigger value="invoices" className="text-sm md:text-base px-3 md:px-4 py-2 whitespace-nowrap">
               {t('billingPage.tabs.invoices')}
@@ -256,7 +216,7 @@ const BillingPage: React.FC = () => {
           </div>
           <SubscriptionStatus />
           {/* Quick actions */}
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('plans')}>
               <CardContent className="p-6 text-center">
                 <ArrowUpCircle className="w-8 h-8 text-blue-500 mx-auto mb-3" />
@@ -265,17 +225,6 @@ const BillingPage: React.FC = () => {
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   {t('billingPage.quickActions.changePlan.description')}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('payment')}>
-              <CardContent className="p-6 text-center">
-                <CreditCard className="w-8 h-8 text-green-500 mx-auto mb-3" />
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                  {t('billingPage.quickActions.paymentMethods.title')}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  {t('billingPage.quickActions.paymentMethods.description')}
                 </p>
               </CardContent>
             </Card>
@@ -311,95 +260,7 @@ const BillingPage: React.FC = () => {
           </div>
           <PlanSelector onPlanSelected={() => refreshSubscription()} />
         </TabsContent>
-        {/* Payment Tab */}
-        <TabsContent value="payment" className="space-y-6">
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {t('billingPage.payment.title')}
-            </h2>
-            {paymentMethods.length > 0 ? (
-              <div className="space-y-4">
-                {paymentMethods.map(method => (
-                  <Card key={method.id} className={method.isDefault ? 'ring-2 ring-blue-500' : ''}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-8 bg-gray-800 rounded flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">
-                              {method.brand?.toUpperCase()}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">
-                              •••• •••• •••• {method.last4}
-                            </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-300">
-                              {t('billingPage.payment.expires')} {method.expiryMonth}/{method.expiryYear}
-                            </p>
-                          </div>
-                          {method.isDefault && (
-                            <Badge variant="secondary">{t('billingPage.payment.default')}</Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {!method.isDefault && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleManagePaymentMethod(method.id)}
-                            >
-                              {t('billingPage.payment.setDefault')}
-                            </Button>
-                          )}
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleManagePaymentMethod(method.id)}
-                          >
-                            <Settings className="w-4 h-4 mr-1" />
-                            {t('billingPage.payment.manage')}
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                {/* Bouton pour ajouter une nouvelle carte */}
-                <Card className="border-dashed border-2">
-                  <CardContent className="p-6 text-center">
-                    <CreditCard className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-                      {t('billingPage.payment.addNew')}
-                    </p>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleAddPaymentMethod()}
-                    >
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      {t('billingPage.payment.addCard')}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            ) : (
-              <Card className="border-dashed border-2">
-                <CardContent className="p-12 text-center">
-                  <CreditCard className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    {t('billingPage.payment.noMethods.title')}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-6">
-                    {t('billingPage.payment.noMethods.description')}
-                  </p>
-                  <Button onClick={() => handleAddPaymentMethod()}>
-                    {t('billingPage.payment.addCard')}
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
+
         {/* Invoices Tab */}
         <TabsContent value="invoices" className="space-y-6">
           <div className="flex items-center justify-between">

@@ -7,8 +7,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import OpenAI from 'https://esm.sh/openai@4.20.1'
-import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
-import { checkRateLimit, rateLimitResponse, getRateLimitPreset } from '../_shared/rate-limit.ts'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 interface TransactionToClassify {
   description: string
@@ -35,13 +38,8 @@ interface CategorySuggestion {
 
 serve(async (req) => {
   // CORS preflight
-  const preflightResponse = handleCorsPreflightRequest(req);
-  if (preflightResponse) return preflightResponse;
-
-  // Rate limiting
-  const rateLimit = checkRateLimit(req, getRateLimitPreset('ai-bank-categorization'))
-  if (!rateLimit.allowed) {
-    return rateLimitResponse(rateLimit.retryAfter!, getCorsHeaders(req))
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
@@ -62,7 +60,7 @@ serve(async (req) => {
     if (!transactions || transactions.length === 0) {
       return new Response(
         JSON.stringify({ error: 'transactions array required' }),
-        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -160,7 +158,7 @@ Retourne un JSON avec un array "categories" contenant exactement ${transactionsB
         total_count: transactions.length,
         has_more: transactions.length > batchSize
       }),
-      { headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
@@ -170,7 +168,7 @@ Retourne un JSON avec un array "categories" contenant exactement ${transactionsB
         error: error instanceof Error ? error.message : 'Unknown error',
         details: error instanceof Error ? error.stack : ''
       }),
-      { status: 500, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })

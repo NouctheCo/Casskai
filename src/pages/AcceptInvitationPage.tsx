@@ -51,7 +51,7 @@ export default function AcceptInvitationPage() {
     if (!token) return;
     try {
       const { data, error: invError } = await supabase
-        .from('user_invitations')
+        .from('company_invitations')
         .select(`
           id,
           email,
@@ -60,7 +60,7 @@ export default function AcceptInvitationPage() {
           expires_at,
           companies:company_id (name)
         `)
-        .eq('token', token)
+        .eq('invitation_token', token)
         .single();
       if (invError || !data) {
         setError(t('invitation.not_found'));

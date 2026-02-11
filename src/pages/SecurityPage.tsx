@@ -590,7 +590,11 @@ const SecurityPage = () => {
 
                 </p>
 
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => navigate('/admin/audit-logs')}
+                >
 
                   Voir les rapports
 
@@ -616,7 +620,11 @@ const SecurityPage = () => {
 
                 </p>
 
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => window.location.href = 'mailto:contact@casskai.com'}
+                >
 
                   Signaler
 
@@ -664,13 +672,13 @@ const SecurityPage = () => {
 
             >
 
-              Essai gratuit 14 jours
+              Essai gratuit 30 jours
 
             </Button>
 
             <Button
 
-              onClick={() => navigate('/contact')}
+              onClick={() => window.open('https://wa.me/?text=Bonjour%2C%20je%20souhaite%20parler%20%C3%A0%20un%20expert%20CassKai', '_blank')}
 
               size="lg"
 

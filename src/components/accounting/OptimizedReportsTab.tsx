@@ -817,11 +817,11 @@ export default function OptimizedReportsTab() {
                       ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
                       : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
                   }`}>
-                    <span>{stat.trend > 0 ? '+' : ''}{stat.trend}%</span>
+                    <span>{stat.trend > 0 ? '+' : ''}{Number(stat.trend).toFixed(1)}%</span>
                   </div>
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {stat.isPercentage ? `${stat.value}%` : <CurrencyAmount amount={stat.value} />}
+                  {stat.isPercentage ? `${Number(stat.value).toFixed(2)}%` : <CurrencyAmount amount={stat.value} />}
                 </p>
               </div>
             </CardContent>

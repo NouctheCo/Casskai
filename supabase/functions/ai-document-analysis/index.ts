@@ -7,8 +7,13 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import OpenAI from 'https://esm.sh/openai@4.20.1'
-import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts'
-import { checkRateLimit, rateLimitResponse, getRateLimitPreset } from '../_shared/rate-limit.ts'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
+  'Access-Control-Max-Age': '86400',
+}
 
 interface DocumentAnalysisRequest {
   document_url?: string
@@ -56,13 +61,11 @@ interface JournalEntryExtracted {
 
 serve(async (req) => {
   // CORS preflight
-  const preflightResponse = handleCorsPreflightRequest(req);
-  if (preflightResponse) return preflightResponse;
-
-  // Rate limiting
-  const rateLimit = checkRateLimit(req, getRateLimitPreset('ai-document-analysis'))
-  if (!rateLimit.allowed) {
-    return rateLimitResponse(rateLimit.retryAfter!, getCorsHeaders(req))
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    })
   }
 
   try {
@@ -83,7 +86,7 @@ serve(async (req) => {
     if (!document_url && !document_base64) {
       return new Response(
         JSON.stringify({ error: 'document_url or document_base64 required' }),
-        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -177,7 +180,7 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify(result),
-      { headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
@@ -187,7 +190,7 @@ serve(async (req) => {
         error: error instanceof Error ? error.message : 'Unknown error',
         details: error instanceof Error ? error.stack : ''
       }),
-      { status: 500, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })

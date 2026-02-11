@@ -99,35 +99,35 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
     switch (period) {
       case 'current-month':
         return {
-          start: new Date(currentYear, currentMonth, 1).toISOString().split('T')[0],
-          end: new Date(currentYear, currentMonth + 1, 0).toISOString().split('T')[0]
+          start: format(new Date(currentYear, currentMonth, 1), 'yyyy-MM-dd'),
+          end: format(new Date(currentYear, currentMonth + 1, 0), 'yyyy-MM-dd')
         };
       case 'current-quarter': {
         const quarterStart = Math.floor(currentMonth / 3) * 3;
         return {
-          start: new Date(currentYear, quarterStart, 1).toISOString().split('T')[0],
-          end: new Date(currentYear, quarterStart + 3, 0).toISOString().split('T')[0]
+          start: format(new Date(currentYear, quarterStart, 1), 'yyyy-MM-dd'),
+          end: format(new Date(currentYear, quarterStart + 3, 0), 'yyyy-MM-dd')
         };
       }
       case 'current-year':
         return {
-          start: new Date(currentYear, 0, 1).toISOString().split('T')[0],
-          end: new Date(currentYear, 11, 31).toISOString().split('T')[0]
+          start: format(new Date(currentYear, 0, 1), 'yyyy-MM-dd'),
+          end: format(new Date(currentYear, 11, 31), 'yyyy-MM-dd')
         };
       case 'last-month': {
         const lastMonth = currentMonth - 1;
         const year = lastMonth < 0 ? currentYear - 1 : currentYear;
         const month = lastMonth < 0 ? 11 : lastMonth;
         return {
-          start: new Date(year, month, 1).toISOString().split('T')[0],
-          end: new Date(year, month + 1, 0).toISOString().split('T')[0]
+          start: format(new Date(year, month, 1), 'yyyy-MM-dd'),
+          end: format(new Date(year, month + 1, 0), 'yyyy-MM-dd')
         };
       }
       case 'last-year': {
         const lastYear = currentYear - 1;
         const dates = {
-          start: new Date(lastYear, 0, 1).toISOString().split('T')[0],
-          end: new Date(lastYear, 11, 31).toISOString().split('T')[0]
+          start: format(new Date(lastYear, 0, 1), 'yyyy-MM-dd'),
+          end: format(new Date(lastYear, 11, 31), 'yyyy-MM-dd')
         };
         logger.debug('ReportGenerationTab', `📅 [ReportGeneration] last-year calculated:`, { lastYear, ...dates });
         return dates;

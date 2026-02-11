@@ -80,7 +80,7 @@ export class RealDashboardKpiService {
       : 0;
     // Calculer la marge bénéficiaire
     const profit_margin = revenueData > 0
-      ? ((revenueData - purchasesData) / revenueData) * 100
+      ? Math.round(((revenueData - purchasesData) / revenueData) * 10000) / 100
       : 0;
     // Calculer le runway (en jours)
     const monthlyBurn = purchasesData / 12;

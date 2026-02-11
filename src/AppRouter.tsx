@@ -21,6 +21,7 @@ import HomePage from '@/components/HomePage';
 import OnboardingPage from '@/pages/OnboardingPage';
 import { OnboardingProvider } from '@/contexts';
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
+import LoanSimulator from '@/pages/Reports/LoanSimulator';
 
 // Lazy load pages for better performance
 const LazyLandingPage = React.lazy(() => import('@/pages/LandingPageV2'));
@@ -77,7 +78,6 @@ const LazyAboutPage = React.lazy(() => import('@/pages/AboutPage'));
 
 // Nouveaux outils financiers
 const LazyTaxSimulator = React.lazy(() => import('@/pages/Reports/TaxSimulator'));
-const LazyLoanSimulator = React.lazy(() => import('@/pages/Reports/LoanSimulator'));
 const LazyComplianceDashboard = React.lazy(() => import('@/pages/Reports/regulatory/ComplianceDashboard'));
 const LazyRegulatoryDocumentsPage = React.lazy(() => import('@/pages/RegulatoryDocumentsPage'));
 
@@ -347,7 +347,7 @@ const AppRouter: React.FC = () => {
             <Route path="reports/loan-simulator" element={
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
-                  <LazyLoanSimulator />
+                  <LoanSimulator />
                 </Suspense>
               </ProtectedRoute>
             } />

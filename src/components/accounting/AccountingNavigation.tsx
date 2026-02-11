@@ -145,7 +145,6 @@ export function AccountingNavigation({
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-    return undefined;
   }, [openDropdown]);
   // Fermer le menu mobile au changement d'onglet
   useEffect(() => {

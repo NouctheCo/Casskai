@@ -247,15 +247,14 @@ export function useUserManagement(companyId: string) {
       const token = generateInvitationToken();
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const { data: invitation, error: inviteError } = await supabase
-        .from('user_invitations')
+        .from('company_invitations')
         .insert({
           email: invitationData.email,
           company_id: invitationData.companyId,
           role: invitationData.role.id,
           invited_by: invitationData.invitedBy,
-          token,
+          invitation_token: token,
           expires_at: expiresAt,
-          message: invitationData.message,
           status: 'pending'
         })
         .select()
@@ -385,7 +384,7 @@ export function useUserManagement(companyId: string) {
     setError(null);
     try {
       const { data: invitations, error: invitationsError } = await supabase
-        .from('user_invitations')
+        .from('company_invitations')
         .select('*')
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
@@ -424,7 +423,7 @@ export function useUserManagement(companyId: string) {
     try {
       const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const { data: invitation, error: updateError } = await supabase
-        .from('user_invitations')
+        .from('company_invitations')
         .update({
           expires_at: newExpiresAt,
           status: 'pending'
@@ -469,7 +468,7 @@ export function useUserManagement(companyId: string) {
     setError(null);
     try {
       const { error: updateError } = await supabase
-        .from('user_invitations')
+        .from('company_invitations')
         .update({ status: 'cancelled' })
         .eq('id', invitationId)
         .eq('company_id', companyId);

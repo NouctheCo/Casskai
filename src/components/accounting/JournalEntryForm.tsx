@@ -26,7 +26,7 @@ import { AccountSuggestions } from '@/components/accounting/AccountSuggestions';
 import SmartAutocomplete, { type AutocompleteOption } from '@/components/ui/SmartAutocomplete';
 import { useAuth } from '@/contexts/AuthContext';
 import { journalEntriesService } from '@/services/journalEntriesService';
-import { aiDocumentAnalysisService } from '@/services/ai/documentService';
+import { aiDocumentAnalysisService } from '@/services/aiDocumentAnalysisService';
 import type {
   JournalEntryFormInitialValues,
   JournalEntryFormValues,

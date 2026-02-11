@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { logger } from '@/lib/logger';
+import { captureException } from '@/lib/sentry';
 // Types pour l'Error Boundary
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -230,6 +231,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo });
+    // Send error to Sentry
+    captureException(error, { componentStack: errorInfo.componentStack || undefined });
     // Reporter l'erreur
     if (this.props.enableReporting !== false) {
       const additionalContext = {

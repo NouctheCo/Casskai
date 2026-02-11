@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -26,43 +25,40 @@ import {
   Zap,
   Crown,
   Sparkles,
-  Command,
-  Cloud,
-  CloudOff,
+  Command
 } from 'lucide-react';
-import { useSyncQueue } from '@/hooks/useSyncQueue';
 // Catégories organisées de manière intuitive
 const MODULE_CATEGORIES = {
   finances: {
-    label: 'sidebar.categories.finances',
+    label: 'Finances',
     icon: Calculator,
     color: 'blue',
     modules: ['dashboard', 'accounting', 'banking', 'invoicing', 'tax', 'budget'],
     priority: 1
   },
   commercial: {
-    label: 'sidebar.categories.commercial',
+    label: 'Commercial',
     icon: Users,
     color: 'green',
     modules: ['salesCrm', 'contracts'],
     priority: 2
   },
   gestion: {
-    label: 'sidebar.categories.management',
+    label: 'Gestion',
     icon: Package,
     color: 'purple',
     modules: ['inventory', 'purchases', 'projects', 'thirdParties', 'humanResources'],
     priority: 3
   },
   analyse: {
-    label: 'sidebar.categories.analysis',
+    label: 'Analyse',
     icon: BarChart3,
     color: 'orange',
     modules: ['reports'],
     priority: 4
   },
   automation: {
-    label: 'sidebar.categories.automation',
+    label: 'Automatisation',
     icon: Zap,
     color: 'yellow',
     modules: ['automation'],
@@ -87,34 +83,6 @@ const MODULE_ICONS = {
   thirdParties: Users,
   automation: Zap
 };
-
-// Helper function to get category colors (fixes Tailwind JIT purge issue)
-const getCategoryColors = (color: string) => {
-  const colorMap: Record<string, { active: string }> = {
-    blue: {
-      active: 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 shadow-sm'
-    },
-    green: {
-      active: 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 shadow-sm'
-    },
-    purple: {
-      active: 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 shadow-sm'
-    },
-    orange: {
-      active: 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 shadow-sm'
-    },
-    yellow: {
-      active: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 shadow-sm'
-    },
-    red: {
-      active: 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 shadow-sm'
-    },
-    indigo: {
-      active: 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 shadow-sm'
-    },
-  };
-  return colorMap[color] || colorMap.blue;
-};
 interface IntelligentSidebarProps {
   collapsed?: boolean;
   onToggle?: () => void;
@@ -124,8 +92,6 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
   const { allModules, isModuleActive: _isModuleActive, activeModules, canAccessModule } = useModulesSafe();
   const { user, currentCompany: _currentCompany } = useAuth();
   const { subscription } = useSubscription();
-  const { t } = useTranslation();
-  const { pendingCount: syncPending, failedCount: syncFailed } = useSyncQueue();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['finances']));
   const [searchQuery, setSearchQuery] = useState('');
   const [recentModules, setRecentModules] = useState<string[]>([]);
@@ -225,7 +191,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
-  if (!allModules) return <div className="p-4">{t('common.loading')}</div>;
+  if (!allModules) return <div className="p-4">Chargement...</div>;
   return (
     <motion.aside 
       className={cn(
@@ -259,7 +225,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
               id="sidebar-search"
               name="sidebar-search"
               type="text"
-              placeholder={t('sidebar.search')}
+              placeholder="Rechercher..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoComplete="off"
@@ -280,7 +246,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
             <div className="mb-4">
               <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wide">
                 <Star className="h-3 w-3" />
-                {t('sidebar.favorites')}
+                Favoris
               </div>
               <div className="space-y-1">
                 {getFavoriteModulesData().map((module) => {
@@ -319,7 +285,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
             <div className="mb-4">
               <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wide">
                 <Clock className="h-3 w-3" />
-                {t('sidebar.recent')}
+                Récents
               </div>
               <div className="space-y-1">
                 {getRecentModulesData().map((module) => {
@@ -374,7 +340,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
                     <CategoryIcon className="h-4 w-4" />
                     {!collapsed && (
                       <>
-                        <span>{t(category.label)}</span>
+                        <span>{category.label}</span>
                         <Badge variant="secondary" className="text-xs px-1.5 py-0">
                           {categoryModules.length}
                         </Badge>
@@ -416,7 +382,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
                               className={cn(
                                 "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200",
                                 isActive(module.path)
-                                  ? getCategoryColors(category.color).active
+                                  ? `bg-${category.color}-100 dark:bg-${category.color}-900/50 text-${category.color}-700 dark:text-${category.color}-300 shadow-sm`
                                   : canAccess
                                   ? "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                                   : "text-gray-400 dark:text-gray-600 cursor-not-allowed"
@@ -466,47 +432,18 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
           })}
         </div>
       </div>
-      {/* Indicateur sync offline */}
-      {(syncPending > 0 || syncFailed > 0 || !navigator.onLine) && !collapsed && (
-        <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 text-xs">
-            {!navigator.onLine ? (
-              <>
-                <CloudOff className="h-3.5 w-3.5 text-orange-500" />
-                <span className="text-orange-600 dark:text-orange-400 font-medium">{t('sidebar.offline')}</span>
-              </>
-            ) : (
-              <>
-                <Cloud className="h-3.5 w-3.5 text-blue-500" />
-                <span className="text-gray-600 dark:text-gray-400">{t('sidebar.online')}</span>
-              </>
-            )}
-            {syncPending > 0 && (
-              <Badge variant="secondary" className="text-xs px-1.5 py-0 bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
-                {syncPending}
-              </Badge>
-            )}
-            {syncFailed > 0 && (
-              <Badge variant="destructive" className="text-xs px-1.5 py-0">
-                {syncFailed}
-              </Badge>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Footer avec raccourcis */}
       {!collapsed && (
         <div className="p-3 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <Button asChild className="w-full mb-2">
             <Link to={subscription ? "/settings?tab=subscription" : "/pricing"}>
-              {t('sidebar.manageSubscription')}
+              Gérer l'abonnement
             </Link>
           </Button>
           <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300 space-y-1">
             <div className="flex items-center gap-2">
               <Zap className="h-3 w-3" />
-              <span>{t('sidebar.keyboardShortcuts')}</span>
+              <span>Raccourcis clavier</span>
             </div>
             <div className="text-xs opacity-75">
               Ctrl+Shift+D → Dashboard

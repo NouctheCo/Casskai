@@ -82,12 +82,12 @@ serve(async (req) => {
         company_id: companyId,
         email: inviteeEmail.toLowerCase(),
         role,
-        token: invitationToken,
+        invitation_token: invitationToken,
         status: "pending",
         expires_at: expiresAt,
-        created_by: inviterId,
+        invited_by: inviterId,
       })
-      .select("id, token")
+      .select("id, invitation_token")
       .single();
 
     if (error) {
@@ -95,14 +95,14 @@ serve(async (req) => {
     }
 
     const { data: company } = await admin.from("companies").select("name").eq("id", companyId).maybeSingle();
-    const inviteUrl = `${APP_URL}/invitation?token=${invite.token}`;
+    const inviteUrl = `${APP_URL}/invitation?token=${invite.invitation_token}`;
 
     const emailResult = await sendInviteEmail(inviteeEmail, company?.name ?? "", role, inviteUrl);
     if (emailResult.error) {
       console.error("Invitation email error:", emailResult.error);
     }
 
-    return Response.json({ id: invite.id, token: invite.token, email_sent: !emailResult.error }, { headers: getCorsHeaders(req) });
+    return Response.json({ id: invite.id, token: invite.invitation_token, email_sent: !emailResult.error }, { headers: getCorsHeaders(req) });
   } catch (err) {
     return Response.json({ error: String(err) }, { status: 500, headers: getCorsHeaders(req) });
   }

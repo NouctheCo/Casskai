@@ -41,7 +41,6 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { useContextualTheme } from '@/hooks/useContextualTheme';
 
 import { AIAssistant } from '@/components/ai/AIAssistant';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 
 
@@ -224,11 +223,6 @@ export function MainLayout() {
     <AnalyticsProvider domain="casskai.app" showConsentBanner={true}>
       <NotificationProvider>
         <div className="flex h-screen bg-gradient-to-br from-slate-100 to-slate-200 dark:from-gray-900 dark:to-gray-950" data-module={currentModule}>
-          {/* Skip link for keyboard accessibility */}
-          <a href="#main-content" className="skip-link">
-            Aller au contenu principal
-          </a>
-
           {/* Sidebar Floating Cards - Desktop uniquement */}
           {showSidebar && !isMobile && (
             <Sidebar />
@@ -276,8 +270,7 @@ export function MainLayout() {
             )}
 
             {/* Page content avec glassmorphism */}
-            <main id="main-content" className="flex-1 min-h-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/20 border border-white/50 dark:border-gray-700/50 overflow-auto">
-              <Breadcrumb />
+            <main className="flex-1 min-h-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/20 border border-white/50 dark:border-gray-700/50 overflow-auto">
               <div className="p-6">
                 <PageTransition>
                   <Outlet />

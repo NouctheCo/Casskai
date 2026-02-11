@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { CheckCircle, AlertCircle, Clock, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
-import { logger } from '@/lib/logger';
 
 interface SubscriptionStatus {
   status: 'success' | 'pending' | 'failed';
@@ -118,7 +117,7 @@ const PaymentConfirmationPage: React.FC = () => {
           });
         }
       } catch (error) {
-        logger.error('PaymentConfirmationPage', 'Error checking session status:', error);
+        console.error('Error checking session status:', error);
         
         // Retry logic: poll jusqu'à 5 fois
         if (pollingCount < 5) {
@@ -147,7 +146,6 @@ const PaymentConfirmationPage: React.FC = () => {
       }, 5000);
       return () => clearTimeout(timer);
     }
-    return undefined;
   }, [status, navigate]);
 
   if (isLoading) {
